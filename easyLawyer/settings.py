@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'el.apps.ElConfig',
 ]
 
 MIDDLEWARE = [
@@ -78,10 +77,10 @@ WSGI_APPLICATION = 'easyLawyer.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.path.join('easy_lawyer'),
-        'USER':'postgres',
-        'PASSWORD':'123',
-        'HOST':'192.168.14.52',
+        'NAME': 'ezl',
+        'USER':'ezl',
+        'PASSWORD':'ezl',
+        'HOST':'127.0.0.1',
         'PORT':'5432'
   }
 }
