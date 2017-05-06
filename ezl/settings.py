@@ -49,7 +49,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'easylawyer.urls'
+ROOT_URLCONF = 'ezl.urls'
 
 TEMPLATES = [
     {
@@ -68,7 +68,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'easylawyer.wsgi.application'
+WSGI_APPLICATION = 'ezl.wsgi.application'
 
 
 # Database
