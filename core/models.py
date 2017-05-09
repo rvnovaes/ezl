@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 # Create your models here.
+
+
 class Audit(models.Model):
     create_date = models.DateTimeField()
     alter_date = models.DateTimeField(blank=True, null=True)

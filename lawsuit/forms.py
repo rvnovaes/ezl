@@ -29,7 +29,7 @@ class TypeMovementForm(BaseForm,forms.Form):
     )
 
     use_wo = forms.BooleanField(
-        label=u"Utiliza wo?",  # FIXME verificar o significado de 'wo'
+        label=u"Utiliza Ordem de Serviço?",
         required=True,
         widget=forms.CheckboxInput
     )
