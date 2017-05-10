@@ -5,7 +5,7 @@ from django.contrib.auth import logout, user_logged_in
 
 
 def login(request):
-    return render (request,'core/login.html')
+    return render (request,'account/login.html')
 
 
 def menu(request):
@@ -22,7 +22,7 @@ def menu(request):
         'user_name': request.user,
         'title_page': title_page
     }
-    return render(request,'core/menu.html',context)
+    return render(request,'core/home.html',context)
 
 
 def logout_user(request):
