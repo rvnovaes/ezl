@@ -9,7 +9,6 @@
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <script src="https://use.fontawesome.com/17ceec182b.js"></script>
     <link rel="stylesheet" type="text/css" href="{% static "ezl_static/core/style.css" %}">
 
 
@@ -27,8 +26,8 @@
           <ul class="right hide-on-med-and-down">
             <li><a href="#">Correspondentes</a></li>
             <li><a href="#">Providências</a></li>
-            <li><a href="#">Dashboard</a></li>
-            <li><a class="dropdown-button" href="#!" data-activates="dropdown1"><i class="fa fa-user-circle" aria-hidden="true"></i> &nbsp; {{user_name}}<i class="material-icons right">arrow_drop_down</i></a></li>
+            <li><a href="#" >Dashboard</a></li>
+            <li><a class="dropdown-button" href="#!" data-activates="dropdown1"><i class="material-icons">person</i></a></li>
           </ul>
 
           <!-- Menu Mobile -->
@@ -36,37 +35,43 @@
             <li><a href="#">Correspondentes</a></li>
             <li><a href="#">Providências</a></li>
             <li><a href="#">Dashboard</a></li>
-            <li><a class="dropdown-button" href="#!" data-activates="dropdownm1"><i class="fa fa-user-circle" aria-hidden="true"></i> &nbsp; {{user_name}}<i class="material-icons right">arrow_drop_down</i></a></li>
-
+            <li><a class="dropdown-button" href="#!" data-activates="dropdownm1"><i class="material-icons">person</i></a></li>
           </ul>
 
           <!-- Menu Dropdown Usuário -->
           <ul id="dropdown1" class="dropdown-content">
+              <li><center>{{user_name}}</center></li>
+              <li class="divider"></li>
               <li><a href="#modal1" onclick="$('#modal1').modal('open');">Sair do Sistema</a></li>
           </ul>
           <!-- Menu Dropdown Usuário Mobile -->
           <ul id="dropdownm1" class="dropdown-content">
+              <li style="margin-top: 5px;"><center>{{user_name}}</center></li>
+              <li class="divider"></li>
               <li><a href="#modal1" onclick="$('#modal1').modal('open');">Sair do Sistema</a></li>
           </ul>
 
+          <!-- Janela modal para confirmação de saída do usuário -->
           <div id="modal1" class="modal">
             <div class="modal-content" style="color: #212121;">
-              <h5><i class="material-icons">warning</i> &nbsp; Atenção</h5>
+              <div class="row">
+                        <div class="col s1"><i class="large material-icons">warning</i></div>
+                        <div class="col s1" style="margin-top: 7px;"><h5>Atenção</h5></div>
+              </div>
               <li class="divider"></li>
               <p>Você tem certeza que deseja sair do sistema ?</p>
-            </div>
-            <div class="modal-footer" style="padding-right: 5%; margin-bottom: 20px;s">
-              <a class="tooltipped btn-floating btn-large waves-effect waves-light red modal-close" data-position="top" data-tooltip="Não" style="margin-left: 5px;"><i class="fa fa-times" aria-hidden="true"></i></a>
-              <a class="tooltipped btn-floating btn-large waves-effect waves-light green" data-position="top" data-tooltip="Sim" href="/logout/"><i class="fa fa-check" aria-hidden="true"></i></a>
+              <a class="tooltipped waves-effect waves-light btn modal-close" style="float: right !important; margin-left: 5px;">Não</a>
+              <a class="tooltipped waves-effect waves-light btn" href="/logout/" style="float: right !important; margin-bottom: 10px;">Sim</a>
             </div>
           </div>
 
         </div>
   </nav>
   <!-- Breadcrumb -->
-  <nav style="background-color: #f6f6f6 !important;">
+  <nav style="height: 30px !important;">
     <div class="nav-wrapper">
-      <div class="col s12" style="color: #212121 !important;">
+      <div class="col s12" id="breadcrumb" style="color: #212121 !important;">
+
         <a href="#!" class="breadcrumb">First</a>
         <a href="#!" class="breadcrumb">Second</a>
         <a href="#!" class="breadcrumb">Third</a>

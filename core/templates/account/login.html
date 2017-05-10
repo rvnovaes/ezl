@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Login - Easy Lawyer</title>
 
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
-
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-
 </head>
+
 <body style="background-color: #eee;">
+
 <br><br><br><br><br><br>
 <form class="col s12" method="POST" action="{% url 'account_login' %}">
     {% csrf_token %}
@@ -21,15 +24,21 @@
         {% if form.errors %}
         {% for field in form %}
         {% for error in field.errors %}
-        <div class="alert-error">
-            <strong>{{ error|escape }}</strong>
-        </div>
+    <script type="text/javascript">
+
+    $(document).ready(function(){
+        Materialize.toast('{{ error|escape }}', 4000)
+    });
+    </script>
         {% endfor %}
         {% endfor %}
         {% for error in form.non_field_errors %}
-        <div class="alert-error">
-            <strong>{{ error|escape }}</strong>
-        </div>
+       <script type="text/javascript">
+
+    $(document).ready(function(){
+	    Materialize.toast('{{ error|escape }}', 4000)
+    });
+    </script>
         {% endfor %}
         {% endif %}
     </center>
@@ -38,13 +47,13 @@
 
             <div class="row">
                 <div class="input-field col s12">
-                    <input placeholder="Login" id="first_name" type="text" name="login" class="validate" style="text-align: center; width: 50%;">
+                    <input placeholder="Login" id="first_name" type="text" name="login" class="validate" style="text-align: center; width: 50%;" required>
                 </div>
             </div>
 
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="password" placeholder="Senha" type="password" name="password" class="validate" style="width: 50%;text-align: center;">
+                    <input id="password" placeholder="Senha" type="password" name="password" class="validate" style="width: 50%;text-align: center;" required>
                 </div>
             </div>
             <button type="submit" value="Entrar" class="waves-effect waves-light btn-large"><i class="material-icons left">input</i> Entrar</button>

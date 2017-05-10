@@ -1,3 +1,16 @@
 .breadcrumb{
-    color: #b6b6b6 !important;
+    color: #212121 !important;
+    font-size: small !important;
+    opacity: 0.7 !important;
+}
+
+.breadcrumb::before{
+    color:#212121 !important;
+}
+
+#breadcrumb{
+    text-align: right !important;
+    padding-right: 20px !important;
+    background-color: #f6f6f6 !important;
+    line-height: 40px !important;
 }
