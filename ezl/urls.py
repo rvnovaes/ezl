@@ -19,7 +19,7 @@ from core import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^home/', views.menu, name='menu'),
+    url(r'^home/', views.home, name='menu'),
     url(r'^',include('core.urls')),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^accounts/login/', views.login, name='login'),

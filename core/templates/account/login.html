@@ -42,25 +42,33 @@
         {% endfor %}
         {% endif %}
     </center>
-    <center>
-        <div class="container">
+
+        <div class="container" style="text-align: center !important;">
 
             <div class="row">
                 <div class="input-field col s12">
-                    <input placeholder="Login" id="first_name" type="text" name="login" class="validate" style="text-align: center; width: 50%;" required>
+                    <input placeholder="Login" id="first_name" type="text" name="login" class="validate" style="text-align: center; max-width: 460px;" required>
                 </div>
             </div>
 
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="password" placeholder="Senha" type="password" name="password" class="validate" style="width: 50%;text-align: center;" required>
+                    <input id="password" placeholder="Senha" type="password" name="password" class="validate" style="max-width: 460px;text-align: center;" required>
                 </div>
             </div>
-            <button type="submit" value="Entrar" class="waves-effect waves-light btn-large"><i class="material-icons left">input</i> Entrar</button>
+
+            <div class="row" style="margin-right: inherit !important;margin-left: inherit !important; max-width: 460px !important;">
+
+                    <button style="width: 100% !important;" type="submit" value="Entrar" class="waves-effect waves-light btn-large"><i class="material-icons left">input</i> Entrar</button>
+                    <br><br>
+                    <button style="width: 100% !important;" type="submit" value="Entrar" class="waves-effect waves-light btn-large"><i class="material-icons left">lock_open</i> Recuperar Senha</button>
+
+            </div>
+
 
 
         </div>
-    </center>
+
 </form>
 </body>
 </html>

@@ -5,10 +5,14 @@ from django.contrib.auth import logout, user_logged_in
 
 
 def login(request):
-    return render (request,'account/login.html')
+    if request.user.is_authenticated:
+        return HttpResponseRedirect('/home')
+
+    else:
+        return render (request,'account/login.html')
 
 
-def menu(request):
+def home(request):
 
     if not request.user.is_authenticated:
         return HttpResponseRedirect('/')
