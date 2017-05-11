@@ -20,12 +20,8 @@ from .models import TypeMovement
 
 def type_movement_list(request):
     try:
-        type_movement = TypeMovement.objects.get(id=request.user.id)
+        type_movements_list = TypeMovement.objects.all()
     except ObjectDoesNotExist:
-        type_movement = None
-    if type_movement:
-        type_movements_list = TypeMovement.objects.filter(id=type_movement.id)
-    else:
         type_movements_list = None
 
     form = TypeMovementForm(request.GET)

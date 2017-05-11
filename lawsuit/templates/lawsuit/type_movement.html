@@ -1,1 +1,52 @@
-f
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block content %}
+    <div style="text-align: center" class="container">
+        <form action="{% url 'type_movement' type_movement_id %}" method="post"> {% csrf_token %}
+            <div class="fieldWrapper">
+                <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                {{ form.name }}
+            </div>
+            <div class="fieldWrapper">
+                <label for="{{ form.legacy_code.id_for_label }}">{{ form.legacy_code.label }}</label>
+                {{ form.legacy_code }}
+            </div>
+            {#            <div class="fieldWrapper">>#}
+            {#                <label for="{{ form.legacy_code.id_for_label }}">{{ form.uses_wo.label }}</label>#}
+            {#                {{ form.uses_wo }}#}
+            {#            </div>#}
+            <div style="clear:left; height:25px; margin-top:20px; margin-right:20px; margin-bottom:20px;  margin-left:20px;">
+                <button type="submit" class="waves-effect waves-light btn"><i class="material-icons left">save</i>
+                    Salvar
+                </button>
+                <button  h"{% url 'type_movements' %}" class="waves-effect waves-light red darken4 btn"><i
+                        class="material-icons left">cancel</i>
+                    Cancelar
+                </button>
+            </div>
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {% if form.errors %}
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <div class="alert alert-danger">
+                            <strong>{{ error|escape }}</strong>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}
+
+
