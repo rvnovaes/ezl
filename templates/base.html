@@ -65,7 +65,40 @@
               <a class="tooltipped waves-effect waves-light btn modal-close" style="float: right !important; margin-left: 5px;">Não</a>
               <a class="tooltipped waves-effect waves-light btn" href="/logout/" style="float: right !important; margin-bottom: 10px;">Sim</a>
             </div>
-          </div>
+        </nav>
+        <!-- Breadcrumb -->
+        <nav style="height: 30px !important;">
+            <div class="nav-wrapper">
+                <div class="col s12" id="breadcrumb" style="color: #212121 !important;">
+                    <div class="align-left">
+                        {% if messages %}
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% if form.errors %}
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <div class="alert alert-danger">
+                                        <strong>{{ error|escape }}</strong>
+                                    </div>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    <strong>{{ error|escape }}</strong>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <a href="#!" class="breadcrumb">First</a>
+                    <a href="#!" class="breadcrumb">Second</a>
+                    <a href="#!" class="breadcrumb">Third</a>
+                </div>
+            </div>
+        </nav>
 
         </div>
   </nav>
@@ -85,8 +118,6 @@
 
 
   <script type="text/javascript">
-
-      $.toast("Lorem ipsum dolor sit amet, consectetur adipisicing elit. Hic, consequuntur doloremque eveniet eius eaque dicta repudiandae illo ullam. Minima itaque sint magnam dolorum asperiores repudiandae dignissimos expedita, voluptatum vitae velit.")
 
       // Inicializa a SideBar Mobile
       $(".button-collapse").sideNav();
@@ -112,7 +143,7 @@
   <!--  {% endif %} -->
 
 </head>
-
+<body>
 {% block content %}
 {% endblock %}
-
+</body>
