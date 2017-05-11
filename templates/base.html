@@ -10,6 +10,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{% static "ezl_static/core/style.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "ezl_static/libs/toast-query/dist/jquery.toast.min.css" %}">
+    <script src="{% static "ezl_static/libs/toast-query/dist/jquery.toast.min.js" %}"></script>
 
 
     <!--Menu do Easy Lawyer-->
@@ -84,6 +86,8 @@
 
   <script type="text/javascript">
 
+      $.toast("Lorem ipsum dolor sit amet, consectetur adipisicing elit. Hic, consequuntur doloremque eveniet eius eaque dicta repudiandae illo ullam. Minima itaque sint magnam dolorum asperiores repudiandae dignissimos expedita, voluptatum vitae velit.")
+
       // Inicializa a SideBar Mobile
       $(".button-collapse").sideNav();
 
@@ -108,7 +112,7 @@
   <!--  {% endif %} -->
 
 </head>
-<body>
+
 {% block content %}
 {% endblock %}
-</body>
+
