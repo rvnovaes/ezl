@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,6 +14,9 @@
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static "ezl_static/libs/toast-query/dist/jquery.toast.min.css" %}">
+    <script src="{% static "ezl_static/libs/toast-query/dist/jquery.toast.min.js" %}"></script>
+
 </head>
 
 <body style="background-color: #eee;">
@@ -26,18 +30,35 @@
         {% for error in field.errors %}
     <script type="text/javascript">
 
+    $.toast('{{ error|escape }}')
+
     $(document).ready(function(){
         Materialize.toast('{{ error|escape }}', 4000)
     });
     </script>
+
+    <script type="text/javascript">
+        function toggleRequired(){
+    var txt = $('#text1');
+
+
+    //Remove the "required" attribute.
+    txt.removeAttr("required");
+    alert(txt[0].outerHTML);
+
+    //Add the "required" attribute.
+    txt.attr("required", "true");
+    alert(txt[0].outerHTML);
+}
+    </script>
         {% endfor %}
         {% endfor %}
         {% for error in form.non_field_errors %}
-       <script type="text/javascript">
-
-    $(document).ready(function(){
-	    Materialize.toast('{{ error|escape }}', 4000)
-    });
+    <script type="text/javascript">
+            $.toast('{{ error|escape }}')
+            $(document).ready(function(){
+                Materialize.toast('{{ error|escape }}', 4000)
+            });
     </script>
         {% endfor %}
         {% endif %}
@@ -61,14 +82,13 @@
 
                     <button style="width: 100% !important;" type="submit" value="Entrar" class="waves-effect waves-light btn-large"><i class="material-icons left">input</i> Entrar</button>
                     <br><br>
-                    <button style="width: 100% !important;" type="submit" value="Entrar" class="waves-effect waves-light btn-large"><i class="material-icons left">lock_open</i> Recuperar Senha</button>
+                    <button type="submit" style="width: 100%;"class="waves-effect waves-light btn-large" formnovalidate formaction="/accounts/password/reset/"><i class="material-icons left">lock_open</i> Recuperar Senha</button>
+
 
             </div>
-
-
-
         </div>
 
 </form>
+
 </body>
 </html>
