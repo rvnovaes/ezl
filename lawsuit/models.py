@@ -4,9 +4,9 @@ from core.models import Audit
 
 
 class TypeMovement(Audit):
-    name = models.CharField(max_length=255,blank=False,null=False)
-    legacy_code = models.CharField(max_length=255)
-    uses_wo = models.BooleanField(null=False, default=False)
+    name = models.CharField(max_length=255,blank=False,null=False,default="",unique=True)
+    legacy_code = models.CharField(max_length=255,blank=False,null=False,default="",unique=True)
+    uses_wo = models.BooleanField(default=True)
 
     class Meta:
         db_table = "type_movement"

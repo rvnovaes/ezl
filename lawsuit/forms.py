@@ -11,25 +11,23 @@ class BaseForm(ModelForm):
             field.widget.attrs['class'] = 'form-control input-sm'
 
 
-class TypeMovementForm(BaseForm,forms.Form):
+class TypeMovementForm(ModelForm):
     class Meta:
         model = TypeMovement
         fields = ['name','legacy_code','uses_wo']
 
     name = forms.CharField(
-        label=u"Nome",
+        label=u"",
         max_length=255,
         required=True,
-        widget=forms.TextInput()
+        widget=forms.TextInput(attrs={"required":"true","placeholder":"Descrição"})
     )
 
     legacy_code = forms.CharField(
-        label=u"Código Legado",
+        label=u"",
         max_length=255,
+        required=True,
+        widget=forms.TextInput(attrs={"placeholder":"Código Legado"})
     )
 
-    use_wo = forms.BooleanField(
-        label=u"Utiliza Ordem de Serviço?",
-        required=True,
-        widget=forms.CheckboxInput
-    )
+    uses_wo = forms.BooleanField(required=False)

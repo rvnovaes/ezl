@@ -18,7 +18,25 @@ from .forms import TypeMovementForm
 from .models import TypeMovement
 
 
-def type_movement(request,type_movement_id):
+def type_movement_list(request):
+    try:
+        type_movement = TypeMovement.objects.get(id=request.user.id)
+    except ObjectDoesNotExist:
+        type_movement = None
+    if type_movement:
+        type_movements_list = TypeMovement.objects.filter(id=type_movement.id)
+    else:
+        type_movements_list = None
+
+    form = TypeMovementForm(request.GET)
+
+    if type_movements_list:
+        return render(request, 'lawsuit/type_movements.html', {'form': form, 'type_movements_list': type_movements_list})
+    else:
+        return render(request, 'lawsuit/type_movements.html', {'form': form})
+
+
+def type_movement_crud(request, type_movement_id):
     type_movement_form = TypeMovementForm(request.POST)
 
     # TODO implementação a lógica para verficiar se o usuário está atuenticado
@@ -26,7 +44,7 @@ def type_movement(request,type_movement_id):
 
     if type_movement_id>0:
         try:
-            type_movement = TypeMovement.objects.get(id_type_movement=type_movement_id)
+            type_movement = TypeMovement.objects.get(id=type_movement_id)
         except ObjectDoesNotExist:
             type_movement = TypeMovement()
     else:
@@ -51,7 +69,7 @@ def type_movement(request,type_movement_id):
             # altera o Tipo de Movimento
             type_movement.save()
 
-            messages.add_message(request, messages.SUCCESS, u'Tipo de Movimento salvo com sucesso.')
+            messages.add_message(request, messages.SUCCESS, u'Tipo de Movimento atualizado com sucesso.')
     else:
         if request.method == 'POST':
             # cria novo Tipo de Movimento
@@ -65,4 +83,6 @@ def type_movement(request,type_movement_id):
 
             messages.add_message(request, messages.SUCCESS, u'Tipo de Movimento salvo com sucesso.')
 
-    return render(request, 'lawsuit/type_movement.html', {'form': type_movement_form, 'type_movement_id': type_movement_id, 'title_page': 'Cadastro de Tipos de Movimentação'})
+    return render(request, 'lawsuit/type_movement.html', {'form': type_movement_form,
+                                                          'type_movement_id': type_movement_id,
+                                                          'title_page': 'Cadastro de Tipos de Movimentação'})
