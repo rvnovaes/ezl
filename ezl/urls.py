@@ -15,15 +15,17 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from core import views
+from core import views as core_views
+
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^home/', views.home, name='menu'),
+    url(r'^home/', core_views.home, name='home'),
+    url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),
     url(r'^',include('core.urls')),
     url(r'^accounts/', include('allauth.urls')),
-    url(r'^accounts/login/', views.login, name='login'),
-    url(r'^logout/', views.logout_user, name='logout'),
+    url(r'^accounts/login/', core_views.login, name='login'),
+    url(r'^logout/', core_views.logout_user, name='logout'),
 
 
 
