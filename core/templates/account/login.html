@@ -30,35 +30,36 @@
         {% for error in field.errors %}
     <script type="text/javascript">
 
-    $.toast('{{ error|escape }}')
+    $.toast({
+        text: '{{ error|escape }}',
+        allowToastClose : false,
+        hideAfter : 100,
+        position : 'top-center',
+        heading: 'Erro',
+        icon: 'error',
+        loader: false,
+        stack: 5
 
-    $(document).ready(function(){
-        Materialize.toast('{{ error|escape }}', 4000)
-    });
+    })
+
     </script>
 
-    <script type="text/javascript">
-        function toggleRequired(){
-    var txt = $('#text1');
-
-
-    //Remove the "required" attribute.
-    txt.removeAttr("required");
-    alert(txt[0].outerHTML);
-
-    //Add the "required" attribute.
-    txt.attr("required", "true");
-    alert(txt[0].outerHTML);
-}
-    </script>
         {% endfor %}
         {% endfor %}
         {% for error in form.non_field_errors %}
+
     <script type="text/javascript">
-            $.toast('{{ error|escape }}')
-            $(document).ready(function(){
-                Materialize.toast('{{ error|escape }}', 4000)
-            });
+    $.toast({
+        text: '{{ error|escape }}',
+        allowToastClose : false,
+        hideAfter : 100,
+        position : 'top-center',
+        heading: 'Error',
+        icon: 'error',
+        loader: false,
+        stack: 5
+
+    })
     </script>
         {% endfor %}
         {% endif %}
