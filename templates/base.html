@@ -52,6 +52,7 @@
                     <li>
                         <center>{{ user_name }}</center>
                     </li>
+                    <li><a href="/accounts/password/change/">Alterar Senha</a></li>
                     <li class="divider"></li>
                     <li><a href="#modal1" onclick="$('#modal1').modal('open');">Sair do Sistema</a></li>
                 </ul>
@@ -60,6 +61,7 @@
                     <li style="margin-top: 5px;">
                         <center>{{ user_name }}</center>
                     </li>
+                    <li><a href="/accounts/password/change/">Alterar Senha</a></li>
                     <li class="divider"></li>
                     <li><a href="#modal1" onclick="$('#modal1').modal('open');">Sair do Sistema</a></li>
                 </ul>
@@ -84,13 +86,7 @@
             <div class="nav-wrapper">
                 <div class="col s12" id="breadcrumb" style="color: #212121 !important;">
                     <div class="align-left">
-                        {% if messages %}
-                            <ul class="messages">
-                                {% for message in messages %}
-                                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
+
 
                     </div>
                     <a href="#!" class="breadcrumb">First</a>

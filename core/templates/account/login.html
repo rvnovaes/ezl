@@ -33,13 +33,12 @@
     $.toast({
         text: '{{ error|escape }}',
         allowToastClose : false,
-        hideAfter : 100,
+        hideAfter : 8000,
         position : 'top-center',
         heading: 'Erro',
         icon: 'error',
         loader: false,
         stack: 5
-
     })
 
     </script>
@@ -52,9 +51,9 @@
     $.toast({
         text: '{{ error|escape }}',
         allowToastClose : false,
-        hideAfter : 100,
+        hideAfter : 8000,
         position : 'top-center',
-        heading: 'Error',
+        heading: 'Erro',
         icon: 'error',
         loader: false,
         stack: 5
@@ -92,4 +91,5 @@
 </form>
 
 </body>
+{{% messages = "" %}}
 </html>
