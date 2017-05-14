@@ -1,11 +1,7 @@
-import json
-from django.http import HttpResponse
-from django.http import JsonResponse
-from django.core import serializers
+from django.http import HttpResponseRedirect
 
 # python imports
 from datetime import datetime
-
 
 # django imports
 from django.contrib import messages
@@ -20,25 +16,30 @@ from .models import TypeMovement
 
 def type_movement_list(request):
     try:
-        type_movements_list = TypeMovement.objects.all()
+        type_movements_list = TypeMovement.objects.filter(active=True)
     except ObjectDoesNotExist:
         type_movements_list = None
 
     form = TypeMovementForm(request.GET)
 
     if type_movements_list:
-        return render(request, 'lawsuit/type_movements.html', {'form': form, 'type_movements_list': type_movements_list})
+        return render(request, 'lawsuit/type_movements.html',
+                      {'form': form, 'type_movements_list': type_movements_list})
     else:
         return render(request, 'lawsuit/type_movements.html', {'form': form})
 
 
 def type_movement_crud(request, type_movement_id):
-    type_movement_form = TypeMovementForm(request.POST)
-
-    # TODO implementação a lógica para verficiar se o usuário está atuenticado
     type_movement_id = int(type_movement_id)
 
-    if type_movement_id>0:
+    post = request.POST.copy()
+    post['uses_wo'] = 'off' if 'uses_wo' not in post and type_movement_id else 'on'
+
+    type_movement_form = TypeMovementForm(post)
+
+    # TODO implementação a lógica para verficiar se o usuário está atuenticado
+
+    if type_movement_id > 0:
         try:
             type_movement = TypeMovement.objects.get(id=type_movement_id)
         except ObjectDoesNotExist:
@@ -49,7 +50,7 @@ def type_movement_crud(request, type_movement_id):
     if type_movement_form.is_valid():
         type_movement.name = type_movement_form.cleaned_data['name']
         type_movement.legacy_code = type_movement_form.cleaned_data['legacy_code']
-        type_movement.uses_wo = type_movement_form.cleaned_data['uses_wo']
+        type_movement.uses_wo = type_movement_form.cleaned_data['uses_wo']#True if 'uses_wo' in type_movement_form.cleaned_data else False
 
     if type_movement_id > 0:
         # carrega o tipo de movimento no form
@@ -66,6 +67,7 @@ def type_movement_crud(request, type_movement_id):
             type_movement.save()
 
             messages.add_message(request, messages.SUCCESS, u'Tipo de Movimento atualizado com sucesso.')
+            return HttpResponseRedirect('/processos/cadastro-tipo-movimentacao/')
     else:
         if request.method == 'POST':
             # cria novo Tipo de Movimento

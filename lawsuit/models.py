@@ -5,7 +5,7 @@ from core.models import Audit
 class TypeMovement(Audit):
     name = models.CharField(max_length=255,blank=False,null=False,default="",unique=True)
     legacy_code = models.CharField(max_length=255,blank=False,null=False,default="",unique=True)
-    uses_wo = models.BooleanField(default=True)
+    uses_wo = models.BooleanField(default=False)
 
     class Meta:
         db_table = "type_movement"
