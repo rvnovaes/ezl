@@ -14,23 +14,30 @@ class BaseForm(ModelForm):
 class TypeMovementForm(ModelForm):
     class Meta:
         model = TypeMovement
-        fields = ['name','legacy_code','uses_wo']
+        fields = ['name', 'legacy_code', 'uses_wo']
 
     name = forms.CharField(
         label=u"",
         max_length=255,
         required=True,
-        widget=forms.TextInput(attrs={"required":"true","placeholder":"Descrição"})
+        widget=forms.TextInput(attrs={"required": "true", "placeholder": "Descrição"}),
+        error_messages= {'required':'O campo de descrição é obrigatório'}
     )
 
     legacy_code = forms.CharField(
         label=u"",
         max_length=255,
         required=True,
-        widget=forms.TextInput(attrs={"placeholder":"Código Legado"})
+        widget=forms.TextInput(attrs={"placeholder": "Código Legado"}),
+        error_messages={'required': 'O campo de código legado é obrigatório'}
     )
 
-    uses_wo = forms.BooleanField(required=False)
+    uses_wo = forms.BooleanField(
+        label="Utiliza ordem de serviço?",
+        initial=False,
+        required=False,
+        error_messages={'required': ''}
+    )
 
 
 class InstanceForm(ModelForm):

@@ -34,11 +34,13 @@ def type_movement_list(request):
 
 def type_movement_crud(request, type_movement_id):
     type_movement_id = int(type_movement_id)
-
     post = request.POST.copy()
     post['uses_wo'] = 'off' if 'uses_wo' not in post and type_movement_id else 'on'
 
-    type_movement_form = TypeMovementForm(post)
+    if request.method == 'GET':
+        type_movement_form = TypeMovementForm(request.GET)
+    else:
+         type_movement_form = TypeMovementForm(post)
 
     # TODO implementação a lógica para verficiar se o usuário está atuenticado
     type_movement_id = int(type_movement_id)
