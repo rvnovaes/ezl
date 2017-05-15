@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import TypeMovement, Instance
+from .models import TypeMovement,Instance
 
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
