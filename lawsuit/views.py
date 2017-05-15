@@ -86,41 +86,41 @@ def type_movement_crud(request, type_movement_id):
                                                           'type_movement_id': type_movement_id,
                                                           'title_page': 'Cadastro de Tipos de Movimentação'})
 
-
-def instance(request):
+# Lista intancias cadastradas no sistema
+def instances(request):
 
     try:
-        instances_list = Instance.objects.all()
-        instances_list_number = Instance.objects.all().count()
+        instances_list = Instance.objects.filter(active=True)
+
+        instances_list_number = len(instances_list)
 
         if instances_list_number > 0:
             context = {'instances': instances_list}
-
         else:
             instances_list = None
             context = {'instances': instances_list}
 
-        return render(request, 'lawsuit/instancias.html', context)
+        return render(request, 'lawsuit/instances.html', context)
 
     except:
         instances_list = None
-        return render(request, 'lawsuit/instancias.html', {'instances': instances_list})
+        return render(request, 'lawsuit/instances.html', {'instances': instances_list})
 
 
 def delete_instance(request, id_instance):
 
     try:
-        Instance.objects.filter(id=id_instance).delete()
+        Instance.objects.filter(id=id_instance).update(active=False)
         messages.add_message(request,messages.INFO,"Instância apagada com sucesso.")
         return HttpResponseRedirect('/processos/instancias/')
 
     except:
         messages.add_message("Erro ao apagar instância.")
-        TemplateResponse('lawsuit/instancias.html', {'message': 'Erro ao apagar instância.', })
+        TemplateResponse('lawsuit/instances.html', {'message': 'Erro ao apagar instância.', })
         return HttpResponseRedirect('/processos/instancias/')
 
 
-def nova_instancia(request):
+def instance(request):
 
     if request.method == 'POST':
         form = InstanceForm(request.POST)
@@ -137,7 +137,7 @@ def nova_instancia(request):
                 )
                 # Salva o objeto no banco de dados
                 instance.save()
-                messages.add_message(request, messages.ERROR, "Dados salvos com sucesso.")
+                messages.add_message(request, messages.SUCCESS, "Dados salvos com sucesso.")
 
             except:
                 messages.add_message(request,messages.ERROR,"Ocorreram erros de validação no formulário.")
@@ -148,7 +148,7 @@ def nova_instancia(request):
 
     else:
         form = InstanceForm()
-        return render(request,'lawsuit/nova_instancia.html',{'form':form,
+        return render(request,'lawsuit/instance.html',{'form':form,
                                                       'title_page': 'Instâncias - Easy Lawyer'  })
 
 

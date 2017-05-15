@@ -39,5 +39,6 @@ class InstanceForm(ModelForm):
         fields = ['name']
 
     name = forms.CharField(
+        label=u"",
         max_length=255
     )
