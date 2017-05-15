@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import TypeMovement
+from .models import TypeMovement, Instance
 
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
@@ -31,3 +31,13 @@ class TypeMovementForm(ModelForm):
     )
 
     uses_wo = forms.BooleanField(required=False)
+
+
+class InstanceForm(ModelForm):
+    class Meta:
+        model = Instance
+        fields = ['name']
+
+    name = forms.CharField(
+        max_length=255
+    )

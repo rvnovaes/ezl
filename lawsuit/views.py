@@ -1,7 +1,8 @@
 import json
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.http import JsonResponse
 from django.core import serializers
+from django.contrib import messages
 
 # python imports
 from datetime import datetime
@@ -10,12 +11,14 @@ from datetime import datetime
 # django imports
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render
+from django.shortcuts import render, render_to_response
 from django.forms.models import model_to_dict
 
 # project imports
-from .forms import TypeMovementForm
-from .models import TypeMovement
+from django.template.response import TemplateResponse
+
+from .forms import TypeMovementForm, InstanceForm
+from .models import TypeMovement, Instance
 
 
 def type_movement_list(request):
@@ -82,3 +85,71 @@ def type_movement_crud(request, type_movement_id):
     return render(request, 'lawsuit/type_movement.html', {'form': type_movement_form,
                                                           'type_movement_id': type_movement_id,
                                                           'title_page': 'Cadastro de Tipos de Movimentação'})
+
+
+def instance(request):
+
+    try:
+        instances_list = Instance.objects.all()
+        instances_list_number = Instance.objects.all().count()
+
+        if instances_list_number > 0:
+            context = {'instances': instances_list}
+
+        else:
+            instances_list = None
+            context = {'instances': instances_list}
+
+        return render(request, 'lawsuit/instancias.html', context)
+
+    except:
+        instances_list = None
+        return render(request, 'lawsuit/instancias.html', {'instances': instances_list})
+
+
+def delete_instance(request, id_instance):
+
+    try:
+        Instance.objects.filter(id=id_instance).delete()
+        messages.add_message(request,messages.INFO,"Instância apagada com sucesso.")
+        return HttpResponseRedirect('/processos/instancias/')
+
+    except:
+        messages.add_message("Erro ao apagar instância.")
+        TemplateResponse('lawsuit/instancias.html', {'message': 'Erro ao apagar instância.', })
+        return HttpResponseRedirect('/processos/instancias/')
+
+
+def nova_instancia(request):
+
+    if request.method == 'POST':
+        form = InstanceForm(request.POST)
+
+        # Verifica se o usuário submeteu dados válidos ao formulário
+        if form.is_valid():
+
+            try:
+                # Instancia o objeto "Instancia" de acordo com seu modelo
+                instance = Instance.objects.create(
+                    name=form.cleaned_data['name'],
+                    create_user_id=request.user.id,
+                    create_date=datetime.now(),
+                )
+                # Salva o objeto no banco de dados
+                instance.save()
+                messages.add_message(request, messages.ERROR, "Dados salvos com sucesso.")
+
+            except:
+                messages.add_message(request,messages.ERROR,"Ocorreram erros de validação no formulário.")
+        else:
+            messages.add_message(request, messages.ERROR, "Ocorreram erros de validação no formulário.")
+
+        return HttpResponseRedirect('/processos/instancias/')
+
+    else:
+        form = InstanceForm()
+        return render(request,'lawsuit/nova_instancia.html',{'form':form,
+                                                      'title_page': 'Instâncias - Easy Lawyer'  })
+
+
+
