@@ -4,8 +4,8 @@ from django.conf import settings
 # Create your models here.
 
 LEGAL_TYPE_CHOICES = {
-    ('0', 'Física'),
-    ('1', 'Jurídica'),
+    ('F', 'Física'),
+    ('J', 'Jurídica'),
 }
 
 
@@ -20,76 +20,6 @@ class Audit(models.Model):
 
     class Meta:
         abstract = True
-
-
-class Person(Audit):
-    legal_name = models.CharField(max_length=255, null=False, unique=True)
-    name = models.CharField(max_length=255, null=False, unique=True)
-    is_lawyer = models.BooleanField(null=False, default=False)
-    is_corresponding = models.BooleanField(null=False, default=False)
-    legal_type = models.CharField(max_length=1, choices=LEGAL_TYPE_CHOICES)
-    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True)
-
-    class Meta:
-        db_table = "person"
-
-    def __str__(self):
-        return self.legal_name
-
-
-class Country(Audit):
-    name = models.CharField(max_length=255, null=False, unique=True)
-
-    class Meta:
-        db_table = "country"
-
-    def __str__(self):
-        return self.name
-
-
-class State(Audit):
-    name = models.CharField(max_length=255, null=False, unique=True)
-    initials = models.CharField(max_length=10, null=False, unique=True)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False)
-
-    class Meta:
-        db_table = "state"
-
-    def __str__(self):
-        return self.name
-
-
-class CourtDistrict(models.Model):
-    name = models.CharField(max_length=255, null=False, unique=True)
-
-    class Meta:
-        db_table = "court_district"
-
-    def __str__(self):
-        return self.name
-
-
-class City(Audit):
-    name = models.CharField(max_length=255, null=False, unique=True)
-    state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False)
-    # TODO alterar court_district para not null true
-    court_district = models.ForeignKey(CourtDistrict, on_delete=models.PROTECT, blank=True, null=True)
-
-    class Meta:
-        db_table = "city"
-
-    def __str__(self):
-        return self.name
-
-
-class AddressType(Audit):
-    name = models.CharField(max_length=255, null=False, unique=True)
-
-    class Meta:
-        db_table = "address_type"
-
-    def __str__(self):
-        return self.name
 
 
 class Address(Audit):
@@ -114,11 +44,24 @@ class Address(Audit):
         return self.street  # TODO refazer o retorno padrao para descrever o endereço
 
 
-class ContactMechanismType(Audit):
+class AddressType(Audit):
     name = models.CharField(max_length=255, null=False, unique=True)
 
     class Meta:
-        db_table = "contact_mechanism_type"
+        db_table = "address_type"
+
+    def __str__(self):
+        return self.name
+
+
+class City(Audit):
+    name = models.CharField(max_length=255, null=False, unique=True)
+    state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False)
+    # TODO alterar court_district para not null true
+    court_district = models.ForeignKey(CourtDistrict, on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = "city"
 
     def __str__(self):
         return self.name
@@ -137,6 +80,16 @@ class ContactMechanism(Audit):
         return self.description
 
 
+class ContactMechanismType(Audit):
+    name = models.CharField(max_length=255, null=False, unique=True)
+
+    class Meta:
+        db_table = "contact_mechanism_type"
+
+    def __str__(self):
+        return self.name
+
+
 class ContactUs(models.Model):
     name = models.CharField(max_length=255, null=False, unique=True)
     email = models.CharField(max_length=255, null=False)
@@ -148,5 +101,68 @@ class ContactUs(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Country(Audit):
+    name = models.CharField(max_length=255, null=False, unique=True)
+
+    class Meta:
+        db_table = "country"
+
+    def __str__(self):
+        return self.name
+
+
+class CourtDistrict(models.Model):
+    name = models.CharField(max_length=255, null=False, unique=True)
+
+    class Meta:
+        db_table = "court_district"
+
+    def __str__(self):
+        return self.name
+
+
+class Person(Audit):
+    legal_name = models.CharField(max_length=255, null=False, unique=True)
+    name = models.CharField(max_length=255, null=False, unique=True)
+    is_lawyer = models.BooleanField(null=False, default=False)
+    is_corresponding = models.BooleanField(null=False, default=False)
+    legal_type = models.CharField(max_length=1, choices=LEGAL_TYPE_CHOICES)
+    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = "person"
+
+    def __str__(self):
+        return self.legal_name
+
+
+class State(Audit):
+    name = models.CharField(max_length=255, null=False, unique=True)
+    initials = models.CharField(max_length=10, null=False, unique=True)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False)
+
+    class Meta:
+        db_table = "state"
+
+    def __str__(self):
+        return self.name
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
