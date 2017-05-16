@@ -8,19 +8,24 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.forms.models import model_to_dict
+from django.views.generic.list import ListView
 
 # project imports
 from .forms import TypeMovementForm
 from .models import TypeMovement
 
 
+class TypeMovementList(ListView):
+    model = TypeMovement
+    queryset = TypeMovement.objects.filter(active=True)
+
+
 def type_movement_list(request):
     try:
-        type_movement_list = TypeMovement.objects.filter(active=True)
+        type_movements = TypeMovement.objects.filter(active=True)
     except ObjectDoesNotExist:
-        type_movement_list = None
-    return render(request, 'lawsuit/type_movements.html', {'type_movement_list': type_movement_list})
-
+        type_movements = None
+    return render(request, 'lawsuit/typemovement_list.html', {'typemovement_list': type_movements})
 
 def type_movement(request):
     if request.method == 'POST':

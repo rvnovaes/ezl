@@ -4,7 +4,7 @@
 {% block content %}
     <div class="container">
     <div>
-        {% if type_movement_list %}
+        {% if typemovement_list %}
             <div>
             <div class="row">
                 <div class="col s12">
@@ -24,7 +24,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for type_movement in type_movement_list %}
+                        {% for type_movement in typemovement_list %}
                             <tr>
                                 <td style="text-align: left">
                                     {{ type_movement.name }}
