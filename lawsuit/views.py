@@ -21,15 +21,6 @@ class TypeMovementList(ListView):
     model = TypeMovement
     queryset = TypeMovement.objects.filter(active=True)
 
-
-def type_movement_list(request):
-    try:
-        type_movements = TypeMovement.objects.filter(active=True)
-    except ObjectDoesNotExist:
-        type_movements = None
-    return render(request, 'lawsuit/typemovement_list.html', {'typemovement_list': type_movements})
-
-
 def type_movement(request, type_movement_id):
     type_movement_id = int(type_movement_id)
     post = request.POST.copy()
