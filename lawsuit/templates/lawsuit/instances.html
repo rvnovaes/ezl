@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+{% if messages %}
+<script>
+      $(document).ready(function(){
+    // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
+    $('.modal').modal();
+  });
+</script>
+<!-- Modal Structure -->
+<ul class="messages">
+    {% for message in messages %}
+    <script type="text/javascript">
+    $.toast({
+        text: '<center><font size=3>{{ message }}</font></center>',
+        allowToastClose : false,
+        hideAfter : 5000,
+        position : 'bottom-center',
+        loader: false,
+        stack: 5
+    })
+    </script>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% if instances == None %}
+<center>Nenhuma instância cadastrada. <a href="/processos/nova_instancia/">Cadastrar agora</a>.</center>
+
+{% else %}
+{% for instance in instances %}
+
+<div id="modal_apagar{{instance.id}}" class="modal">
+        <div class="modal-content">
+            <h4>Atenção</h4>
+            <p>Tem certeza que deseja apagar esta instância ?</p>
+        </div>
+        <div class="modal-footer">
+            <a href="/processos/instancias/apagar/{{instance.id}}" class="modal-action waves-effect waves-green btn-flat">Sim</a>
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Não</a>
+        </div>
+        </div>
+    <p>{{instance.name}}</p>&nbsp;&nbsp;
+    <a href="#modal_apagar{{instance.id}}" onclick="$('.modal').modal();">Apagar</a> &nbsp;&nbsp;
+    <a href="#">Editar</a>
+
+
+    <hr>
+    <br>
+{% endfor %}
+{% endif %}
+{% endblock %}

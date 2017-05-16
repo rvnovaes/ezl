@@ -13,3 +13,12 @@ class TypeMovement(Audit):
     def __str__(self):
         return self.name
 
+
+class Instance(Audit):
+    name = models.CharField(max_length=255,null=False, blank = False, default="", unique=True)
+
+    class Meta:
+        db_table = "instance"
+
+    def __str__(self):
+        return self.name
