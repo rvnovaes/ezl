@@ -38,19 +38,18 @@ def type_movement(request, type_movement_id):
     if request.method == 'GET':
         type_movement_form = TypeMovementForm(request.GET)
     else:
-         type_movement_form = TypeMovementForm(post)
+        type_movement_form = TypeMovementForm(post)
 
     # TODO implementação a lógica para verficiar se o usuário está atuenticado
-    type_movement_id = int(type_movement_id)
 
-    if type_movement_id>0:
+    if type_movement_id > 0:
         try:
             type_movement = TypeMovement.objects.get(id=type_movement_id)
         except ObjectDoesNotExist:
             type_movement = TypeMovement()
-            type_movement.name = form.cleaned_data['name']
-            type_movement.legacy_code = form.cleaned_data['legacy_code']
-            type_movement.uses_wo = form.cleaned_data['uses_wo']#True if 'uses_wo' in type_movement_form.cleaned_data else False
+            type_movement.name = type_movement_form.cleaned_data['name']
+            type_movement.legacy_code = type_movement_form.cleaned_data['legacy_code']
+            type_movement.uses_wo = type_movement_form.cleaned_data['uses_wo']#True if 'uses_wo' in type_movement_form.cleaned_data else False
 
         if type_movement_id > 0:
             # carrega o tipo de movimento no form
@@ -81,13 +80,12 @@ def type_movement(request, type_movement_id):
 
                 messages.add_message(request, messages.SUCCESS, u'Tipo de Movimento salvo com sucesso.')
     else:
-        form = TypeMovementForm()
-
-
+        type_movement_form = TypeMovementForm()
 
     return render(request, 'lawsuit/type_movement.html', {'form': type_movement_form,
                                                           'type_movement_id': type_movement_id,
                                                           'title_page': 'Cadastro de Tipos de Movimentação'})
+
 
 # Lista intancias cadastradas no sistema
 def instances(request):
