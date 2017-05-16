@@ -4,7 +4,7 @@
 {% block content %}
     <div class="container">
     <div>
-        {% if type_movements_list %}
+        {% if type_movement_list %}
             <div>
             <div class="row">
                 <div class="col s12">
@@ -24,7 +24,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for type_movement in type_movements_list %}
+                        {% for type_movement in type_movement_list %}
                             <tr>
                                 <td style="text-align: left">
                                     {{ type_movement.name }}
@@ -43,11 +43,11 @@
                                     {% endif %}
                                 </td>
                                 <td style="text-align: center">
-                                    <a href="{% url 'type_movement' type_movement.id %}">
+                                    <a href="{% url 'type_movement' %}">
                                         <i class="material-icons tooltipped" data-position="top" data-tooltip="Editar">mode_edit</i>
                                     </a>&nbsp;
 
-                                    <a href="{% url 'type_movement' type_movement.id %}delete">
+                                    <a href="{% url 'type_movement' %}delete">
                                         <i class="material-icons tooltipped" data-position="top" data-tooltip="Excluir"
                                            style="color:red">cancel</i>
                                     </a>
@@ -59,7 +59,7 @@
                 </div>
             </div>
         {% endif %}
-        <a class="btn-floating btn-large"  style="float: right;" type="submit" value="Cadastrar novo" href="{% url 'type_movement' 0 %}">
+        <a class="btn-floating btn-large"  style="float: right;" type="submit" value="Cadastrar novo" href="{% url 'type_movement' %}">
             <i class="material-icons">add</i>
         </a>
         </div>

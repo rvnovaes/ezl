@@ -1,9 +1,9 @@
-{% extends 'base.html' %}
+    {% extends 'base.html' %}
 {% load staticfiles %}
 {% block content %}
     <div style="text-align: center" class="container">
         <div>
-            <form action="{% url 'type_movement' type_movement_id %}" method="post"> {% csrf_token %}
+            <form action="{% url 'type_movement' %}" method="post"> {% csrf_token %}
                 <div class="fieldWrapper hidden">
                     {{ form.id }}
                 </div>

@@ -43,4 +43,4 @@ class TypeMovementForm(ModelForm):
         initial=False,
         required=True,
         error_messages={'required':''}
-    )
+        )
