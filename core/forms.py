@@ -43,9 +43,9 @@ class ContactForm(ModelForm, forms.Form):
 class ContactMechanismForm(ModelForm, forms.Form):
     class Meta:
         model = ContactMechanism
-        fields = ['type', 'name', 'description', 'notes']
+        fields = ['contact_mechanism_type', 'name', 'description', 'notes']
 
-    type = forms.Select()
+    #contact_mechanism_type = forms.Select()
 
     name = forms.CharField(
         label=u"Nome",
@@ -105,12 +105,12 @@ class PersonForm(ModelForm, forms.Form):
                   ('J', u'Jurídica')])
     )
 
-    auth_user = forms.ModelChoiceField(
-        label=u"Usuário",
-        #queryset =  TODO implementar o carregado dos usuários pré cadastrados;
-        required=False,
-        widget=forms.Select()
-    )
+    # auth_user = forms.ModelChoiceField(
+    #     label=u"Usuário",
+    #     #queryset =  TODO implementar o carregado dos usuários pré cadastrados;
+    #     required=False,
+    #     widget=forms.Select()
+    # )
 
 
 class AddressForm(ModelForm, forms.Form):
