@@ -9,11 +9,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.forms.models import model_to_dict
 from django.views.generic.list import ListView
-from django.core.urlresolvers import reverse, reverse_lazy, resolve
+from django.core.urlresolvers import reverse_lazy
 
 # project imports
 from django.template.response import TemplateResponse
-from django.views.generic.edit import CreateView, UpdateView, DeleteView, View
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
 
 from .forms import TypeMovementForm, InstanceForm

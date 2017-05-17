@@ -14,6 +14,8 @@ from core.tables import PersonTable
 
 from datetime import datetime
 
+from django.utils import  timezone
+
 
 def login(request):
     if request.user.is_authenticated:
@@ -50,10 +52,10 @@ class BaseCustomView(View):
     def form_valid(self, form):
         user = User.objects.get(id=self.request.user.id)
         if form.instance.id is None:
-            form.instance.create_date = datetime.now()
+            form.instance.create_date = timezone.now()
             form.instance.create_user = user
         else:
-            form.instance.alter_date = datetime.now()
+            form.instance.alter_date = timezone.now()
             form.instance.alter_user = user
             form.save()
         super(BaseCustomView, self).form_valid(form)
@@ -75,13 +77,13 @@ class PersonListView(ListView, BaseCustomView):
     # #     context['person_list'] = self.queryset
     # #     return context
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(PersonListView, self).get_context_data(**kwargs)
-    #     context['nav_person'] = True
-    #     table = PersonTable(Person.objects.filter(active=True).order_by('-pk'))
-    #     RequestConfig(self.request, paginate={'per_page': 30}).configure(table)
-    #     context['table'] = table
-    #     return context
+    def get_context_data(self, **kwargs):
+        context = super(PersonListView, self).get_context_data(**kwargs)
+        context['nav_person'] = True
+        table = PersonTable(Person.objects.filter(active=True).order_by('-pk'))
+        RequestConfig(self.request, paginate={'per_page': 30}).configure(table)
+        context['table'] = table
+        return context
 
 
 class PersonCreateView(BaseCustomView, CreateView):
