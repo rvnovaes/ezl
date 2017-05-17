@@ -47,9 +47,9 @@ class InstanceForm(ModelForm):
         fields = ['name']
 
     name = forms.CharField(
-        label=u"",
+        label=u"Nome da Instância",
         max_length=255,
-        widget=forms.TextInput(attrs={"placeholder": "Nome da Instância"})
+
     )
 
 

@@ -55,6 +55,7 @@ class BaseCustomView(View):
         else:
             form.instance.alter_date = datetime.now()
             form.instance.alter_user = User.objects.get(id=self.request.user.id)
+            #form.instance.alter_user = self.request.user.id
             form.save()
         super(BaseCustomView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)

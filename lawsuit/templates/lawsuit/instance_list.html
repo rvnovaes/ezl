@@ -1,0 +1,36 @@
+
+    <div class="container">
+    {% if object_list == None %}
+        <div> Nenhuma instância cadastrada. <a href="/processos/nova_instancia/">Cadastrar agora</a>.</div>
+
+    {% else %}
+        <a href="/processos/nova_instancia/">Nova Instância</a>
+        <br><br>
+        <table>
+            <thead>
+            <tr>
+                <th>Nome da Instância</th>
+                <th>Ação</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for instance in object_list %}
+                <tr>
+                    <td>{{instance.name}}</td>
+
+                    <td>
+                        <a href="#modal_apagar{{instance.id}}">
+                            Apagar
+                        </a> &nbsp;&nbsp;
+                        <a href="{% url 'instance_update' instance.id %}">
+                            Editar
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+    {% endif %}
+
+<div>
