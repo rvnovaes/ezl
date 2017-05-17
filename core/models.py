@@ -21,6 +21,15 @@ class Audit(models.Model):
     class Meta:
         abstract = True
 
+class AddressType(Audit):
+    name = models.CharField(max_length=255, null=False, unique=True)
+
+    class Meta:
+        db_table = "address_type"
+
+    def __str__(self):
+        return self.name
+
 
 class Address(Audit):
     address_type = models.ForeignKey(AddressType, on_delete=models.PROTECT, blank=False, null=False)
@@ -42,16 +51,6 @@ class Address(Audit):
 
     def __str__(self):
         return self.street  # TODO refazer o retorno padrao para descrever o endereço
-
-
-class AddressType(Audit):
-    name = models.CharField(max_length=255, null=False, unique=True)
-
-    class Meta:
-        db_table = "address_type"
-
-    def __str__(self):
-        return self.name
 
 
 class City(Audit):
@@ -149,6 +148,26 @@ class State(Audit):
     def __str__(self):
         return self.name
 
+class Address(Audit):
+    address_type = models.ForeignKey(AddressType, on_delete=models.PROTECT, blank=False, null=False)
+    street = models.CharField(max_length=255)
+    number = models.CharField(max_length=255)
+    complement = models.CharField(max_length=255, blank=True)
+    city_region = models.CharField(max_length=255)
+    zip_code = models.CharField(max_length=255)
+    notes = models.TextField(blank=True)
+    home_address = models.BooleanField(default=False, blank=True)
+    business_address = models.BooleanField(default=False, blank=True)
+    city = models.ForeignKey(City, on_delete=models.PROTECT, blank=False, null=False)
+    state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False)
+    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
+
+    class Meta:
+        db_table = "address"
+
+    def __str__(self):
+        return self.street  # TODO refazer o retorno padrao para descrever o endereço
 
 
 

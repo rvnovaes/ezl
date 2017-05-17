@@ -15,7 +15,10 @@ from django.template.response import TemplateResponse
 
 from .forms import TypeMovementForm, InstanceForm
 from .models import TypeMovement, Instance
+from django.views.generic import TemplateView, CreateView, UpdateView
 
+class InstanceView(TemplateView):
+    model = Instance
 
 class TypeMovementList(ListView):
     model = TypeMovement

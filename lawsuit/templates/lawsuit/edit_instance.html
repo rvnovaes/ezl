@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+<form action="/processos/instancias/editar_instancia/{{ instance.id }}/" method="post">
+{% csrf_token %}
+<input type="text" value="{{ instance.name }}" name="name" id="{{ instance.name.id_for_label}}">
+    <input type="submit" value="Salvar">
+
+</form>
+
+{% endblock %}

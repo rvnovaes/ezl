@@ -1,3 +1,8 @@
+#center{
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+}
 .breadcrumb{
     color: #212121 !important;
     font-size: small !important;

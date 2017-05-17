@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import TypeMovement,Instance
+from .models import TypeMovement, Instance
 
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
@@ -9,6 +9,7 @@ class BaseForm(ModelForm):
         super(BaseForm, self).__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control input-sm'
+            
 
 
 class TypeMovementForm(ModelForm):
@@ -47,5 +48,8 @@ class InstanceForm(ModelForm):
 
     name = forms.CharField(
         label=u"",
-        max_length=255
+        max_length=255,
+        widget=forms.TextInput(attrs={"placeholder": "Nome da Instância"})
     )
+
+

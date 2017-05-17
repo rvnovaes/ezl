@@ -25,26 +25,25 @@
         <!-- <meta http-equiv="REFRESH" content="0;url=/"> -->
 
         <!-- {% else %} -->
-        <nav>
-            <div class="nav-wrapper">
 
-                <a href="#!" class="brand-logo">Logo</a>
-                <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
-                <ul class="right hide-on-med-and-down">
-                    <li><a href="#">Correspondentes</a></li>
-                    <li><a href="#">Providências</a></li>
-                    <li><a href="#">Dashboard</a></li>
-                    <li><a class="dropdown-button" href="#!" data-activates="dropdown1"><i
-                            class="material-icons">person</i></a></li>
-                </ul>
-
-                <!-- Menu Mobile -->
+        <!-- Menu Mobile -->
                 <ul class="side-nav" id="mobile-demo">
-                    <li><a href="#">Correspondentes</a></li>
+                    <li><a class="dropdown-button" href="#!" data-activates="dropdownm2">Processos</a></li>
+                    <li><a href="#">Providências</a></li>
                     <li><a href="#">Providências</a></li>
                     <li><a href="#">Dashboard</a></li>
                     <li><a class="dropdown-button" href="#!" data-activates="dropdownm1"><i class="material-icons">person</i></a>
                     </li>
+                </ul>
+
+                <!-- Menu Dropdown de Processos -->
+                <ul id="dropdown2" class="dropdown-content">
+                    <li><a href="/processos/instancias">Instâncias</a></li>
+                </ul>
+
+                <!-- Menu Dropdown de Processos Mobile -->
+                <ul id="dropdownm2" class="dropdown-content">
+                    <li><a href="/processos/instancias">Instâncias</a></li>
                 </ul>
 
                 <!-- Menu Dropdown Usuário -->
@@ -64,6 +63,19 @@
                     <li><a href="/accounts/password/change/">Alterar Senha</a></li>
                     <li class="divider"></li>
                     <li><a href="#modal1" onclick="$('#modal1').modal('open');">Sair do Sistema</a></li>
+                </ul>
+
+        <nav>
+            <div class="nav-wrapper">
+
+                <a href="/" class="brand-logo">Logo</a>
+                <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li><a class="dropdown-button" href="#!" data-activates="dropdown2">Processos</a></li>
+                    <li><a href="#">Providências</a></li>
+                    <li><a href="#">Dashboard</a></li>
+                    <li><a class="dropdown-button" href="#!" data-activates="dropdown1"><i
+                            class="material-icons">person</i></a></li>
                 </ul>
 
                 <!-- Janela modal para confirmação de saída do usuário -->
@@ -106,9 +118,9 @@
 
             // Configuração do menu dropdown do usuário
             $(".dropdown-button").dropdown({
-                hover: true,
+                hover: false,
                 alignment: 'bottom',
-                belowOrigin: true,
+                belowOrigin: false,
                 constrainWidth: false,
                 outDuration: 400,
                 stopPropagation: false
