@@ -10,6 +10,7 @@ class TypeMovement(Audit):
 
     class Meta:
         db_table = "type_movement"
+        ordering = ['-id']
 
     def __str__(self):
         return self.name
