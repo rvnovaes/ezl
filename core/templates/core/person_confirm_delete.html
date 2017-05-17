@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}{{person_name}} Confirm delete?{% endblock %}
+
+{% block content %}
+    <div id="content-container" class="container p-none">
+        <div class="side-p">
+            <h3>Tem certeza?</h3>
+            <p>Você irá apagar o registro {{ person }}. Por favor confirme.</p>
+            <form action="" method="post">
+                {% csrf_token %}
+                <input class="btn btn-link"
+                       type="button" value="Cancel"
+                       onclick="window.history.go(-1);"/>
+                <input class="btn btn-danger" type="submit" value="Confirm"/>
+            </form>
+        </div>
+    </div>
+{% endblock %}
