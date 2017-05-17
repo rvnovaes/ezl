@@ -40,7 +40,7 @@ class InstanceListView(ListView):
     queryset = Instance.objects.filter(active=True)
 
 
-class TypeMovementList(ListView):
+class TypeMovementListView(ListView):
     model = TypeMovement
     queryset = TypeMovement.objects.filter(active=True)
     ordering = ['id']
