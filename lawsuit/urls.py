@@ -3,9 +3,14 @@ from django.conf.urls import url, include
 from lawsuit import views
 
 urlpatterns = [
-    url(r'^tipo-movimentacao/listar$', views.TypeMovementList.as_view(), name='type_movement_list'),
-    url(r'^tipo-movimentacao/$', views.type_movement, name='type_movement'),
-    # Instances
+
+    #Tipo de movimentacao
+    url(r'^tipo-movimentacao/listar/$', views.TypeMovementListView.as_view(), name='type_movement_list'),
+    url(r'^tipo-movimentacao/$', views.TypeMovementCreateView.as_view(), name='type_movement_add'),
+    url(r'^tipo-movimentacao/(?P<pk>[0-9]+)/$', views.TypeMovementUpdateView.as_view(), name='type_movement_update'),
+    url(r'^tipo-movimentacao/(?P<pk>[0-9]+)/excluir$', views.TypeMovementDeleteView.as_view(),
+        name='type_movement_delete'),
+
     #url(r'^instancias/$', views.instances, name='instances'),
     url(r'^instancias/listar/$', views.InstanceListView.as_view(), name='instance_list'),
     url(r'instancias/$', views.InstanceCreateView.as_view(), name='instance_create'),

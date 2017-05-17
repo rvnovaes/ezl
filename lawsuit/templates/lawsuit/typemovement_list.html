@@ -43,11 +43,11 @@
                                     {% endif %}
                                 </td>
                                 <td style="text-align: center">
-                                    <a href="{% url 'type_movement' %}">
+                                    <a href="{% url 'type_movement_update' type_movement.id%}">
                                         <i class="material-icons tooltipped" data-position="top" data-tooltip="Editar">mode_edit</i>
                                     </a>&nbsp;
 
-                                    <a href="{% url 'type_movement' %}delete">
+                                    <a href="{% url 'type_movement_delete' type_movement.id %}">
                                         <i class="material-icons tooltipped" data-position="top" data-tooltip="Excluir"
                                            style="color:red">cancel</i>
                                     </a>
@@ -59,7 +59,7 @@
                 </div>
             </div>
         {% endif %}
-        <a class="btn-floating btn-large"  style="float: right;" type="submit" value="Cadastrar novo" href="{% url 'type_movement' %}">
+        <a class="btn-floating btn-large"  style="float: right;" type="submit" value="Cadastrar novo" href="{% url 'type_movement_add'%}">
             <i class="material-icons">add</i>
         </a>
         </div>

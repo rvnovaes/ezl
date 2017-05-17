@@ -3,7 +3,7 @@
 {% block content %}
     <div style="text-align: center" class="container">
         <div>
-            <form action="{% url 'type_movement' %}" method="post"> {% csrf_token %}
+            <form action="" method="post"> {% csrf_token %}
                 <div class="fieldWrapper hidden">
                     {{ form.id }}
                 </div>
@@ -28,11 +28,11 @@
                     <button type="submit" class="waves-effect waves-light btn"><i class="material-icons left">save</i>
                         Salvar
                     </button>
-                    <button class="waves-effect waves-light red darken4 btn" formnovalidate
-                            formaction="{% url 'type_movements' %}"><i
+                    <a class="waves-effect waves-light red darken4 btn" formnovalidate
+                            href="{% url 'type_movement_list' %}"><i
                             class="material-icons left">cancel</i>
                         Cancelar
-                    </button>
+                    </a>
                 </div>
                 {% if messages %}
                     <ul class="messages">

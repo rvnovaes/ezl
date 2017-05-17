@@ -37,7 +37,6 @@ class TypeMovementForm(ModelForm):
         label="Utiliza ordem de serviço?",
         initial=False,
         required=False,
-        error_messages={'required': ''}
     )
 
 
