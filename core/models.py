@@ -88,7 +88,6 @@ class Person(Audit):
     class Meta:
         db_table = "person"
         ordering = ['-id']
-        verbose_name = 'Person'
 
     def __str__(self):
         return self.legal_name

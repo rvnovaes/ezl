@@ -4,10 +4,6 @@ from .models import Person
 
 
 class PersonTable(tables.Table):
-    #legal_name = tables.LinkColumn('', args=[A('pk')])
-    #name = tables.LinkColumn('', args=[A('pk')])
-    #auth_user = tables.LinkColumn('', args=[A('pk')])
-
     class Meta:
         model = Person
         fields = ['legal_name', 'name', 'is_lawyer', 'is_corresponding', 'legal_type', 'auth_user', 'active']

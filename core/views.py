@@ -7,7 +7,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView, View
 from django.views.generic.list import ListView
 from django.contrib.auth import logout, user_logged_in
 from django_tables2 import RequestConfig
-
+from django.core.urlresolvers import reverse, reverse_lazy, resolve
 from core.models import Person
 from core.forms import PersonForm
 from core.tables import PersonTable
@@ -47,23 +47,24 @@ def logout_user(request):
 
 # Implementa a alteração da data e usuários para operação de update e new
 class BaseCustomView(View):
-
     def form_valid(self, form):
+        user = User.objects.get(id=self.request.user.id)
         if form.instance.id is None:
             form.instance.create_date = datetime.now()
-            form.instance.create_user = User.objects.get(id=self.request.user.id)
+            form.instance.create_user = user
         else:
             form.instance.alter_date = datetime.now()
-            form.instance.alter_user = User.objects.get(id=self.request.user.id)
+            form.instance.alter_user = user
             form.save()
         super(BaseCustomView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
 
-class PersonListView(ListView,BaseCustomView):
+class PersonListView(ListView, BaseCustomView):
     model = Person
     queryset = Person.objects.filter(active=True)
     ordering = ['id']
+
     # context_object_name = 'person'
     # def dispatch(self, request, *args, **kwargs):
     #     if not request.user.is_authenticated:
@@ -74,19 +75,19 @@ class PersonListView(ListView,BaseCustomView):
     # #     context['person_list'] = self.queryset
     # #     return context
 
-    def get_context_data(self, **kwargs):
-        context = super(PersonListView, self).get_context_data(**kwargs)
-        context['nav_person'] = True
-        table = PersonTable(Person.objects.filter(active=True).order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 30}).configure(table)
-        context['table'] = table
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(PersonListView, self).get_context_data(**kwargs)
+    #     context['nav_person'] = True
+    #     table = PersonTable(Person.objects.filter(active=True).order_by('-pk'))
+    #     RequestConfig(self.request, paginate={'per_page': 30}).configure(table)
+    #     context['table'] = table
+    #     return context
 
 
 class PersonCreateView(BaseCustomView, CreateView):
     model = Person
     form_class = PersonForm
-    success_url = '/pessoas/listar'
+    success_url = reverse_lazy('person_list')
 
     # def form_valid(self, form):
     #     form.instance.user = self.request.user
@@ -107,18 +108,16 @@ class PersonCreateView(BaseCustomView, CreateView):
 
 
 class PersonUpdateView(BaseCustomView, UpdateView):
-
     model = Person
     form_class = PersonForm
-    success_url = '/pessoas/listar'
+    success_url = reverse_lazy('person_list')
 
 
-class PersonDeleteView(BaseCustomView,DeleteView):
+class PersonDeleteView(BaseCustomView, DeleteView):
     model = Person
-    success_url = '/pessoas/listar'
+    success_url = reverse_lazy('person_list')
 
     def delete(self, request, *args, **kwargs):
-
         person = self.get_object()
         success_url = self.get_success_url()
         person_id = int(person.id)
