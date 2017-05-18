@@ -42,20 +42,20 @@ class TypeMovementListView(ListView):
         context['table'] = table
         return context
 
-    
-class TypeMovementCreateView(BaseCustomView,CreateView):
+
+class TypeMovementCreateView(BaseCustomView, CreateView):
     model = TypeMovement
     form_class = TypeMovementForm
     success_url = reverse_lazy('type_movement_list')
 
 
-class TypeMovementUpdateView(BaseCustomView,UpdateView):
+class TypeMovementUpdateView(BaseCustomView, UpdateView):
     model = TypeMovement
     form_class = TypeMovementForm
     success_url = reverse_lazy('type_movement_list')
 
-      
-class TypeMovementDeleteView(BaseCustomView,DeleteView):
+
+class TypeMovementDeleteView(BaseCustomView, DeleteView):
     model = TypeMovement
     success_url = reverse_lazy('type_movement_list')
 

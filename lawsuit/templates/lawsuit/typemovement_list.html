@@ -1,10 +1,10 @@
-{% extends "base.html" %}
-{% load static %}
+{#{% extends "base.html" %}#}
+{#{% load static %}#}
 <body>
 {% block content %}
     <div class="container">
     <div>
-        {% if typemovement_list %}
+
             <div>
             <div class="row">
                 <div class="col s12">
@@ -13,6 +13,7 @@
                 <div class="col s12">
                     <h2>Cadastro de Tipos de Movimentação</h2>
                 </div>
+             {% if typemovement_list %}
                 <div>
                     <table class="bordered highlight" style="margin-bottom: 1%">
                         <thead>

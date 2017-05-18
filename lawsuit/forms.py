@@ -1,5 +1,6 @@
 from django import forms
 from django.forms import ModelForm
+# from django.contrib.admin.widgets import AdminDateWidget #TODO Verificar se será utilizado datepicker
 from core.models import Person, CourtDistrict
 from .models import TypeMovement, Instance, LawSuit, Movement, Folder, Task
 
@@ -76,23 +77,27 @@ class MovementForm(ModelForm):
         label=u"Advogado"
     )
 
+    person_court = forms.ModelChoiceField(
+        queryset=Person.objects.filter(active=True),
+        empty_label=u"Selecione...",
+        label=u"Tribunal"
+    )
+
     type_movement = forms.ModelChoiceField(
         queryset=TypeMovement.objects.filter(active=True),
         empty_label=u"Selecione...",
         label=u"Tipo de Movimentação"
     )
 
+    deadline = forms.DateTimeField(
+        label=u"Data da Movimentação"
+    )
+
 
 class FolderForm(ModelForm):
     class Meta:
         model = Folder
-        fields = ['name', 'legacy_code', 'person_customer']
-
-    name = forms.CharField(
-        label=u"Nome da Pasta",
-        max_length=255,
-        required=True
-    )
+        fields = ['legacy_code', 'person_customer']
 
     legacy_code = forms.CharField(
         label=u"Código Legado",
@@ -110,32 +115,12 @@ class FolderForm(ModelForm):
 class LawSuitForm(ModelForm):
     class Meta:
         model = LawSuit
-        fields = ['person_lawyer', 'person_court', 'court_district', 'instance'
-            , 'folder']
+        fields = ['person_lawyer', 'folder']
 
     person_lawyer = forms.ModelChoiceField(
         label=u"Advogado",
         empty_label=u"Selecione",
         queryset=Person.objects.filter(active=True, is_lawyer=True)
-    )
-
-    person_court = forms.ModelChoiceField(
-        label=u"Tribunal",
-        empty_label=u"Selecione...",
-        queryset=Person.objects.filter(active=True)  # TODO Verificar como cadastrar tribunal
-
-    )
-
-    court_district = forms.ModelChoiceField(
-        label=u"Comarca",
-        empty_label=u"Selecione...",
-        queryset=CourtDistrict.objects.filter(active=True)
-    )
-
-    instance = forms.ModelChoiceField(
-        label=u"Instância",
-        empty_label=u"Selecione",
-        queryset=Instance.objects.filter(active=True)
     )
 
     folder = forms.ModelChoiceField(
@@ -145,7 +130,7 @@ class LawSuitForm(ModelForm):
     )
 
 
-class ProvidenceForm(ModelForm):
+class TaskForm(ModelForm):
     class Meta:
         model = Task
         fields = ['legacy_code', 'movement', 'person', 'type_movement', 'delegation_date',
@@ -176,12 +161,22 @@ class ProvidenceForm(ModelForm):
         label=u"Tipo de Movimentação"
     )
     # TODO verificar como aplicar os formulários com dateTimeField
-    delegation_date = forms.DateTimeField
+    delegation_date = forms.DateTimeField(
+        label=u"Data de abertura"
+    )
 
-    acceptance_date = forms.DateTimeField
+    acceptance_date = forms.DateTimeField(
+        label=u"Data Fechamento"
+    )
 
-    deadline_date = forms.DateTimeField
+    deadline_date = forms.DateTimeField(
+        label=u"Prazo"
+    )
 
-    final_deadline_date = forms.DateTimeField
+    final_deadline_date = forms.DateTimeField(
+        label=u"Prazo Fatal"
+    )
 
-    execution_deadline_date = forms.DateTimeField
+    execution_deadline_date = forms.DateTimeField(
+        label=u"Prazo Execução Fatal"
+    )

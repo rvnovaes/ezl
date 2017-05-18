@@ -44,7 +44,6 @@ def logout_user(request):
 
 # Implementa a alteração da data e usuários para operação de update e new
 class BaseCustomView(View):
-
     def form_valid(self, form):
         user = User.objects.get(id=self.request.user.id)
         if form.instance.id is None:
@@ -62,6 +61,7 @@ class PersonListView(ListView, BaseCustomView):
     model = Person
     queryset = Person.objects.filter(active=True)
     ordering = ['id']
+
     # context_object_name = 'person'
     # def dispatch(self, request, *args, **kwargs):
     #     if not request.user.is_authenticated:
@@ -105,7 +105,6 @@ class PersonCreateView(BaseCustomView, CreateView):
 
 
 class PersonUpdateView(BaseCustomView, UpdateView):
-
     model = Person
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
@@ -116,7 +115,6 @@ class PersonDeleteView(BaseCustomView, DeleteView):
     success_url = reverse_lazy('person_list')
 
     def delete(self, request, *args, **kwargs):
-
         person = self.get_object()
         success_url = self.get_success_url()
         person_id = int(person.id)

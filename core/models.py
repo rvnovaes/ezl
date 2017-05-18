@@ -1,6 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.conf import settings
-
+from django.utils import timezone
 LEGAL_TYPE_CHOICES = {
     ('F', 'Física'),
     ('J', 'Jurídica'),
@@ -137,10 +138,10 @@ class ContactMechanism(Audit):
 
 
 class ContactUs(Audit):
-    name = models.CharField(max_length=255, null=False, unique=True)
-    email = models.CharField(max_length=255, null=False)
-    phone_number = models.CharField(max_length=255, null=False)
-    message = models.CharField(max_length=255, null=False, unique=True)
+    name = models.CharField(max_length=255)
+    email = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=255)
+    message = models.TextField()
 
     class Meta:
         db_table = "contact_us"
