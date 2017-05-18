@@ -52,7 +52,7 @@ class State(Audit):
         return self.name
 
 
-class CourtDistrict(models.Model):
+class CourtDistrict(Audit):
     name = models.CharField(max_length=255, null=False, unique=True)
 
     class Meta:
@@ -136,7 +136,7 @@ class ContactMechanism(Audit):
         return self.description
 
 
-class ContactUs(models.Model):
+class ContactUs(Audit):
     name = models.CharField(max_length=255, null=False, unique=True)
     email = models.CharField(max_length=255, null=False)
     phone_number = models.CharField(max_length=255, null=False)
