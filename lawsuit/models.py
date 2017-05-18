@@ -1,12 +1,9 @@
 from django.db import models
 from core.models import Audit
-# Create your models here.
-
 
 class TypeMovement(Audit):
-    name = models.CharField(max_length=255,blank=False,null=False,default="",unique=True)
-    legacy_code = models.CharField(max_length=255,blank=False,null=False,default="",unique=True)
-    legacy_code = models.CharField(max_length=255,blank=False,null=False,default="",unique=True)
+    name = models.CharField(max_length=255, blank=False, null=False, default='', unique=True)
+    legacy_code = models.CharField(max_length=255, blank=False, null=False, default='', unique=True)
     uses_wo = models.BooleanField(default=False)
 
     class Meta:
@@ -18,7 +15,7 @@ class TypeMovement(Audit):
 
 
 class Instance(Audit):
-    name = models.CharField(max_length=255,null=False, blank = False, default="", unique=True)
+    name = models.CharField(max_length=255, null=False, blank=False, default='', unique=True)
 
     class Meta:
         db_table = "instance"

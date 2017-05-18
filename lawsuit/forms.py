@@ -9,7 +9,6 @@ class BaseForm(ModelForm):
         super(BaseForm, self).__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control input-sm'
-            
 
 
 class TypeMovementForm(ModelForm):
@@ -50,5 +49,3 @@ class InstanceForm(ModelForm):
         max_length=255,
 
     )
-
-

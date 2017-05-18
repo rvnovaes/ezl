@@ -1,20 +1,15 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import IntegrityError
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, View
 from django.views.generic.list import ListView
-from django.contrib.auth import logout, user_logged_in
+from django.contrib.auth import logout
 from django_tables2 import RequestConfig
-from django.core.urlresolvers import reverse, reverse_lazy, resolve
+from django.core.urlresolvers import reverse_lazy
 from core.models import Person
 from core.forms import PersonForm
 from core.tables import PersonTable
-
-from datetime import datetime
-
-from django.utils import  timezone
+from django.utils import timezone
 
 
 def login(request):

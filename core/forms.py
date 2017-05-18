@@ -4,9 +4,6 @@ from django import forms
 from core.models import ContactUs, Person, Address, Country, City, State, ContactMechanism
 
 
-
-
-
 class ContactForm(ModelForm, forms.Form):
     class Meta:
         model = ContactUs
@@ -206,5 +203,3 @@ class AddressForm(ModelForm, forms.Form):
         },
         )
     )
-
-

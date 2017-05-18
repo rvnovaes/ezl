@@ -1,18 +1,8 @@
 from django.http import HttpResponseRedirect
-
-# python imports
-from datetime import datetime
-
-# django imports
-from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render
-from django.forms.models import model_to_dict
 from django.views.generic.list import ListView
 from django.core.urlresolvers import reverse_lazy
 
 # project imports
-from django.template.response import TemplateResponse
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
 
@@ -20,7 +10,6 @@ from .forms import TypeMovementForm, InstanceForm
 from .models import TypeMovement, Instance
 from .tables import TypeMovementTable
 from core.views import BaseCustomView
-
 
 
 class InstanceUpdateView(BaseCustomView, UpdateView):
@@ -75,6 +64,3 @@ class TypeMovementDeleteView(BaseCustomView,DeleteView):
         typemovement_id = int(typemovement.id)
         TypeMovement.objects.filter(id=typemovement_id).update(active=False)
         return HttpResponseRedirect(self.success_url)
-
-   
-
