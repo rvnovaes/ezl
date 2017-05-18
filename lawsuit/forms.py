@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 from core.models import Person, CourtDistrict
-from .models import TypeMovement, Instance, LawSuit, Movement, Folder, Providence
+from .models import TypeMovement, Instance, LawSuit, Movement, Folder, Task
 
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
@@ -147,7 +147,7 @@ class LawSuitForm(ModelForm):
 
 class ProvidenceForm(ModelForm):
     class Meta:
-        model = Providence
+        model = Task
         fields = ['legacy_code', 'movement', 'person', 'type_movement', 'delegation_date',
                   'acceptance_date', 'deadline_date', 'final_deadline_date', 'execution_deadline_date']
 
