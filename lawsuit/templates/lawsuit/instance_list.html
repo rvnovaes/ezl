@@ -4,7 +4,7 @@
         <div> Nenhuma instância cadastrada. <a href="/processos/nova_instancia/">Cadastrar agora</a>.</div>
 
     {% else %}
-        <a href="/processos/nova_instancia/">Nova Instância</a>
+        <a href="{% url 'instance_create' %}">Nova Instância</a>
         <br><br>
         <table>
             <thead>
@@ -19,7 +19,7 @@
                     <td>{{instance.name}}</td>
 
                     <td>
-                        <a href="#modal_apagar{{instance.id}}">
+                        <a href="{% url 'instance_delete' instance.id %}">
                             Apagar
                         </a> &nbsp;&nbsp;
                         <a href="{% url 'instance_update' instance.id %}">
