@@ -19,7 +19,7 @@
                     <td>{{instance.name}}</td>
 
                     <td>
-                        <a href="#modal_apagar{{instance.id}}">
+                        <a href="{% url 'instance_delete' instance.id %}">
                             Apagar
                         </a> &nbsp;&nbsp;
                         <a href="{% url 'instance_update' instance.id %}">
