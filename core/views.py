@@ -1,15 +1,16 @@
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.contrib.auth import logout
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, View
 from django.views.generic.list import ListView
-from django.contrib.auth import logout
 from django_tables2 import RequestConfig
-from django.core.urlresolvers import reverse_lazy
-from core.models import Person
+
 from core.forms import PersonForm
+from core.models import Person
 from core.tables import PersonTable
-from django.utils import timezone
 
 
 def login(request):
@@ -57,7 +58,7 @@ class BaseCustomView(View):
         return HttpResponseRedirect(self.success_url)
 
 
-class PersonListView(ListView, BaseCustomView):
+class PersonListView(ListView):
     model = Person
     queryset = Person.objects.filter(active=True)
     ordering = ['id']

@@ -1,26 +1,14 @@
 {#{% extends 'base.html' %}#}
 {#{% load staticfiles %}#}
-{% load render_table from django_tables2 %}
 {% load static %}
+{% load render_table from django_tables2 %}
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
 <body>
 {% block content %}
-{#    <div class="form-horizontal" style="align-content: center">#}
-{#        <form action="" method="post">{% csrf_token %}#}
-{#            {% for person in person_list %}#}
-{#                {{ person }}#}
-{#            {% endfor %}#}
-{#            <input type="submit" value="Editar"/>#}
-{#        </form>#}
-{#    {% render_table person %}#}
-{#    </div>#}
-{#{% endblock %}#}
-{#</body>#}
-
     {% if table.page %}
-    <div class="table-container">
-{% endif %}
+        <div class="table-container">
+    {% endif %}
 
 {% block table %}
     <div class="table-responsive">
@@ -28,7 +16,8 @@
             {% block table.thead %}
                 <thead>
                 <tr>
-                    <th><a href="{% url 'person_add' %}"><span class="hidden-phone"><i class="fa fa-user-plus"></i> Adicionar Pessoa</span></a>
+                    <th><a href="{% url 'courtdistrict_add' %}"><span class="hidden-phone"><i
+                            class="fa fa-user-plus"></i> Adicionar Comarcas</span></a>
 
                     </th>
                     {#                    <th colspan="5">#}
@@ -90,7 +79,7 @@
     {% block pagination %}
         {% bootstrap_pagination table.page url=request.get_full_path %}
     {% endblock pagination %}
-  </div>
+    </div>
 {% endif %}
 
 

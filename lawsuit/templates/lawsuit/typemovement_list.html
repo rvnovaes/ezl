@@ -5,7 +5,7 @@
     <div class="container">
     <div>
 
-            <div>
+        <div>
             <div class="row">
                 <div class="col s12">
                     <i class="material-icons medium">toc</i>
@@ -13,56 +13,61 @@
                 <div class="col s12">
                     <h2>Cadastro de Tipos de Movimentação</h2>
                 </div>
-             {% if typemovement_list %}
-                <div>
-                    <table class="bordered highlight" style="margin-bottom: 1%">
-                        <thead>
-                        <tr>
-                            <th class="align-left">Descrição</th>
-                            <th class="align-left">Código Legado</th>
-                            <th class="tooltipped center" data-position="top" data-tooltip="Ordem de Serviço?">O.S.</th>
-                            <th class="center">Ações</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for type_movement in typemovement_list %}
+                {% if typemovement_list %}
+                    <div>
+                        <table class="bordered highlight" style="margin-bottom: 1%">
+                            <thead>
                             <tr>
-                                <td style="text-align: left">
-                                    {{ type_movement.name }}
-                                </td>
-                                <td style="text-align: left">
-                                    {{ type_movement.legacy_code }}
-                                </td>
-                                <td style="text-align: center">
-                                    {% if type_movement.uses_wo %}
-                                        <i class="material-icons center tooltipped" data-position="top"
-                                           data-tooltip="Sim" style="color:green">check_circle_outline</i>
-                                    {% endif %}
-                                    {% if not type_movement.uses_wo %}
-                                        <i class="material-icons center tooltipped" data-position="top"
-                                           data-tooltip="Não" style="color:red">remove_circle_outline</i>
-                                    {% endif %}
-                                </td>
-                                <td style="text-align: center">
-                                    <a href="{% url 'type_movement_update' type_movement.id%}">
-                                        <i class="material-icons tooltipped" data-position="top" data-tooltip="Editar">mode_edit</i>
-                                    </a>&nbsp;
-
-                                    <a href="{% url 'type_movement_delete' type_movement.id %}">
-                                        <i class="material-icons tooltipped" data-position="top" data-tooltip="Excluir"
-                                           style="color:red">cancel</i>
-                                    </a>
-                                </td>
+                                <th class="align-left">Descrição</th>
+                                <th class="align-left">Código Legado</th>
+                                <th class="tooltipped center" data-position="top" data-tooltip="Ordem de Serviço?">
+                                    O.S.
+                                </th>
+                                <th class="center">Ações</th>
                             </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        {% endif %}
-        <a class="btn-floating btn-large"  style="float: right;" type="submit" value="Cadastrar novo" href="{% url 'type_movement_add'%}">
-            <i class="material-icons">add</i>
-        </a>
+                            </thead>
+                            <tbody>
+                            {% for type_movement in typemovement_list %}
+                                <tr>
+                                    <td style="text-align: left">
+                                        {{ type_movement.name }}
+                                    </td>
+                                    <td style="text-align: left">
+                                        {{ type_movement.legacy_code }}
+                                    </td>
+                                    <td style="text-align: center">
+                                        {% if type_movement.uses_wo %}
+                                            <i class="material-icons center tooltipped" data-position="top"
+                                               data-tooltip="Sim" style="color:green">check_circle_outline</i>
+                                        {% endif %}
+                                        {% if not type_movement.uses_wo %}
+                                            <i class="material-icons center tooltipped" data-position="top"
+                                               data-tooltip="Não" style="color:red">remove_circle_outline</i>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align: center">
+                                        <a href="{% url 'type_movement_update' type_movement.id %}">
+                                            <i class="material-icons tooltipped" data-position="top"
+                                               data-tooltip="Editar">mode_edit</i>
+                                        </a>&nbsp;
+
+                                        <a href="{% url 'type_movement_delete' type_movement.id %}">
+                                            <i class="material-icons tooltipped" data-position="top"
+                                               data-tooltip="Excluir"
+                                               style="color:red">cancel</i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                {% endif %}
+            <a class="btn-floating btn-large" style="float: right;" type="submit" value="Cadastrar novo"
+               href="{% url 'type_movement_add' %}">
+                <i class="material-icons">add</i>
+            </a>
         </div>
     </div>
 {% endblock %}

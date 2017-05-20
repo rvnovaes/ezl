@@ -1,11 +1,11 @@
 {#{% extends 'base.html' %}#}
-{% block title %}Confirm delete?{% endblock %}
+{% block title %} Confirm delete?{% endblock %}
 
 {% block content %}
     <div id="content-container" class="container p-none">
         <div class="side-p">
             <h3>Tem certeza?</h3>
-            <p>Você irá apagar o registro {{ typemovement }}. Por favor confirme.</p>
+            <p>Você irá apagar o registro {{ task }}. Por favor confirme.</p>
             <form action="" method="post">
                 {% csrf_token %}
                 <input class="btn btn-link"
@@ -15,4 +15,4 @@
             </form>
         </div>
     </div>
-{% endblock %}
+{% endblock %

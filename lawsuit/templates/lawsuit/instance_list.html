@@ -1,10 +1,10 @@
 
     <div class="container">
     {% if object_list == None %}
-        <div> Nenhuma instância cadastrada. <a href="/processos/nova_instancia/">Cadastrar agora</a>.</div>
+        <div> Nenhuma instância cadastrada. <a href="{% url 'instance_create' %}">Cadastrar agora</a>.</div>
 
     {% else %}
-        <a href="/processos/nova_instancia/">Nova Instância</a>
+        <a href="{% url 'instance_create' %}">Nova Instância</a>
         <br><br>
         <table>
             <thead>

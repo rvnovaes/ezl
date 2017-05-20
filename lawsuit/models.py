@@ -1,6 +1,7 @@
 from django.db import models
-from core.models import Audit, Person, CourtDistrict
 from django.utils import timezone
+
+from core.models import Audit, Person, State
 
 
 class TypeMovement(Audit):
@@ -28,20 +29,21 @@ class Instance(Audit):
 
 
 class Folder(Audit):
-    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True)
-    person_customer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
+    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
+                                   verbose_name='Código Legado')
+    person_customer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
+                                        verbose_name='Cliente')
 
     class Meta:
         db_table = "folder"
         ordering = ['-id']
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
 
 class LawSuit(Audit):
-    person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
-                                      related_name='lawyer_lawsuit')
+    person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
     folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False)
 
     class Meta:
@@ -49,14 +51,15 @@ class LawSuit(Audit):
         ordering = ['-id']
 
     def __str__(self):
-        return self.id  # TODO verificar novos campos e refatorar o toString
+        return str(self.id)  # TODO verificar novos campos e refatorar o toString
 
 
 class Movement(Audit):
     legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True)
     person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
-                                      related_name='lawyer_movement')
-    person_court = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False, related_name='court')
+                                      related_name='%(class)s_lawyer')
+    person_court = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
+                                     related_name='%(class)s_court')
     type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False)
     law_suit = models.ForeignKey(LawSuit, on_delete=models.PROTECT, blank=False, null=False)
     deadline = models.DateTimeField(null=True)
@@ -86,3 +89,14 @@ class Task(Audit):
 
     def __str__(self):
         return self.legacy_code  # TODO verificar campo para toString
+
+
+class CourtDistrict(Audit):
+    name = models.CharField(max_length=255, null=False, unique=True, verbose_name='Nome')
+    state = models.ForeignKey(State, on_delete=models.PROTECT, null=False, blank=False, verbose_name='Estado')
+
+    class Meta:
+        db_table = "court_district"
+
+    def __str__(self):
+        return self.name

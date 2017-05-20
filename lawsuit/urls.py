@@ -4,6 +4,27 @@ from lawsuit import views
 
 urlpatterns = [
 
+    # Comarcas
+    url(r'^comarcas/listar/$', views.CourtDistrictListView.as_view(), name='courtdistrict_list'),
+    url(r'^comarcas/$', views.CourtDistrictCreateView.as_view(), name='courtdistrict_add'),
+    url(r'^comarcas/(?P<pk>[0-9]+)/$', views.CourtDistrictUpdateView.as_view(), name='courtdistrict_update'),
+    url(r'^comarcas/(?P<pk>[0-9]+)/excluir$', views.CourtDistrictDeleteView.as_view(),
+        name='courtdistrict_delete'),
+
+    # Providências
+    url(r'^providencias/listar/$', views.TaskListView.as_view(), name='task_list'),
+    url(r'^providencias/$', views.TaskCreateView.as_view(), name='task_add'),
+    url(r'^providencias/(?P<pk>[0-9]+)/$', views.TaskUpdateView.as_view(), name='task_update'),
+    url(r'^providencias/(?P<pk>[0-9]+)/excluir$', views.TaskDeleteView.as_view(),
+        name='task_delete'),
+
+    # Pastas
+    url(r'^pastas/listar/$', views.FolderListView.as_view(), name='folder_list'),
+    url(r'^pastas/$', views.FolderCreateView.as_view(), name='folder_add'),
+    url(r'^pastas/(?P<pk>[0-9]+)/$', views.FolderUpdateView.as_view(), name='folder_update'),
+    url(r'^pastas/(?P<pk>[0-9]+)/excluir$', views.FolderDeleteView.as_view(),
+        name='folder_delete'),
+
     # Processos
     url(r'^processos/listar/$', views.LawSuitListView.as_view(), name='lawsuit_list'),
     url(r'^processos/$', views.LawSuitCreateView.as_view(), name='lawsuit_add'),

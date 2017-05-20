@@ -1,0 +1,14 @@
+{#{% extends 'base.html' %}#}
+{#{% load staticfiles %}#}
+
+<body>
+{% block content %}
+    <div class="form-horizontal" style="align-content: center">
+        <form action="" method="post">{% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Salvar"/>
+        </form>
+    </div>
+{% endblock %}
+</body>
+

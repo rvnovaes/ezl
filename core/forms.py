@@ -1,5 +1,5 @@
-from django.forms import ModelForm
 from django import forms
+from django.forms import ModelForm
 
 from core.models import ContactUs, Person, Address, Country, City, State, ContactMechanism
 
@@ -77,6 +77,12 @@ class PersonForm(ModelForm, forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
     )
 
+    cpf_cnpj = forms.CharField(
+        label=u"CPF/CNPJ",
+        required=False,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
+    )
     name = forms.CharField(
         label=u"Nome Fantasia/Apelido",
         required=False,

@@ -1,8 +1,10 @@
 from django import forms
 from django.forms import ModelForm
+from django.forms.models import fields_for_model
+
 # from django.contrib.admin.widgets import AdminDateWidget #TODO Verificar se será utilizado datepicker
-from core.models import Person, CourtDistrict
-from .models import TypeMovement, Instance, LawSuit, Movement, Folder, Task
+from core.models import Person, State
+from .models import TypeMovement, Instance, LawSuit, Movement, Folder, Task, CourtDistrict
 
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
@@ -11,6 +13,8 @@ class BaseForm(ModelForm):
         super(BaseForm, self).__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control input-sm'
+            # Preenche o o label de cada field do form de acordo com o verbose_name preenchido no modelo
+            field.label = self._meta.model._meta.get_field(field_name).verbose_name
 
 
 class TypeMovementForm(ModelForm):
@@ -72,13 +76,13 @@ class MovementForm(ModelForm):
     )
 
     person_lawyer = forms.ModelChoiceField(
-        queryset=Person.objects.filter(active=True),
+        queryset=Person.objects.filter(active=True, is_lawyer=True),
         empty_label=u"Selecione...",
         label=u"Advogado"
     )
 
     person_court = forms.ModelChoiceField(
-        queryset=Person.objects.filter(active=True),
+        queryset=Person.objects.filter(active=True, is_court=True),
         empty_label=u"Selecione...",
         label=u"Tribunal"
     )
@@ -94,13 +98,13 @@ class MovementForm(ModelForm):
     )
 
 
-class FolderForm(ModelForm):
+class FolderForm(BaseForm):
     class Meta:
         model = Folder
-        fields = ['legacy_code', 'person_customer']
+        fields = fields_for_model(Folder,
+                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
 
     legacy_code = forms.CharField(
-        label=u"Código Legado",
         max_length=255,
         required=True
     )
@@ -108,7 +112,6 @@ class FolderForm(ModelForm):
     person_customer = forms.ModelChoiceField(
         queryset=Person.objects.filter(active=True),
         empty_label=u"Selecione...",
-        label=u"Cliente"
     )
 
 
@@ -151,7 +154,7 @@ class TaskForm(ModelForm):
     person = forms.ModelChoiceField(
         label=u"Correpondente",
         empty_label=u"Selecione...",
-        queryset=Person.objects.filter(active=True, is_corresponding=True)  # TODO Verificar se label é correspondente
+        queryset=Person.objects.filter(active=True, is_corresponding=True)
 
     )
 
@@ -179,4 +182,15 @@ class TaskForm(ModelForm):
 
     execution_deadline_date = forms.DateTimeField(
         label=u"Prazo Execução Fatal"
+    )
+
+
+class CourtDistrictForm(BaseForm):
+    class Meta:
+        model = CourtDistrict
+        fields = fields_for_model(CourtDistrict, exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
+
+    state = forms.ModelChoiceField(
+        queryset=State.objects.filter(active=True),
+        empty_label=u"Selecione..."
     )

@@ -12,11 +12,12 @@
     <link rel="stylesheet" type="text/css" href="{% static "ezl_static/core/style.css" %}">
     <link rel="stylesheet" type="text/css" href="{% static "ezl_static/libs/toast-query/dist/jquery.toast.min.css" %}">
     <script src="{% static "ezl_static/libs/toast-query/dist/jquery.toast.min.js" %}"></script>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i&amp;subset=latin-ext" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i&amp;subset=latin-ext"
+          rel="stylesheet">
     <style>
-      body {
-        font-family: 'Roboto', sans-serif;
-      }
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
     </style>
 
     <!--Menu do Easy Lawyer-->
@@ -26,72 +27,84 @@
 
         <!-- {% else %} -->
 
-        <!-- Menu Mobile -->
-                <ul class="side-nav" id="mobile-demo">
-                    <li><a class="dropdown-button" href="#!" data-activates="dropdownm2">Processos</a></li>
-                    <li><a href="#">Providências</a></li>
-                    <li><a href="#">Providências</a></li>
-                    <li><a href="#">Dashboard</a></li>
-                    <li><a class="dropdown-button" href="#!" data-activates="dropdownm1"><i class="material-icons">person</i></a>
-                    </li>
-                </ul>
+        {#        <!-- Menu Mobile -->#}
+        {#        <ul class="nav-wrapper">#}
+        {#            <li><a class="dropdown-button" href="#!" data-activates="dropdownm2">Processos</a></li>#}
+        {#            <li><a href="#">Dashboard</a></li>#}
+        {#            <li><a class="dropdown-button" href="#!" data-activates="dropdownm1"><i#}
+        {#                    class="material-icons">person</i></a>#}
+        {#            </li>#}
+        {#        </ul>#}
 
-                <!-- Menu Dropdown de Processos -->
-                <ul id="dropdown2" class="dropdown-content">
-                    <li><a href="/processos/instancias">Instâncias</a></li>
-                </ul>
 
-                <!-- Menu Dropdown de Processos Mobile -->
-                <ul id="dropdownm2" class="dropdown-content">
-                    <li><a href="/processos/instancias">Instâncias</a></li>
-                </ul>
-
-                <!-- Menu Dropdown Usuário -->
-                <ul id="dropdown1" class="dropdown-content">
-                    <li>
-                        <center>{{ user_name }}</center>
-                    </li>
-                    <li><a href="/accounts/password/change/">Alterar Senha</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#modal1" onclick="$('#modal1').modal('open');">Sair do Sistema</a></li>
-                </ul>
-                <!-- Menu Dropdown Usuário Mobile -->
-                <ul id="dropdownm1" class="dropdown-content">
-                    <li style="margin-top: 5px;">
-                        <center>{{ user_name }}</center>
-                    </li>
-                    <li><a href="/accounts/password/change/">Alterar Senha</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#modal1" onclick="$('#modal1').modal('open');">Sair do Sistema</a></li>
-                </ul>
+        <!-- Menu Dropdown Usuário -->
+        <ul id="dropdown1" class="dropdown-content">
+            <li>
+                <center>{{ user_name }}</center>
+            </li>
+            <li><a href="/accounts/password/change/">Alterar Senha</a></li>
+            <li class="divider"></li>
+            <li><a href="#modal1" onclick="$('#modal1').modal('open');">Sair do Sistema</a></li>
+        </ul>
+        <!-- Menu Dropdown Usuário Mobile -->
+        <ul id="dropdownm1" class="dropdown-content">
+            <li style="margin-top: 5px;">
+                <center>{{ user_name }}</center>
+            </li>
+            <li><a href="/accounts/password/change/">Alterar Senha</a></li>
+            <li class="divider"></li>
+            <li><a href="#modal1" onclick="$('#modal1').modal('open');">Sair do Sistema</a></li>
+        </ul>
 
         <nav>
             <div class="nav-wrapper">
 
                 <a href="/" class="brand-logo">Logo</a>
                 <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
-                    <li><a class="dropdown-button" href="#!" data-activates="dropdown2">Processos</a></li>
-                    <li><a href="#">Providências</a></li>
+                    <li><a class="dropdown-button" href="#!" data-activates="teste">Processos</a></li>
                     <li><a href="#">Dashboard</a></li>
                     <li><a class="dropdown-button" href="#!" data-activates="dropdown1"><i
                             class="material-icons">person</i></a></li>
                 </ul>
+                <ul id="teste" class="dropdown-content">
 
-                <!-- Janela modal para confirmação de saída do usuário -->
-                <div id="modal1" class="modal">
-                    <div class="modal-content" style="color: #212121;">
-                        <div class="row">
-                            <div class="col s1"><i class="large material-icons">warning</i></div>
-                            <div class="col s1" style="margin-top: 7px;"><h5>Atenção</h5></div>
-                        </div>
-                        <li class="divider"></li>
-                        <p>Você tem certeza que deseja sair do sistema ?</p>
-                        <a class="tooltipped waves-effect waves-light btn modal-close"
-                           style="float: right !important; margin-left: 5px;">Não</a>
-                        <a class="tooltipped waves-effect waves-light btn" href="/logout/"
-                           style="float: right !important; margin-bottom: 10px;">Sim</a>
+                    <li><a href="{% url 'instance_list' %}">Instâncias</a></li>
+
+
+                    <!-- Menu Dropdown de Pastas -->
+                    <li><a href="{% url 'folder_list' %}">Pastas</a></li>
+
+                    <!-- Menu Dropdown de Processos -->
+                    <li><a href="{% url 'lawsuit_list' %}">Processos</a></li>
+
+                    <!-- Menu Dropdown de providências -->
+                    <li><a href="{% url 'task_list' %}">Providências</a></li>
+
+                    <!-- Menu Dropdown de movimentações -->
+                    <li><a href="{% url 'movement_list' %}">Movimentações</a></li>
+
+                    <!-- Menu Dropdown de tipos de movimentações -->
+                    <li><a href="{% url 'type_movement_list' %}">Tiops de Movimentação</a></li>
+                </ul>
+            </div>
+            <!-- Janela modal para confirmação de saída do usuário -->
+            <div id="modal1" class="modal">
+                <div class="modal-content" style="color: #212121;">
+                    <div class="row">
+                        <div class="col s1"><i class="large material-icons">warning</i></div>
+                        <div class="col s1" style="margin-top: 7px;"><h5>Atenção</h5></div>
                     </div>
+                    <li class="divider"></li>
+                    <p>Você tem certeza que deseja sair do sistema ?</p>
+                    <a class="tooltipped waves-effect waves-light btn modal-close"
+                       style="float: right !important; margin-left: 5px;">Não</a>
+                    <a class="tooltipped waves-effect waves-light btn" href="/logout/"
+                       style="float: right !important; margin-bottom: 10px;">Sim</a>
+                </div>
+            </div>
+            </div>
         </nav>
         <!-- Breadcrumb -->
         <nav style="height: 30px !important; display: table !important; margin-bottom: 5%!important;">

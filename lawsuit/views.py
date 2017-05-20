@@ -6,9 +6,9 @@ from django.views.generic.list import ListView
 from django_tables2 import RequestConfig
 
 from core.views import BaseCustomView
-from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, TaskForm
-from .models import TypeMovement, Instance, Movement, LawSuit, Folder, Task
-from .tables import TypeMovementTable, MovementTable, FolderTable, LawSuitTable, TaskTable
+from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, TaskForm, CourtDistrictForm
+from .models import TypeMovement, Instance, Movement, LawSuit, Folder, Task, CourtDistrict
+from .tables import TypeMovementTable, MovementTable, FolderTable, LawSuitTable, TaskTable, CourtDistrictTable
 
 
 class InstanceUpdateView(BaseCustomView, UpdateView):
@@ -28,7 +28,7 @@ class InstanceListView(ListView):
     queryset = Instance.objects.filter(active=True)
 
 
-class TypeMovementListView(ListView):
+class TypeMovementListView(ListView, BaseCustomView):
     model = TypeMovement
     queryset = TypeMovement.objects.filter(active=True)
     ordering = ['id']
@@ -65,7 +65,7 @@ class TypeMovementDeleteView(BaseCustomView, DeleteView):
         return HttpResponseRedirect(self.success_url)
 
 
-class MovementListView(ListView):
+class MovementListView(ListView, BaseCustomView):
     model = Movement
     queryset = Movement.objects.filter(active=True)
     ordering = ['-id']
@@ -102,10 +102,11 @@ class MovementDeleteView(BaseCustomView, DeleteView):
         return HttpResponseRedirect(self.success_url)
 
 
-class FolderListView(BaseCustomView, ListView):
+class FolderListView(ListView, BaseCustomView):
     model = Folder
     queryset = Folder.objects.filter(active=True)
     ordering = ['id']
+    table_class = FolderTable
 
     def get_context_data(self, **kwargs):
         context = super(FolderListView, self).get_context_data(**kwargs)
@@ -139,7 +140,7 @@ class FolderDeleteView(BaseCustomView, DeleteView):
         return HttpResponseRedirect(self.success_url)
 
 
-class LawSuitListView(ListView):
+class LawSuitListView(ListView, BaseCustomView):
     model = LawSuit
     queryset = LawSuit.objects.filter(active=True)
     ordering = ['-id']
@@ -156,13 +157,13 @@ class LawSuitListView(ListView):
 class LawSuitCreateView(BaseCustomView, CreateView):
     model = LawSuit
     form_class = LawSuitForm
-    success_url = reverse_lazy('lawsuit-list')
+    success_url = reverse_lazy('lawsuit_list')
 
 
 class LawSuitUpdateView(BaseCustomView, UpdateView):
     model = LawSuit
     form_class = LawSuitForm
-    success_url = reverse_lazy('lawsuit-list')
+    success_url = reverse_lazy('lawsuit_list')
 
 
 class LawSuitDeleteView(BaseCustomView, DeleteView):
@@ -176,7 +177,7 @@ class LawSuitDeleteView(BaseCustomView, DeleteView):
         return HttpResponseRedirect(self.success_url)
 
 
-class TaskListView(BaseCustomView, ListView):
+class TaskListView(ListView, BaseCustomView):
     model = Task
     queryset = Task.objects.filter(active=True)
     ordering = ['id']
@@ -209,5 +210,42 @@ class TaskDeleteView(BaseCustomView, DeleteView):
     def delete(self, request, *args, **kwargs):
         task = self.get_object()
         task_id = int(task.id)
-        Movement.objects.filter(id=task_id).update(active=False)
+        Task.objects.filter(id=task_id).update(active=False)
+        return HttpResponseRedirect(self.success_url)
+
+
+class CourtDistrictListView(ListView, BaseCustomView):
+    model = CourtDistrict
+    queryset = CourtDistrict.objects.filter(active=True)
+    ordering = ['id']
+
+    def get_context_data(self, **kwargs):
+        context = super(CourtDistrictListView, self).get_context_data(**kwargs)
+        context['nav_courtdistrict'] = True
+        table = CourtDistrictTable(CourtDistrict.objects.filter(active=True).order_by('-pk'))
+        RequestConfig(self.request, paginate={'per_page': 30}).configure(table)
+        context['table'] = table
+        return context
+
+
+class CourtDistrictCreateView(BaseCustomView, CreateView):
+    model = CourtDistrict
+    form_class = CourtDistrictForm
+    success_url = reverse_lazy('courtdistrict_list')
+
+
+class CourtDistrictUpdateView(BaseCustomView, UpdateView):
+    model = CourtDistrict
+    form_class = CourtDistrictForm
+    success_url = reverse_lazy('courtdistrict_list')
+
+
+class CourtDistrictDeleteView(BaseCustomView, DeleteView):
+    model = CourtDistrict
+    success_url = reverse_lazy('courtdistrict_list')
+
+    def delete(self, request, *args, **kwargs):
+        courtdistrict = self.get_object()
+        courtdistrict_id = int(courtdistrict.id)
+        CourtDistrict.objects.filter(id=courtdistrict_id).update(active=False)
         return HttpResponseRedirect(self.success_url)

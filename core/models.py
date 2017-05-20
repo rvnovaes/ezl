@@ -1,12 +1,13 @@
-from django.db import models
-from django.contrib.auth.models import User
 from django.conf import settings
-from django.utils import timezone
+from django.contrib.auth.models import User
+from django.db import models
+
+# from lawsuit.models import CourtDistrict
+
 LEGAL_TYPE_CHOICES = {
     ('F', 'Física'),
     ('J', 'Jurídica'),
 }
-
 
 class Audit(models.Model):
     create_date = models.DateTimeField()
@@ -15,7 +16,7 @@ class Audit(models.Model):
                                     related_name='%(class)s_create_user')
     alter_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True,
                                    related_name='%(class)s_alter_user')
-    active = models.BooleanField(default=True)
+    active = models.BooleanField(default=True, verbose_name='Ativo')
 
     class Meta:
         abstract = True
@@ -53,21 +54,12 @@ class State(Audit):
         return self.name
 
 
-class CourtDistrict(Audit):
-    name = models.CharField(max_length=255, null=False, unique=True)
-
-    class Meta:
-        db_table = "court_district"
-
-    def __str__(self):
-        return self.name
-
-
 class City(Audit):
     name = models.CharField(max_length=255, null=False, unique=True)
     state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False)
-    # TODO alterar court_district para not null true
-    court_district = models.ForeignKey(CourtDistrict, on_delete=models.PROTECT, blank=True, null=True)
+
+    court_district = models.ForeignKey('lawsuit.CourtDistrict', on_delete=models.PROTECT, blank=False, null=False,
+                                       verbose_name='Comarca')
 
     class Meta:
         db_table = "city"
@@ -81,7 +73,9 @@ class Person(Audit):
     name = models.CharField(max_length=255, null=False, unique=True)
     is_lawyer = models.BooleanField(null=False, default=False)
     is_corresponding = models.BooleanField(null=False, default=False)
+    is_court = models.BooleanField(null=False, default=False)
     legal_type = models.CharField(max_length=1, choices=LEGAL_TYPE_CHOICES)
+    cpf_cnpj = models.CharField(max_length=255, blank=True)
     auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
