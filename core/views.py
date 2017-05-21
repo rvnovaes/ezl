@@ -4,6 +4,9 @@ from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
+# http://stackoverflow.com/questions/6069070/how-to-use-permission-required-decorators-on-django-class-based-views
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required, permission_required
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, View
 from django.views.generic.list import ListView
 from django_tables2 import RequestConfig
@@ -19,7 +22,7 @@ def login(request):
     else:
         return render(request, 'account/login.html')
 
-
+@method_decorator(login_required, name='dispatch')
 def inicial(request):
     if request.user.is_authenticated:
         title_page = {'title_page': 'Principal - Easy Lawyer'}
@@ -49,6 +52,8 @@ class BaseCustomView(View):
         super(BaseCustomView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
+
+@method_decorator(login_required, name='dispatch')
 class PersonListView(ListView):
     model = Person
     queryset = Person.objects.filter(active=True)
@@ -73,6 +78,7 @@ class PersonListView(ListView):
         return context
 
 
+@method_decorator(login_required, name='dispatch')
 class PersonCreateView(BaseCustomView, CreateView):
     model = Person
     form_class = PersonForm
@@ -96,12 +102,14 @@ class PersonCreateView(BaseCustomView, CreateView):
     #     super(DataCreate, self).save() < / code >
 
 
+@method_decorator(login_required, name='dispatch')
 class PersonUpdateView(BaseCustomView, UpdateView):
     model = Person
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
 
 
+@method_decorator(login_required, name='dispatch')
 class PersonDeleteView(BaseCustomView, DeleteView):
     model = Person
     success_url = reverse_lazy('person_list')
