@@ -9,6 +9,7 @@ LEGAL_TYPE_CHOICES = {
     ('J', 'Jurídica'),
 }
 
+
 class Audit(models.Model):
     create_date = models.DateTimeField()
     alter_date = models.DateTimeField(blank=True, null=True)
