@@ -57,8 +57,7 @@ class LawSuit(Audit):
 class Movement(Audit):
     legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True)
     person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
-                                      related_name='%(class)s_laoberto'
-                                                   'wyer')
+                                      related_name='%(class)s_lawyer')
     person_court = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                      related_name='%(class)s_court')
     type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False)
