@@ -1,95 +1,38 @@
-{% load staticfiles %}
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Login - Easy Lawyer</title>
-
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
-    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-    <!-- Compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{% static "ezl_static/libs/toast-query/dist/jquery.toast.min.css" %}">
-    <script src="{% static "ezl_static/libs/toast-query/dist/jquery.toast.min.js" %}"></script>
-
-</head>
-
-<body style="background-color: #eee;">
-
-<br><br><br><br><br><br>
-<form class="col s12" method="POST" action="{% url 'account_login' %}">
+{% block body %}
+    <div class="page-header col-md-4 col-md-offset-4">
+        <h1>Easy Lawyer</h1>
+    </div>
+    <div class="well col-md-4 col-md-offset-4">
+    <div style="overflow: hidden;" >
+<form method="POST" action="{% url 'account_login' %}">
+    <fieldset>
     {% csrf_token %}
-    <center>
         {% if form.errors %}
         {% for field in form %}
         {% for error in field.errors %}
-    <script type="text/javascript">
-
-    $.toast({
-        text: '{{ error|escape }}',
-        allowToastClose : false,
-        hideAfter : 8000,
-        position : 'top-center',
-        heading: 'Erro',
-        icon: 'error',
-        loader: false,
-        stack: 5
-    })
-
-    </script>
-
         {% endfor %}
         {% endfor %}
         {% for error in form.non_field_errors %}
-
-    <script type="text/javascript">
-    $.toast({
-        text: '{{ error|escape }}',
-        allowToastClose : false,
-        hideAfter : 8000,
-        position : 'top-center',
-        heading: 'Erro',
-        icon: 'error',
-        loader: false,
-        stack: 5
-
-    })
-    </script>
         {% endfor %}
         {% endif %}
-    </center>
 
-        <div class="container" style="text-align: center !important;">
-
-            <div class="row">
-                <div class="input-field col s12">
-                    <input placeholder="Login" id="first_name" type="text" name="login" class="validate" style="text-align: center; max-width: 460px;" required>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="input-field col s12">
-                    <input id="password" placeholder="Senha" type="password" name="password" class="validate" style="max-width: 460px;text-align: center;" required>
-                </div>
-            </div>
-
-            <div class="row" style="margin-right: inherit !important;margin-left: inherit !important; max-width: 460px !important;">
-
-                    <button style="width: 100% !important;" type="submit" value="Entrar" class="waves-effect waves-light btn-large"><i class="material-icons left">input</i> Entrar</button>
-                    <br><br>
-                    <button type="submit" style="width: 100%;"class="waves-effect waves-light btn-large" formnovalidate formaction="/accounts/password/reset/"><i class="material-icons left">lock_open</i> Recuperar Senha</button>
-
-
-            </div>
+        <div class="form-group label-floating">
+            <label class="control-label" for="first_name">Login</label>
+            <input class="form-control" id="first_name" type="text" name="login" >
         </div>
 
+        <div class="form-group label-floating">
+            <label class="control-label" for="password">Senha</label>
+            <input class="form-control" id="password" type="password" name="password" >
+        </div>
+        <div>
+            <button class="btn btn-raised btn-primary" type="submit" value="Entrar">Entrar</button>
+            <button class="btn btn-raised" type="submit" formnovalidate formaction="/accounts/password/reset/">Recuperar Senha</button>
+        </div>
+    </fieldset>
 </form>
-
-</body>
-{#cre#}
-</html>
+    </div>
+    </div>
+{% endblock body %}

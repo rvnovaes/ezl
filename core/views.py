@@ -33,7 +33,7 @@ def home(request):
         'user_name': request.user,
         'title_page': title_page
     }
-    return render(request, 'core/home.html', context)
+    return render(request, 'home.html', context)
 
 
 def logout_user(request):

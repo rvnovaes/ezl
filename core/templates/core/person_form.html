@@ -1,7 +1,4 @@
-{#{% extends 'base.html' %}#}
-{#{% load staticfiles %}#}
-
-<body>
+{% extends 'home.html' %}
 {% block content %}
     <div class="form-horizontal" style="align-content: center">
         <form action="" method="post">{% csrf_token %}
@@ -10,5 +7,5 @@
         </form>
     </div>
 {% endblock %}
-</body>
+
 

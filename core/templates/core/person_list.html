@@ -1,23 +1,9 @@
-{#{% extends 'base.html' %}#}
-{#{% load staticfiles %}#}
+{% extends 'home.html' %}
 {% load render_table from django_tables2 %}
 {% load static %}
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
-<body>
 {% block content %}
-{#    <div class="form-horizontal" style="align-content: center">#}
-{#        <form action="" method="post">{% csrf_token %}#}
-{#            {% for person in person_list %}#}
-{#                {{ person }}#}
-{#            {% endfor %}#}
-{#            <input type="submit" value="Editar"/>#}
-{#        </form>#}
-{#    {% render_table person %}#}
-{#    </div>#}
-{#{% endblock %}#}
-{#</body>#}
-
     {% if table.page %}
     <div class="table-container">
 {% endif %}
@@ -92,7 +78,4 @@
     {% endblock pagination %}
   </div>
 {% endif %}
-
-
 {% endblock content %}
-</body>

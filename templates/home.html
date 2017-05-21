@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block body %}
+     <!-- {% if not user.is_authenticated %} -->
+        <!-- <meta http-equiv="REFRESH" content="0;url=/"> -->
+
+        <!-- {% else %} -->
+
+        {#        <!-- Menu Mobile -->#}
+        {#        <ul class="nav-wrapper">#}
+        {#            <li><a class="dropdown-button" href="#!" data-activates="dropdownm2">Processos</a></li>#}
+        {#            <li><a href="#">Dashboard</a></li>#}
+        {#            <li><a class="dropdown-button" href="#!" data-activates="dropdownm1"><i#}
+        {#                    class="material-icons">person</i></a>#}
+        {#            </li>#}
+        {#        </ul>#}
+    <div class="navbar navbar-default">
+        <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="{% url 'home' %}">EZL</a>
+    </div>
+    <div class="navbar-collapse collapse navbar-responsive-collapse">
+      <ul class="nav navbar-nav">
+        <li><a href="{% url 'person_list' %}">Pessoas</a></li>
+        <li><a href="{% url 'courtdistrict_list' %}">Comarcas</a></li>
+        <li><a href="{% url 'lawsuit_list' %}">Processos</a></li>
+        <li><a href="{% url 'instance_list' %}">Instâncias</a></li>
+        <li><a href="{% url 'folder_list' %}">Pastas</a></li>
+        <li><a href="{% url 'task_list' %}">Providências</a></li>
+        <li><a href="{% url 'movement_list' %}">Movimentações</a></li>
+        <li><a href="{% url 'type_movement_list' %}">Tiops de Movimentação</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+<li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user_name }} <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/accounts/password/change/">Alterar Senha</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#modal1" onclick="$('#modal1').modal('open');">Sair do Sistema</a></li>
+          </ul>
+        </li>
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+            <!-- Janela modal para confirmação de saída do usuário -->
+            <div id="modal1" class="modal">
+                <div class="modal-content" style="color: #212121;">
+                    <div class="row">
+                        <div class="col s1"><i class="large material-icons">warning</i></div>
+                        <div class="col s1" style="margin-top: 7px;"><h5>Atenção</h5></div>
+                    </div>
+                    <li class="divider"></li>
+                    <p>Você tem certeza que deseja sair do sistema ?</p>
+                    <a class="tooltipped waves-effect waves-light btn modal-close"
+                       style="float: right !important; margin-left: 5px;">Não</a>
+                    <a class="tooltipped waves-effect waves-light btn" href="/logout/"
+                       style="float: right !important; margin-bottom: 10px;">Sim</a>
+                </div>
+            </div>
+            </div>
+        </nav>
+        {% endif %}
+    {% block content %}
+    {% endblock content %}
+{% endblock %}
+
+
+
