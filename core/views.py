@@ -15,25 +15,21 @@ from core.tables import PersonTable
 
 def login(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect('/home/')
+        return HttpResponseRedirect('/inicial')
     else:
         return render(request, 'account/login.html')
 
 
-def home(request):
-    if not request.user.is_authenticated:
+def inicial(request):
+    if request.user.is_authenticated:
+        title_page = "Principal - Easy Lawyer"
+        context = {
+            'user_name': request.user,
+            'title_page': title_page
+        }
+        return render(request, 'inicial.html', context)
+    else:
         return HttpResponseRedirect('/')
-    # Recupera o nome do usuário logado no sistema
-    # usuario = User.objects.filter(username=request.user).values("username","first_name")
-    # Cria um objeto do tipo 'context' => context = {'username': ''}
-    # context = usuario.get()
-
-    title_page = "Principal - Easy Lawyer"
-    context = {
-        'user_name': request.user,
-        'title_page': title_page
-    }
-    return render(request, 'home.html', context)
 
 
 def logout_user(request):
@@ -56,7 +52,6 @@ class BaseCustomView(View):
             form.save()
         super(BaseCustomView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
-
 
 class PersonListView(ListView):
     model = Person

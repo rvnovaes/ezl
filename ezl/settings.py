@@ -139,7 +139,7 @@ STATICFILES_DIRS = (
 )
 
 #STATIC_ROOT = '/opt/mta/easy_lawyer_django/static/'
-LOGIN_REDIRECT_URL = '/home'
+LOGIN_REDIRECT_URL = '/inicial'
 
 AUTHENTICATION_BACKENDS = (
 
