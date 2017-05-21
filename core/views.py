@@ -22,12 +22,8 @@ def login(request):
 
 def inicial(request):
     if request.user.is_authenticated:
-        title_page = "Principal - Easy Lawyer"
-        context = {
-            'user_name': request.user,
-            'title_page': title_page
-        }
-        return render(request, 'inicial.html', context)
+        title_page = {'title_page': 'Principal - Easy Lawyer'}
+        return render(request, 'inicial.html', title_page)
     else:
         return HttpResponseRedirect('/')
 
