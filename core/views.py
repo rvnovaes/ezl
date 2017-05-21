@@ -22,7 +22,8 @@ def login(request):
     else:
         return render(request, 'account/login.html')
 
-@method_decorator(login_required, name='dispatch')
+
+@login_required
 def inicial(request):
     if request.user.is_authenticated:
         title_page = {'title_page': 'Principal - Easy Lawyer'}
