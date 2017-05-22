@@ -1,5 +1,3 @@
 syntax: glob
 *.pyc
-
-syntax: regexp
-^.idea/
+.idea
