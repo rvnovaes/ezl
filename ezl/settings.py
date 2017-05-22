@@ -151,5 +151,5 @@ AUTHENTICATION_BACKENDS = (
 EMAIL_USE_SSL = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 465
-EMAIL_HOST_USER = 'lfmrodrigues.informatica@gmail.com'
-EMAIL_HOST_PASSWORD = '8pin-xhgz-gopf'
+EMAIL_HOST_USER = 'testedevmta@gmail.com'
+EMAIL_HOST_PASSWORD = 'abc12345678'
