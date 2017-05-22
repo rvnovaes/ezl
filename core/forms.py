@@ -68,7 +68,7 @@ class ContactMechanismForm(ModelForm, forms.Form):
 class PersonForm(ModelForm, forms.Form):
     class Meta:
         model = Person
-        fields = ['legal_name', 'name', 'is_lawyer', 'is_corresponding','legal_type','auth_user', 'active']
+        fields = ['legal_name', 'name', 'is_lawyer', 'is_corresponding','legal_type', 'cpf_cnpj', 'auth_user', 'active']
 
     legal_name = forms.CharField(
         label=u"Razão Social/Nome completo",
@@ -77,12 +77,6 @@ class PersonForm(ModelForm, forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
     )
 
-    cpf_cnpj = forms.CharField(
-        label=u"CPF/CNPJ",
-        required=False,
-        max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
-    )
     name = forms.CharField(
         label=u"Nome Fantasia/Apelido",
         required=False,
@@ -106,6 +100,13 @@ class PersonForm(ModelForm, forms.Form):
         widget=forms.Select(),
         choices=([('F', u'Física'),
                   ('J', u'Jurídica')])
+    )
+
+    cpf_cnpj = forms.CharField(
+        label=u"CPF/CNPJ",
+        required=False,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
     )
 
     # auth_user = forms.ModelChoiceField(
