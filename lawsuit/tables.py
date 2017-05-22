@@ -23,8 +23,8 @@ class FolderTable(tables.Table):
     class Meta:
         model = Folder
         fields = ['legacy_code', 'person_customer']
-        attrs = {"class": "table-striped table-bordered"}
-        empty_text = "Não existem pastas cadastrados"
+        # attrs = {"class": "table-striped table-bordered"}
+        empty_text = "Não existem pastas cadastradas"
 
 
 class LawSuitTable(tables.Table):

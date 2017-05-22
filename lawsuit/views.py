@@ -6,7 +6,8 @@ from django.views.generic.list import ListView
 from django_tables2 import RequestConfig
 
 from core.views import BaseCustomView
-from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, TaskForm, CourtDistrictForm
+from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, TaskForm, CourtDistrictForm, \
+    LawSuitFormSet
 from .models import TypeMovement, Instance, Movement, LawSuit, Folder, Task, CourtDistrict
 from .tables import TypeMovementTable, MovementTable, FolderTable, LawSuitTable, TaskTable, CourtDistrictTable
 
@@ -135,6 +136,11 @@ class FolderCreateView(BaseCustomView, CreateView):
     model = Folder
     form_class = FolderForm
     success_url = reverse_lazy('folder_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(FolderCreateView, self).get_context_data(**kwargs)
+        context['formset'] = LawSuitFormSet()
+        return context
 
 
 class FolderUpdateView(BaseCustomView, UpdateView):
