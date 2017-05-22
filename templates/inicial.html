@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% block body %}
-  {% if user.is_authenticated %}
+{#  {% if user.is_authenticated %}#}
     <div class="navbar navbar-default">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -62,10 +62,7 @@
         </div>
       </div>
     </div>
-  {% else %}
-
-
-  {% endif %}
-
-
+{#  {% else %}#}
+{#      <p>Você não está logado!!!</p>#}
+{#  {% endif %}#}
 {% endblock %}

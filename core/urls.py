@@ -1,6 +1,5 @@
 from django.conf.urls import url
 # http://stackoverflow.com/questions/6069070/how-to-use-permission-required-decorators-on-django-class-based-views
-from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, permission_required
 from . import views
 
