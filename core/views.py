@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, View
 from django.views.generic.list import ListView
 from django_tables2 import RequestConfig
+from django_tables2 import SingleTableView
 
 from core.forms import PersonForm
 from core.models import Person
@@ -54,29 +55,13 @@ class BaseCustomView(View):
         return HttpResponseRedirect(self.success_url)
 
 
+# http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
 @method_decorator(login_required, name='dispatch')
-class PersonListView(ListView):
+class PersonListView(SingleTableView):
     model = Person
+    table_class = PersonTable
     queryset = Person.objects.filter(active=True)
     ordering = ['id']
-
-    # context_object_name = 'person'
-    # def dispatch(self, request, *args, **kwargs):
-    #     if not request.user.is_authenticated:
-    #         return self.handle_no_permission()
-    #     return super(PersonListView, self).dispatch(request, *args, **kwargs)
-    # # def get_context_data(self, **kwargs):
-    # #     context = super(PersonListView,self).get_context_data(**kwargs)
-    # #     context['person_list'] = self.queryset
-    # #     return context
-
-    def get_context_data(self, **kwargs):
-        context = super(PersonListView, self).get_context_data(**kwargs)
-        context['nav_person'] = True
-        table = PersonTable(Person.objects.filter(active=True).order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 30}).configure(table)
-        context['table'] = table
-        return context
 
 
 @method_decorator(login_required, name='dispatch')
