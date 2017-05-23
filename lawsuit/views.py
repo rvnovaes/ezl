@@ -119,7 +119,7 @@ class MovementDeleteView(BaseCustomView, DeleteView):
 
 class FolderListView(SingleTableView):
     model = Folder
-    queryset = Folder.objects.all()  # filter(active=True)
+    queryset = Folder.objects.all()#filter(active=True)
     ordering = ['id']
     table_class = FolderTable
 
