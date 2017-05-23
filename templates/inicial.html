@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% block body %}
-  {% if user.is_authenticated %}
+{#  {% if user.is_authenticated %}#}
     <div class="navbar navbar-default">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -21,7 +21,7 @@
             <li><a href="{% url 'folder_list' %}">Pastas</a></li>
             <li><a href="{% url 'task_list' %}">Providências</a></li>
             <li><a href="{% url 'movement_list' %}">Movimentações</a></li>
-            <li><a href="{% url 'type_movement_list' %}">Tiops de Movimentação</a></li>
+            <li><a href="{% url 'type_movement_list' %}">Tipos de Movimentação</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
@@ -36,7 +36,6 @@
         </div>
     </div>
     </div>
-
     <div style="margin: 20px">
     {% block content %}
     {% endblock content %}
@@ -62,10 +61,7 @@
         </div>
       </div>
     </div>
-  {% else %}
-
-
-  {% endif %}
-
-
+{#  {% else %}#}
+{#      <p>Você não está logado!!!</p>#}
+{#  {% endif %}#}
 {% endblock %}
