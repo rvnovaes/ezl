@@ -1,4 +1,3 @@
-from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse_lazy
@@ -27,7 +26,6 @@ def login(request):
 
 @login_required
 def inicial(request):
-
     if request.user.is_authenticated:
         title_page = {'title_page': 'Principal - Easy Lawyer'}
         return render(request, 'inicial.html', title_page)

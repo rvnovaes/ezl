@@ -3,6 +3,7 @@ from django.forms import ModelForm, inlineformset_factory
 from django.forms.models import fields_for_model
 
 # from django.contrib.admin.widgets import AdminDateWidget #TODO Verificar se será utilizado datepicker
+from core.fields import CustomBooleanField
 from core.models import Person, State
 from .models import TypeMovement, Instance, LawSuit, Movement, Folder, Task, CourtDistrict
 
@@ -12,7 +13,8 @@ class BaseForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(BaseForm, self).__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control'
+            if field.widget.input_type != 'checkbox':
+                field.widget.attrs['class'] = 'form-control'
             # Preenche o o label de cada field do form de acordo com o verbose_name preenchido no modelo
             field.label = self._meta.model._meta.get_field(field_name).verbose_name
 
@@ -100,6 +102,12 @@ class FolderForm(BaseForm):
         fields = fields_for_model(Folder,
                                   exclude={'create_user', 'alter_date', 'create_date', 'alter_user'})
 
+    # active = forms.BooleanField(
+    #     label=u"ativo",
+    #     initial=True,
+    #     # widget=MDCheckboxInput()
+    # )
+
     legacy_code = forms.CharField(
         max_length=255,
         required=True
@@ -108,6 +116,11 @@ class FolderForm(BaseForm):
     person_customer = forms.ModelChoiceField(
         queryset=Person.objects.filter(active=True),
         empty_label=u"Selecione...",
+    )
+
+    active = CustomBooleanField(  # forms.BooleanField(
+        initial=True,
+        required=False,
     )
 
 

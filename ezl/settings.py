@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     # TODO validar o formset
     'jquery',
     'djangoformsetjs',
-    
+
 ]
 
 MIDDLEWARE = [

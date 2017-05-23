@@ -1,22 +1,29 @@
 {% extends 'inicial.html' %}
-{#Outra forma de renderizar as tabelas#}
-{#{% load render_table from django_tables2 %}#}
-{#{% render_table table %}#}
-{#{% extends 'base.html' %}#}
-{#{% load staticfiles %}#}
-{% load static %}
 {% load render_table from django_tables2 %}
+{% load static %}
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
-<body>
 {% block content %}
     {% if table.page %}
         <div class="table-container">
     {% endif %}
 
 {% block table %}
+    <div class="form-group">
+        {% if messages %}
+            <div class="alert alert-dismissible alert-info">
+
+                <div class="messages">
+                    {% for message in messages %}
+                        {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}
+                    {% endfor %}
+                </div>
+
+            </div>
+        {% endif %}
+    </div>
     <div class="table-responsive">
-        <table class="table bordered highlight">
+        <table class="table table-striped table-hover">
             {% block table.thead %}
                 <thead>
                 <tr>
@@ -48,9 +55,6 @@
                             <th {{ column.attrs.th.as_html }}>{{ column.header|title }}</th>
                         {% endif %}
                     {% endfor %}
-                    <th style="color: #009688;">
-                        {{ 'Ações'|title }}
-                    </th>
                 </tr>
                 </thead>
             {% endblock table.thead %}
@@ -62,7 +66,6 @@
                             {% for column, cell in row.items %}
                                 <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                             {% endfor %}
-                            <td><a href=""><i class="material-icons edit">remove_circle</i></a></td>
                         </tr>
                     {% endblock table.tbody.row %}
                 {% empty %}
@@ -89,7 +92,4 @@
     {% endblock pagination %}
     </div>
 {% endif %}
-
-
 {% endblock content %}
-</body>

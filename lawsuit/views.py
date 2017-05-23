@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 # project imports
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
-from django_tables2 import RequestConfig
+from django_tables2 import RequestConfig, SingleTableView
 
 from core.views import BaseCustomView
 from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, TaskForm, CourtDistrictForm, \
@@ -117,19 +117,19 @@ class MovementDeleteView(BaseCustomView, DeleteView):
         return HttpResponseRedirect(self.success_url)
 
 
-class FolderListView(ListView, BaseCustomView):
+class FolderListView(SingleTableView):
     model = Folder
-    queryset = Folder.objects.filter(active=True)
+    queryset = Folder.objects.all()#filter(active=True)
     ordering = ['id']
     table_class = FolderTable
 
-    def get_context_data(self, **kwargs):
-        context = super(FolderListView, self).get_context_data(**kwargs)
-        context['nav_folder'] = True
-        table = FolderTable(Folder.objects.filter(active=True).order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 30}).configure(table)
-        context['table'] = table
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(FolderListView, self).get_context_data(**kwargs)
+    #     context['nav_folder'] = True
+    #     table = FolderTable(Folder.objects.filter(active=True).order_by('-pk'))
+    #     RequestConfig(self.request, paginate={'per_page': 30}).configure(table)
+    #     context['table'] = table
+    #     return context
 
 
 class FolderCreateView(BaseCustomView, CreateView):
