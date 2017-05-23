@@ -1,121 +1,48 @@
 {% extends 'inicial.html' %}
-{% load staticfiles %}
-{% load formset_tags %}
+{#{% load staticfiles %}#}
+{#{% load formset_tags %}#}
 {% block content %}
-    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/jquery.formset.js' %}"></script>
     <form action="" method="post">{% csrf_token %}
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title">Cadastro de Pastas</h3>
-            </div>
-            <div class="panel-body">
-                <div class=" center-block">
-
-                    <div>
-                        {{ form.as_table }}
-                    </div>
-                </div>
-            </div>
+        <div class="col-md-4 col-md-offset-3">
             <div class="panel panel-primary">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Processos</h3>
+                    <h1 class="panel-title">Cadastro de Pastas</h1>
                 </div>
                 <div class="panel-body">
-                    {#            {{ lawsuit_form.management_form }}#}
-                    {#            {{ lawsuit_form.non_form_errors }}#}
-                    {#            {% for form in lawsuit_form %}#}
-                    {#                <div class="form-horizontal">#}
-                    {#                    {{ form.as_table }}#}
-                    {#                </div>#}
-                    {#                    <div class="inline {{ lawsuit_form.prefix }}">#}
-                    {#                        {{ form.description.errors }}#}
-                    {#                        {{ form.description.label_tag }}#}
-                    {#                        {{ form.description }}#}
-                    {#                    </div>#}
-                    {#            {% endfor %}#}
-
-
-                    <div id="formset" data-formset-prefix="{{ formset.prefix }}">
-                        {{ formset.management_form }}
-
-                        <div data-formset-body>
-                            <!-- New forms will be inserted in here -->
-                            {% for form in formset %}
-                                <div data-formset-form>
-                                    {{ form }}
-                                    <button formnovalidate class="'btn btn-default" data-formset-move-up-button><i
-                                            class="material-icons">keyboard_arrow_up</i></button>
-                                    <button formnovalidate class="'btn btn-default" data-formset-move-down-button><i
-                                            class="material-icons">keyboard_arrow_down</i>
-                                    </button>
-                                    <button formnovalidate class="'btn btn-danger" data-formset-delete-button><i
-                                            class="material-icons">remove</i>
-                                    </button>
-                                </div>
-                            {% endfor %}
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label>
+                                {{ field.label }}{{ field }}
+                            </label>
                         </div>
-
-                        <!-- The empty form template. By wrapping this in a <script> tag, the
-                        __prefix__ placeholder can easily be replaced in both attributes and
-                        any scripts -->
-                        <script type="form-template" data-formset-empty-form>
-                            {% escapescript %}
-                                <div data-formset-form>
-                                    {{ formset.empty_form }}
-                                    <button formnovalidate class="'btn btn-default" data-formset-move-up-button><i
-                                            class="material-icons">keyboard_arrow_up</i></button>
-                                    <button formnovalidate class="'btn btn-default" data-formset-move-down-button><i
-                                            class="material-icons">keyboard_arrow_down</i>
-                                    </button>
-                                    <button formnovalidate class="'btn btn-danger" data-formset-delete-button><i
-                                            class="material-icons">remove</i>
-                                    </button>
-                                </div>
-                            {% endescapescript %}
-                        </script>
-
-                        <!-- This button will add a new form when clicked -->
-                        <button class="btn btn-primary btn-raised" title='Adicionar Processo' data-formset-add>
-                            <i class="material-icons">add</i>
+                    {% endfor %}
+                    <div class="form-group text-center">
+                        <a class="btn btn-raised btn-danger" formnovalidate
+                           href="{% url 'folder_list' %}"><i
+                                class="material-icons left">cancel</i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-raised btn-primary"><i
+                                class="material-icons left">save</i>
+                            Salvar
                         </button>
-
-                        <script>jQuery(function ($) {
-                            $("#formset").formset({
-                                animateForms: true,
-                                reorderMode: 'dom',
-                            });
-                        });</script>
-
                     </div>
                 </div>
-                {#            <fieldset>#}
-                {#                <legend>Recipe instruction</legend>#}
-                {#                {{ instruction_form.management_form }}#}
-                {#                {{ instruction_form.non_form_errors }}#}
-                {#                {% for form in instruction_form %}#}
-                {#                    {{ form.id }}#}
-                {#                    <div class="inline {{ instruction_form.prefix }}">#}
-                {#                        {{ form.number.errors }}#}
-                {#                        {{ form.number.label_tag }}#}
-                {#                        {{ form.number }}#}
-                {#                        {{ form.description.errors }}#}
-                {#                        {{ form.description.label_tag }}#}
-                {#                        {{ form.description }}#}
-                {#                    </div>#}
-                {#                {% endfor %}#}
-                {#            </fieldset>#}
-                <div class="inline-group">
-                    <a class="btn btn-raised btn-danger" formnovalidate
-                       href="{% url 'folder_list' %}"><i
-                            class="material-icons left">cancel</i>
-                        Cancelar
-                    </a>
-                    <button type="submit" class="btn btn-raised btn-primary"><i class="material-icons left">save</i>
-                        Salvar
-                    </button>
-                </div>
-
             </div>
+
+        </div>
+        <div class="form-group">
+            {% if messages %}
+                <div class="alert alert-dismissible alert-info">
+
+                    <div class="messages">
+                        {% for message in messages %}
+                            {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}
+                        {% endfor %}
+                    </div>
+
+                </div>
+            {% endif %}
+        </div>
     </form>
 {% endblock content %}
