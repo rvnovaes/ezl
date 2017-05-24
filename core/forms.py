@@ -1,7 +1,10 @@
 from django import forms
+from django.contrib.auth.models import User
 from django.forms import ModelForm
 
+from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, Country, City, State, ContactMechanism
+from lawsuit.forms import BaseForm
 
 
 class ContactForm(ModelForm, forms.Form):
@@ -42,7 +45,7 @@ class ContactMechanismForm(ModelForm, forms.Form):
         model = ContactMechanism
         fields = ['contact_mechanism_type', 'name', 'description', 'notes']
 
-    #contact_mechanism_type = forms.Select()
+    # contact_mechanism_type = forms.Select()
 
     name = forms.CharField(
         label=u"Nome",
@@ -65,29 +68,32 @@ class ContactMechanismForm(ModelForm, forms.Form):
     )
 
 
-class PersonForm(ModelForm, forms.Form):
+class PersonForm(BaseForm, forms.Form):
     class Meta:
         model = Person
-        fields = ['legal_name', 'name', 'is_lawyer', 'is_corresponding','legal_type', 'cpf_cnpj', 'auth_user', 'active']
+        fields = ['legal_name', 'name', 'is_lawyer', 'is_corresponding', 'is_court', 'legal_type', 'cpf_cnpj',
+                  'auth_user']
 
     legal_name = forms.CharField(
         required=False,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
     )
 
     name = forms.CharField(
         required=False,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
     )
 
-    is_lawyer = forms.BooleanField(
+    is_lawyer = CustomBooleanField(
         required=False,
     )
 
-    is_corresponding = forms.BooleanField(
+    is_corresponding = CustomBooleanField(
         required=False,
+    )
+
+    is_court = CustomBooleanField(
+        required=False
     )
 
     legal_type = forms.ChoiceField(
@@ -101,15 +107,14 @@ class PersonForm(ModelForm, forms.Form):
         label=u"CPF/CNPJ",
         required=False,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
     )
 
-    # auth_user = forms.ModelChoiceField(
-    #     label=u"Usuário",
-    #     #queryset =  TODO implementar o carregado dos usuários pré cadastrados;
-    #     required=False,
-    #     widget=forms.Select()
-    # )
+    auth_user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        empty_label="Selecione..."
+
+    )
 
 
 class AddressForm(ModelForm, forms.Form):

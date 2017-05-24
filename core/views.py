@@ -1,6 +1,7 @@
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -8,9 +9,10 @@ from django.utils import timezone
 # http://stackoverflow.com/questions/6069070/how-to-use-permission-required-decorators-on-django-class-based-views
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
-from django_tables2 import SingleTableView
+from django_tables2 import SingleTableView, RequestConfig
 
 from core.forms import PersonForm
+from core.messages import new_success, update_success
 from core.models import Person
 from core.tables import PersonTable
 
@@ -64,36 +66,29 @@ class PersonListView(SingleTableView):
     queryset = Person.objects.filter(active=True)
     ordering = ['id']
 
-
-@method_decorator(login_required, name='dispatch')
-class PersonCreateView(BaseCustomView, CreateView):
-    model = Person
-    form_class = PersonForm
-    success_url = reverse_lazy('person_list')
-
-    # def form_valid(self, form):
-    #     form.instance.user = self.request.user
-    #     try:
-    #         return super(PersonForm, self).form_valid(form)
-    #     except IntegrityError:
-    #
-    #         if self.object.active:
-    #             Person.objects.filter(self)
-    #             #form.add_error('unique_name', 'You already have a user by that name')
-    #         else:
-    #             form.add_error('unique_name', 'You already have a user by that name')
-    #         return HttpResponseRedirect(self.success_url)
-    #
-    # def save(self):
-    #     request.session['unique_name'] = self.object.unique_name
-    #     super(DataCreate, self).save() < / code >
+    def get_context_data(self, **kwargs):
+        context = super(PersonListView, self).get_context_data(**kwargs)
+        context['nav_courtdistrict'] = True
+        table = PersonTable(Person.objects.all().order_by('-pk'))
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        context['table'] = table
+        return context
 
 
 @method_decorator(login_required, name='dispatch')
-class PersonUpdateView(BaseCustomView, UpdateView):
+class PersonCreateView(SuccessMessageMixin, BaseCustomView, CreateView):
     model = Person
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
+    success_message = new_success
+
+
+@method_decorator(login_required, name='dispatch')
+class PersonUpdateView(SuccessMessageMixin, BaseCustomView, UpdateView):
+    model = Person
+    form_class = PersonForm
+    success_url = reverse_lazy('person_list')
+    success_message = update_success
 
 
 @method_decorator(login_required, name='dispatch')
