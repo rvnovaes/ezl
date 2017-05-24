@@ -1,37 +1,46 @@
-{#{% extends 'base.html' %}#}
-{#{% load staticfiles %}#}
+{% extends 'inicial.html' %}
 {% block content %}
-    <div style="text-align: center" class="container">
+    <div class="container">
         <form action="" method="post"> {% csrf_token %}
-            <div class="fieldWrapper hidden">
-                {{ form.id }}
-            </div>
-            <div class="fieldWrapper">
-                <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
-                {{ form.name }}
-            </div>
-            <div class="fieldWrapper">
-                <label for="{{ form.legacy_code.id_for_label }}">{{ form.legacy_code.label }}</label>
-                {{ form.legacy_code }}
-            </div>
-            <div class="fieldWrapper">
-                <p>
-                    {{ form.uses_wo.errors }}
-                    <input class="filled-in" {% if form.uses_wo.value == True %}checked{% endif %}
-                           type="checkbox" name="{{ form.uses_wo.html_name }}"
-                           id="{{ form.uses_wo.id_for_label }}"/>
-                    <label for="{{ form.uses_wo.id_for_label }}">{{ form.uses_wo.label }}</label>
-                </p>
-            </div>
-            <div style="clear:left; height:25px; margin-top:20px; margin-right:20px; margin-bottom:20px;  margin-left:20px;">
-                <button type="submit" class="waves-effect waves-light btn"><i class="material-icons left">save</i>
-                    Salvar
-                </button>
-                <a class="waves-effect waves-light red darken4 btn" formnovalidate
+            {{ form.as_p }}
+            {#            <div class="form-group label-floating">#}
+            {#                <label class="control-label" for="focusedInput1">Write something to make the label float</label>#}
+            {#                <input class="form-control" id="focusedInput1" type="text">#}
+            {#            </div>#}
+            {#            <div class="fieldWrapper hidden">#}
+            {#                {{ form.id }}#}
+            {#            </div>#}
+            {#            <div class="label-floating">#}
+            {#                <label class="control-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>#}
+            {#                {{ form.name }}#}
+            {#            </div>#}
+            {#            <div class="fieldWrapper">#}
+            {#                <label for="{{ form.legacy_code.id_for_label }}">{{ form.legacy_code.label }}</label>#}
+            {#                {{ form.legacy_code }}#}
+            {#            </div>#}
+            {#            <div class="checkbox">#}
+            {##}
+            {#                {{ form.uses_wo.errors }}#}
+            {#                <input class="checkbox"#}
+            {#                       type="checkbox" name="{{ form.uses_wo.html_name }}"#}
+            {#                       id="{{ form.uses_wo.id_for_label }}"/>#}
+            {##}
+            {#            </div>#}
+            {#            <div class="checkbox">#}
+            {#                <label>#}
+            {#                    <input class="checkbox" type="checkbox" name="{{ form.uses_wo.html_name }}"> {{ form.uses_wo.label }}#}
+            {#                </label>#}
+            {##}
+            {#            </div>#}
+            <div class="align-right">
+                <a class="btn btn-raised btn-danger" formnovalidate
                    href="{% url 'type_movement_list' %}"><i
                         class="material-icons left">cancel</i>
                     Cancelar
                 </a>
+                <button type="submit" class="btn btn-raised btn-primary"><i class="material-icons left">save</i>
+                    Salvar
+                </button>
             </div>
             {#            {% if messages %}#}
             {#                <ul class="messages">#}

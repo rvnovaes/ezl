@@ -5,9 +5,10 @@ from core.models import Audit, Person, State
 
 
 class TypeMovement(Audit):
-    name = models.CharField(max_length=255, blank=False, null=False, default="", unique=True)
-    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True)
-    uses_wo = models.BooleanField(default=False)
+    name = models.CharField(max_length=255, blank=False, null=False, default="", unique=True, verbose_name='Nome')
+    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
+                                   verbose_name='Código legado')
+    uses_wo = models.BooleanField(default=False, verbose_name='Utiliza ordem de serviço?')
 
     class Meta:
         db_table = "type_movement"
@@ -43,7 +44,8 @@ class Folder(Audit):
 
 
 class LawSuit(Audit):
-    person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
+    person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
+                                      verbose_name='Advogado')
     folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False)
 
     class Meta:

@@ -1,4 +1,5 @@
 import django_tables2 as tables
+from django_tables2 import A
 
 from .models import TypeMovement, Movement, LawSuit, Folder, Task, CourtDistrict
 
@@ -20,11 +21,12 @@ class MovementTable(tables.Table):
 
 
 class FolderTable(tables.Table):
+    legacy_code = tables.LinkColumn(viewname='folder_update', attrs={'a': {'target': '_blank'}}, args=[A('pk')])
     class Meta:
         model = Folder
         fields = ['legacy_code', 'person_customer']
-        attrs = {"class": "table-striped table-bordered"}
-        empty_text = "Não existem pastas cadastrados"
+        # attrs = {"class": "table-striped table-bordered"}
+        empty_text = "Não existem pastas cadastradas"
 
 
 class LawSuitTable(tables.Table):
