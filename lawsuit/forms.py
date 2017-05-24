@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import ModelForm, inlineformset_factory
+from django.forms import ModelForm
 from django.forms.models import fields_for_model
 
 # from django.contrib.admin.widgets import AdminDateWidget #TODO Verificar se será utilizado datepicker
@@ -15,6 +15,9 @@ class BaseForm(ModelForm):
         for field_name, field in self.fields.items():
             if field.widget.input_type != 'checkbox':
                 field.widget.attrs['class'] = 'form-control'
+            if field.widget.input_type == 'text':
+                field.widget.attrs['style'] = 'width: 100%; display: table-cell; '
+
             # Preenche o o label de cada field do form de acordo com o verbose_name preenchido no modelo
             field.label = self._meta.model._meta.get_field(field_name).verbose_name
 
@@ -22,12 +25,12 @@ class BaseForm(ModelForm):
 class TypeMovementForm(BaseForm):
     class Meta:
         model = TypeMovement
-        fields = ['name', 'legacy_code', 'uses_wo']
+        fields = fields_for_model(TypeMovement,
+                                  exclude={'active', 'create_user', 'alter_date', 'create_date', 'alter_user'})
 
     name = forms.CharField(
         max_length=255,
         required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control checkbox'}),
         error_messages={'required': 'O campo de descrição é obrigatório'}
     )
 
@@ -37,13 +40,13 @@ class TypeMovementForm(BaseForm):
         error_messages={'required': 'O campo de código legado é obrigatório'}
     )
 
-    uses_wo = forms.BooleanField(
+    uses_wo = CustomBooleanField(
         initial=False,
         required=False,
     )
 
 
-class InstanceForm(ModelForm):
+class InstanceForm(BaseForm):
     class Meta:
         model = Instance
         fields = ['name']
@@ -55,7 +58,7 @@ class InstanceForm(ModelForm):
     )
 
 
-class MovementForm(ModelForm):
+class MovementForm(BaseForm):
     class Meta:
         model = Movement
         fields = ['legacy_code', 'law_suit', 'person_lawyer', 'type_movement']
@@ -100,7 +103,7 @@ class FolderForm(BaseForm):
     class Meta:
         model = Folder
         fields = fields_for_model(Folder,
-                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user'})
+                                  exclude={'active', 'create_user', 'alter_date', 'create_date', 'alter_user'})
 
     # active = forms.BooleanField(
     #     label=u"ativo",
@@ -124,32 +127,24 @@ class FolderForm(BaseForm):
     )
 
 
-LawSuitFormSet = inlineformset_factory(
-    Folder, LawSuit,
-    exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'active'},
-    extra=1,
-)
-
-
-class LawSuitForm(ModelForm):
+class LawSuitForm(BaseForm):
     class Meta:
         model = LawSuit
-        fields = ['person_lawyer', 'folder']
+        fields = fields_for_model(LawSuit,
+                                  exclude={'active', 'create_user', 'alter_date', 'create_date', 'alter_user'})
 
     person_lawyer = forms.ModelChoiceField(
-        label=u"Advogado",
         empty_label=u"Selecione",
         queryset=Person.objects.filter(active=True, is_lawyer=True)
     )
 
     folder = forms.ModelChoiceField(
-        label=u"Pasta",
         empty_label=u"Selecione",
         queryset=Folder.objects.filter(active=True)
     )
 
 
-class TaskForm(ModelForm):
+class TaskForm(BaseForm):
     class Meta:
         model = Task
         fields = ['legacy_code', 'movement', 'person', 'type_movement', 'delegation_date',
@@ -204,7 +199,8 @@ class TaskForm(ModelForm):
 class CourtDistrictForm(BaseForm):
     class Meta:
         model = CourtDistrict
-        fields = fields_for_model(CourtDistrict, exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
+        fields = fields_for_model(CourtDistrict,
+                                  exclude=['active', 'create_user', 'alter_date', 'create_date', 'alter_user'])
 
     state = forms.ModelChoiceField(
         queryset=State.objects.filter(active=True),

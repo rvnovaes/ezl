@@ -1,4 +1,5 @@
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
@@ -6,10 +7,7 @@ from django.shortcuts import render
 from django.utils import timezone
 # http://stackoverflow.com/questions/6069070/how-to-use-permission-required-decorators-on-django-class-based-views
 from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required, permission_required
-from django.views.generic.edit import CreateView, UpdateView, DeleteView, View
-from django.views.generic.list import ListView
-from django_tables2 import RequestConfig
+from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django_tables2 import SingleTableView
 
 from core.forms import PersonForm
@@ -41,7 +39,10 @@ def logout_user(request):
 
 
 # Implementa a alteração da data e usuários para operação de update e new
-class BaseCustomView(View):
+class BaseCustomView(FormView):
+    success_url = None
+    success_message = "Registro Salvo com Sucesso"
+
     def form_valid(self, form):
         user = User.objects.get(id=self.request.user.id)
         if form.instance.id is None:

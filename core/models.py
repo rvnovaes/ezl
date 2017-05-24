@@ -70,14 +70,15 @@ class City(Audit):
 
 
 class Person(Audit):
-    legal_name = models.CharField(max_length=255, null=False, unique=True)
-    name = models.CharField(max_length=255, null=False, unique=True)
-    is_lawyer = models.BooleanField(null=False, default=False)
-    is_corresponding = models.BooleanField(null=False, default=False)
-    is_court = models.BooleanField(null=False, default=False)
-    legal_type = models.CharField(max_length=1, choices=LEGAL_TYPE_CHOICES)
-    cpf_cnpj = models.CharField(max_length=255, blank=True)
-    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True)
+    legal_name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Razão social/nome completo")
+    name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Nome Fantasia/Apelido")
+    is_lawyer = models.BooleanField(null=False, default=False, verbose_name="É Advogado?")
+    is_corresponding = models.BooleanField(null=False, default=False, verbose_name="É Correspondente?")
+    is_court = models.BooleanField(null=False, default=False, verbose_name="É Tribunal?")
+    legal_type = models.CharField(max_length=1, choices=LEGAL_TYPE_CHOICES, verbose_name="Tipo")
+    cpf_cnpj = models.CharField(max_length=255, blank=True, verbose_name="CPF/CNPJ")
+    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True,
+                                     verbose_name="Usuário do sistema")
 
     class Meta:
         db_table = "person"

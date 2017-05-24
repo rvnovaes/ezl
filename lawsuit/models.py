@@ -13,6 +13,8 @@ class TypeMovement(Audit):
     class Meta:
         db_table = "type_movement"
         ordering = ['-id']
+        verbose_name = "Tipo de Movimentação"
+        verbose_name_plural = "Tipos de Movimentação"
 
     def __str__(self):
         return self.name
@@ -38,6 +40,8 @@ class Folder(Audit):
     class Meta:
         db_table = "folder"
         ordering = ['-id']
+        verbose_name = "Pasta"
+        verbose_name_plural = "Pastas"
 
     def __str__(self):
         return str(self.id)
@@ -46,39 +50,48 @@ class Folder(Audit):
 class LawSuit(Audit):
     person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                       verbose_name='Advogado')
-    folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False)
+    folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False, verbose_name="Pasta")
 
     class Meta:
         db_table = "law_suit"
         ordering = ['-id']
+        verbose_name = "Processo"
+        verbose_name_plural = "Processos"
 
     def __str__(self):
         return str(self.id)  # TODO verificar novos campos e refatorar o toString
 
 
 class Movement(Audit):
-    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True)
+    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
+                                   verbose_name="Código Legado")
     person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
-                                      related_name='%(class)s_lawyer')
+                                      related_name='%(class)s_lawyer', verbose_name="Advogado")
     person_court = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
-                                     related_name='%(class)s_court')
-    type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False)
-    law_suit = models.ForeignKey(LawSuit, on_delete=models.PROTECT, blank=False, null=False)
-    deadline = models.DateTimeField(null=True)
+                                     related_name='%(class)s_court', verbose_name="Tribunal")
+    type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False,
+                                      verbose_name="Tipo de Movimentação")
+    law_suit = models.ForeignKey(LawSuit, on_delete=models.PROTECT, blank=False, null=False, verbose_name="Processo")
+    deadline = models.DateTimeField(null=True, verbose_name="Prazo")
 
     class Meta:
         db_table = "movement"
         ordering = ['-id']
+        verbose_name = "Movimentação"
+        verbose_name_plural = "Movimentação"
 
     def __str__(self):
         return self.legacy_code  # TODO verificar novos campos e refatorar o toString
 
 
 class Task(Audit):
-    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True)
-    movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False)
-    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
-    type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False)
+    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
+                                   verbose_name="Código Legado")
+    movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
+                                 verbose_name="Movimentação")
+    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False, verbose_name="Correspondente")
+    type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False,
+                                      verbose_name="Tipo de Movimentação")
     delegation_date = models.DateTimeField(default=timezone.now)
     acceptance_date = models.DateTimeField(null=True)
     deadline_date = models.DateTimeField(null=True)
@@ -88,6 +101,8 @@ class Task(Audit):
     class Meta:
         db_table = 'task'
         ordering = ['-id']
+        verbose_name = "Providência"
+        verbose_name_plural = "Providências"
 
     def __str__(self):
         return self.legacy_code  # TODO verificar campo para toString
@@ -99,6 +114,8 @@ class CourtDistrict(Audit):
 
     class Meta:
         db_table = "court_district"
+        verbose_name = "Comarca"
+        verbose_name_plural = "Comarcas"
 
     def __str__(self):
         return self.name

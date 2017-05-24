@@ -71,31 +71,26 @@ class PersonForm(ModelForm, forms.Form):
         fields = ['legal_name', 'name', 'is_lawyer', 'is_corresponding','legal_type', 'cpf_cnpj', 'auth_user', 'active']
 
     legal_name = forms.CharField(
-        label=u"Razão Social/Nome completo",
         required=False,
         max_length=255,
         widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
     )
 
     name = forms.CharField(
-        label=u"Nome Fantasia/Apelido",
         required=False,
         max_length=255,
         widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
     )
 
     is_lawyer = forms.BooleanField(
-        label=u"Advogado?",
         required=False,
     )
 
     is_corresponding = forms.BooleanField(
-        label=u"Correspondente?",
         required=False,
     )
 
     legal_type = forms.ChoiceField(
-        label=u"Tipo",
         required=True,
         widget=forms.Select(),
         choices=([('F', u'Física'),
