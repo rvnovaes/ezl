@@ -45,3 +45,17 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
     padding-right: 20px;
 
 }
+
+.checkbox-material::before {
+    display: none !important;
+}
+
+.checkbox {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+
+}
+
+.selection {
+    width: 22px !important;
+}

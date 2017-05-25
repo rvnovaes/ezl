@@ -4,6 +4,7 @@
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
 {% block content %}
+    <script src="{% static "core/js/utils.js" %}"></script>
     {% include 'core/widgets/messages.html' %}
     {% if table.page %}
         <div class="table-container">
@@ -25,6 +26,7 @@
                 <table class="table table-striped table-hover">
                     {% block table.thead %}
                         <thead>
+                        {#                        <div class="check"><label><input type="Checkbox" onclick="toggle( this)"></label></div>#}
                         <tr>
                             {% for column in table.columns %}
                                 {% if column.orderable %}
