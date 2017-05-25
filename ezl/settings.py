@@ -42,9 +42,6 @@ INSTALLED_APPS = [
     'allauth.account',
     'django_tables2',
     'bootstrap3',
-    # TODO validar o formset
-    'jquery',
-    'djangoformsetjs',
 
 ]
 
@@ -132,7 +129,8 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
     # ...
-    ("ezl_static", os.path.join(BASE_DIR, 'static/')),
+    os.path.join(BASE_DIR, 'static/'),
+    # ("ezl_static", os.path.join(BASE_DIR, 'static/')),
 )
 
 # STATIC_ROOT = '/opt/mta/easy_lawyer_django/static/'

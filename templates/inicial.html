@@ -1,71 +1,78 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% block body %}
-  {% if user.is_authenticated %}
-    <div class="navbar navbar-default">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="{% url 'inicial' %}">EZL</a>
+    {% if user.is_authenticated %}
+        <div class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse"
+                            data-target=".navbar-responsive-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="{% url 'inicial' %}">EZL</a>
+                </div>
+                <div class="navbar-collapse collapse navbar-responsive-collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="{% url 'person_list' %}">Pessoas</a></li>
+                        <li><a href="{% url 'courtdistrict_list' %}">Comarcas</a></li>
+                        <li><a href="{% url 'lawsuit_list' %}">Processos</a></li>
+                        <li><a href="{% url 'instance_list' %}">Instâncias</a></li>
+                        <li><a href="{% url 'folder_list' %}">Pastas</a></li>
+                        <li><a href="{% url 'task_list' %}">Providências</a></li>
+                        <li><a href="{% url 'movement_list' %}">Movimentações</a></li>
+                        <li><a href="{% url 'type_movement_list' %}">Tipos de Movimentação</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-haspopup="true" aria-expanded="false">{{ user.username }} <span
+                                    class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="/accounts/password/change/">Alterar Senha</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="#modal1" onclick="$('#logout_modal').modal('show');">Sair do Sistema</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-        <div class="navbar-collapse collapse navbar-responsive-collapse">
-          <ul class="nav navbar-nav">
-            <li><a href="{% url 'person_list' %}">Pessoas</a></li>
-            <li><a href="{% url 'courtdistrict_list' %}">Comarcas</a></li>
-            <li><a href="{% url 'lawsuit_list' %}">Processos</a></li>
-            <li><a href="{% url 'instance_list' %}">Instâncias</a></li>
-            <li><a href="{% url 'folder_list' %}">Pastas</a></li>
-            <li><a href="{% url 'task_list' %}">Providências</a></li>
-            <li><a href="{% url 'movement_list' %}">Movimentações</a></li>
-              <li><a href="{% url 'type_movement_list' %}">Tipos de Movimentação</a></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user.username }} <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="/accounts/password/change/">Alterar Senha</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="#modal1" onclick="$('#logout_modal').modal('show');">Sair do Sistema</a></li>
-              </ul>
-            </li>
-          </ul>
+
+        <div style="margin: 20px">
+            {% block content %}
+                {% include 'core/widgets/messages.html' %}
+            {% endblock content %}
         </div>
-    </div>
-    </div>
 
-    <div style="margin: 20px">
-    {% block content %}
-    {% endblock content %}
-    </div>
-
-  <!-- Janela modal de logout -->
-    <div class="modal" id="logout_modal">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h4 class="modal-title">Logout</h4>
-          </div>
-          <div class="modal-body">
-            <p>Tem certeza que deseja sair do sistema?</p>
-          </div>
-          <div class="modal-footer">
-              <form action="{% url 'logout' %}">
-                  <input type="submit" class="btn btn-raised btn-danger" data-dismiss="modal" value="Cancelar" />
-                  <input type="submit" class="btn btn-raised btn-primary" value="Sair" style="margin: 10px 1px !important;"/>
-              </form>
-          </div>
+        <!-- Janela modal de logout -->
+        <div class="modal" id="logout_modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Logout</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Tem certeza que deseja sair do sistema?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <form action="{% url 'logout' %}">
+                            <input type="submit" class="btn btn-raised btn-danger" data-dismiss="modal"
+                                   value="Cancelar"/>
+                            <input type="submit" class="btn btn-raised btn-primary" value="Sair"
+                                   style="margin: 10px 1px !important;"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  {% else %}
+    {% else %}
 
 
-  {% endif %}
+    {% endif %}
 
 
 {% endblock %}
