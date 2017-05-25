@@ -1,14 +1,12 @@
 import django_tables2 as tables
-from django_tables2 import A, TemplateColumn
+from django_tables2 import A
 
+from core.tables import CheckBoxMaterial
 from .models import TypeMovement, Movement, LawSuit, Folder, Task, CourtDistrict
 
 
 class TypeMovementTable(tables.Table):
-    selection = TemplateColumn(
-        '<div class="checkbox"><label><input type="checkbox" value="{{ record.pk }}" /></label></div>',
-        verbose_name='', accessor='pk', attrs={'th__input':
-                                                   {'onclick': 'toggle( this)'}}, orderable=False)
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     name = tables.LinkColumn(viewname='type_movement_update', attrs={'a': {'target': 'type_movement_update'}},
                              args=[A('pk')])
@@ -22,10 +20,7 @@ class TypeMovementTable(tables.Table):
 
 
 class MovementTable(tables.Table):
-    selection = TemplateColumn(
-        '<div class="checkbox"><label><input type="checkbox" value="{{ record.pk }}" /></label></div>',
-        verbose_name='', accessor='pk', attrs={'th__input':
-                                                   {'onclick': 'toggle( this)'}}, orderable=False)
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     legacy_code = tables.LinkColumn(viewname='type_movement_update', attrs={'a': {'target': 'movement_update'}},
                                     args=[A('pk')])
@@ -39,12 +34,8 @@ class MovementTable(tables.Table):
 
 
 class FolderTable(tables.Table):
-    # selection = tables.CheckBoxColumn(accessor="pk", attrs={'th__input':
-    #                                                             {'onclick': 'toggle( this)'}}, orderable=False)
-    selection = TemplateColumn(
-        '<div class="checkbox"><label><input type="checkbox" value="{{ record.pk }}" /></label></div>',
-        verbose_name='', accessor='pk', attrs={'th__input':
-                                                   {'onclick': 'toggle( this)'}}, orderable=False)
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
+
     legacy_code = tables.LinkColumn(viewname='folder_update', attrs={'a': {'target': 'folder_update'}}, args=[A('pk')])
 
     class Meta:
@@ -56,10 +47,7 @@ class FolderTable(tables.Table):
 
 
 class LawSuitTable(tables.Table):
-    selection = TemplateColumn(
-        '<div class="checkbox"><label><input type="checkbox" value="{{ record.pk }}" /></label></div>',
-        verbose_name='', accessor='pk', attrs={'th__input':
-                                                   {'onclick': 'toggle( this)'}}, orderable=False)
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
         sequence = ('selection', 'folder', 'person_lawyer')
@@ -70,10 +58,7 @@ class LawSuitTable(tables.Table):
 
 
 class TaskTable(tables.Table):
-    selection = TemplateColumn(
-        '<div class="checkbox"><label><input type="checkbox" value="{{ record.pk }}" /></label></div>',
-        verbose_name='', accessor='pk', attrs={'th__input':
-                                                   {'onclick': 'toggle( this)'}}, orderable=False)
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
     legacy_code = tables.LinkColumn(viewname='task_update', attrs={'a': {'target': 'task_update'}}, args=[A('pk')])
 
     class Meta:
@@ -85,10 +70,7 @@ class TaskTable(tables.Table):
 
 
 class CourtDistrictTable(tables.Table):
-    selection = TemplateColumn(
-        '<div class="checkbox"><label><input type="checkbox" value="{{ record.pk }}" /></label></div>',
-        verbose_name='', accessor='pk', attrs={'th__input':
-                                                   {'onclick': 'toggle( this)'}}, orderable=False)
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     name = tables.LinkColumn(viewname='folder_update', attrs={'a': {'target': 'courtdistrict_update'}}, args=[A('pk')])
 

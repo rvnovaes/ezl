@@ -1,15 +1,48 @@
 import django_tables2 as tables
-from django_tables2 import TemplateColumn
-from django_tables2.utils import A  # alias for Accessor
+from django.utils.safestring import mark_safe
+from django_tables2.utils import A, AttributeDict  # alias for Accessor
 
 from .models import Person
 
 
+class CheckBoxMaterial(tables.CheckBoxColumn):
+    def __init__(self, attrs=None, checked=None, **extra):
+        self.checked = checked
+        kwargs = {'orderable': False, 'attrs': attrs}
+        kwargs.update(extra)
+        super(CheckBoxMaterial, self).__init__(**kwargs)
+
+    @property
+    def header(self):
+        default = {'type': 'checkbox'}
+        general = self.attrs.get('input')
+        specific = self.attrs.get('th__input')
+        attrs = AttributeDict(default, **(specific or general or {}))
+        return mark_safe('<div class="checkbox"><label><input onclick="toggle(this)" name="selection" '
+                         'type="checkbox" %s value="{{ record.pk }}"/>'
+                         '</label></div>')
+
+    def render(self, value, bound_column, record):
+        default = {
+            'type': 'checkbox',
+            'name': bound_column.name,
+            'value': value
+        }
+        if self.is_checked(value, record):
+            default.update({
+                'checked': 'checked',
+            })
+
+        general = self.attrs.get('input')
+        specific = self.attrs.get('td__input')
+        attrs = AttributeDict(default, **(specific or general or {}))
+        return mark_safe('<div class="checkbox"><label><input name="selection"'
+                         ' type="checkbox" value="{{ record.pk }}" />'
+                         '</label></div>')
+
+
 class PersonTable(tables.Table):
-    selection = TemplateColumn(
-        '<div class="checkbox"><label><input type="checkbox" value="{{ record.pk }}" /></label></div>',
-        verbose_name='', accessor='pk', attrs={'th__input':
-                                                   {'onclick': 'toggle( this)'}}, orderable=False)
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     name = tables.LinkColumn(viewname='person_update', attrs={'a': {'target': '_blank'}}, args=[A('pk')])
 
