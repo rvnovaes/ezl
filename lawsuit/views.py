@@ -182,7 +182,7 @@ class LawSuitListView(LoginRequiredMixin, SingleTableView):
         return context
 
 
-class LawSuitCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
+class LawSuitCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
     model = LawSuit
     form_class = LawSuitForm
     success_url = reverse_lazy('lawsuit_list')
