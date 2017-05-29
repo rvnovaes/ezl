@@ -10,5 +10,6 @@ urlpatterns = [
                   url(r'^', include('core.urls')),
                   url(r'^admin/', admin.site.urls),
                   url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),
+                  url(r'^providencias/', include('task.urls'), name='task'),
                   url(r'^accounts/', include('allauth.urls')),
               ] + static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static'))

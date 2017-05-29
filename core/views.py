@@ -43,7 +43,6 @@ def logout_user(request):
 # Implementa a alteração da data e usuários para operação de update e new
 class BaseCustomView(FormView):
     success_url = None
-    success_message = "Registro Salvo com Sucesso"
 
     def form_valid(self, form):
         user = User.objects.get(id=self.request.user.id)
@@ -68,7 +67,7 @@ class PersonListView(SingleTableView):
 
     def get_context_data(self, **kwargs):
         context = super(PersonListView, self).get_context_data(**kwargs)
-        context['nav_courtdistrict'] = True
+        context['nav_person'] = True
         table = PersonTable(Person.objects.all().order_by('-pk'))
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table

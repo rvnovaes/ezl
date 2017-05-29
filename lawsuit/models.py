@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 
 from core.models import Audit, Person, State
 
@@ -72,6 +71,7 @@ class Movement(Audit):
     type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False,
                                       verbose_name="Tipo de Movimentação")
     law_suit = models.ForeignKey(LawSuit, on_delete=models.PROTECT, blank=False, null=False, verbose_name="Processo")
+
     deadline = models.DateTimeField(null=True, verbose_name="Prazo")
 
     class Meta:
@@ -82,30 +82,6 @@ class Movement(Audit):
 
     def __str__(self):
         return self.legacy_code  # TODO verificar novos campos e refatorar o toString
-
-
-class Task(Audit):
-    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
-                                   verbose_name="Código Legado")
-    movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
-                                 verbose_name="Movimentação")
-    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False, verbose_name="Correspondente")
-    type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False,
-                                      verbose_name="Tipo de Movimentação")
-    delegation_date = models.DateTimeField(default=timezone.now)
-    acceptance_date = models.DateTimeField(null=True)
-    deadline_date = models.DateTimeField(null=True)
-    final_deadline_date = models.DateTimeField(null=True)
-    execution_deadline_date = models.DateTimeField(null=True)  # TODO ou first_deadline_date e second_deadline_date?
-
-    class Meta:
-        db_table = 'task'
-        ordering = ['-id']
-        verbose_name = "Providência"
-        verbose_name_plural = "Providências"
-
-    def __str__(self):
-        return self.legacy_code  # TODO verificar campo para toString
 
 
 class CourtDistrict(Audit):

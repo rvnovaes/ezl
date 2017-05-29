@@ -9,9 +9,9 @@ from django_tables2 import RequestConfig, SingleTableView
 
 from core.messages import new_success, update_success
 from core.views import BaseCustomView
-from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, TaskForm, CourtDistrictForm
-from .models import TypeMovement, Instance, Movement, LawSuit, Folder, Task, CourtDistrict
-from .tables import TypeMovementTable, MovementTable, FolderTable, LawSuitTable, TaskTable, CourtDistrictTable
+from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm
+from .models import TypeMovement, Instance, Movement, LawSuit, Folder, CourtDistrict
+from .tables import TypeMovementTable, MovementTable, FolderTable, LawSuitTable, CourtDistrictTable
 
 
 class InstanceUpdateView(BaseCustomView, UpdateView):
@@ -204,46 +204,6 @@ class LawSuitDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
         lawsuit = self.get_object()
         lawsuit_id = int(lawsuit.id)
         LawSuit.objects.filter(id=lawsuit_id).update(active=False)
-        return HttpResponseRedirect(self.success_url)
-
-
-class TaskListView(LoginRequiredMixin, SingleTableView):
-    model = Task
-    table_class = TaskTable
-    queryset = Task.objects.all()
-    ordering = ['id']
-
-    def get_context_data(self, **kwargs):
-        context = super(TaskListView, self).get_context_data(**kwargs)
-        context['nav_task'] = True
-        table = TaskTable(Task.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
-        return context
-
-
-class TaskCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
-    model = Task
-    form_class = TaskForm
-    success_url = reverse_lazy('task_list')
-    success_message = new_success
-
-
-class TaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
-    model = Task
-    form_class = TaskForm
-    success_url = reverse_lazy('task_list')
-    success_message = update_success
-
-
-class TaskDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
-    model = Task
-    success_url = reverse_lazy('task-list')
-
-    def delete(self, request, *args, **kwargs):
-        task = self.get_object()
-        task_id = int(task.id)
-        Task.objects.filter(id=task_id).update(active=False)
         return HttpResponseRedirect(self.success_url)
 
 

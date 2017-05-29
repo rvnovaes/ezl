@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core.apps.CoreConfig',
     'lawsuit.apps.LawsuitConfig',
+    'task.apps.TaskConfig',
     'django.contrib.sites',
     'allauth',
     'allauth.account',
@@ -86,7 +87,7 @@ DATABASES = {
         'NAME': 'ezl',
         'USER': 'ezl',
         'PASSWORD': 'ezl',
-        'HOST': '127.0.0.1',
+        'HOST': '13.68.213.60',
         'PORT': '5432'
     }
 }

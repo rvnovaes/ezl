@@ -12,15 +12,19 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         kwargs.update(extra)
         super(CheckBoxMaterial, self).__init__(**kwargs)
 
-    @property
+    # @property
+    # def selectable(self):
+    #     return True;
+
     def header(self):
         default = {'type': 'checkbox'}
         general = self.attrs.get('input')
         specific = self.attrs.get('th__input')
         attrs = AttributeDict(default, **(specific or general or {}))
-        return mark_safe('<div class="checkbox"><label><input onclick="toggle(this)" name="selection" '
-                         'type="checkbox" %s value="{{ record.pk }}"/>'
-                         '</label></div>')
+        attrs['selectable'] = True
+        return mark_safe(
+            '<div class="checkbox"><label><input %s name="selection" onclick="toggle(this)"/></label></div>'
+            % attrs.as_html())
 
     def render(self, value, bound_column, record):
         default = {

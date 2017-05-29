@@ -2,7 +2,7 @@ import django_tables2 as tables
 from django_tables2 import A
 
 from core.tables import CheckBoxMaterial
-from .models import TypeMovement, Movement, LawSuit, Folder, Task, CourtDistrict
+from .models import TypeMovement, Movement, LawSuit, Folder, CourtDistrict
 
 
 class TypeMovementTable(tables.Table):
@@ -55,18 +55,6 @@ class LawSuitTable(tables.Table):
         fields = ['selection', 'folder', 'person_lawyer']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem processos cadastrados"
-
-
-class TaskTable(tables.Table):
-    selection = CheckBoxMaterial(accessor="pk", orderable=False)
-    legacy_code = tables.LinkColumn(viewname='task_update', attrs={'a': {'target': 'task_update'}}, args=[A('pk')])
-
-    class Meta:
-        model = Task
-        fields = ['selection', 'legacy_code', 'movement', 'person', 'type_movement', 'delegation_date',
-                  'acceptance_date', 'deadline_date', 'final_deadline_date', 'execution_deadline_date']
-        # attrs = {"class": "table-striped table-bordered"}
-        empty_text = "Não existem providências cadastrados"
 
 
 class CourtDistrictTable(tables.Table):

@@ -5,7 +5,7 @@ from django.forms.models import fields_for_model
 # from django.contrib.admin.widgets import AdminDateWidget #TODO Verificar se será utilizado datepicker
 from core.fields import CustomBooleanField
 from core.models import Person, State
-from .models import TypeMovement, Instance, LawSuit, Movement, Folder, Task, CourtDistrict
+from .models import TypeMovement, Instance, LawSuit, Movement, Folder, CourtDistrict
 
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
@@ -61,7 +61,7 @@ class InstanceForm(BaseForm):
 class MovementForm(BaseForm):
     class Meta:
         model = Movement
-        fields = ['legacy_code', 'law_suit', 'person_lawyer', 'type_movement']
+        fields = ['legacy_code', 'law_suit', 'person_lawyer', 'person_court', 'type_movement']
 
     legacy_code = forms.CharField(
         label=u"Código Legado",
@@ -141,58 +141,6 @@ class LawSuitForm(BaseForm):
     folder = forms.ModelChoiceField(
         empty_label=u"Selecione",
         queryset=Folder.objects.filter(active=True)
-    )
-
-
-class TaskForm(BaseForm):
-    class Meta:
-        model = Task
-        fields = ['legacy_code', 'movement', 'person', 'type_movement', 'delegation_date',
-                  'acceptance_date', 'deadline_date', 'final_deadline_date', 'execution_deadline_date']
-
-    legacy_code = forms.CharField(
-        label=u"Código Legado",
-        max_length=255,
-        required=True
-    )
-
-    movement = forms.ModelChoiceField(
-        queryset=Movement.objects.filter(active=True),
-        empty_label=u"Selecione...",
-        label=u"Movimentação"
-    )
-
-    person = forms.ModelChoiceField(
-        label=u"Correpondente",
-        empty_label=u"Selecione...",
-        queryset=Person.objects.filter(active=True, is_corresponding=True)
-
-    )
-
-    type_movement = forms.ModelChoiceField(
-        queryset=TypeMovement.objects.filter(active=True),
-        empty_label=u"Selecione...",
-        label=u"Tipo de Movimentação"
-    )
-    # TODO verificar como aplicar os formulários com dateTimeField
-    delegation_date = forms.DateTimeField(
-        label=u"Data de abertura"
-    )
-
-    acceptance_date = forms.DateTimeField(
-        label=u"Data Fechamento"
-    )
-
-    deadline_date = forms.DateTimeField(
-        label=u"Prazo"
-    )
-
-    final_deadline_date = forms.DateTimeField(
-        label=u"Prazo Fatal"
-    )
-
-    execution_deadline_date = forms.DateTimeField(
-        label=u"Prazo Execução Fatal"
     )
 
 
