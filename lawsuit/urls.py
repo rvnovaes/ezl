@@ -21,6 +21,15 @@ urlpatterns = [
     url(r'^pastas/(?P<pk>[0-9]+)/excluir$', login_required(login_required(views.FolderDeleteView.as_view())),
         name='folder_delete'),
 
+    # instancia processo
+    url(r'^processos-instancias/listar/$', login_required(views.LawSuitInstanceListView.as_view()),
+        name='lawsuitinstance_list'),
+    url(r'^processos-instancias/$', login_required(views.LawSuitInstanceCreateView.as_view()),
+        name='lawsuitinstance_add'),
+    url(r'^processos-instancias/(?P<pk>[0-9]+)/$', login_required(views.LawSuitInstanceUpdateView.as_view()),
+        name='lawsuitinstance_update'),
+    url(r'^processos-instancias/(?P<pk>[0-9]+)/excluir$', login_required(views.LawSuitInstanceDeleteView.as_view()),
+        name='movement_delete'),
     # Processos
     url(r'^processos/listar/$', login_required(views.LawSuitListView.as_view()), name='lawsuit_list'),
     url(r'^processos/$', login_required(views.LawSuitCreateView.as_view()), name='lawsuit_add'),

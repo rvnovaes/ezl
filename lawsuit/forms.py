@@ -5,7 +5,7 @@ from django.forms.models import fields_for_model
 # from django.contrib.admin.widgets import AdminDateWidget #TODO Verificar se será utilizado datepicker
 from core.fields import CustomBooleanField
 from core.models import Person, State
-from .models import TypeMovement, Instance, LawSuit, Movement, Folder, CourtDistrict
+from .models import TypeMovement, Instance, LawSuit, Movement, Folder, CourtDistrict, LawSuitInstance
 
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
@@ -61,37 +61,27 @@ class InstanceForm(BaseForm):
 class MovementForm(BaseForm):
     class Meta:
         model = Movement
-        fields = ['legacy_code', 'law_suit', 'person_lawyer', 'person_court', 'type_movement']
+        fields = ['legacy_code', 'person_lawyer', 'type_movement', 'law_suit_instance', 'deadline']
 
     legacy_code = forms.CharField(
         label=u"Código Legado",
         max_length=255,
         required=True
-
-    )
-
-    law_suit = forms.ModelChoiceField(
-        queryset=LawSuit.objects.filter(active=True),
-        empty_label=u"Selecione...",
-        label="Processo"
     )
 
     person_lawyer = forms.ModelChoiceField(
         queryset=Person.objects.filter(active=True, is_lawyer=True),
         empty_label=u"Selecione...",
-        label=u"Advogado"
     )
 
-    person_court = forms.ModelChoiceField(
-        queryset=Person.objects.filter(active=True, is_court=True),
+    law_suit_instance = forms.ModelChoiceField(
+        queryset=LawSuitInstance.objects.filter(active=True),
         empty_label=u"Selecione...",
-        label=u"Tribunal"
     )
 
     type_movement = forms.ModelChoiceField(
         queryset=TypeMovement.objects.filter(active=True),
         empty_label=u"Selecione...",
-        label=u"Tipo de Movimentação"
     )
 
     deadline = forms.DateTimeField(
@@ -104,12 +94,6 @@ class FolderForm(BaseForm):
         model = Folder
         fields = fields_for_model(Folder,
                                   exclude={'active', 'create_user', 'alter_date', 'create_date', 'alter_user'})
-
-    # active = forms.BooleanField(
-    #     label=u"ativo",
-    #     initial=True,
-    #     # widget=MDCheckboxInput()
-    # )
 
     legacy_code = forms.CharField(
         max_length=255,
@@ -154,3 +138,28 @@ class CourtDistrictForm(BaseForm):
         queryset=State.objects.filter(active=True),
         empty_label=u"Selecione..."
     )
+
+
+class LawSuitInstanceForm(BaseForm):
+    class Meta:
+        model = LawSuitInstance
+        fields = fields_for_model(LawSuitInstance,
+                                  exclude=['active', 'create_user', 'alter_date', 'create_date', 'alter_user'])
+
+        law_suit_number = forms.CharField(max_length=255, required=True)
+
+        law_suit = forms.ModelChoiceField(queryset=LawSuit.objects.filter(active=True),
+                                          empty_label=u"Selecione")
+
+        instance = forms.ModelChoiceField(queryset=Instance.objects.filter(active=True),
+                                          empty_label=u"Selecione")
+
+        court_district = forms.ModelChoiceField(queryset=CourtDistrict.objects.filter(active=True),
+                                                empty_label=u"Selecione")
+
+        person_court = forms.ModelChoiceField(queryset=Person.objects.filter(active=True),
+                                              empty_label=u"Selecione")
+        legacy_code = forms.CharField(
+            max_length=255,
+            required=True
+        )

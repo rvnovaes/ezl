@@ -9,9 +9,11 @@ from django_tables2 import RequestConfig, SingleTableView
 
 from core.messages import new_success, update_success
 from core.views import BaseCustomView
-from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm
-from .models import TypeMovement, Instance, Movement, LawSuit, Folder, CourtDistrict
-from .tables import TypeMovementTable, MovementTable, FolderTable, LawSuitTable, CourtDistrictTable
+from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm, \
+    LawSuitInstanceForm
+from .models import TypeMovement, Instance, Movement, LawSuit, Folder, CourtDistrict, LawSuitInstance
+from .tables import TypeMovementTable, MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, \
+    LawSuitInstanceTable
 
 
 class InstanceUpdateView(BaseCustomView, UpdateView):
@@ -244,4 +246,44 @@ class CourtDistrictDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
         courtdistrict = self.get_object()
         courtdistrict_id = int(courtdistrict.id)
         CourtDistrict.objects.filter(id=courtdistrict_id).update(active=False)
+        return HttpResponseRedirect(self.success_url)
+
+
+class LawSuitInstanceListView(LoginRequiredMixin, SingleTableView):
+    model = LawSuitInstance
+    table_class = LawSuitInstanceTable
+    queryset = LawSuitInstance.objects.all()
+    ordering = ['id']
+
+    def get_context_data(self, **kwargs):
+        context = super(LawSuitInstanceListView, self).get_context_data(**kwargs)
+        context['nav_lawsuitinstance'] = True
+        table = LawSuitInstanceTable(LawSuitInstance.objects.all().order_by('-pk'))
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        context['table'] = table
+        return context
+
+
+class LawSuitInstanceCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+    model = LawSuitInstance
+    form_class = LawSuitInstanceForm
+    success_url = reverse_lazy('lawsuitinstance_list')
+    success_message = new_success
+
+
+class LawSuitInstanceUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
+    model = LawSuitInstance
+    form_class = LawSuitInstanceForm
+    success_url = reverse_lazy('lawsuitinstance_list')
+    success_message = update_success
+
+
+class LawSuitInstanceDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
+    model = LawSuitInstance
+    success_url = reverse_lazy('lawsuitinstance_list')
+
+    def delete(self, request, *args, **kwargs):
+        law_suit_instance = self.get_object()
+        law_suit_instance_id = int(law_suit_instance.id)
+        LawSuitInstance.objects.filter(id=law_suit_instance_id).update(active=False)
         return HttpResponseRedirect(self.success_url)

@@ -2,7 +2,7 @@ import django_tables2 as tables
 from django_tables2 import A
 
 from core.tables import CheckBoxMaterial
-from .models import TypeMovement, Movement, LawSuit, Folder, CourtDistrict
+from .models import TypeMovement, Movement, LawSuit, Folder, CourtDistrict, LawSuitInstance
 
 
 class TypeMovementTable(tables.Table):
@@ -22,14 +22,14 @@ class TypeMovementTable(tables.Table):
 class MovementTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
-    legacy_code = tables.LinkColumn(viewname='type_movement_update', attrs={'a': {'target': 'movement_update'}},
+    legacy_code = tables.LinkColumn(viewname='movement_update', attrs={'a': {'target': 'movement_update'}},
                                     args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'law_suit', 'person_lawyer', 'type_movement')
+        sequence = ('selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit_instance', 'deadline')
         model = Movement
         attrs = {"class": "table-striped table-bordered"}
-        fields = ['selection', 'legacy_code', 'law_suit', 'person_lawyer', 'type_movement']
+        fields = ['selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit_instance', 'deadline']
         empty_text = "Não existem movimentações cadastrados"
 
 
@@ -67,4 +67,17 @@ class CourtDistrictTable(tables.Table):
         model = CourtDistrict
         fields = ['selection', 'name', 'state']
         # attrs = {"class": "table-striped table-bordered"}
-        empty_text = "Não existem comarcas cadastrados"
+        empty_text = "Não existem comarcas cadastradas"
+
+
+class LawSuitInstanceTable(tables.Table):
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
+    law_suit_number = tables.LinkColumn(viewname='law_suit_instance_update',
+                                        attrs={'a': {'target': 'law_suit_instance__update'}}, args=[A('pk')])
+
+    class Meta:
+        sequence = ('selection', 'law_suit_number', 'law_suit', 'instance', 'court_district', 'person_court')
+        model = LawSuitInstance
+        fields = ['selection', 'law_suit_number', 'law_suit', 'instance', 'court_district', 'person_court']
+        # attrs = {"class": "table-striped table-bordered"}
+        empty_text = "Não existem instâncias de processo cadastrados"
