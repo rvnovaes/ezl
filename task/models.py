@@ -1,19 +1,22 @@
+from asyncio import Task
 from enum import Enum
 
 from django.db import models
 from django.utils import timezone
-from django.utils.functional import cached_property
 
 from core.models import Person, Audit
 from lawsuit.models import Movement, TypeMovement
 
 
 class TaskStatus(Enum):
-    ACCEPTED = 0
-    OPEN = 1
-    RETURN = 3
-    DONE = 2
-    REFUSED = 4
+    def __str__(self):
+        return str(self.value)
+
+    ACCEPTED = "Aceita"
+    OPEN = "Aberta"
+    RETURN = "Retorno"
+    DONE = "Cumprida"
+    REFUSED = "Recusada"
 
     # 'Em Aberto' = 1  # Providencias que foram delegadas
     # (1, 'Aceita/Retorno'),
@@ -53,27 +56,22 @@ class Task(Audit):
     def __str__(self):
         return self.legacy_code  # TODO verificar campo para toString
 
-    # @property
-    # def status(self):
-    #     return self.get_status
-
-    @cached_property
+    @property
     def status(self):
-        task = Task.objects.get(id=self.id)
+        acceptance_date, return_date, execution_date, refused_date = Task.objects.filter(id=self.id).values_list(
+            'acceptance_date', 'return_date', 'execution_date', 'refused_date').first()
         # acceptance_date IS NOT NULL AND execution_date IS NULL AND return_date IS NULL
-        if task.acceptance_date is not None and task.execution_date is None and task.return_date is None:
+        if acceptance_date is not None and execution_date is None and return_date is None:
             return TaskStatus.ACCEPTED
         # return_date IS NOT NULL
-        elif task.return_date is not None:
+        elif return_date is not None:
             return TaskStatus.RETURN
         # acceptance_date IS NULL
-        elif task.acceptance_date is None:
+        elif acceptance_date is None:
             return TaskStatus.OPEN
         # execution_date IS NOT NUL
-        elif task.execution_date is not None:
+        elif execution_date is not None:
             return TaskStatus.DONE
         # refused_date IS NOT NULL
-        elif task.refused_date is not None:
+        elif refused_date is not None:
             return TaskStatus.REFUSED
-
-    status.short_description = 'Estado'

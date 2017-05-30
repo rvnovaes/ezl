@@ -1,0 +1,16 @@
+{% if value.name == 'ACCEPTED' %}
+    <i class="material-icons" data-toggle="tooltip" data-placement="bottom" title={{ value }}>assignment_ind</i>
+{% endif %}
+{% if value.name == 'OPEN' %}
+    <i class="material-icons" data-toggle="tooltip" data-placement="bottom" title={{ value }}>assignment</i>
+{% endif %}
+{% if value.name == 'RETURN' %}
+    <i class="material-icons" data-toggle="tooltip" data-placement="bottom" title={{ value }}>assignment_return</i>
+{% endif %}
+{% if value.name == 'DONE' %}
+    <i class="material-icons" data-toggle="tooltip" data-placement="bottom" title={{ value }}>assignment_turned_in</i>
+{% endif %}
+{% if value.name == 'REFUSED' %}
+    <i class="material-icons" data-toggle="tooltip" data-placement="bottom" title={{ value }}>assignment_late</i>
+{% endif %}
+

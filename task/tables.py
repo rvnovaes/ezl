@@ -1,22 +1,20 @@
 import django_tables2 as tables
-from django.utils.html import format_html
 from django_tables2 import A
 
 from core.tables import CheckBoxMaterial
 from task.models import Task
 
 
-class IconColumn(tables.Column):
-    def render(self, value):
-        return format_html(
-            '<i class="material-icons" data-toggle="tooltip" data-placement="bottom" title={} data-original-title="Tooltip on bottom">done</i>',
-            value)
-
-
 class TaskTable(tables.Table):
+    def __init__(self, *args, _overriden_value="Estado", **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.base_columns['status'].verbose_name = _overriden_value
+
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
     legacy_code = tables.LinkColumn(viewname='task_update', attrs={'a': {'target': 'task_update'}}, args=[A('pk')])
-    status = IconColumn('status')
+
+    status = tables.TemplateColumn(template_name="task/task_status_column.html")
 
     class Meta:
         model = Task
