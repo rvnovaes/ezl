@@ -46,19 +46,19 @@ class TaskForm(BaseForm):
     delegation_date = forms.DateTimeField(
     )
 
-    acceptance_date = forms.DateTimeField(
-    )
+    acceptance_date = forms.DateTimeField(required=False
+                                          )
 
-    first_deadline_date = forms.DateTimeField(
-    )
+    first_deadline_date = forms.DateTimeField(required=False
+                                              )
 
-    second_deadline_date = forms.DateTimeField(
-    )
+    second_deadline_date = forms.DateTimeField(required=False
+                                               )
 
-    execution_date = forms.DateTimeField(
-    )
+    execution_date = forms.DateTimeField(required=False
+                                         )
 
-    return_date = forms.DateTimeField(
-    )
-    refused_date = forms.DateTimeField(
-    )
+    return_date = forms.DateTimeField(required=False
+                                      )
+    refused_date = forms.DateTimeField(required=False
+                                       )
