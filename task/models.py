@@ -12,11 +12,11 @@ class TaskStatus(Enum):
     def __str__(self):
         return str(self.value)
 
-    ACCEPTED = "Aceita"
-    OPEN = "Aberta"
-    RETURN = "Retorno"
-    DONE = "Cumprida"
-    REFUSED = "Recusada"
+    ACCEPTED = u"Aceita"
+    OPEN = u"Em Aberto"
+    RETURN = u"Retorno"
+    DONE = u"Cumprida"
+    REFUSED = u"Recusada"
 
     # 'Em Aberto' = 1  # Providencias que foram delegadas
     # (1, 'Aceita/Retorno'),

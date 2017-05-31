@@ -136,7 +136,7 @@ class CourtDistrictForm(BaseForm):
 
     state = forms.ModelChoiceField(
         queryset=State.objects.filter(active=True),
-        empty_label=u"Selecione..."
+        empty_label=u"Selecione"
     )
 
 

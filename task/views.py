@@ -50,3 +50,5 @@ class TaskDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
         task_id = int(task.id)
         Task.objects.filter(id=task_id).update(active=False)
         return HttpResponseRedirect(self.success_url)
+
+# class DashboardView(TemplateView):
