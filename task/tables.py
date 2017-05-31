@@ -24,4 +24,21 @@ class TaskTable(tables.Table):
                   'acceptance_date', 'first_deadline_date', 'second_deadline_date', 'execution_date', 'return_date',
                   'refused_date']
         # attrs = {"class": "table-striped table-bordered"}
-        empty_text = "Não existem providências cadastrados"
+        empty_text = "Não existem providências cadastradas"
+
+
+class DashboardStatusTable(tables.Table):
+    def __init__(self, *args, service="Serviço", client="Cliente", legacy_code="Número", title="tabela", **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.base_columns['service'].verbose_name = service
+        self.base_columns['client'].verbose_name = client
+        self.base_columns['legacy_code'].verbose_name = legacy_code
+        self.title = title
+
+    legacy_code = tables.LinkColumn(viewname='task_detail', attrs={'a': {'target': 'task_detail'}}, args=[A('pk')])
+
+    class Meta:
+        model = Task
+        fields = ['legacy_code', 'service', 'first_deadline_date', 'client']
+        empty_text = "Não existem providências a serem exibidas"

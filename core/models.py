@@ -73,7 +73,7 @@ class Person(Audit):
     legal_name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Razão social/nome completo")
     name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Nome Fantasia/Apelido")
     is_lawyer = models.BooleanField(null=False, default=False, verbose_name="É Advogado?")
-    is_corresponding = models.BooleanField(null=False, default=False, verbose_name="É Correspondente?")
+    is_correspondent = models.BooleanField(null=False, default=False, verbose_name="É Correspondente?")
     is_court = models.BooleanField(null=False, default=False, verbose_name="É Tribunal?")
     legal_type = models.CharField(max_length=1, choices=LEGAL_TYPE_CHOICES, verbose_name="Tipo")
     cpf_cnpj = models.CharField(max_length=255, blank=True, verbose_name="CPF/CNPJ")

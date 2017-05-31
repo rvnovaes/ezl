@@ -71,7 +71,7 @@ class ContactMechanismForm(ModelForm, forms.Form):
 class PersonForm(BaseForm, forms.Form):
     class Meta:
         model = Person
-        fields = ['legal_name', 'name', 'is_lawyer', 'is_corresponding', 'is_court', 'legal_type', 'cpf_cnpj',
+        fields = ['legal_name', 'name', 'is_lawyer', "is_correspondent", 'is_court', 'legal_type', 'cpf_cnpj',
                   'auth_user']
 
     legal_name = forms.CharField(
@@ -88,7 +88,7 @@ class PersonForm(BaseForm, forms.Form):
         required=False,
     )
 
-    is_corresponding = CustomBooleanField(
+    is_correspondent = CustomBooleanField(
         required=False,
     )
 

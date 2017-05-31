@@ -27,13 +27,13 @@ class TaskForm(BaseForm):
 
     person_asked_by = forms.ModelChoiceField(
         empty_label=u"Selecione...",
-        queryset=Person.objects.filter(active=True, is_corresponding=False)
+        queryset=Person.objects.filter(active=True, is_correspondent=False)
 
     )
 
     person_executed_by = forms.ModelChoiceField(
         empty_label=u"Selecione...",
-        queryset=Person.objects.filter(active=True, is_corresponding=True)
+        queryset=Person.objects.filter(active=True, is_correspondent=True)
 
     )
 

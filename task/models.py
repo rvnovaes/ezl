@@ -75,3 +75,11 @@ class Task(Audit):
         # refused_date IS NOT NULL
         elif refused_date is not None:
             return TaskStatus.REFUSED
+
+    @property
+    def client(self):
+        return Person.objects.all().first()  # TODO implementar reverse lookup para o clinete
+
+    @property
+    def service(self):
+        return "Audiencia"  # TODO implementar reverser lookup para o tipo de movimentacao
