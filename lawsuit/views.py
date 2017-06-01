@@ -14,6 +14,31 @@ from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, Law
 from .models import TypeMovement, Instance, Movement, LawSuit, Folder, CourtDistrict, LawSuitInstance
 from .tables import TypeMovementTable, MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, \
     LawSuitInstanceTable
+from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm
+from .models import TypeMovement, Instance, Movement, LawSuit, Folder, CourtDistrict
+from .tables import TypeMovementTable, MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, InstanceTable
+
+
+class InstanceListView(LoginRequiredMixin, SingleTableView):
+    model = Instance
+    table_class = InstanceTable
+    queryset = Instance.objects.all()
+    ordering = ['-id']
+
+    def get_context_data(self, **kwargs):
+        context = super(InstanceListView, self).get_context_data(**kwargs)
+        context['nav_instance'] = True
+        context['form_name_plural'] = Instance._meta.verbose_name_plural
+        table = InstanceTable(Instance.objects.all().order_by('-pk'))
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        context['table'] = table
+        return context
+
+
+class InstanceCreateView(BaseCustomView, CreateView):
+    model = Instance
+    form_class = InstanceForm
+    success_url = reverse_lazy('instance_list')
 
 
 class InstanceUpdateView(BaseCustomView, UpdateView):
@@ -34,17 +59,6 @@ class InstanceDeleteView(BaseCustomView, DeleteView):
         instance_id = int(instance.id)
         Instance.objects.filter(id=instance_id).update(active=False)
         return HttpResponseRedirect(success_url)
-
-
-class InstanceCreateView(BaseCustomView, CreateView):
-    model = Instance
-    form_class = InstanceForm
-    success_url = reverse_lazy('instance_list')
-
-
-class InstanceListView(ListView):
-    model = Instance
-    queryset = Instance.objects.filter(active=True)
 
 
 class TypeMovementListView(LoginRequiredMixin, SingleTableView):

@@ -1,5 +1,31 @@
 {% extends 'inicial.html' %}
-<form action="" method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Salvar"/>
-</form>
+{#{% load staticfiles %}#}
+{#{% load formset_tags %}#}
+{% block content %}
+    {% include 'core/widgets/messages.html' %}
+    <form action="" method="post">{% csrf_token %}
+        <div class="col-lg-12">
+            <fieldset>
+                {% for field in form %}
+                    <div class="form-group">
+                        <label>
+                            {{ field.label }}{{ field }}
+                        </label>
+                    </div>
+                {% endfor %}
+                <div class="form-row  text-center">
+                    <a class="btn btn-sm btn-raised btn-default"
+                       href="{% url 'instance_list' %}"><i
+                            class="material-icons left">clear</i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
+                            class="material-icons left">done</i>
+                        Salvar
+                    </button>
+                </div>
+            </fieldset>
+        </div>
+
+    </form>
+{% endblock content %}

@@ -20,11 +20,13 @@ class TypeMovement(Audit):
 
 
 class Instance(Audit):
-    name = models.CharField(max_length=255, null=False, blank=False, default="", unique=True)
+    name = models.CharField(verbose_name="Nome", max_length=255, null=False, blank=False, default="", unique=True)
 
     class Meta:
         db_table = "instance"
         ordering = ['-id']
+        verbose_name = "Instância"
+        verbose_name_plural = "Instâncias"
 
     def __str__(self):
         return self.name
