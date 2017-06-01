@@ -10,13 +10,25 @@ LEGAL_TYPE_CHOICES = {
 }
 
 
-class Audit(models.Model):
+class AuditCreate(models.Model):
     create_date = models.DateTimeField()
-    alter_date = models.DateTimeField(blank=True, null=True)
     create_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
                                     related_name='%(class)s_create_user')
+
+    class Meta:
+        abstract = True
+
+
+class AuditAlter(models.Model):
+    alter_date = models.DateTimeField(blank=True, null=True)
     alter_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True,
                                    related_name='%(class)s_alter_user')
+
+    class Meta:
+        abstract = True
+
+
+class Audit(AuditCreate, AuditAlter):
     active = models.BooleanField(default=True, verbose_name='Ativo')
 
     class Meta:
