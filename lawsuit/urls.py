@@ -58,6 +58,6 @@ urlpatterns = [
     url(r'^instancias/listar/$', login_required(views.InstanceListView.as_view()), name='instance_list'),
     url(r'instancias/$', login_required(views.InstanceCreateView.as_view()), name='instance_create'),
     url(r'instancias/(?P<pk>[0-9]+)/$', login_required(views.InstanceUpdateView.as_view()), name='instance_update'),
-    url(r'^instancias/(?P<pk>[0-9]+)/excluir/$', login_required(views.InstanceDeleteView.as_view()),
+    url(r'instancias/excluir$', login_required(views.InstanceDeleteView.as_view()),
         name='instance_delete'),
 ]

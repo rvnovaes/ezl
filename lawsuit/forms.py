@@ -57,6 +57,11 @@ class InstanceForm(BaseForm):
 
     )
 
+    # active = CustomBooleanField(  # forms.BooleanField(
+    #     initial=True,
+    #     required=False,
+    # )
+
 
 class MovementForm(BaseForm):
     class Meta:

@@ -22,6 +22,7 @@ class TypeMovement(Audit):
 class Instance(Audit):
     name = models.CharField(verbose_name="Nome", max_length=255, null=False, blank=False, default="", unique=True)
 
+
     class Meta:
         db_table = "instance"
         ordering = ['-id']

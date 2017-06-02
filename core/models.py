@@ -4,6 +4,7 @@ from django.db import models
 
 # from lawsuit.models import CourtDistrict
 
+#To do: Mudar coluna Active, pois causa conflito na renderização no template.
 LEGAL_TYPE_CHOICES = {
     ('F', 'Física'),
     ('J', 'Jurídica'),

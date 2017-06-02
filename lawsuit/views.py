@@ -38,24 +38,16 @@ class InstanceCreateView(BaseCustomView, CreateView):
     success_url = reverse_lazy('instance_list')
 
 
-class InstanceUpdateView(BaseCustomView, UpdateView):
+class InstanceUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
     model = Instance
     form_class = InstanceForm
     success_url = reverse_lazy('instance_list')
 
 
-class InstanceDeleteView(BaseCustomView, DeleteView):
+class InstanceDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
     model = Instance
     success_url = reverse_lazy('instance_list')
-
-    # Sobrescreve a função Delete da classe DeleteView. Pois a exclusão de um elemento é
-    # Tornar o flag Active = False e não remover a linha
-    def delete(self, request, *args, **kwargs):
-        instance = self.get_object()
-        success_url = self.success_url
-        instance_id = int(instance.id)
-        Instance.objects.filter(id=instance_id).update(active=False)
-        return HttpResponseRedirect(success_url)
+    success_message = delete_success('instâncias')
 
 
 class TypeMovementListView(LoginRequiredMixin, SingleTableView):

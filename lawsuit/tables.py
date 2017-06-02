@@ -2,21 +2,22 @@ import django_tables2 as tables
 from django_tables2 import A
 
 from core.tables import CheckBoxMaterial
-from .models import TypeMovement, Movement, LawSuit, Folder, CourtDistrict, Instance
+from .models import TypeMovement, Movement, LawSuit, Folder, CourtDistrict, Instance, LawSuitInstance
 
 
 class InstanceTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
     name = tables.LinkColumn(viewname='instance_update', attrs={'a': {'target': 'instance_update'}},
                              args=[A('pk')])
+    #action = tables.LinkColumn(text='deletar', verbose_name='Ação', viewname='instance_delete', attrs={'a': {'target':'instance_delete'}},
+    #                           args=[A('pk')])
 
     class Meta:
         sequence = ('selection', 'name')
         model = Instance
         fields = ['name']
-        attrs = {"class": "table-striped table-bordered"}
+        attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existem instâncias cadastradas"
-from .models import TypeMovement, Movement, LawSuit, Folder, CourtDistrict, LawSuitInstance
 
 
 class TypeMovementTable(tables.Table):
