@@ -53,7 +53,13 @@ class BaseCustomView(FormView):
         else:
             form.instance.alter_date = timezone.now()
             form.instance.alter_user = user
-            form.instance.active = not form.instance.inactive
+
+            if form.cleaned_data['is_inactive'] == True:
+                form.instance.active = False
+
+            else:
+                form.instance.active = True
+
             form.save()
         super(BaseCustomView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
