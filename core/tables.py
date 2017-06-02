@@ -23,7 +23,7 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         attrs = AttributeDict(default, **(specific or general or {}))
         attrs['selectable'] = True
         return mark_safe(
-            '<div class="checkbox"><label><input %s name="selection" onclick="toggle(this)"/></label></div>'
+            '<div class="checkbox"><label><input %s id="selection_header"  onclick="toggle(this)"/></label></div>'
             % attrs.as_html())
 
     def render(self, value, bound_column, record):
@@ -40,9 +40,10 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         general = self.attrs.get('input')
         specific = self.attrs.get('td__input')
         attrs = AttributeDict(default, **(specific or general or {}))
+        attrs['id'] = record.id
         return mark_safe('<div class="checkbox"><label><input name="selection"'
-                         ' type="checkbox" value="{{ record.pk }}" />'
-                         '</label></div>')
+                         ' type="checkbox" %s onclick="showDeleteButton(this)"/>'
+                         '</label></div>' % attrs.as_html())
 
 
 class PersonTable(tables.Table):

@@ -50,8 +50,9 @@ urlpatterns = [
     url(r'^tipo-movimentacao/$', login_required(views.TypeMovementCreateView.as_view()), name='type_movement_add'),
     url(r'^tipo-movimentacao/(?P<pk>[0-9]+)/$', login_required(views.TypeMovementUpdateView.as_view()),
         name='type_movement_update'),
-    url(r'^tipo-movimentacao/(?P<pk>[0-9]+)/excluir$', login_required(views.TypeMovementDeleteView.as_view()),
+    url(r'^tipo-movimentacao/excluir$', login_required(views.TypeMovementDeleteView.as_view()),
         name='type_movement_delete'),
+    # url(r'^tipo-movimentacao/excluir$', login_required(views.typemovement_delete_by_pks),name='type_movement_delete'),
 
     # Intancias
     url(r'^instancias/listar/$', login_required(views.InstanceListView.as_view()), name='instance_list'),

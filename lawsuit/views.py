@@ -4,18 +4,15 @@ from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
 # project imports
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views.generic.list import ListView
 from django_tables2 import RequestConfig, SingleTableView
 
-from core.messages import new_success, update_success
-from core.views import BaseCustomView
-from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm, \
-    LawSuitInstanceForm
-from .models import TypeMovement, Instance, Movement, LawSuit, Folder, CourtDistrict, LawSuitInstance
-from .tables import TypeMovementTable, MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, \
-    LawSuitInstanceTable
+from core.messages import new_success, update_success, delete_success
+from core.views import BaseCustomView, MultiDeleteViewMixin
+from .forms import LawSuitInstanceForm
 from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm
+from .models import LawSuitInstance
 from .models import TypeMovement, Instance, Movement, LawSuit, Folder, CourtDistrict
+from .tables import LawSuitInstanceTable
 from .tables import TypeMovementTable, MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, InstanceTable
 
 
@@ -92,15 +89,17 @@ class TypeMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustom
     success_message = update_success
 
 
-class TypeMovementDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
+def typemovement_delete_by_pks(request):
+    if request.method == "POST":
+        pks = request.POST.getlist("selection")
+        selected_objects = TypeMovement.objects.filter(pk__in=pks)
+    return HttpResponseRedirect(reverse_lazy('type_movement_list'))
+
+
+class TypeMovementDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
     model = TypeMovement
     success_url = reverse_lazy('type_movement_list')
-
-    def delete(self, request, *args, **kwargs):
-        typemovement = self.get_object()
-        typemovement_id = int(typemovement.id)
-        TypeMovement.objects.filter(id=typemovement_id).update(active=False)
-        return HttpResponseRedirect(self.success_url)
+    success_message = delete_success(model._meta.verbose_name_plural)
 
 
 class MovementListView(LoginRequiredMixin, SingleTableView):

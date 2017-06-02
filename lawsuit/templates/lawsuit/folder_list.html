@@ -33,7 +33,7 @@
                                             href="{% querystring table.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header|title }}</a>
                                     </th>
                                 {% else %}
-                                    {% if column.selectable %}
+                                    {% if not column.attrs.selectable == 'True' %}
                                         <th {{ column.attrs.th.as_html }}>{{ column.header }}</th>
                                     {% else %}
                                         <th {{ column.attrs.th.as_html }}>{{ column.header|title }}</th>

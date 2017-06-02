@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -57,7 +58,18 @@ class BaseCustomView(FormView):
         return HttpResponseRedirect(self.success_url)
 
 
-# http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
+class MultiDeleteViewMixin(DeleteView):
+    success_message = None
+
+    def delete(self, request, *args, **kwargs):
+        if request.method == "POST":
+            pks = request.POST.getlist("selection")
+            self.model.objects.filter(pk__in=pks).delete()
+            messages.success(self.request, self.success_message)
+        return HttpResponseRedirect(
+            self.success_url)  # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
+
+
 @method_decorator(login_required, name='dispatch')
 class PersonListView(SingleTableView):
     model = Person
