@@ -46,7 +46,7 @@
 
             <div class="panel panel-primary">
             <div class="panel-heading">
-                <div class="panel-title form-row">{{ table.title }} ({{ table|length }})</div>
+                <div class="panel-title form-row">{{ table.title }} ({{ table.length }})</div>
             </div>
             <div class="panel-body">
                 <div class="table-responsive">
@@ -97,10 +97,6 @@
                         {% bootstrap_pagination table.page url=request.get_full_path %}
                     {% endblock pagination %}
                 {% endif %}
-                {#            <div class="text-right" style="margin: auto">#}
-                {#                <a class="btn btn-fab btn-primary" href="{% url 'person_add' %}"><i#}
-                {#                        class="material-icons">add</i></a>#}
-                {#            </div>#}
             </div>
         {% endfor %}
     </div>

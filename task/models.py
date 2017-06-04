@@ -5,7 +5,7 @@ from django.db import models
 from django.utils import timezone
 
 from core.models import Person, Audit
-from lawsuit.models import Movement, TypeMovement
+from lawsuit.models import Movement, TypeMovement, Folder
 
 
 class TaskStatus(Enum):
@@ -78,8 +78,11 @@ class Task(Audit):
 
     @property
     def client(self):
-        return Person.objects.all().first()  # TODO implementar reverse lookup para o clinete
+        mv = Movement.objects.get(task__exact=self.id).id
+        client = Folder.objects.get(lawsuit__lawsuitinstance__movement__exact=mv).person_customer
+        return client
 
     @property
     def service(self):
-        return "Audiencia"  # TODO implementar reverser lookup para o tipo de movimentacao
+        type_movement = TypeMovement.objects.get(movement__task=self.id).name
+        return type_movement

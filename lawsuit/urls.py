@@ -10,7 +10,7 @@ urlpatterns = [
     url(r'^comarcas/$', login_required(views.CourtDistrictCreateView.as_view()), name='courtdistrict_add'),
     url(r'^comarcas/(?P<pk>[0-9]+)/$', login_required(views.CourtDistrictUpdateView.as_view()),
         name='courtdistrict_update'),
-    url(r'^comarcas/(?P<pk>[0-9]+)/excluir$', login_required(views.CourtDistrictDeleteView.as_view()),
+    url(r'^comarcas/excluir$', login_required(views.CourtDistrictDeleteView.as_view()),
         name='courtdistrict_delete'),
 
     # Pastas
@@ -18,7 +18,7 @@ urlpatterns = [
     url(r'^pastas/$', login_required(login_required(views.FolderCreateView.as_view())), name='folder_add'),
     url(r'^pastas/(?P<pk>[0-9]+)/$', login_required(login_required(views.FolderUpdateView.as_view())),
         name='folder_update'),
-    url(r'^pastas/(?P<pk>[0-9]+)/excluir$', login_required(login_required(views.FolderDeleteView.as_view())),
+    url(r'^pastas/excluir$', login_required(login_required(views.FolderDeleteView.as_view())),
         name='folder_delete'),
 
     # instancia processo
@@ -28,20 +28,20 @@ urlpatterns = [
         name='lawsuitinstance_add'),
     url(r'^processos-instancias/(?P<pk>[0-9]+)/$', login_required(views.LawSuitInstanceUpdateView.as_view()),
         name='lawsuitinstance_update'),
-    url(r'^processos-instancias/(?P<pk>[0-9]+)/excluir$', login_required(views.LawSuitInstanceDeleteView.as_view()),
-        name='movement_delete'),
+    url(r'^processos-instancias/excluir$', login_required(views.LawSuitInstanceDeleteView.as_view()),
+        name='lawsuitinstance_delete'),
     # Processos
     url(r'^processos/listar/$', login_required(views.LawSuitListView.as_view()), name='lawsuit_list'),
     url(r'^processos/$', login_required(views.LawSuitCreateView.as_view()), name='lawsuit_add'),
     url(r'^processos/(?P<pk>[0-9]+)/$', login_required(views.LawSuitUpdateView.as_view()), name='lawsuit_update'),
-    url(r'^processos/(?P<pk>[0-9]+)/excluir$', login_required(views.LawSuitDeleteView.as_view()),
-        name='movement_delete'),
+    url(r'^processos/excluir$', login_required(views.LawSuitDeleteView.as_view()),
+        name='lawsuit_delete'),
 
     # Movimentacao
     url(r'^movimentacao/listar/$', login_required(views.MovementListView.as_view()), name='movement_list'),
     url(r'^movimentacao/$', login_required(views.MovementCreateView.as_view()), name='movement_add'),
     url(r'^movimentacao/(?P<pk>[0-9]+)/$', login_required(views.MovementUpdateView.as_view()), name='movement_update'),
-    url(r'^movimentacao/(?P<pk>[0-9]+)/excluir$', login_required(views.MovementDeleteView.as_view()),
+    url(r'^movimentacao/excluir$', login_required(views.MovementDeleteView.as_view()),
         name='movement_delete'),
 
     # Tipo de movimentacao

@@ -28,15 +28,17 @@ class TaskTable(tables.Table):
 
 
 class DashboardStatusTable(tables.Table):
-    def __init__(self, *args, service="Serviço", client="Cliente", legacy_code="Número", title="tabela", **kwargs):
+    def __init__(self, *args, length='0', service="Serviço", client="Cliente", legacy_code="Número", title="tabela",
+                 **kwargs):
         super().__init__(*args, **kwargs)
 
         self.base_columns['service'].verbose_name = service
         self.base_columns['client'].verbose_name = client
         self.base_columns['legacy_code'].verbose_name = legacy_code
         self.title = title
+        self.length = self.rows.__len__()
 
-    legacy_code = tables.LinkColumn(viewname='task_detail', attrs={'a': {'target': 'task_detail'}}, args=[A('pk')])
+    legacy_code = tables.LinkColumn(viewname='task_update', attrs={'a': {'target': 'task_update'}}, args=[A('pk')])
 
     class Meta:
         model = Task

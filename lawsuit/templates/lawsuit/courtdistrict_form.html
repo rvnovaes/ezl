@@ -1,10 +1,12 @@
 {% extends 'inicial.html' %}
 {#{% load staticfiles %}#}
 {#{% load formset_tags %}#}
+
 {% block content %}
     {% include 'core/widgets/messages.html' %}
+
     <form action="" method="post">{% csrf_token %}
-        <div class="col-lg-12">
+        <div class="col-lg-12 ">
             <fieldset>
                 {#                <div class="form-row">#}
                 {#            <div class="panel panel-primary">#}
@@ -30,8 +32,10 @@
                         Salvar
                     </button>
                 </div>
+                {#                </div>#}
             </fieldset>
         </div>
 
     </form>
+
 {% endblock content %}

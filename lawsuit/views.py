@@ -1,13 +1,12 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponseRedirect
 # project imports
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView
 from django_tables2 import RequestConfig, SingleTableView
 
 from core.messages import new_success, update_success, delete_success
-from core.views import BaseCustomView, MultiDeleteViewMixin
+from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin
 from .forms import LawSuitInstanceForm
 from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm
 from .models import LawSuitInstance
@@ -50,21 +49,19 @@ class InstanceDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteVie
     success_message = delete_success('instâncias')
 
 
-class TypeMovementListView(LoginRequiredMixin, SingleTableView):
+class TypeMovementListView(LoginRequiredMixin, SingleTableViewMixin):
     model = TypeMovement
     table_class = TypeMovementTable
-    queryset = TypeMovement.objects.all()
-    ordering = ['-id']
 
-    def get_context_data(self, **kwargs):
-        context = super(TypeMovementListView, self).get_context_data(**kwargs)
-        context['nav_type_movement'] = True
-        context['form_name'] = TypeMovement._meta.verbose_name
-        context['form_name_plural'] = TypeMovement._meta.verbose_name_plural
-        table = TypeMovementTable(TypeMovement.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(TypeMovementListView, self).get_context_data(**kwargs)
+    #     context['nav_type_movement'] = True
+    #     context['form_name'] = TypeMovement._meta.verbose_name
+    #     context['form_name_plural'] = TypeMovement._meta.verbose_name_plural
+    #     table = TypeMovementTable(TypeMovement.objects.all().order_by('-pk'))
+    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+    #     context['table'] = table
+    #     return context
 
 
 class TypeMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
@@ -81,32 +78,23 @@ class TypeMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustom
     success_message = update_success
 
 
-def typemovement_delete_by_pks(request):
-    if request.method == "POST":
-        pks = request.POST.getlist("selection")
-        selected_objects = TypeMovement.objects.filter(pk__in=pks)
-    return HttpResponseRedirect(reverse_lazy('type_movement_list'))
-
-
 class TypeMovementDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
     model = TypeMovement
     success_url = reverse_lazy('type_movement_list')
     success_message = delete_success(model._meta.verbose_name_plural)
 
 
-class MovementListView(LoginRequiredMixin, SingleTableView):
+class MovementListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Movement
     table_class = MovementTable
-    queryset = Movement.objects.all()
-    ordering = ['-id']
 
-    def get_context_data(self, **kwargs):
-        context = super(MovementListView, self).get_context_data(**kwargs)
-        context['nav_movement'] = True
-        table = MovementTable(Movement.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(MovementListView, self).get_context_data(**kwargs)
+    #     context['nav_movement'] = True
+    #     table = MovementTable(Movement.objects.all().order_by('-pk'))
+    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+    #     context['table'] = table
+    #     return context
 
 
 class MovementCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
@@ -123,30 +111,15 @@ class MovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView
     success_message = update_success
 
 
-class MovementDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
+class MovementDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
     model = Movement
     success_url = reverse_lazy('movement_list')
-
-    def delete(self, request, *args, **kwargs):
-        movement = self.get_object()
-        movement_id = int(movement.id)
-        Movement.objects.filter(id=movement_id).update(active=False)
-        return HttpResponseRedirect(self.success_url)
+    success_message = delete_success(model._meta.verbose_name_plural)
 
 
-class FolderListView(LoginRequiredMixin, SingleTableView):
+class FolderListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Folder
-    queryset = Folder.objects.all()  # filter(active=True)
-    ordering = ['id']
     table_class = FolderTable
-
-    def get_context_data(self, **kwargs):
-        context = super(FolderListView, self).get_context_data(**kwargs)
-        context['nav_folder'] = True
-        table = FolderTable(Folder.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
-        return context
 
 
 class FolderCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
@@ -163,30 +136,23 @@ class FolderUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, 
     success_message = update_success
 
 
-class FolderDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
+class FolderDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
     model = Folder
     success_url = reverse_lazy('folder-list')
-
-    def delete(self, request, *args, **kwargs):
-        folder = self.get_object()
-        folder_id = int(folder.id)
-        Movement.objects.filter(id=folder_id).update(active=False)
-        return HttpResponseRedirect(self.success_url)
+    success_message = delete_success(model._meta.verbose_name_plural)
 
 
-class LawSuitListView(LoginRequiredMixin, SingleTableView):
+class LawSuitListView(LoginRequiredMixin, SingleTableViewMixin):
     model = LawSuit
-    queryset = LawSuit.objects.all()
-    ordering = ['-id']
     table_class = LawSuitTable
 
-    def get_context_data(self, **kwargs):
-        context = super(LawSuitListView, self).get_context_data(**kwargs)
-        context['nav_lawsuit'] = True
-        table = LawSuitTable(LawSuit.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(LawSuitListView, self).get_context_data(**kwargs)
+    #     context['nav_lawsuit'] = True
+    #     table = LawSuitTable(LawSuit.objects.all().order_by('-pk'))
+    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+    #     context['table'] = table
+    #     return context
 
 
 class LawSuitCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
@@ -203,30 +169,23 @@ class LawSuitUpdateView(LoginRequiredMixin, BaseCustomView, UpdateView):
     success_message = update_success
 
 
-class LawSuitDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
+class LawSuitDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
     model = LawSuit
     success_url = reverse_lazy('lawsuit_list')
-
-    def delete(self, request, *args, **kwargs):
-        lawsuit = self.get_object()
-        lawsuit_id = int(lawsuit.id)
-        LawSuit.objects.filter(id=lawsuit_id).update(active=False)
-        return HttpResponseRedirect(self.success_url)
+    success_message = delete_success(model._meta.verbose_name_plural)
 
 
-class CourtDistrictListView(LoginRequiredMixin, SingleTableView):
+class CourtDistrictListView(LoginRequiredMixin, SingleTableViewMixin):
     model = CourtDistrict
     table_class = CourtDistrictTable
-    queryset = CourtDistrict.objects.all()
-    ordering = ['id']
 
-    def get_context_data(self, **kwargs):
-        context = super(CourtDistrictListView, self).get_context_data(**kwargs)
-        context['nav_courtdistrict'] = True
-        table = CourtDistrictTable(CourtDistrict.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(CourtDistrictListView, self).get_context_data(**kwargs)
+    #     context['nav_courtdistrict'] = True
+    #     table = CourtDistrictTable(CourtDistrict.objects.all().order_by('-pk'))
+    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+    #     context['table'] = table
+    #     return context
 
 
 class CourtDistrictCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
@@ -243,30 +202,23 @@ class CourtDistrictUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCusto
     success_message = update_success
 
 
-class CourtDistrictDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
+class CourtDistrictDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
     model = CourtDistrict
     success_url = reverse_lazy('courtdistrict_list')
-
-    def delete(self, request, *args, **kwargs):
-        courtdistrict = self.get_object()
-        courtdistrict_id = int(courtdistrict.id)
-        CourtDistrict.objects.filter(id=courtdistrict_id).update(active=False)
-        return HttpResponseRedirect(self.success_url)
+    success_message = delete_success(model._meta.verbose_name_plural)
 
 
-class LawSuitInstanceListView(LoginRequiredMixin, SingleTableView):
+class LawSuitInstanceListView(LoginRequiredMixin, SingleTableViewMixin):
     model = LawSuitInstance
     table_class = LawSuitInstanceTable
-    queryset = LawSuitInstance.objects.all()
-    ordering = ['id']
 
-    def get_context_data(self, **kwargs):
-        context = super(LawSuitInstanceListView, self).get_context_data(**kwargs)
-        context['nav_lawsuitinstance'] = True
-        table = LawSuitInstanceTable(LawSuitInstance.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(LawSuitInstanceListView, self).get_context_data(**kwargs)
+    #     context['nav_lawsuitinstance'] = True
+    #     table = LawSuitInstanceTable(LawSuitInstance.objects.all().order_by('-pk'))
+    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+    #     context['table'] = table
+    #     return context
 
 
 class LawSuitInstanceCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
@@ -283,12 +235,12 @@ class LawSuitInstanceUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCus
     success_message = update_success
 
 
-class LawSuitInstanceDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
+class LawSuitInstanceDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
     model = LawSuitInstance
     success_url = reverse_lazy('lawsuitinstance_list')
-
-    def delete(self, request, *args, **kwargs):
-        law_suit_instance = self.get_object()
-        law_suit_instance_id = int(law_suit_instance.id)
-        LawSuitInstance.objects.filter(id=law_suit_instance_id).update(active=False)
-        return HttpResponseRedirect(self.success_url)
+    success_message = delete_success(model._meta.verbose_name_plural)
+    # def delete(self, request, *args, **kwargs):
+    #     law_suit_instance = self.get_object()
+    #     law_suit_instance_id = int(law_suit_instance.id)
+    #     LawSuitInstance.objects.filter(id=law_suit_instance_id).update(active=False)
+    #     return HttpResponseRedirect(self.success_url)

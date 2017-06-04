@@ -27,7 +27,7 @@ class TypeMovementTable(tables.Table):
                              args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'legacy_code', 'name', 'uses_wo')
+        sequence = ('selection', 'name', 'legacy_code', 'uses_wo')
         model = TypeMovement
         fields = ['selection', 'name', 'legacy_code', 'uses_wo']
         attrs = {"class": "table-striped table-bordered"}
@@ -56,7 +56,7 @@ class FolderTable(tables.Table):
     class Meta:
         sequence = ('selection', 'legacy_code', 'person_customer', '...')
         model = Folder
-        fields = ['selection', 'legacy_code', 'person_customer']
+        fields = ['selection', 'legacy_code', 'person_customer', 'active']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem pastas cadastradas"
 
@@ -75,7 +75,8 @@ class LawSuitTable(tables.Table):
 class CourtDistrictTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
-    name = tables.LinkColumn(viewname='folder_update', attrs={'a': {'target': 'courtdistrict_update'}}, args=[A('pk')])
+    name = tables.LinkColumn(viewname='courtdistrict_update', attrs={'a': {'target': 'courtdistrict_update'}},
+                             args=[A('pk')])
 
     class Meta:
         sequence = ('selection', 'name', 'state')
@@ -87,8 +88,8 @@ class CourtDistrictTable(tables.Table):
 
 class LawSuitInstanceTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
-    law_suit_number = tables.LinkColumn(viewname='law_suit_instance_update',
-                                        attrs={'a': {'target': 'law_suit_instance__update'}}, args=[A('pk')])
+    law_suit_number = tables.LinkColumn(viewname='lawsuitinstance_update',
+                                        attrs={'a': {'target': 'lawsuitinstance_update'}}, args=[A('pk')])
 
     class Meta:
         sequence = ('selection', 'law_suit_number', 'law_suit', 'instance', 'court_district', 'person_court')

@@ -53,16 +53,21 @@ class BaseCustomView(FormView):
         else:
             form.instance.alter_date = timezone.now()
             form.instance.alter_user = user
-
-            if form.cleaned_data['is_inactive'] == True:
-                form.instance.active = False
-
-            else:
-                form.instance.active = True
-
             form.save()
         super(BaseCustomView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
+
+
+class SingleTableViewMixin(SingleTableView):
+    def get_context_data(self, **kwargs):
+        context = super(SingleTableViewMixin, self).get_context_data(**kwargs)
+        context['nav_' + self.model._meta.verbose_name] = True
+        context['form_name'] = self.model._meta.verbose_name
+        context['form_name_plural'] = self.model._meta.verbose_name_plural
+        table = self.table_class(self.model.objects.all().order_by('-pk'))
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        context['table'] = table
+        return context
 
 
 class MultiDeleteViewMixin(DeleteView):
