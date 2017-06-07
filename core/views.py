@@ -53,7 +53,14 @@ class BaseCustomView(FormView):
         else:
             form.instance.alter_date = timezone.now()
             form.instance.alter_user = user
-            form.save()
+
+            # if form.cleaned_data['is_inactive']:
+            #     form.instance.active = False
+            #
+            # else:
+            #     form.instance.active = True
+
+        form.save()
         super(BaseCustomView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
@@ -86,7 +93,7 @@ class MultiDeleteViewMixin(DeleteView):
 class PersonListView(SingleTableView):
     model = Person
     table_class = PersonTable
-    queryset = Person.objects.filter(active=True)
+    queryset = Person.objects.filter(is_active=True)
     ordering = ['id']
 
     def get_context_data(self, **kwargs):
@@ -123,5 +130,5 @@ class PersonDeleteView(BaseCustomView, DeleteView):
         person = self.get_object()
         success_url = self.get_success_url()
         person_id = int(person.id)
-        Person.objects.filter(id=person_id).update(active=False)
+        Person.objects.filter(id=person_id).update(is_active=False)
         return HttpResponseRedirect(success_url)

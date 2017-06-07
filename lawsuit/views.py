@@ -36,11 +36,41 @@ class InstanceCreateView(BaseCustomView, CreateView):
     form_class = InstanceForm
     success_url = reverse_lazy('instance_list')
 
+    def __init__(self, *args, **kwargs):
+        super(InstanceCreateView, self).__init__(*args, **kwargs)
+        # self.form_class.declared_fields['active'].class = 'hidden'
+
+    # def get_initial(self):
+    #     super(InstanceCreateView, self).get_initial()
+    #     if self.object == None:
+    #         self.form_class.declared_fields['is_inactive'].disabled = True
+    #
+    #     return self.initial.copy()
+
 
 class InstanceUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
     model = Instance
     form_class = InstanceForm
     success_url = reverse_lazy('instance_list')
+
+    def __init__(self, *args, **kwargs):
+        super(InstanceUpdateView, self).__init__(*args, **kwargs)
+        self.form_class.declared_fields['is_active'].disabled = False
+
+    def get_initial(self):
+        super(InstanceUpdateView, self).get_initial()
+        self.initial['is_active'] = not self.object.is_active
+        return self.initial.copy()
+
+    # def get(self, request, *args, **kwargs):
+    #     self.object = self.get_object()
+    #     self.object.active = False
+    #     return super(InstanceUpdateView, self).get(request, *args, **kwargs)
+
+    # def __init__(self, *args, **kwargs):
+    #     super(InstanceUpdateView, self).__init__(*args, **kwargs)
+    #     self.initial['is_inactive'] = True
+    #     #self.initial['is_inactive'].disabled = True
 
 
 class InstanceDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):

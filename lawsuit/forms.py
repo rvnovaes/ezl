@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import FieldDoesNotExist
 from django.forms import ModelForm
 from django.forms.models import fields_for_model
 
@@ -19,14 +20,20 @@ class BaseForm(ModelForm):
                 field.widget.attrs['style'] = 'width: 100%; display: table-cell; '
 
             # Preenche o o label de cada field do form de acordo com o verbose_name preenchido no modelo
-            field.label = self._meta.model._meta.get_field(field_name).verbose_name
+
+            try:
+                field.label = self._meta.model._meta.get_field(field_name).verbose_name
+            except FieldDoesNotExist:
+                pass
+
+
 
 
 class TypeMovementForm(BaseForm):
     class Meta:
         model = TypeMovement
         fields = fields_for_model(TypeMovement,
-                                  exclude={'active', 'create_user', 'alter_date', 'create_date', 'alter_user'})
+                                  exclude={'is_active', 'create_user', 'alter_date', 'create_date', 'alter_user'})
 
     name = forms.CharField(
         max_length=255,
@@ -47,20 +54,23 @@ class TypeMovementForm(BaseForm):
 
 
 class InstanceForm(BaseForm):
+
     class Meta:
         model = Instance
-        fields = ['name']
+        #fields = ['name', 'is_inactive']
+        fields = ['name', 'is_active']
 
     name = forms.CharField(
         label=u"Nome da Instância",
         max_length=255,
 
-    )
+    ),
 
-    # active = CustomBooleanField(  # forms.BooleanField(
-    #     initial=True,
-    #     required=False,
-    # )
+    is_active = CustomBooleanField(
+        label=u"Ativo",
+        required=False,
+
+    )
 
 
 class MovementForm(BaseForm):
@@ -75,17 +85,17 @@ class MovementForm(BaseForm):
     )
 
     person_lawyer = forms.ModelChoiceField(
-        queryset=Person.objects.filter(active=True, is_lawyer=True),
+        queryset=Person.objects.filter(is_active=True, is_lawyer=True),
         empty_label=u"Selecione...",
     )
 
     law_suit_instance = forms.ModelChoiceField(
-        queryset=LawSuitInstance.objects.filter(active=True),
+        queryset=LawSuitInstance.objects.filter(is_active=True),
         empty_label=u"Selecione...",
     )
 
     type_movement = forms.ModelChoiceField(
-        queryset=TypeMovement.objects.filter(active=True),
+        queryset=TypeMovement.objects.filter(is_active=True),
         empty_label=u"Selecione...",
     )
 
@@ -98,7 +108,7 @@ class FolderForm(BaseForm):
     class Meta:
         model = Folder
         fields = fields_for_model(Folder,
-                                  exclude={'active', 'create_user', 'alter_date', 'create_date', 'alter_user'})
+                                  exclude={'is_active', 'create_user', 'alter_date', 'create_date', 'alter_user'})
 
     legacy_code = forms.CharField(
         max_length=255,
@@ -106,11 +116,11 @@ class FolderForm(BaseForm):
     )
 
     person_customer = forms.ModelChoiceField(
-        queryset=Person.objects.filter(active=True),
+        queryset=Person.objects.filter(is_active=True),
         empty_label=u"Selecione...",
     )
 
-    active = CustomBooleanField(  # forms.BooleanField(
+    is_active = CustomBooleanField(  # forms.BooleanField(
         initial=True,
         required=False,
     )
@@ -120,16 +130,16 @@ class LawSuitForm(BaseForm):
     class Meta:
         model = LawSuit
         fields = fields_for_model(LawSuit,
-                                  exclude={'active', 'create_user', 'alter_date', 'create_date', 'alter_user'})
+                                  exclude={'is_active', 'create_user', 'alter_date', 'create_date', 'alter_user'})
 
     person_lawyer = forms.ModelChoiceField(
         empty_label=u"Selecione",
-        queryset=Person.objects.filter(active=True, is_lawyer=True)
+        queryset=Person.objects.filter(is_active=True, is_lawyer=True)
     )
 
     folder = forms.ModelChoiceField(
         empty_label=u"Selecione",
-        queryset=Folder.objects.filter(active=True)
+        queryset=Folder.objects.filter(is_active=True)
     )
 
 
@@ -137,10 +147,10 @@ class CourtDistrictForm(BaseForm):
     class Meta:
         model = CourtDistrict
         fields = fields_for_model(CourtDistrict,
-                                  exclude=['active', 'create_user', 'alter_date', 'create_date', 'alter_user'])
+                                  exclude=['is_active', 'create_user', 'alter_date', 'create_date', 'alter_user'])
 
     state = forms.ModelChoiceField(
-        queryset=State.objects.filter(active=True),
+        queryset=State.objects.filter(is_active=True),
         empty_label=u"Selecione"
     )
 
@@ -149,20 +159,20 @@ class LawSuitInstanceForm(BaseForm):
     class Meta:
         model = LawSuitInstance
         fields = fields_for_model(LawSuitInstance,
-                                  exclude=['active', 'create_user', 'alter_date', 'create_date', 'alter_user'])
+                                  exclude=['is_active', 'create_user', 'alter_date', 'create_date', 'alter_user'])
 
         law_suit_number = forms.CharField(max_length=255, required=True)
 
-        law_suit = forms.ModelChoiceField(queryset=LawSuit.objects.filter(active=True),
+        law_suit = forms.ModelChoiceField(queryset=LawSuit.objects.filter(is_active=True),
                                           empty_label=u"Selecione")
 
-        instance = forms.ModelChoiceField(queryset=Instance.objects.filter(active=True),
+        instance = forms.ModelChoiceField(queryset=Instance.objects.filter(is_active=True),
                                           empty_label=u"Selecione")
 
-        court_district = forms.ModelChoiceField(queryset=CourtDistrict.objects.filter(active=True),
+        court_district = forms.ModelChoiceField(queryset=CourtDistrict.objects.filter(is_active=True),
                                                 empty_label=u"Selecione")
 
-        person_court = forms.ModelChoiceField(queryset=Person.objects.filter(active=True),
+        person_court = forms.ModelChoiceField(queryset=Person.objects.filter(is_active=True),
                                               empty_label=u"Selecione")
         legacy_code = forms.CharField(
             max_length=255,

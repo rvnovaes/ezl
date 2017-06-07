@@ -24,13 +24,14 @@ class AuditAlter(models.Model):
     alter_date = models.DateTimeField(blank=True, null=True)
     alter_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True,
                                    related_name='%(class)s_alter_user')
+    is_active = models.BooleanField(null=False, default=True, verbose_name='Ativo')
 
     class Meta:
         abstract = True
 
 
 class Audit(AuditCreate, AuditAlter):
-    active = models.BooleanField(default=True, verbose_name='Ativo')
+    #active = models.BooleanField(default=True, verbose_name='Ativo')
 
     class Meta:
         abstract = True

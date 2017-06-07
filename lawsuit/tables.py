@@ -10,12 +10,12 @@ class InstanceTable(tables.Table):
     name = tables.LinkColumn(viewname='instance_update', attrs={'a': {'target': 'instance_update'}},
                              args=[A('pk')])
     #action = tables.LinkColumn(text='deletar', verbose_name='Ação', viewname='instance_delete', attrs={'a': {'target':'instance_delete'}},
-    #                           args=[A('pk')])
-
+    #
+    #                            args=[A('pk')])
     class Meta:
-        sequence = ('selection', 'name')
+        sequence = ('selection', 'name', 'is_active')
         model = Instance
-        fields = ['name']
+        fields = ['name', 'is_active']
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existem instâncias cadastradas"
 
@@ -56,7 +56,7 @@ class FolderTable(tables.Table):
     class Meta:
         sequence = ('selection', 'legacy_code', 'person_customer', '...')
         model = Folder
-        fields = ['selection', 'legacy_code', 'person_customer', 'active']
+        fields = ['selection', 'legacy_code', 'person_customer', 'is_active']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem pastas cadastradas"
 
