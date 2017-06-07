@@ -1,7 +1,7 @@
 django==1.11.1
 django-allauth==0.32
 psycopg2==2.7.1
-django-tables2==1.6.1
+django-tables2==1.7.1
 uwsgi==2.0.15
 # Adicionando depencências para a utilização do mecanismo de formsets
 django-extra-views==0.9.0

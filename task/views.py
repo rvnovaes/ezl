@@ -1,6 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, CreateView, UpdateView, TemplateView
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
@@ -44,17 +43,14 @@ class TaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Up
 
 class TaskDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
     model = Task
-    success_url = reverse_lazy('task-list')
-
-    def delete(self, request, *args, **kwargs):
-        task = self.get_object()
-        task_id = int(task.id)
-        Task.objects.filter(id=task_id).update(active=False)
-        return HttpResponseRedirect(self.success_url)
+    success_url = reverse_lazy('task_list')
 
 
 class DashboardView(MultiTableMixin, TemplateView):
     template_name = "task/task_dashboard.html"
+    table_pagination = {
+        'per_page': 5
+    }
 
     def load_task_by_status(self, status, person):
         global data
@@ -74,25 +70,19 @@ class DashboardView(MultiTableMixin, TemplateView):
         else:
             return data.filter(person_asked_by=person.id)
 
-    def config_table(self, table):
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+    def get_tables(self):
 
-    def get_context_data(self, **kwargs):
-        # super(DashboardView, self).get_context_data(**kwargs)
         person = Person.objects.get(auth_user=self.request.user)
+        if person:
+            return_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.RETURN, person), title="Retorno")
+            accepted_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.ACCEPTED, person),
+                                                  title="Aceitas")
+            open_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.OPEN, person), title="Em Aberto")
+            done_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.DONE, person), title="Cumpridas")
+            refused_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.REFUSED, person),
+                                                 title="Recusadas")
 
-        return_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.RETURN, person), title="Retorno")
-        accepted_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.ACCEPTED, person), title="Aceitas")
-        open_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.OPEN, person), title="Abertas")
-        done_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.DONE, person), title="Cumpridas")
-        refused_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.REFUSED, person), title="Recusadas")
-
-        self.config_table(return_table)
-        self.config_table(accepted_table)
-        self.config_table(open_table)
-        self.config_table(done_table)
-        self.config_table(refused_table)
-
-        self.tables = [return_table, accepted_table, open_table, done_table, refused_table]
-        # context['tables'] = tables
-        return super(DashboardView, self).get_context_data(**kwargs)
+            tables = [return_table, accepted_table, open_table, done_table, refused_table]
+        else:
+            tables = None
+        return tables
