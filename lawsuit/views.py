@@ -168,7 +168,7 @@ class FolderUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, 
 
 class FolderDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
     model = Folder
-    success_url = reverse_lazy('folder-list')
+    success_url = reverse_lazy('folder_list')
     success_message = delete_success(model._meta.verbose_name_plural)
 
 

@@ -20,6 +20,11 @@
     line-height: 40px !important;
 }
 
+.alert.alert-error {
+    background-color: #f44336;
+    color: rgba(255, 255, 255, 0.84);
+}
+
 h3{
 
     font-weight: 100 !important;

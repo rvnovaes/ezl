@@ -123,11 +123,16 @@
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                         <h4 class="modal-title"><i class="material-icons">warning</i></h4>
-                        <h4 class="modal-title">Aviso!</h4>
+                        <h4 class="modal-title">Atenção!</h4>
                     </div>
                     <div class="modal-body">
-                        <p>Tem certeza que deseja excluir os registros
-                            de {{ form_name_plural }} selecionados?</p>
+                        {% if on_delete == 'CASCADE' %}
+                            <p>Ao excluir o(s) registro(s) de {{ form_name }} todos os seus vínculos também
+                                serão excluídos! Essa ação é irreversível. Deseja continuar?</p>
+                        {% else %}
+                            <p>Tem certeza que deseja excluir o(s) registro(s)
+                                de {{ form_name }} selecionado(s)? Essa ação é irreversível. Deseja continuar?</p>
+                        {% endif %}
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>

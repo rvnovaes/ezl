@@ -8,19 +8,40 @@
     <form action="" method="post">{% csrf_token %}
         <div class="col-lg-12 ">
             <fieldset>
+                <div class="container">
+                    <div class="row">
+                        {% for field in form %}
+                            <div class="form-group">
+                                <label>
+                                    {{ field.label }}{{ field }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
                 {#                <div class="form-row">#}
                 {#            <div class="panel panel-primary">#}
                 {#                <div class="panel-heading">#}
                 {#                    <h1 class="panel-title text-center">Cadastro de Tipo de Movimentação</h1>#}
                 {#                </div>#}
                 {#                <div class="panel-body">#}
-                {% for field in form %}
-                    <div class="form-group">
-                        <label>
-                            {{ field.label }}{{ field }}
-                        </label>
-                    </div>
-                {% endfor %}
+                {#                {% for field in form %}#}
+                {#                    <div class="form-group">#}
+                {##}
+                {#                        {% if forloop.counter|divisibleby:"2" %}#}
+                {#                            <label>#}
+                {#                                {{ field.label }}{{ field }}#}
+                {#                            </label>#}
+                {#                        {% endif %}#}
+                {#                        {% if not forloop.counter|divisibleby:"2" %}#}
+                {#                            <label>#}
+                {#                                {{ field.label }}{{ field }}#}
+                {#                            </label>#}
+                {#                        {% endif %}#}
+                {##}
+                {##}
+                {#                    </div>#}
+                {#                {% endfor %}#}
                 <div class="form-row  text-center">
                     <a class="btn btn-sm btn-raised btn-default"
                        href="{% url 'folder_list' %}"><i

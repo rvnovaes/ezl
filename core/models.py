@@ -4,7 +4,7 @@ from django.db import models
 
 # from lawsuit.models import CourtDistrict
 
-#To do: Mudar coluna Active, pois causa conflito na renderização no template.
+# To do: Mudar coluna Active, pois causa conflito na renderização no template.
 LEGAL_TYPE_CHOICES = {
     ('F', 'Física'),
     ('J', 'Jurídica'),
@@ -31,8 +31,6 @@ class AuditAlter(models.Model):
 
 
 class Audit(AuditCreate, AuditAlter):
-    #active = models.BooleanField(default=True, verbose_name='Ativo')
-
     class Meta:
         abstract = True
 
@@ -97,6 +95,8 @@ class Person(Audit):
     class Meta:
         db_table = "person"
         ordering = ['-id']
+        verbose_name = "Pessoa"
+        verbose_name_plural = "Pessoas"
 
     def __str__(self):
         return self.legal_name
