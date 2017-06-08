@@ -111,7 +111,7 @@ class Movement(Audit):
 
     deadline = models.DateTimeField(null=True, verbose_name="Data da Movimentação")
 
-    law_suit_instance = models.ForeignKey(LawSuitInstance, on_delete=models.CASCADE, blank=False, null=False,
+    law_suit_instance = models.ForeignKey(LawSuitInstance, on_delete=models.PROTECT, blank=False, null=False,
                                           verbose_name="Instância do Processo")
 
     class Meta:

@@ -55,15 +55,20 @@ class DashboardView(MultiTableMixin, TemplateView):
     def load_task_by_status(self, status, person):
         global data
         if status == TaskStatus.OPEN:
-            data = Task.objects.filter(execution_date__isnull=True, acceptance_date__isnull=True)
+            data = Task.objects.filter(execution_date__isnull=True, acceptance_date__isnull=True,
+                                       refused_date__isnull=True, return_date__isnull=True)
         elif status == TaskStatus.ACCEPTED:
-            data = Task.objects.filter(acceptance_date__isnull=False)
+            data = Task.objects.filter(acceptance_date__isnull=False, return_date__isnull=True,
+                                       execution_date__isnull=True)
         elif status == TaskStatus.RETURN:
-            data = Task.objects.filter(return_date__isnull=False)
+            data = Task.objects.filter(return_date__isnull=False, acceptance_date__isnull=False,
+                                       execution_date__isnull=True, refused_date__isnull=True)
         elif status == TaskStatus.DONE:
-            data = Task.objects.filter(execution_date__isnull=False)
+            data = Task.objects.filter(execution_date__isnull=False, acceptance_date__isnull=False,
+                                       refused_date__isnull=True)
         elif status == TaskStatus.REFUSED:
-            data = Task.objects.filter(refused_date__isnull=False)
+            data = Task.objects.filter(refused_date__isnull=False, acceptance_date__isnull=True,
+                                       execution_date__isnull=True)
 
         if person.is_correspondent:
             return data.filter(person_executed_by=person.id)

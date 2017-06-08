@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy
+from django.db.models import ProtectedError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
@@ -13,9 +14,10 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormVi
 from django_tables2 import SingleTableView, RequestConfig
 
 from core.forms import PersonForm
-from core.messages import new_success, update_success
+from core.messages import new_success, update_success, delete_error_protected, delete_success
 from core.models import Person
 from core.tables import PersonTable
+
 
 def login(request):
     if request.user.is_authenticated:
@@ -28,7 +30,7 @@ def login(request):
 def inicial(request):
     if request.user.is_authenticated:
         title_page = {'title_page': 'Principal - Easy Lawyer'}
-        return render(request, 'inicial.html', title_page)
+        return render(request, 'task/task_dashboard.html', title_page)
     else:
         return HttpResponseRedirect('/')
 
@@ -40,21 +42,9 @@ def logout_user(request):
     return HttpResponseRedirect('/')
 
 
+# Implementa a alteração da data e usuários para operação de update e new
 class BaseCustomView(FormView):
     success_url = None
-
-    # Lógica que verifica se a requisição é para Create ou Update.
-    # Se Create, o botão 'ativar' é desabilitar e valor padrão True
-    # Se Update, o botão 'ativar é habilitado para edição e o valor, carregado do banco
-    def get_initial(self):
-
-        if isinstance(self, CreateView):
-            self.form_class.declared_fields['is_active'].initial = True
-            self.form_class.declared_fields['is_active'].disabled = True
-
-        elif isinstance(self, UpdateView):
-            self.form_class.declared_fields['is_active'].disabled = False
-        return self.initial.copy()
 
     def form_valid(self, form):
         user = User.objects.get(id=self.request.user.id)
@@ -64,7 +54,7 @@ class BaseCustomView(FormView):
         else:
             form.instance.alter_date = timezone.now()
             form.instance.alter_user = user
-        form.save()
+            form.save()
         super(BaseCustomView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
@@ -87,8 +77,15 @@ class MultiDeleteViewMixin(DeleteView):
     def delete(self, request, *args, **kwargs):
         if request.method == "POST":
             pks = request.POST.getlist("selection")
-            self.model.objects.filter(pk__in=pks).delete()
-            messages.success(self.request, self.success_message)
+            try:
+                self.model.objects.filter(pk__in=pks).delete()
+                messages.success(self.request, self.success_message)
+            except ProtectedError as e:
+                qs = e.protected_objects.first()
+                # type = type('Task')
+                messages.error(self.request,
+                               delete_error_protected(self.model._meta.verbose_name
+                                                      , qs.__str__()))
         return HttpResponseRedirect(
             self.success_url)  # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
 
@@ -126,13 +123,13 @@ class PersonUpdateView(SuccessMessageMixin, BaseCustomView, UpdateView):
 
 
 @method_decorator(login_required, name='dispatch')
-class PersonDeleteView(BaseCustomView, DeleteView):
+class PersonDeleteView(BaseCustomView, MultiDeleteViewMixin):
     model = Person
     success_url = reverse_lazy('person_list')
-
-    def delete(self, request, *args, **kwargs):
-        person = self.get_object()
-        success_url = self.get_success_url()
-        person_id = int(person.id)
-        Person.objects.filter(id=person_id).update(is_active=False)
-        return HttpResponseRedirect(success_url)
+    success_message = delete_success(model._meta.verbose_name_plural)
+    # def delete(self, request, *args, **kwargs):
+    #     person = self.get_object()
+    #     success_url = self.get_success_url()
+    #     person_id = int(person.id)
+    #     Person.objects.filter(id=person_id).update(active=False)
+    #     return HttpResponseRedirect(success_url)

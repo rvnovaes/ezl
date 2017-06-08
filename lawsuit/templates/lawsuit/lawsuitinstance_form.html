@@ -8,19 +8,56 @@
     <form action="" method="post">{% csrf_token %}
         <div class="col-lg-12 ">
             <fieldset>
-                {#                <div class="form-row">#}
-                {#            <div class="panel panel-primary">#}
-                {#                <div class="panel-heading">#}
-                {#                    <h1 class="panel-title text-center">Cadastro de Tipo de Movimentação</h1>#}
+                {#                <div class="container">#}
+                <div class="row">
+                    {% for field in form %}
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label>
+                                    {{ field.label }}{{ field }}
+                                </label>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
                 {#                </div>#}
-                {#                <div class="panel-body">#}
-                {% for field in form %}
-                    <div class="form-group">
-                        <label>
-                            {{ field.label }}{{ field }}
-                        </label>
-                    </div>
-                {% endfor %}
+                {#                <table>#}
+                {#                    {% for field in form %}#}
+                {##}
+                {#                        <tr>#}
+                {##}
+                {#                            {% if forloop.counter|divisibleby:"2" %}#}
+                {#                                <td>#}
+                {#                                    <div class="form-group">#}
+                {#                                        <label>#}
+                {#                                            {{ field.label }}{{ field }}#}
+                {#                                        </label>#}
+                {#                                    </div>#}
+                {#                                </td>#}
+                {#                            {% else %}#}
+                {#                                <td>#}
+                {#                                    <div class="form-group">#}
+                {#                                        <label>#}
+                {#                                            {{ field.label }}{{ field }}#}
+                {#                                        </label>#}
+                {#                                    </div>#}
+                {#                                </td>#}
+                {#                            {% endif %}#}
+                {##}
+                {#                            <td>#}
+                {#                                {% if not forloop.counter|divisibleby:"2" %}#}
+                {##}
+                {#                                  #}
+                {##}
+                {##}
+                {#                                {% endif %}#}
+                {#                            </td>#}
+                {#                        </tr>#}
+                {##}
+                {##}
+                {#                    {% endfor %}#}
+
+                {#                </table>#}
                 <div class="form-row  text-center">
                     <a class="btn btn-sm btn-raised btn-default"
                        href="{% url 'lawsuitinstance_list' %}"><i
