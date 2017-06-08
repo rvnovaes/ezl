@@ -30,7 +30,7 @@ def login(request):
 def inicial(request):
     if request.user.is_authenticated:
         title_page = {'title_page': 'Principal - Easy Lawyer'}
-        return render(request, 'inicial.html', title_page)
+        return render(request, 'task/task_dashboard.html', title_page)
     else:
         return HttpResponseRedirect('/')
 

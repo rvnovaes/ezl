@@ -6,8 +6,9 @@
 {% block content %}
     {% block table %}
         <div class="row">
+        {% include 'core/widgets/messages.html' %}
         {% for table in tables %}
-            {% include 'core/widgets/messages.html' %}
+
             {% if table.page %}
                 <div class="table-container">
             {% endif %}
