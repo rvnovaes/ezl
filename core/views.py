@@ -17,21 +17,6 @@ from core.messages import new_success, update_success
 from core.models import Person
 from core.tables import PersonTable
 
-
-class CreateViewMixin(CreateView):
-
-    def get_initial(self):
-        super(CreateViewMixin, self).get_initial()
-       # self.form_class.declared_fields['is_active'].attrs['class']='hidden'
-        self.form_class.declared_fields['is_active'].disabled = True
-        self.form_class.declared_fields['is_active'].initial = True
-
-    # def __init__(self, *args, **kwargs):
-    #     super(CreateViewMixin, self).__init__(*args, **kwargs)
-    #     self.form_class.declared_fields['is_active'].disabled = True
-    #     self.form_class.declared_fields['is_active'].initial = True
-
-
 def login(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect('/inicial')

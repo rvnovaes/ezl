@@ -10,7 +10,7 @@ from lawsuit.forms import BaseForm
 class ContactForm(ModelForm, forms.Form):
     class Meta:
         model = ContactUs
-        fields = ['name', 'email', 'phone_number', 'message']
+        fields = ['name', 'email', 'phone_number', 'message', 'is_active']
 
     name = forms.CharField(
         label=u"Nome",
@@ -43,7 +43,7 @@ class ContactForm(ModelForm, forms.Form):
 class ContactMechanismForm(ModelForm, forms.Form):
     class Meta:
         model = ContactMechanism
-        fields = ['contact_mechanism_type', 'name', 'description', 'notes']
+        fields = ['contact_mechanism_type', 'name', 'description', 'notes', 'is_active']
 
     # contact_mechanism_type = forms.Select()
 
@@ -72,7 +72,7 @@ class PersonForm(BaseForm, forms.Form):
     class Meta:
         model = Person
         fields = ['legal_name', 'name', 'is_lawyer', "is_correspondent", 'is_court', 'legal_type', 'cpf_cnpj',
-                  'auth_user']
+                  'auth_user', 'is_active']
 
     legal_name = forms.CharField(
         required=False,
@@ -121,7 +121,7 @@ class AddressForm(ModelForm, forms.Form):
     class Meta:
         model = Address
         fields = ['type', 'street', 'number', 'complement', 'city_region', 'zip_code', 'notes', 'home_address',
-                  'business_address', 'country', 'state', 'city']
+                  'business_address', 'country', 'state', 'city', 'is_active']
 
     type = forms.CharField(
         label=u"Tipo de endereço",
