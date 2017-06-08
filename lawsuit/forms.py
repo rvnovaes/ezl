@@ -13,7 +13,6 @@ from .models import TypeMovement, Instance, LawSuit, Movement, Folder, CourtDist
 class BaseForm(ModelForm):
 
     is_active = CustomBooleanField(
-        label=u"Ativo",
         required=False,
     )
 

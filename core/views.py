@@ -21,7 +21,7 @@ from core.tables import PersonTable
 
 def login(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect('/inicial')
+        return HttpResponseRedirect(reverse_lazy('dashboard'))
     else:
         return render(request, 'account/login.html')
 
@@ -45,6 +45,19 @@ def logout_user(request):
 # Implementa a alteração da data e usuários para operação de update e new
 class BaseCustomView(FormView):
     success_url = None
+
+    # Lógica que verifica se a requisição é para Create ou Update.
+    # Se Create, o botão 'ativar' é desabilitar e valor padrão True
+    # Se Update, o botão 'ativar é habilitado para edição e o valor, carregado do banco
+    def get_initial(self):
+
+        if isinstance(self, CreateView):
+            self.form_class.declared_fields['is_active'].initial = True
+            self.form_class.declared_fields['is_active'].disabled = True
+
+        elif isinstance(self, UpdateView):
+            self.form_class.declared_fields['is_active'].disabled = False
+        return self.initial.copy()
 
     def form_valid(self, form):
         user = User.objects.get(id=self.request.user.id)

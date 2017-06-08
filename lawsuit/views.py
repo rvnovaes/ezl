@@ -6,7 +6,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from django_tables2 import RequestConfig, SingleTableView
 
 from core.messages import new_success, update_success, delete_success
-from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin, CreateViewMixin
+from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin
 from .forms import LawSuitInstanceForm
 from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm
 from .models import LawSuitInstance
