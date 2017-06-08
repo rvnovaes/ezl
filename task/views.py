@@ -49,7 +49,6 @@ class TaskDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
     def delete(self, request, *args, **kwargs):
         task = self.get_object()
         task_id = int(task.id)
-        Task.objects.filter(id=task_id).update(active=False)
         return HttpResponseRedirect(self.success_url)
 
 

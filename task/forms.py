@@ -20,25 +20,21 @@ class TaskForm(BaseForm):
     )
 
     movement = forms.ModelChoiceField(
-        queryset=Movement.objects.filter(active=True),
         empty_label=u"Selecione...",
         label=u"Movimentação"
     )
 
     person_asked_by = forms.ModelChoiceField(
         empty_label=u"Selecione...",
-        queryset=Person.objects.filter(active=True, is_correspondent=False)
 
     )
 
     person_executed_by = forms.ModelChoiceField(
         empty_label=u"Selecione...",
-        queryset=Person.objects.filter(active=True, is_correspondent=True)
 
     )
 
     type_movement = forms.ModelChoiceField(
-        queryset=TypeMovement.objects.filter(active=True),
         empty_label=u"Selecione...",
         label=u"Tipo de Movimentação"
     )
