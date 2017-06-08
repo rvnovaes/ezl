@@ -18,6 +18,20 @@ from core.models import Person
 from core.tables import PersonTable
 
 
+class CreateViewMixin(CreateView):
+
+    def get_initial(self):
+        super(CreateViewMixin, self).get_initial()
+       # self.form_class.declared_fields['is_active'].attrs['class']='hidden'
+        self.form_class.declared_fields['is_active'].disabled = True
+        self.form_class.declared_fields['is_active'].initial = True
+
+    # def __init__(self, *args, **kwargs):
+    #     super(CreateViewMixin, self).__init__(*args, **kwargs)
+    #     self.form_class.declared_fields['is_active'].disabled = True
+    #     self.form_class.declared_fields['is_active'].initial = True
+
+
 def login(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect('/inicial')
@@ -41,9 +55,21 @@ def logout_user(request):
     return HttpResponseRedirect('/')
 
 
-# Implementa a alteração da data e usuários para operação de update e new
 class BaseCustomView(FormView):
     success_url = None
+
+    # Lógica que verifica se a requisição é para Create ou Update.
+    # Se Create, o botão 'ativar' é desabilitar e valor padrão True
+    # Se Update, o botão 'ativar é habilitado para edição e o valor, carregado do banco
+    def get_initial(self):
+
+        if isinstance(self, CreateView):
+            self.form_class.declared_fields['is_active'].initial = True
+            self.form_class.declared_fields['is_active'].disabled = True
+
+        elif isinstance(self, UpdateView):
+            self.form_class.declared_fields['is_active'].disabled = False
+        return self.initial.copy()
 
     def form_valid(self, form):
         user = User.objects.get(id=self.request.user.id)
@@ -53,13 +79,6 @@ class BaseCustomView(FormView):
         else:
             form.instance.alter_date = timezone.now()
             form.instance.alter_user = user
-
-            # if form.cleaned_data['is_inactive']:
-            #     form.instance.active = False
-            #
-            # else:
-            #     form.instance.active = True
-
         form.save()
         super(BaseCustomView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)

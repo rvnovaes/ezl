@@ -11,6 +11,12 @@ from .models import TypeMovement, Instance, LawSuit, Movement, Folder, CourtDist
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
 class BaseForm(ModelForm):
+
+    is_active = CustomBooleanField(
+        label=u"Ativo",
+        required=False,
+    )
+
     def __init__(self, *args, **kwargs):
         super(BaseForm, self).__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
@@ -27,13 +33,11 @@ class BaseForm(ModelForm):
                 pass
 
 
-
-
 class TypeMovementForm(BaseForm):
     class Meta:
         model = TypeMovement
         fields = fields_for_model(TypeMovement,
-                                  exclude={'is_active', 'create_user', 'alter_date', 'create_date', 'alter_user'})
+                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user'})
 
     name = forms.CharField(
         max_length=255,
@@ -57,18 +61,11 @@ class InstanceForm(BaseForm):
 
     class Meta:
         model = Instance
-        #fields = ['name', 'is_inactive']
         fields = ['name', 'is_active']
 
     name = forms.CharField(
         label=u"Nome da Instância",
         max_length=255,
-
-    ),
-
-    is_active = CustomBooleanField(
-        label=u"Ativo",
-        required=False,
 
     )
 
@@ -76,7 +73,7 @@ class InstanceForm(BaseForm):
 class MovementForm(BaseForm):
     class Meta:
         model = Movement
-        fields = ['legacy_code', 'person_lawyer', 'type_movement', 'law_suit_instance', 'deadline']
+        fields = ['legacy_code', 'person_lawyer', 'type_movement', 'law_suit_instance', 'deadline', 'is_active']
 
     legacy_code = forms.CharField(
         label=u"Código Legado",
@@ -108,7 +105,7 @@ class FolderForm(BaseForm):
     class Meta:
         model = Folder
         fields = fields_for_model(Folder,
-                                  exclude={'is_active', 'create_user', 'alter_date', 'create_date', 'alter_user'})
+                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user'})
 
     legacy_code = forms.CharField(
         max_length=255,
@@ -120,17 +117,12 @@ class FolderForm(BaseForm):
         empty_label=u"Selecione...",
     )
 
-    is_active = CustomBooleanField(  # forms.BooleanField(
-        initial=True,
-        required=False,
-    )
-
 
 class LawSuitForm(BaseForm):
     class Meta:
         model = LawSuit
         fields = fields_for_model(LawSuit,
-                                  exclude={'is_active', 'create_user', 'alter_date', 'create_date', 'alter_user'})
+                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user'})
 
     person_lawyer = forms.ModelChoiceField(
         empty_label=u"Selecione",
@@ -147,7 +139,7 @@ class CourtDistrictForm(BaseForm):
     class Meta:
         model = CourtDistrict
         fields = fields_for_model(CourtDistrict,
-                                  exclude=['is_active', 'create_user', 'alter_date', 'create_date', 'alter_user'])
+                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
 
     state = forms.ModelChoiceField(
         queryset=State.objects.filter(is_active=True),
@@ -159,7 +151,7 @@ class LawSuitInstanceForm(BaseForm):
     class Meta:
         model = LawSuitInstance
         fields = fields_for_model(LawSuitInstance,
-                                  exclude=['is_active', 'create_user', 'alter_date', 'create_date', 'alter_user'])
+                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
 
         law_suit_number = forms.CharField(max_length=255, required=True)
 

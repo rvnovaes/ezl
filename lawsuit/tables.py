@@ -9,9 +9,7 @@ class InstanceTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
     name = tables.LinkColumn(viewname='instance_update', attrs={'a': {'target': 'instance_update'}},
                              args=[A('pk')])
-    #action = tables.LinkColumn(text='deletar', verbose_name='Ação', viewname='instance_delete', attrs={'a': {'target':'instance_delete'}},
-    #
-    #                            args=[A('pk')])
+
     class Meta:
         sequence = ('selection', 'name', 'is_active')
         model = Instance
@@ -27,9 +25,9 @@ class TypeMovementTable(tables.Table):
                              args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'name', 'legacy_code', 'uses_wo')
+        sequence = ('selection', 'name', 'legacy_code', 'uses_wo', 'is_active')
         model = TypeMovement
-        fields = ['selection', 'name', 'legacy_code', 'uses_wo']
+        fields = ['selection', 'name', 'legacy_code', 'uses_wo', 'is_active']
         attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem tipos de movimentação cadastrados"
 
@@ -41,10 +39,12 @@ class MovementTable(tables.Table):
                                     args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit_instance', 'deadline')
+        sequence = ('selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit_instance', 'deadline',
+                    'is_active')
         model = Movement
         attrs = {"class": "table-striped table-bordered"}
-        fields = ['selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit_instance', 'deadline']
+        fields = ['selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit_instance', 'deadline',
+                  'is_active']
         empty_text = "Não existem movimentações cadastrados"
 
 
@@ -54,7 +54,7 @@ class FolderTable(tables.Table):
     legacy_code = tables.LinkColumn(viewname='folder_update', attrs={'a': {'target': 'folder_update'}}, args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'legacy_code', 'person_customer', '...')
+        sequence = ('selection', 'legacy_code', 'person_customer', 'is_active', '...')
         model = Folder
         fields = ['selection', 'legacy_code', 'person_customer', 'is_active']
         # attrs = {"class": "table-striped table-bordered"}
@@ -65,9 +65,9 @@ class LawSuitTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'folder', 'person_lawyer')
+        sequence = ('selection', 'folder', 'person_lawyer', 'is_active')
         model = LawSuit
-        fields = ['selection', 'folder', 'person_lawyer']
+        fields = ['selection', 'folder', 'person_lawyer', 'is_active']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem processos cadastrados"
 
@@ -79,9 +79,9 @@ class CourtDistrictTable(tables.Table):
                              args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'name', 'state')
+        sequence = ('selection', 'name', 'state', 'is_active')
         model = CourtDistrict
-        fields = ['selection', 'name', 'state']
+        fields = ['selection', 'name', 'state', 'is_active']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem comarcas cadastradas"
 
@@ -92,8 +92,10 @@ class LawSuitInstanceTable(tables.Table):
                                         attrs={'a': {'target': 'lawsuitinstance_update'}}, args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'law_suit_number', 'law_suit', 'instance', 'court_district', 'person_court')
+        sequence = ('selection', 'law_suit_number', 'law_suit', 'instance', 'court_district', 'person_court',
+                    'is_active')
         model = LawSuitInstance
-        fields = ['selection', 'law_suit_number', 'law_suit', 'instance', 'court_district', 'person_court']
+        fields = ['selection', 'law_suit_number', 'law_suit', 'instance', 'court_district', 'person_court',
+                  'is_active']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem instâncias de processo cadastrados"
