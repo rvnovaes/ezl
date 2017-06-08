@@ -40,13 +40,16 @@ class Task(Audit):
                                       verbose_name="Tipo de Movimentação")
     delegation_date = models.DateTimeField(default=timezone.now, verbose_name="Data de Delegação")
     acceptance_date = models.DateTimeField(null=True, verbose_name="Data de Aceitação")
-    first_deadline_date = models.DateTimeField(null=True, verbose_name="Primeiro Prazo")
-    second_deadline_date = models.DateTimeField(null=True, verbose_name="Segundo Prazo")
-    execution_date = models.DateTimeField(null=True, verbose_name="Data de Execução")
+    reminder_deadline_date = models.DateTimeField(null=True, verbose_name="Primeiro Prazo")
+    final_deadline_date = models.DateTimeField(null=True, verbose_name="Segundo Prazo")
+    execution_date = models.DateTimeField(null=True, verbose_name="Data de Cumprimento")
 
     return_date = models.DateTimeField(null=True, verbose_name="Data de Retorno")
     refused_date = models.DateTimeField(null=True, verbose_name="Data de Recusa")
 
+    notes = models.TextField(null=True, blank=True, verbose_name=u"Observações")
+
+    #
     class Meta:
         db_table = 'task'
         ordering = ['-id']

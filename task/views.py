@@ -1,13 +1,13 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
-from django.views.generic import DeleteView, CreateView, UpdateView, TemplateView
+from django.views.generic import DeleteView, CreateView, UpdateView, TemplateView, DetailView
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
 from core.messages import new_success, update_success
 from core.models import Person
 from core.views import BaseCustomView
-from task.forms import TaskForm
+from task.forms import TaskForm, TaskDetailForm
 from task.models import Task, TaskStatus
 from task.tables import TaskTable, DashboardStatusTable
 
@@ -91,3 +91,9 @@ class DashboardView(MultiTableMixin, TemplateView):
         else:
             tables = None
         return tables
+
+
+class TaskDetailView(DetailView, BaseCustomView):
+    model = Task
+    template_name = "task/task_detail.html"
+    form_class = TaskDetailForm

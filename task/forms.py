@@ -10,7 +10,8 @@ class TaskForm(BaseForm):
     class Meta:
         model = Task
         fields = ['legacy_code', 'movement', 'person_asked_by', "person_executed_by", 'type_movement',
-                  'delegation_date', 'acceptance_date', 'first_deadline_date', 'second_deadline_date', 'execution_date',
+                  'delegation_date', 'acceptance_date', "reminder_deadline_date", "final_deadline_date",
+                  'execution_date',
                   'return_date', 'refused_date']
 
     legacy_code = forms.CharField(
@@ -62,3 +63,9 @@ class TaskForm(BaseForm):
                                       )
     refused_date = forms.DateTimeField(required=False
                                        )
+
+
+class TaskDetailForm(BaseForm):
+    class Meta:
+        model = Task
+        fields = ['is_active']

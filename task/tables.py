@@ -21,7 +21,7 @@ class TaskTable(tables.Table):
         fields = ['selection', 'status', 'legacy_code', 'movement', 'person_asked_by', 'person_executed_by',
                   'type_movement',
                   'delegation_date',
-                  'acceptance_date', 'first_deadline_date', 'second_deadline_date', 'execution_date', 'return_date',
+                  'acceptance_date', 'reminder_deadline_date', 'second_deadline_date', 'execution_date', 'return_date',
                   'refused_date']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem providências cadastradas"
@@ -42,5 +42,5 @@ class DashboardStatusTable(tables.Table):
 
     class Meta:
         model = Task
-        fields = ['legacy_code', 'service', 'first_deadline_date', 'client']
+        fields = ['legacy_code', 'service', 'reminder_deadline_date', 'client']
         empty_text = "Não existem providências a serem exibidas"
