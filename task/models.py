@@ -7,12 +7,23 @@ from django.utils import timezone
 from core.models import Person, Audit
 from lawsuit.models import Movement, TypeMovement, Folder
 
+# Dicionário para retornar o icone referente ao status da providencia
+icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'keyboard_return', 'DONE': 'done',
+             'REFUSED': 'assignment_late'}
+
 
 class TaskStatus(Enum):
+    __ordering__ = ['accepted', 'open', 'return', 'done', 'refused']
+
+    def get_icon(self):
+        return icon_dict[self.name]
+
+    # def order(self):
+    #     if
     def __str__(self):
         return str(self.value)
 
-    ACCEPTED = u"Aceita"
+    ACCEPTED = u"A Cumprir"
     OPEN = u"Em Aberto"
     RETURN = u"Retorno"
     DONE = u"Cumprida"
@@ -64,19 +75,19 @@ class Task(Audit):
         acceptance_date, return_date, execution_date, refused_date = Task.objects.filter(id=self.id).values_list(
             'acceptance_date', 'return_date', 'execution_date', 'refused_date').first()
         # acceptance_date IS NOT NULL AND execution_date IS NULL AND return_date IS NULL
-        if acceptance_date is not None and execution_date is None and return_date is None:
+        if acceptance_date is not None and refused_date is None and execution_date is None and return_date is None:
             return TaskStatus.ACCEPTED
         # return_date IS NOT NULL
-        elif return_date is not None:
+        elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is not None:
             return TaskStatus.RETURN
         # acceptance_date IS NULL
-        elif acceptance_date is None:
+        elif acceptance_date is None and refused_date is None and execution_date is None and return_date is None:
             return TaskStatus.OPEN
         # execution_date IS NOT NUL
-        elif execution_date is not None:
+        elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is None:
             return TaskStatus.DONE
         # refused_date IS NOT NULL
-        elif refused_date is not None:
+        elif acceptance_date is None and refused_date is not None and execution_date is None and return_date is None:
             return TaskStatus.REFUSED
 
     @property
@@ -89,3 +100,13 @@ class Task(Audit):
     def service(self):
         type_movement = TypeMovement.objects.get(movement__task=self.id).name
         return type_movement
+
+    @property
+    def name_person_asked_by(self):
+        person_asked_by = Person.objects.get(id=self.person_asked_by_id).legal_name
+        return person_asked_by
+
+    @property
+    def name_type_service(self):
+        type_service = TypeMovement.objects.get(id=self.type_movement_id)
+        return type_service

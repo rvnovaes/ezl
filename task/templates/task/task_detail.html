@@ -1,0 +1,87 @@
+{% extends 'inicial.html' %}
+{% load staticfiles %}
+{#{% load formset_tags %}#}
+
+{% block content %}
+    {% include 'core/widgets/messages.html' %}
+    <style type="text/css">
+        #wrap {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .buttons {
+            position: absolute;
+        }
+
+        .btn-group {
+            position: relative;
+            bottom: 0;
+            right: 0;
+        }
+
+        #left_col {
+            float: left;
+            width: 300px;
+        }
+
+        #right_col {
+            float: right;
+            width: 300px;
+        }
+    </style>
+    <form class="container" action="" method="post">{% csrf_token %}
+        <div class="panel">
+            <div class="panel-heading {{ form.instance.status.name }}">
+                <div class="panel-title"><i class="material-icons">{{ form.instance.status.get_icon }}</i>
+                    <b>{{ form.instance.status }} #{{ form.instance.legacy_code.value }} - Cópia</b>
+                </div>
+            </div>
+            <div class="panel-body form-group is-focused">
+                <div class="form-row">
+
+                    <label>Dados do Solicitante: </label><br>
+                    {{ form.instance.name_person_asked_by|lower|capfirst }}
+                    <br><br>
+                    <label>Detalhes do Serviço: </label>
+                    <br>
+                    <span class="content"><b>Prazo:</b> </span> {{ form.instance.reminder_deadline_date.value }} horas
+                    <br>
+                    <span>Recebida em :</span>{{ form.instance.delegation_date.value }} horas
+                    <br>
+                    <span>Serviço solicitado:</span>{{ form.instance.name_type_service|lower|capfirst }}
+
+                </div>
+                {#                <div class="text-center">#}
+                <div class="form-group text-center">
+                    <button type="submit"
+                            class="btn btn-sm btn-raised ACCEPTED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}"
+                    ><i
+                            class="material-icons left" style="color: white;">assignment_ind</i>
+                        Aceitar
+                    </button>
+                    <a
+                            class="btn btn-sm btn-raised REFUSED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}"><i
+                            class="material-icons left" style="color: white;">assignment_late</i>
+                        Recusar
+                    </a>
+                    <a class="btn btn-sm btn-raised OPEN {% if not form.instance.status.name == 'DELEGATE' %}hidden{% endif %}"
+                       href=""><i
+                            class="material-icons left" style="color: white">redo</i>
+                        Delegar
+                    </a>
+                    {% if form.instance.status.name == 'ACCEPTED' %}
+                        <span class="form-group"><label>{{ form.execution_date.label }}{{ form.execution_date }}</label></span>
+                    {% endif %}
+                    <button type="submit"
+                            class="btn btn-sm btn-raised DONE {% if not form.instance.status.name == 'ACCEPTED' %}hidden{% endif %}">
+                        <i
+                                class="material-icons left" style="color: white">done</i>
+                        Cumprir
+                    </button>
+                </div>
+                {#                </div>#}
+            </div>
+        </div>
+    </form>
+{% endblock content %}

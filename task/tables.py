@@ -14,7 +14,10 @@ class TaskTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
     legacy_code = tables.LinkColumn(viewname='task_update', attrs={'a': {'target': 'task_update'}}, args=[A('pk')])
 
-    status = tables.TemplateColumn(template_name="task/task_status_column.html")
+    status = tables.TemplateColumn(template_name="task/task_status_column.html",
+                                   orderable=False)
+
+    # order_by = sorted(Task.objects.all(), key=lambda t: str(t.status.value))
 
     class Meta:
         model = Task
@@ -28,7 +31,7 @@ class TaskTable(tables.Table):
 
 
 class DashboardStatusTable(tables.Table):
-    def __init__(self, *args, length='0', service="Serviço", client="Cliente", legacy_code="Número", title="tabela",
+    def __init__(self, *args, service="Serviço", client="Cliente", legacy_code="Número", title="", status="",
                  **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -36,9 +39,10 @@ class DashboardStatusTable(tables.Table):
         self.base_columns['client'].verbose_name = client
         self.base_columns['legacy_code'].verbose_name = legacy_code
         self.title = title
+        self.status = status
         self.length = self.rows.__len__()
 
-    legacy_code = tables.LinkColumn(viewname='task_update', attrs={'a': {'target': 'task_update'}}, args=[A('pk')])
+    legacy_code = tables.LinkColumn(viewname='task_detail', attrs={'a': {'target': 'task_detail'}}, args=[A('pk')])
 
     class Meta:
         model = Task

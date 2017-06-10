@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 
 from ezl import settings
+from task.views import DashboardView, TaskDetailView
 
 urlpatterns = [
                   url(r'^', include('core.urls')),
@@ -12,4 +13,6 @@ urlpatterns = [
                   url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),
                   url(r'^providencias/', include('task.urls'), name='task'),
                   url(r'^accounts/', include('allauth.urls')),
+                  url(r'^dashboard/$', DashboardView.as_view(), name='dashboard'),
+                  url(r'^dashboard/(?P<pk>[0-9]+)/$', TaskDetailView.as_view(), name='task_detail'),
               ] + static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static'))

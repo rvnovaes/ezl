@@ -1,19 +1,20 @@
-#center{
+#center {
     margin-left: auto !important;
     margin-right: auto !important;
     text-align: center !important;
 }
-.breadcrumb{
+
+.breadcrumb {
     color: #212121 !important;
     font-size: small !important;
     opacity: 0.7 !important;
 }
 
-.breadcrumb::before{
-    color:#212121 !important;
+.breadcrumb::before {
+    color: #212121 !important;
 }
 
-#breadcrumb{
+#breadcrumb {
     text-align: right !important;
     padding-right: 20px !important;
     background-color: #f6f6f6 !important;
@@ -25,7 +26,7 @@
     color: rgba(255, 255, 255, 0.84);
 }
 
-h3{
+h3 {
 
     font-weight: 100 !important;
 
@@ -36,11 +37,12 @@ h3{
     color: red;
 !important;
 }
+
 input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
     background-color: #000 !important;
 }
 
-.content-container{
+.content-container {
     width: 75%;
     background-color: #fff;
     border-radius: 7px;
@@ -64,3 +66,39 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
 .selection {
     width: 22px !important;
 }
+
+.RETURN {
+    color: white !important;
+    background: linear-gradient(60deg, #ef5350, #e53935);
+    box-shadow: 0 12px 20px -10px rgba(244, 67, 54, 0.28), 0 4px 20px 0px rgba(0, 0, 0, 0.12), 0 7px 8px -5px rgba(244, 67, 54, 0.2);
+}
+
+.OPEN {
+    color: white !important;
+    background: linear-gradient(60deg, #ffa726, #fb8c00);
+    box-shadow: 0 12px 20px -10px rgba(255, 152, 0, 0.28), 0 4px 20px 0px rgba(0, 0, 0, 0.12), 0 7px 8px -5px rgba(255, 152, 0, 0.2);
+}
+
+.ACCEPTED {
+    color: white !important;
+    background: linear-gradient(60deg, #26c6da, #00acc1);
+    box-shadow: 0 12px 20px -10px rgba(0, 188, 212, 0.28), 0 4px 20px 0px rgba(0, 0, 0, 0.12), 0 7px 8px -5px rgba(0, 188, 212, 0.2);
+}
+
+.REFUSED {
+    color: white !important;
+    background-color: #999999 !important;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+
+}
+
+.DONE {
+    color: white !important;
+    background: linear-gradient(60deg, #66bb6a, #43a047);
+    box-shadow: 0 12px 20px -10px rgba(76, 175, 80, 0.28), 0 4px 20px 0px rgba(0, 0, 0, 0.12), 0 7px 8px -5px rgba(76, 175, 80, 0.2);
+}
+
+.material-icons {
+    vertical-align: middle !important;
+}
+

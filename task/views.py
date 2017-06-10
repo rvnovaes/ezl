@@ -1,12 +1,17 @@
+from datetime import datetime
+
+import pytz
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.views.generic import DeleteView, CreateView, UpdateView, TemplateView, DetailView
+from django.views.generic import DeleteView, CreateView, UpdateView, TemplateView
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
 from core.messages import new_success, update_success
 from core.models import Person
 from core.views import BaseCustomView
+from ezl import settings
 from task.forms import TaskForm, TaskDetailForm
 from task.models import Task, TaskStatus
 from task.tables import TaskTable, DashboardStatusTable
@@ -55,20 +60,23 @@ class DashboardView(MultiTableMixin, TemplateView):
     def load_task_by_status(self, status, person):
         global data
         if status == TaskStatus.OPEN:
-            data = Task.objects.filter(execution_date__isnull=True, acceptance_date__isnull=True,
-                                       refused_date__isnull=True, return_date__isnull=True)
+            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
+                                       refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True)
         elif status == TaskStatus.ACCEPTED:
-            data = Task.objects.filter(acceptance_date__isnull=False, return_date__isnull=True,
-                                       execution_date__isnull=True)
-        elif status == TaskStatus.RETURN:
-            data = Task.objects.filter(return_date__isnull=False, acceptance_date__isnull=False,
-                                       execution_date__isnull=True, refused_date__isnull=True)
-        elif status == TaskStatus.DONE:
-            data = Task.objects.filter(execution_date__isnull=False, acceptance_date__isnull=False,
-                                       refused_date__isnull=True)
+            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
+                                       refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True)
         elif status == TaskStatus.REFUSED:
-            data = Task.objects.filter(refused_date__isnull=False, acceptance_date__isnull=True,
-                                       execution_date__isnull=True)
+            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
+                                       refused_date__isnull=False, execution_date__isnull=True,
+                                       return_date__isnull=True)
+        elif status == TaskStatus.DONE:
+            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
+                                       refused_date__isnull=True, execution_date__isnull=False,
+                                       return_date__isnull=True)
+        elif status == TaskStatus.RETURN:
+            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
+                                       refused_date__isnull=True, execution_date__isnull=False,
+                                       return_date__isnull=False)
 
         if person.is_correspondent:
             return data.filter(person_executed_by=person.id)
@@ -79,13 +87,20 @@ class DashboardView(MultiTableMixin, TemplateView):
 
         person = Person.objects.get(auth_user=self.request.user)
         if person:
-            return_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.RETURN, person), title="Retorno")
+            return_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.RETURN, person), title="Retornadas",
+                                                status=TaskStatus.RETURN)
+
             accepted_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.ACCEPTED, person),
-                                                  title="Aceitas")
-            open_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.OPEN, person), title="Em Aberto")
-            done_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.DONE, person), title="Cumpridas")
+                                                  title="A Cumprir", status=TaskStatus.ACCEPTED)
+
+            open_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.OPEN, person), title="Em Aberto",
+                                              status=TaskStatus.OPEN)
+
+            done_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.DONE, person), title="Cumpridas",
+                                              status=TaskStatus.DONE)
+
             refused_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.REFUSED, person),
-                                                 title="Recusadas")
+                                                 title="Recusadas", status=TaskStatus.REFUSED)
 
             tables = [return_table, accepted_table, open_table, done_table, refused_table]
         else:
@@ -93,7 +108,20 @@ class DashboardView(MultiTableMixin, TemplateView):
         return tables
 
 
-class TaskDetailView(DetailView, BaseCustomView):
+class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Task
-    template_name = "task/task_detail.html"
     form_class = TaskDetailForm
+    success_url = reverse_lazy('dashboard')
+    success_message = update_success
+    template_name = "task/task_detail.html"
+
+    def form_valid(self, form):
+        task = form.instance
+        if task.status == TaskStatus.OPEN:
+            task.acceptance_date = datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
+        elif task.status == TaskStatus.ACCEPTED:
+            if form.cleaned_data['execution_date']:
+                task.execution_date = form.cleaned_data['execution_date']
+        task.save()
+        super(TaskDetailView, self).form_valid(form)
+        return HttpResponseRedirect(self.success_url)

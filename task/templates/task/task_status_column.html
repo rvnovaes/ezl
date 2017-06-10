@@ -1,16 +1,13 @@
 {% if value.name == 'ACCEPTED' %}
-    <i class="material-icons" data-toggle="tooltip" data-placement="bottom" title={{ value }}>assignment_ind</i>
+    <i class="material-icons ACCEPTED" data-toggle="tooltip" data-placement="bottom"
+       title="A Cumprir">assignment_ind</i>
+{% elif value.name == 'OPEN' %}
+    <i class="material-icons OPEN" data-toggle="tooltip" data-placement="bottom" title="Em Aberto">assignment</i>
+{% elif value.name == 'RETURN' %}
+    <i class="material-icons RETURN " data-toggle="tooltip" data-placement="bottom" title="Retorno">keyboard_return</i>
+{% elif value.name == 'DONE' %}
+    <i class="material-icons DONE" data-toggle="tooltip" data-placement="bottom"
+       title="Cumprida">done</i>
+{% elif value.name == 'REFUSED' %}
+    <i class="material-icons REFUSED" data-toggle="tooltip" data-placement="bottom" title="Recusada">assignment_late</i>
 {% endif %}
-{% if value.name == 'OPEN' %}
-    <i class="material-icons" data-toggle="tooltip" data-placement="bottom" title={{ value }}>assignment</i>
-{% endif %}
-{% if value.name == 'RETURN' %}
-    <i class="material-icons" data-toggle="tooltip" data-placement="bottom" title={{ value }}>assignment_return</i>
-{% endif %}
-{% if value.name == 'DONE' %}
-    <i class="material-icons" data-toggle="tooltip" data-placement="bottom" title={{ value }}>assignment_turned_in</i>
-{% endif %}
-{% if value.name == 'REFUSED' %}
-    <i class="material-icons" data-toggle="tooltip" data-placement="bottom" title={{ value }}>assignment_late</i>
-{% endif %}
-
