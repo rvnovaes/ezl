@@ -62,6 +62,8 @@ class Task(Audit):
 
     notes = models.TextField(null=True, blank=True, verbose_name=u"Observações")
 
+    description = models.TextField(null=True, blank=True, verbose_name=u"Descrição do serviço")
+
     #
     class Meta:
         db_table = 'task'
