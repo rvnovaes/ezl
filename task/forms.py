@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytz
 from django import forms
-from django.forms import fields_for_model, ModelForm
+from django.forms import ModelForm
 
 from core.models import Person
 from ezl import settings
@@ -73,14 +73,14 @@ class TaskForm(BaseForm):
 class TaskDetailForm(ModelForm):
     class Meta:
         model = Task
-        fields = fields_for_model(Task,
-                                  exclude={'legacy_code', 'movement', 'person_asked_by', "person_executed_by",
-                                           'type_movement',
-                                           'delegation_date', 'acceptance_date', "reminder_deadline_date",
-                                           "final_deadline_date",
-                                           # 'execution_date',
-                                           'return_date', 'refused_date', 'create_user', 'alter_date',
-                                           'create_date', 'alter_user', 'is_active', 'notes'})
+        # fields = ['legacy_code', 'movement', 'person_asked_by', "person_executed_by",
+        #           'type_movement',
+        #           'delegation_date', 'acceptance_date', "reminder_deadline_date",
+        #           "final_deadline_date",
+        fields = ['execution_date', 'notes']
+        # 'return_date', 'refused_date', \
+        # 'create_user', 'alter_date',
+        # 'alter_user', 'is_active']
 
     # legacy_code = forms.CharField(
     #     label=u"Código Legado",
@@ -122,7 +122,7 @@ class TaskDetailForm(ModelForm):
     # acceptance_date = forms.DateTimeField(required=False
     #                                       )
     #
-    # reminder_deadline_date = forms.DateTimeField(required=False
+    # create_date = forms.DateTimeField(required=False
     #                                              )
     #
     # final_deadline_date = forms.DateTimeField(required=False
@@ -132,26 +132,34 @@ class TaskDetailForm(ModelForm):
                                          initial=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE)),
                                          label=u"Data de Cumprimento",
                                          widget=forms.DateTimeInput(
-                                             attrs={'class': 'form-control', 'type': 'datetime-local'},
-                                             format='%Y-%m-%d %H:%M:%S')
+                                             attrs={'class': 'form-control', 'type': 'date'}
+                                             # format='%Y-%m-%d %H:%M:%S')
+                                         ))
+    notes = forms.CharField(
+        required=True,
+        initial="",
+        label=u"Insira um comentário",
+        widget=forms.Textarea(
+            attrs={'class': 'form-control', 'type': 'text', 'cols': '5', 'id': 'textarea1'}
+        )
+    )
 
-                                         )
-    #
     # return_date = forms.DateTimeField(required=False
     #                                   )
     # refused_date = forms.DateTimeField(required=False
     #                                    )
 
     # def __init__(self, *args, **kwargs):
-    #     super(BaseForm, self).__init__(*args, **kwargs)
+    #     super(TaskDetailForm, self).__init__(*args, **kwargs)
     #
-    #     for field_name, field in self.fields.items():
-    #         field.widget.attrs['disabled'] = 'true'
-    #         if field.widget.input_type != 'checkbox':
-    #             field.widget.attrs['class'] = 'form-control'
-    #         if field.widget.input_type == 'text':
-    #             field.widget.attrs['style'] = 'width: 100%; display: table-cell; '
-    #         try:
+    #     self.cleaned_data['reminder_deadline_date'] = self.instance.reminder_deadline_date
+    #     # for field_name, field in self.fields.items():
+    #     field.widget.attrs['disabled'] = 'true'
+    #     if field.widget.input_type != 'checkbox':
+    #         field.widget.attrs['class'] = 'form-control'
+    #     if field.widget.input_type == 'text':
+    #         field.widget.attrs['style'] = 'width: 100%; display: table-cell; '
+    #     try:
     #             field.label = self._meta.model._meta.get_field(field_name).verbose_name
     #         except FieldDoesNotExist:
     #             pass

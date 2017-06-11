@@ -10,6 +10,8 @@ from lawsuit.models import Movement, TypeMovement, Folder
 # Dicionário para retornar o icone referente ao status da providencia
 icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'keyboard_return', 'DONE': 'done',
              'REFUSED': 'assignment_late'}
+next_action = {'ACCEPTED': 'cumprir', 'OPEN': 'assignment', 'RETURN': 'keyboard_return', 'DONE': 'done',
+               'REFUSED': 'assignment_late'}
 
 
 class TaskStatus(Enum):
@@ -101,12 +103,12 @@ class Task(Audit):
         type_movement = TypeMovement.objects.get(movement__task=self.id).name
         return type_movement
 
-    @property
-    def name_person_asked_by(self):
-        person_asked_by = Person.objects.get(id=self.person_asked_by_id).legal_name
-        return person_asked_by
-
-    @property
-    def name_type_service(self):
-        type_service = TypeMovement.objects.get(id=self.type_movement_id)
-        return type_service
+        # @property
+        # def name_person_asked_by(self):
+        #     person_asked_by = Person.objects.get(id=self.person_asked_by_id).legal_name
+        #     return person_asked_by
+        #
+        # @property
+        # def name_type_service(self):
+        #     type_service = TypeMovement.objects.get(id=self.type_movement_id)
+        #     return type_service

@@ -3,84 +3,118 @@
 {#{% load formset_tags %}#}
 
 {% block content %}
-    {% include 'core/widgets/messages.html' %}
-    <style type="text/css">
-        #wrap {
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .buttons {
-            position: absolute;
-        }
-
-        .btn-group {
-            position: relative;
-            bottom: 0;
-            right: 0;
-        }
-
-        #left_col {
-            float: left;
-            width: 300px;
-        }
-
-        #right_col {
-            float: right;
-            width: 300px;
-        }
-    </style>
     <form class="container" action="" method="post">{% csrf_token %}
+        <script type="text/javascript">
+
+            var nextState = {
+                excludeId: {text: "teste", icon: "remove"},
+                ACCEPTED: {text: "aceitar", icon: "assignment_ind"},
+                REFUSED: {text: "recusar", icon: "assignment"},
+                DELEGATED: {text: "delegar", icon: "remove"},
+                DONE: {text: "Cumprir", icon: "done"}
+            };
+            function getId(value) {
+                var actionButton = document.getElementById("actionButton");
+                var nextText = document.getElementById("actionText")
+                var id = value.id;
+                var icon = document.getElementById("icon");
+                var modalHeader = document.getElementById("modalHeader");
+
+                nextText.innerHTML = nextState[id]['text'];
+                icon.innerHTML = nextState[id]['icon'];
+
+                modalHeader.setAttribute("class", "panel-header panel-heading" + " " + id);
+
+                actionButton.setAttribute("name", "action");
+                actionButton.setAttribute("value", id);
+            }
+        </script>
+        {% include 'core/widgets/messages.html' %}
         <div class="panel">
             <div class="panel-heading {{ form.instance.status.name }}">
                 <div class="panel-title"><i class="material-icons">{{ form.instance.status.get_icon }}</i>
-                    <b>{{ form.instance.status }} #{{ form.instance.legacy_code.value }} - Cópia</b>
+                    <b>{{ form.instance.status }} #{{ form.instance.legacy_code }}
+                        - {{ form.instance.type_movement|lower|capfirst }}</b>
                 </div>
             </div>
             <div class="panel-body form-group is-focused">
                 <div class="form-row">
 
                     <label>Dados do Solicitante: </label><br>
-                    {{ form.instance.name_person_asked_by|lower|capfirst }}
+                    {{ form.instance.person_asked_by|capfirst }}
                     <br><br>
                     <label>Detalhes do Serviço: </label>
                     <br>
-                    <span class="content"><b>Prazo:</b> </span> {{ form.instance.reminder_deadline_date.value }} horas
+                    <span class="content"><b>Prazo:</b> </span> {{ form.instance.reminder_deadline_date }} horas
                     <br>
-                    <span>Recebida em :</span>{{ form.instance.delegation_date.value }} horas
+                    <span>Recebida em :</span>{{ form.instance.delegation_date }} horas
                     <br>
-                    <span>Serviço solicitado:</span>{{ form.instance.name_type_service|lower|capfirst }}
+                    <span>Serviço solicitado:</span>{{ form.instance.type_movement|lower|capfirst }}
 
                 </div>
-                {#                <div class="text-center">#}
                 <div class="form-group text-center">
-                    <button type="submit"
-                            class="btn btn-sm btn-raised ACCEPTED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}"
-                    ><i
-                            class="material-icons left" style="color: white;">assignment_ind</i>
+                    <a id="ACCEPTED" onclick="getId(this)" data-toggle="modal" data-target="#confirmAction"
+                       class="btn btn-sm btn-raised ACCEPTED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
+                        <i class="material-icons left" style="color: white;">assignment_ind</i>
                         Aceitar
-                    </button>
-                    <a
-                            class="btn btn-sm btn-raised REFUSED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}"><i
+                    </a>
+                    <a id="REFUSED" onclick="getId(this)" data-toggle="modal" data-target="#confirmAction"
+                       class="btn btn-sm btn-raised REFUSED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}"><i
                             class="material-icons left" style="color: white;">assignment_late</i>
                         Recusar
                     </a>
-                    <a class="btn btn-sm btn-raised OPEN {% if not form.instance.status.name == 'DELEGATE' %}hidden{% endif %}"
+                    <a id="DELEGATE" onclick="getId(this)" data-toggle="modal" data-target="#confirmAction"
+                       class="btn btn-sm btn-raised DELEGATE {% if not form.instance.status.name == 'DELEGATE' %}hidden{% endif %}"
                        href=""><i
                             class="material-icons left" style="color: white">redo</i>
                         Delegar
                     </a>
-                    {% if form.instance.status.name == 'ACCEPTED' %}
+                    <input type="button" id="excludeId" data-toggle="modal" data-target="#confirmAction"
+                           class="btn btn-fab btn-warning material-icons"
+                           value="remove" onclick="getId(this)">
+                    {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
                         <span class="form-group"><label>{{ form.execution_date.label }}{{ form.execution_date }}</label></span>
+
+                        <a onclick="getId(this)" id="DONE" type="submit" data-toggle="modal"
+                           data-target="#confirmAction"
+                           class="btn btn-sm btn-raised DONE ">
+                            <i class="material-icons left" style="color: white">done</i>
+                            Cumprir
+                        </a>
                     {% endif %}
-                    <button type="submit"
-                            class="btn btn-sm btn-raised DONE {% if not form.instance.status.name == 'ACCEPTED' %}hidden{% endif %}">
-                        <i
-                                class="material-icons left" style="color: white">done</i>
-                        Cumprir
-                    </button>
                 </div>
                 {#                </div>#}
+            </div>
+        </div>
+        <!-- Modal -->
+        <div id="confirmAction" class="modal">
+            <div class="modal-dialog">
+                <div class="modal-content ">
+                    <div id="modalHeader">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="panel-title text-center">
+                            <i id="icon" class="material-icons "></i>
+                            <b> Deseja <span id="actionText">aceitar</span> o prazo?</b></h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group" style="margin: auto">
+                            <label> {{ form.notes.label }}</label>
+                            {{ form.notes }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="form-group text-center">
+                            <button type="button" style="width: 95px!important;"
+                                    class="btn btn-sm btn-raised btn-default"
+                                    data-dismiss="modal">
+                                Cancelar
+                            </button>
+                            <button value="1" id="actionButton" type="submit" style="width: 95px!important;"
+                                    class="btn btn-sm btn-raised btn-primary">Sim
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </form>

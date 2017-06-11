@@ -61,6 +61,7 @@ class BaseCustomView(FormView):
 
     def form_valid(self, form):
         user = User.objects.get(id=self.request.user.id)
+
         if form.instance.id is None:
             form.instance.create_date = timezone.now()
             form.instance.create_user = user

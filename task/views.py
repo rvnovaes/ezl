@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pytz
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
@@ -75,7 +76,7 @@ class DashboardView(MultiTableMixin, TemplateView):
                                        return_date__isnull=True)
         elif status == TaskStatus.RETURN:
             data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                       refused_date__isnull=True, execution_date__isnull=False,
+                                       refused_date__isnull=True, execution_date__isnull=True,
                                        return_date__isnull=False)
 
         if person.is_correspondent:
@@ -117,11 +118,24 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         task = form.instance
-        if task.status == TaskStatus.OPEN:
-            task.acceptance_date = datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
-        elif task.status == TaskStatus.ACCEPTED:
+        now_date = datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
+        action = self.request.POST['action']
+
+        if action == TaskStatus.ACCEPTED.name:
+            task.acceptance_date = now_date
+        elif action == TaskStatus.REFUSED.name:
+            task.refused_date = now_date
+        elif action == TaskStatus.DONE.name:
             if form.cleaned_data['execution_date']:
                 task.execution_date = form.cleaned_data['execution_date']
-        task.save()
+                # else:
+                #     task.execution_date =
+        elif action == TaskStatus.RETURN.name:
+            task.execution_date = None
+            task.refused_date = now_date
+        task.alter_date = now_date
+        task.alter_user = User.objects.get(id=self.request.user.id)
+        form = TaskDetailForm(self.request.POST, instance=task)
+        form.save()
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
