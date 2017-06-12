@@ -86,11 +86,8 @@ WSGI_APPLICATION = 'ezl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ezl',
-        'USER': 'ezl',
-        'PASSWORD': 'ezl',
-        'HOST': '13.68.213.60',
-        'PORT': '5432'
+        'NAME': 'gsnasc',
+        'USER': 'gsnasc'
     }
 }
 

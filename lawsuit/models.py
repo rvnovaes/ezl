@@ -77,7 +77,7 @@ class CourtDistrict(Audit):
         
 class CourtDivision(Audit):
 
-    legacy_code = models.CharField(max_length=255,verbose_name="Código Legado")
+    legacy_code = models.CharField(max_length=255,unique=True,verbose_name="Código Legado")
     name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Vara")
     
 
@@ -139,8 +139,8 @@ class Movement(Audit):
         
 class TypeTask(Audit):
 
-    legacy_code = models.CharField(max_length=255,verbose_name="Código Legado")
-    name = models.CharField(max_length=255, null=False, verbose_name="Tipo de Serviço")
+    legacy_code = models.CharField(max_length=255,unique=True,verbose_name="Código Legado")
+    name = models.CharField(max_length=255, null=False, unique=True,verbose_name="Tipo de Serviço")
     
 
     class Meta:
