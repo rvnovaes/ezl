@@ -3,7 +3,10 @@
 {#{% load formset_tags %}#}
 
 {% block content %}
+    <div class="container">
     <form class="container" action="" method="post">{% csrf_token %}
+
+
         <script type="text/javascript">
 
             var nextState = {
@@ -69,12 +72,19 @@
                             class="material-icons left" style="color: white">redo</i>
                         Delegar
                     </a>
-                    <input type="button" id="excludeId" data-toggle="modal" data-target="#confirmAction"
-                           class="btn btn-fab btn-warning material-icons"
-                           value="remove" onclick="getId(this)">
+                    {#                    <input type="button" id="excludeId" data-toggle="modal" data-target="#confirmAction"#}
+                    {#                           class="btn btn-fab btn-warning material-icons"#}
+                    {#                           value="remove" onclick="getId(this)">#}
                     {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                        <span class="form-group"><label>{{ form.execution_date.label }}{{ form.execution_date }}</label></span>
-
+                        {#                                                <span class="form-group">#}
+                        {#                        <label>{{ form.execution_date.label }}</label>#}
+                        {{ form.execution_date }}
+                        {#                        </span>#}
+                        {#                        </label>#}
+                        {#                        </span>#}
+                        {#                        <a>#}
+                        {#                            {{ form.execution_date }}#}
+                        {#                        </a>#}
                         <a onclick="getId(this)" id="DONE" type="submit" data-toggle="modal"
                            data-target="#confirmAction"
                            class="btn btn-sm btn-raised DONE ">

@@ -5,6 +5,7 @@ from django import forms
 from django.forms import ModelForm
 
 from core.models import Person
+from core.widgets import MDDateTimepicker
 from ezl import settings
 from lawsuit.forms import BaseForm
 from lawsuit.models import Movement, TypeMovement
@@ -131,8 +132,8 @@ class TaskDetailForm(ModelForm):
     execution_date = forms.DateTimeField(required=False,
                                          initial=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE)),
                                          label=u"Data de Cumprimento",
-                                         widget=forms.DateTimeInput(
-                                             attrs={'class': 'form-control', 'type': 'date'}
+                                         widget=MDDateTimepicker(
+                                             attrs={'class': 'form-control', 'type': 'text'}
                                              # format='%Y-%m-%d %H:%M:%S')
                                          ))
     notes = forms.CharField(

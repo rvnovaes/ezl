@@ -1,0 +1,52 @@
+{#<div class='input-group date' id='execution-date'>#}
+{#    <label>#}
+{#        <input type='text' class="form-control" type="{{ widget.type }}" name="{{ widget.name }}"#}
+{#                {% if widget.value != None %}#}
+{#               value="{{ widget.value }}"{% endif %}{% include "django/forms/widgets/attrs.html" %} />{{ widget.label }}#}
+{#    </label>#}
+{#    <span class="input-group-addon">#}
+{#                        <span class="glyphicon glyphicon-calendar"></span>#}
+{#                    </span>#}
+{#</div>#}
+{#<label>  {{ widget.label }}</label>#}
+<script>
+    $(function () {
+        $('#datetime').datetimepicker({
+            locale: 'pt-br',
+            tooltips: {
+                selectTime: 'seleciona horas e minutos',
+                selectYear: 'seleciona o ano',
+                selectMonth: 'select o mês',
+
+            },
+            {#            icons: {#}
+            {#                time: 'glyphicon glyphicon-time',#}
+            {#                date: 'glyphicon glyphicon-date',#}
+            {#                up: 'glyphicon glyphicon-chevron-up',#}
+            {#                down: 'glyphicon glyphicon-chevron-down',#}
+            {#                previous: 'glyphicon glyphicon-chevron-left',#}
+            {#                next: 'glyphicon glyphicon-chevron-right',#}
+            {#                today: 'glyphicon glyphicon-screenshot',#}
+            {#                clear: 'glyphicon glyphicon-trash',#}
+            {#                close: 'glyphicon glyphicon-remove'#}
+            {#            }#}
+        });
+    });
+</script>
+<span class="col-sm-4">
+    <span class="form-group is-empty">
+        <span class="input-group date" id="datetime">
+
+                <input type='text' class="form-control" type="{{ widget.type }}" name="{{ widget.name }}"
+                        {% if widget.value != None %}
+                       value="{{ widget.value }}"{% endif %} />
+{#            {{ widget.label }}#}
+{#            </label>#}
+{#            <input type="text" class="form-control">#}
+            <span class="input-group-addon">
+{#                        <i class="material-icons" style="color: #00aa9a">event</i>#}
+                <span class="material-icons event" style="color: #009688">event</span>
+                    </span>
+        </span>
+    </span>
+</span>

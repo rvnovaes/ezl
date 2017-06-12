@@ -1,6 +1,11 @@
-from django.forms.widgets import boolean_check, Input
+from django.forms.widgets import boolean_check, Input, DateTimeBaseInput
 from django.utils import six
 from django.utils.encoding import force_text
+
+
+class MDDateTimepicker(DateTimeBaseInput):
+    format_key = 'DATETIME_INPUT_FORMATS'
+    template_name = 'core/widgets/md_datetimepicker.html'
 
 
 class MDCheckboxInput(Input):
