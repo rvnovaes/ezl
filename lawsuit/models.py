@@ -74,6 +74,20 @@ class CourtDistrict(Audit):
 
     def __str__(self):
         return self.name
+        
+class CourtDivision(Audit):
+
+    legacy_code = models.CharField(max_length=255,verbose_name="Código Legado")
+    name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Vara")
+    
+
+    class Meta:
+        db_table = "court_division"
+        verbose_name = "Vara"
+        verbose_name_plural = "Varas"
+
+    def __str__(self):
+        return self.name
 
 
 class LawSuitInstance(Audit):
@@ -122,3 +136,19 @@ class Movement(Audit):
 
     def __str__(self):
         return self.legacy_code  # TODO verificar novos campos e refatorar o toString
+        
+class TypeTask(Audit):
+
+    legacy_code = models.CharField(max_length=255,verbose_name="Código Legado")
+    name = models.CharField(max_length=255, null=False, verbose_name="Tipo de Serviço")
+    
+
+    class Meta:
+        db_table = "type_task"
+        verbose_name = "Tipo de Serviço"
+        verbose_name_plural = "Tipos de Serviço"
+
+    def __str__(self):
+        return self.name
+ 
+       
