@@ -120,8 +120,6 @@ class Task(Audit):
 
 
 class Ecm(Audit):
-    path = models.FileField(upload_to='tasks/', max_length=255, unique=True, null=False)
-    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
-                                   verbose_name="Código Legado")
+    path = models.FileField(upload_to='GEDs/', max_length=255, unique=True, null=False)
     task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False,
-                             verbose_name="Movimentação")
+                             )
