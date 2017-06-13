@@ -9,7 +9,7 @@ from core.widgets import MDDateTimepicker
 from ezl import settings
 from lawsuit.forms import BaseForm
 from lawsuit.models import Movement, TypeMovement
-from task.models import Task, Ecm
+from task.models import Task
 
 
 class TaskForm(BaseForm):
@@ -170,7 +170,3 @@ class TaskDetailForm(ModelForm):
     #             #                           exclude={'create_user', 'alter_date', 'create_date', 'alter_user','is_active'})
 
 
-class EcmForm(BaseForm):
-    class Meta:
-        model = Ecm
-        fields = ['path', 'legacy_code', 'task']
