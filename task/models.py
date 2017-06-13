@@ -121,5 +121,4 @@ class Task(Audit):
 
 class Ecm(Audit):
     path = models.FileField(upload_to='GEDs/', max_length=255, unique=True, null=False)
-    task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False,
-                             )
+    task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False)
