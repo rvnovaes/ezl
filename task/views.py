@@ -58,6 +58,11 @@ class DashboardView(MultiTableMixin, TemplateView):
         'per_page': 5
     }
 
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        context['title_page'] = u"Dashboard do Correpondente"
+        return self.render_to_response(context)
+
     def load_task_by_status(self, status, person):
         global data
         if status == TaskStatus.OPEN:

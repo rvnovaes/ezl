@@ -8,10 +8,13 @@ from core.models import Person, Audit
 from lawsuit.models import Movement, TypeMovement, Folder
 
 # Dicionário para retornar o icone referente ao status da providencia
-icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'keyboard_return', 'DONE': 'done',
+icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assignment_return',
+             'DONE': 'assignment_turned_in',
              'REFUSED': 'assignment_late'}
-next_action = {'ACCEPTED': 'cumprir', 'OPEN': 'assignment', 'RETURN': 'keyboard_return', 'DONE': 'done',
-               'REFUSED': 'assignment_late'}
+
+
+# next_action = {'ACCEPTED': 'cumprir', 'OPEN': 'assignment', 'RETURN': 'keyboard_return', 'DONE': 'done',
+#                'REFUSED': 'assignment_late'}
 
 
 class TaskStatus(Enum):

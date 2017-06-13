@@ -56,11 +56,11 @@ class TaskForm(BaseForm):
     acceptance_date = forms.DateTimeField(required=False
                                           )
 
-    first_deadline_date = forms.DateTimeField(required=False
-                                              )
+    reminder_deadline_date = forms.DateTimeField(required=False
+                                                 )
 
-    second_deadline_date = forms.DateTimeField(required=False
-                                               )
+    final_deadline_date = forms.DateTimeField(required=False
+                                              )
 
     execution_date = forms.DateTimeField(required=False
                                          )
@@ -144,6 +144,7 @@ class TaskDetailForm(ModelForm):
             attrs={'class': 'form-control', 'type': 'text', 'cols': '5', 'id': 'textarea1'}
         )
     )
+
 
     # return_date = forms.DateTimeField(required=False
     #                                   )

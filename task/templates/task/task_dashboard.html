@@ -4,9 +4,11 @@
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
 {% block content %}
+    <div class="container form-group"><label class="is-focused"><h2>{{ title_page }}</h2></label></div>
     {% include 'core/widgets/messages.html' %}
     {% block table %}
         <div class="container">
+
 
         {% if table.page %}
             <div class="table-container">

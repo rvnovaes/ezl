@@ -11,7 +11,7 @@
 {#<label>  {{ widget.label }}</label>#}
 <script>
     $(function () {
-        $('#datetime').datetimepicker({
+        $('#{{ widget.name }}').datetimepicker({
             locale: 'pt-br',
             tooltips: {
                 selectTime: 'seleciona horas e minutos',
@@ -33,11 +33,11 @@
         });
     });
 </script>
-<span class="col-sm-4">
+<span class="col-sm-3">
     <span class="form-group is-empty">
-        <span class="input-group date" id="datetime">
+        <span class="input-group date" id="{{ widget.name }}">
 
-                <input type='text' class="form-control" type="{{ widget.type }}" name="{{ widget.name }}"
+                <input type='text' class="form-control text-center" type="{{ widget.type }}" name="{{ widget.name }}"
                         {% if widget.value != None %}
                        value="{{ widget.value }}"{% endif %} />
 {#            {{ widget.label }}#}
