@@ -13,9 +13,10 @@ from core.messages import new_success, update_success
 from core.models import Person
 from core.views import BaseCustomView
 from ezl import settings
-from task.forms import TaskForm, TaskDetailForm
-from task.models import Task, TaskStatus
+from task.forms import TaskForm, TaskDetailForm, EcmForm
+from task.models import Task, TaskStatus, Ecm
 from task.tables import TaskTable, DashboardStatusTable
+
 
 
 class TaskListView(LoginRequiredMixin, SingleTableView):
@@ -144,3 +145,9 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         form.save()
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
+
+
+class EcmCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+    model = Ecm
+    form_class = EcmForm
+    success_url = reverse_lazy('instance_list')

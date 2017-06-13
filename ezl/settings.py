@@ -73,6 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media'
             ],
         },
     },
@@ -135,6 +136,9 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static/'),
     # ("ezl_static", os.path.join(BASE_DIR, 'static/')),
 )
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # STATIC_ROOT = '/opt/mta/easy_lawyer_django/static/'
 LOGIN_REDIRECT_URL = reverse_lazy('dashboard')

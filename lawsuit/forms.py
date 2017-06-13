@@ -6,12 +6,12 @@ from django.forms.models import fields_for_model
 # from django.contrib.admin.widgets import AdminDateWidget #TODO Verificar se será utilizado datepicker
 from core.fields import CustomBooleanField
 from core.models import Person, State
-from .models import TypeMovement, Instance, LawSuit, Movement, Folder, CourtDistrict, LawSuitInstance, CourtDivision,TypeTask
+from .models import TypeMovement, Instance, LawSuit, Movement, Folder, CourtDistrict, LawSuitInstance, CourtDivision, \
+    TypeTask
 
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
 class BaseForm(ModelForm):
-
     is_active = CustomBooleanField(
         required=False,
     )
@@ -57,7 +57,6 @@ class TypeMovementForm(BaseForm):
 
 
 class InstanceForm(BaseForm):
-
     class Meta:
         model = Instance
         fields = ['name', 'is_active']
@@ -140,7 +139,6 @@ class CourtDivisionForm(BaseForm):
         fields = fields_for_model(CourtDivision,
                                   exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
 
-    
     legacy_code = forms.CharField(max_length=255, required=True)
 
 
@@ -179,14 +177,12 @@ class LawSuitInstanceForm(BaseForm):
             max_length=255,
             required=True
         )
-        
+
+
 class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
         fields = fields_for_model(TypeTask,
                                   exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
 
-    
     legacy_code = forms.CharField(max_length=255, required=True)
-    
-    

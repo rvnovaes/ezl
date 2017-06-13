@@ -1,4 +1,4 @@
-from asyncio import Task
+# from asyncio import Task
 from enum import Enum
 
 from django.db import models
@@ -117,3 +117,11 @@ class Task(Audit):
         # def name_type_service(self):
         #     type_service = TypeMovement.objects.get(id=self.type_movement_id)
         #     return type_service
+
+
+class Ecm(Audit):
+    path = models.FileField(upload_to='tasks/', max_length=255, unique=True, null=False)
+    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
+                                   verbose_name="Código Legado")
+    task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False,
+                             verbose_name="Movimentação")
