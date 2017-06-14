@@ -11,35 +11,59 @@
 {#<label>  {{ widget.label }}</label>#}
 <script>
     $(function () {
+        {#        $('#{{ widget.name }}').datetimepicker({#}
+        {#            disabledDates: [#}
+        {#                moment("2017-06-15"),#}
+        {#                new Date(2017, 11 - 1, 1-30),#}
+        {#                "11/22/2013 00:53"#}
+        {#            ]#}
+        {#        });#}
+
         $('#{{ widget.name }}').datetimepicker({
-            locale: 'pt-br',
+            {#            locale: 'pt-br',#}
             tooltips: {
                 selectTime: 'seleciona horas e minutos',
                 selectYear: 'seleciona o ano',
                 selectMonth: 'select o mês',
 
+
             },
-            {#            icons: {#}
-            {#                time: 'glyphicon glyphicon-time',#}
-            {#                date: 'glyphicon glyphicon-date',#}
-            {#                up: 'glyphicon glyphicon-chevron-up',#}
-            {#                down: 'glyphicon glyphicon-chevron-down',#}
-            {#                previous: 'glyphicon glyphicon-chevron-left',#}
-            {#                next: 'glyphicon glyphicon-chevron-right',#}
-            {#                today: 'glyphicon glyphicon-screenshot',#}
-            {#                clear: 'glyphicon glyphicon-trash',#}
-            {#                close: 'glyphicon glyphicon-remove'#}
-            {#            }#}
-        });
+            {% if widget.min_date %}
+                minDate: moment("{{ widget.min_date }}", "DD_MM_YYYY HH:mm").locale("pt-br").format(), {% endif %}
+            maxDate: moment().format(),
+            {#            disabledDates: [#}
+            {#                 new Date(2017, 6, 16)#}
+            {#                moment("14-06-2017", "DD_MM_YYYY").locale("pt-br").format(),#}
+            {#                moment("15-06-2017", "D_M_YYYY").locale("pt-br").format('ddd'),#}
+            {#                moment('2017-06-15 11:31:23 PM', 'YYYY-MM-DD hh:mm:ss a')#}
+            {#            ],#}
+            icons: {
+                time: 'glyphicon glyphicon-time',
+                date: 'glyphicon glyphicon-date',
+                up: 'glyphicon glyphicon-chevron-up',
+                down: 'glyphicon glyphicon-chevron-down',
+                previous: 'glyphicon glyphicon-chevron-left',
+                next: 'glyphicon glyphicon-chevron-right',
+                today: 'glyphicon glyphicon-screenshot',
+                clear: 'glyphicon glyphicon-trash',
+                close: 'glyphicon glyphicon-remove'
+            }
+        })
+        ;
     });
 </script>
 <span class="col-sm-3">
+
     <span class="form-group is-empty">
         <span class="input-group date" id="{{ widget.name }}">
 
-                <input type='text' class="form-control text-center" type="{{ widget.type }}" name="{{ widget.name }}"
-                        {% if widget.value != None %}
-                       value="{{ widget.value }}"{% endif %} />
+                <input class="form-control text-center" type="text"
+                       name="{{ widget.name }}"
+                        {% if widget.value != None %} value="{{ widget.value }}" {% endif %}
+
+
+
+                />
 {#            {{ widget.label }}#}
 {#            </label>#}
 {#            <input type="text" class="form-control">#}

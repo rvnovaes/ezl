@@ -64,7 +64,7 @@ class DashboardView(MultiTableMixin, TemplateView):
         return self.render_to_response(context)
 
     def load_task_by_status(self, status, person):
-        global data
+        data = {}
         if status == TaskStatus.OPEN:
             data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
                                        refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True)

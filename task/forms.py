@@ -73,6 +73,10 @@ class TaskForm(BaseForm):
 
 
 class TaskDetailForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+        self.fields['execution_date'].widget.min_date = self.instance.acceptance_date
+
     class Meta:
         model = Task
         # fields = ['legacy_code', 'movement', 'person_asked_by', "person_executed_by",
@@ -134,7 +138,8 @@ class TaskDetailForm(ModelForm):
                                          initial=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE)),
                                          label=u"Data de Cumprimento",
                                          widget=MDDateTimepicker(
-                                             attrs={'class': 'form-control', 'type': 'text'}
+                                             # min_date="12-06-2017"
+                                             # attrs={'class': 'form-control', 'type': 'text'}
                                              # format='%Y-%m-%d %H:%M:%S')
                                          ))
     notes = forms.CharField(
@@ -168,5 +173,3 @@ class TaskDetailForm(ModelForm):
     #             pass
     #             # fields = fields_for_model(Task,
     #             #                           exclude={'create_user', 'alter_date', 'create_date', 'alter_user','is_active'})
-
-
