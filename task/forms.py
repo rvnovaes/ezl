@@ -9,7 +9,7 @@ from core.widgets import MDDateTimepicker
 from ezl import settings
 from lawsuit.forms import BaseForm
 from lawsuit.models import Movement, TypeMovement
-from task.models import Task
+from task.models import Task, Ecm
 
 
 class TaskForm(BaseForm):
@@ -173,3 +173,11 @@ class TaskDetailForm(ModelForm):
     #             pass
     #             # fields = fields_for_model(Task,
     #             #                           exclude={'create_user', 'alter_date', 'create_date', 'alter_user','is_active'})
+
+
+class EcmForm(BaseForm):
+    class Meta:
+        model = Ecm
+        fields = ['path', 'task']
+
+    path = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))

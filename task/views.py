@@ -4,7 +4,7 @@ import pytz
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, CreateView, UpdateView, TemplateView
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
@@ -13,8 +13,8 @@ from core.messages import new_success, update_success
 from core.models import Person
 from core.views import BaseCustomView
 from ezl import settings
-from task.forms import TaskForm, TaskDetailForm
-from task.models import Task, TaskStatus
+from task.forms import TaskForm, TaskDetailForm, EcmForm
+from task.models import Task, TaskStatus, Ecm
 from task.tables import TaskTable, DashboardStatusTable
 
 
@@ -143,4 +143,22 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         form = TaskDetailForm(self.request.POST, instance=task)
         form.save()
         super(TaskDetailView, self).form_valid(form)
+        return HttpResponseRedirect(self.success_url)
+
+
+class EcmCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
+    model = Ecm
+    form_class = EcmForm
+    success_url = reverse_lazy('instance_list')
+
+    def post(self, request, *args, **kwargs):
+        files = request.FILES.getlist('path')
+        task = 26
+        for file in files:
+            ecm = Ecm(path=file, task=Task.objects.get(id=task),
+                      create_user_id=str(request.user.id),
+                      create_date=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
+                      )
+            ecm.save()
+
         return HttpResponseRedirect(self.success_url)
