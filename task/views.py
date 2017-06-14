@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 
 import pytz
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -13,8 +13,8 @@ from core.messages import new_success, update_success
 from core.models import Person
 from core.views import BaseCustomView
 from ezl import settings
-from task.forms import TaskForm, TaskDetailForm, EcmForm
-from task.models import Task, TaskStatus, Ecm
+from task.forms import TaskForm, TaskDetailForm
+from task.models import Task, TaskStatus
 from task.tables import TaskTable, DashboardStatusTable
 
 
@@ -144,8 +144,3 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         form.save()
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
-
-
-    model = Ecm
-    form_class = EcmForm
-    success_url = reverse_lazy('instance_list')
