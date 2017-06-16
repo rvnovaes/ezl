@@ -1,5 +1,6 @@
 from django.forms.widgets import boolean_check, Input, DateTimeBaseInput
 from django.utils import six
+from django.utils import timezone
 from django.utils.encoding import force_text
 
 
@@ -10,7 +11,12 @@ class MDDateTimepicker(DateTimeBaseInput):
     def get_context(self, name, value, attrs):
         context = super(Input, self).get_context(name, value, attrs)
         context['widget']['type'] = self.input_type
-        context['widget']['min_date'] = self.min_date.strftime('%d/%m/%Y %H:%M')
+        # timezone_local = pytz.timezone(settings.TIME_ZONE)
+        # utc = pytz.utc
+        # time_local = utc.localize(self.min_date).astimezone(timezone_local)
+        # d1 = pytz.timezone(settings.TIME_ZONE).localize(self.min_date)
+        # d3 = timezone.localtime(self.min_date)
+        context['widget']['min_date'] = timezone.localtime(self.min_date).strftime('%d/%m/%Y %H:%M')
         return context
 
     def __init__(self, attrs=None, format=None, min_date=None):

@@ -30,8 +30,8 @@
             },
             ignoreReadonly: true,
             {% if widget.min_date %}
-                minDate: moment("{{ widget.min_date }}", "DD_MM_YYYY HH:mm").locale("pt-br").format(), {% endif %}
-            maxDate: moment().format(),
+                minDate: moment("{{ widget.min_date }}", "DD_MM_YYYY HH:mm").tz("America/Sao_Paulo").format(), {% endif %}
+            maxDate: moment().tz("America/Sao_Paulo").format()
             {#            disabledDates: [#}
             {#                 new Date(2017, 6, 16)#}
             {#                moment("14-06-2017", "DD_MM_YYYY").locale("pt-br").format(),#}

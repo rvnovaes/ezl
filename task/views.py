@@ -4,8 +4,9 @@ import pytz
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import DeleteView, CreateView, UpdateView, TemplateView
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
@@ -123,7 +124,10 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         task = form.instance
-        now_date = datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
+        # now3 =
+        now2 = timezone.now()
+        # now_date = datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
+        now_date = timezone.now()
         action = self.request.POST['action']
 
         if action == TaskStatus.ACCEPTED.name:

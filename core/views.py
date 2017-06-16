@@ -8,7 +8,6 @@ from django.db.models import ProtectedError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
-# http://stackoverflow.com/questions/6069070/how-to-use-permission-required-decorators-on-django-class-based-views
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django_tables2 import SingleTableView, RequestConfig
