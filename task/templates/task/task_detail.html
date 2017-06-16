@@ -1,7 +1,7 @@
 {% extends 'inicial.html' %}
 {% load staticfiles %}
 {#{% load formset_tags %}#}
-
+{% load tz %}
 {% block content %}
     <div class="container">
         <form class="container" action="" method="post">{% csrf_token %}
@@ -49,9 +49,9 @@
                         <label>Detalhes do Serviço: </label>
                         <br>
                         <span class="type-LineString "><b>Prazo: </b>
-                            {{ form.instance.final_deadline_date|default_if_none:"" }}</span>
+                            {{ form.instance.final_deadline_date|localtime|default_if_none:"" }}</span>
                         <br>
-                        <span>Recebida em: {{ form.instance.delegation_date|default_if_none:"" }}</span>
+                        <span>Recebida em: {{ form.instance.delegation_date|localtime|default_if_none:"" }}</span>
                         <br>
                         <span>Serviço solicitado: {{ form.instance.type_movement|lower|capfirst|default_if_none:"" }}</span>
 
