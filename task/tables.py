@@ -31,6 +31,7 @@ class TaskTable(tables.Table):
 
 
 class DashboardStatusTable(tables.Table):
+
     def __init__(self, *args, service="Serviço", client="Cliente", legacy_code="Número", title="", status="",
                  **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,6 +41,7 @@ class DashboardStatusTable(tables.Table):
         self.base_columns['legacy_code'].verbose_name = legacy_code
         self.title = title
         self.status = status
+        self.order_by = '-alter_date'
         self.length = self.rows.__len__()
 
     legacy_code = tables.LinkColumn(viewname='task_detail', attrs={'a': {'target': 'task_detail'}}, args=[A('pk')])

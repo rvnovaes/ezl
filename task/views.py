@@ -95,19 +95,21 @@ class DashboardView(MultiTableMixin, TemplateView):
         person = Person.objects.get(auth_user=self.request.user)
         if person:
             return_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.RETURN, person), title="Retornadas",
-                                                status=TaskStatus.RETURN)
+                                                status=TaskStatus.RETURN, order_by="-alter_date")
 
             accepted_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.ACCEPTED, person),
-                                                  title="A Cumprir", status=TaskStatus.ACCEPTED)
+                                                  title="A Cumprir", status=TaskStatus.ACCEPTED,
+                                                  order_by="-alter_date")
 
             open_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.OPEN, person), title="Em Aberto",
-                                              status=TaskStatus.OPEN)
+                                              status=TaskStatus.OPEN, order_by="-alter_date")
 
             done_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.DONE, person), title="Cumpridas",
-                                              status=TaskStatus.DONE)
+                                              status=TaskStatus.DONE, order_by="-alter_date")
 
             refused_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.REFUSED, person),
-                                                 title="Recusadas", status=TaskStatus.REFUSED)
+                                                 title="Recusadas", status=TaskStatus.REFUSED, order_by="-alter_date"
+                                                 )
 
             tables = [return_table, accepted_table, open_table, done_table, refused_table]
         else:

@@ -70,7 +70,7 @@ class Task(Audit):
     #
     class Meta:
         db_table = 'task'
-        ordering = ['-id']
+        ordering = ['-alter_date']
         verbose_name = "Providência"
         verbose_name_plural = "Providências"
 
