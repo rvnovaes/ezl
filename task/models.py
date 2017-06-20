@@ -18,7 +18,12 @@ icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assi
 
 
 class TaskStatus(Enum):
-    __ordering__ = ['accepted', 'open', 'return', 'done', 'refused']
+    # __ordering__ = ['accepted', 'open', 'return', 'done', 'refused']
+    ACCEPTED = u"A Cumprir"
+    OPEN = u"Em Aberto"
+    RETURN = u"Retorno"
+    DONE = u"Cumprida"
+    REFUSED = u"Recusada"
 
     def get_icon(self):
         return icon_dict[self.name]
@@ -28,17 +33,26 @@ class TaskStatus(Enum):
     def __str__(self):
         return str(self.value)
 
-    ACCEPTED = u"A Cumprir"
-    OPEN = u"Em Aberto"
-    RETURN = u"Retorno"
-    DONE = u"Cumprida"
-    REFUSED = u"Recusada"
+    # @classmethod
+    # def choices(cls):
+    #     # get all members of the class
+    #     members = inspect.getmembers(cls, lambda m: not (inspect.isroutine(m)))
+    #     # filter down to just properties
+    #     props = [m for m in members if not (m[0][:2] == '__')]
+    #     # format into django choice tuple
+    #     choices = tuple([(str(p[1].value), p[0]) for p in props])
+    #     return choices
+    @classmethod
+    def choices(cls):
+        return [(x.value, x.name) for x in cls]
 
-    # 'Em Aberto' = 1  # Providencias que foram delegadas
-    # (1, 'Aceita/Retorno'),
-    #  Retorno (return) / Aceitas (accepted) providencias que foram executadas com sucesso ou retornadas ao correspondente por pendencias
-    # (2, 'Recusada'),  # providencias recusadas pelo correposndente
-    # (3, 'Cumprida'),  # providencias executadas sem nenhuma pendencia
+
+
+        # 'Em Aberto' = 1  # Providencias que foram delegadas
+        # (1, 'Aceita/Retorno'),
+        #  Retorno (return) / Aceitas (accepted) providencias que foram executadas com sucesso ou retornadas ao correspondente por pendencias
+        # (2, 'Recusada'),  # providencias recusadas pelo correposndente
+        # (3, 'Cumprida'),  # providencias executadas sem nenhuma pendencia
 
 
 class Task(Audit):
@@ -123,17 +137,17 @@ class Ecm(Audit):
     path = models.FileField(upload_to='GEDs/', max_length=255, unique=True, null=False)
     task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False)
 
+
 # id_task fk
 # status enum
 # notes text
 # herdar da tabela audit_create
 
-# class TaskHistory(AuditCreate):
-#     task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False)
-#     description = models.TextField(null=True, blank=True, verbose_name=u"Descrição")
-#     notes = models.TextField(null=True, blank=True, verbose_name=u"Observações")
-#     status = models.CharField(max_length=10, choices=TaskStatus)
-#
-#     class Meta:
-#         verbose_name = "Histórico da Providência"
-#         verbose_name_plural = "Histórico das Providências"
+class TaskHistory(AuditCreate):
+    task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False)
+    notes = models.TextField(null=True, blank=True, verbose_name=u"Observações")
+    status = models.CharField(max_length=10, choices=TaskStatus.choices())
+
+    class Meta:
+        verbose_name = "Histórico da Providência"
+        verbose_name_plural = "Histórico das Providências"
