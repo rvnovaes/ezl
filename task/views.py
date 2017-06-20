@@ -15,7 +15,7 @@ from core.models import Person
 from core.views import BaseCustomView
 from ezl import settings
 from task.forms import TaskForm, TaskDetailForm, EcmForm
-from task.models import Task, TaskStatus, Ecm
+from task.models import Task, TaskStatus, Ecm, TaskHistory
 from task.tables import TaskTable, DashboardStatusTable
 
 
@@ -127,7 +127,8 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         task = form.instance
         # now3 =
-        now2 = timezone.now()
+        # now2 = timezone.now()
+        notes = form.cleaned_data['notes']
         # now_date = datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
         now_date = timezone.now()
         action = self.request.POST['action']
@@ -139,15 +140,23 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         elif action == TaskStatus.DONE.name:
             if form.cleaned_data['execution_date']:
                 task.execution_date = form.cleaned_data['execution_date']
+                task.return_date = None
                 # else:
                 #     task.execution_date =
         elif action == TaskStatus.RETURN.name:
             task.execution_date = None
             task.refused_date = now_date
+
         task.alter_date = now_date
-        task.alter_user = User.objects.get(id=self.request.user.id)
+        user = User.objects.get(id=self.request.user.id)
+        task.alter_user = user
         form = TaskDetailForm(self.request.POST, instance=task)
         form.save()
+        # salvando snapshot com novo status
+        status = TaskStatus[action]
+        task_history = TaskHistory(task=task, create_user=user, create_date=now_date, status=status,
+                                   notes=notes)
+        task_history.save()
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
