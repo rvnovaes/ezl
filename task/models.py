@@ -4,7 +4,7 @@ from enum import Enum
 from django.db import models
 from django.utils import timezone
 
-from core.models import Person, Audit
+from core.models import Person, Audit, AuditCreate
 from lawsuit.models import Movement, TypeMovement, Folder
 
 # Dicionário para retornar o icone referente ao status da providencia
@@ -63,7 +63,7 @@ class Task(Audit):
     return_date = models.DateTimeField(null=True, verbose_name="Data de Retorno")
     refused_date = models.DateTimeField(null=True, verbose_name="Data de Recusa")
 
-    notes = models.TextField(null=True, blank=True, verbose_name=u"Observações")
+    # notes = models.TextField(null=True, blank=True, verbose_name=u"Observações")
 
     description = models.TextField(null=True, blank=True, verbose_name=u"Descrição do serviço")
 
@@ -122,3 +122,18 @@ class Task(Audit):
 class Ecm(Audit):
     path = models.FileField(upload_to='GEDs/', max_length=255, unique=True, null=False)
     task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False)
+
+# id_task fk
+# status enum
+# notes text
+# herdar da tabela audit_create
+
+# class TaskHistory(AuditCreate):
+#     task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False)
+#     description = models.TextField(null=True, blank=True, verbose_name=u"Descrição")
+#     notes = models.TextField(null=True, blank=True, verbose_name=u"Observações")
+#     status = models.CharField(max_length=10, choices=TaskStatus)
+#
+#     class Meta:
+#         verbose_name = "Histórico da Providência"
+#         verbose_name_plural = "Histórico das Providências"

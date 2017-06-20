@@ -83,7 +83,7 @@ class TaskDetailForm(ModelForm):
         #           'type_movement',
         #           'delegation_date', 'acceptance_date', "reminder_deadline_date",
         #           "final_deadline_date",
-        fields = ['execution_date', 'notes']
+        fields = ['execution_date']
         # 'return_date', 'refused_date', \
         # 'create_user', 'alter_date',
         # 'alter_user', 'is_active']
