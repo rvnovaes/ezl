@@ -7,7 +7,6 @@ from django.db import models
 from django.utils import timezone
 
 from core.models import Person, Audit, AuditCreate
-from ezl.settings import BASE_DIR
 from lawsuit.models import Movement, TypeMovement, Folder
 
 # Dicionário para retornar o icone referente ao status da providencia
@@ -102,7 +101,7 @@ class Task(Audit):
         if acceptance_date is not None and refused_date is None and execution_date is None and return_date is None:
             return TaskStatus.ACCEPTED
         # return_date IS NOT NULL
-        elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is not None:
+        elif acceptance_date is not None and refused_date is None and execution_date is None and return_date is not None:
             return TaskStatus.RETURN
         # acceptance_date IS NULL
         elif acceptance_date is None and refused_date is None and execution_date is None and return_date is None:
