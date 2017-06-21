@@ -1,3 +1,28 @@
+#cell-table {
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+#row-file{
+    display: flex;
+    align-items: center;
+}
+
+.spaceFile {
+    height: 10px !important;
+}
+
+.lineFile {
+    background-color: #f6f6f6 !important;
+}
+
+#file-view {
+    padding-bottom: 0 !important;
+    padding-top: 0 !important;
+    background-color: #f6f6f6 !important;
+    border: none !important;
+}
+
 #center {
     margin-left: auto !important;
     margin-right: auto !important;
@@ -124,3 +149,12 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
     vertical-align: middle !important;
 }
 
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 30px;
+  height: 30px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}

@@ -1,6 +1,8 @@
 # from asyncio import Task
+import os
 from enum import Enum
 
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
@@ -99,7 +101,7 @@ class Task(Audit):
         if acceptance_date is not None and refused_date is None and execution_date is None and return_date is None:
             return TaskStatus.ACCEPTED
         # return_date IS NOT NULL
-        elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is not None:
+        elif acceptance_date is not None and refused_date is None and execution_date is None and return_date is not None:
             return TaskStatus.RETURN
         # acceptance_date IS NULL
         elif acceptance_date is None and refused_date is None and execution_date is None and return_date is None:
@@ -133,15 +135,27 @@ class Task(Audit):
         #     return type_service
 
 
+def get_dir_name(self, filename):
+    upload_dir = os.path.join('opt', 'media', 'GEDs', str(self.task_id))
+    if not os.path.exists(upload_dir):
+        os.makedirs(upload_dir)
+    path = os.path.join('GEDs', str(self.task_id), filename)
+    return path
+
+
 class Ecm(Audit):
-    path = models.FileField(upload_to='GEDs/', max_length=255, unique=True, null=False)
-    task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False)
+    path = models.FileField(upload_to=get_dir_name, max_length=255, unique=True, null=False)
+    task = models.ForeignKey(Task, blank=False, null=False)
 
+    # Retorna o nome do arquivo no Path, para renderizar no tamplate
+    @property
+    def filename(self):
+        return os.path.basename(self.path.path)
 
-# id_task fk
-# status enum
-# notes text
-# herdar da tabela audit_create
+    @property
+    def user(self):
+        return User.objects.get(username=self.path.instance.create_user)
+
 
 class TaskHistory(AuditCreate):
     task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False)
