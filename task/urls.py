@@ -11,5 +11,6 @@ urlpatterns = [
     url(r'^providencias/(?P<pk>[0-9]+)/excluir$', login_required(views.TaskDeleteView.as_view()),
         name='task_delete'),
     url(r'^ecm/(?P<pk>[0-9]+)/$', login_required(views.EcmCreateView.as_view()), name='ecm_add'),
-    url(r'^ecm/(?P<pk>[0-9]+)/excluir$', views.delete_ecm, name='delete_ecm')
+    url(r'^ecm/(?P<pk>[0-9]+)/excluir$', views.delete_ecm, name='delete_ecm'),
+    url(r'^search/$', login_required(views.TaskListSearch), name='search'), 
 ]
