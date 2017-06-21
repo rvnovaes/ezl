@@ -49,7 +49,6 @@ class TaskStatus(Enum):
         return [(x.value, x.name) for x in cls]
 
 
-
         # 'Em Aberto' = 1  # Providencias que foram delegadas
         # (1, 'Aceita/Retorno'),
         #  Retorno (return) / Aceitas (accepted) providencias que foram executadas com sucesso ou retornadas ao correspondente por pendencias

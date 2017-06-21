@@ -1,10 +1,13 @@
 import os
+# from .utils import PagedFilteredTableView
+from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import DeleteView, CreateView, UpdateView, TemplateView
@@ -16,80 +19,77 @@ from core.views import BaseCustomView
 from task.forms import TaskForm, TaskDetailForm, EcmForm
 from task.models import Task, TaskStatus, Ecm, TaskHistory
 from task.tables import TaskTable, DashboardStatusTable
-
 from .filters import TaskFilter
-from django.shortcuts import render
-#from .utils import PagedFilteredTableView
-from datetime import datetime
-from django.utils import timezone
 
-def TaskFilterAtt(request,person):
 
-#{'reminder_init_day': ['0'], 'accepted': ['on'], 'deadline_init_year': ['0'], 'done': ['on'], 'deadline_end_year': ['0'], 'deadline_init_day': ['0'], 'reminder_init_month': ['0'], 'deadline_end_day': ['0'], 'deadline_init_month': ['0'], 'refused': ['on'], 'cliente': [''], 'deadline_end_month': ['0'], 'reminder_end_year': ['0'], 'reminder_end_day': ['0'], 'reminder_init_year': ['0'], 'openned': ['on'], 'returned': ['on'], 'reminder_end_month': ['0']}
-    
+def TaskFilterAtt(request, person):
+    # {'reminder_init_day': ['0'], 'accepted': ['on'], 'deadline_init_year': ['0'], 'done': ['on'], 'deadline_end_year': ['0'], 'deadline_init_day': ['0'], 'reminder_init_month': ['0'], 'deadline_end_day': ['0'], 'deadline_init_month': ['0'], 'refused': ['on'], 'cliente': [''], 'deadline_end_month': ['0'], 'reminder_end_year': ['0'], 'reminder_end_day': ['0'], 'reminder_init_year': ['0'], 'openned': ['on'], 'returned': ['on'], 'reminder_end_month': ['0']}
+
     task_list = Task.objects.none()
-    
+
     if person.is_correspondent:
-          task_list = Task.objects.filter(person_executed_by=person.id)
+        task_list = Task.objects.filter(person_executed_by=person.id)
     else:
-          task_list = Task.objects.filter(person_asked_by=person.id)
-        
+        task_list = Task.objects.filter(person_asked_by=person.id)
+
     if not bool(task_list):
-        return task_list     
-    
+        return task_list
+
     del_datetime_init = None
     del_datetime_end = None
     rem_datetime_init = None
     rem_datetime_end = None
-    
-    
-    #if request.get('cliente') != '':
+
+    # if request.get('cliente') != '':
     #    task_list &= Task.objects.filter(client=request.get('cliente'))
-    
-    
-    if request.get('deadline_init_year') != '0' and request.get('deadline_init_month') != '0' and request.get('deadline_init_day') != '0': 
-    
-        del_datetime_init = datetime(int(request.get('deadline_init_year')),int(request.get('deadline_init_month')),int(request.get('deadline_init_day')))
-        
- 
-    
-    if request.get('deadline_end_year') != '0' and request.get('deadline_end_month') != '0' and request.get('deadline_end_day') != '0': 
-        
-        del_datetime_end = datetime(int(request.get('deadline_end_year')),int(request.get('deadline_end_month')),int(request.get('deadline_end_day')))
-        
-
-    if request.get('reminder_init_year') != '0' and request.get('reminder_init_month') != '0' and request.get('reminder_init_day') != '0': 
-            rem_datetime_init = datetime(int(request.get('reminder_init_year')),int(request.get('reminder_init_month')),int(request.get('reminder_init_day')))
-
-    if request.get('reminder_end_year') != '0' and request.get('reminder_end_month') != '0' and request.get('reminder_end_day') != '0': 
-            rem_datetime_end = datetime(int(request.get('reminder_end_year')),int(request.get('reminder_end_month')),int(request.get('reminder_end_day')))
 
 
-    
+    if request.get('deadline_init_year') != '0' and request.get('deadline_init_month') != '0' and request.get(
+            'deadline_init_day') != '0':
+        del_datetime_init = datetime(int(request.get('deadline_init_year')), int(request.get('deadline_init_month')),
+                                     int(request.get('deadline_init_day')))
+
+    if request.get('deadline_end_year') != '0' and request.get('deadline_end_month') != '0' and request.get(
+            'deadline_end_day') != '0':
+        del_datetime_end = datetime(int(request.get('deadline_end_year')), int(request.get('deadline_end_month')),
+                                    int(request.get('deadline_end_day')))
+
+    if request.get('reminder_init_year') != '0' and request.get('reminder_init_month') != '0' and request.get(
+            'reminder_init_day') != '0':
+        rem_datetime_init = datetime(int(request.get('reminder_init_year')), int(request.get('reminder_init_month')),
+                                     int(request.get('reminder_init_day')))
+
+    if request.get('reminder_end_year') != '0' and request.get('reminder_end_month') != '0' and request.get(
+            'reminder_end_day') != '0':
+        rem_datetime_end = datetime(int(request.get('reminder_end_year')), int(request.get('reminder_end_month')),
+                                    int(request.get('reminder_end_day')))
+
     if 'openned' in request:
-            task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
-                                       refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True)
+        task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
+                                         refused_date__isnull=True, execution_date__isnull=True,
+                                         return_date__isnull=True)
     if 'accepted' in request:
-            task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                       refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True)
+        task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
+                                         refused_date__isnull=True, execution_date__isnull=True,
+                                         return_date__isnull=True)
     if 'refused' in request:
-            task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
-                                       refused_date__isnull=False, execution_date__isnull=True,
-                                       return_date__isnull=True)
+        task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
+                                         refused_date__isnull=False, execution_date__isnull=True,
+                                         return_date__isnull=True)
     if 'done' in request:
-            task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                       refused_date__isnull=True, execution_date__isnull=False,
-                                       return_date__isnull=True)
+        task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
+                                         refused_date__isnull=True, execution_date__isnull=False,
+                                         return_date__isnull=True)
     if 'returned' in request:
-            task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                       refused_date__isnull=True, execution_date__isnull=True,
-                                       return_date__isnull=False)                                  
-     
-     
-    #task_list &= Task.objects.filter( final_deadline_date__isnull = False, final_deadline_date__range=(del_datetime_init,del_datetime_end))
-    #task_list &= Task.objects.filter( reminder_deadline_date__isnull=False,reminder_deadline_date__range=
+        task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
+                                         refused_date__isnull=True, execution_date__isnull=True,
+                                         return_date__isnull=False)
+
+
+        # task_list &= Task.objects.filter( final_deadline_date__isnull = False, final_deadline_date__range=(del_datetime_init,del_datetime_end))
+    # task_list &= Task.objects.filter( reminder_deadline_date__isnull=False,reminder_deadline_date__range=
     #                               (rem_datetime_init,rem_datetime_end))                                 
-    
+
     if request.get('cliente') != '':
 
         wanted_items = set()
@@ -97,28 +97,27 @@ def TaskFilterAtt(request,person):
             if str(i.client) == request.get('cliente'):
                 wanted_items.add(i.pk)
 
-        task_list = Task.objects.filter(pk__in = wanted_items)
-    
-    
+        task_list = Task.objects.filter(pk__in=wanted_items)
+
     return task_list
+
 
 def TaskListSearch(request):
     task_list = Task.objects.none()
-    
+
     person = Person.objects.get(auth_user=request.user)
     if person.is_correspondent:
-          task_list = Task.objects.filter(person_executed_by=person.id)
+        task_list = Task.objects.filter(person_executed_by=person.id)
     else:
-          task_list = Task.objects.filter(person_asked_by=person.id)
-    
-    
+        task_list = Task.objects.filter(person_asked_by=person.id)
+
     if bool(request.GET):
-        task_list = TaskFilterAtt(request.GET,person)       
-           
+        task_list = TaskFilterAtt(request.GET, person)
+
     task_filter = TaskFilter(request=request.GET, queryset=task_list)
-    print("Query",request.GET,"Task List",task_list)
-    
-    return render(request, 'task/search.html', {'filter': task_filter}) #pode retornar qualquer lista aqui
+    print("Query", request.GET, "Task List", task_list)
+
+    return render(request, 'task/search.html', {'filter': task_filter})  # pode retornar qualquer lista aqui
 
 
 class TaskListView(LoginRequiredMixin, SingleTableView):
