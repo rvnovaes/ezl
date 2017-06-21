@@ -1,10 +1,12 @@
+import os
 from datetime import datetime
 
 import pytz
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import DeleteView, CreateView, UpdateView, TemplateView
@@ -160,6 +162,11 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
+    def get_context_data(self, **kwargs):
+        context = super(TaskDetailView, self).get_context_data(**kwargs)
+        context['geds'] = Ecm.objects.filter(task_id=self.object.id)
+        return context
+
 
 class EcmCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     model = Ecm
@@ -168,12 +175,41 @@ class EcmCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 
     def post(self, request, *args, **kwargs):
         files = request.FILES.getlist('path')
-        task = 26
+        task = kwargs['pk']
+
         for file in files:
-            ecm = Ecm(path=file, task=Task.objects.get(id=task),
+            ecm = Ecm(path=file,
+                      task=Task.objects.get(id=task),
                       create_user_id=str(request.user.id),
-                      create_date=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
+                      create_date=timezone.now()
                       )
             ecm.save()
+            data = {'success': True,
+                    'id': ecm.id,
+                    'name': str(file),
+                    'user': str(self.request.user),
+                    'username': str(self.request.user.first_name + ' ' + self.request.user.last_name),
+                    'filename': str(os.path.basename(ecm.path.path)),
+                    'task_id': str(task)
+                    }
+            return JsonResponse(data)
 
-        return HttpResponseRedirect(self.success_url)
+
+@login_required
+def delete_ecm(request, pk):
+    try:
+        # query = Ecm.objects.filter(id=pk).delete()
+        query = Ecm.objects.filter(id=pk)
+        task = query.values('task_id').first()
+        query.delete()
+        num_ged = Ecm.objects.filter(task_id=task['task_id']).count()
+        data = {'is_deleted': True,
+                'num_ged': num_ged
+                }
+        return JsonResponse(data)
+
+    except ...:
+        data = {'is_deleted': False,
+                'num_ged': num_ged
+                }
+        return JsonResponse(data)

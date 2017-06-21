@@ -16,4 +16,5 @@ urlpatterns = [
                   url(r'^accounts/', include('allauth.urls')),
                   url(r'^dashboard/$', login_required(DashboardView.as_view()), name='dashboard'),
                   url(r'^dashboard/(?P<pk>[0-9]+)/$', login_required(TaskDetailView.as_view()), name='task_detail'),
-              ] + static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static'))
+              ] + static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static')) + static(
+    settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
