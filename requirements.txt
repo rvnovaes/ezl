@@ -8,3 +8,4 @@ django-tables2==1.7.1
 psycopg2==2.7.1
 uwsgi==2.0.15
 SQLAlchemy==1.0.11
+django-cleanup==0.4.2
