@@ -1,11 +1,13 @@
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import text
-from .connections.db_connection import connect_db
-from .dimensoes.models import Base
-from .dimensoes.models import Person, AuthUser
-import sys
 import datetime
 import hashlib
+import sys
+
+from sqlalchemy import text
+from sqlalchemy.orm import sessionmaker
+
+from .models import Base
+from .models import Person, AuthUser
+from .connections.db_connection import connect_db
 
 
 def return_user_from_auth(key, auth_dict):
@@ -175,7 +177,7 @@ def insere_person(session, linha):
     get_or_create(session, Person, linha)
 
 
-ezl_file_path = sys.argv[2]  # pkg_resources.resource_filename('connections', 'aleteia.cfg')
+ezl_file_path = sys.argv[2]
 engine_ezl = connect_db(ezl_file_path)  # conexao com o banco aleteia --usar configparser
 
 # pega o caminho do arquivo de acordo com o pacote
