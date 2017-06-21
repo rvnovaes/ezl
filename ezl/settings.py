@@ -62,6 +62,8 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'ezl.urls'
 SITE_ID = 1
 
+FILE_UPLOAD_HANDLERS = ["django.core.files.uploadhandler.MemoryFileUploadHandler",
+                        "django.core.files.uploadhandler.TemporaryFileUploadHandler"]
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
