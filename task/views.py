@@ -1,7 +1,5 @@
 import os
-from datetime import datetime
 
-import pytz
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
@@ -15,7 +13,6 @@ from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from core.messages import new_success, update_success
 from core.models import Person
 from core.views import BaseCustomView
-from ezl import settings
 from task.forms import TaskForm, TaskDetailForm, EcmForm
 from task.models import Task, TaskStatus, Ecm, TaskHistory
 from task.tables import TaskTable, DashboardStatusTable
@@ -197,10 +194,11 @@ class EcmCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 
 @login_required
 def delete_ecm(request, pk):
+    query = Ecm.objects.filter(id=pk)
+    task = query.values('task_id').first()
+    num_ged = Ecm.objects.filter(task_id=task['task_id']).count()
     try:
         # query = Ecm.objects.filter(id=pk).delete()
-        query = Ecm.objects.filter(id=pk)
-        task = query.values('task_id').first()
         query.delete()
         num_ged = Ecm.objects.filter(task_id=task['task_id']).count()
         data = {'is_deleted': True,
