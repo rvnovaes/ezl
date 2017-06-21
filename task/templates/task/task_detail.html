@@ -48,7 +48,7 @@
                         <br><br>
                         <label>Detalhes do Serviço: </label>
                         <br>
-                        <span class="type-LineString "><b>Prazo: </b>
+                        <span class="type-LineString "><b>Prazo:</b>
                             {{ form.instance.final_deadline_date|localtime|default_if_none:"" }}</span>
                         <br>
                         <span>Recebida em: {{ form.instance.delegation_date|localtime|default_if_none:"" }}</span>
@@ -97,6 +97,128 @@
                     {#                </div>#}
                 </div>
             </div>
+
+            <!-- Arquivos GED -->
+
+            <div class="panel panel-primary">
+                <div class="panel-heading " data-toggle="collapse" data-target="#attachment" id="header-attachment" onclick="toggleArrow()">
+                    <div class="panel-title"><i class="material-icons">attach_file</i>
+                        <b>Anexar Arquivos</b>
+                        <i class="material-icons" style="float: right;" id="down">arrow_drop_down</i>
+                        <i class="material-icons" style="float: right; display: none;" id="up">arrow_drop_up</i>
+                    </div>
+                </div>
+                <div id="attachment" class="panel-collapse collapse">
+                    <div class="panel-body form-group is-focused">
+                        <button type="button" class="btn btn-sm btn-primary btn-raised js-upload-files"
+                                style="color: #fff !important;">
+                            <i class="material-icons">cloud_upload</i> &nbsp; Enviar Arquivo(s)
+                        </button>
+
+                        <input id="fileupload" type="file" name="path" multiple
+                               style="display: none;"
+                               data-method="POST"
+                               enctype="multipart/form-data"
+                               data-url="{% url 'ecm_add' object.id %}"
+                               data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+                        <br>
+                        <br>
+
+                        <p class="text-center" id="no-providence">
+                            {% if geds|length == 0 %}
+                                Esta providência não possui nenhum arquivo em
+                                anexo.
+                            {% endif %}
+                        </p>
+                        <div class="table-responsive">
+                            <table id="files" class="table table-bordered table-responsive">
+                                <tbody>
+                                {% for ged in geds %}
+                                    <tr class="lineFile" id="row-{{ ged.id }}">
+                                        <td id="cell-table">
+                                            <div class="row" id="row-file">
+                                                <div class="col-sm-2"
+                                                     style="text-align: center !important; vertical-align: middle !important;">
+                                                    <i class="material-icons">person_pin</i>
+                                                </div>
+                                                <div class="col-sm-8" style="text-align: left; padding-left: 0;">
+                                                    <h6 style="margin-bottom: 3px !important;">{{ ged.user.first_name }} {{ ged.user.last_name }}
+                                                        ({{ ged.create_user }})
+                                                    </h6>
+
+                                                    <div style="font-size: x-small">
+                                                        {{ ged.create_date|localtime }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td id="cell-table" style="font-size: small; width: 70% !important;">
+                                            <a href="/media/{{ ged.path }}" download
+                                               style="text-decoration: none;">{{ ged.filename }}</a>
+                                        </td>
+                                        <td id="cell-table" style="font-size: small">
+                                            <i class="material-icons" id="" style="cursor: pointer; font-size: medium;"
+                                               data-toggle="modal"
+                                               data-target="#confirmDelete-{{ ged.id }}">delete</i>
+                                        </td>
+                                    </tr>
+                                    <tr class="spaceFile" id="row-space{{ ged.id }}"></tr>
+
+                                    <!-- Janela modal para confirmação de deleção de arquivo -->
+                                    <div id="confirmDelete-{{ ged.id }}" class="modal">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content ">
+                                                <div class="modal-body" style="text-align: center !important;">
+                                                    Tem certeza que deseja excluir o arquivo <b>{{ ged.filename }}</b> ?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <div class="form-group text-center">
+                                                        <button type="button" style="width: 95px!important;"
+                                                                class="btn btn-sm btn-raised btn-default"
+                                                                data-dismiss="modal">
+                                                            Não
+                                                        </button>
+                                                        <button value="1" id="delete-ecm-{{ ged.id }}"
+                                                                style="width: 95px!important;"
+                                                                class="btn btn-sm btn-raised btn-primary"
+                                                                data-dismiss="modal">Sim
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                                <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído o conteúdo das novas janelas modais
+                                a medida que for adicionando novos arquivos -->
+                                <div id="modals">
+                                </div>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Janela modal para mostrar progresso do envio de arquivos -->
+
+                        <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" style="text-align: center">Enviando ...</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: 0%;">0%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
             <!-- Modal -->
             <div id="confirmAction" class="modal">
                 <div class="modal-dialog">
@@ -130,4 +252,120 @@
             </div>
         </form>
     </div>
+
+
+    <!-- Janela modal para confirmação de deleção de arquivo -->
+    <div id="deleteSuccess" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center !important;">
+                    Arquivo deletado com sucesso !
+                </div>
+                <div class="modal-footer">
+                    <div class="form-group text-center">
+                        <button type="button" style="width: 95px!important;"
+                                class="btn btn-sm btn-raised btn-primary"
+                                data-dismiss="modal">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Janela modal para confirmação de deleção de arquivo -->
+    <div id="deleting" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center;">
+                    Excluindo arquivo ...
+                </div>
+                <div class="modal-footer">
+                    <div class="progress progress-striped active">
+                        <div class="progress-bar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Janela modal para confirmação de deleção de arquivo -->
+    <div id="deleteError" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center !important;">
+                    Ocorreu um erro ao tentar deletar o arquivo.
+                </div>
+                <div class="modal-footer">
+                    <div class="form-group text-center">
+                        <button type="button" style="width: 95px!important;"
+                                class="btn btn-sm btn-raised btn-primary"
+                                data-dismiss="modal">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% block javascript %}
+        <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+        <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>
+
+        {% for ged in geds %}
+            <script>
+                $("#delete-ecm-{{ ged.id }}").click(function () {
+                        $('#deleting').modal('show');
+                        $.ajax({
+                            url: '{% url 'delete_ecm' ged.id %}',
+                            dataType: 'json',
+
+                            success: function (data) {
+                                if (data.is_deleted) {
+                                    $('#row-{{ ged.id }}').remove();
+                                    $('#row-space{{ ged.id }}').remove();
+                                    $('#deleting').modal('hide');
+                                    $('#deleteSuccess').modal('show')
+
+                                }
+                                else {
+                                    $('#deleting').modal('hide');
+                                    $('#deleteError').modal('show')
+                                }
+
+                                if (data.num_ged == 0) {
+                                    document.getElementById("no-providence").innerHTML = "Esta providência não possui nenhum arquivo em anexo.";
+                                }
+                            }
+                        })
+                    }
+                );
+            </script>
+        {% endfor %}
+        <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
+             a medida que for adicionando novos arquivos -->
+        <div id="scripts">
+        </div>
+        <script>
+        var expanded = false;
+
+        function toggleArrow() {
+
+            if (expanded){
+                expanded = false;
+                document.getElementById("up").style.display="none";
+                document.getElementById("down").style.display="block";
+            }
+            else{
+                expanded = true;
+                document.getElementById("up").style.display="block";
+                document.getElementById("down").style.display="none";
+            }
+        }
+        </script>
+    {% endblock %}
 {% endblock content %}

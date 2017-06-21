@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'django_tables2',
     'bootstrap3',
+    'django_cleanup'
 
 ]
 
@@ -138,7 +139,7 @@ STATICFILES_DIRS = (
 )
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = '/opt/files_easy_lawyer/'
 
 # STATIC_ROOT = '/opt/mta/easy_lawyer_django/static/'
 LOGIN_REDIRECT_URL = reverse_lazy('dashboard')

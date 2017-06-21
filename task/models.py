@@ -1,10 +1,13 @@
 # from asyncio import Task
+import os
 from enum import Enum
 
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
 from core.models import Person, Audit, AuditCreate
+from ezl.settings import BASE_DIR
 from lawsuit.models import Movement, TypeMovement, Folder
 
 # Dicionário para retornar o icone referente ao status da providencia
@@ -133,15 +136,27 @@ class Task(Audit):
         #     return type_service
 
 
+def get_dir_name(self, filename):
+    upload_dir = os.path.join('opt', 'media', 'GEDs', str(self.task_id))
+    if not os.path.exists(upload_dir):
+        os.makedirs(upload_dir)
+    path = os.path.join('GEDs', str(self.task_id), filename)
+    return path
+
+
 class Ecm(Audit):
-    path = models.FileField(upload_to='GEDs/', max_length=255, unique=True, null=False)
-    task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False)
+    path = models.FileField(upload_to=get_dir_name, max_length=255, unique=True, null=False)
+    task = models.ForeignKey(Task, blank=False, null=False)
 
+    # Retorna o nome do arquivo no Path, para renderizar no tamplate
+    @property
+    def filename(self):
+        return os.path.basename(self.path.path)
 
-# id_task fk
-# status enum
-# notes text
-# herdar da tabela audit_create
+    @property
+    def user(self):
+        return User.objects.get(username=self.path.instance.create_user)
+
 
 class TaskHistory(AuditCreate):
     task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False)

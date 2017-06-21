@@ -1,53 +1,125 @@
-// /**
-//  * Created by luiz on 14/06/17.
-//  */
-// $(function () {
-//
-//   $(".js-upload-photos").click(function () {
-//     $("#fileupload").click();
-//   });
-//
-//   $("#fileupload").fileupload({
-//     dataType: 'json',
-//     done: function (e, data) {
-//       if (data.result.is_valid) {
-//         $("#gallery tbody").prepend(
-//           "<tr><td><a href='" + data.result.url + "'>" + data.result.name + "</a></td></tr>"
-//         )
-//       }
-//     }
-//   });
-// });
-
 $(function () {
 
-  $(".js-upload-photos").click(function () {
-    $("#fileupload").click();
-  });
+    $(".js-upload-files").click(function () {
+        $("#fileupload").click();
+    });
 
-  $("#fileupload").fileupload({
-    dataType: 'json',
-    sequentialUploads: true,  /* 1. SEND THE FILES ONE BY ONE */
-    start: function (e) {  /* 2. WHEN THE UPLOADING PROCESS STARTS, SHOW THE MODAL */
-      $("#modal-progress").modal("show");
-    },
-    stop: function (e) {  /* 3. WHEN THE UPLOADING PROCESS FINALIZE, HIDE THE MODAL */
-      $("#modal-progress").modal("hide");
-    },
-    progressall: function (e, data) {  /* 4. UPDATE THE PROGRESS BAR */
-      var progress = parseInt(data.loaded / data.total * 100, 10);
-      var strProgress = progress + "%";
-      $(".progress-bar").css({"width": strProgress});
-      $(".progress-bar").text(strProgress);
-    },
-    done: function (e, data) {
-      if (data.result.is_valid) {
-        $("#gallery tbody").prepend(
-          "<tr><td><a href='" + data.result.url + "'>" + data.result.name + "</a></td></tr>"
-        )
-      }
-    }
+    $("#fileupload").fileupload({
+        dataType: 'json',
+        //Envia os arquivos um-a-um
+        sequentialUploads: false,
 
-  });
+        // Mostra a janela modal com progress bar ao início do upload
+        start: function (e) {
+            $("#modal-progress").modal("show");
+        },
+
+        // Depois de enviado o(s) arquivo(s), encerra a janela modal
+        stop: function (e) {
+            $("#modal-progress").modal("hide");
+        },
+
+        // Atualiza o Progress bar de acordo com o andamento do envio do arquivo
+        progressall: function (e, data) {
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            var strProgress = progress + "%";
+            $(".progress-bar").css({"width": strProgress});
+            $(".progress-bar").text(strProgress);
+        },
+        done: function (e, data) {
+            if (data.result.success) {
+                document.getElementById("no-providence").innerHTML="";
+                $("#files tbody").prepend(
+                    "<tr class='lineFile' id='row-"+ data.result.id +"'>" +
+                        "<td id='cell-table'>" +
+                            "<div class='row' id='row-file'>" +
+                                "<div class='col-sm-2' style='text-align: center !important; vertical-align: middle !important;'>" +
+                                    "<i class='material-icons'>person_pin</i>" +
+                                "</div>" +
+                                "<div class='col-sm-8' style='text-align: left; padding-left: 0;'>" +
+                                    "<h6 style='margin-bottom: 3px !important;'>" + data.result.username + " (" + data.result.user + ")" +
+                                    "</h6>" +
+                                    "<div style='font-size: x-small'>" +
+                                         moment().tz("America/Sao_Paulo").format("DD [de] MMMM [de] YYYY [às] HH:mm") +
+                                    "</div>" +
+                                "</div>" +
+                            "</div>" +
+                        "</td>" +
+                        "<td id='cell-table' style='font-size: small; width: 70% !important;'>" +
+                            "<a href='/media/GEDs/"+ data.result.task_id + '/' +data.result.filename +"' download " +
+                            "style='text-decoration: none;'>"+ data.result.filename +"</a>" +
+                        "</td>" +
+                        "<td id='cell-table' style='font-size: small'>" +
+                            "<i class='material-icons' id='' style='cursor: pointer; font-size: medium;'" +
+                            "data-toggle='modal'" +
+                            "data-target='#confirmDelete-"+ data.result.id +"'>delete</i>" +
+                        "</td>" +
+                    "</tr>" +
+                    "<tr class='spaceFile' id='row-space"+ data.result.id +"'></tr>"
+                );
+
+                $("#modals").prepend(
+                    "<div id='confirmDelete-" + data.result.id + "' class='modal'>" +
+                        "<div class='modal-dialog'>" +
+                            "<div class='modal-content '>" +
+                                "<div class='modal-body' style='text-align: center !important;'>" +
+                                    "Tem certeza que deseja excluir o arquivo <b>" + data.result.filename + "</b> ?" +
+                                "</div>" +
+                                "<div class='modal-footer'>" +
+                                    "<div class='form-group text-center'>" +
+                                        "<button type='button' style='width: 95px!important;'" +
+                                            "class='btn btn-sm btn-raised btn-default'" +
+                                            "data-dismiss='modal'>" +
+                                            "Não" +
+                                        "</button>" +
+                                        "<button value='1' id='delete-ecm-" + data.result.id + "'" +
+                                            "style='width: 95px!important;'" +
+                                            "class='btn btn-sm btn-raised btn-primary'" +
+                                            "data-dismiss='modal'>Sim" +
+                                        "</button>" +
+                                    "</div>" +
+                                "</div>" +
+                            "</div>" +
+                        "</div>" +
+                    "</div>"
+                );
+
+                //language=HTML
+                $("#scripts").prepend(
+                    "<script>"+
+                    "$('#delete-ecm-"+ data.result.id +"').click(function () {" +
+                            "$('#deleting').modal('show');" +
+                            "$.ajax({" +
+                                "url: '/providencias/ecm/"+ data.result.id +"/excluir'," +
+                                "dataType: 'json'," +
+
+                                "success: function (data) {" +
+                                    "if (data.is_deleted) {" +
+                                        "$('#row-"+ data.result.id +"').remove();" +
+                                        "$('#row-space"+ data.result.id +"').remove();" +
+                                        "$('#deleting').modal('hide');" +
+                                        "$('#deleteSuccess').modal('show')" +
+
+                                    "}" +
+                                    "else {" +
+                                        "$('#deleting').modal('hide');" +
+                                        "$('#deleteError').modal('show')" +
+                                    "}" +
+
+                                    "if (data.num_ged == 0) {" +
+                                        "document.getElementById('no-providence').innerHTML = 'Esta providência não possui nenhum arquivo em anexo.';"+
+
+                                    "}" +
+                                "}" +
+                            "})" +
+                        "}" +
+                    ");"+
+                    "</script>"
+                );
+
+            }
+        }
+
+    });
 
 });
