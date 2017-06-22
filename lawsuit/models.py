@@ -64,13 +64,15 @@ class LawSuit(Audit):
 
 
 class CourtDistrict(Audit):
-    name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Nome")
+    name = models.CharField(max_length=255, null=False, verbose_name="Nome")
     state = models.ForeignKey(State, on_delete=models.PROTECT, null=False, blank=False, verbose_name="Estado")
 
     class Meta:
         db_table = "court_district"
         verbose_name = "Comarca"
         verbose_name_plural = "Comarcas"
+        # cria constraint unique para a combinação de estado e comarca
+        unique_together = (('state', 'name'),)
 
     def __str__(self):
         return self.name

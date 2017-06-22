@@ -1,10 +1,12 @@
-from sqlalchemy.orm import sessionmaker
-from .connections.db_connection import connect_db
-from .models import Base
-from .models import City, State, CourtDistrict
-import sys
 import datetime
 import json
+import sys
+
+from sqlalchemy.orm import sessionmaker
+
+from connections.db_connection import connect_db
+from etl.advwin.models import Base
+from etl.advwin.models import City, State, CourtDistrict
 
 
 def trataCidade(linha, session):

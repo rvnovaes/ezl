@@ -5,9 +5,9 @@ import sys
 from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
-from .models import Base
-from .models import Person, AuthUser
-from .connections.db_connection import connect_db
+from connections.db_connection import connect_db
+from etl.advwin.models import Base
+from etl.advwin.models import Person, AuthUser
 
 
 def return_user_from_auth(key, auth_dict):
