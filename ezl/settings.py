@@ -47,17 +47,18 @@ INSTALLED_APPS = [
     'bootstrap3',
     'django_filters',
     'widget_tweaks',
-
+    'debug_toolbar'
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
 ROOT_URLCONF = 'ezl.urls'
@@ -93,6 +94,7 @@ DATABASES = {
         'USER': 'ezl',
         'PASSWORD': 'ezl',
         'HOST': '13.68.213.60',
+        # 'HOST': '127.0.0.1',
         'PORT': '5432'
     }
 }
@@ -161,3 +163,5 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'testedevmta@gmail.com'
 EMAIL_HOST_PASSWORD = 'abc12345678'
+
+INTERNAL_IPS = '127.0.0.1'
