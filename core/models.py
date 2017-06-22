@@ -9,6 +9,11 @@ LEGAL_TYPE_CHOICES = {
     ('F', 'Física'),
     ('J', 'Jurídica'),
 }
+# Enum choices para prefixo do sistema
+SYSTEM_PREFIX_CHOICES = {
+    ('ADVWIN', '0'),
+
+}
 
 
 class AuditCreate(models.Model):
@@ -28,6 +33,17 @@ class AuditAlter(models.Model):
 
     class Meta:
         abstract = True
+
+
+class LegacyCode(models.Model):
+    legacy_code = models.CharField(max_length=255, blank=False, null=False, default='', unique=True,
+                                   verbose_name='Código legado')
+    system_prefix = models.CharField(max_length=255, choices=SYSTEM_PREFIX_CHOICES, default='',
+                                     blank=False, null=False, verbose_name='Prefixo do Sistema')
+
+    class Meta:
+        abstract = True
+        unique_together = (('legacy_code', 'system_prefix'),)
 
 
 class Audit(AuditCreate, AuditAlter):

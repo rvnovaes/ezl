@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
-from core.models import Person, Audit, AuditCreate
+from core.models import Person, Audit, AuditCreate, LegacyCode
 from lawsuit.models import Movement, TypeMovement, Folder
 
 # Dicionário para retornar o icone referente ao status da providencia
@@ -56,9 +56,9 @@ class TaskStatus(Enum):
         # (3, 'Cumprida'),  # providencias executadas sem nenhuma pendencia
 
 
-class Task(Audit):
-    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
-                                   verbose_name="Código Legado")
+class Task(Audit, LegacyCode):
+    # legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
+    #                                verbose_name="Código Legado")
     movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
                                  verbose_name="Movimentação")
     person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,

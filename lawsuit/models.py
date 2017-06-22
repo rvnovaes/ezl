@@ -1,12 +1,12 @@
 from django.db import models
 
-from core.models import Audit, Person, State
+from core.models import Audit, Person, State, LegacyCode
 
 
-class TypeMovement(Audit):
+class TypeMovement(Audit, LegacyCode):
     name = models.CharField(max_length=255, blank=False, null=False, default="", unique=True, verbose_name='Nome')
-    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
-                                   verbose_name='Código legado')
+    # legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
+    #                                verbose_name='Código legado')
     uses_wo = models.BooleanField(default=False, verbose_name='Utiliza ordem de serviço?')
 
     class Meta:
@@ -32,9 +32,9 @@ class Instance(Audit):
         return self.name
 
 
-class Folder(Audit):
-    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
-                                   verbose_name='Código Legado')
+class Folder(Audit, LegacyCode):
+    # legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
+    #                                verbose_name='Código Legado')
     person_customer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                         verbose_name='Cliente')
 
@@ -76,8 +76,8 @@ class CourtDistrict(Audit):
         return self.name
 
 
-class CourtDivision(Audit):
-    legacy_code = models.CharField(max_length=255, unique=True, verbose_name="Código Legado")
+class CourtDivision(Audit, LegacyCode):
+    # legacy_code = models.CharField(max_length=255, unique=True, verbose_name="Código Legado")
     name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Vara")
 
     class Meta:
@@ -89,7 +89,7 @@ class CourtDivision(Audit):
         return self.name
 
 
-class LawSuitInstance(Audit):
+class LawSuitInstance(Audit, LegacyCode):
     law_suit = models.ForeignKey(LawSuit, on_delete=models.PROTECT, blank=False, null=False, verbose_name="Processo")
 
     person_court = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
@@ -102,8 +102,8 @@ class LawSuitInstance(Audit):
     law_suit_number = models.CharField(max_length=255, unique=True, blank=False, null=False,
                                        verbose_name='Número do Processo')
 
-    legacy_code = models.CharField(max_length=255, unique=True, blank=False, null=False,
-                                   verbose_name='Código Legado')
+    # legacy_code = models.CharField(max_length=255, unique=True, blank=False, null=False,
+    #                                verbose_name='Código Legado')
 
     class Meta:
         verbose_name = "Instância do Processo"
@@ -114,9 +114,9 @@ class LawSuitInstance(Audit):
         return self.law_suit_number
 
 
-class Movement(Audit):
-    legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
-                                   verbose_name="Código Legado")
+class Movement(Audit, LegacyCode):
+    # legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
+    #                                verbose_name="Código Legado")
     person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                       related_name='%(class)s_lawyer', verbose_name="Advogado")
     type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False,
@@ -137,8 +137,8 @@ class Movement(Audit):
         return self.legacy_code  # TODO verificar novos campos e refatorar o toString
 
 
-class TypeTask(Audit):
-    legacy_code = models.CharField(max_length=255, unique=True, verbose_name="Código Legado")
+class TypeTask(Audit, LegacyCode):
+    # legacy_code = models.CharField(max_length=255, unique=True, verbose_name="Código Legado")
     name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Tipo de Serviço")
 
     class Meta:
