@@ -99,6 +99,7 @@ def TaskFilterAtt(request, person):
 
         task_list = Task.objects.filter(pk__in=wanted_items)
 
+
     return task_list
 
 
@@ -115,10 +116,10 @@ def TaskListSearch(request):
         task_list = TaskFilterAtt(request.GET, person)
 
     task_filter = TaskFilter(request=request.GET, queryset=task_list)
+
     print("Query", request.GET, "Task List", task_list)
 
     return render(request, 'task/search.html', {'filter': task_filter})  # pode retornar qualquer lista aqui
-
 
 class TaskListView(LoginRequiredMixin, SingleTableView):
     model = Task

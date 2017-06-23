@@ -15,6 +15,12 @@ SYSTEM_PREFIX_CHOICES = {
 
 }
 
+SERVICE_TYPE_CHOICES = {
+    ('C', 'Cliente'),
+    ('F', 'Fornecedor'),
+    ('N', 'Nao Aplicavel')
+}
+
 
 class AuditCreate(models.Model):
     create_date = models.DateTimeField()
@@ -107,6 +113,8 @@ class Person(Audit):
     cpf_cnpj = models.CharField(max_length=255, blank=True, verbose_name="CPF/CNPJ")
     auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True,
                                      verbose_name="Usuário do sistema")
+    service_type = models.CharField(max_length=1, choices=SERVICE_TYPE_CHOICES, verbose_name="Tipo de Serviço",default='N')                                 
+    
 
     class Meta:
         db_table = "person"

@@ -1,8 +1,8 @@
 # coding: utf-8
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, SmallInteger, String, Text, UniqueConstraint, \
-    text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, SmallInteger, String, Text, UniqueConstraint, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -27,8 +27,7 @@ class AccountEmailconfirmation(Base):
     created = Column(DateTime(True), nullable=False)
     sent = Column(DateTime(True))
     key = Column(String(64), nullable=False, unique=True)
-    email_address_id = Column(ForeignKey('account_emailaddress.id', deferrable=True, initially='DEFERRED'),
-                              nullable=False, index=True)
+    email_address_id = Column(ForeignKey('account_emailaddress.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
 
     email_address = relationship('AccountEmailaddres')
 
@@ -39,7 +38,6 @@ class Addres(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('address_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     street = Column(String(255), nullable=False)
     number = Column(String(255), nullable=False)
     complement = Column(String(255), nullable=False)
@@ -48,15 +46,14 @@ class Addres(Base):
     notes = Column(Text, nullable=False)
     home_address = Column(Boolean, nullable=False)
     business_address = Column(Boolean, nullable=False)
-    address_type_id = Column(ForeignKey('address_type.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                             index=True)
+    address_type_id = Column(ForeignKey('address_type.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
     city_id = Column(ForeignKey('city.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     country_id = Column(ForeignKey('country.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     person_id = Column(ForeignKey('person.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     state_id = Column(ForeignKey('state.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     address_type = relationship('AddressType')
     alter_user = relationship('AuthUser', primaryjoin='Addres.alter_user_id == AuthUser.id')
@@ -73,11 +70,10 @@ class AddressType(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('address_type_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     name = Column(String(255), nullable=False, unique=True)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='AddressType.alter_user_id == AuthUser.id')
     create_user = relationship('AuthUser', primaryjoin='AddressType.create_user_id == AuthUser.id')
@@ -98,8 +94,7 @@ class AuthGroupPermission(Base):
 
     id = Column(Integer, primary_key=True, server_default=text("nextval('auth_group_permissions_id_seq'::regclass)"))
     group_id = Column(ForeignKey('auth_group.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
-    permission_id = Column(ForeignKey('auth_permission.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                           index=True)
+    permission_id = Column(ForeignKey('auth_permission.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
 
     group = relationship('AuthGroup')
     permission = relationship('AuthPermission')
@@ -113,8 +108,7 @@ class AuthPermission(Base):
 
     id = Column(Integer, primary_key=True, server_default=text("nextval('auth_permission_id_seq'::regclass)"))
     name = Column(String(255), nullable=False)
-    content_type_id = Column(ForeignKey('django_content_type.id', deferrable=True, initially='DEFERRED'),
-                             nullable=False, index=True)
+    content_type_id = Column(ForeignKey('django_content_type.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     codename = Column(String(100), nullable=False)
 
     content_type = relationship('DjangoContentType')
@@ -123,7 +117,7 @@ class AuthPermission(Base):
 class AuthUser(Base):
     __tablename__ = 'auth_user'
 
-    id = Column(Integer, primary_key=True, server_default=text("nextval('auth_user_id_seq'::regclass)"))
+    id = Column(Integer, primary_key=True)
     password = Column(String(128), nullable=False)
     last_login = Column(DateTime(True))
     is_superuser = Column(Boolean, nullable=False)
@@ -156,11 +150,9 @@ class AuthUserUserPermission(Base):
         UniqueConstraint('user_id', 'permission_id'),
     )
 
-    id = Column(Integer, primary_key=True,
-                server_default=text("nextval('auth_user_user_permissions_id_seq'::regclass)"))
+    id = Column(Integer, primary_key=True, server_default=text("nextval('auth_user_user_permissions_id_seq'::regclass)"))
     user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
-    permission_id = Column(ForeignKey('auth_permission.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                           index=True)
+    permission_id = Column(ForeignKey('auth_permission.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
 
     permission = relationship('AuthPermission')
     user = relationship('AuthUser')
@@ -169,16 +161,15 @@ class AuthUserUserPermission(Base):
 class City(Base):
     __tablename__ = 'city'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, server_default=text("nextval('city_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
-    name = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False, unique=True)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    court_district_id = Column(ForeignKey('court_district.id', deferrable=True, initially='DEFERRED'), index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    court_district_id = Column(ForeignKey('court_district.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     state_id = Column(ForeignKey('state.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='City.alter_user_id == AuthUser.id')
     court_district = relationship('CourtDistrict')
@@ -192,15 +183,13 @@ class ContactMechanism(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('contact_mechanism_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     description = Column(String(255), nullable=False, unique=True)
     notes = Column(String(400), nullable=False)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    contact_mechanism_type_id = Column(ForeignKey('contact_mechanism_type.id', deferrable=True, initially='DEFERRED'),
-                                       nullable=False, index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    contact_mechanism_type_id = Column(ForeignKey('contact_mechanism_type.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     person_id = Column(ForeignKey('person.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='ContactMechanism.alter_user_id == AuthUser.id')
     contact_mechanism_type = relationship('ContactMechanismType')
@@ -214,11 +203,10 @@ class ContactMechanismType(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('contact_mechanism_type_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     name = Column(String(255), nullable=False, unique=True)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='ContactMechanismType.alter_user_id == AuthUser.id')
     create_user = relationship('AuthUser', primaryjoin='ContactMechanismType.create_user_id == AuthUser.id')
@@ -230,14 +218,13 @@ class ContactU(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('contact_us_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     name = Column(String(255), nullable=False)
     email = Column(String(255), nullable=False)
     phone_number = Column(String(255), nullable=False)
     message = Column(Text, nullable=False)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='ContactU.alter_user_id == AuthUser.id')
     create_user = relationship('AuthUser', primaryjoin='ContactU.create_user_id == AuthUser.id')
@@ -249,11 +236,10 @@ class Country(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('country_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     name = Column(String(255), nullable=False, unique=True)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='Country.alter_user_id == AuthUser.id')
     create_user = relationship('AuthUser', primaryjoin='Country.create_user_id == AuthUser.id')
@@ -265,16 +251,31 @@ class CourtDistrict(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('court_district_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     name = Column(String(255), nullable=False, unique=True)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     state_id = Column(ForeignKey('state.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='CourtDistrict.alter_user_id == AuthUser.id')
     create_user = relationship('AuthUser', primaryjoin='CourtDistrict.create_user_id == AuthUser.id')
     state = relationship('State')
+
+
+class CourtDivision(Base):
+    __tablename__ = 'court_division'
+
+    id = Column(Integer, primary_key=True, server_default=text("nextval('court_division_id_seq'::regclass)"))
+    create_date = Column(DateTime(True), nullable=False)
+    alter_date = Column(DateTime(True))
+    is_active = Column(Boolean, nullable=False)
+    legacy_code = Column(String(255), nullable=False, unique=True)
+    name = Column(String(255), nullable=False, unique=True)
+    alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+
+    alter_user = relationship('AuthUser', primaryjoin='CourtDivision.alter_user_id == AuthUser.id')
+    create_user = relationship('AuthUser', primaryjoin='CourtDivision.create_user_id == AuthUser.id')
 
 
 class DjangoAdminLog(Base):
@@ -335,13 +336,11 @@ class Folder(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('folder_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     legacy_code = Column(String(255), nullable=False, unique=True)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
-    person_customer_id = Column(ForeignKey('person.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                                index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    person_customer_id = Column(ForeignKey('person.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='Folder.alter_user_id == AuthUser.id')
     create_user = relationship('AuthUser', primaryjoin='Folder.create_user_id == AuthUser.id')
@@ -354,11 +353,10 @@ class Instance(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('instance_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     name = Column(String(255), nullable=False, unique=True)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='Instance.alter_user_id == AuthUser.id')
     create_user = relationship('AuthUser', primaryjoin='Instance.create_user_id == AuthUser.id')
@@ -370,13 +368,11 @@ class LawSuit(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('law_suit_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     folder_id = Column(ForeignKey('folder.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
-    person_lawyer_id = Column(ForeignKey('person.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                              index=True)
+    person_lawyer_id = Column(ForeignKey('person.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='LawSuit.alter_user_id == AuthUser.id')
     create_user = relationship('AuthUser', primaryjoin='LawSuit.create_user_id == AuthUser.id')
@@ -390,17 +386,15 @@ class LawsuitLawsuitinstance(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('lawsuit_lawsuitinstance_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     law_suit_number = Column(String(255), nullable=False, unique=True)
     legacy_code = Column(String(255), nullable=False, unique=True)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    court_district_id = Column(ForeignKey('court_district.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                               index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    court_district_id = Column(ForeignKey('court_district.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     instance_id = Column(ForeignKey('instance.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     law_suit_id = Column(ForeignKey('law_suit.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     person_court_id = Column(ForeignKey('person.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='LawsuitLawsuitinstance.alter_user_id == AuthUser.id')
     court_district = relationship('CourtDistrict')
@@ -416,18 +410,14 @@ class Movement(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('movement_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     legacy_code = Column(String(255), nullable=False, unique=True)
     deadline = Column(DateTime(True))
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
-    person_lawyer_id = Column(ForeignKey('person.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                              index=True)
-    type_movement_id = Column(ForeignKey('type_movement.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                              index=True)
-    law_suit_instance_id = Column(ForeignKey('lawsuit_lawsuitinstance.id', deferrable=True, initially='DEFERRED'),
-                                  nullable=False, index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    person_lawyer_id = Column(ForeignKey('person.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    type_movement_id = Column(ForeignKey('type_movement.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    law_suit_instance_id = Column(ForeignKey('lawsuit_lawsuitinstance.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='Movement.alter_user_id == AuthUser.id')
     create_user = relationship('AuthUser', primaryjoin='Movement.create_user_id == AuthUser.id')
@@ -439,10 +429,9 @@ class Movement(Base):
 class Person(Base):
     __tablename__ = 'person'
 
-    id = Column(Integer, primary_key=True, server_default=text("nextval('person_id_seq'::regclass)"))
+    id = Column(Integer, primary_key=True)
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     legal_name = Column(String(255), nullable=False, unique=True)
     name = Column(String(255), nullable=False, unique=True)
     is_lawyer = Column(Boolean, nullable=False)
@@ -452,8 +441,9 @@ class Person(Base):
     cpf_cnpj = Column(String(255), nullable=False)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
     auth_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), unique=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
+    service_type = Column(String(1), nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='Person.alter_user_id == AuthUser.id')
     auth_user = relationship('AuthUser', uselist=False, primaryjoin='Person.auth_user_id == AuthUser.id')
@@ -466,13 +456,12 @@ class State(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('state_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     name = Column(String(255), nullable=False, unique=True)
     initials = Column(String(10), nullable=False, unique=True)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
     country_id = Column(ForeignKey('country.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='State.alter_user_id == AuthUser.id')
     country = relationship('Country')
@@ -485,25 +474,22 @@ class Task(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('task_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     legacy_code = Column(String(255), nullable=False, unique=True)
     delegation_date = Column(DateTime(True), nullable=False)
     acceptance_date = Column(DateTime(True))
-    first_deadline_date = Column(DateTime(True))
-    second_deadline_date = Column(DateTime(True))
+    reminder_deadline_date = Column(DateTime(True))
+    final_deadline_date = Column(DateTime(True))
     execution_date = Column(DateTime(True))
     return_date = Column(DateTime(True))
     refused_date = Column(DateTime(True))
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
-    person_asked_by_id = Column(ForeignKey('person.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                                index=True)
-    person_executed_by_id = Column(ForeignKey('person.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                                   index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    person_asked_by_id = Column(ForeignKey('person.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    person_executed_by_id = Column(ForeignKey('person.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     movement_id = Column(ForeignKey('movement.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
-    type_movement_id = Column(ForeignKey('type_movement.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                              index=True)
+    type_movement_id = Column(ForeignKey('type_movement.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
+    description = Column(Text)
 
     alter_user = relationship('AuthUser', primaryjoin='Task.alter_user_id == AuthUser.id')
     create_user = relationship('AuthUser', primaryjoin='Task.create_user_id == AuthUser.id')
@@ -513,19 +499,65 @@ class Task(Base):
     type_movement = relationship('TypeMovement')
 
 
+class TaskEcm(Base):
+    __tablename__ = 'task_ecm'
+
+    id = Column(Integer, primary_key=True, server_default=text("nextval('task_ecm_id_seq'::regclass)"))
+    create_date = Column(DateTime(True), nullable=False)
+    alter_date = Column(DateTime(True))
+    is_active = Column(Boolean, nullable=False)
+    path = Column(String(255), nullable=False, unique=True)
+    alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    task_id = Column(ForeignKey('task.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+
+    alter_user = relationship('AuthUser', primaryjoin='TaskEcm.alter_user_id == AuthUser.id')
+    create_user = relationship('AuthUser', primaryjoin='TaskEcm.create_user_id == AuthUser.id')
+    task = relationship('Task')
+
+
+class TaskTaskhistory(Base):
+    __tablename__ = 'task_taskhistory'
+
+    id = Column(Integer, primary_key=True, server_default=text("nextval('task_taskhistory_id_seq'::regclass)"))
+    create_date = Column(DateTime(True), nullable=False)
+    notes = Column(Text)
+    status = Column(String(10), nullable=False)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    task_id = Column(ForeignKey('task.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+
+    create_user = relationship('AuthUser')
+    task = relationship('Task')
+
+
 class TypeMovement(Base):
     __tablename__ = 'type_movement'
 
     id = Column(Integer, primary_key=True, server_default=text("nextval('type_movement_id_seq'::regclass)"))
     create_date = Column(DateTime(True), nullable=False)
     alter_date = Column(DateTime(True))
-    active = Column(Boolean, nullable=False)
     name = Column(String(255), nullable=False, unique=True)
     legacy_code = Column(String(255), nullable=False, unique=True)
     uses_wo = Column(Boolean, nullable=False)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
-    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False,
-                            index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+    is_active = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='TypeMovement.alter_user_id == AuthUser.id')
     create_user = relationship('AuthUser', primaryjoin='TypeMovement.create_user_id == AuthUser.id')
+
+
+class TypeTask(Base):
+    __tablename__ = 'type_task'
+
+    id = Column(Integer, primary_key=True, server_default=text("nextval('type_task_id_seq'::regclass)"))
+    create_date = Column(DateTime(True), nullable=False)
+    alter_date = Column(DateTime(True))
+    is_active = Column(Boolean, nullable=False)
+    legacy_code = Column(String(255), nullable=False, unique=True)
+    name = Column(String(255), nullable=False, unique=True)
+    alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)
+    create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
+
+    alter_user = relationship('AuthUser', primaryjoin='TypeTask.alter_user_id == AuthUser.id')
+    create_user = relationship('AuthUser', primaryjoin='TypeTask.create_user_id == AuthUser.id')

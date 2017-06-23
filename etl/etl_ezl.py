@@ -5,9 +5,9 @@ import sys
 from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
-from .models import Base
-from .models import Person, AuthUser
-from .connections.db_connection import connect_db
+from models import Base
+from models import Person, AuthUser
+from connections.db_connection import connect_db
 
 
 def return_user_from_auth(key, auth_dict):
@@ -37,6 +37,9 @@ def get_or_create(session, model, kwargs):
 
 
 def trataAuthUser(linha):
+
+    print(linha)
+
     if linha['status'] == 'I':
         return None
 
@@ -75,6 +78,7 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
     legal_type = 'F'
     cpf_cnpj = ''
     auth_user_id = None
+    service_type = 'N'
 
     print(linha)
 
@@ -108,6 +112,12 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
                 auth_user_id = authuser_query.id
 
         cpf_cnpj = linha['Codigo']
+        
+        if linha['TipoCF'] == 'A':
+            service_type = 'C'
+            
+        elif linha['TipoCF'] == 'F':   
+            service_type = 'F'
 
     if person_type == 'cliente':
 
@@ -126,6 +136,12 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
             legal_type = 'J'
 
         cpf_cnpj = linha['Codigo']
+        
+        if linha['TipoCF'] == 'A':
+            service_type = 'C'
+            
+        elif linha['TipoCF'] == 'F':   
+            service_type = 'F'
 
     if person_type == 'trib':
         date_creation = datetime.datetime.now()
@@ -137,7 +153,7 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
     linha = {
         'create_date': date_creation,
         'alter_date': None,
-        'active': active,
+        'is_active': active,
         'legal_name': legal_name,
         'name': name,
         'is_lawyer': is_lawyer,
@@ -147,7 +163,8 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
         'cpf_cnpj': cpf_cnpj,
         'alter_user_id': None,
         'auth_user_id': auth_user_id,
-        'create_user_id': 2
+        'create_user_id': 2,
+        'service_type': service_type
 
     }
 
@@ -167,9 +184,9 @@ def retorna_campos_consulta(cursor):
 
 def insere_user(session, linha):
     user_linha = AuthUser(**linha)
-    get_or_create(session, AuthUser, linha)
-    # session.add_all(user_linha)
-    # session.commit()
+    #get_or_create(session, AuthUser, linha)
+    session.add(user_linha)
+    session.commit()
 
 
 def insere_person(session, linha):
@@ -187,14 +204,14 @@ engine_advwin = connect_db(advwin_file_path)  # arquivo de conexao do advwin
 Base.metadata.create_all(engine_ezl)
 session_ezl = sessionmaker(bind=engine_ezl)()
 
-sql_str_cliente = text('select * from Jurid_CliFor where Status = \'Ativo\';')  # top 1 apenas para testes
-sql_str_advogado = text('select * from Jurid_Advogado where Status = \'Ativo\';')
+sql_str_cliente = text('select * from Jurid_Clifor where Status=\'Ativo\' and Codigo not in (select Jurid_CliFor.Codigo from Jurid_CliFor inner join Jurid_advogado on (Jurid_advogado.Codigo = Jurid_Clifor.Codigo));')  # top 1 apenas para testes
+sql_str_advogado = text('select Jurid_Advogado.*,Jurid_CliFor.TipoCF from Jurid_Advogado left join Jurid_clifor on (Jurid_advogado.Codigo = Jurid_Clifor.Codigo) where Jurid_Advogado.Status = \'Ativo\';')
 sql_str_tribunais = text('select * from Jurid_Tribunais;')
 sql_str_advweb = text(
     'select advweb_usuario.* from advweb_usuario inner join Jurid_Advogado on (advweb_usuario.codigo_adv = Jurid_advogado.codigo) where Jurid_Advogado.Correspondente = \'1\' and Jurid_Advogado.Status = \'Ativo\';')
 
-consultas_advwin = [sql_str_advogado, sql_str_cliente, sql_str_tribunais]
-consultas_tipo = ['adv', 'cliente', 'trib']
+consultas_advwin = [sql_str_advweb,sql_str_advogado, sql_str_cliente, sql_str_tribunais]
+consultas_tipo = ['usuario','adv', 'cliente', 'trib']
 
 # consultas_advwin = [sql_str_advogado]
 # consultas_tipo = ['adv']
