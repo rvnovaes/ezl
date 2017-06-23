@@ -1,7 +1,9 @@
+from django import forms
 from django.forms.widgets import boolean_check, Input, DateTimeBaseInput
 from django.utils import six
 from django.utils import timezone
 from django.utils.encoding import force_text
+from django_filters import RangeFilter
 
 
 class MDDateTimepicker(DateTimeBaseInput):
@@ -65,3 +67,44 @@ class MDCheckboxInput(Input):
         # HTML checkboxes don't appear in POST data if not checked, so it's
         # never known if the value is actually omitted.
         return False
+
+
+class MDRangeWidget(forms.MultiWidget):
+    template_name = 'core/widgets/md_range_datetimepicker.html'
+
+    def __init__(self, attrs=None):
+        widgets = (MDDateTimepicker(), MDDateTimepicker())
+        super(MDRangeWidget, self).__init__(widgets, attrs)
+
+    def format_output(self, rendered_widgets):
+        # Method was removed in Django 1.11.
+        return ' à '.join(rendered_widgets)
+
+    def decompress(self, value):
+        if value:
+            return [value.start, value.stop]
+        return [None, None]
+
+
+class DateTimeRangeField(forms.MultiValueField):
+    widget = MDRangeWidget
+
+    def __init__(self, fields=None, label=None, *args, **kwargs):
+        if fields is None:
+            fields = (
+                forms.DateTimeField(widget=MDDateTimepicker(attrs={'class': 'form-control'})),
+                forms.DateTimeField(widget=MDDateTimepicker(attrs={'class': 'form-control'})))
+        super(DateTimeRangeField, self).__init__(fields, *args, **kwargs)
+
+    def compress(self, data_list):
+        if data_list:
+            return slice(*data_list)
+        return None
+
+
+class MDDateTimeRangeFilter(RangeFilter):
+    field_class = DateTimeRangeField
+
+    def __init__(self, name=None, *args, **kwargs):
+        self.name = name
+        super(MDDateTimeRangeFilter, self).__init__(*args, **kwargs)

@@ -78,8 +78,8 @@
                         {#                           value="remove" onclick="getId(this)">#}
                         {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
                             {#                                                <span class="form-group">#}
-                            {#                        <label>{{ form.execution_date.label }}</label>#}
-                            {{ form.execution_date }}
+                            {#                        {{ form.execution_date.label }}</label>#}
+                            <label> {{ form.execution_date }}</label>
                             {#                        </span>#}
                             {#                        </label>#}
                             {#                        </span>#}
@@ -101,7 +101,8 @@
             <!-- Arquivos GED -->
 
             <div class="panel panel-primary">
-                <div class="panel-heading " data-toggle="collapse" data-target="#attachment" id="header-attachment" onclick="toggleArrow()">
+                <div class="panel-heading " data-toggle="collapse" data-target="#attachment" id="header-attachment"
+                     onclick="toggleArrow()">
                     <div class="panel-title"><i class="material-icons">attach_file</i>
                         <b>Anexar Arquivos</b>
                         <i class="material-icons" style="float: right;" id="down">arrow_drop_down</i>
@@ -351,21 +352,21 @@
         <div id="scripts">
         </div>
         <script>
-        var expanded = false;
+            var expanded = false;
 
-        function toggleArrow() {
+            function toggleArrow() {
 
-            if (expanded){
-                expanded = false;
-                document.getElementById("up").style.display="none";
-                document.getElementById("down").style.display="block";
+                if (expanded) {
+                    expanded = false;
+                    document.getElementById("up").style.display = "none";
+                    document.getElementById("down").style.display = "block";
+                }
+                else {
+                    expanded = true;
+                    document.getElementById("up").style.display = "block";
+                    document.getElementById("down").style.display = "none";
+                }
             }
-            else{
-                expanded = true;
-                document.getElementById("up").style.display="block";
-                document.getElementById("down").style.display="none";
-            }
-        }
         </script>
     {% endblock %}
 {% endblock content %}

@@ -1,31 +1,29 @@
 from datetime import datetime
 
-import django_filters as df
-from django.forms.extras import SelectDateWidget
+from django import forms
+from django_filters import FilterSet, BooleanFilter, CharFilter
 
-from core.widgets import MDCheckboxInput
+from core.widgets import MDCheckboxInput, MDDateTimeRangeFilter
 from .models import Task
 
 
-class TaskFilter(df.FilterSet):
+class TaskFilter(FilterSet):
     year = datetime.now().year
 
-    openned = df.ChoiceFilter(widget=MDCheckboxInput, label="Em aberto", name='openned')
-    accepted = df.ChoiceFilter(widget=MDCheckboxInput, label="Aceitas", name='accepted')
-    refused = df.ChoiceFilter(widget=MDCheckboxInput, label="Recusadas", name='refused')
-    done = df.ChoiceFilter(widget=MDCheckboxInput, label="Cumpridas", name='done')
-    returned = df.ChoiceFilter(widget=MDCheckboxInput, label="Retornadas", name='returned')
+    openned = BooleanFilter(required=False, widget=MDCheckboxInput, label="Em aberto", name='openned')
+    accepted = BooleanFilter(required=False, widget=MDCheckboxInput, label="Aceitas", name='accepted')
+    refused = BooleanFilter(required=False, widget=MDCheckboxInput, label="Recusadas", name='refused')
+    done = BooleanFilter(required=False, widget=MDCheckboxInput, label="Cumpridas", name='done')
+    returned = BooleanFilter(required=False, widget=MDCheckboxInput, label="Retornadas", name='returned')
 
-    reminder_init = df.DateFilter(widget=SelectDateWidget(years=range(2008, year + 1)), name='Lembrete',
-                                  lookup_expr='rem', label="Lembrete")
-    reminder_end = df.DateFilter(widget=SelectDateWidget(years=range(2008, year + 1)), name='Lembrete',
-                                 lookup_expr='rem', label="a")
-    deadline_init = df.DateFilter(widget=SelectDateWidget(years=range(2008, year + 1)), name='PrazoFinal',
-                                  lookup_expr='dl', label="Prazo Final")
-    deadline_end = df.DateFilter(widget=SelectDateWidget(years=range(2008, year + 1)), name='PrazoFinal',
-                                 lookup_expr='dl', label="a")
+    reminder = MDDateTimeRangeFilter(name="Prazo Inicial", label="Prazo Inicial",
+                                     )
+    deadline = MDDateTimeRangeFilter(label="Prazo Final", name="Prazo Final",
+                                     )
 
-    cliente = df.CharFilter(lookup_expr='cli', label="Cliente", name='cliente')
+    client = CharFilter(lookup_expr='cli', label="Cliente", name='client', widget=forms.TextInput(
+        attrs={'class': 'form-control'}
+    ))
 
     class Meta:
         model = Task

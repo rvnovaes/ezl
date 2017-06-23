@@ -1,13 +1,11 @@
 import os
-# from .utils import PagedFilteredTableView
-from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import DeleteView, CreateView, UpdateView, TemplateView
@@ -21,105 +19,6 @@ from task.models import Task, TaskStatus, Ecm, TaskHistory
 from task.tables import TaskTable, DashboardStatusTable
 from .filters import TaskFilter
 
-
-def TaskFilterAtt(request, person):
-    # {'reminder_init_day': ['0'], 'accepted': ['on'], 'deadline_init_year': ['0'], 'done': ['on'], 'deadline_end_year': ['0'], 'deadline_init_day': ['0'], 'reminder_init_month': ['0'], 'deadline_end_day': ['0'], 'deadline_init_month': ['0'], 'refused': ['on'], 'cliente': [''], 'deadline_end_month': ['0'], 'reminder_end_year': ['0'], 'reminder_end_day': ['0'], 'reminder_init_year': ['0'], 'openned': ['on'], 'returned': ['on'], 'reminder_end_month': ['0']}
-
-    task_list = Task.objects.none()
-
-    if person.is_correspondent:
-        task_list = Task.objects.filter(person_executed_by=person.id)
-    else:
-        task_list = Task.objects.filter(person_asked_by=person.id)
-
-    if not bool(task_list):
-        return task_list
-
-    del_datetime_init = None
-    del_datetime_end = None
-    rem_datetime_init = None
-    rem_datetime_end = None
-
-    # if request.get('cliente') != '':
-    #    task_list &= Task.objects.filter(client=request.get('cliente'))
-
-
-    if request.get('deadline_init_year') != '0' and request.get('deadline_init_month') != '0' and request.get(
-            'deadline_init_day') != '0':
-        del_datetime_init = datetime(int(request.get('deadline_init_year')), int(request.get('deadline_init_month')),
-                                     int(request.get('deadline_init_day')))
-
-    if request.get('deadline_end_year') != '0' and request.get('deadline_end_month') != '0' and request.get(
-            'deadline_end_day') != '0':
-        del_datetime_end = datetime(int(request.get('deadline_end_year')), int(request.get('deadline_end_month')),
-                                    int(request.get('deadline_end_day')))
-
-    if request.get('reminder_init_year') != '0' and request.get('reminder_init_month') != '0' and request.get(
-            'reminder_init_day') != '0':
-        rem_datetime_init = datetime(int(request.get('reminder_init_year')), int(request.get('reminder_init_month')),
-                                     int(request.get('reminder_init_day')))
-
-    if request.get('reminder_end_year') != '0' and request.get('reminder_end_month') != '0' and request.get(
-            'reminder_end_day') != '0':
-        rem_datetime_end = datetime(int(request.get('reminder_end_year')), int(request.get('reminder_end_month')),
-                                    int(request.get('reminder_end_day')))
-
-    if 'openned' in request:
-        task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
-                                         refused_date__isnull=True, execution_date__isnull=True,
-                                         return_date__isnull=True)
-    if 'accepted' in request:
-        task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                         refused_date__isnull=True, execution_date__isnull=True,
-                                         return_date__isnull=True)
-    if 'refused' in request:
-        task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
-                                         refused_date__isnull=False, execution_date__isnull=True,
-                                         return_date__isnull=True)
-    if 'done' in request:
-        task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                         refused_date__isnull=True, execution_date__isnull=False,
-                                         return_date__isnull=True)
-    if 'returned' in request:
-        task_list &= Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                         refused_date__isnull=True, execution_date__isnull=True,
-                                         return_date__isnull=False)
-
-
-        # task_list &= Task.objects.filter( final_deadline_date__isnull = False, final_deadline_date__range=(del_datetime_init,del_datetime_end))
-    # task_list &= Task.objects.filter( reminder_deadline_date__isnull=False,reminder_deadline_date__range=
-    #                               (rem_datetime_init,rem_datetime_end))                                 
-
-    if request.get('cliente') != '':
-
-        wanted_items = set()
-        for i in task_list:
-            if str(i.client) == request.get('cliente'):
-                wanted_items.add(i.pk)
-
-        task_list = Task.objects.filter(pk__in=wanted_items)
-
-
-    return task_list
-
-
-def TaskListSearch(request):
-    task_list = Task.objects.none()
-
-    person = Person.objects.get(auth_user=request.user)
-    if person.is_correspondent:
-        task_list = Task.objects.filter(person_executed_by=person.id)
-    else:
-        task_list = Task.objects.filter(person_asked_by=person.id)
-
-    if bool(request.GET):
-        task_list = TaskFilterAtt(request.GET, person)
-
-    task_filter = TaskFilter(request=request.GET, queryset=task_list)
-
-    print("Query", request.GET, "Task List", task_list)
-
-    return render(request, 'task/search.html', {'filter': task_filter})  # pode retornar qualquer lista aqui
 
 class TaskListView(LoginRequiredMixin, SingleTableView):
     model = Task
@@ -186,7 +85,7 @@ class DashboardView(MultiTableMixin, TemplateView):
             data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
                                        refused_date__isnull=True, execution_date__isnull=True,
                                        return_date__isnull=False)
-
+        # TODO Adicionar metodo para filtrar dashboard do coordenador
         if person.is_correspondent:
             return data.filter(person_executed_by=person.id)
         else:
@@ -228,10 +127,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         task = form.instance
-        # now3 =
-        # now2 = timezone.now()
         notes = form.cleaned_data['notes']
-        # now_date = datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
         now_date = timezone.now()
         action = self.request.POST['action']
 
@@ -314,3 +210,96 @@ def delete_ecm(request, pk):
                 'num_ged': num_ged
                 }
         return JsonResponse(data)
+
+
+class DashboardSearchView(LoginRequiredMixin, SingleTableView):
+    model = Task
+    filter_class = TaskFilter
+    template_name = 'task/task_filter.html'
+    context_object_name = 'task_filter'
+    context_filter_name = 'filter'
+    ordering = ['-id']
+    table_class = DashboardStatusTable
+
+    def query_builder(self, person):
+        query_set = {}
+        request = self.request.GET
+        filter = TaskFilter(request)
+        task_form = filter.form
+
+        if task_form.is_valid():
+            data = task_form.cleaned_data
+            status_dynamic_query = Q()
+            person_dynamic_query = Q()
+            reminder_dynamic_query = Q()
+            deadline_dynamic_query = Q()
+            if person.is_correspondent:
+                person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+            else:
+                person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+
+            if data['openned']:
+                status_dynamic_query.add(Q(delegation_date__isnull=False, acceptance_date__isnull=True,
+                                           refused_date__isnull=True, execution_date__isnull=True,
+                                           return_date__isnull=True), Q.OR)
+            if data['accepted']:
+                status_dynamic_query.add(Q(delegation_date__isnull=False, acceptance_date__isnull=False,
+                                           refused_date__isnull=True, execution_date__isnull=True,
+                                           return_date__isnull=True), Q.OR)
+            if data['refused']:
+                status_dynamic_query.add(Q(delegation_date__isnull=False, acceptance_date__isnull=True,
+                                           refused_date__isnull=False, execution_date__isnull=True,
+                                           return_date__isnull=True), Q.OR)
+            if data['done']:
+                status_dynamic_query.add(Q(delegation_date__isnull=False, acceptance_date__isnull=False,
+                                           refused_date__isnull=True, execution_date__isnull=False,
+                                           return_date__isnull=True), Q.OR)
+            if data['returned']:
+                status_dynamic_query.add(Q(delegation_date__isnull=False, acceptance_date__isnull=False,
+                                           refused_date__isnull=True, execution_date__isnull=True,
+                                           return_date__isnull=False), Q.OR)
+            if data['reminder']:
+                if data['reminder'].start:
+                    reminder_dynamic_query.add(Q(reminder_deadline_date__gte=data['reminder'].start), Q.AND)
+                if data['reminder'].stop:
+                    reminder_dynamic_query.add(Q(reminder_deadline_date__lte=data['reminder'].stop), Q.AND)
+            if data['deadline']:
+                if data['deadline'].start:
+                    deadline_dynamic_query.add(Q(final_deadline_date__gte=data['deadline'].start), Q.AND)
+                if data['deadline'].stop:
+                    deadline_dynamic_query.add(Q(final_deadline_date__lte=data['deadline'].stop), Q.AND)
+
+            person_dynamic_query.add(status_dynamic_query, Q.AND).add(Q(reminder_dynamic_query), Q.AND)
+
+            query_set = Task.objects.filter(person_dynamic_query)
+
+            if data['client']:
+                wanted_items = set()
+                for i in query_set:
+                    if request.get('client') in str(i.client):
+                        wanted_items.add(i.pk)
+
+                query_set.filter(pk__in=wanted_items)
+
+        return query_set, filter
+
+    def get_queryset(self, **kwargs):
+        task_list = {}
+        person = Person.objects.get(auth_user=self.request.user)
+
+        if bool(self.request.GET):
+            task_list, task_filter = self.query_builder(person)
+            # self.table =
+            self.filter = task_filter
+        else:
+            self.filter = TaskFilter(queryset={})
+        return task_list
+
+    def get_context_data(self, **kwargs):
+        context = super(DashboardSearchView, self).get_context_data()
+        # if self.request:
+        context[self.context_filter_name] = self.filter
+        table = DashboardStatusTable(self.object_list)
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        context['table'] = table
+        return context

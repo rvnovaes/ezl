@@ -10,6 +10,7 @@ class TaskTable(tables.Table):
         super().__init__(*args, **kwargs)
 
         self.base_columns['status'].verbose_name = _overriden_value
+        self.length = self.rows.__len__()
 
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
     legacy_code = tables.LinkColumn(viewname='task_update', attrs={'a': {'target': 'task_update'}}, args=[A('pk')])
@@ -24,14 +25,13 @@ class TaskTable(tables.Table):
         fields = ['selection', 'status', 'legacy_code', 'movement', 'person_asked_by', 'person_executed_by',
                   'type_movement',
                   'delegation_date',
-                  'acceptance_date', 'reminder_deadline_date', 'second_deadline_date', 'execution_date', 'return_date',
+                  'acceptance_date', 'reminder_deadline_date', 'final_deadline_date', 'execution_date', 'return_date',
                   'refused_date']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem providências cadastradas"
 
 
 class DashboardStatusTable(tables.Table):
-
     def __init__(self, *args, service="Serviço", client="Cliente", legacy_code="Número", title="", status="",
                  **kwargs):
         super().__init__(*args, **kwargs)
