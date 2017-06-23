@@ -130,10 +130,6 @@
                 {% bootstrap_pagination table.page url=request.get_full_path %}
             {% endblock pagination %}
         {% endif %}
-        <div class="text-right" style="margin: auto">
-            <a class="btn btn-fab btn-primary" href="{% url 'task_add' %}"><i
-                    class="material-icons">add</i></a>
-        </div>
     </div>
 {% endblock table %}
 {% endblock content %}
