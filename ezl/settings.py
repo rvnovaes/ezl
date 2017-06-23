@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'bootstrap3',
     'django_filters',
     'widget_tweaks',
-    'debug_toolbar'
+    'debug_toolbar',
+    'django_cleanup'
 ]
 
 MIDDLEWARE = [
@@ -97,11 +98,13 @@ DATABASES = {
         # 'HOST': '127.0.0.1',
         'PORT': '5432'
 
+    }
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
+    # Password validation
+    # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -117,6 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -143,7 +147,7 @@ STATICFILES_DIRS = (
 )
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = '/opt/files_easy_lawyer/'
 
 # STATIC_ROOT = '/opt/mta/easy_lawyer_django/static/'
 LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
