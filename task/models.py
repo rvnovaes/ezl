@@ -164,3 +164,16 @@ class TaskHistory(AuditCreate):
     class Meta:
         verbose_name = "Histórico da Providência"
         verbose_name_plural = "Histórico das Providências"
+
+
+class TypeTask(Audit, LegacyCode):
+    # legacy_code = models.CharField(max_length=255, unique=True, verbose_name="Código Legado")
+    name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Tipo de Serviço")
+
+    class Meta:
+        db_table = "type_task"
+        verbose_name = "Tipo de Serviço"
+        verbose_name_plural = "Tipos de Serviço"
+
+    def __str__(self):
+        return self.name

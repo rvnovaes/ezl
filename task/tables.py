@@ -2,7 +2,7 @@ import django_tables2 as tables
 from django_tables2 import A
 
 from core.tables import CheckBoxMaterial
-from task.models import Task
+from .models import Task, TypeTask
 
 
 class TaskTable(tables.Table):
@@ -50,3 +50,18 @@ class DashboardStatusTable(tables.Table):
         model = Task
         fields = ['legacy_code', 'service', 'reminder_deadline_date', 'client']
         empty_text = "Não existem providências a serem exibidas"
+
+
+class TypeTaskTable(tables.Table):
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
+    legacy_code = tables.LinkColumn(viewname='typetask_update', attrs={'a': {'target': 'typetask_update'}},
+                                    args=[A('pk')])
+    name = tables.LinkColumn(viewname='typetask_update', attrs={'a': {'target': 'typetask_update'}},
+                             args=[A('pk')])
+
+    class Meta:
+        sequence = ('selection', 'legacy_code', 'name', 'is_active')
+        model = TypeTask
+        fields = ['selection', 'legacy_code', 'name', 'is_active']
+        # attrs = {"class": "table-striped table-bordered"}
+        empty_text = "Não existem tipos de serviço cadastrados"

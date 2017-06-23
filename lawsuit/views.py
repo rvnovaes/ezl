@@ -8,11 +8,13 @@ from django_tables2 import RequestConfig, SingleTableView
 from core.messages import new_success, update_success, delete_success
 from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin
 from .forms import LawSuitInstanceForm
-from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm, CourtDivisionForm,TypeTaskForm
+from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm, \
+    CourtDivisionForm
 from .models import LawSuitInstance
-from .models import TypeMovement, Instance, Movement, LawSuit, Folder, CourtDistrict,CourtDivision,TypeMovement, TypeTask
+from .models import Instance, Movement, LawSuit, Folder, CourtDistrict, CourtDivision, TypeMovement
 from .tables import LawSuitInstanceTable
-from .tables import TypeMovementTable, MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, InstanceTable, CourtDivisionTable, TypeMovementTable, TypeTaskTable
+from .tables import MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, InstanceTable, \
+    CourtDivisionTable, TypeMovementTable
 
 
 class InstanceListView(LoginRequiredMixin, SingleTableView):
@@ -244,7 +246,8 @@ class LawSuitInstanceDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteV
     #     law_suit_instance_id = int(law_suit_instance.id)
     #     LawSuitInstance.objects.filter(id=law_suit_instance_id).update(active=False)
     #     return HttpResponseRedirect(self.success_url)
-    
+
+
 class CourtDivisionListView(LoginRequiredMixin, SingleTableViewMixin):
     model = CourtDivision
     table_class = CourtDivisionTable
@@ -275,38 +278,4 @@ class CourtDivisionUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCusto
 class CourtDivisionDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
     model = CourtDivision
     success_url = reverse_lazy('courtdivision_list')
-    success_message = delete_success(model._meta.verbose_name_plural)    
-    
-class TypeTaskListView(LoginRequiredMixin, SingleTableViewMixin):
-    model = TypeTask
-    table_class = TypeTaskTable
-
-    # def get_context_data(self, **kwargs):
-    #     context = super(CourtDistrictListView, self).get_context_data(**kwargs)
-    #     context['nav_courtdistrict'] = True
-    #     table = CourtDistrictTable(CourtDistrict.objects.all().order_by('-pk'))
-    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-    #     context['table'] = table
-    #     return context
-
-
-class TypeTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
-    model = TypeTask
-    form_class = TypeTaskForm
-    success_url = reverse_lazy('typetask_list')
-    success_message = new_success
-
-
-class TypeTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
-    model = TypeTask
-    form_class = TypeTaskForm
-    success_url = reverse_lazy('typetask_list')
-    success_message = update_success
-
-
-class TypeTaskDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
-    model = TypeTask
-    success_url = reverse_lazy('typetask_list')
-    success_message = delete_success(model._meta.verbose_name_plural)    
-    
-    
+    success_message = delete_success(model._meta.verbose_name_plural)

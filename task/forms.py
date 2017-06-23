@@ -3,13 +3,14 @@ from datetime import datetime
 import pytz
 from django import forms
 from django.forms import ModelForm
+from django.forms.models import fields_for_model
 
 from core.models import Person
 from core.widgets import MDDateTimepicker
 from ezl import settings
 from lawsuit.forms import BaseForm
 from lawsuit.models import Movement, TypeMovement
-from task.models import Task, Ecm
+from .models import Task, Ecm, TypeTask
 
 
 class TaskForm(BaseForm):
@@ -181,3 +182,12 @@ class EcmForm(BaseForm):
         fields = ['path', 'task']
 
     path = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
+
+
+class TypeTaskForm(BaseForm):
+    class Meta:
+        model = TypeTask
+        fields = fields_for_model(TypeTask,
+                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
+
+    legacy_code = forms.CharField(max_length=255, required=True)

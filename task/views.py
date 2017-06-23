@@ -13,12 +13,13 @@ from django.utils import timezone
 from django.views.generic import DeleteView, CreateView, UpdateView, TemplateView
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
-from core.messages import new_success, update_success
+from core.messages import new_success, update_success, delete_success
 from core.models import Person
-from core.views import BaseCustomView
-from task.forms import TaskForm, TaskDetailForm, EcmForm
-from task.models import Task, TaskStatus, Ecm, TaskHistory
-from task.tables import TaskTable, DashboardStatusTable
+from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin
+
+from .forms import TaskForm, TaskDetailForm, EcmForm, TypeTaskForm
+from .models import Task, TaskStatus, Ecm, TaskHistory, TypeTask
+from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
 from .filters import TaskFilter
 
 
@@ -293,6 +294,39 @@ class EcmCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
                     'task_id': str(task)
                     }
             return JsonResponse(data)
+
+
+class TypeTaskListView(LoginRequiredMixin, SingleTableViewMixin):
+    model = TypeTask
+    table_class = TypeTaskTable
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(CourtDistrictListView, self).get_context_data(**kwargs)
+    #     context['nav_courtdistrict'] = True
+    #     table = CourtDistrictTable(CourtDistrict.objects.all().order_by('-pk'))
+    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+    #     context['table'] = table
+    #     return context
+
+
+class TypeTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+    model = TypeTask
+    form_class = TypeTaskForm
+    success_url = reverse_lazy('typetask_list')
+    success_message = new_success
+
+
+class TypeTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
+    model = TypeTask
+    form_class = TypeTaskForm
+    success_url = reverse_lazy('typetask_list')
+    success_message = update_success
+
+
+class TypeTaskDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
+    model = TypeTask
+    success_url = reverse_lazy('typetask_list')
+    success_message = delete_success(model._meta.verbose_name_plural)
 
 
 @login_required

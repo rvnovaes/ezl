@@ -21,14 +21,6 @@ urlpatterns = [
     url(r'^varas/excluir$', login_required(views.CourtDivisionDeleteView.as_view()),
         name='courtdivision_delete'),
         
-    # TipoServico
-    url(r'^tipo_servico/listar/$', login_required(views.TypeTaskListView.as_view()), name='typetask_list'),
-    url(r'^tipo_servico/$', login_required(views.TypeTaskCreateView.as_view()), name='typetask_add'),
-    url(r'^tipo_servico/(?P<pk>[0-9]+)/$', login_required(views.TypeTaskUpdateView.as_view()),
-        name='typetask_update'),
-    url(r'^tipo_servico/excluir$', login_required(views.TypeTaskDeleteView.as_view()),
-        name='typetask_delete'),    
-
     # Pastas
     url(r'^pastas/listar/$', login_required(login_required(views.FolderListView.as_view())), name='folder_list'),
     url(r'^pastas/$', login_required(login_required(views.FolderCreateView.as_view())), name='folder_add'),

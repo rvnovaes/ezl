@@ -37,7 +37,6 @@ def get_or_create(session, model, kwargs):
 
 
 def trataAuthUser(linha):
-
     print(linha)
 
     if linha['status'] == 'I':
@@ -112,11 +111,11 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
                 auth_user_id = authuser_query.id
 
         cpf_cnpj = linha['Codigo']
-        
+
         if linha['TipoCF'] == 'A':
             service_type = 'C'
-            
-        elif linha['TipoCF'] == 'F':   
+
+        elif linha['TipoCF'] == 'F':
             service_type = 'F'
 
     if person_type == 'cliente':
@@ -136,11 +135,11 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
             legal_type = 'J'
 
         cpf_cnpj = linha['Codigo']
-        
+
         if linha['TipoCF'] == 'A':
             service_type = 'C'
-            
-        elif linha['TipoCF'] == 'F':   
+
+        elif linha['TipoCF'] == 'F':
             service_type = 'F'
 
     if person_type == 'trib':
@@ -184,7 +183,7 @@ def retorna_campos_consulta(cursor):
 
 def insere_user(session, linha):
     user_linha = AuthUser(**linha)
-    #get_or_create(session, AuthUser, linha)
+    # get_or_create(session, AuthUser, linha)
     session.add(user_linha)
     session.commit()
 
@@ -204,14 +203,16 @@ engine_advwin = connect_db(advwin_file_path)  # arquivo de conexao do advwin
 Base.metadata.create_all(engine_ezl)
 session_ezl = sessionmaker(bind=engine_ezl)()
 
-sql_str_cliente = text('select * from Jurid_Clifor where Status=\'Ativo\' and Codigo not in (select Jurid_CliFor.Codigo from Jurid_CliFor inner join Jurid_advogado on (Jurid_advogado.Codigo = Jurid_Clifor.Codigo));')  # top 1 apenas para testes
-sql_str_advogado = text('select Jurid_Advogado.*,Jurid_CliFor.TipoCF from Jurid_Advogado left join Jurid_clifor on (Jurid_advogado.Codigo = Jurid_Clifor.Codigo) where Jurid_Advogado.Status = \'Ativo\';')
+sql_str_cliente = text(
+    'select * from Jurid_Clifor where Status=\'Ativo\' and Codigo not in (select Jurid_CliFor.Codigo from Jurid_CliFor inner join Jurid_advogado on (Jurid_advogado.Codigo = Jurid_Clifor.Codigo));')  # top 1 apenas para testes
+sql_str_advogado = text(
+    'select Jurid_Advogado.*,Jurid_CliFor.TipoCF from Jurid_Advogado left join Jurid_clifor on (Jurid_advogado.Codigo = Jurid_Clifor.Codigo) where Jurid_Advogado.Status = \'Ativo\';')
 sql_str_tribunais = text('select * from Jurid_Tribunais;')
 sql_str_advweb = text(
     'select advweb_usuario.* from advweb_usuario inner join Jurid_Advogado on (advweb_usuario.codigo_adv = Jurid_advogado.codigo) where Jurid_Advogado.Correspondente = \'1\' and Jurid_Advogado.Status = \'Ativo\';')
 
-consultas_advwin = [sql_str_advweb,sql_str_advogado, sql_str_cliente, sql_str_tribunais]
-consultas_tipo = ['usuario','adv', 'cliente', 'trib']
+consultas_advwin = [sql_str_advweb, sql_str_advogado, sql_str_cliente, sql_str_tribunais]
+consultas_tipo = ['usuario', 'adv', 'cliente', 'trib']
 
 # consultas_advwin = [sql_str_advogado]
 # consultas_tipo = ['adv']
