@@ -29,6 +29,9 @@ $(function () {
         done: function (e, data) {
             if (data.result.success) {
                 document.getElementById("no-providence").innerHTML="";
+                document.getElementById("message-success-sent").innerHTML=data.result.message
+                $("#sucessSent").modal("show");
+
                 $("#files tbody").prepend(
                     "<tr class='lineFile' id='row-"+ data.result.id +"'>" +
                         "<td id='cell-table'>" +
@@ -95,6 +98,7 @@ $(function () {
 
                                 "success: function (data) {" +
                                     "if (data.is_deleted) {" +
+                                        "document.getElementById('message-delete-success').innerHTML=data.message;" +
                                         "$('#row-"+ data.result.id +"').remove();" +
                                         "$('#row-space"+ data.result.id +"').remove();" +
                                         "$('#deleting').modal('hide');" +
@@ -102,6 +106,7 @@ $(function () {
 
                                     "}" +
                                     "else {" +
+                                        "document.getElementById('deleteErrorText').innerHTML= data.message;" +
                                         "$('#deleting').modal('hide');" +
                                         "$('#deleteError').modal('show')" +
                                     "}" +
@@ -117,6 +122,11 @@ $(function () {
                     "</script>"
                 );
 
+            }
+
+            else{
+                document.getElementById("error-message").innerHTML=data.result.message;
+                $("#errorSent").modal("show");
             }
         }
 

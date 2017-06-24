@@ -1,4 +1,6 @@
 import os
+# from .utils import PagedFilteredTableView
+from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -18,6 +20,9 @@ from task.forms import TaskForm, TaskDetailForm, EcmForm
 from task.models import Task, TaskStatus, Ecm, TaskHistory
 from task.tables import TaskTable, DashboardStatusTable
 from .filters import TaskFilter
+from django.db import IntegrityError, DataError, OperationalError
+from core.messages import operational_error_create, ioerror_create, exception_create, integrity_error_delete, \
+    file_exists_error_delete, exception_delete, success_sent, success_delete
 
 
 class TaskListView(LoginRequiredMixin, SingleTableView):
@@ -164,11 +169,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         return context
 
 
-class EcmCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
-    model = Ecm
-    form_class = EcmForm
-    success_url = reverse_lazy('instance_list')
-
+class EcmCreateView(LoginRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         files = request.FILES.getlist('path')
         task = kwargs['pk']
@@ -179,15 +180,35 @@ class EcmCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
                       create_user_id=str(request.user.id),
                       create_date=timezone.now()
                       )
-            ecm.save()
-            data = {'success': True,
-                    'id': ecm.id,
-                    'name': str(file),
-                    'user': str(self.request.user),
-                    'username': str(self.request.user.first_name + ' ' + self.request.user.last_name),
-                    'filename': str(os.path.basename(ecm.path.path)),
-                    'task_id': str(task)
-                    }
+
+            try:
+                ecm.save()
+                data = {'success': True,
+                        'id': ecm.id,
+                        'name': str(file),
+                        'user': str(self.request.user),
+                        'username': str(self.request.user.first_name + ' ' + self.request.user.last_name),
+                        'filename': str(os.path.basename(ecm.path.path)),
+                        'task_id': str(task),
+                        'message': success_sent()
+                        }
+
+            except OperationalError:
+                data = {'success': False,
+                        'message': operational_error_create()
+                        }
+
+            except IOError:
+
+                data = {'is_deleted': False,
+                        'message': ioerror_create()
+                        }
+
+            except Exception:
+                data = {'success': False,
+                        'message': exception_create()
+                        }
+
             return JsonResponse(data)
 
 
@@ -195,21 +216,33 @@ class EcmCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 def delete_ecm(request, pk):
     query = Ecm.objects.filter(id=pk)
     task = query.values('task_id').first()
-    num_ged = Ecm.objects.filter(task_id=task['task_id']).count()
+
     try:
         # query = Ecm.objects.filter(id=pk).delete()
         query.delete()
         num_ged = Ecm.objects.filter(task_id=task['task_id']).count()
         data = {'is_deleted': True,
-                'num_ged': num_ged
+                'num_ged': num_ged,
+                'message': success_delete()
                 }
-        return JsonResponse(data)
 
-    except ...:
+    except IntegrityError:
         data = {'is_deleted': False,
-                'num_ged': num_ged
+                'message': integrity_error_delete()
                 }
-        return JsonResponse(data)
+
+    except FileExistsError:
+        data = {'is_deleted': False,
+                'message': file_exists_error_delete()
+                }
+
+
+    except Exception:
+        data = {'is_deleted': False,
+                'message': exception_delete()
+                }
+
+    return JsonResponse(data)
 
 
 class DashboardSearchView(LoginRequiredMixin, SingleTableView):

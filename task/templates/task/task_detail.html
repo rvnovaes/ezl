@@ -255,12 +255,13 @@
     </div>
 
 
-    <!-- Janela modal para confirmação de deleção de arquivo -->
+    <!-- Janela modal para mostrar sucesso ao deletar arquivo -->
     <div id="deleteSuccess" class="modal">
         <div class="modal-dialog">
             <div class="modal-content ">
                 <div class="modal-body" style="text-align: center !important;">
-                    Arquivo deletado com sucesso !
+                    <p id="message-delete-success">
+                    </p>
                 </div>
                 <div class="modal-footer">
                     <div class="form-group text-center">
@@ -275,7 +276,30 @@
         </div>
     </div>
 
-    <!-- Janela modal para confirmação de deleção de arquivo -->
+    <!-- Janela modal para mostrar erro ao deletar arquivo -->
+    <div id="deleteError" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center !important;">
+{#                    Ocorreu um erro ao tentar excluir o arquivo.#}
+                    <p id="deleteErrorText">
+
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-group text-center">
+                        <button type="button" style="width: 95px!important;"
+                                class="btn btn-sm btn-raised btn-primary"
+                                data-dismiss="modal">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Janela modal para mostrar progresso de deleção do arquivo -->
     <div id="deleting" class="modal">
         <div class="modal-dialog">
             <div class="modal-content ">
@@ -291,12 +315,35 @@
         </div>
     </div>
 
-    <!-- Janela modal para confirmação de deleção de arquivo -->
-    <div id="deleteError" class="modal">
+    <!-- Janela modal para mostrar sucesso ao enviar arquivo -->
+    <div id="sucessSent" class="modal">
         <div class="modal-dialog">
             <div class="modal-content ">
                 <div class="modal-body" style="text-align: center !important;">
-                    Ocorreu um erro ao tentar deletar o arquivo.
+                    <p id="message-success-sent">
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-group text-center">
+                        <button type="button" style="width: 95px!important;"
+                                class="btn btn-sm btn-raised btn-primary"
+                                data-dismiss="modal">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Janela modal para mostrar erro ao enviar arquivo -->
+    <div id="errorSent" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center !important;">
+                   <p id="error-message">
+
+                   </p>
                 </div>
                 <div class="modal-footer">
                     <div class="form-group text-center">
@@ -327,6 +374,7 @@
 
                             success: function (data) {
                                 if (data.is_deleted) {
+                                    document.getElementById("message-delete-success").innerHTML=data.message;
                                     $('#row-{{ ged.id }}').remove();
                                     $('#row-space{{ ged.id }}').remove();
                                     $('#deleting').modal('hide');
@@ -334,6 +382,7 @@
 
                                 }
                                 else {
+                                    document.getElementById("deleteErrorText").innerHTML= data.message;
                                     $('#deleting').modal('hide');
                                     $('#deleteError').modal('show')
                                 }
