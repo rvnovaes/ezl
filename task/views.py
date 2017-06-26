@@ -131,6 +131,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     template_name = "task/task_detail.html"
 
     def form_valid(self, form):
+        task_id = self.kwargs['pk']
         task = form.instance
         notes = form.cleaned_data['notes']
         now_date = timezone.now()
@@ -153,13 +154,17 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         task.alter_date = now_date
         user = User.objects.get(id=self.request.user.id)
         task.alter_user = user
+        status = TaskStatus[action]
+        task.task_status = status
+
         form = TaskDetailForm(self.request.POST, instance=task)
         form.save()
         # salvando snapshot com novo status
-        status = TaskStatus[action]
+
         task_history = TaskHistory(task=task, create_user=user, create_date=now_date, status=status,
                                    notes=notes)
         task_history.save()
+
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 

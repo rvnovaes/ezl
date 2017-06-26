@@ -81,6 +81,7 @@ class Task(Audit, LegacyCode):
     # notes = models.TextField(null=True, blank=True, verbose_name=u"Observações")
 
     description = models.TextField(null=True, blank=True, verbose_name=u"Descrição do serviço")
+    task_status = models.CharField(null=True, verbose_name=u"Status",choices=TaskStatus.choices(), max_length=30, default="-")
 
     #
     class Meta:
