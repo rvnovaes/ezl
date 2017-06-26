@@ -113,7 +113,8 @@ class Person(Audit):
     cpf_cnpj = models.CharField(max_length=255, blank=True, verbose_name="CPF/CNPJ")
     auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True,
                                      verbose_name="Usuário do sistema")
-    service_type = models.CharField(max_length=1, choices=SERVICE_TYPE_CHOICES, verbose_name="Tipo de Serviço",default='N')                                 
+    is_client = models.BooleanField(null=False, default=False, verbose_name="É Cliente?")   
+    is_provider = models.BooleanField(null=False, default=False, verbose_name="É Fornecedor?")                              
     
 
     class Meta:

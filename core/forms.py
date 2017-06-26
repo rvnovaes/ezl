@@ -72,7 +72,7 @@ class PersonForm(BaseForm, forms.Form):
     class Meta:
         model = Person
         fields = ['legal_name', 'name', 'is_lawyer', "is_correspondent", 'is_court', 'legal_type', 'cpf_cnpj',
-                  'auth_user', 'is_active']
+                  'auth_user', 'is_active','is_client','is_provider']
 
     legal_name = forms.CharField(
         required=False,
@@ -89,6 +89,14 @@ class PersonForm(BaseForm, forms.Form):
     )
 
     is_correspondent = CustomBooleanField(
+        required=False,
+    )
+    
+    is_client = CustomBooleanField(
+        required=False,
+    )
+    
+    is_provider = CustomBooleanField(
         required=False,
     )
 

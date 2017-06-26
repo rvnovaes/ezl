@@ -5,9 +5,9 @@ import sys
 from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
+from models import Base
+from models import Person, AuthUser
 from connections.db_connection import connect_db
-from etl.advwin.models import Base
-from etl.advwin.models import Person, AuthUser
 
 
 def return_user_from_auth(key, auth_dict):
@@ -78,7 +78,8 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
     legal_type = 'F'
     cpf_cnpj = ''
     auth_user_id = None
-    service_type = 'N'
+    is_client = False
+    is_provider = False
 
     print(linha)
 
@@ -114,10 +115,10 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
         cpf_cnpj = linha['Codigo']
         
         if linha['TipoCF'] == 'A':
-            service_type = 'C'
+            is_client = True
             
         elif linha['TipoCF'] == 'F':   
-            service_type = 'F'
+            is_provider = True
 
     if person_type == 'cliente':
 
@@ -138,10 +139,10 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
         cpf_cnpj = linha['Codigo']
         
         if linha['TipoCF'] == 'A':
-            service_type = 'C'
+            is_client = True
             
-        elif linha['TipoCF'] == 'F':   
-            service_type = 'F'
+        if linha['TipoCF'] == 'F':   
+            is_provider = True
 
     if person_type == 'trib':
         date_creation = datetime.datetime.now()
@@ -164,7 +165,8 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
         'alter_user_id': None,
         'auth_user_id': auth_user_id,
         'create_user_id': 2,
-        'service_type': service_type
+        'is_client':is_client,
+        'is_provider':is_provider
 
     }
 
@@ -210,8 +212,8 @@ sql_str_tribunais = text('select * from Jurid_Tribunais;')
 sql_str_advweb = text(
     'select advweb_usuario.* from advweb_usuario inner join Jurid_Advogado on (advweb_usuario.codigo_adv = Jurid_advogado.codigo) where Jurid_Advogado.Correspondente = \'1\' and Jurid_Advogado.Status = \'Ativo\';')
 
-consultas_advwin = [sql_str_advweb,sql_str_advogado, sql_str_cliente, sql_str_tribunais]
-consultas_tipo = ['usuario','adv', 'cliente', 'trib']
+consultas_advwin = [sql_str_advogado, sql_str_cliente, sql_str_tribunais]
+consultas_tipo = ['adv', 'cliente', 'trib']
 
 # consultas_advwin = [sql_str_advogado]
 # consultas_tipo = ['adv']
