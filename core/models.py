@@ -42,10 +42,10 @@ class AuditAlter(models.Model):
 
 
 class LegacyCode(models.Model):
-    legacy_code = models.CharField(max_length=255, blank=False, null=False, default='', unique=True,
+    legacy_code = models.CharField(max_length=255, blank=False, null=True,
                                    verbose_name='Código legado')
-    system_prefix = models.CharField(max_length=255, choices=SYSTEM_PREFIX_CHOICES, default='',
-                                     blank=False, null=False, verbose_name='Prefixo do Sistema')
+    system_prefix = models.CharField(max_length=255, choices=SYSTEM_PREFIX_CHOICES, unique=True,
+                                     blank=False, null=True, verbose_name='Prefixo do Sistema')
 
     class Meta:
         abstract = True

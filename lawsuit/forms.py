@@ -36,7 +36,7 @@ class TypeMovementForm(BaseForm):
     class Meta:
         model = TypeMovement
         fields = fields_for_model(TypeMovement,
-                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user'})
+                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix'})
 
     name = forms.CharField(
         max_length=255,
@@ -103,7 +103,7 @@ class FolderForm(BaseForm):
     class Meta:
         model = Folder
         fields = fields_for_model(Folder,
-                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user'})
+                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix'})
 
     legacy_code = forms.CharField(
         max_length=255,
@@ -137,7 +137,7 @@ class CourtDivisionForm(BaseForm):
     class Meta:
         model = CourtDivision
         fields = fields_for_model(CourtDivision,
-                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
+                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix'])
 
     legacy_code = forms.CharField(max_length=255, required=True)
 
@@ -158,7 +158,7 @@ class LawSuitInstanceForm(BaseForm):
     class Meta:
         model = LawSuitInstance
         fields = fields_for_model(LawSuitInstance,
-                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
+                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix'])
 
         law_suit_number = forms.CharField(max_length=255, required=True)
 
@@ -183,6 +183,6 @@ class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
         fields = fields_for_model(TypeTask,
-                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
+                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix'])
 
     legacy_code = forms.CharField(max_length=255, required=True)

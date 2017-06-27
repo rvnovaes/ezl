@@ -151,7 +151,6 @@ class TaskDetailForm(ModelForm):
         )
     )
 
-
     # return_date = forms.DateTimeField(required=False
     #                                   )
     # refused_date = forms.DateTimeField(required=False
@@ -172,7 +171,8 @@ class TaskDetailForm(ModelForm):
     #         except FieldDoesNotExist:
     #             pass
     #             # fields = fields_for_model(Task,
-    #             #                           exclude={'create_user', 'alter_date', 'create_date', 'alter_user','is_active'})
+    #             #
+    #       exclude={'create_user', 'alter_date', 'create_date', 'alter_user','is_active'})
 
 
 class EcmForm(BaseForm):
