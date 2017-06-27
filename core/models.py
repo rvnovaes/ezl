@@ -116,9 +116,6 @@ class Person(Audit):
     is_client = models.BooleanField(null=False, default=False, verbose_name="É Cliente?")
     is_provider = models.BooleanField(null=False, default=False, verbose_name="É Fornecedor?")
 
-    # service_type = models.CharField(max_length=1, choices=SERVICE_TYPE_CHOICES, verbose_name="Tipo de Serviço",
-    #                                 default='N')
-
     class Meta:
         db_table = "person"
         ordering = ['-id']

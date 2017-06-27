@@ -46,6 +46,12 @@ class TaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Cr
     success_url = reverse_lazy('task_list')
     success_message = new_success
 
+    def get_initial(self):
+        if isinstance(self, TaskCreateView):
+            self.form_class.declared_fields['task_status'].initial = 'OPEN'
+            self.form_class.declared_fields['is_active'].initial = True
+            self.form_class.declared_fields['is_active'].disabled = True
+
 
 class TaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
     model = Task
@@ -131,7 +137,6 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     template_name = "task/task_detail.html"
 
     def form_valid(self, form):
-        task_id = self.kwargs['pk']
         task = form.instance
         notes = form.cleaned_data['notes']
         now_date = timezone.now()
@@ -155,8 +160,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         user = User.objects.get(id=self.request.user.id)
         task.alter_user = user
         status = TaskStatus[action]
-        task.task_status = status
-
+        task.task_status = status.name
         form = TaskDetailForm(self.request.POST, instance=task)
         form.save()
         # salvando snapshot com novo status

@@ -18,7 +18,7 @@ class TaskForm(BaseForm):
         fields = ['legacy_code', 'movement', 'person_asked_by', "person_executed_by", 'type_movement',
                   'delegation_date', 'acceptance_date', "reminder_deadline_date", "final_deadline_date",
                   'execution_date',
-                  'return_date', 'refused_date']
+                  'return_date', 'refused_date', 'task_status', 'is_active']
 
     legacy_code = forms.CharField(
         label=u"Código Legado",
@@ -70,6 +70,9 @@ class TaskForm(BaseForm):
                                       )
     refused_date = forms.DateTimeField(required=False
                                        )
+    task_status = forms.CharField(
+        widget=forms.HiddenInput()
+    )
 
 
 class TaskDetailForm(ModelForm):
