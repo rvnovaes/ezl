@@ -1,5 +1,4 @@
 import datetime
-import json
 import os
 
 import connections
@@ -7,56 +6,81 @@ import connections
 from sqlalchemy import text
 
 from connections.db_connection import connect_db
+from core.utils import LegacySystem
+from etl.advwin import settings
 
 
 def import_data():
     # apaga registros da tabela type_task - tem que ter cascade mesmo que não existam registros
     # associados em outras tabelas
     # restart identity - reinica o id da tabela
-    engine.execute(text('truncate table type_task restart identity cascade;').execution_options(autocommit=True))
+    if settings.TRUNCATE_ALL_TABLES:
+        ezl_engine.execute(text('truncate table type_task restart identity cascade;').execution_options(
+            autocommit=True))
+
+    # inativa todos os registros já existentes para não ter que consultar ativos e inativos do legado
+    ezl_engine.execute(text("update type_task set is_active = False where legacy_code = '{0}'"
+                            .format(LegacySystem.ADVWIN.value)).execution_options(autocommit=True))
 
     # seleciona os serviços do advwin
-    query = "select * from Jurid_ProcMov where table_schema not in " \
-            "('information_schema','pg_catalog') and COLUMN_NAME = 'court_district_id'"
+    query = "select distinct " \
+            "codigo, descricao " \
+            "from Jurid_CodMov " \
+            "where " \
+            "descricao is not null and " \
+            "status = 'Ativo' and " \
+            "usaros = 1"
 
-    connection = engine.connect()
+    connection = advwin_engine.connect()
     result = connection.execute(query)
 
     for row in result:
-        try:
-            # limpa dependencia da fk court_district_id
-            engine.execute(text('update ' + row['table_name'] + ' set court_district_id = null;').
-                           execution_options(autocommit=True))
-        except exc.IntegrityError:
-            pass
+        code = row['codigo']
+        name = str(row['descricao']).replace("'", "''")
 
-    # pega o diretorio do arquivo __init__.py do diretorio corrente e junta com o 'state_court_district.json'
-    json_file_path = os.path.join(os.path.dirname(__file__), 'state_court_district.json')
-    json_file_path = json_file_path.replace('\\', '/')
+        query = "select id " \
+                "from type_task " \
+                "where " \
+                "system_prefix = '{0}' and " \
+                "legacy_code = '{1}'".format(LegacySystem.ADVWIN.value, code)
 
-    json_file = open(json_file_path, encoding="utf8")
+        connection = ezl_engine.connect()
+        result = connection.execute(query)
 
-    court_district_dict = json.load(json_file)
+        if result.rowcount > 0:
+            for r in result:
+                query = "update type_task set " \
+                        "alter_date = '{0}', " \
+                        "is_active = {1}, " \
+                        "name = '{2}', " \
+                        "alter_user_id = {3} " \
+                        "where id = {4}" \
+                    .format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            True, name, settings.USER, r['id'])
+        else:
+            query = "insert into type_task(create_date, is_active, legacy_code, name, create_user_id, " \
+                    "system_prefix) values('{0}', {1}, '{2}', '{3}', {4}, '{5}')" \
+                .format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        True,
+                        code,
+                        name, settings.USER,
+                        LegacySystem.ADVWIN.value)
 
-    for data in court_district_dict:
-        court_district_name = str(data['court_district']).replace("'", "''")
-
-        query = "insert into court_district(create_date, name, create_user_id, state_id, is_active) values('{0}', " \
-                "'{1}', {2}, {3}, {4})"\
-            .format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    court_district_name, '1',
-                    "(select id from state where initials = '" + data['state'] + "')",
-                    True)
-
-        connection = engine.connect()
+        connection = ezl_engine.connect()
         result = connection.execute(query)
 
     connection.close()
 
-if __name__ == "__main__":
-    # pega o diretorio do arquivo __init__.py de acordo com o pacote e junta com o 'ezl.cfg'
-    cfg_file = os.path.join(os.path.abspath(os.path.dirname(connections.__file__)), 'ezl_local.cfg')
 
-    engine = connect_db(cfg_file)
+if __name__ == "__main__":
+    # pega o diretorio do arquivo __init__.py de acordo com o pacote e junta com o 'advwin.cfg'
+    advwin_cfg_file = os.path.join(os.path.abspath(os.path.dirname(connections.__file__)), 'advwin_ho.cfg')
+
+    advwin_engine = connect_db(advwin_cfg_file)
+
+    # pega o diretorio do arquivo __init__.py de acordo com o pacote e junta com o 'ezl.cfg'
+    ezl_cfg_file = os.path.join(os.path.abspath(os.path.dirname(connections.__file__)), 'ezl_local.cfg')
+
+    ezl_engine = connect_db(ezl_cfg_file)
 
     import_data()
