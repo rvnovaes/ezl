@@ -35,18 +35,19 @@ class TaskStatus(Enum):
     def __str__(self):
         return str(self.value)
 
-    # @classmethod
-    # def choices(cls):
-    #     # get all members of the class
-    #     members = inspect.getmembers(cls, lambda m: not (inspect.isroutine(m)))
-    #     # filter down to just properties
-    #     props = [m for m in members if not (m[0][:2] == '__')]
-    #     # format into django choice tuple
-    #     choices = tuple([(str(p[1].value), p[0]) for p in props])
-    #     return choices
+        # def choices(cls):
+        #     # get all members of the class
+        #     members = inspect.getmembers(cls, lambda m: not (inspect.isroutine(m)))
+        #     # filter down to just properties
+        #     props = [m for m in members if not (m[0][:2] == '__')]
+        #     # format into django choice tuple
+        #     choices = tuple([(str(p[1].value), p[0]) for p in props])
+        #     return choicesn
+
     @classmethod
     def choices(cls):
         return [(x.value, x.name) for x in cls]
+        # choices = tuple((str(p[1].value), p[0]) for p in props)
 
 
         # 'Em Aberto' = 1  # Providencias que foram delegadas
@@ -81,8 +82,10 @@ class Task(Audit, LegacyCode):
     # notes = models.TextField(null=True, blank=True, verbose_name=u"Observações")
 
     description = models.TextField(null=True, blank=True, verbose_name=u"Descrição do serviço")
-    task_status = models.CharField(null=True, verbose_name=u"", max_length=30,
-                                   default="-")
+
+    task_status = models.CharField(null=False, verbose_name=u"", max_length=30,
+                                   choices=((x.value, x.name.title()) for x in TaskStatus),
+                                   default=TaskStatus.OPEN)
 
     #
     class Meta:
@@ -134,6 +137,13 @@ class Task(Audit, LegacyCode):
         # def name_type_service(self):
         #     type_service = TypeMovement.objects.get(id=self.type_movement_id)
         #     return type_service
+
+    def save(self, *args, **kwargs):
+        try:
+            self.task_status = self.status
+        except Exception:
+            pass
+        super(Task, self).save(*args, **kwargs)
 
 
 def get_dir_name(self, filename):

@@ -49,7 +49,7 @@ class TaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Cr
 
     def get_initial(self):
         if isinstance(self, TaskCreateView):
-            self.form_class.declared_fields['task_status'].initial = 'OPEN'
+            self.form_class.declared_fields['task_status'].initial = TaskStatus.OPEN
             self.form_class.declared_fields['is_active'].initial = True
             self.form_class.declared_fields['is_active'].disabled = True
 
@@ -161,7 +161,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         user = User.objects.get(id=self.request.user.id)
         task.alter_user = user
         status = TaskStatus[action]
-        task.task_status = status.name
+        # task.task_status = status
         form = TaskDetailForm(self.request.POST, instance=task)
         form.save()
         # salvando snapshot com novo status
