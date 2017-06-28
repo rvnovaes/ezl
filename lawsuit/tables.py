@@ -2,7 +2,7 @@ import django_tables2 as tables
 from django_tables2 import A
 
 from core.tables import CheckBoxMaterial
-from .models import TypeMovement, Movement, LawSuit, Folder, CourtDistrict, Instance, LawSuitInstance,CourtDivision,TypeTask
+from .models import TypeMovement, Movement, LawSuit, Folder, CourtDistrict, Instance, LawSuitInstance
 
 
 class InstanceTable(tables.Table):
@@ -72,21 +72,18 @@ class LawSuitTable(tables.Table):
         empty_text = "Não existem processos cadastrados"
 
 
-
-
 class CourtDivisionTable(tables.Table):
-    
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
-
-    legacy_code = tables.LinkColumn(viewname='courtdivision_update', attrs={'a': {'target': 'courtdivision_update'}}, args=[A('pk')])
+    legacy_code = tables.LinkColumn(viewname='courtdivision_update', attrs={'a': {'target': 'courtdivision_update'}},
+                                    args=[A('pk')])
     name = tables.LinkColumn(viewname='courtdivision_update', attrs={'a': {'target': 'courtdivision_update'}},
                              args=[A('pk')])
 
     class Meta:
-        sequence = ('selection','legacy_code','name','is_active')
+        sequence = ('selection', 'legacy_code', 'name', 'is_active')
         model = CourtDistrict
-        fields = ['selection','legacy_code','name','is_active']
+        fields = ['selection', 'legacy_code', 'name', 'is_active']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem varas cadastradas"
 
@@ -118,20 +115,3 @@ class LawSuitInstanceTable(tables.Table):
                   'is_active']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem instâncias de processo cadastrados"
-        
-        
-class TypeTaskTable(tables.Table):
-    
-    selection = CheckBoxMaterial(accessor="pk", orderable=False)
-
-
-    legacy_code = tables.LinkColumn(viewname='typetask_update', attrs={'a': {'target': 'typetask_update'}}, args=[A('pk')])
-    name = tables.LinkColumn(viewname='typetask_update', attrs={'a': {'target': 'typetask_update'}},
-                             args=[A('pk')])
-
-    class Meta:
-        sequence = ('selection','legacy_code','name','is_active')
-        model = CourtDistrict
-        fields = ['selection','legacy_code','name','is_active']
-        # attrs = {"class": "table-striped table-bordered"}
-        empty_text = "Não existem tipos de serviço cadastrados"
