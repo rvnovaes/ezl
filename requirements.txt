@@ -6,7 +6,6 @@ django-bootstrap3==8.2.3
 django-cleanup==0.4.2
 django-debug-toolbar==1.8
 django-filter==1.0.4
-django-popup-view-field==0.3.0
 django-querysetsequence==0.7.2
 django-tables2==1.7.1
 psycopg2==2.7.1
