@@ -1,11 +1,10 @@
 import os
-# from .utils import PagedFilteredTableView
-from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db import IntegrityError, OperationalError
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
@@ -14,16 +13,17 @@ from django.views.generic import DeleteView, CreateView, UpdateView, TemplateVie
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
 from core.messages import new_success, update_success, delete_success
-from core.models import Person
-from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin
-
-from .forms import TaskForm, TaskDetailForm, EcmForm, TypeTaskForm
-from .models import Task, TaskStatus, Ecm, TaskHistory, TypeTask
-from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
-from .filters import TaskFilter
-from django.db import IntegrityError, DataError, OperationalError
 from core.messages import operational_error_create, ioerror_create, exception_create, integrity_error_delete, \
     file_exists_error_delete, exception_delete, success_sent, success_delete
+from core.models import Person
+from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin
+from .filters import TaskFilter
+from .forms import TaskForm, TaskDetailForm, TypeTaskForm
+from .models import Task, TaskStatus, Ecm, TaskHistory, TypeTask
+from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
+
+
+# from .utils import PagedFilteredTableView
 
 
 class TaskListView(LoginRequiredMixin, SingleTableView):
@@ -294,8 +294,8 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
     def query_builder(self, person):
         query_set = {}
         request = self.request.GET
-        filter = TaskFilter(request)
-        task_form = filter.form
+        task_filter = TaskFilter(request)
+        task_form = task_filter.form
 
         if task_form.is_valid():
             data = task_form.cleaned_data
@@ -344,14 +344,9 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             query_set = Task.objects.filter(person_dynamic_query)
 
             if data['client']:
-                wanted_items = set()
-                for i in query_set:
-                    if request.get('client') in str(i.client):
-                        wanted_items.add(i.pk)
+                query_set = list(filter(lambda x: x.client.pk == data['client'].id, query_set))
 
-                query_set.filter(pk__in=wanted_items)
-
-        return query_set, filter
+        return query_set, task_filter
 
     def get_queryset(self, **kwargs):
         task_list = {}
@@ -359,7 +354,6 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
 
         if bool(self.request.GET):
             task_list, task_filter = self.query_builder(person)
-            # self.table =
             self.filter = task_filter
         else:
             self.filter = TaskFilter(queryset={})
@@ -367,7 +361,6 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
 
     def get_context_data(self, **kwargs):
         context = super(DashboardSearchView, self).get_context_data()
-        # if self.request:
         context[self.context_filter_name] = self.filter
         table = DashboardStatusTable(self.object_list)
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)

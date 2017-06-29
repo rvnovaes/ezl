@@ -5,8 +5,6 @@ from core.models import Audit, Person, State, LegacyCode
 
 class TypeMovement(Audit, LegacyCode):
     name = models.CharField(max_length=255, blank=False, null=False, default="", unique=True, verbose_name='Nome')
-    # legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
-    #                                verbose_name='Código legado')
     uses_wo = models.BooleanField(default=False, verbose_name='Utiliza ordem de serviço?')
 
     class Meta:
@@ -33,8 +31,6 @@ class Instance(Audit):
 
 
 class Folder(Audit, LegacyCode):
-    # legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
-    #                                verbose_name='Código Legado')
     person_customer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                         verbose_name='Cliente')
 
@@ -79,7 +75,6 @@ class CourtDistrict(Audit):
 
 
 class CourtDivision(Audit, LegacyCode):
-    # legacy_code = models.CharField(max_length=255, unique=True, verbose_name="Código Legado")
     name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Vara")
 
     class Meta:
@@ -104,9 +99,6 @@ class LawSuitInstance(Audit, LegacyCode):
     law_suit_number = models.CharField(max_length=255, unique=True, blank=False, null=False,
                                        verbose_name='Número do Processo')
 
-    # legacy_code = models.CharField(max_length=255, unique=True, blank=False, null=False,
-    #                                verbose_name='Código Legado')
-
     class Meta:
         verbose_name = "Instância do Processo"
         verbose_name_plural = "Instâncias dos Processos"
@@ -117,8 +109,6 @@ class LawSuitInstance(Audit, LegacyCode):
 
 
 class Movement(Audit, LegacyCode):
-    # legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
-    #                                verbose_name="Código Legado")
     person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                       related_name='%(class)s_lawyer', verbose_name="Advogado")
     type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False,
@@ -137,4 +127,3 @@ class Movement(Audit, LegacyCode):
 
     def __str__(self):
         return self.legacy_code  # TODO verificar novos campos e refatorar o toString
-

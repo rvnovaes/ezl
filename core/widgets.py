@@ -1,9 +1,12 @@
+from dal.widgets import QuerySetSelectMixin
 from django import forms
-from django.forms.widgets import boolean_check, Input, DateTimeBaseInput
-from django.utils import six
+from django.forms.widgets import boolean_check, Input, DateTimeBaseInput, ChoiceWidget
+from django.utils import six, translation
 from django.utils import timezone
 from django.utils.encoding import force_text
 from django_filters import RangeFilter
+
+from ezl import settings
 
 
 class MDDateTimepicker(DateTimeBaseInput):
@@ -13,11 +16,6 @@ class MDDateTimepicker(DateTimeBaseInput):
     def get_context(self, name, value, attrs):
         context = super(Input, self).get_context(name, value, attrs)
         context['widget']['type'] = self.input_type
-        # timezone_local = pytz.timezone(settings.TIME_ZONE)
-        # utc = pytz.utc
-        # time_local = utc.localize(self.min_date).astimezone(timezone_local)
-        # d1 = pytz.timezone(settings.TIME_ZONE).localize(self.min_date)
-        # d3 = timezone.localtime(self.min_date)
         context['widget']['min_date'] = timezone.localtime(self.min_date).strftime('%d/%m/%Y %H:%M')
         return context
 
@@ -108,3 +106,94 @@ class MDDateTimeRangeFilter(RangeFilter):
     def __init__(self, name=None, *args, **kwargs):
         self.name = name
         super(MDDateTimeRangeFilter, self).__init__(*args, **kwargs)
+
+
+class MDSelect2WidgetMixin(object):
+    """Mixin for Select2 widgets."""
+
+    def build_attrs(self, *args, **kwargs):
+        attrs = super(MDSelect2WidgetMixin, self).build_attrs(*args, **kwargs)
+        lang_code = self._get_language_code()
+        if lang_code:
+            attrs.setdefault('data-autocomplete-light-language', lang_code)
+        # search min length
+        attrs.setdefault('data-minimum-input-length', 3)
+        return attrs
+
+    def _get_language_code(self):
+        lang_code = translation.get_language()
+        if lang_code:
+            lang_code = translation.to_locale(lang_code).replace('_', '-')
+        return lang_code
+
+    def _media(self):
+        """Automatically include static files for the admin."""
+        _min = '' if settings.DEBUG else 'min.'
+        i18n_file = ()
+        lang_code = self._get_language_code()
+
+        if lang_code:
+            i18n_file = (
+                'autocomplete_light/vendor/select2/dist/js/i18n/{}.js'.format(
+                    lang_code),
+            )
+        css = (
+            'autocomplete_light/vendor/select2/dist/css/select2.{}css'.format(
+                _min),
+            'autocomplete_light/select2.css',
+        )
+        js = ('autocomplete_light/jquery.init.js',
+              'autocomplete_light/autocomplete.init.js',
+              'autocomplete_light/vendor/select2/dist/js/select2.full.{}js'.format(
+                  _min),
+              ) + i18n_file + (
+                 'libs/django-autocomplete-light-3.2.9/select2.js',
+             )
+
+        return forms.Media(css={'all': css}, js=js)
+
+    media = property(_media)
+    autocomplete_function = 'select2'
+
+
+class MDSelect(ChoiceWidget):
+    input_type = 'select'
+    template_name = 'core/widgets/md_select.html'
+    option_template_name = 'core/widgets/md_select_option.html'
+    add_id_index = False
+    checked_attribute = {'selected': True}
+    option_inherits_attrs = False
+
+    def get_context(self, name, value, attrs):
+        context = super(MDSelect, self).get_context(name, value, attrs)
+        if self.allow_multiple_selected:
+            context['widget']['attrs']['multiple'] = 'multiple'
+        return context
+
+    @staticmethod
+    def _choice_has_empty_value(choice):
+        """Return True if the choice's value is empty string or None."""
+        value, _ = choice
+        return (
+            (isinstance(value, six.string_types) and not bool(value)) or
+            value is None
+        )
+
+    def use_required_attribute(self, initial):
+        """
+        Don't render 'required' if the first <option> has a value, as that's
+        invalid HTML.
+        """
+        use_required_attribute = super(MDSelect, self).use_required_attribute(initial)
+        # 'required' is always okay for <select multiple>.
+        if self.allow_multiple_selected:
+            return use_required_attribute
+
+        first_choice = next(iter(self.choices), None)
+        return use_required_attribute and first_choice is not None and self._choice_has_empty_value(first_choice)
+
+
+class MDModelSelect2(QuerySetSelectMixin,
+                     MDSelect2WidgetMixin,
+                     MDSelect):
+    """Select widget for QuerySet choices and Select2."""

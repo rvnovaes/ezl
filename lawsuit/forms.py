@@ -6,6 +6,7 @@ from django.forms.models import fields_for_model
 # from django.contrib.admin.widgets import AdminDateWidget #TODO Verificar se será utilizado datepicker
 from core.fields import CustomBooleanField
 from core.models import Person, State
+from core.widgets import MDModelSelect2
 from .models import TypeMovement, Instance, LawSuit, Movement, Folder, CourtDistrict, LawSuitInstance, CourtDivision
 
 
@@ -112,6 +113,7 @@ class FolderForm(BaseForm):
     person_customer = forms.ModelChoiceField(
         queryset=Person.objects.filter(is_active=True),
         empty_label=u"Selecione...",
+        widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'})
     )
 
 

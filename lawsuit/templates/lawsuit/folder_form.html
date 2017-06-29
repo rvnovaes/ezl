@@ -1,7 +1,4 @@
 {% extends 'inicial.html' %}
-{#{% load staticfiles %}#}
-{#{% load formset_tags %}#}
-
 {% block content %}
     {% include 'core/widgets/messages.html' %}
 
@@ -58,5 +55,5 @@
         </div>
 
     </form>
-
+    {{ form.media }}
 {% endblock content %}

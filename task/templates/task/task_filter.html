@@ -1,9 +1,9 @@
 {% extends 'inicial.html' %}
 {% load django_tables2 %}
 {% load static %}
+{% load staticfiles %}
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
-{% load widget_tweaks %}
 {% block content %}
     {#    <div class="container form-group"><label class="is-focused"><h2>{{ title_page }}</h2></label></div>#}
     <div class="panel panel-primary">
@@ -48,6 +48,7 @@
                         <div class="form-group">
                             <label> {{ filter.form.client.label_tag }}
                                 {{ filter.form.client }}</label>
+
                         </div>
                     </div>
                     {#                        <div class="form-group">#}
@@ -70,6 +71,7 @@
                     </button>
                 </div>
             </form>
+            {{ filter.form.media }}
         </div>
     </div>
     {% if table.page %}
@@ -130,6 +132,6 @@
                 {% bootstrap_pagination table.page url=request.get_full_path %}
             {% endblock pagination %}
         {% endif %}
-    </div>
+    </div>/
 {% endblock table %}
 {% endblock content %}

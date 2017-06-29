@@ -20,7 +20,6 @@ icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assi
 
 
 class TaskStatus(Enum):
-    # __ordering__ = ['accepted', 'open', 'return', 'done', 'refused']
     ACCEPTED = u"A Cumprir"
     OPEN = u"Em Aberto"
     RETURN = u"Retorno"
@@ -30,24 +29,12 @@ class TaskStatus(Enum):
     def get_icon(self):
         return icon_dict[self.name]
 
-    # def order(self):
-    #     if
     def __str__(self):
         return str(self.value)
-
-        # def choices(cls):
-        #     # get all members of the class
-        #     members = inspect.getmembers(cls, lambda m: not (inspect.isroutine(m)))
-        #     # filter down to just properties
-        #     props = [m for m in members if not (m[0][:2] == '__')]
-        #     # format into django choice tuple
-        #     choices = tuple([(str(p[1].value), p[0]) for p in props])
-        #     return choicesn
 
     @classmethod
     def choices(cls):
         return [(x.value, x.name) for x in cls]
-        # choices = tuple((str(p[1].value), p[0]) for p in props)
 
 
         # 'Em Aberto' = 1  # Providencias que foram delegadas
@@ -58,8 +45,6 @@ class TaskStatus(Enum):
 
 
 class Task(Audit, LegacyCode):
-    # legacy_code = models.CharField(max_length=255, blank=False, null=False, default="", unique=True,
-    #                                verbose_name="Código Legado")
     movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
                                  verbose_name="Movimentação")
     person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
@@ -78,8 +63,6 @@ class Task(Audit, LegacyCode):
 
     return_date = models.DateTimeField(null=True, verbose_name="Data de Retorno")
     refused_date = models.DateTimeField(null=True, verbose_name="Data de Recusa")
-
-    # notes = models.TextField(null=True, blank=True, verbose_name=u"Observações")
 
     description = models.TextField(null=True, blank=True, verbose_name=u"Descrição do serviço")
 
@@ -127,16 +110,6 @@ class Task(Audit, LegacyCode):
     def service(self):
         type_movement = TypeMovement.objects.get(movement__task=self.id).name
         return type_movement
-
-        # @property
-        # def name_person_asked_by(self):
-        #     person_asked_by = Person.objects.get(id=self.person_asked_by_id).legal_name
-        #     return person_asked_by
-        #
-        # @property
-        # def name_type_service(self):
-        #     type_service = TypeMovement.objects.get(id=self.type_movement_id)
-        #     return type_service
 
     def save(self, *args, **kwargs):
         try:

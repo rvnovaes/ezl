@@ -46,9 +46,15 @@ INSTALLED_APPS = [
     'django_tables2',
     'bootstrap3',
     'django_filters',
-    'widget_tweaks',
     'debug_toolbar',
-    'django_cleanup'
+    'django_cleanup',
+    'django_popup_view_field',
+    # Autocomplete
+    'dal',
+    # Enable plugins
+    'dal_select2',
+    'dal_queryset_sequence',
+
 ]
 
 MIDDLEWARE = [
@@ -101,9 +107,8 @@ DATABASES = {
     }
 }
 
-
-    # Password validation
-    # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
+# Password validation
+# https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -120,7 +125,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/

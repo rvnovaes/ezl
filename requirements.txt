@@ -1,14 +1,18 @@
+###Dependências do projeto
 django==1.11.1
 django-allauth==0.32
+django-autocomplete-light==3.2.9
 django-bootstrap3==8.2.3
-
-# Adicionando depencência para a utilização do mecanismo de formsets
-django-tables2==1.7.1
-
-psycopg2==2.7.1
-uwsgi==2.0.15
-SQLAlchemy==1.0.11
 django-cleanup==0.4.2
-django-filter==1.0.4
-django-widget-tweaks==1.4.1
 django-debug-toolbar==1.8
+django-filter==1.0.4
+django-popup-view-field==0.3.0
+django-querysetsequence==0.7.2
+django-tables2==1.7.1
+psycopg2==2.7.1
+SQLAlchemy==1.0.11
+uwsgi==2.0.15
+## Favor inserir novas dependências em ordem alfabética.
+
+
+

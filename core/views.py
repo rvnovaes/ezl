@@ -1,3 +1,4 @@
+from dal import autocomplete
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
@@ -140,9 +141,17 @@ class PersonDeleteView(BaseCustomView, MultiDeleteViewMixin):
     model = Person
     success_url = reverse_lazy('person_list')
     success_message = delete_success(model._meta.verbose_name_plural)
-    # def delete(self, request, *args, **kwargs):
-    #     person = self.get_object()
-    #     success_url = self.get_success_url()
-    #     person_id = int(person.id)
-    #     Person.objects.filter(id=person_id).update(active=False)
-    #     return HttpResponseRedirect(success_url)
+
+
+class ClientAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Person.objects.none()
+
+        qs = None
+
+        if self.q:
+            qs = Person.objects.filter(name__istartswith=self.q, is_client=True)
+
+        return qs
