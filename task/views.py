@@ -47,12 +47,6 @@ class TaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Cr
     success_url = reverse_lazy('task_list')
     success_message = new_success
 
-    def get_initial(self):
-        if isinstance(self, TaskCreateView):
-            self.form_class.declared_fields['task_status'].initial = TaskStatus.OPEN
-            self.form_class.declared_fields['is_active'].initial = True
-            self.form_class.declared_fields['is_active'].disabled = True
-
 
 class TaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
     model = Task
