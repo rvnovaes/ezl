@@ -17,11 +17,12 @@ class MDDateTimepicker(DateTimeBaseInput):
         context = super(Input, self).get_context(name, value, attrs)
         context['widget']['type'] = self.input_type
         context['widget']['min_date'] = timezone.localtime(self.min_date).strftime('%d/%m/%Y %H:%M')
+        context['widget']['format'] = self.format
         return context
 
     def __init__(self, attrs=None, format=None, min_date=None):
         super(MDDateTimepicker, self).__init__(attrs)
-        self.format = format if format else None
+        self.format = format if format else 'DD/MM/YYYY'
         self.min_date = min_date if min_date else None
 
 
@@ -69,30 +70,61 @@ class MDCheckboxInput(Input):
 
 class MDRangeWidget(forms.MultiWidget):
     template_name = 'core/widgets/md_range_datetimepicker.html'
+    format = "DD/MM/YYYY"
 
-    def __init__(self, attrs=None):
+    def __init__(self, format=None, attrs=None):
+        self.format = format if format else "DD/MM/YYYY"
         widgets = (MDDateTimepicker(), MDDateTimepicker())
         super(MDRangeWidget, self).__init__(widgets, attrs)
-
-    def format_output(self, rendered_widgets):
-        # Method was removed in Django 1.11.
-        return ' à '.join(rendered_widgets)
 
     def decompress(self, value):
         if value:
             return [value.start, value.stop]
         return [None, None]
 
+    def get_context(self, name, value, attrs):
+        context = super(MDRangeWidget, self).get_context(name, value, attrs)
+        if self.is_localized:
+            for widget in self.widgets:
+                widget.is_localized = self.is_localized
+        # value is a list of values, each corresponding to a widget
+        # in self.widgets.
+        if not isinstance(value, list):
+            value = self.decompress(value)
+
+        final_attrs = context['widget']['attrs']
+        input_type = final_attrs.pop('type', None)
+        id_ = final_attrs.get('id')
+        subwidgets = []
+        for i, widget in enumerate(self.widgets):
+            if input_type is not None:
+                widget.input_type = input_type
+            widget_name = '%s_%s' % (name, i)
+            try:
+                widget_value = value[i]
+            except IndexError:
+                widget_value = None
+            if id_:
+                widget_attrs = final_attrs.copy()
+                widget_attrs['id'] = '%s_%s' % (id_, i)
+            else:
+                widget_attrs = final_attrs
+            subwidgets.append(widget.get_context(widget_name, widget_value, widget_attrs)['widget'])
+        context['widget']['subwidgets'] = subwidgets
+        context['widget']['format'] = self.format
+        return context
+
 
 class DateTimeRangeField(forms.MultiValueField):
     widget = MDRangeWidget
 
-    def __init__(self, fields=None, label=None, *args, **kwargs):
+    def __init__(self, fields=None, format=None, label=None, *args, **kwargs):
+
         if fields is None:
             fields = (
                 forms.DateTimeField(widget=MDDateTimepicker(attrs={'class': 'form-control'})),
                 forms.DateTimeField(widget=MDDateTimepicker(attrs={'class': 'form-control'})))
-        super(DateTimeRangeField, self).__init__(fields, *args, **kwargs)
+            super(DateTimeRangeField, self).__init__(fields, *args, **kwargs)
 
     def compress(self, data_list):
         if data_list:
@@ -102,9 +134,13 @@ class DateTimeRangeField(forms.MultiValueField):
 
 class MDDateTimeRangeFilter(RangeFilter):
     field_class = DateTimeRangeField
+    format = None
 
-    def __init__(self, name=None, *args, **kwargs):
+    def __init__(self, name=None, label=None, format=None, *args, **kwargs):
         self.name = name
+        self.format = format if format else 'DD/MM/YYYY'
+        # self.field.widget = MDRangeWidget(format=self.format)
+        kwargs['format'] = self.format
         super(MDDateTimeRangeFilter, self).__init__(*args, **kwargs)
 
 

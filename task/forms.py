@@ -85,8 +85,8 @@ class TaskDetailForm(ModelForm):
     execution_date = forms.DateTimeField(required=False,
                                          initial=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE)),
                                          label=u"Data de Cumprimento",
-                                         widget=MDDateTimepicker(attrs={'class': 'form-control'}
-
+                                         widget=MDDateTimepicker(attrs={'class': 'form-control'},
+                                                                 format='DD/MM/YYYY HH:mm'
                                                                  ))
     notes = forms.CharField(
         required=True,

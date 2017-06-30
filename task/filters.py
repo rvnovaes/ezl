@@ -14,7 +14,7 @@ class TaskFilter(FilterSet):
 
     reminder = MDDateTimeRangeFilter(name="Prazo Inicial", label="Prazo Inicial",
                                      )
-    deadline = MDDateTimeRangeFilter(label="Prazo Final", name="Prazo Final",
+    deadline = MDDateTimeRangeFilter(label="Prazo Final", name="Prazo Final", format="DD/MM/YYYY HH:mm"
                                      )
 
     client = ModelChoiceFilter(queryset=Person.objects.all(),

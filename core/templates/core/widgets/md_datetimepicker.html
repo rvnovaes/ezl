@@ -12,7 +12,9 @@
             showClear: true,
             {% if widget.min_date %}
                 minDate: moment("{{ widget.min_date }}", "DD_MM_YYYY HH:mm").tz("America/Sao_Paulo").format(), {% endif %}
-            maxDate: moment().tz("America/Sao_Paulo").format()
+            maxDate: moment().tz("America/Sao_Paulo").format(),
+            format: "{{ widget.format }}"
+
         })
         ;
     });

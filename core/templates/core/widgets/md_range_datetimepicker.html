@@ -9,7 +9,8 @@
             },
             ignoreReadonly: true,
             useCurrent: false,
-            showClear: true
+            showClear: true,
+            format: '{{widget.format}}'
 
         });
         $('#{{ widget.name }}_1').datetimepicker({
@@ -22,7 +23,8 @@
             },
             ignoreReadonly: true,
             useCurrent: false,
-            showClear: true
+            showClear: true,
+            format: '{{widget.format}}'
         });
         $('#{{ widget.name }}_0').on("dp.change", function (e) {
             $('#{{ widget.name }}_1').data("DateTimePicker").minDate(e.date);

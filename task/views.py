@@ -330,14 +330,18 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
                                            return_date__isnull=False), Q.OR)
             if data['reminder']:
                 if data['reminder'].start:
-                    reminder_dynamic_query.add(Q(reminder_deadline_date__gte=data['reminder'].start), Q.AND)
+                    reminder_dynamic_query.add(
+                        Q(reminder_deadline_date__gte=data['reminder'].start.replace(hour=0, minute=0)), Q.AND)
                 if data['reminder'].stop:
-                    reminder_dynamic_query.add(Q(reminder_deadline_date__lte=data['reminder'].stop), Q.AND)
+                    reminder_dynamic_query.add(
+                        Q(reminder_deadline_date__lte=data['reminder'].stop.replace(hour=23, minute=59)), Q.AND)
             if data['deadline']:
                 if data['deadline'].start:
-                    deadline_dynamic_query.add(Q(final_deadline_date__gte=data['deadline'].start), Q.AND)
+                    deadline_dynamic_query.add(
+                        Q(final_deadline_date__gte=data['deadline'].start.replace(hour=0, minute=0)), Q.AND)
                 if data['deadline'].stop:
-                    deadline_dynamic_query.add(Q(final_deadline_date__lte=data['deadline'].stop), Q.AND)
+                    deadline_dynamic_query.add(
+                        Q(final_deadline_date__lte=data['deadline'].stop.replace(hour=23, minute=59)), Q.AND)
 
             person_dynamic_query.add(status_dynamic_query, Q.AND).add(Q(reminder_dynamic_query), Q.AND)
 

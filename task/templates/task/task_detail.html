@@ -73,19 +73,8 @@
                                 class="material-icons left" style="color: white">assignment_return</i>
                             Delegar
                         </a>
-                        {#                    <input type="button" id="excludeId" data-toggle="modal" data-target="#confirmAction"#}
-                        {#                           class="btn btn-fab btn-warning material-icons"#}
-                        {#                           value="remove" onclick="getId(this)">#}
                         {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                            {#                                                <span class="form-group">#}
-                            {#                        {{ form.execution_date.label }}</label>#}
-                            <label> {{ form.execution_date }}</label>
-                            {#                        </span>#}
-                            {#                        </label>#}
-                            {#                        </span>#}
-                            {#                        <a>#}
-                            {#                            {{ form.execution_date }}#}
-                            {#                        </a>#}
+                            <a>{{ form.execution_date }}</a>
                             <a onclick="getId(this)" id="DONE" type="submit" data-toggle="modal"
                                data-target="#confirmAction"
                                class="btn btn-sm btn-raised DONE ">
@@ -94,7 +83,6 @@
                             </a>
                         {% endif %}
                     </div>
-                    {#                </div>#}
                 </div>
             </div>
 
@@ -281,7 +269,7 @@
         <div class="modal-dialog">
             <div class="modal-content ">
                 <div class="modal-body" style="text-align: center !important;">
-{#                    Ocorreu um erro ao tentar excluir o arquivo.#}
+                    {#                    Ocorreu um erro ao tentar excluir o arquivo.#}
                     <p id="deleteErrorText">
 
                     </p>
@@ -341,9 +329,9 @@
         <div class="modal-dialog">
             <div class="modal-content ">
                 <div class="modal-body" style="text-align: center !important;">
-                   <p id="error-message">
+                    <p id="error-message">
 
-                   </p>
+                    </p>
                 </div>
                 <div class="modal-footer">
                     <div class="form-group text-center">
@@ -374,7 +362,7 @@
 
                             success: function (data) {
                                 if (data.is_deleted) {
-                                    document.getElementById("message-delete-success").innerHTML=data.message;
+                                    document.getElementById("message-delete-success").innerHTML = data.message;
                                     $('#row-{{ ged.id }}').remove();
                                     $('#row-space{{ ged.id }}').remove();
                                     $('#deleting').modal('hide');
@@ -382,7 +370,7 @@
 
                                 }
                                 else {
-                                    document.getElementById("deleteErrorText").innerHTML= data.message;
+                                    document.getElementById("deleteErrorText").innerHTML = data.message;
                                     $('#deleting').modal('hide');
                                     $('#deleteError').modal('show')
                                 }

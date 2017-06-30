@@ -146,10 +146,10 @@ class PersonDeleteView(BaseCustomView, MultiDeleteViewMixin):
 class ClientAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
-            return Person.objects.none()
+        # if not self.request.user.is_authenticated():
+        #     return Person.objects.none()
 
-        qs = None
+        qs = Person.objects.none()
 
         if self.q:
             qs = Person.objects.filter(name__istartswith=self.q, is_client=True)
