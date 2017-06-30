@@ -1,24 +1,13 @@
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db import models
 
-# from lawsuit.models import CourtDistrict
+from .utils import LegacySystem
+
 
 # To do: Mudar coluna Active, pois causa conflito na renderização no template.
 LEGAL_TYPE_CHOICES = {
     ('F', 'Física'),
     ('J', 'Jurídica'),
-}
-# Enum choices para prefixo do sistema
-SYSTEM_PREFIX_CHOICES = {
-    ('ADVWIN', '0'),
-
-}
-
-SERVICE_TYPE_CHOICES = {
-    ('C', 'Cliente'),
-    ('F', 'Fornecedor'),
-    ('N', 'Nao Aplicavel')
 }
 
 
@@ -42,10 +31,9 @@ class AuditAlter(models.Model):
 
 
 class LegacyCode(models.Model):
-    legacy_code = models.CharField(max_length=255, blank=False, null=True,
-                                   verbose_name='Código legado')
-    system_prefix = models.CharField(max_length=255, choices=SYSTEM_PREFIX_CHOICES, unique=True,
-                                     blank=False, null=True, verbose_name='Prefixo do Sistema')
+    legacy_code = models.CharField(max_length=255, blank=True, null=True, verbose_name='Código legado')
+    system_prefix = models.CharField(max_length=255, blank=True, null=True, verbose_name=u'Prefixo do sistema',
+                                     choices=((x.value, x.name.title()) for x in LegacySystem))
 
     class Meta:
         abstract = True

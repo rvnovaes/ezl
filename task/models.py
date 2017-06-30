@@ -152,7 +152,6 @@ class TaskHistory(AuditCreate):
 
 
 class TypeTask(Audit, LegacyCode):
-    # legacy_code = models.CharField(max_length=255, unique=True, verbose_name="Código Legado")
     name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Tipo de Serviço")
 
     class Meta:
