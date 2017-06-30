@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'f5*(8sgk)n1!i52xijv0yt@jtewp28%g%sp1rx*=y68ocgg+!2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -143,30 +143,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-if DEBUG:
-
-    STATIC_ROOT = ''
-
-    STATICFILES_DIRS = (
-        os.path.join(BASE_DIR, "static/"),
-    )
-
-else:
-
-    STATIC_ROOT = os.path.join(BASE_DIR, "static/")
-
-    STATICFILES_DIRS = (
-    )
-
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+STATICFILES_DIRS = (
+    # ...
+    os.path.join(BASE_DIR, 'static/'),
+    # ("ezl_static", os.path.join(BASE_DIR, 'static/')),
 )
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/opt/files_easy_lawyer/'
 
+# STATIC_ROOT = '/opt/mta/easy_lawyer_django/static/'
 LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
 
 AUTHENTICATION_BACKENDS = (

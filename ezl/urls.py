@@ -23,7 +23,7 @@ urlpatterns = [
                       login_required(ClientAutocomplete.as_view()),
                       name='client_autocomplete'),
 
-              ] + static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, "static")) + static(
+              ] + static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, "static/")) + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
