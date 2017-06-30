@@ -1,3 +1,5 @@
+import os
+
 from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -21,7 +23,7 @@ urlpatterns = [
                       login_required(ClientAutocomplete.as_view()),
                       name='client_autocomplete'),
 
-              ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(
+              ] + static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, "static")) + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
