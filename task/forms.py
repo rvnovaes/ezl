@@ -24,7 +24,7 @@ class TaskForm(BaseForm):
     legacy_code = forms.CharField(
         label=u"Código Legado",
         max_length=255,
-        required=True
+        required=False
     )
 
     movement = forms.ModelChoiceField(
@@ -110,6 +110,5 @@ class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
         fields = fields_for_model(TypeTask,
-                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
-
-    legacy_code = forms.CharField(max_length=255, required=True)
+                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user',
+                                           'legacy_code', 'system_prefix'])

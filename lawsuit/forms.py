@@ -46,7 +46,7 @@ class TypeMovementForm(BaseForm):
 
     legacy_code = forms.CharField(
         max_length=255,
-        required=True,
+        required=False,
         error_messages={'required': 'O campo de código legado é obrigatório'}
     )
 
@@ -76,7 +76,7 @@ class MovementForm(BaseForm):
     legacy_code = forms.CharField(
         label=u"Código Legado",
         max_length=255,
-        required=True
+        required=False
     )
 
     person_lawyer = forms.ModelChoiceField(
@@ -107,7 +107,7 @@ class FolderForm(BaseForm):
 
     legacy_code = forms.CharField(
         max_length=255,
-        required=True
+        required=False
     )
 
     person_customer = forms.ModelChoiceField(
@@ -140,7 +140,7 @@ class CourtDivisionForm(BaseForm):
         fields = fields_for_model(CourtDivision,
                                   exclude=['create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix'])
 
-    legacy_code = forms.CharField(max_length=255, required=True)
+    legacy_code = forms.CharField(max_length=255, required=False)
 
 
 class CourtDistrictForm(BaseForm):
@@ -176,5 +176,5 @@ class LawSuitInstanceForm(BaseForm):
                                               empty_label=u"Selecione")
         legacy_code = forms.CharField(
             max_length=255,
-            required=True
+            required=False
         )
