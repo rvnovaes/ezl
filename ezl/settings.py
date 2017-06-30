@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'f5*(8sgk)n1!i52xijv0yt@jtewp28%g%sp1rx*=y68ocgg+!2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'django_filters',
     'debug_toolbar',
     'django_cleanup',
-    'django_popup_view_field',
     # Autocomplete
     'dal',
     # Enable plugins
@@ -100,8 +99,8 @@ DATABASES = {
         'NAME': 'ezl',
         'USER': 'ezl',
         'PASSWORD': 'ezl',
-        'HOST': '13.68.213.60',
-        # 'HOST': '127.0.0.1',
+        # 'HOST': '13.68.213.60',
+        'HOST': '127.0.0.1',
         'PORT': '5432'
 
     }
@@ -144,16 +143,27 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = (
-    # ...
-    os.path.join(BASE_DIR, 'static/'),
-    # ("ezl_static", os.path.join(BASE_DIR, 'static/')),
+if DEBUG:
+
+    STATIC_ROOT = ''
+
+    STATICFILES_DIRS = (
+        os.path.join(BASE_DIR, "static/"),
+    )
+
+else:
+
+    STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/opt/files_easy_lawyer/'
 
-# STATIC_ROOT = '/opt/mta/easy_lawyer_django/static/'
 LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
 
 AUTHENTICATION_BACKENDS = (
