@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'f5*(8sgk)n1!i52xijv0yt@jtewp28%g%sp1rx*=y68ocgg+!2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -143,20 +143,23 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# if DEBUG:
-#
-#     STATIC_ROOT = ''
-#
-#     STATICFILES_DIRS = (
-#         os.path.join(BASE_DIR, "static/"),
-#     )
-#
-# else:
-#
-#     STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+if DEBUG:
+
+    STATIC_ROOT = ''
+
+    STATICFILES_DIRS = (
+        os.path.join(BASE_DIR, "static/"),
+    )
+
+else:
+
+    STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+
+    STATICFILES_DIRS = (
+    )
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static/"),
+    os.path.join(BASE_DIR, "static/libs"),
 )
 
 STATICFILES_FINDERS = (
