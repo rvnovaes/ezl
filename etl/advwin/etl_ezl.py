@@ -5,8 +5,8 @@ import sys
 from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
-from models import Base
-from models import Person, AuthUser
+from etl.advwin.models import Base
+from etl.advwin.models import Person, AuthUser
 from connections.db_connection import connect_db
 
 
@@ -85,7 +85,7 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
     if person_type == 'adv':
 
         # print(linha['Correspondente'])
-        if linha['Dt_cad'] != None:
+        if linha['Dt_cad'] is not None:
 
             date_creation = linha['Dt_cad']
 
@@ -95,12 +95,12 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
 
         name = linha['Nome']
 
-        if linha['Razao'] != None:
+        if linha['Razao'] is not None:
             legal_name = linha['Razao']
 
         is_lawyer = True
 
-        if linha['Correspondente'] == True:
+        if linha['Correspondente'] is True:
 
             is_correspondent = True
             authuser_query = session.query(AuthUser).filter(
@@ -108,7 +108,7 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
 
             print("auth_user", authuser_query)
 
-            if authuser_query != None:
+            if authuser_query is not None:
                 auth_user_id = authuser_query.id
 
         cpf_cnpj = linha['Codigo']
@@ -121,7 +121,7 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
 
     if person_type == 'cliente':
 
-        if linha['Dt_cad'] != None:
+        if linha['Dt_cad'] is not None:
 
             date_creation = linha['Dt_cad']
 
@@ -129,10 +129,10 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
 
             date_creation = datetime.datetime.now()
         name = linha['Nome']
-        if linha['Razao'] != None:
+        if linha['Razao'] is not None:
             legal_name = linha['Razao']
 
-        if linha['pessoa_fisica'] != True:
+        if linha['pessoa_fisica'] is not True:
             legal_type = 'J'
 
         cpf_cnpj = linha['Codigo']
@@ -164,8 +164,8 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
         'alter_user_id': None,
         'auth_user_id': auth_user_id,
         'create_user_id': 2,
-        'is_client':is_client,
-        'is_provider':is_provider
+        'is_client': is_client,
+        'is_provider': is_provider
 
     }
 
@@ -236,7 +236,7 @@ for i in range(len(consultas_advwin)):
 
             person = trataPerson(j, session_ezl, consultas_tipo[i], result_consulta_usuario)
 
-            if person != None:
+            if person is not None:
                 print("Adicionado: ", n, "advogados")
                 insere_person(session_ezl, person)
                 n += 1
@@ -245,5 +245,5 @@ for i in range(len(consultas_advwin)):
 
             user = trataAuthUser(j)
 
-            if user != None:
+            if user is not None:
                 insere_user(session_ezl, user)
