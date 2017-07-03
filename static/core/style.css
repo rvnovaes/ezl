@@ -1,3 +1,7 @@
+.borderless {
+    border: none !important;
+}
+
 #cell-table {
     vertical-align: middle !important;
     text-align: center !important;
