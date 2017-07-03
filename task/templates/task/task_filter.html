@@ -5,6 +5,23 @@
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
 {% block content %}
+    <style>
+        label {
+            font-size: small !important;
+        }
+
+        .select2-selection{
+            width: 250px !important;
+        }
+
+        .select2-selection__arrow{
+            width: 90px !important;
+        }
+
+        .select2-dropdown--below{
+            width: 250px !important;
+        }
+    </style>
     {#    <div class="container form-group"><label class="is-focused"><h2>{{ title_page }}</h2></label></div>#}
     <div class="panel panel-primary">
         <div class="panel-content">
@@ -12,63 +29,114 @@
             <form method="get">
                 {% csrf_token %}
                 <fieldset>
-                    <div class="col-sm-2">
-                        <div class="form-group">
-                            <label>
-                                {{ filter.form.openned.label_tag }}
-                                {{ filter.form.openned }}
-                            </label>
+                    <div class="panel panel-default" style="margin-top: 2%; margin-left: 2%; margin-right: 2%;">
+                        <div class="panel-heading"><i class="material-icons">search</i> &nbsp; Filtrar Providências
                         </div>
-                        <div class="form-group">
-                            <label>
-                                {{ filter.form.accepted.label_tag }}
-                                {{ filter.form.accepted }}
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                {{ filter.form.returned.label_tag }}
-                                {{ filter.form.returned }}
-                            </label>
-                        </div>
-                    </div>
-                    <div class=" col-sm-2">
-                        <div class="form-group">
-                            <label>
-                                {{ filter.form.refused.label_tag }}
-                                {{ filter.form.refused }}
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                {{ filter.form.done.label_tag }}
-                                {{ filter.form.done }}
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <label> {{ filter.form.client.label_tag }}
-                                {{ filter.form.client }}</label>
+                        <div class="panel-body" style="margin-left: 15px !important;">
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>
+                                            {{ filter.form.openned.label }}
+                                            {{ filter.form.openned }}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>
+                                            {{ filter.form.accepted.label }}
+                                            {{ filter.form.accepted }}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>
+                                            {{ filter.form.returned.label }}
+                                            {{ filter.form.returned }}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>
+                                            {{ filter.form.refused.label }}
+                                            {{ filter.form.refused }}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>
+                                            {{ filter.form.done.label }}
+                                            {{ filter.form.done }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <br><br>
+
+                            <div class="row">
+                                <div class=" col-sm-6">
+                                    <div class="form-group">
+                                        <label>
+                                            Lembrete
+                                        </label>
+                                        {{ filter.form.reminder }}
+
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>
+                                            Cliente
+                                        </label><br>
+                                        {{ filter.form.client }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class=" col-sm-6" style="padding-left: 0px !important;">
+                                <div class="form-group">
+                                    <label>
+                                        Prazo Final
+                                    </label>
+                                    {{ filter.form.deadline }}
+                                </div>
+
+                            </div>
+
+
+                            <br><br>
+                            {#                        <div class="form-group">#}
+                            {#                            <label>{{ filter.form.reminder.label_tag }}</label>#}
+
+                            {#                            <div class="form-group">#}
+                            {#                                <label style="display: grid;">#}
+                            {#                                    {{ filter.form.reminder.label_tag }}#}
+                            {#                                    {{ filter.form.reminder }}#}
+                            {#                                </label>#}
+                            {#                            </div>#}
+                            {#                            <div class="form-group">#}
+                            {#                                <label style="display: grid; ">#}
+                            {#                                    {{ filter.form.deadline.label_tag }}#}
+                            {#                                    {{ filter.form.deadline }}#}
+                            {#                                </label>#}
+                            {#                            </div>#}
+
 
                         </div>
+                        <br>
+                        <button type="submit" class="btn btn-raised btn-primary" style="margin-left: 30px !important;">
+                            <span class="glyphicon glyphicon-search"></span> Exibir
+                        </button>
                     </div>
-                    {#                        <div class="form-group">#}
-                    {#                            <label>{{ filter.form.reminder.label_tag }}</label>#}
-                    <div class=" col-sm-10">
-                        <div class="form-group">
-                            {{ filter.form.reminder.label_tag }}
-                            {{ filter.form.reminder }}
-                        </div>
-                        <div class="form-group">
-                            {{ filter.form.deadline.label_tag }}
-                            {{ filter.form.deadline }}
-                        </div>
 
-                    </div>
                 </fieldset>
                 <div>
-                    <button type="submit" class="btn btn-primary">
-                        <span class="glyphicon glyphicon-search"></span> Exibir
-                    </button>
+
                 </div>
             </form>
             {{ filter.form.media }}
