@@ -1,13 +1,12 @@
 import datetime
 import os
 
-import connections
-
 from sqlalchemy import text
 
+import connections
 from connections.db_connection import connect_db
 from core.utils import LegacySystem
-from etl.advwin import settings
+from etl import settings
 
 
 def import_data():
