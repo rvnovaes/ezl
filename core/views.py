@@ -63,6 +63,7 @@ class BaseCustomView(FormView):
         user = User.objects.get(id=self.request.user.id)
 
         if form.instance.id is None:
+            # todo: nao precisa salvar o create_date e o alter_date pq o model já faz isso. tirar de todos os lugares
             form.instance.create_date = timezone.now()
             form.instance.create_user = user
         else:

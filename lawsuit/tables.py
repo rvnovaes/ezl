@@ -2,7 +2,7 @@ import django_tables2 as tables
 from django_tables2 import A
 
 from core.tables import CheckBoxMaterial
-from .models import TypeMovement, Movement, LawSuit, Folder, CourtDistrict, Instance, LawSuitInstance
+from .models import TypeMovement, Movement, LawSuit, Folder, CourtDistrict, Instance, LawSuit
 
 
 class InstanceTable(tables.Table):
@@ -39,11 +39,11 @@ class MovementTable(tables.Table):
                                     args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit_instance', 'deadline',
+        sequence = ('selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit', 'deadline',
                     'is_active')
         model = Movement
         attrs = {"class": "table-striped table-bordered"}
-        fields = ['selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit_instance', 'deadline',
+        fields = ['selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit', 'deadline',
                   'is_active']
         empty_text = "Não existem movimentações cadastrados"
 
@@ -63,11 +63,15 @@ class FolderTable(tables.Table):
 
 class LawSuitTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
+    law_suit_number = tables.LinkColumn(viewname='lawsuit_update',
+                                        attrs={'a': {'target': 'lawsuit_update'}}, args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'folder', 'person_lawyer', 'is_active')
+        sequence = ('selection', 'folder', 'instance', 'court_district', 'person_court', 'court_division',
+                    'law_suit_number', 'person_lawyer', 'is_active')
         model = LawSuit
-        fields = ['selection', 'folder', 'person_lawyer', 'is_active']
+        fields = ['selection', 'folder', 'instance', 'court_district', 'person_court', 'court_division',
+                  'law_suit_number', 'person_lawyer', 'is_active']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem processos cadastrados"
 
@@ -100,18 +104,3 @@ class CourtDistrictTable(tables.Table):
         fields = ['selection', 'name', 'state', 'is_active']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem comarcas cadastradas"
-
-
-class LawSuitInstanceTable(tables.Table):
-    selection = CheckBoxMaterial(accessor="pk", orderable=False)
-    law_suit_number = tables.LinkColumn(viewname='lawsuitinstance_update',
-                                        attrs={'a': {'target': 'lawsuitinstance_update'}}, args=[A('pk')])
-
-    class Meta:
-        sequence = ('selection', 'law_suit_number', 'law_suit', 'instance', 'court_district', 'person_court',
-                    'is_active')
-        model = LawSuitInstance
-        fields = ['selection', 'law_suit_number', 'law_suit', 'instance', 'court_district', 'person_court',
-                  'is_active']
-        # attrs = {"class": "table-striped table-bordered"}
-        empty_text = "Não existem instâncias de processo cadastrados"

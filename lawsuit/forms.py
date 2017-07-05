@@ -7,7 +7,7 @@ from django.forms.models import fields_for_model
 from core.fields import CustomBooleanField
 from core.models import Person, State
 from core.widgets import MDModelSelect2
-from .models import TypeMovement, Instance, LawSuit, Movement, Folder, CourtDistrict, LawSuitInstance, CourtDivision
+from .models import TypeMovement, Instance, LawSuit, Movement, Folder, CourtDistrict, LawSuit, CourtDivision
 
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
@@ -71,7 +71,7 @@ class InstanceForm(BaseForm):
 class MovementForm(BaseForm):
     class Meta:
         model = Movement
-        fields = ['legacy_code', 'person_lawyer', 'type_movement', 'law_suit_instance', 'deadline', 'is_active']
+        fields = ['legacy_code', 'person_lawyer', 'type_movement', 'law_suit', 'deadline', 'is_active']
 
     legacy_code = forms.CharField(
         label=u"Código Legado",
@@ -84,8 +84,8 @@ class MovementForm(BaseForm):
         empty_label=u"Selecione...",
     )
 
-    law_suit_instance = forms.ModelChoiceField(
-        queryset=LawSuitInstance.objects.filter(is_active=True),
+    law_suit = forms.ModelChoiceField(
+        queryset=LawSuit.objects.filter(is_active=True),
         empty_label=u"Selecione...",
     )
 
@@ -121,17 +121,33 @@ class LawSuitForm(BaseForm):
     class Meta:
         model = LawSuit
         fields = fields_for_model(LawSuit,
-                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user'})
+                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
+                                           'legacy_code'})
 
     person_lawyer = forms.ModelChoiceField(
         empty_label=u"Selecione",
-        queryset=Person.objects.filter(is_active=True, is_lawyer=True)
+        queryset=Person.objects.filter(is_active=True, is_lawyer=True), required=True
     )
-
     folder = forms.ModelChoiceField(
         empty_label=u"Selecione",
-        queryset=Folder.objects.filter(is_active=True)
+        queryset=Folder.objects.filter(is_active=True), required=True
     )
+    instance = forms.ModelChoiceField(
+        queryset=Instance.objects.filter(is_active=True),
+        empty_label=u"Selecione", required=True
+    )
+    court_district = forms.ModelChoiceField(
+        queryset=CourtDistrict.objects.filter(is_active=True),
+        empty_label=u"Selecione", required=True
+    )
+    person_court = forms.ModelChoiceField(
+        queryset=Person.objects.filter(is_active=True),
+        empty_label=u"Selecione", required=True)
+    court_division = forms.ModelChoiceField(
+        queryset=CourtDivision.objects.filter(is_active=True),
+        empty_label=u"Selecione", required=True
+    )
+    law_suit_number = forms.CharField(max_length=255, required=True)
 
 
 class CourtDivisionForm(BaseForm):
@@ -153,28 +169,3 @@ class CourtDistrictForm(BaseForm):
         queryset=State.objects.filter(is_active=True),
         empty_label=u"Selecione"
     )
-
-
-class LawSuitInstanceForm(BaseForm):
-    class Meta:
-        model = LawSuitInstance
-        fields = fields_for_model(LawSuitInstance,
-                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix'])
-
-        law_suit_number = forms.CharField(max_length=255, required=True)
-
-        law_suit = forms.ModelChoiceField(queryset=LawSuit.objects.filter(is_active=True),
-                                          empty_label=u"Selecione")
-
-        instance = forms.ModelChoiceField(queryset=Instance.objects.filter(is_active=True),
-                                          empty_label=u"Selecione")
-
-        court_district = forms.ModelChoiceField(queryset=CourtDistrict.objects.filter(is_active=True),
-                                                empty_label=u"Selecione")
-
-        person_court = forms.ModelChoiceField(queryset=Person.objects.filter(is_active=True),
-                                              empty_label=u"Selecione")
-        legacy_code = forms.CharField(
-            max_length=255,
-            required=False
-        )
