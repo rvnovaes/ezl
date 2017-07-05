@@ -3,6 +3,7 @@ import os
 from sqlalchemy import text
 
 import connections
+
 from connections.db_connection import connect_db
 from core.utils import LegacySystem
 from etl.advwin.advwin_ezl.advwin_ezl import truncate_tables, deactivate_records, select_user
@@ -11,7 +12,6 @@ from lawsuit.models import CourtDivision
 
 def import_data():
     truncate_tables([CourtDivision])
-    deactivate_records([CourtDivision])
 
     # seleciona codigo e descricao das varas com descricao (distinct) do advwin
     query = "select codigo, descricao from Jurid_Varas as v1 " \
@@ -22,8 +22,8 @@ def import_data():
     user = select_user()
 
     for row in rows:
-        code = (str(row['codigo'])).strip()
-        name = (str(row['descricao']).replace("'", "''")).strip()
+        code = row['codigo']
+        name = row['descricao']
 
         # tem que verificar se é novo antes para não salvar o create_user ao fazer update
         court_divisions = CourtDivision.objects.filter(legacy_code=code, system_prefix=LegacySystem.ADVWIN.value)
