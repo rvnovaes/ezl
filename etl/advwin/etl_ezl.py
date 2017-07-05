@@ -5,9 +5,8 @@ import sys
 from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
-from etl.advwin.models import Base
-from etl.advwin.models import Person, AuthUser
 from connections.db_connection import connect_db
+from etl.advwin.models import Base, Person, AuthUser
 
 
 def return_user_from_auth(key, auth_dict):
@@ -71,9 +70,9 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
     active = True
     legal_name = ''
     name = ''
-    is_lawyer = False;
-    is_correspondent = False;
-    is_court = False;
+    is_lawyer = False
+    is_correspondent = False
+    is_court = False
     legal_type = 'F'
     cpf_cnpj = ''
     auth_user_id = None
