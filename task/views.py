@@ -17,9 +17,10 @@ from core.messages import operational_error_create, ioerror_create, exception_cr
     file_exists_error_delete, exception_delete, success_sent, success_delete
 from core.models import Person
 from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin
+from task.signals import send_notes_execution_date
 from .filters import TaskFilter
 from .forms import TaskForm, TaskDetailForm, TypeTaskForm
-from .models import Task, TaskStatus, Ecm, TaskHistory, TypeTask
+from .models import Task, TaskStatus, Ecm, TypeTask
 from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
 
 
@@ -132,37 +133,15 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     template_name = "task/task_detail.html"
 
     def form_valid(self, form):
-        task = form.instance
-        notes = form.cleaned_data['notes']
-        now_date = timezone.now()
-        action = self.request.POST['action']
+        form.instance.task_status = TaskStatus[self.request.POST['action']] or TaskStatus.INVALID
+        form.instance.alter_user = User.objects.get(id=self.request.user.id)
+        notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None
+        execution_date = form.cleaned_data['execution_date'] if form.cleaned_data['execution_date'] else None
 
-        if action == TaskStatus.ACCEPTED.name:
-            task.acceptance_date = now_date
-        elif action == TaskStatus.REFUSED.name:
-            task.refused_date = now_date
-        elif action == TaskStatus.DONE.name:
-            if form.cleaned_data['execution_date']:
-                task.execution_date = form.cleaned_data['execution_date']
-                task.return_date = None
-                # else:
-                #     task.execution_date =
-        elif action == TaskStatus.RETURN.name:
-            task.execution_date = None
-            task.refused_date = now_date
-
-        task.alter_date = now_date
-        user = User.objects.get(id=self.request.user.id)
-        task.alter_user = user
-        status = TaskStatus[action]
-        # task.task_status = status
-        form = TaskDetailForm(self.request.POST, instance=task)
+        # form = TaskDetailForm(self.request.POST, instance=form.instance)
+        send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
+                                       execution_date=execution_date)
         form.save()
-        # salvando snapshot com novo status
-
-        task_history = TaskHistory(task=task, create_user=user, create_date=now_date, status=status,
-                                   notes=notes)
-        task_history.save()
 
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)

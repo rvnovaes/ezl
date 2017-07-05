@@ -78,6 +78,9 @@ class TaskDetailForm(ModelForm):
         super(ModelForm, self).__init__(*args, **kwargs)
         self.fields['execution_date'].widget.min_date = self.instance.acceptance_date
 
+    # def deliver_notes(self, notes):
+    #     send_notes_execution_date.send(sender=self.__class__, notes=notes)
+
     class Meta:
         model = Task
         fields = ['execution_date']

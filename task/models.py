@@ -25,6 +25,7 @@ class TaskStatus(Enum):
     RETURN = u"Retorno"
     DONE = u"Cumprida"
     REFUSED = u"Recusada"
+    INVALID = u"Inválida"
 
     def get_icon(self):
         return icon_dict[self.name]
@@ -69,16 +70,14 @@ class Task(Audit, LegacyCode):
     task_status = models.CharField(null=False, verbose_name=u"", max_length=30,
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
                                    default=TaskStatus.OPEN)
+    __previous_status = None  # atributo transient
+    __notes = None  # atributo transient
 
-    #
     class Meta:
         db_table = 'task'
         ordering = ['-alter_date']
         verbose_name = "Providência"
         verbose_name_plural = "Providências"
-
-    def __str__(self):
-        return self.legacy_code  # TODO verificar campo para toString
 
     @property
     def status(self):
@@ -111,12 +110,8 @@ class Task(Audit, LegacyCode):
         type_movement = TypeMovement.objects.get(movement__task=self.id).name
         return type_movement
 
-    def save(self, *args, **kwargs):
-        try:
-            self.task_status = self.status
-        except Exception:
-            pass
-        super(Task, self).save(*args, **kwargs)
+    def __str__(self):
+        return self.legacy_code  # TODO verificar campo para toString
 
 
 def get_dir_name(self, filename):
