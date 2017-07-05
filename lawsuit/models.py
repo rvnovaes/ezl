@@ -17,7 +17,7 @@ class TypeMovement(Audit, LegacyCode):
         return self.name
 
 
-class Instance(Audit):
+class Instance(Audit, LegacyCode):
     name = models.CharField(verbose_name="Nome", max_length=255, null=False, blank=False, default="", unique=True)
 
     class Meta:
