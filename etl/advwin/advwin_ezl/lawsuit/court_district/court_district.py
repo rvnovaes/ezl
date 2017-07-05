@@ -2,10 +2,9 @@ import datetime
 import json
 import os
 
-import connections
-
 from sqlalchemy import text
 
+import connections
 from connections.db_connection import connect_db
 
 

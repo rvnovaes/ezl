@@ -3,11 +3,9 @@ import os
 from sqlalchemy import text
 
 import connections
-
 from connections.db_connection import connect_db
 from core.utils import LegacySystem
 from etl.advwin.advwin_ezl.advwin_ezl import truncate_tables, deactivate_records, select_user
-from etl.format_fields import FieldType
 from lawsuit.models import CourtDivision
 
 
