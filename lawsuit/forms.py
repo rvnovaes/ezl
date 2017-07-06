@@ -7,7 +7,7 @@ from django.forms.models import fields_for_model
 from core.fields import CustomBooleanField
 from core.models import Person, State
 from core.widgets import MDModelSelect2
-from .models import TypeMovement, Instance, LawSuit, Movement, Folder, CourtDistrict, LawSuit, CourtDivision
+from .models import TypeMovement, Instance, Movement, Folder, CourtDistrict, LawSuit, CourtDivision
 
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
@@ -141,7 +141,7 @@ class LawSuitForm(BaseForm):
         empty_label=u"Selecione", required=True
     )
     person_court = forms.ModelChoiceField(
-        queryset=Person.objects.filter(is_active=True),
+        queryset=Person.objects.filter(is_active=True, is_court=True),
         empty_label=u"Selecione", required=True)
     court_division = forms.ModelChoiceField(
         queryset=CourtDivision.objects.filter(is_active=True),
