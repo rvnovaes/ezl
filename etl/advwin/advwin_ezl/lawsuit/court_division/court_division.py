@@ -19,19 +19,24 @@ class CourtDivisionETL(GenericETL):
             court_division = CourtDivision.objects.filter(legacy_code=code,
                                                           system_prefix=LegacySystem.ADVWIN.value).first()
             if court_division:
-
-                obj = CourtDivision.objects.update(
-                    name=name,
-                    is_active=True,
-                    alter_user=user)
+                # use update_fields to specify which fields to save
+                # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
+                court_division.name = name
+                court_division.is_active = True
+                court_division.alter_user = user
+                court_division.save(
+                    update_fields=['name',
+                                   'is_active',
+                                   'alter_user'])
             else:
-                obj = CourtDivision.objects.create(name=name,
-                                                   is_active=True,
-                                                   legacy_code=code,
-                                                   system_prefix=LegacySystem.ADVWIN.value,
-                                                   create_user=user,
-                                                   alter_user=user)
-            # obj.save()
+                obj = CourtDivision(name=name,
+                                    is_active=True,
+                                    legacy_code=code,
+                                    system_prefix=LegacySystem.ADVWIN.value,
+                                    create_user=user,
+                                    alter_user=user)
+                obj.save()
+
             super(CourtDivisionETL, self).load_etl(rows, user)
 
 

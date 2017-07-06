@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-from django.utils import timezone
 
 from .utils import LegacySystem
 
@@ -13,7 +12,7 @@ LEGAL_TYPE_CHOICES = {
 
 class AuditCreate(models.Model):
     # auto_now_add - toda vez que for criado
-    create_date = models.DateTimeField('Criado em', default=timezone.now())
+    create_date = models.DateTimeField('Criado em', auto_now_add=True)
     create_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
                                     related_name='%(class)s_create_user')
 
