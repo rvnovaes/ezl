@@ -22,7 +22,7 @@ class CourtDivisionETL(GenericETL):
                 instance.name = name
                 instance.alter_user = user
                 instance.is_active = True
-                instance.save(update_fields=['is_active', 'name', 'alter_user'])
+                instance.save(update_fields=['is_active', 'name', 'alter_user', 'alter_date'])
             else:
                 self.model.objects.create(name=name,
                                           is_active=True,
