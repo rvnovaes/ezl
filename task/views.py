@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import DeleteView, CreateView, UpdateView, TemplateView
+from django.views.generic import CreateView, UpdateView, TemplateView
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
 from core.messages import new_success, update_success, delete_success
@@ -56,9 +56,10 @@ class TaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Up
     success_message = update_success
 
 
-class TaskDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
+class TaskDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
     model = Task
     success_url = reverse_lazy('task_list')
+    success_message = delete_success(model._meta.verbose_name_plural)
 
 
 class DashboardView(MultiTableMixin, TemplateView):
