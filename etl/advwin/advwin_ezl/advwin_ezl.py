@@ -22,6 +22,7 @@ class GenericETL(object):
     model = None
     query = None
     advwin_table = None
+    has_status = None
 
     class Meta:
         abstract = True
@@ -37,10 +38,11 @@ class GenericETL(object):
     #     if self.advwin_table:
     #         connection = self.advwin_engine.connect()
     #         query = "SELECT DISTINCT SYSOBJECTS.NAME " \
-    #                 " FROM SYSCOLUMNS INNER JOIN SYSOBJECTS ON SYSCOLUMNS.ID = SYSOBJECTS.ID" \
-    #                 " WHERE SYSCOLUMNS.NAME = 'status' AND SYSOBJECTS.NAME =" \
-    #                 + self.advwin_table + " AND SYSOBJECTS.XTYPE = 'U' ORDER BY SYSOBJECTS.NAME"
+    #                 "FROM SYSCOLUMNS INNER JOIN SYSOBJECTS ON SYSCOLUMNS.ID = SYSOBJECTS.ID " \
+    #                 "WHERE SYSCOLUMNS.NAME = 'status' AND SYSOBJECTS.NAME ='{0}' AND SYSOBJECTS.XTYPE = 'U' " \
+    #                 "ORDER BY SYSOBJECTS.NAME".format('advwin_table')
     #         rows = connection.execute(text(query))
+    #         connection.close()
     #         return rows
 
     @staticmethod
@@ -63,7 +65,8 @@ class GenericETL(object):
 
         self.truncate_table()
         # if self.has_status_column():
-        #     self.deactivate_records()
+        if self.has_status:
+            self.deactivate_records()
 
         connection = self.advwin_engine.connect()
 
