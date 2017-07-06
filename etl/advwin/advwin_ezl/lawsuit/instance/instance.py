@@ -4,7 +4,7 @@ from lawsuit.models import Instance
 
 
 class InstanceETL(GenericETL):
-    query = "SELECT Codigo, Descicao FROM Jurid_Instancia AS i1 WHERE Codigo = " \
+    query = "SELECT Codigo, Descicao FROM Jurid_Instancia AS i1 WHERE Descicao iS NOT NULL AND Codigo = " \
             "(SELECT min (Codigo) FROM Jurid_Instancia AS i2 WHERE i1.Descicao = i2.Descicao)"
 
     model = Instance
