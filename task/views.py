@@ -340,6 +340,8 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             task_list, task_filter = self.query_builder(person)
             self.filter = task_filter
         else:
+            if person.is_correspondent:
+                task_list = Task.objects.filter(person_executed_by=person)
             self.filter = TaskFilter(queryset={})
         return task_list
 
