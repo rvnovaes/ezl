@@ -93,27 +93,28 @@
                 <div class="panel-heading " data-toggle="collapse" data-target="#attachment" id="header-attachment"
                      onclick="toggleArrow()">
                     <div class="panel-title"><i class="material-icons">attach_file</i>
-                        <b>Anexar Arquivos</b>
+                        <b>Anexos</b>
                         <i class="material-icons" style="float: right;" id="down">arrow_drop_down</i>
                         <i class="material-icons" style="float: right; display: none;" id="up">arrow_drop_up</i>
                     </div>
                 </div>
                 <div id="attachment" class="panel-collapse collapse">
                     <div class="panel-body form-group is-focused">
-                        <button type="button" class="btn btn-sm btn-primary btn-raised js-upload-files"
-                                style="color: #fff !important;">
-                            <i class="material-icons">cloud_upload</i> &nbsp; Enviar Arquivo(s)
-                        </button>
+                        {% if not form.instance.status.name == 'OPEN' and not form.instance.status.name == 'REFUSED' %}
+                            <button type="button" class="btn btn-sm btn-primary btn-raised js-upload-files"
+                                    style="color: #fff !important;">
+                                <i class="material-icons">cloud_upload</i> &nbsp; Enviar Arquivo(s)
+                            </button>
 
-                        <input id="fileupload" type="file" name="path" multiple
-                               style="display: none;"
-                               data-method="POST"
-                               enctype="multipart/form-data"
-                               data-url="{% url 'ecm_add' object.id %}"
-                               data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
-                        <br>
-                        <br>
-
+                            <input id="fileupload" type="file" name="path" multiple
+                                   style="display: none;"
+                                   data-method="POST"
+                                   enctype="multipart/form-data"
+                                   data-url="{% url 'ecm_add' object.id %}"
+                                   data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+                            <br>
+                            <br>
+                        {% endif %}
                         <p class="text-center" id="no-providence">
                             {% if geds|length == 0 %}
                                 Esta providência não possui nenhum arquivo em
@@ -146,11 +147,14 @@
                                             <a href="/media/{{ ged.path }}" download
                                                style="text-decoration: none;">{{ ged.filename }}</a>
                                         </td>
-                                        <td id="cell-table" style="font-size: small">
-                                            <i class="material-icons" id="" style="cursor: pointer; font-size: medium;"
-                                               data-toggle="modal"
-                                               data-target="#confirmDelete-{{ ged.id }}">delete</i>
-                                        </td>
+                                        {% if not form.instance.status.name == 'DONE' %}
+                                            <td id="cell-table" style="font-size: small">
+                                                <i class="material-icons" id=""
+                                                   style="cursor: pointer; font-size: medium;"
+                                                   data-toggle="modal"
+                                                   data-target="#confirmDelete-{{ ged.id }}">delete</i>
+                                            </td>
+                                        {% endif %}
                                     </tr>
                                     <tr class="spaceFile" id="row-space{{ ged.id }}"></tr>
 
