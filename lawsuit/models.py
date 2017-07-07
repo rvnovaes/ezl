@@ -112,7 +112,7 @@ class Movement(Audit, LegacyCode):
         db_table = "movement"
         ordering = ['-id']
         verbose_name = "Movimentação"
-        verbose_name_plural = "Movimentação"
+        verbose_name_plural = "Movimentações"
 
     def __str__(self):
         return self.legacy_code  # TODO verificar novos campos e refatorar o toString

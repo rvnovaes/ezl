@@ -27,19 +27,9 @@ from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
 # from .utils import PagedFilteredTableView
 
 
-class TaskListView(LoginRequiredMixin, SingleTableView):
+class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Task
     table_class = TaskTable
-    queryset = Task.objects.all()
-    ordering = ['id']
-
-    def get_context_data(self, **kwargs):
-        context = super(TaskListView, self).get_context_data(**kwargs)
-        context['nav_task'] = True
-        table = TaskTable(Task.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
-        return context
 
 
 class TaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
