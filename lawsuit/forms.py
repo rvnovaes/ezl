@@ -18,6 +18,7 @@ class BaseForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(BaseForm, self).__init__(*args, **kwargs)
+        self.title = self._meta.model._meta.verbose_name
         for field_name, field in self.fields.items():
             if field.widget.input_type != 'checkbox':
                 field.widget.attrs['class'] = 'form-control'

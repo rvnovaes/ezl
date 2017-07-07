@@ -135,7 +135,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         form.save()
 
         super(TaskDetailView, self).form_valid(form)
-        return HttpResponseRedirect(self.success_url)
+        return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
     def get_context_data(self, **kwargs):
         context = super(TaskDetailView, self).get_context_data(**kwargs)

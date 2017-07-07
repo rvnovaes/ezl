@@ -33,6 +33,7 @@
             </script>
             {% include 'core/widgets/messages.html' %}
             <div class="panel">
+
                 <div class="panel-heading {{ form.instance.status.name }}">
                     <div class="panel-title"><i class="material-icons">{{ form.instance.status.get_icon }}</i>
                         <b>{{ form.instance.status|default_if_none:"" }}
