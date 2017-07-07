@@ -45,7 +45,7 @@
                                             {% block table.tbody.row %}
                                                 <tr class="{% cycle "odd" "even" %}">
                                                     {% for column, cell in row.items %}
-                                                        <td {{ column.attrs.td.as_html }}>{{ cell|lower|capfirst }}</td>
+                                                        <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                                                     {% endfor %}
                                                 </tr>
                                             {% endblock table.tbody.row %}
