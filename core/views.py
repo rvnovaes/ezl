@@ -2,6 +2,7 @@ from dal import autocomplete
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy
@@ -9,7 +10,6 @@ from django.db.models import ProtectedError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
-from django.utils.decorators import method_decorator
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django_tables2 import SingleTableView, RequestConfig
 
@@ -105,40 +105,26 @@ class MultiDeleteViewMixin(DeleteView):
             self.success_url)  # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
 
 
-@method_decorator(login_required, name='dispatch')
-class PersonListView(SingleTableView):
+class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Person
     table_class = PersonTable
-    queryset = Person.objects.filter(is_active=True)
-    ordering = ['id']
-
-    def get_context_data(self, **kwargs):
-        context = super(PersonListView, self).get_context_data(**kwargs)
-        context['nav_person'] = True
-        table = PersonTable(Person.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
-        return context
 
 
-@method_decorator(login_required, name='dispatch')
-class PersonCreateView(SuccessMessageMixin, BaseCustomView, CreateView):
+class PersonCreateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, CreateView):
     model = Person
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
     success_message = new_success
 
 
-@method_decorator(login_required, name='dispatch')
-class PersonUpdateView(SuccessMessageMixin, BaseCustomView, UpdateView):
+class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, UpdateView):
     model = Person
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
     success_message = update_success
 
 
-@method_decorator(login_required, name='dispatch')
-class PersonDeleteView(BaseCustomView, MultiDeleteViewMixin):
+class PersonDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
     model = Person
     success_url = reverse_lazy('person_list')
     success_message = delete_success(model._meta.verbose_name_plural)

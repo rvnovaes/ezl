@@ -3,7 +3,6 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy
 # project imports
 from django.views.generic.edit import CreateView, UpdateView
-from django_tables2 import RequestConfig, SingleTableView
 
 from core.messages import new_success, update_success, delete_success
 from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin
@@ -14,20 +13,20 @@ from .tables import MovementTable, FolderTable, LawSuitTable, CourtDistrictTable
     CourtDivisionTable, TypeMovementTable
 
 
-class InstanceListView(LoginRequiredMixin, SingleTableView):
+class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Instance
     table_class = InstanceTable
-    queryset = Instance.objects.all()
-    ordering = ['-id']
+    # queryset = Instance.objects.all()
+    # ordering = ['-id']
 
-    def get_context_data(self, **kwargs):
-        context = super(InstanceListView, self).get_context_data(**kwargs)
-        context['nav_instance'] = True
-        context['form_name_plural'] = Instance._meta.verbose_name_plural
-        table = InstanceTable(Instance.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(InstanceListView, self).get_context_data(**kwargs)
+    #     context['nav_instance'] = True
+    #     context['form_name_plural'] = Instance._meta.verbose_name_plural
+    #     table = InstanceTable(Instance.objects.all().order_by('-pk'))
+    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+    #     context['table'] = table
+    #     return context
 
 
 class InstanceCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):

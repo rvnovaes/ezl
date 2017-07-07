@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import DeleteView, CreateView, UpdateView, TemplateView
+from django.views.generic import CreateView, UpdateView, TemplateView
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
 from core.messages import new_success, update_success, delete_success
@@ -27,19 +27,9 @@ from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
 # from .utils import PagedFilteredTableView
 
 
-class TaskListView(LoginRequiredMixin, SingleTableView):
+class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Task
     table_class = TaskTable
-    queryset = Task.objects.all()
-    ordering = ['id']
-
-    def get_context_data(self, **kwargs):
-        context = super(TaskListView, self).get_context_data(**kwargs)
-        context['nav_task'] = True
-        table = TaskTable(Task.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
-        return context
 
 
 class TaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
@@ -56,9 +46,10 @@ class TaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Up
     success_message = update_success
 
 
-class TaskDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
+class TaskDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
     model = Task
     success_url = reverse_lazy('task_list')
+    success_message = delete_success(model._meta.verbose_name_plural)
 
 
 class DashboardView(MultiTableMixin, TemplateView):
@@ -144,7 +135,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         form.save()
 
         super(TaskDetailView, self).form_valid(form)
-        return HttpResponseRedirect(self.success_url)
+        return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
     def get_context_data(self, **kwargs):
         context = super(TaskDetailView, self).get_context_data(**kwargs)
@@ -339,6 +330,8 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             task_list, task_filter = self.query_builder(person)
             self.filter = task_filter
         else:
+            if person.is_correspondent:
+                task_list = Task.objects.filter(person_executed_by=person)
             self.filter = TaskFilter(queryset={})
         return task_list
 
