@@ -444,8 +444,8 @@ class Person(Base):
     auth_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), unique=True)
     create_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), nullable=False, index=True)
     is_active = Column(Boolean, nullable=False)
-    is_client = Column(Boolean, nullable=False)
-    is_provider = Column(Boolean, nullable=False)
+    is_customer = Column(Boolean, nullable=False)
+    is_supplier = Column(Boolean, nullable=False)
 
     alter_user = relationship('AuthUser', primaryjoin='Person.alter_user_id == AuthUser.id')
     auth_user = relationship('AuthUser', uselist=False, primaryjoin='Person.auth_user_id == AuthUser.id')

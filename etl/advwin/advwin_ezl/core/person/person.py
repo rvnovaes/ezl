@@ -8,29 +8,27 @@ from core.utils import LegacySystem
 
 
 class PersonETL(GenericETL):
-    advwin_table = ['Jurid_Clifor', 'Jurid_Advogado', 'Jurid_Tribunais']
+    advwin_table = ['Jurid_Tribunais', 'Jurid_Advogado', 'Jurid_Clifor']
     model = Person
 
     query = "select \n" \
-            "  cf1.Razao as legal_name, \n" \
-            "  cf1.Nome as name, \n" \
-            "  cf1.Codigo as legacy_code, \n" \
-            "  CASE cf1.pessoa_fisica WHEN 0 THEN 'J' ELSE 'F' END as legal_type, \n" \
-            "  cf1.TipoCF as customer_supplier, \n" \
+            "  t1.Descricao as legal_name, \n" \
+            "  t1.Descricao as name, \n" \
+            "  t1.Codigo as legacy_code, \n" \
+            "  'J' as legal_type, \n" \
+            "  'F' as customer_supplier, \n" \
             "  'False' AS is_lawyer, \n" \
             "  'False' AS is_correspondent, \n" \
-            "  'False' AS is_court \n" \
-            "from " + advwin_table[0] + " as cf1 \n" \
+            "  'True' AS is_court \n" \
+            "from " + advwin_table[0] + " as t1 \n" \
             "where \n" \
-            "  cf1.Status = 'Ativo' and \n" \
-            "  cf1.Razao is not null and cf1.Razao <> '' and \n" \
-            "  cf1.Codigo = ( \n" \
-            "    select min(cf2.Codigo) \n" \
-            "    from Jurid_CliFor as cf2 \n" \
-            "    where \n" \
-            "      cf2.Status = 'Ativo' and \n" \
-            "      cf2.Razao is not null and cf2.Razao <> '' and \n" \
-            "      cf1.Codigo = cf2.Codigo) \n" \
+            "  t1.Descricao is not null and t1.Descricao <> '' and \n" \
+            "  t1.Codigo = ( \n" \
+            "  select min(t2.Codigo) \n" \
+            "  from " + advwin_table[0] + " as t2 \n" \
+            "  where \n" \
+            "    t2.Descricao is not null and t2.Descricao <> '' and \n" \
+            "    t1.Codigo = t2.Codigo) \n" \
             " \n" \
             "UNION \n" \
             " \n" \
@@ -47,34 +45,29 @@ class PersonETL(GenericETL):
             "where \n" \
             "  a1.Status = 'Ativo' and \n" \
             "  a1.Nome is not null and a1.Nome <> '' and \n" \
-            "  a1.Codigo = ( \n" \
-            "  select min(a2.Codigo) \n" \
-            "  from Jurid_Advogado as a2 \n" \
+            "  a1.Codigo not in ( \n" \
+            "  select cf.Codigo \n" \
+            "  from " + advwin_table[2] + " as cf \n" \
             "  where \n" \
-            "    a2.Status = 'Ativo' and \n" \
-            "    a2.Nome is not null and a2.Nome <> '' and \n" \
-            "    a1.Codigo = a2.Codigo) \n" \
+            "      cf.Status = 'Ativo' and \n" \
+            "      cf.Razao is not null and cf.Razao <> '') \n" \
             " \n" \
             "UNION \n" \
             " \n" \
             "select \n" \
-            "  t1.Descricao as legal_name, \n" \
-            "  t1.Descricao as name, \n" \
-            "  t1.Codigo as legacy_code, \n" \
-            "  'J' as legal_type, \n" \
-            "  'F' as customer_supplier, \n" \
+            "  cf.Razao as legal_name, \n" \
+            "  cf.Nome as name, \n" \
+            "  cf.Codigo as legacy_code, \n" \
+            "  CASE cf.pessoa_fisica WHEN 0 THEN 'J' ELSE 'F' END as legal_type, \n" \
+            "  cf.TipoCF as customer_supplier, \n" \
             "  'False' AS is_lawyer, \n" \
             "  'False' AS is_correspondent, \n" \
-            "  'True' AS is_court \n" \
-            "from " + advwin_table[2] + " as t1 \n" \
+            "  'False' AS is_court \n" \
+            "from " + advwin_table[2] + " as cf \n" \
             "where \n" \
-            "  t1.Descricao is not null and t1.Descricao <> '' and \n" \
-            "  t1.Codigo = ( \n" \
-            "  select min(t2.Codigo) \n" \
-            "  from Jurid_Tribunais as t2 \n" \
-            "  where \n" \
-            "    t2.Descricao is not null and t2.Descricao <> '' and \n" \
-            "    t1.Codigo = t2.Codigo)"
+            "  cf.Status = 'Ativo' and \n" \
+            "  cf.Razao is not null and cf.Razao <> ''"
+
     has_status = True
 
     def load_etl(self, rows, user):
@@ -82,8 +75,8 @@ class PersonETL(GenericETL):
         for row in rows:
             print(row)
 
-            legal_name = row['legal_name']
-            name = row['name']
+            legal_name = row['legal_name'] or row['name']
+            name = row['name'] or row['legal_name']
             legacy_code = row['legacy_code']
             legal_type = row['legal_type']
             customer_supplier = row['customer_supplier']
@@ -107,17 +100,19 @@ class PersonETL(GenericETL):
                 cpf_cnpj = legacy_code
 
             if customer_supplier == 'A':
-                is_client = True
-                is_provider = True
+                is_customer = True
+                is_supplier = True
             elif customer_supplier == 'C':
-                is_client = True
-                is_provider = False
+                is_customer = True
+                is_supplier = False
             elif customer_supplier == 'F':
-                is_client = False
-                is_provider = True
+                is_customer = False
+                is_supplier = True
             else:
-                is_client = False
-                is_provider = False
+                is_customer = False
+                is_supplier = False
+
+            is_active = True
 
             instance = self.model.objects.filter(legacy_code=legacy_code,
                                                  system_prefix=LegacySystem.ADVWIN.value).first()
@@ -133,8 +128,9 @@ class PersonETL(GenericETL):
                 instance.legal_type = legal_type
                 instance.cpf_cnpj = cpf_cnpj
                 instance.alter_user = user
-                instance.is_client = is_client
-                instance.is_provider = is_provider
+                instance.is_customer = is_customer
+                instance.is_supplier = is_supplier
+                instance.is_active = is_active
                 instance.save(
                     update_fields=['alter_date',
                                    'legal_name',
@@ -145,8 +141,9 @@ class PersonETL(GenericETL):
                                    'legal_type',
                                    'cpf_cnpj',
                                    'alter_user',
-                                   'is_client',
-                                   'is_provider'])
+                                   'is_active',
+                                   'is_customer',
+                                   'is_supplier'])
             else:
                 obj = self.model(legal_name=legal_name,
                                  name=name,
@@ -157,8 +154,9 @@ class PersonETL(GenericETL):
                                  cpf_cnpj=cpf_cnpj,
                                  alter_user=user,
                                  create_user=user,
-                                 is_client=is_client,
-                                 is_provider=is_provider,
+                                 is_customer=is_customer,
+                                 is_supplier=is_supplier,
+                                 is_active=is_active,
                                  legacy_code=legacy_code,
                                  system_prefix=LegacySystem.ADVWIN.value)
                 try:

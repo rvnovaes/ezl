@@ -34,8 +34,6 @@ class GenericETL(object):
         abstract = True
 
     # apaga registros das tabelas
-    # tem que ter cascade mesmo que não existam registros associados em outras tabelas
-    # restart identity - reinica o id da tabela
     def truncate_table(self):
         if etl_settings.TRUNCATE_ALL_TABLES:
             self.model.objects.all().delete()

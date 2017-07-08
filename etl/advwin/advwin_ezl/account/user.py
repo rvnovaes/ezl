@@ -69,8 +69,8 @@ class UserETL(GenericETL):
                 # no advwin nao tem campo para cpf_cnpj, é salvo no codigo
                 cpf_cnpj = legacy_code
 
-            is_client = False
-            is_provider = True
+            is_customer = False
+            is_supplier = True
             is_lawyer = row['is_lawyer']
             is_correspondent = row['is_correspondent']
             is_court = row['is_court']
@@ -79,15 +79,19 @@ class UserETL(GenericETL):
             first_name = (name_user.split(' ')[0])[:30]
             last_name = (" ".join(name_user.split(' ')[1:]))[:30]
 
+            # tenta encontrar o usuario pelo username (unique)
+            instance = User.objects.filter(username=username).first()
+
             # todo: fazer usuario independente do usuario do django (extend, override or custom user???)
             # todo: deve herdar de LegacyCode e Audit e já deve criar person ao criar o usuário
-            # person = Person.objects.select_related('auth_user').filter(legacy_code=legacy_code,
-            #                                                            system_prefix=LegacySystem.ADVWIN.value).first()
             # tenta encontrar a pessoa pelo legacy_code
             person = Person.objects.filter(legacy_code=legacy_code,
                                            system_prefix=LegacySystem.ADVWIN.value).first()
 
-            if person:
+            if instance and person:
+                # vincula o usuario encontrado à pessoa encontrada
+                person.auth_user = instance
+            elif person:
                 # tenta encontrar o usuario vinculado a essa pessoa
                 instance = self.model.objects.get(id=person.auth_user.id)
             else:
@@ -105,7 +109,6 @@ class UserETL(GenericETL):
                 instance.last_name = last_name
                 instance.save(
                     update_fields=['is_superuser',
-                                   'username',
                                    'email',
                                    'is_staff',
                                    'is_active',
@@ -121,8 +124,9 @@ class UserETL(GenericETL):
                 person.legal_type = legal_type
                 person.cpf_cnpj = cpf_cnpj
                 person.alter_user = user
-                person.is_client = is_client
-                person.is_provider = is_provider
+                person.is_active = is_active
+                person.is_customer = is_customer
+                person.is_supplier = is_supplier
                 person.save(
                     update_fields=['alter_date',
                                    'legal_name',
@@ -133,36 +137,39 @@ class UserETL(GenericETL):
                                    'legal_type',
                                    'cpf_cnpj',
                                    'alter_user',
-                                   'is_client',
-                                   'is_provider'])
+                                   'is_active',
+                                   'is_customer',
+                                   'is_supplier'])
             else:
                 # deve ser usada a funcao create_user para gerar a senha criptografada
-                user_obj = self.model.objects.create_user(password=password,
-                                                          is_superuser=is_superuser,
-                                                          username=username,
-                                                          first_name=first_name,
-                                                          last_name=last_name,
-                                                          email=email,
-                                                          is_staff=is_staff,
-                                                          is_active=is_active,
-                                                          date_joined=date_joined)
+                user_obj = self.model.objects.create_user(
+                    password=password,
+                    is_superuser=is_superuser,
+                    username=username,
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=email,
+                    is_staff=is_staff,
+                    is_active=is_active,
+                    date_joined=date_joined)
+                    # extra_fields={'legal_name': legal_name})
 
-                person_obj = Person(legal_name=legal_name,
-                                    name=name,
-                                    is_lawyer=is_lawyer,
-                                    is_correspondent=is_correspondent,
-                                    is_court=is_court,
-                                    legal_type=legal_type,
-                                    cpf_cnpj=cpf_cnpj,
-                                    alter_user=user,
-                                    auth_user=user_obj,
-                                    create_user=user,
-                                    is_active=is_active,
-                                    is_client=is_client,
-                                    is_provider=is_provider,
-                                    legacy_code=legacy_code,
-                                    system_prefix=LegacySystem.ADVWIN.value)
-                person_obj.save()
+                Person.objects.create(
+                    legal_name=legal_name,
+                    name=name,
+                    is_lawyer=is_lawyer,
+                    is_correspondent=is_correspondent,
+                    is_court=is_court,
+                    legal_type=legal_type,
+                    cpf_cnpj=cpf_cnpj,
+                    alter_user=user,
+                    auth_user=user_obj,
+                    create_user=user,
+                    is_active=is_active,
+                    is_customer=is_customer,
+                    is_supplier=is_supplier,
+                    legacy_code=legacy_code,
+                    system_prefix=LegacySystem.ADVWIN.value)
 
             super(UserETL, self).load_etl(rows, user)
 

@@ -29,6 +29,7 @@ class FolderETL(GenericETL):
     has_status = True
 
     def load_etl(self, rows, user):
+        log_file = open('log_file.txt', 'w')
         for row in rows:
             print(row)
 
@@ -62,6 +63,8 @@ class FolderETL(GenericETL):
                     obj.save()
 
                 super(FolderETL, self).load_etl(rows, user)
+            else:
+                log_file.write(str(row) + '\n')
 
 
 if __name__ == "__main__":

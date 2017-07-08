@@ -139,6 +139,6 @@ class ClientAutocomplete(autocomplete.Select2QuerySetView):
         qs = Person.objects.none()
 
         if self.q:
-            qs = Person.objects.filter(name__istartswith=self.q, is_client=True)
+            qs = Person.objects.filter(name__istartswith=self.q, is_customer=True)
 
         return qs

@@ -14,8 +14,8 @@
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField"></field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user">1</field>
-        <field name="is_client" type="BooleanField">False</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="2">
         <field name="create_date" type="DateTimeField">2017-06-30T14:10:55.356087+00:00</field>
@@ -31,8 +31,8 @@
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField"></field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user">2</field>
-        <field name="is_client" type="BooleanField">False</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="3">
         <field name="create_date" type="DateTimeField">2017-06-30T14:11:51.238281+00:00</field>
@@ -48,8 +48,8 @@
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField"></field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user">3</field>
-        <field name="is_client" type="BooleanField">False</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="4">
         <field name="create_date" type="DateTimeField">2017-06-30T14:17:43.484814+00:00</field>
@@ -65,8 +65,8 @@
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">47.693.567/0001-54</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_client" type="BooleanField">True</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="5">
         <field name="create_date" type="DateTimeField">2017-06-30T14:20:06.968844+00:00</field>
@@ -82,8 +82,8 @@
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">220.229.617-49</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_client" type="BooleanField">False</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="6">
         <field name="create_date" type="DateTimeField">2017-06-30T14:25:24.446267+00:00</field>
@@ -99,8 +99,8 @@
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">47.650.944/0001-78</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_client" type="BooleanField">True</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="10">
         <field name="create_date" type="DateTimeField">2017-06-30T14:38:09.697196+00:00</field>
@@ -116,8 +116,8 @@
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">06427790404</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_client" type="BooleanField">False</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="11">
         <field name="create_date" type="DateTimeField">2017-06-30T14:39:09.009961+00:00</field>
@@ -133,8 +133,8 @@
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">577.656.711-46</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_client" type="BooleanField">False</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="12">
         <field name="create_date" type="DateTimeField">2017-06-30T14:45:09.930222+00:00</field>
@@ -150,8 +150,8 @@
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">07.727.516/0001-81</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_client" type="BooleanField">True</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="13">
         <field name="create_date" type="DateTimeField">2017-06-30T14:46:13.027571+00:00</field>
@@ -167,8 +167,8 @@
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">38.068.246/0001-78</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_client" type="BooleanField">True</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="14">
         <field name="create_date" type="DateTimeField">2017-06-30T15:57:50.184312+00:00</field>
@@ -184,8 +184,8 @@
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">627.585.805-27</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_client" type="BooleanField">False</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="15">
         <field name="create_date" type="DateTimeField">2017-06-30T16:03:43.968789+00:00</field>
@@ -201,8 +201,8 @@
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">072.576.001-04</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_client" type="BooleanField">False</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="17">
         <field name="create_date" type="DateTimeField">2017-06-30T20:40:50.374603+00:00</field>
@@ -218,8 +218,8 @@
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">447.048.404-09</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_client" type="BooleanField">False</field>
-        <field name="is_provider" type="BooleanField">True</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">True</field>
     </object>
     <object model="core.person" pk="18">
         <field name="create_date" type="DateTimeField">2017-06-30T20:42:10.725104+00:00</field>
@@ -235,8 +235,8 @@
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">74.459.471/0001-07</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_client" type="BooleanField">True</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="19">
         <field name="create_date" type="DateTimeField">2017-06-30T20:43:49.411305+00:00</field>
@@ -252,7 +252,7 @@
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">29.345.157/0001-30</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_client" type="BooleanField">True</field>
-        <field name="is_provider" type="BooleanField">False</field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
 </django-objects>
