@@ -122,7 +122,7 @@ class Person(Audit, LegacyCode):
     legal_type = models.CharField(null=False, verbose_name="Tipo", max_length=1,
                                   choices=((x.value, x.name.title()) for x in LegalType),
                                   default=LegalType.JURIDICA)
-    cpf_cnpj = models.CharField(max_length=255, blank=True, verbose_name="CPF/CNPJ")
+    cpf_cnpj = models.CharField(max_length=255, blank=True, null=True, unique=True, verbose_name="CPF/CNPJ")
     auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True,
                                      verbose_name="Usuário do sistema")
     is_customer = models.BooleanField(null=False, default=False, verbose_name="É Cliente?")
