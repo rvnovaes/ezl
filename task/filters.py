@@ -19,7 +19,8 @@ class TaskFilter(FilterSet):
 
     client = ModelChoiceFilter(queryset=Person.objects.all(),
                                lookup_expr='cli', label="Cliente",
-                               name='client', widget=MDModelSelect2(url='client_autocomplete'))
+                               name='client',
+                               widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'}))
 
     class Meta:
         model = Task

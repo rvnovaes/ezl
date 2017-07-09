@@ -9,14 +9,14 @@ from core.models import Person
 from core.widgets import MDDateTimepicker
 from ezl import settings
 from lawsuit.forms import BaseForm
-from lawsuit.models import Movement, TypeMovement
+from lawsuit.models import Movement
 from .models import Task, Ecm, TypeTask
 
 
 class TaskForm(BaseForm):
     class Meta:
         model = Task
-        fields = ['legacy_code', 'movement', 'person_asked_by', "person_executed_by", 'type_movement',
+        fields = ['legacy_code', 'movement', 'person_asked_by', "person_executed_by", 'type_task',
                   'delegation_date', 'acceptance_date', "reminder_deadline_date", "final_deadline_date",
                   'execution_date',
                   'return_date', 'refused_date', 'is_active']
@@ -45,10 +45,10 @@ class TaskForm(BaseForm):
 
     )
 
-    type_movement = forms.ModelChoiceField(
-        queryset=TypeMovement.objects.filter(is_active=True),
+    type_task = forms.ModelChoiceField(
+        queryset=TypeTask.objects.filter(is_active=True),
         empty_label=u"Selecione...",
-        label=u"Tipo de Movimentação"
+        label=u"Tipo de Serviço"
     )
     # TODO verificar como aplicar os formulários com dateTimeField
 

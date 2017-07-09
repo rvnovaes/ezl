@@ -105,10 +105,10 @@
         $(this).select2({
             tokenSeparators: element.attr('data-tags') ? [','] : null,
             debug: true,
-            placeholder: '',
+            placeholder: 'Selecione...',
             language: element.attr('data-autocomplete-light-language'),
             minimumInputLength: 0,
-            allowClear: !$(this).is('required'),
+            allowClear: true,
             templateResult: template,
             templateSelection: template,
             ajax: ajax,

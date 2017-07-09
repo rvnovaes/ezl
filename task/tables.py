@@ -23,7 +23,7 @@ class TaskTable(tables.Table):
     class Meta:
         model = Task
         fields = ['selection', 'status', 'legacy_code', 'movement', 'person_asked_by', 'person_executed_by',
-                  'type_movement',
+                  'type_task',
                   'delegation_date',
                   'acceptance_date', 'reminder_deadline_date', 'final_deadline_date', 'execution_date', 'return_date',
                   'refused_date']
@@ -45,6 +45,9 @@ class DashboardStatusTable(tables.Table):
         self.length = self.rows.__len__()
 
     legacy_code = tables.LinkColumn(viewname='task_detail', attrs={'a': {'target': 'task_detail'}}, args=[A('pk')])
+
+    # service = tables.Column(accessor='__service__',order_by='__service__')
+    # client = tables.Column(accessor='client')
 
     class Meta:
         model = Task

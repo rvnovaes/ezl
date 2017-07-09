@@ -76,8 +76,8 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
     legal_type = 'F'
     cpf_cnpj = ''
     auth_user_id = None
-    is_client = False
-    is_provider = False
+    is_customer = False
+    is_supplier = False
 
     print(linha)
 
@@ -113,10 +113,10 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
         cpf_cnpj = linha['Codigo']
 
         if linha['TipoCF'] == 'A':
-            is_client = True
+            is_customer = True
 
         elif linha['TipoCF'] == 'F':
-            is_provider = True
+            is_supplier = True
 
     if person_type == 'cliente':
 
@@ -137,10 +137,10 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
         cpf_cnpj = linha['Codigo']
 
         if linha['TipoCF'] == 'A':
-            is_client = True
+            is_customer = True
 
         elif linha['TipoCF'] == 'F':
-            is_provider = True
+            is_supplier = True
 
     if person_type == 'trib':
         date_creation = datetime.datetime.now()
@@ -163,8 +163,8 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
         'alter_user_id': None,
         'auth_user_id': auth_user_id,
         'create_user_id': 2,
-        'is_client': is_client,
-        'is_provider': is_provider
+        'is_customer': is_customer,
+        'is_supplier': is_supplier
 
     }
 

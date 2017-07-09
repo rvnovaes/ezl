@@ -17,6 +17,16 @@ icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assi
 
 # next_action = {'ACCEPTED': 'cumprir', 'OPEN': 'assignment', 'RETURN': 'keyboard_return', 'DONE': 'done',
 #                'REFUSED': 'assignment_late'}
+class TypeTask(Audit, LegacyCode):
+    name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Tipo de Serviço")
+
+    class Meta:
+        db_table = "type_task"
+        verbose_name = "Tipo de Serviço"
+        verbose_name_plural = "Tipos de Serviço"
+
+    def __str__(self):
+        return self.name
 
 
 class TaskStatus(Enum):
@@ -54,8 +64,8 @@ class Task(Audit, LegacyCode):
     person_executed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                            related_name='%(class)s_executed_by',
                                            verbose_name="Correspondente")
-    type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False,
-                                      verbose_name="Tipo de Movimentação")
+    type_task = models.ForeignKey(TypeTask, on_delete=models.PROTECT, blank=False, null=False,
+                                  verbose_name="Tipo de Serviço")
     delegation_date = models.DateTimeField(default=timezone.now, verbose_name="Data de Delegação")
     acceptance_date = models.DateTimeField(null=True, verbose_name="Data de Aceitação")
     reminder_deadline_date = models.DateTimeField(null=True, verbose_name="Primeiro Prazo")
@@ -70,6 +80,7 @@ class Task(Audit, LegacyCode):
     task_status = models.CharField(null=False, verbose_name=u"", max_length=30,
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
                                    default=TaskStatus.OPEN)
+
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
 
@@ -101,14 +112,13 @@ class Task(Audit, LegacyCode):
 
     @property
     def client(self):
-        mv = Movement.objects.get(task__exact=self.id).id
-        client = Folder.objects.get(lawsuit__lawsuitinstance__movement__exact=mv).person_customer
-        return client
+        folder = Folder.objects.get(folders__law_suits__task__exact=self)
+        return folder.person_customer
 
     @property
     def service(self):
-        type_movement = TypeMovement.objects.get(movement__task=self.id).name
-        return type_movement
+        type_task = TypeTask.objects.get(task__exact=self)
+        return type_task
 
     def __str__(self):
         return self.legacy_code  # TODO verificar campo para toString
@@ -144,15 +154,3 @@ class TaskHistory(AuditCreate):
     class Meta:
         verbose_name = "Histórico da Providência"
         verbose_name_plural = "Histórico das Providências"
-
-
-class TypeTask(Audit, LegacyCode):
-    name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Tipo de Serviço")
-
-    class Meta:
-        db_table = "type_task"
-        verbose_name = "Tipo de Serviço"
-        verbose_name_plural = "Tipos de Serviço"
-
-    def __str__(self):
-        return self.name

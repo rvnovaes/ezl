@@ -44,22 +44,19 @@ class Folder(Audit, LegacyCode):
         return str(self.legacy_code)
 
 
-class LawSuit(Audit):
-    person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
-                                      verbose_name='Advogado')
-    folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False, verbose_name="Pasta")
+class CourtDivision(Audit, LegacyCode):
+    name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Vara")
 
     class Meta:
-        db_table = "law_suit"
-        ordering = ['-id']
-        verbose_name = "Processo"
-        verbose_name_plural = "Processos"
+        db_table = "court_division"
+        verbose_name = "Vara"
+        verbose_name_plural = "Varas"
 
     def __str__(self):
-        return str(self.id)  # TODO verificar novos campos e refatorar o toString
+        return self.name
 
 
-class CourtDistrict(Audit):
+class CourtDistrict(Audit, LegacyCode):
     name = models.CharField(max_length=255, null=False, verbose_name="Nome")
     state = models.ForeignKey(State, on_delete=models.PROTECT, null=False, blank=False, verbose_name="Estado")
 
@@ -74,35 +71,29 @@ class CourtDistrict(Audit):
         return self.name
 
 
-class CourtDivision(Audit, LegacyCode):
-    name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Vara")
-
-    class Meta:
-        db_table = "court_division"
-        verbose_name = "Vara"
-        verbose_name_plural = "Varas"
-
-    def __str__(self):
-        return self.name
-
-
-class LawSuitInstance(Audit, LegacyCode):
-    law_suit = models.ForeignKey(LawSuit, on_delete=models.PROTECT, blank=False, null=False, verbose_name="Processo")
-
+class LawSuit(Audit, LegacyCode):
+    person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
+                                      verbose_name='Advogado', related_name='person_lawyers')
+    folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False, verbose_name="Pasta",
+                               related_name='folders')
+    instance = models.ForeignKey(Instance, on_delete=models.PROTECT, blank=False, null=False, verbose_name='Instância',
+                                 related_name='instances')
+    court_district = models.ForeignKey(CourtDistrict, on_delete=models.PROTECT, blank=False, null=False,
+                                       verbose_name='Comarca', related_name='court_districts')
     person_court = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                      related_name='%(class)s_court', verbose_name="Tribunal")
-    court_district = models.ForeignKey(CourtDistrict, on_delete=models.PROTECT, blank=False, null=False,
-                                       verbose_name='Comarca')
-    instance = models.ForeignKey(Instance, on_delete=models.PROTECT, blank=False, null=False, verbose_name='Instância')
-
-    # id_court_division fk not null TODO criar modelo para Vara
-    law_suit_number = models.CharField(max_length=255, unique=True, blank=False, null=False,
+    court_division = models.ForeignKey(CourtDivision, on_delete=models.PROTECT, blank=False, null=False,
+                                       verbose_name='Vara', related_name='court_divisions')
+    law_suit_number = models.CharField(max_length=255, blank=False, null=False,
                                        verbose_name='Número do Processo')
 
     class Meta:
-        verbose_name = "Instância do Processo"
-        verbose_name_plural = "Instâncias dos Processos"
+        db_table = "law_suit"
         ordering = ['-id']
+        verbose_name = "Processo"
+        verbose_name_plural = "Processos"
+        # cria constraint unique para a combinação de instancia e nr processo
+        unique_together = (('instance', 'law_suit_number'),)
 
     def __str__(self):
         return self.law_suit_number
@@ -113,17 +104,15 @@ class Movement(Audit, LegacyCode):
                                       related_name='%(class)s_lawyer', verbose_name="Advogado")
     type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False,
                                       verbose_name="Tipo de Movimentação")
-
-    deadline = models.DateTimeField(null=True, verbose_name="Data da Movimentação")
-
-    law_suit_instance = models.ForeignKey(LawSuitInstance, on_delete=models.PROTECT, blank=False, null=False,
-                                          verbose_name="Instância do Processo")
+    deadline = models.DateTimeField(null=True, verbose_name="Prazo")
+    law_suit = models.ForeignKey(LawSuit, on_delete=models.PROTECT, blank=False, null=False,
+                                 verbose_name="Processo", related_name='law_suits')
 
     class Meta:
         db_table = "movement"
         ordering = ['-id']
         verbose_name = "Movimentação"
-        verbose_name_plural = "Movimentação"
+        verbose_name_plural = "Movimentações"
 
     def __str__(self):
         return self.legacy_code  # TODO verificar novos campos e refatorar o toString

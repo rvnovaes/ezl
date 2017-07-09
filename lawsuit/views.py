@@ -3,34 +3,30 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy
 # project imports
 from django.views.generic.edit import CreateView, UpdateView
-from django_tables2 import RequestConfig, SingleTableView
 
 from core.messages import new_success, update_success, delete_success
 from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin
-from .forms import LawSuitInstanceForm
 from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm, \
     CourtDivisionForm
-from .models import LawSuitInstance
 from .models import Instance, Movement, LawSuit, Folder, CourtDistrict, CourtDivision, TypeMovement
-from .tables import LawSuitInstanceTable
 from .tables import MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, InstanceTable, \
     CourtDivisionTable, TypeMovementTable
 
 
-class InstanceListView(LoginRequiredMixin, SingleTableView):
+class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Instance
     table_class = InstanceTable
-    queryset = Instance.objects.all()
-    ordering = ['-id']
+    # queryset = Instance.objects.all()
+    # ordering = ['-id']
 
-    def get_context_data(self, **kwargs):
-        context = super(InstanceListView, self).get_context_data(**kwargs)
-        context['nav_instance'] = True
-        context['form_name_plural'] = Instance._meta.verbose_name_plural
-        table = InstanceTable(Instance.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(InstanceListView, self).get_context_data(**kwargs)
+    #     context['nav_instance'] = True
+    #     context['form_name_plural'] = Instance._meta.verbose_name_plural
+    #     table = InstanceTable(Instance.objects.all().order_by('-pk'))
+    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+    #     context['table'] = table
+    #     return context
 
 
 class InstanceCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
@@ -208,44 +204,6 @@ class CourtDistrictDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteVie
     model = CourtDistrict
     success_url = reverse_lazy('courtdistrict_list')
     success_message = delete_success(model._meta.verbose_name_plural)
-
-
-class LawSuitInstanceListView(LoginRequiredMixin, SingleTableViewMixin):
-    model = LawSuitInstance
-    table_class = LawSuitInstanceTable
-
-    # def get_context_data(self, **kwargs):
-    #     context = super(LawSuitInstanceListView, self).get_context_data(**kwargs)
-    #     context['nav_lawsuitinstance'] = True
-    #     table = LawSuitInstanceTable(LawSuitInstance.objects.all().order_by('-pk'))
-    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-    #     context['table'] = table
-    #     return context
-
-
-class LawSuitInstanceCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
-    model = LawSuitInstance
-    form_class = LawSuitInstanceForm
-    success_url = reverse_lazy('lawsuitinstance_list')
-    success_message = new_success
-
-
-class LawSuitInstanceUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
-    model = LawSuitInstance
-    form_class = LawSuitInstanceForm
-    success_url = reverse_lazy('lawsuitinstance_list')
-    success_message = update_success
-
-
-class LawSuitInstanceDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
-    model = LawSuitInstance
-    success_url = reverse_lazy('lawsuitinstance_list')
-    success_message = delete_success(model._meta.verbose_name_plural)
-    # def delete(self, request, *args, **kwargs):
-    #     law_suit_instance = self.get_object()
-    #     law_suit_instance_id = int(law_suit_instance.id)
-    #     LawSuitInstance.objects.filter(id=law_suit_instance_id).update(active=False)
-    #     return HttpResponseRedirect(self.success_url)
 
 
 class CourtDivisionListView(LoginRequiredMixin, SingleTableViewMixin):

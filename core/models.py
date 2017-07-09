@@ -1,15 +1,24 @@
-from datetime import datetime
+from enum import Enum
+
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from .utils import LegacySystem
 
 
-# To do: Mudar coluna Active, pois causa conflito na renderização no template.
-LEGAL_TYPE_CHOICES = {
-    ('F', 'Física'),
-    ('J', 'Jurídica'),
-}
+class LegalType(Enum):
+    FISICA = u"F"
+    JURIDICA = u"J"
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        return [(x.value, x.name) for x in cls]
 
 
 class AuditCreate(models.Model):
@@ -103,18 +112,21 @@ class City(Audit):
         return self.name
 
 
-class Person(Audit):
-    legal_name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Razão social/nome completo")
-    name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Nome Fantasia/Apelido")
+class Person(Audit, LegacyCode):
+    legal_name = models.CharField(max_length=255, verbose_name="Razão social/Nome completo")
+    name = models.CharField(max_length=255, null=True, blank=True, default=legal_name,
+                            verbose_name="Nome Fantasia/Apelido")
     is_lawyer = models.BooleanField(null=False, default=False, verbose_name="É Advogado?")
     is_correspondent = models.BooleanField(null=False, default=False, verbose_name="É Correspondente?")
     is_court = models.BooleanField(null=False, default=False, verbose_name="É Tribunal?")
-    legal_type = models.CharField(max_length=1, choices=LEGAL_TYPE_CHOICES, verbose_name="Tipo")
-    cpf_cnpj = models.CharField(max_length=255, blank=True, verbose_name="CPF/CNPJ")
+    legal_type = models.CharField(null=False, verbose_name="Tipo", max_length=1,
+                                  choices=((x.value, x.name.title()) for x in LegalType),
+                                  default=LegalType.JURIDICA)
+    cpf_cnpj = models.CharField(max_length=255, blank=True, null=True, unique=True, verbose_name="CPF/CNPJ")
     auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True,
                                      verbose_name="Usuário do sistema")
-    is_client = models.BooleanField(null=False, default=False, verbose_name="É Cliente?")
-    is_provider = models.BooleanField(null=False, default=False, verbose_name="É Fornecedor?")
+    is_customer = models.BooleanField(null=False, default=False, verbose_name="É Cliente?")
+    is_supplier = models.BooleanField(null=False, default=False, verbose_name="É Fornecedor?")
 
     class Meta:
         db_table = "person"
@@ -124,6 +136,42 @@ class Person(Audit):
 
     def __str__(self):
         return self.legal_name
+
+    # def post_save_user(sender, instance, created, **kwargs):
+    #     if created:
+    #         Person.objects.create(
+    #             auth_user=instance,
+    #             # legal_name=kwargs['legal_name'],
+    #             legal_name=instance.username,
+    #             name=(instance.first_name + ' ' + instance.last_name) or instance.username,
+    #             is_lawyer=False,
+    #             is_correspondent=True,
+    #             is_court=False,
+    #             legal_type='J',
+    #             cpf_cnpj=' ',
+    #             alter_user=instance,
+    #             create_user=instance,
+    #             is_customer=False,
+    #             is_supplier=True,
+    #             is_active=True)
+    #     else:
+    #         instance.person.save(
+    #             update_fields=[
+    #                 'alter_date',
+    #                 'legal_name',
+    #                 'name',
+    #                 'is_lawyer',
+    #                 'is_correspondent',
+    #                 'is_court',
+    #                 'legal_type',
+    #                 'cpf_cnpj',
+    #                 'alter_user',
+    #                 'is_active',
+    #                 'is_customer',
+    #                 'is_supplier'])
+    #
+    # # dispatch_uid - A unique identifier for a signal receiver in cases where duplicate signals may be sent.
+    # models.signals.post_save.connect(post_save_user, sender=User, dispatch_uid='post_save_user')
 
 
 class Address(Audit):
