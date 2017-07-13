@@ -1,72 +1,72 @@
 # esse import deve vir antes de todos porque ele executa o __init__.py
-from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
-
 from django.db import IntegrityError
 
 from core.models import Person
 from core.utils import LegacySystem
+from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
 
 
 class PersonETL(GenericETL):
     advwin_table = ['Jurid_Tribunais', 'Jurid_Advogado', 'Jurid_Clifor']
     model = Person
 
-    query = "select \n" \
-            "  t1.Descricao as legal_name, \n" \
-            "  t1.Descricao as name, \n" \
-            "  t1.Codigo as legacy_code, \n" \
-            "  'J' as legal_type, \n" \
-            "  'F' as customer_supplier, \n" \
-            "  'False' AS is_lawyer, \n" \
-            "  'False' AS is_correspondent, \n" \
-            "  'True' AS is_court \n" \
-            "from " + advwin_table[0] + " as t1 \n" \
-            "where \n" \
-            "  t1.Descricao is not null and t1.Descricao <> '' and \n" \
-            "  t1.Codigo = ( \n" \
-            "  select min(t2.Codigo) \n" \
-            "  from " + advwin_table[0] + " as t2 \n" \
-            "  where \n" \
-            "    t2.Descricao is not null and t2.Descricao <> '' and \n" \
-            "    t1.Codigo = t2.Codigo) \n" \
-            " \n" \
-            "UNION \n" \
-            " \n" \
-            "select \n" \
-            "  a1.Nome as legal_name, \n" \
-            "  a1.Nome as name, \n" \
-            "  a1.Codigo as legacy_code, \n" \
-            "  'N/D' as legal_type, \n" \
-            "  'F' as customer_supplier, \n" \
-            "  'True' AS is_lawyer, \n" \
-            "  CASE a1.Correspondente WHEN 0 THEN 'False' ELSE 'True' END as is_correspondent, \n" \
-            "  'False' AS is_court \n" \
-            "from " + advwin_table[1] + " as a1 \n" \
-            "where \n" \
-            "  a1.Status = 'Ativo' and \n" \
-            "  a1.Nome is not null and a1.Nome <> '' and \n" \
-            "  a1.Codigo not in ( \n" \
-            "  select cf.Codigo \n" \
-            "  from " + advwin_table[2] + " as cf \n" \
-            "  where \n" \
-            "      cf.Status = 'Ativo' and \n" \
-            "      cf.Razao is not null and cf.Razao <> '') \n" \
-            " \n" \
-            "UNION \n" \
-            " \n" \
-            "select \n" \
-            "  cf.Razao as legal_name, \n" \
-            "  cf.Nome as name, \n" \
-            "  cf.Codigo as legacy_code, \n" \
-            "  CASE cf.pessoa_fisica WHEN 0 THEN 'J' ELSE 'F' END as legal_type, \n" \
-            "  cf.TipoCF as customer_supplier, \n" \
-            "  'False' AS is_lawyer, \n" \
-            "  'False' AS is_correspondent, \n" \
-            "  'False' AS is_court \n" \
-            "from " + advwin_table[2] + " as cf \n" \
-            "where \n" \
-            "  cf.Status = 'Ativo' and \n" \
-            "  cf.Razao is not null and cf.Razao <> ''"
+    query = "select" \
+            "  t1.Descricao as legal_name, " \
+            "  t1.Descricao as name, " \
+            "  t1.Codigo as legacy_code, " \
+            "  'J' as legal_type, " \
+            "  'F' as customer_supplier, " \
+            "  'False' AS is_lawyer, " \
+            "  'False' AS is_correspondent, " \
+            "  'True' AS is_court " \
+            "from " + advwin_table[0] + " as t1 " \
+                                        "where " \
+                                        "  t1.Descricao is not null and t1.Descricao <> '' and " \
+                                        "  t1.Codigo = ( " \
+                                        "  select min(t2.Codigo) " \
+                                        "  from " + advwin_table[0] + " as t2 " \
+                                                                      "  where " \
+                                                                      "    t2.Descricao is not null and t2.Descricao <> '' and " \
+                                                                      "    t1.Codigo = t2.Codigo) " \
+                                                                      " " \
+                                                                      "UNION " \
+                                                                      " " \
+                                                                      "select " \
+                                                                      "  a1.Nome as legal_name, " \
+                                                                      "  a1.Nome as name, " \
+                                                                      "  a1.Codigo as legacy_code, " \
+                                                                      "  'N/D' as legal_type, " \
+                                                                      "  'F' as customer_supplier, " \
+                                                                      "  'True' AS is_lawyer, " \
+                                                                      "  CASE a1.Correspondente WHEN 0 THEN 'False' ELSE 'True' END as is_correspondent, " \
+                                                                      "  'False' AS is_court " \
+                                                                      "from " + advwin_table[1] + " as a1 " \
+                                                                                                  "where " \
+                                                                                                  "  a1.Status = 'Ativo' and " \
+                                                                                                  "  a1.Nome is not null and a1.Nome <> '' and " \
+                                                                                                  "  a1.Codigo not in ( " \
+                                                                                                  "  select cf.Codigo " \
+                                                                                                  "  from " + \
+            advwin_table[2] + " as cf " \
+                              "  where " \
+                              "      cf.Status = 'Ativo' and " \
+                              "      cf.Razao is not null and cf.Razao <> '') " \
+                              " " \
+                              "UNION " \
+                              " " \
+                              "select " \
+                              "  cf.Razao as legal_name, " \
+                              "  cf.Nome as name, " \
+                              "  cf.Codigo as legacy_code, " \
+                              "  CASE cf.pessoa_fisica WHEN 0 THEN 'J' ELSE 'F' END as legal_type, " \
+                              "  cf.TipoCF as customer_supplier, " \
+                              "  'False' AS is_lawyer, " \
+                              "  'False' AS is_correspondent, " \
+                              "  'False' AS is_court " \
+                              "from " + advwin_table[2] + " as cf " \
+                                                          "where " \
+                                                          "  cf.Status = 'Ativo' and " \
+                                                          "  cf.Razao is not null and cf.Razao <> ''"
 
     has_status = True
 
@@ -83,7 +83,7 @@ class PersonETL(GenericETL):
             is_lawyer = row['is_lawyer']
             is_correspondent = row['is_correspondent']
             is_court = row['is_court']
-
+            cpf_cnpj = None
             if legal_type != 'F' and legal_type != 'J':
                 if str(legacy_code).isnumeric():
                     # se for maior que 11 provavelmente é o cnpj
@@ -162,7 +162,7 @@ class PersonETL(GenericETL):
                 try:
                     obj.save()
                 except IntegrityError:
-                    log_file.write(str(row) + '\n')
+                    log_file.write(str(row) + '')
 
             super(PersonETL, self).load_etl(rows, user)
 

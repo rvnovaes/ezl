@@ -3,8 +3,6 @@ from enum import Enum
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 from .utils import LegacySystem
 
@@ -137,41 +135,6 @@ class Person(Audit, LegacyCode):
     def __str__(self):
         return self.legal_name
 
-    # def post_save_user(sender, instance, created, **kwargs):
-    #     if created:
-    #         Person.objects.create(
-    #             auth_user=instance,
-    #             # legal_name=kwargs['legal_name'],
-    #             legal_name=instance.username,
-    #             name=(instance.first_name + ' ' + instance.last_name) or instance.username,
-    #             is_lawyer=False,
-    #             is_correspondent=True,
-    #             is_court=False,
-    #             legal_type='J',
-    #             cpf_cnpj=' ',
-    #             alter_user=instance,
-    #             create_user=instance,
-    #             is_customer=False,
-    #             is_supplier=True,
-    #             is_active=True)
-    #     else:
-    #         instance.person.save(
-    #             update_fields=[
-    #                 'alter_date',
-    #                 'legal_name',
-    #                 'name',
-    #                 'is_lawyer',
-    #                 'is_correspondent',
-    #                 'is_court',
-    #                 'legal_type',
-    #                 'cpf_cnpj',
-    #                 'alter_user',
-    #                 'is_active',
-    #                 'is_customer',
-    #                 'is_supplier'])
-    #
-    # # dispatch_uid - A unique identifier for a signal receiver in cases where duplicate signals may be sent.
-    # models.signals.post_save.connect(post_save_user, sender=User, dispatch_uid='post_save_user')
 
 
 class Address(Audit):

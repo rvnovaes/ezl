@@ -12,9 +12,8 @@
 # todo: ou pode ser usado o luigi com o crontab
 import os
 
-from sqlalchemy import text
-
 from django.contrib.auth.models import User
+from sqlalchemy import text
 
 import connections
 from connections.db_connection import connect_db

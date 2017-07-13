@@ -37,7 +37,7 @@ def import_data():
         connection = engine.connect()
         result = connection.execute(query)
 
-    connection.close()
+        connection.close()
 
 if __name__ == "__main__":
     # pega o diretorio do arquivo __init__.py de acordo com o pacote e junta com o 'ezl.cfg'
