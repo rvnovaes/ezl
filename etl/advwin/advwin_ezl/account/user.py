@@ -1,10 +1,11 @@
 # esse import deve vir antes de todos porque ele executa o __init__.py
+from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
+
 from django.contrib.auth.models import User
 from django.utils import timezone
 
 from core.models import Person
 from core.utils import LegacySystem
-from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
 from etl.advwin.advwin_ezl.signals import new_person
 
 
@@ -18,17 +19,17 @@ class UserETL(GenericETL):
             "a1.Nome AS name, " \
             "a1.Codigo AS legacy_code, 'True' AS is_lawyer, 'True' AS is_correspondent, 'False' AS is_court" \
             " FROM (" + advwin_table + " AS u1" \
-                                       " INNER JOIN Jurid_Advogado AS a1 ON u1.codigo_adv = a1.Codigo)" \
-                                       " WHERE  a1.Correspondente = 1 AND  u1.status = 'A' AND " \
-                                       "u1.usuarioNome IS NOT NULL AND " \
-                                       "u1.usuarioNome <> '' AND " \
-                                       "u1.usuarioLogin IS NOT NULL AND " \
-                                       "u1.usuarioLogin <> '' AND " \
-                                       "u1.usuarioId = (SELECT min(u2.usuarioId) FROM " + advwin_table + " AS u2" \
-                                                                                                         " WHERE u2.status = 'A' AND " \
-                                                                                                         "u2.usuarioNome IS NOT NULL AND u2.usuarioNome <> '' AND " \
-                                                                                                         "u2.usuarioLogin IS NOT NULL AND u2.usuarioLogin <> '' AND " \
-                                                                                                         "u1.usuarioLogin = u2.usuarioLogin)"
+            " INNER JOIN Jurid_Advogado AS a1 ON u1.codigo_adv = a1.Codigo)" \
+            " WHERE  a1.Correspondente = 1 AND  u1.status = 'A' AND " \
+            "u1.usuarioNome IS NOT NULL AND " \
+            "u1.usuarioNome <> '' AND " \
+            "u1.usuarioLogin IS NOT NULL AND " \
+            "u1.usuarioLogin <> '' AND " \
+            "u1.usuarioId = (SELECT min(u2.usuarioId) FROM " + advwin_table + " AS u2" \
+            " WHERE u2.status = 'A' AND " \
+            "u2.usuarioNome IS NOT NULL AND u2.usuarioNome <> '' AND " \
+            "u2.usuarioLogin IS NOT NULL AND u2.usuarioLogin <> '' AND " \
+            "u1.usuarioLogin = u2.usuarioLogin)"
 
     # como não tem o nosso model de usuario não tem como herdar de LegacyCode e não tem como inativar os que são advwin
     # todo: fazer model de usuario pra ter herança com LegacyCode e Audit
