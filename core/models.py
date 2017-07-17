@@ -79,6 +79,7 @@ class Country(Audit):
 
     class Meta:
         db_table = "country"
+        verbose_name = 'País'
 
     def __str__(self):
         return self.name
@@ -91,6 +92,7 @@ class State(Audit):
 
     class Meta:
         db_table = "state"
+        verbose_name = "Estado"
 
     def __str__(self):
         return self.name
@@ -105,6 +107,7 @@ class City(Audit):
 
     class Meta:
         db_table = "city"
+        verbose_name = "Cidade"
 
     def __str__(self):
         return self.name
@@ -134,7 +137,6 @@ class Person(Audit, LegacyCode):
 
     def __str__(self):
         return self.legal_name
-
 
 
 class Address(Audit):
