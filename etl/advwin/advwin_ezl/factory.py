@@ -12,10 +12,10 @@ from core.models import Country, State, City, Person
 from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, Movement
 from task.models import TypeTask, Task, TaskStatus
 
-invalid_registry = '#{}-INVALIDO'
+invalid_registry = '#{}-INVÁLIDO'
 
 
-class InvalidObjectsFactory(object):
+class InvalidObjectFactory(object):
     @staticmethod
     def create():
         # cria usuário padrão
@@ -71,6 +71,10 @@ class InvalidObjectsFactory(object):
                                                            person_executed_by=invalid_person,
                                                            task_status=TaskStatus.INVALID, type_task=invalid_type_task)
 
+    @staticmethod
+    def get_invalid_model(model):
+        return model.Objects.get(id=1)
+
 
 if __name__ == '__main__':
-    InvalidObjectsFactory().create()
+    InvalidObjectFactory.create()
