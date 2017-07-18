@@ -46,8 +46,8 @@ class DashboardStatusTable(tables.Table):
 
     legacy_code = tables.LinkColumn(viewname='task_detail', attrs={'a': {'target': 'task_detail'}}, args=[A('pk')])
 
-    # service = tables.Column(accessor='__service__',order_by='__service__')
-    # client = tables.Column(accessor='client')
+    service = tables.Column(orderable=False)
+    client = tables.Column(orderable=False)
 
     class Meta:
         model = Task
