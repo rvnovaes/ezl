@@ -3,6 +3,7 @@ from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
 
 from core.models import Person
 from core.utils import LegacySystem
+from etl.advwin.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import LawSuit, Folder, Instance, CourtDistrict, CourtDivision
 
 
@@ -63,18 +64,19 @@ class LawsuitETL(GenericETL):
             person_court = Person.objects.filter(legacy_code=person_court_legacy_code).first()
             court_division = CourtDivision.objects.filter(legacy_code=court_division_legacy_code).first()
 
+            # se não encontrou o registro, busca o registro inválido
             if not folder:
-                folder = Folder.objects.get(id=1)
+                folder = InvalidObjectFactory.get_invalid_model(Folder)
             if not person_lawyer:
-                person_lawyer = Person.objects.get(id=1)
+                person_lawyer = InvalidObjectFactory.get_invalid_model(Person)
             if not instance:
-                instance = Instance.objects.get(id=1)
+                instance = InvalidObjectFactory.get_invalid_model(Instance)
             if not court_district:
-                court_district = CourtDistrict.objects.get(id=1)
+                court_district = InvalidObjectFactory.get_invalid_model(CourtDistrict)
             if not person_court:
-                person_court = Person.objects.get(id=1)
+                person_court = InvalidObjectFactory.get_invalid_model(Person)
             if not court_division:
-                court_division = CourtDivision.objects.get(id=1)
+                court_division = InvalidObjectFactory.get_invalid_model(CourtDivision)
 
             lawsuit = self.model.objects.filter(instance=instance,
                                                 law_suit_number=law_suit_number).first()

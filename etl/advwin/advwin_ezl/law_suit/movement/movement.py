@@ -1,6 +1,8 @@
+from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
+
 from core.models import Person
 from core.utils import LegacySystem
-from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import Movement, LawSuit, TypeMovement
 
 
@@ -20,9 +22,11 @@ class MovementETL(GenericETL):
     advwin_table = "Jurid_ProcMov"
     has_status = True
 
-    def load_etl(self, rows, user):
+    def load_etl(self, rows, user, rows_count):
         for row in rows:
-            print(row)
+            print(rows_count)
+            rows_count -= 1
+
             legacy_code = row['legacy_code']
             law_suit_legacy_code = row['law_suit_legacy_code']
             person_lawyer_legacy_code = row['person_lawyer_legacy_code']
@@ -39,7 +43,8 @@ class MovementETL(GenericETL):
             person_lawyer = Person.objects.filter(legacy_code=person_lawyer_legacy_code).first()
 
             if not lawsuit:
-                lawsuit = LawSuit.objects.get(id=1)
+                # se não encontrou o registro, busca o registro inválido
+                lawsuit = InvalidObjectFactory.get_invalid_model(LawSuit)
 
             if movement:
                 movement.lawsuit = lawsuit
@@ -67,7 +72,7 @@ class MovementETL(GenericETL):
                                           person_lawyer=person_lawyer
                                           )
 
-        super(MovementETL, self).load_etl(rows, user)
+        super(MovementETL, self).load_etl(rows, user, rows_count)
 
 
 if __name__ == "__main__":

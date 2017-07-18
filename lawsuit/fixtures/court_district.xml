@@ -10068,7 +10068,7 @@
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="name" type="CharField">São Paulo - Capital</field>
+        <field name="name" type="CharField">São Paulo</field>
         <field name="state" rel="ManyToOneRel" to="core.state">26</field>
     </object>
     <object model="lawsuit.courtdistrict" pk="1120">
