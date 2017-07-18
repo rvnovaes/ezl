@@ -149,6 +149,7 @@ class LawSuitForm(BaseForm):
         empty_label=u"Selecione", required=True
     )
     law_suit_number = forms.CharField(max_length=255, required=True)
+    is_current_instance = CustomBooleanField(initial=False, required=False)
 
 
 class CourtDivisionForm(BaseForm):

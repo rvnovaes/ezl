@@ -7,7 +7,10 @@
 # court_division
 # person
 # folder
+# instance
 # law_suit
+# movement
+# task
 # todo: acho que tem que ser feito um script que roda todos os scripts de etl na ordem correta pra não dar erro de fk
 # todo: ou pode ser usado o luigi com o crontab
 import os
@@ -50,7 +53,7 @@ class GenericETL(object):
             for record in records:
                 record.deactivate()
 
-    def load_etl(self, rows, user):
+    def load_etl(self, rows, user, rows_count):
         pass
 
     def import_data(self):
@@ -60,9 +63,11 @@ class GenericETL(object):
 
         connection = self.advwin_engine.connect()
 
-        rows = connection.execute(text(self.query))
+        cursor = self.advwin_engine.execute(text(self.query))
+        rows = cursor.fetchall()
+        rows_count = len(rows)
         user = User.objects.get(pk=etl_settings.USER)
 
-        self.load_etl(rows, user)
+        self.load_etl(rows, user, rows_count)
 
         connection.close()

@@ -1,5 +1,6 @@
-from core.utils import LegacySystem
 from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
+
+from core.utils import LegacySystem
 from lawsuit.models import CourtDivision
 
 
@@ -10,7 +11,7 @@ class CourtDivisionETL(GenericETL):
             "WHERE codigo = (SELECT min(codigo) FROM Jurid_Varas AS v2 WHERE v1.descricao = v2.descricao)"
     has_status = False
 
-    def load_etl(self, rows, user):
+    def load_etl(self, rows, user, rows_count):
         for row in rows:
             code = row['codigo']
             name = row['descricao']
@@ -30,7 +31,7 @@ class CourtDivisionETL(GenericETL):
                                           system_prefix=LegacySystem.ADVWIN.value,
                                           create_user=user,
                                           alter_user=user)
-        super(CourtDivisionETL, self).load_etl(rows, user)
+        super(CourtDivisionETL, self).load_etl(rows, user, rows_count)
 
 
 if __name__ == "__main__":

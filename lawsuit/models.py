@@ -86,6 +86,7 @@ class LawSuit(Audit, LegacyCode):
                                        verbose_name='Vara', related_name='court_divisions')
     law_suit_number = models.CharField(max_length=255, blank=False, null=False,
                                        verbose_name='Número do Processo')
+    is_current_instance = models.BooleanField(verbose_name='Instância Atual', default=False)
 
     class Meta:
         db_table = "law_suit"

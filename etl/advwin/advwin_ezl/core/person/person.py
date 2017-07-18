@@ -1,9 +1,10 @@
 # esse import deve vir antes de todos porque ele executa o __init__.py
+from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
+
 from django.db import IntegrityError
 
 from core.models import Person
 from core.utils import LegacySystem
-from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
 
 
 class PersonETL(GenericETL):
@@ -70,10 +71,11 @@ class PersonETL(GenericETL):
 
     has_status = True
 
-    def load_etl(self, rows, user):
+    def load_etl(self, rows, user, rows_count):
         log_file = open('log_file.txt', 'w')
         for row in rows:
-            print(row)
+            print(rows_count)
+            rows_count -= 1
 
             legal_name = row['legal_name'] or row['name']
             name = row['name'] or row['legal_name']
@@ -164,7 +166,7 @@ class PersonETL(GenericETL):
                 except IntegrityError:
                     log_file.write(str(row) + '')
 
-            super(PersonETL, self).load_etl(rows, user)
+            super(PersonETL, self).load_etl(rows, user, rows_count)
 
 
 if __name__ == "__main__":
