@@ -19,8 +19,8 @@ class InvalidObjectFactory(object):
     @staticmethod
     def create():
         # cria usuário padrão
-        user = User.objects.create_superuser('admin', 'admin@mttech.com.br', 'abc123456*', id=1)
-
+        admin = User.objects.create_superuser('admin', 'admin@mttech.com.br', 'abc123456*', id=2)
+        user = User.objects.create_user('invalid_user', 'invalid@mttech.com.br', 'abc123456*', id=1)
         # Registros inválidos para o app core
         invalid_country, created = Country.objects.get_or_create(id=1,
                                                                  name=Country._meta.verbose_name.upper() + invalid_registry,
@@ -58,7 +58,7 @@ class InvalidObjectFactory(object):
                                                                   court_district=invalid_court_district,
                                                                   instance=invalid_instance,
                                                                   court_division=invalid_court_division,
-                                                                  law_suit_number=LawSuit._meta.verbose_name + invalid_registry)
+                                                                  law_suit_number=LawSuit._meta.verbose_name.upper() + invalid_registry)
         invalid_movement, created = Movement.objects.get_or_create(id=1, create_user=user, law_suit=invalid_law_suit,
                                                                    person_lawyer=invalid_person,
                                                                    type_movement=invalid_type_movement)
