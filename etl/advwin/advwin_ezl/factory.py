@@ -12,7 +12,7 @@ from core.models import Country, State, City, Person
 from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, Movement
 from task.models import TypeTask, Task, TaskStatus
 
-invalid_registry = '#{}-INVÁLIDO'
+invalid_registry = '-INVÁLIDO'
 
 
 class InvalidObjectFactory(object):
