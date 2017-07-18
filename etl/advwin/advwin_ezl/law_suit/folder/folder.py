@@ -1,7 +1,8 @@
 # esse import deve vir antes de todos porque ele executa o __init__.py
+from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
+
 from core.models import Person
 from core.utils import LegacySystem
-from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
 from lawsuit.models import Folder
 
 
@@ -27,10 +28,11 @@ class FolderETL(GenericETL):
             "    t1.Codigo_Comp = t2.Codigo_Comp)"
     has_status = True
 
-    def load_etl(self, rows, user):
+    def load_etl(self, rows, user, rows_count):
         log_file = open('log_file.txt', 'w')
         for row in rows:
-            # print(row)
+            print(rows_count)
+            rows_count -= 1
 
             legacy_code = row['Codigo_Comp']
             customer_code = row['Cliente']
@@ -61,7 +63,7 @@ class FolderETL(GenericETL):
                                      alter_user=user)
                     obj.save()
 
-                super(FolderETL, self).load_etl(rows, user)
+                super(FolderETL, self).load_etl(rows, user, rows_count)
             else:
                 log_file.write(str(row) + '\n')
 

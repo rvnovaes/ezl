@@ -35,11 +35,13 @@ class UserETL(GenericETL):
     # todo: fazer model de usuario pra ter herança com LegacyCode e Audit
     # has_status = True
 
-    def load_etl(self, rows, user):
+    def load_etl(self, rows, user, rows_count):
         for row in rows:
             created = False
             person_id = None
-            print(row)
+
+            print(rows_count)
+            rows_count -= 1
 
             # todas as senhas serão importadas como 1 e o usuário terá que alterar futuramente
             password = '1'
@@ -152,7 +154,7 @@ class UserETL(GenericETL):
                                 system_prefix=LegacySystem.ADVWIN.value),
                             created=created)
 
-            super(UserETL, self).load_etl(rows, user)
+            super(UserETL, self).load_etl(rows, user, rows_count)
 
 
 if __name__ == "__main__":

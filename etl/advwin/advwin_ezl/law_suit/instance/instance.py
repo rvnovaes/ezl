@@ -1,5 +1,7 @@
-from core.utils import LegacySystem
+# esse import deve vir antes de todos porque ele executa o __init__.py
 from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
+
+from core.utils import LegacySystem
 from lawsuit.models import Instance
 
 
@@ -11,8 +13,11 @@ class InstanceETL(GenericETL):
     advwin_table = 'Jurid_Instancia'
     has_status = False
 
-    def load_etl(self, rows, user):
+    def load_etl(self, rows, user, rows_count):
         for row in rows:
+            print(rows_count)
+            rows_count -= 1
+
             code = row['Codigo']
             name = row['Descicao']
 
@@ -32,7 +37,7 @@ class InstanceETL(GenericETL):
                     alter_user=user,
                     create_user=user,
                     system_prefix=LegacySystem.ADVWIN.value)
-        super(InstanceETL, self).load_etl(rows, user)
+        super(InstanceETL, self).load_etl(rows, user, rows_count)
 
 
 if __name__ == "__main__":

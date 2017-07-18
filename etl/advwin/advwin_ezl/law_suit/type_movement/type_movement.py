@@ -14,7 +14,7 @@ class TypeMovmentETL(GenericETL):
     advwin_table = 'Jurid_CodMov'
     has_status = True
 
-    def load_etl(self, rows, user):
+    def load_etl(self, rows, user, rows_count):
         for row in rows:
             code = row['Codigo']
             name = row['Descricao']
@@ -34,7 +34,7 @@ class TypeMovmentETL(GenericETL):
                                           system_prefix=LegacySystem.ADVWIN.value,
                                           create_user=user,
                                           alter_user=user)
-        super(TypeMovmentETL, self).load_etl(rows, user)
+        super(TypeMovmentETL, self).load_etl(rows, user, rows_count)
 
 
 if __name__ == '__main__':

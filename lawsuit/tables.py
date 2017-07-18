@@ -68,10 +68,10 @@ class LawSuitTable(tables.Table):
 
     class Meta:
         sequence = ('selection', 'folder', 'instance', 'court_district', 'person_court', 'court_division',
-                    'law_suit_number', 'person_lawyer', 'is_active')
+                    'law_suit_number', 'person_lawyer', 'is_active', 'is_current_instance')
         model = LawSuit
         fields = ['selection', 'folder', 'instance', 'court_district', 'person_court', 'court_division',
-                  'law_suit_number', 'person_lawyer', 'is_active']
+                  'law_suit_number', 'person_lawyer', 'is_active', 'is_current_instance']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem processos cadastrados"
 

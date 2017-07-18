@@ -10,9 +10,12 @@ class LawsuitETL(GenericETL):
     model = LawSuit
     advwin_table = 'Jurid_Pastas'
 
-    query = "SELECT p.Advogado AS person_legacy_code, " \
+    query = "SELECT" \
+            "   p.Codigo_Comp AS folder_legacy_code, " \
+            "   case when (d.D_Atual is null) then 'False' else d.D_Atual end as is_current_instance, " \
+            "   p.Advogado AS person_legacy_code, " \
             "   case when (rtrim(ltrim(d.D_Codigo)) LIKE '') or (d.D_Codigo is null) then " \
-            "     p.Codigo_Comp else d.D_Codigo end as legacy_code, " \
+            "     p.Codigo_Comp else cast(d.D_Codigo as varchar(20)) end as legacy_code, " \
             "   case when (rtrim(ltrim(d.D_Codigo_Inst)) LIKE '') or (d.D_Codigo_Inst is null) then " \
             "     p.Instancia else d.D_Codigo_Inst end as instance_legacy_code, " \
             "   case when (rtrim(ltrim(d.D_Comarca)) LIKE '') or (d.D_Comarca is null) then " \
@@ -38,10 +41,12 @@ class LawsuitETL(GenericETL):
 
     has_status = True
 
-    def load_etl(self, rows, user):
+    def load_etl(self, rows, user, rows_count):
         for row in rows:
-            print(row)
+            print(rows_count)
+            rows_count -= 1
 
+            folder_legacy_code = row['folder_legacy_code']
             person_legacy_code = row['person_legacy_code']
             legacy_code = row['legacy_code']
             instance_legacy_code = row['instance_legacy_code']
@@ -49,14 +54,13 @@ class LawsuitETL(GenericETL):
             person_court_legacy_code = row['person_court_legacy_code']
             court_division_legacy_code = row['court_division_legacy_code']
             law_suit_number = row['law_suit_number']
+            is_current_instance = row['is_current_instance']
 
-            lawsuit = self.model.objects.filter(legacy_code=legacy_code,
-                                                system_prefix=LegacySystem.ADVWIN.value).first()
-            folder = Folder.objects.filter(legacy_code=legacy_code).first()
-            person_lawyer = Person.objects.filter(legacy_code=person_legacy_code).first()  # advogado burro
+            folder = Folder.objects.filter(legacy_code=folder_legacy_code).first()
+            person_lawyer = Person.objects.filter(legacy_code=person_legacy_code).first()
             instance = Instance.objects.filter(legacy_code=instance_legacy_code).first()
-            court_district = CourtDistrict.objects.filter(name=court_district_legacy_code).first()  # court_district
-            person_court = Person.objects.filter(legacy_code=person_court_legacy_code).first()  # campo donkey
+            court_district = CourtDistrict.objects.filter(name=court_district_legacy_code).first()
+            person_court = Person.objects.filter(legacy_code=person_court_legacy_code).first()
             court_division = CourtDivision.objects.filter(legacy_code=court_division_legacy_code).first()
 
             if not folder:
@@ -71,6 +75,9 @@ class LawsuitETL(GenericETL):
                 person_court = Person.objects.get(id=1)
             if not court_division:
                 court_division = CourtDivision.objects.get(id=1)
+
+            lawsuit = self.model.objects.filter(instance=instance,
+                                                law_suit_number=law_suit_number).first()
 
             if lawsuit:
                 lawsuit.folder = folder
@@ -94,7 +101,8 @@ class LawsuitETL(GenericETL):
                         'person_court',
                         'law_suit_number',
                         'alter_user',
-                        'alter_date']
+                        'alter_date',
+                        'is_current_instance']
                 )
             else:
                 self.model.objects.create(
@@ -108,10 +116,11 @@ class LawsuitETL(GenericETL):
                     alter_user=user,
                     create_user=user,
                     is_active=True,
+                    is_current_instance=is_current_instance,
                     legacy_code=legacy_code,
                     system_prefix=LegacySystem.ADVWIN.value)
 
-            super(LawsuitETL, self).load_etl(rows, user)
+            super(LawsuitETL, self).load_etl(rows, user, rows_count)
 
 
 if __name__ == "__main__":
