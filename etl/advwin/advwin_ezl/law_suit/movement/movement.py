@@ -1,7 +1,6 @@
-from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
-
 from core.models import Person
 from core.utils import LegacySystem
+from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
 from etl.advwin.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import Movement, LawSuit, TypeMovement
 
@@ -38,9 +37,11 @@ class MovementETL(GenericETL):
 
             lawsuit = LawSuit.objects.filter(legacy_code=law_suit_legacy_code).first()
 
-            type_movement = TypeMovement.objects.filter(legacy_code=type_movement_legacy_code).first()
+            type_movement = TypeMovement.objects.filter(
+                legacy_code=type_movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(TypeMovement)
 
-            person_lawyer = Person.objects.filter(legacy_code=person_lawyer_legacy_code).first()
+            person_lawyer = Person.objects.filter(
+                legacy_code=person_lawyer_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
 
             if not lawsuit:
                 # se não encontrou o registro, busca o registro inválido
