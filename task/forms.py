@@ -6,7 +6,7 @@ from django.forms import ModelForm
 from django.forms.models import fields_for_model
 
 from core.models import Person
-from core.widgets import MDDateTimepicker
+from core.widgets import MDDateTimepicker, MDDatePicker
 from ezl import settings
 from lawsuit.forms import BaseForm
 from lawsuit.models import Movement
@@ -54,10 +54,10 @@ class TaskForm(BaseForm):
 
     delegation_date = forms.DateTimeField(
         label=u"Data de Cumprimento",
-        widget=MDDateTimepicker(attrs={'class': 'form-control'},
-                                format='DD/MM/YYYY',
-                                min_date=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
-                                )
+        widget=MDDatePicker(attrs={'class': 'form-control'},
+                            format='DD/MM/YYYY',
+                            min_date=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
+                            )
     )
 
     acceptance_date = forms.DateTimeField(required=False
