@@ -313,7 +313,8 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
                     deadline_dynamic_query.add(
                         Q(final_deadline_date__lte=data['deadline'].stop.replace(hour=23, minute=59)), Q.AND)
 
-            person_dynamic_query.add(status_dynamic_query, Q.AND).add(Q(reminder_dynamic_query), Q.AND)
+            person_dynamic_query.add(status_dynamic_query, Q.AND).add(Q(reminder_dynamic_query), Q.AND).add(
+                Q(deadline_dynamic_query), Q.AND)
 
             query_set = Task.objects.filter(person_dynamic_query)
 
