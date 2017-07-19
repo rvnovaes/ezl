@@ -12,8 +12,8 @@
             showClear: true,
             {% if widget.min_date %}
                 minDate: moment("{{ widget.min_date }}", "DD_MM_YYYY").tz("America/Sao_Paulo").format(), {% endif %}
-            format: "{{ widget.format }}"
-
+            format: "{{ widget.format }}",
+            date: "{{ widget.value }}"
         })
         ;
     });
