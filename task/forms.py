@@ -53,6 +53,11 @@ class TaskForm(BaseForm):
     # TODO verificar como aplicar os formulários com dateTimeField
 
     delegation_date = forms.DateTimeField(
+        label=u"Data de Cumprimento",
+        widget=MDDateTimepicker(attrs={'class': 'form-control'},
+                                format='DD/MM/YYYY',
+                                min_date=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
+                                )
     )
 
     acceptance_date = forms.DateTimeField(required=False

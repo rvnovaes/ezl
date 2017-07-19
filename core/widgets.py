@@ -26,6 +26,10 @@ class MDDateTimepicker(DateTimeBaseInput):
         self.min_date = min_date if min_date else None
 
 
+class MDDatePicker(DateTimeBaseInput):
+    template_name = 'core/widgets/md_datepicker.html'
+
+
 class MDCheckboxInput(Input):
     input_type = 'checkbox'
     template_name = 'core/widgets/md_checkbox.html'
