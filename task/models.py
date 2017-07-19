@@ -115,11 +115,6 @@ class Task(Audit, LegacyCode):
         folder = Folder.objects.get(folders__law_suits__task__exact=self)
         return folder.person_customer
 
-    @property
-    def service(self):
-        type_task = TypeTask.objects.get(task__exact=self)
-        return type_task
-
     def __str__(self):
         return self.legacy_code  # TODO verificar campo para toString
 

@@ -35,8 +35,7 @@ class DashboardStatusTable(tables.Table):
     def __init__(self, *args, service="Serviço", client="Cliente", legacy_code="Número", title="", status="",
                  **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.base_columns['service'].verbose_name = service
+        self.base_columns['type_task'].verbose_name = service
         self.base_columns['client'].verbose_name = client
         self.base_columns['legacy_code'].verbose_name = legacy_code
         self.title = title
@@ -45,13 +44,11 @@ class DashboardStatusTable(tables.Table):
         self.length = self.rows.__len__()
 
     legacy_code = tables.LinkColumn(viewname='task_detail', attrs={'a': {'target': 'task_detail'}}, args=[A('pk')])
-
-    service = tables.Column(orderable=False)
     client = tables.Column(orderable=False)
 
     class Meta:
         model = Task
-        fields = ['legacy_code', 'service', 'reminder_deadline_date', 'client']
+        fields = ['legacy_code', 'type_task', 'reminder_deadline_date', 'client']
         empty_text = "Não existem providências a serem exibidas"
 
 
