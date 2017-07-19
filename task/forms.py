@@ -55,56 +55,38 @@ class TaskForm(BaseForm):
     delegation_date = forms.DateTimeField(
 
         widget=MDDatePicker(attrs={'class': 'form-control'},
-                            format='DD/MM/YYYY',
-                            min_date=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
+                            format='DD/MM/YYYY'
                             )
     )
 
     acceptance_date = forms.DateTimeField(required=False,
                                           widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                              format='DD/MM/YYYY',
-                                                              min_date=datetime.utcnow().replace(
-                                                                  tzinfo=pytz.timezone(settings.TIME_ZONE))
+                                                              format='DD/MM/YYYY'
                                                               )
                                           )
 
     reminder_deadline_date = forms.DateTimeField(required=False,
                                                  widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                                     format='DD/MM/YYYY',
-                                                                     min_date=datetime.utcnow().replace(
-                                                                         tzinfo=pytz.timezone(settings.TIME_ZONE))
-                                                                     )
+                                                                     format='DD/MM/YYYY')
                                                  )
 
     final_deadline_date = forms.DateTimeField(required=False,
                                               widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                                  format='DD/MM/YYYY',
-                                                                  min_date=datetime.utcnow().replace(
-                                                                      tzinfo=pytz.timezone(settings.TIME_ZONE))
-                                                                  )
+                                                                  format='DD/MM/YYYY')
                                               )
 
     execution_date = forms.DateTimeField(required=False,
                                          widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                             format='DD/MM/YYYY',
-                                                             min_date=datetime.utcnow().replace(
-                                                                 tzinfo=pytz.timezone(settings.TIME_ZONE))
-                                                             )
+                                                             format='DD/MM/YYYY')
                                          )
 
     return_date = forms.DateTimeField(required=False,
                                       widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                          format='DD/MM/YYYY',
-                                                          min_date=datetime.utcnow().replace(
-                                                              tzinfo=pytz.timezone(settings.TIME_ZONE))
-                                                          )
+                                                          format='DD/MM/YYYY')
                                       )
     refused_date = forms.DateTimeField(required=False,
                                        widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                           format='DD/MM/YYYY',
-                                                           min_date=datetime.utcnow().replace(
-                                                               tzinfo=pytz.timezone(settings.TIME_ZONE))
-                                                           )
+                                                           format='DD/MM/YYYY')
                                        )
 
 

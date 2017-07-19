@@ -18,6 +18,13 @@ class TaskTable(tables.Table):
     status = tables.TemplateColumn(template_name="task/task_status_column.html",
                                    orderable=False)
 
+    delegation_date = tables.DateColumn(format="d/m/Y")
+    acceptance_date = tables.DateColumn(format="d/m/Y")
+    reminder_deadline_date = tables.DateColumn(format="d/m/Y")
+    final_deadline_date = tables.DateColumn(format="d/m/Y")
+    execution_date = tables.DateColumn(format="d/m/Y")
+    return_date = tables.DateColumn(format="d/m/Y")
+    refused_date = tables.DateColumn(format="d/m/Y")
     # order_by = sorted(Task.objects.all(), key=lambda t: str(t.status.value))
 
     class Meta:

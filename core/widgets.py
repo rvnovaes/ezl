@@ -33,8 +33,13 @@ class MDDatePicker(DateTimeBaseInput):
     def get_context(self, name, value, attrs):
         context = super(Input, self).get_context(name, value, attrs)
         context['widget']['type'] = self.input_type
-        context['widget']['min_date'] = timezone.localtime(self.min_date).strftime('%d/%m/%Y %H:%M')
         context['widget']['format'] = self.format
+        if self.min_date:
+            context['widget']['min_date'] = timezone.localtime(self.min_date).strftime('%d/%m/%Y')
+
+        if value:
+            context['widget']['value'] = value.strftime('%d/%m/%Y')
+            # self.value = value.strftime('%d/%m/%Y %H:%M')
         return context
 
     def __init__(self, attrs=None, format=None, min_date=None):

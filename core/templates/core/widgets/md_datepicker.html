@@ -1,6 +1,5 @@
 <script>
     $(function () {
-        $('#{{ widget.name }}').val(moment("{{ widget.value }}", "DD_MM_YYYY").tz("America/Sao_Paulo").format());
         $('#{{ widget.name }}').datetimepicker({
             {#            locale: 'pt-br',#}
             tooltips: {
@@ -11,18 +10,26 @@
             },
             ignoreReadonly: true,
             showClear: true,
+            format: '{{ widget.format }}',
             {% if widget.min_date %}
-                minDate: moment("{{ widget.min_date }}", "DD_MM_YYYY").tz("America/Sao_Paulo").format(), {% endif %}
-            format: "{{ widget.format }}",
-            date: "{{ widget.value }}"
+                minDate: moment("{{ widget.min_date }}", "DD_MM_YYYY").tz("America/Sao_Paulo").format(),
+            {% elif widget.value %}
+                minDate: moment("{{ widget.value }}", "DD_MM_YYYY").tz("America/Sao_Paulo").format(),
+            {% endif %}
+
+            {% if widget.value %}
+                date: '{{ widget.value }}',
+            {% endif %}
         })
         ;
     });
+
+    console.log(moment("{{ widget.value }}", "DD_MM_YYYY").tz("America/Sao_Paulo").format());
+    console.log("{{ widget.value }}");
 </script>
 <span>
     <span class="form-group is-empty">
-        <span class="col-sm-3 input-group date" id="{{ widget.name }}">
-
+        <span class="col-sm-2 input-group date" id="{{ widget.name }}">
                 <input class="form-control text-center" type="text" readonly
                        name="{{ widget.name }}" data-toggle="tooltip" data-placement="top"
                        title="Clique no ícone ao lado"
