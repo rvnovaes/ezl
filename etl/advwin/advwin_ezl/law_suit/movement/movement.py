@@ -48,7 +48,7 @@ class MovementETL(GenericETL):
                 lawsuit = InvalidObjectFactory.get_invalid_model(LawSuit)
 
             if movement:
-                movement.lawsuit = lawsuit
+                movement.law_suit = lawsuit
                 movement.type_movement = type_movement
                 movement.person_lawyer = person_lawyer
                 movement.deadline = deadline
@@ -67,7 +67,7 @@ class MovementETL(GenericETL):
                                           alter_user=user,
                                           create_user=user,
                                           is_active=True,
-                                          lawsuit=lawsuit,
+                                          law_suit=lawsuit,
                                           type_movement=type_movement,
                                           deadline=deadline,
                                           person_lawyer=person_lawyer

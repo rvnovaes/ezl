@@ -1,6 +1,6 @@
 <script>
     $(function () {
-        $('#{{ widget.name }}').datetimepicker(moment("{{ widget.value }}", "DD_MM_YYYY").tz("America/Sao_Paulo").format());
+        $('#{{ widget.name }}').val(moment("{{ widget.value }}", "DD_MM_YYYY").tz("America/Sao_Paulo").format());
         $('#{{ widget.name }}').datetimepicker({
             {#            locale: 'pt-br',#}
             tooltips: {

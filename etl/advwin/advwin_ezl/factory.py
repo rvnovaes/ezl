@@ -11,14 +11,14 @@ django.setup()
 from django.contrib.auth.models import User
 from core.models import Country, State, City, Person
 from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, Movement
-from task.models import TypeTask, Task, TaskStatus
+from task.models import TypeTask, Task, TaskStatus, TaskHistory
 
 invalid_registry = '-INVÁLIDO'
 
 
 class InvalidObjectFactory(object):
     models = [Person, TypeMovement, Instance, Folder, CourtDivision, LawSuit, Movement, TypeTask,
-              Task, CourtDistrict, Country, State, City, User]
+              Task, CourtDistrict, Country, State, City, User, TaskHistory]
 
     @staticmethod
     def create():
@@ -79,7 +79,7 @@ class InvalidObjectFactory(object):
 
     @staticmethod
     def get_invalid_model(model):
-        return model.Objects.get(id=1)
+        return model.objects.get(id=1)
 
     def restart_table_id(self):
         with connection.cursor() as cursor:

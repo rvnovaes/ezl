@@ -9,6 +9,8 @@
 # folder
 # instance
 # law_suit
+# type_movement
+# type_task
 # movement
 # task
 # todo: acho que tem que ser feito um script que roda todos os scripts de etl na ordem correta pra não dar erro de fk
