@@ -53,28 +53,58 @@ class TaskForm(BaseForm):
     # TODO verificar como aplicar os formulários com dateTimeField
 
     delegation_date = forms.DateTimeField(
-        label=u"Data de Cumprimento",
+
         widget=MDDatePicker(attrs={'class': 'form-control'},
                             format='DD/MM/YYYY',
                             min_date=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE))
                             )
     )
 
-    acceptance_date = forms.DateTimeField(required=False
+    acceptance_date = forms.DateTimeField(required=False,
+                                          widget=MDDatePicker(attrs={'class': 'form-control'},
+                                                              format='DD/MM/YYYY',
+                                                              min_date=datetime.utcnow().replace(
+                                                                  tzinfo=pytz.timezone(settings.TIME_ZONE))
+                                                              )
                                           )
 
-    reminder_deadline_date = forms.DateTimeField(required=False
+    reminder_deadline_date = forms.DateTimeField(required=False,
+                                                 widget=MDDatePicker(attrs={'class': 'form-control'},
+                                                                     format='DD/MM/YYYY',
+                                                                     min_date=datetime.utcnow().replace(
+                                                                         tzinfo=pytz.timezone(settings.TIME_ZONE))
+                                                                     )
                                                  )
 
-    final_deadline_date = forms.DateTimeField(required=False
+    final_deadline_date = forms.DateTimeField(required=False,
+                                              widget=MDDatePicker(attrs={'class': 'form-control'},
+                                                                  format='DD/MM/YYYY',
+                                                                  min_date=datetime.utcnow().replace(
+                                                                      tzinfo=pytz.timezone(settings.TIME_ZONE))
+                                                                  )
                                               )
 
-    execution_date = forms.DateTimeField(required=False
+    execution_date = forms.DateTimeField(required=False,
+                                         widget=MDDatePicker(attrs={'class': 'form-control'},
+                                                             format='DD/MM/YYYY',
+                                                             min_date=datetime.utcnow().replace(
+                                                                 tzinfo=pytz.timezone(settings.TIME_ZONE))
+                                                             )
                                          )
 
-    return_date = forms.DateTimeField(required=False
+    return_date = forms.DateTimeField(required=False,
+                                      widget=MDDatePicker(attrs={'class': 'form-control'},
+                                                          format='DD/MM/YYYY',
+                                                          min_date=datetime.utcnow().replace(
+                                                              tzinfo=pytz.timezone(settings.TIME_ZONE))
+                                                          )
                                       )
-    refused_date = forms.DateTimeField(required=False
+    refused_date = forms.DateTimeField(required=False,
+                                       widget=MDDatePicker(attrs={'class': 'form-control'},
+                                                           format='DD/MM/YYYY',
+                                                           min_date=datetime.utcnow().replace(
+                                                               tzinfo=pytz.timezone(settings.TIME_ZONE))
+                                                           )
                                        )
 
 
