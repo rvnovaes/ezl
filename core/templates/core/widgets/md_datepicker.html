@@ -18,7 +18,7 @@
             {% endif %}
 
             {% if widget.value %}
-                date: '{{ widget.value }}',
+                date: moment("{{ widget.value }}", "DD_MM_YYYY").tz("America/Sao_Paulo").format(),
             {% endif %}
         })
         ;
