@@ -27,7 +27,20 @@ class MDDateTimepicker(DateTimeBaseInput):
 
 
 class MDDatePicker(DateTimeBaseInput):
+    format_key = 'DATETIME_INPUT_FORMATS'
     template_name = 'core/widgets/md_datepicker.html'
+
+    def get_context(self, name, value, attrs):
+        context = super(Input, self).get_context(name, value, attrs)
+        context['widget']['type'] = self.input_type
+        context['widget']['min_date'] = timezone.localtime(self.min_date).strftime('%d/%m/%Y %H:%M')
+        context['widget']['format'] = self.format
+        return context
+
+    def __init__(self, attrs=None, format=None, min_date=None):
+        super(MDDatePicker, self).__init__(attrs)
+        self.format = format if format else 'DD/MM/YYYY'
+        self.min_date = min_date if min_date else None
 
 
 class MDCheckboxInput(Input):
