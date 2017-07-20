@@ -9,7 +9,7 @@ from task.models import Task, TypeTask, TaskStatus
 
 
 class TaskETL(GenericETL):
-    query = "SELECT " \
+    query = "SELECT top 10 " \
             "a.SubStatus AS status_code_advwin, " \
             "a.ident AS legacy_code, " \
             "a.Mov AS movement_legacy_code, " \
@@ -26,7 +26,8 @@ class TaskETL(GenericETL):
             "a.Pasta = p.Codigo_Comp " \
             "WHERE " \
             "(p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND " \
-            "((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0))"
+            "((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0)) " \
+            "and a.Data BETWEEN '2017-07-18 00:00' and '2017-07-19 23:59:59'"
     model = Task
     advwin_table = 'Jurid_agenda_table'
     has_status = False
