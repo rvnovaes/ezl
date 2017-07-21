@@ -5,7 +5,7 @@ import sys
 from sqlalchemy.orm import sessionmaker
 
 from connections.db_connection import connect_db
-from etl.advwin.models import Base, City, State, CourtDistrict
+from etl.advwin_ezl.models import Base, City, State, CourtDistrict
 
 
 def trataCidade(linha, session):

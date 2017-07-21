@@ -2,14 +2,14 @@ from django.utils import timezone
 
 from core.models import Person
 from core.utils import LegacySystem
-from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
-from etl.advwin.advwin_ezl.factory import InvalidObjectFactory
+from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus
 
 
 class TaskETL(GenericETL):
-    query = "SELECT top 10 " \
+    query = "SELECT TOP 1000" \
             "a.SubStatus AS status_code_advwin, " \
             "a.ident AS legacy_code, " \
             "a.Mov AS movement_legacy_code, " \
@@ -27,54 +27,37 @@ class TaskETL(GenericETL):
             "WHERE " \
             "(p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND " \
             "((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0)) " \
-            "and a.Data BETWEEN '2017-07-18 00:00' and '2017-07-19 23:59:59'"
+            "ORDER BY a.ident DESC "
+    # "and a.Data BETWEEN '2017-07-18 00:00' and '2017-07-19 23:59:59'"
     model = Task
     advwin_table = 'Jurid_agenda_table'
     has_status = False
 
-    # movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
-    #                              verbose_name="Movimentação")
-    # person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
-    #                                     related_name='%(class)s_asked_by',
-    #                                     verbose_name="Solicitante")
-    # person_executed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
-    #                                        related_name='%(class)s_executed_by',
-    #                                        verbose_name="Correspondente")
-    # type_task = models.ForeignKey(TypeTask, on_delete=models.PROTECT, blank=False, null=False,
-    #                               verbose_name="Tipo de Serviço")
-    # delegation_date = models.DateTimeField(default=timezone.now, verbose_name="Data de Delegação")
-    # acceptance_date = models.DateTimeField(null=True, verbose_name="Data de Aceitação")
-    # reminder_deadline_date = models.DateTimeField(null=True, verbose_name="Primeiro Prazo")
-    # final_deadline_date = models.DateTimeField(null=True, verbose_name="Segundo Prazo")
-    # execution_date = models.DateTimeField(null=True, verbose_name="Data de Cumprimento")
-    #
-    # return_date = models.DateTimeField(null=True, verbose_name="Data de Retorno")
-    # refused_date = models.DateTimeField(null=True, verbose_name="Data de Recusa")
-    #
-    # description = models.TextField(null=True, blank=True, verbose_name=u"Descrição do serviço")
-    #
-    # task_status = models.CharField(null=False, verbose_name=u"", max_length=30,
-    #                                choices=((x.value, x.name.title()) for x in TaskStatus),
-    #                                default=TaskStatus.OPEN)
-    def load_etl(self, rows, user):
+    def load_etl(self, rows, user, rows_count):
         for row in rows:
-            print(row)
+            print(rows_count, 'type_task:', row['type_task_legacy_code'])
+            rows_count -= 1
+
             legacy_code = row['legacy_code']
             movement_legacy_code = row['movement_legacy_code']
             person_asked_by_legacy_code = row['person_asked_by_legacy_code']
             person_executed_by_legacy_code = row['person_executed_by_legacy_code']
             type_task_legacy_code = row['type_task_legacy_code']
-            delegation_date = row['delegation_date']
+            delegation_date = timezone.make_aware(row['delegation_date'], timezone.get_current_timezone()) if row[
+                'delegation_date'] else None
             status_code_advwin = row['status_code_advwin']
-            reminder_deadline_date = row['reminder_deadline_date']
-            final_deadline_date = row['final_deadline_date']
+            reminder_deadline_date = timezone.make_aware(row['reminder_deadline_date'],
+                                                         timezone.get_current_timezone()) if row[
+                'reminder_deadline_date'] else None
+            final_deadline_date = timezone.make_aware(row['final_deadline_date'], timezone.get_current_timezone()) if \
+                row['final_deadline_date'] else None
 
             description = row['description']
 
             task = Task.objects.filter(legacy_code=legacy_code, system_prefix=LegacySystem.ADVWIN.value).first()
 
             movement = Movement.objects.filter(
-                movement_legacy_code=movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
+                legacy_code=movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
                 Movement)
             person_asked_by = Person.objects.filter(
                 legacy_code=person_asked_by_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
@@ -105,6 +88,10 @@ class TaskETL(GenericETL):
                     task.save(update_fields=update_fields)
             else:
                 self.model.objects.create(movement=movement,
+                                          legacy_code=legacy_code,
+                                          system_prefix=LegacySystem.ADVWIN.value,
+                                          create_user=user,
+                                          alter_user=user,
                                           person_asked_by=person_asked_by,
                                           person_executed_by=person_executed_by,
                                           type_task=type_task,
@@ -113,7 +100,7 @@ class TaskETL(GenericETL):
                                           final_deadline_date=final_deadline_date,
                                           description=description,
                                           task_status=TaskStatus.OPEN)
-        super(TaskETL, self).load_etl(rows, user)
+        super(TaskETL, self).load_etl(rows, user, rows_count)
 
 
 if __name__ == '__main__':

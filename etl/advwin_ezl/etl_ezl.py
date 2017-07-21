@@ -6,7 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
 from connections.db_connection import connect_db
-from etl.advwin.models import Base, Person, AuthUser
+from etl.advwin_ezl.models import Base, Person, AuthUser
 
 
 def return_user_from_auth(key, auth_dict):

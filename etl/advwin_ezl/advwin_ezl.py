@@ -10,9 +10,9 @@
 # instance
 # law_suit
 # type_movement
-# type_task
-# movement
-# task
+# 18 type_task
+# 19 movement
+# 20 task
 # todo: acho que tem que ser feito um script que roda todos os scripts de etl na ordem correta pra não dar erro de fk
 # todo: ou pode ser usado o luigi com o crontab
 import os
@@ -23,7 +23,7 @@ from sqlalchemy import text
 import connections
 from connections.db_connection import connect_db
 from core.utils import LegacySystem
-from etl.advwin import settings as etl_settings
+from etl.advwin_ezl import settings
 
 
 class GenericETL(object):
@@ -39,21 +39,25 @@ class GenericETL(object):
 
     # apaga registros das tabelas
     def truncate_table(self):
-        if etl_settings.TRUNCATE_ALL_TABLES:
+        if settings.TRUNCATE_ALL_TABLES:
             self.model.objects.all().delete()
 
     @staticmethod
     def truncate_tables(table_list):
-        if etl_settings.TRUNCATE_ALL_TABLES:
+        if settings.TRUNCATE_ALL_TABLES:
             for table in table_list:
                 table.objects.all().delete()
 
     # inativa todos os registros já existentes para não ter que consultar ativos e inativos do legado
     def deactivate_records(self):
-        if not etl_settings.TRUNCATE_ALL_TABLES:
+        if not settings.TRUNCATE_ALL_TABLES:
             records = self.model.objects.filter(system_prefix=LegacySystem.ADVWIN.value)
             for record in records:
                 record.deactivate()
+
+    def deactivate_all(self):
+        if not settings.TRUNCATE_ALL_TABLES:
+            self.model.objects.all().update(is_active=False)
 
     def load_etl(self, rows, user, rows_count):
         pass
@@ -61,14 +65,14 @@ class GenericETL(object):
     def import_data(self):
         self.truncate_table()
         if self.has_status:
-            self.deactivate_records()
+            self.deactivate_all()
 
         connection = self.advwin_engine.connect()
 
         cursor = self.advwin_engine.execute(text(self.query))
         rows = cursor.fetchall()
         rows_count = len(rows)
-        user = User.objects.get(pk=etl_settings.USER)
+        user = User.objects.get(pk=settings.USER)
 
         self.load_etl(rows, user, rows_count)
 

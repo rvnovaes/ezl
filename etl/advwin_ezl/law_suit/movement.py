@@ -1,12 +1,13 @@
+from etl.advwin_ezl.advwin_ezl.advwin_ezl import GenericETL
+
 from core.models import Person
 from core.utils import LegacySystem
-from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
-from etl.advwin.advwin_ezl.factory import InvalidObjectFactory
+from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import Movement, LawSuit, TypeMovement
 
 
 class MovementETL(GenericETL):
-    query = "SELECT " \
+    query = "SELECT TOP 1000 " \
             "pm.Codigo_comp AS Cod_Comp, " \
             "pm.M_Distribuicao AS law_suit_legacy_code, " \
             "pm.Ident AS legacy_code, " \
@@ -16,7 +17,9 @@ class MovementETL(GenericETL):
             "FROM Jurid_ProcMov AS pm " \
             "INNER JOIN Jurid_Pastas AS p " \
             "ON pm.Codigo_Comp = p.Codigo_Comp " \
-            "WHERE (p.Status = 'Ativa' OR p.Dt_Saida IS NULL) "
+            "WHERE (p.Status = 'Ativa' OR p.Dt_Saida IS NULL)" \
+            " order by pm.ident  DESC "
+    # " AND pm.data BETWEEN '2017-07-18 00:00' AND '2017-07-19 23:59:59'"
     model = Movement
     advwin_table = "Jurid_ProcMov"
     has_status = True
@@ -45,7 +48,8 @@ class MovementETL(GenericETL):
 
             if not lawsuit:
                 # se não encontrou o registro, busca o registro inválido
-                lawsuit = InvalidObjectFactory.get_invalid_model(LawSuit)
+                lawsuit = LawSuit.objects.first()
+                # InvalidObjectFactory.get_invalid_model(LawSuit)
 
             if movement:
                 movement.law_suit = lawsuit
@@ -54,7 +58,7 @@ class MovementETL(GenericETL):
                 movement.deadline = deadline
                 movement.is_active = True
                 movement.save(update_fields=['is_active',
-                                             'lawsuit',
+                                             'law_suit',
                                              'type_movement',
                                              'person_lawyer',
                                              'deadline',

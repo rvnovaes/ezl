@@ -1,5 +1,5 @@
 from core.utils import LegacySystem
-from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL
 from lawsuit.models import TypeMovement
 
 

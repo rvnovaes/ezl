@@ -1,12 +1,11 @@
 # esse import deve vir antes de todos porque ele executa o __init__.py
-from etl.advwin.advwin_ezl.advwin_ezl import GenericETL
-
 from django.contrib.auth.models import User
 from django.utils import timezone
+from etl.advwin_ezl.advwin_ezl.signals import new_person
 
 from core.models import Person
 from core.utils import LegacySystem
-from etl.advwin.advwin_ezl.signals import new_person
+from etl.advwin_ezl.advwin_ezl import GenericETL
 
 
 class UserETL(GenericETL):

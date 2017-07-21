@@ -12,6 +12,7 @@ from django.contrib.auth.models import User
 from core.models import Country, State, City, Person
 from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, Movement
 from task.models import TypeTask, Task, TaskStatus, TaskHistory
+from core import signals
 
 invalid_registry = '-INVÁLIDO'
 
@@ -23,7 +24,7 @@ class InvalidObjectFactory(object):
     @staticmethod
     def create():
         # cria usuário padrão
-
+        signals
         user = User.objects.create_superuser('invalid_user', 'invalid_user@mttech.com.br', 'abc123456*')
         admin = User.objects.create_superuser('admin', 'admin@mttech.com.br', 'abc123456*')
 
