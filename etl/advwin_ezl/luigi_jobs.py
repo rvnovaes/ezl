@@ -195,8 +195,8 @@ class TaskTask(luigi.Task):
         return luigi.LocalTarget(
             path=get_folder_ipc(self))
 
-    # def requires(self):
-    #     yield MovementTask()
+    def requires(self):
+        yield MovementTask()
 
     def run(self):
         f = open(get_folder_ipc(self), 'w')
