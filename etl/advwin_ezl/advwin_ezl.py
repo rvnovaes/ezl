@@ -1,4 +1,5 @@
 # ordem de importação
+# factory
 # user - inserir id do usuário configurado em etl/advwin/settings.py
 # country
 # state
@@ -10,9 +11,9 @@
 # instance
 # law_suit
 # type_movement
-# 18 type_task
-# 19 movement
-# 20 task
+# type_task
+# movement
+# task
 # todo: acho que tem que ser feito um script que roda todos os scripts de etl na ordem correta pra não dar erro de fk
 # todo: ou pode ser usado o luigi com o crontab
 import os

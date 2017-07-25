@@ -3,7 +3,7 @@ from etl.advwin_ezl.advwin_ezl import GenericETL
 from lawsuit.models import TypeMovement
 
 
-class TypeMovmentETL(GenericETL):
+class TypeMovementETL(GenericETL):
     query = "SELECT  tm.Codigo,  tm.Descricao FROM Jurid_CodMov AS tm  " \
             "WHERE right(tm.Codigo, 1) <> '.'  " \
             "   AND (tm.UsarOS = 0 OR tm.UsarOS IS NULL)  " \
@@ -34,8 +34,8 @@ class TypeMovmentETL(GenericETL):
                                           system_prefix=LegacySystem.ADVWIN.value,
                                           create_user=user,
                                           alter_user=user)
-        super(TypeMovmentETL, self).load_etl(rows, user, rows_count)
+        super(TypeMovementETL, self).load_etl(rows, user, rows_count)
 
 
 if __name__ == '__main__':
-    TypeMovmentETL().import_data()
+    TypeMovementETL().import_data()

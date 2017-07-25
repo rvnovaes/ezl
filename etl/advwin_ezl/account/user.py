@@ -1,11 +1,13 @@
 # esse import deve vir antes de todos porque ele executa o __init__.py
 from django.contrib.auth.models import User
+from django.db import models
 from django.utils import timezone
-from etl.advwin_ezl.advwin_ezl.signals import new_person
 
 from core.models import Person
+from core.signals import create_person
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.signals import new_person, temp_disconnect_signal
 
 
 class UserETL(GenericETL):
@@ -122,36 +124,42 @@ class UserETL(GenericETL):
             elif not person and not instance:
                 created = True
                 # deve ser usada a funcao create_user para gerar a senha criptografada
-                instance = self.model.objects.create_user(
-                    password=password,
-                    is_superuser=is_superuser,
-                    username=username,
-                    first_name=first_name,
-                    last_name=last_name,
-                    email=email,
-                    is_staff=is_staff,
-                    is_active=is_active,
-                    date_joined=date_joined)
+                with temp_disconnect_signal(
+                        signal=models.signals.post_save,
+                        receiver=create_person,
+                        sender=User,
+                        dispatch_uid='create_person'):
 
-            new_person.send(sender=self,
-                            person=Person(
-                                id=person_id,
-                                legal_name=legal_name,
-                                name=name,
-                                is_lawyer=is_lawyer,
-                                is_correspondent=is_correspondent,
-                                is_court=is_court,
-                                legal_type=legal_type,
-                                cpf_cnpj=cpf_cnpj,
-                                alter_user=user,
-                                auth_user=instance,
-                                create_user=user,
-                                is_active=is_active,
-                                is_customer=is_customer,
-                                is_supplier=is_supplier,
-                                legacy_code=legacy_code,
-                                system_prefix=LegacySystem.ADVWIN.value),
-                            created=created)
+                    instance = self.model.objects.create_user(
+                        password=password,
+                        is_superuser=is_superuser,
+                        username=username,
+                        first_name=first_name,
+                        last_name=last_name,
+                        email=email,
+                        is_staff=is_staff,
+                        is_active=is_active,
+                        date_joined=date_joined)
+
+                new_person.send(sender=self,
+                                person=Person(
+                                    id=person_id,
+                                    legal_name=legal_name,
+                                    name=name,
+                                    is_lawyer=is_lawyer,
+                                    is_correspondent=is_correspondent,
+                                    is_court=is_court,
+                                    legal_type=legal_type,
+                                    cpf_cnpj=cpf_cnpj,
+                                    alter_user=user,
+                                    auth_user=instance,
+                                    create_user=user,
+                                    is_active=is_active,
+                                    is_customer=is_customer,
+                                    is_supplier=is_supplier,
+                                    legacy_code=legacy_code,
+                                    system_prefix=LegacySystem.ADVWIN.value),
+                                created=created)
 
             super(UserETL, self).load_etl(rows, user, rows_count)
 
