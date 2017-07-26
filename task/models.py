@@ -127,7 +127,7 @@ def get_dir_name(self, filename):
     return path
 
 
-class Ecm(Audit):
+class Ecm(Audit, LegacyCode):
     path = models.FileField(upload_to=get_dir_name, max_length=255, unique=True, null=False)
     task = models.ForeignKey(Task, blank=False, null=False, on_delete=models.PROTECT)
 
