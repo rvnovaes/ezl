@@ -9,7 +9,7 @@ from task.models import Task, TypeTask, TaskStatus
 
 
 class TaskETL(GenericETL):
-    query = "SELECT TOP 1000" \
+    query = "SELECT " \
             "a.SubStatus AS status_code_advwin, " \
             "a.ident AS legacy_code, " \
             "a.Mov AS movement_legacy_code, " \

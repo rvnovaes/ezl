@@ -7,7 +7,7 @@ from lawsuit.models import Movement, LawSuit, TypeMovement
 
 
 class MovementETL(GenericETL):
-    query = "SELECT TOP 1000 " \
+    query = "SELECT " \
             "pm.Codigo_comp AS Cod_Comp, " \
             "pm.M_Distribuicao AS law_suit_legacy_code, " \
             "pm.Ident AS legacy_code, " \
