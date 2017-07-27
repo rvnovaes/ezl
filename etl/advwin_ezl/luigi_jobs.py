@@ -154,7 +154,7 @@ class TypeMovementTask(luigi.Task):
             path=get_folder_ipc(self))
 
     def requires(self):
-        yield LawsuitETL()
+        yield LawsuitTask()
 
     def run(self):
         f = open(get_folder_ipc(self), 'w')
