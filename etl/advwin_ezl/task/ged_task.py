@@ -16,7 +16,7 @@ class EcmETL(GenericETL):
             "   G.Link      " \
             " FROM Jurid_Ged_Main AS G" \
             " INNER JOIN Jurid_agenda_table AS A" \
-            "   ON G.Codigo_OR = CAST(A.Ident as VARCHAR(255)) AND A.Ident = 2254248 " \
+            "   ON G.Codigo_OR = CAST(A.Ident as VARCHAR(255)) " \
             " INNER JOIN  Jurid_Pastas AS P" \
             "   ON A.Pasta = P.Codigo_Comp" \
             "  WHERE G.Tabela_OR = 'Agenda' AND P.Status = 'Ativa' AND G.Link <> '' AND G.Link IS NOT NULL"
