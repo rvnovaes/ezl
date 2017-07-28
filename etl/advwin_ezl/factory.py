@@ -15,6 +15,7 @@ from task.models import TypeTask, Task, TaskStatus, TaskHistory
 from core import signals
 
 invalid_registry = '-INVÁLIDO'
+invalid_legacy_code = 'REGISTRO' + invalid_registry
 
 
 class InvalidObjectFactory(object):
@@ -45,37 +46,51 @@ class InvalidObjectFactory(object):
             court_district=invalid_court_district)
 
         invalid_person, created = Person.objects.get_or_create(
-            legal_name=Person._meta.verbose_name.upper() + invalid_registry
+            legacy_code=invalid_legacy_code,
+            legal_name=Person._meta.verbose_name.upper() + invalid_registry,
+            name=Person._meta.verbose_name.upper() + invalid_registry
             , create_user=user)
         # Registros inválidos para o app lawsuit
         invalid_type_movement, created = TypeMovement.objects.get_or_create(
+            legacy_code=invalid_legacy_code,
             name=TypeMovement._meta.verbose_name.upper() +
                  invalid_registry, create_user=user)
-        invalid_instance, created = Instance.objects.get_or_create(name=Instance._meta.verbose_name.upper() +
-                                                                        invalid_registry, create_user=user)
-        invalid_folder, created = Folder.objects.get_or_create(person_customer=invalid_person, create_user=user)
+
+        invalid_instance, created = Instance.objects.get_or_create(
+            legacy_code=invalid_legacy_code,
+            name=Instance._meta.verbose_name.upper() +
+                 invalid_registry, create_user=user)
+        invalid_folder, created = Folder.objects.get_or_create(legacy_code=invalid_legacy_code,
+                                                               person_customer=invalid_person, create_user=user)
 
         invalid_court_division, created = CourtDivision.objects.get_or_create(
+            legacy_code=invalid_legacy_code,
             name=CourtDivision._meta.verbose_name.upper()
                  + invalid_registry, create_user=user)
 
-        invalid_law_suit, created = LawSuit.objects.get_or_create(create_user=user, person_court=invalid_person,
-                                                                  folder=invalid_folder,
-                                                                  person_lawyer=invalid_person,
-                                                                  court_district=invalid_court_district,
-                                                                  instance=invalid_instance,
-                                                                  court_division=invalid_court_division,
-                                                                  law_suit_number=LawSuit._meta.verbose_name.upper() + invalid_registry)
-        invalid_movement, created = Movement.objects.get_or_create(create_user=user, law_suit=invalid_law_suit,
-                                                                   person_lawyer=invalid_person,
-                                                                   type_movement=invalid_type_movement)
+        invalid_law_suit, created = LawSuit.objects.get_or_create(
+            legacy_code=invalid_legacy_code,
+            create_user=user, person_court=invalid_person,
+            folder=invalid_folder,
+            person_lawyer=invalid_person,
+            court_district=invalid_court_district,
+            instance=invalid_instance,
+            court_division=invalid_court_division,
+            law_suit_number=LawSuit._meta.verbose_name.upper() + invalid_registry)
+
+        invalid_movement, created = Movement.objects.get_or_create(
+            legacy_code=invalid_legacy_code,
+            create_user=user, law_suit=invalid_law_suit,
+            person_lawyer=invalid_person,
+            type_movement=invalid_type_movement)
 
         # Registros inválidos para o app Task
-        invalid_type_task, created = TypeTask.objects.get_or_create(create_user=user,
+        invalid_type_task, created = TypeTask.objects.get_or_create(create_user=user, legacy_code=invalid_legacy_code,
                                                                     name=TypeTask._meta.verbose_name.upper() + invalid_registry)
         invalid_task, created = Task.objects.get_or_create(create_user=user, movement=invalid_movement,
                                                            person_asked_by=invalid_person,
                                                            person_executed_by=invalid_person,
+                                                           legacy_code=invalid_legacy_code,
                                                            task_status=TaskStatus.INVALID, type_task=invalid_type_task)
 
     @staticmethod
