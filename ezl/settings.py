@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     # Enable plugins
     'dal_select2',
     'dal_queryset_sequence',
+    #Test
+    
 
 ]
 
@@ -96,12 +98,9 @@ WSGI_APPLICATION = 'ezl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ezl_datatest',
-        'USER': 'ezl',
-        'PASSWORD': 'ezl',
-        'HOST': '13.68.213.60',
-        # 'HOST': '127.0.0.1',
-        'PORT': '5432'
+        'NAME': 'gsnasc',
+        'USER': 'gsnasc',
+        'PASSWORD': 'nacigi-2'
 
     }
 }
