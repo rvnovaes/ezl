@@ -221,12 +221,13 @@
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                             <h4 class="panel-title text-center">
                                 <i id="icon" class="material-icons "></i>
-                                <b> Deseja <span id="actionText">aceitar</span> o prazo?</b></h4>
+                                <b> Deseja <span id="actionText">aceitar</span> o prazo? </b></h4>
                         </div>
                         <div class="modal-body">
                             <div class="form-group" style="margin: auto">
                                 <label> {{ form.notes.label }}</label>
                                 {{ form.notes }}
+
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -238,10 +239,20 @@
                                 </button>
 
                                 {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                                    <button data-toggle="modal" data-target="#survey" value="1" id="actionButton"
-                                            data-dismiss="modal" style="width: 95px!important;"
-                                            class="btn btn-sm btn-raised btn-primary">Sim
-                                    </button>
+                                    {% if form.instance.type_task.survey_type %}
+
+
+                                        <button data-toggle="modal" data-target="#survey" value="1" id="actionButton"
+                                                data-dismiss="modal" style="width: 95px!important;"
+                                                class="btn btn-sm btn-raised btn-primary">Sim
+                                        </button>
+                                    {% else %}
+                                        <button value="1" id="actionButton"
+                                                type="submit" style="width: 95px!important;"
+                                                class="btn btn-sm btn-raised btn-primary">Sim
+                                        </button>
+                                    {% endif %}
+
                                 {% else %}
                                     <button value="1" id="actionButton" style="width: 95px!important;"
                                             type="submit" class="btn btn-sm btn-raised btn-primary">Sim
