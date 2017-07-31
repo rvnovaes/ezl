@@ -1,0 +1,45 @@
+{% load staticfiles %}
+{% block content %}
+    {% load bootstrap3 %}
+    <script src="https://surveyjs.azureedge.net/0.12.20/survey.jquery.js"></script>
+    <script src="{% static  "core/js" %}/{{ generic_survey|lower }}.js"></script>
+
+    <div id="survey" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div id=" modal modalHeader">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="panel-title text-center">
+                        <i class="material-icons ">question_answer</i>
+                        Formulário de {{ form.instance.type_task.survey_type }} </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group" style="margin: auto">
+                        <div id="surveyElement">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        Survey.Survey.cssType = "bootstrapmaterial";
+        Survey.defaultBootstrapMaterialCss.navigationButton = "btn btn-primary";
+        survey.onComplete.add(function (result) {
+            var surveyResponse = JSON.stringify(result.data);
+            var surveyResult = document.getElementsByName('survey_result').item(0);
+            surveyResult.value = surveyResponse;
+            document.getElementById('id_survey_result').innerHTML = surveyResponse;
+            document.getElementById('surveyElement').innerHTML = '<p>Formulário Preenchido com Sucesso</p>'
+            var v = document.createElement('p');
+            v.innerHTML = '<button name="action" value="DONE" class="btn btn-sm btn-raised btn-primary" type="submit">Enviar</button>';
+            document.getElementById('surveyElement').appendChild(v);
+        });
+        survey.locale = "pt";
+        $("#surveyElement").Survey({model: survey});
+    </script>
+
+{% endblock %}

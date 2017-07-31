@@ -25,6 +25,7 @@ class TaskTable(tables.Table):
     execution_date = tables.DateColumn(format="d/m/Y")
     return_date = tables.DateColumn(format="d/m/Y")
     refused_date = tables.DateColumn(format="d/m/Y")
+
     # order_by = sorted(Task.objects.all(), key=lambda t: str(t.status.value))
 
     class Meta:
@@ -65,12 +66,9 @@ class TypeTaskTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
     legacy_code = tables.LinkColumn(viewname='typetask_update', attrs={'a': {'target': 'typetask_update'}},
                                     args=[A('pk')])
-    name = tables.LinkColumn(viewname='typetask_update', attrs={'a': {'target': 'typetask_update'}},
-                             args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'legacy_code', 'name', 'is_active')
+        sequence = ('selection', 'legacy_code', 'name', 'survey_type', 'is_active')
         model = TypeTask
-        fields = ['selection', 'legacy_code', 'name', 'is_active']
-        # attrs = {"class": "table-striped table-bordered"}
+        fields = ['selection', 'legacy_code', 'name', 'is_active', 'survey_type']
         empty_text = "Não existem tipos de serviço cadastrados"

@@ -13,9 +13,10 @@ def load_previous_status(sender, instance, **kwargs):
 
 
 @receiver(send_notes_execution_date)
-def receive_notes_execution_date(notes, instance, execution_date, **kwargs):
+def receive_notes_execution_date(notes, instance, execution_date, survey_result, **kwargs):
     instance.__notes = notes if notes else ''
     instance.execution_date = execution_date if execution_date else None
+    instance.survey_result = survey_result if survey_result else None
 
 
 @receiver(pre_save, sender=Task)

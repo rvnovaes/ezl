@@ -4,6 +4,7 @@ from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
 
 from core.views import ClientAutocomplete
 from ezl import settings
@@ -22,6 +23,7 @@ urlpatterns = [
                   url(r'^client_form',
                       login_required(ClientAutocomplete.as_view()),
                       name='client_autocomplete'),
+                  url(r'^qa/$', TemplateView.as_view(template_name="questionnaire/generic_survey.html")),
 
               ] + static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, "static/")) + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -128,10 +128,10 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         form.instance.alter_user = User.objects.get(id=self.request.user.id)
         notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None
         execution_date = form.cleaned_data['execution_date'] if form.cleaned_data['execution_date'] else None
+        survey_result = form.cleaned_data['survey_result'] if form.cleaned_data['survey_result'] else None
 
-        # form = TaskDetailForm(self.request.POST, instance=form.instance)
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
-                                       execution_date=execution_date)
+                                       execution_date=execution_date, survey_result=survey_result)
         form.save()
 
         super(TaskDetailView, self).form_valid(form)

@@ -12,30 +12,23 @@ from lawsuit.models import Movement, TypeMovement, Folder
 # Dicionário para retornar o icone referente ao status da providencia
 icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assignment_return',
              'DONE': 'assignment_turned_in',
-             'REFUSED': 'assignment_late'}
+             'REFUSED': 'assignment_late', 'INVALID': 'error', 'VALIDATED': "gavel", '': 'money_off'}
 
 
 # next_action = {'ACCEPTED': 'cumprir', 'OPEN': 'assignment', 'RETURN': 'keyboard_return', 'DONE': 'done',
 #                'REFUSED': 'assignment_late'}
-class TypeTask(Audit, LegacyCode):
-    name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Tipo de Serviço")
 
-    class Meta:
-        db_table = "type_task"
-        verbose_name = "Tipo de Serviço"
-        verbose_name_plural = "Tipos de Serviço"
-
-    def __str__(self):
-        return self.name
 
 
 class TaskStatus(Enum):
-    ACCEPTED = u"A Cumprir"
-    OPEN = u"Em Aberto"
-    RETURN = u"Retorno"
-    DONE = u"Cumprida"
-    REFUSED = u"Recusada"
-    INVALID = u"Inválida"
+    ACCEPTED = "A Cumprir"
+    OPEN = "Em Aberto"
+    RETURN = "Retorno"
+    DONE = "Cumprida"
+    REFUSED = "Recusada"
+    REFUSEDPAYMENT = "Glosada"
+    VALIDATED = "Válida"
+    INVALID = "Inválida"
 
     def get_icon(self):
         return icon_dict[self.name]
@@ -46,13 +39,41 @@ class TaskStatus(Enum):
     @classmethod
     def choices(cls):
         return [(x.value, x.name) for x in cls]
-
-
         # 'Em Aberto' = 1  # Providencias que foram delegadas
         # (1, 'Aceita/Retorno'),
         #  Retorno (return) / Aceitas (accepted) providencias que foram executadas com sucesso ou retornadas ao correspondente por pendencias
         # (2, 'Recusada'),  # providencias recusadas pelo correposndente
         # (3, 'Cumprida'),  # providencias executadas sem nenhuma pendencia
+
+
+class SurveyType(Enum):
+    BLANK = ""
+    OPERATIONLICENSE = "Cumprimento de Ordem de Serviço do tipo Alvará"
+    COURTHEARING = "Cumprimento de Ordem de Serviço do tipo Audiência"
+    DILIGENCE = "Cumprimento de Ordem de Serviço do tipo Diligência"
+    PROTOCOL = "Cumprimento de Ordem de Serviço do tipo Protocolo"
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        return [(x.value, x.name) for x in cls]
+
+
+class TypeTask(Audit, LegacyCode):
+    name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Tipo de Serviço")
+    survey_type = models.CharField(null=False, verbose_name="Tipo de Formulário", max_length=100,
+                                   choices=((x.name.title(), x.value) for x in SurveyType),
+                                   default=SurveyType.BLANK)
+
+    class Meta:
+        db_table = "type_task"
+        verbose_name = "Tipo de Serviço"
+        verbose_name_plural = "Tipos de Serviço"
+
+    def __str__(self):
+        return self.name
 
 
 class Task(Audit, LegacyCode):
@@ -80,7 +101,7 @@ class Task(Audit, LegacyCode):
     task_status = models.CharField(null=False, verbose_name=u"", max_length=30,
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
                                    default=TaskStatus.OPEN)
-
+    survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
 

@@ -100,7 +100,9 @@ class TaskDetailForm(ModelForm):
 
     class Meta:
         model = Task
-        fields = ['execution_date']
+        fields = ['execution_date', 'survey_result']
+
+    survey_result = forms.CharField(required=False, initial=None)
 
     execution_date = forms.DateTimeField(required=False,
                                          initial=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE)),
