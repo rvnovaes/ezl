@@ -98,7 +98,7 @@ WSGI_APPLICATION = 'ezl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ezl_datatest',
+        'NAME': 'demo',
         'USER': 'ezl',
         'PASSWORD': 'ezl',
         'HOST': '13.68.213.60',
