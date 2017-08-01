@@ -12,12 +12,11 @@ from lawsuit.models import Movement, TypeMovement, Folder
 # Dicionário para retornar o icone referente ao status da providencia
 icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assignment_return',
              'DONE': 'assignment_turned_in',
-             'REFUSED': 'assignment_late', 'INVALID': 'error', 'VALIDATED': "gavel", '': 'money_off'}
+             'REFUSED': 'assignment_late', 'INVALID': 'error', 'FINISHED': "gavel", 'BLOCKEDPAYMENT': 'money_off'}
 
 
 # next_action = {'ACCEPTED': 'cumprir', 'OPEN': 'assignment', 'RETURN': 'keyboard_return', 'DONE': 'done',
 #                'REFUSED': 'assignment_late'}
-
 
 
 class TaskStatus(Enum):
@@ -26,8 +25,8 @@ class TaskStatus(Enum):
     RETURN = "Retorno"
     DONE = "Cumprida"
     REFUSED = "Recusada"
-    REFUSEDPAYMENT = "Glosada"
-    VALIDATED = "Válida"
+    BLOCKEDPAYMENT = "Glosada"
+    FINISHED = "Finalizada"
     INVALID = "Inválida"
 
     def get_icon(self):
@@ -96,6 +95,9 @@ class Task(Audit, LegacyCode):
     return_date = models.DateTimeField(null=True, verbose_name="Data de Retorno")
     refused_date = models.DateTimeField(null=True, verbose_name="Data de Recusa")
 
+    blocked_payment_date = models.DateTimeField(null=True, verbose_name="Data da Glosa")
+    validated_date = models.DateTimeField(null=True, verbose_name="Data de Validação")
+
     description = models.TextField(null=True, blank=True, verbose_name=u"Descrição do serviço")
 
     task_status = models.CharField(null=False, verbose_name=u"", max_length=30,
@@ -113,23 +115,35 @@ class Task(Audit, LegacyCode):
 
     @property
     def status(self):
-        acceptance_date, return_date, execution_date, refused_date = Task.objects.filter(id=self.id).values_list(
-            'acceptance_date', 'return_date', 'execution_date', 'refused_date').first()
+        acceptance_date, return_date, execution_date, refused_date, blocked_payment_date, validated_date = Task.objects.filter(
+            id=self.id).values_list(
+            'acceptance_date', 'return_date', 'execution_date', 'refused_date', 'blocked_payment_date',
+            'validated_date').first()
         # acceptance_date IS NOT NULL AND execution_date IS NULL AND return_date IS NULL
-        if acceptance_date is not None and refused_date is None and execution_date is None and return_date is None:
+        if acceptance_date is not None and refused_date is None and execution_date is None and return_date is None \
+                and validated_date is not None and blocked_payment_date is None:
             return TaskStatus.ACCEPTED
         # return_date IS NOT NULL
-        elif acceptance_date is not None and refused_date is None and execution_date is None and return_date is not None:
+        elif acceptance_date is not None and refused_date is None and execution_date is None and return_date is not None \
+                and validated_date is not None and blocked_payment_date is None:
             return TaskStatus.RETURN
         # acceptance_date IS NULL
-        elif acceptance_date is None and refused_date is None and execution_date is None and return_date is None:
+        elif acceptance_date is None and refused_date is None and execution_date is None and return_date is None \
+                and validated_date is not None and blocked_payment_date is None:
             return TaskStatus.OPEN
         # execution_date IS NOT NUL
-        elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is None:
+        elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is None \
+                and validated_date is None and blocked_payment_date is None:
             return TaskStatus.DONE
         # refused_date IS NOT NULL
         elif acceptance_date is None and refused_date is not None and execution_date is None and return_date is None:
             return TaskStatus.REFUSED
+        elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is None \
+                and validated_date is None and blocked_payment_date is not None:
+            return TaskStatus.BLOCKEDPAYMENT
+        elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is None \
+                and validated_date is not None and blocked_payment_date is None:
+            return TaskStatus.FINISHED
 
     @property
     def client(self):

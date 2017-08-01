@@ -83,6 +83,17 @@ class DashboardView(MultiTableMixin, TemplateView):
             data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
                                        refused_date__isnull=True, execution_date__isnull=True,
                                        return_date__isnull=False)
+
+        elif status == TaskStatus.BLOCKEDPAYMENT:
+            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
+                                       refused_date__isnull=True, execution_date__isnull=False,
+                                       return_date__isnull=True, blocked_payment_date__isnull=False,
+                                       validated_date__isnull=True)
+        elif status == TaskStatus.FINISHED:
+            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
+                                       refused_date__isnull=True, execution_date__isnull=False,
+                                       return_date__isnull=True, blocked_payment_date__isnull=True,
+                                       validated_date__isnull=False)
         # TODO Adicionar metodo para filtrar dashboard do coordenador
         if person.is_correspondent:
             return data.filter(person_executed_by=person.id)
@@ -109,8 +120,17 @@ class DashboardView(MultiTableMixin, TemplateView):
             refused_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.REFUSED, person),
                                                  title="Recusadas", status=TaskStatus.REFUSED, order_by="-alter_date"
                                                  )
+            blocked_payment_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.BLOCKEDPAYMENT, person),
+                                                         title="Glosadas", status=TaskStatus.BLOCKEDPAYMENT,
+                                                         order_by="-alter_date"
+                                                         )
+            validated_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.FINISHED, person),
+                                                   title="Finalizadas", status=TaskStatus.FINISHED,
+                                                   order_by="-alter_date"
+                                                   )
 
-            tables = [return_table, accepted_table, open_table, done_table, refused_table]
+            tables = [return_table, accepted_table, open_table, done_table, refused_table, blocked_payment_table,
+                      validated_table]
         else:
             tables = None
         return tables
