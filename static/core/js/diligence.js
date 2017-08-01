@@ -58,13 +58,13 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    {
-                        type: "file",
-                        name: "debiteDiligencia",
-                        visible: false,
-                        visibleIf: "{cumprimento}='item1' or {cumprimento}='item2'",
-                        title: "Debite"
-                    },
+                    // {
+                    //     type: "file",
+                    //     name: "debiteDiligencia",
+                    //     visible: false,
+                    //     visibleIf: "{cumprimento}='item1' or {cumprimento}='item2'",
+                    //     title: "Debite"
+                    // },
                     {
                         type: "text",
                         name: "obsRelevantes",
@@ -95,13 +95,13 @@ window.survey = new Survey.Model(
                         visible: false,
                         visibleIf: "{motivoCumprimentoParcial}='item2'"
                     },
-                    {
-                        type: "file",
-                        name: "gedDiligencia",
-                        visible: false,
-                        visibleIf: "{cumprimento}='item1' or {cumprimento}='item2'",
-                        title: "GED"
-                    },
+                    // {
+                    //     type: "file",
+                    //     name: "gedDiligencia",
+                    //     visible: false,
+                    //     visibleIf: "{cumprimento}='item1' or {cumprimento}='item2'",
+                    //     title: "GED"
+                    // },
                     {
                         type: "text",
                         name: "justificativaNCumprir",

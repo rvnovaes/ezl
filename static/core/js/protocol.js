@@ -44,13 +44,13 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    {
-                        type: "file",
-                        name: "debiteDiligencia",
-                        visible: false,
-                        visibleIf: "{protocoloRealizado} = 'S'",
-                        title: "Debite"
-                    },
+                    // {
+                    //     type: "file",
+                    //     name: "debiteDiligencia",
+                    //     visible: false,
+                    //     visibleIf: "{protocoloRealizado} = 'S'",
+                    //     title: "Debite"
+                    // },
                     {
                         type: "text",
                         name: "obsRelevantes",
@@ -58,13 +58,13 @@ window.survey = new Survey.Model(
                         visibleIf: "{protocoloRealizado} = 'S'",
                         title: "Observações Relevantes: "
                     },
-                    {
-                        type: "file",
-                        name: "gedDiligencia",
-                        visible: false,
-                        visibleIf: "{protocoloRealizado} = 'S'",
-                        title: "GED"
-                    },
+                    // {
+                    //     type: "file",
+                    //     name: "gedDiligencia",
+                    //     visible: false,
+                    //     visibleIf: "{protocoloRealizado} = 'S'",
+                    //     title: "GED"
+                    // },
                     {
                         type: "text",
                         name: "justificativaNProtocolo",

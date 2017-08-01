@@ -104,27 +104,28 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    {
-                        type: "file",
-                        name: "debiteDiligencia",
-                        visible: false,
-                        visibleIf: "{despReembolsaveis} = 'S'",
-                        title: "Debite de Diligência"
-                    },
+                    // {
+                    //     type: "file",
+                    //     name: "debiteDiligencia",
+                    //     visible: false,
+                    //     visibleIf: "{despReembolsaveis} = 'S'",
+                    //     title: "Debite de Diligência"
+                    // },
                     {
                         type: "text",
                         name: "obsRelevante",
                         visible: false,
                         visibleIf: "{despReembolsaveis} = 'S'",
                         title: "Observações relevantes: "
-                    },
-                    {
-                        type: "file",
-                        name: "gedDiligencia",
-                        visible: false,
-                        visibleIf: "{despReembolsaveis} = 'S'",
-                        title: "GED de Diligência "
                     }
+                    // ,
+                    // {
+                    //     type: "file",
+                    //     name: "gedDiligencia",
+                    //     visible: false,
+                    //     visibleIf: "{despReembolsaveis} = 'S'",
+                    //     title: "GED de Diligência "
+                    // }
                 ]
             }
         ]
