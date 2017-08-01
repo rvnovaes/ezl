@@ -96,7 +96,7 @@ class Task(Audit, LegacyCode):
     refused_date = models.DateTimeField(null=True, verbose_name="Data de Recusa")
 
     blocked_payment_date = models.DateTimeField(null=True, verbose_name="Data da Glosa")
-    validated_date = models.DateTimeField(null=True, verbose_name="Data de Validação")
+    finished_date = models.DateTimeField(null=True, verbose_name="Data de Finalização")
 
     description = models.TextField(null=True, blank=True, verbose_name=u"Descrição do serviço")
 
@@ -118,7 +118,7 @@ class Task(Audit, LegacyCode):
         acceptance_date, return_date, execution_date, refused_date, blocked_payment_date, validated_date = Task.objects.filter(
             id=self.id).values_list(
             'acceptance_date', 'return_date', 'execution_date', 'refused_date', 'blocked_payment_date',
-            'validated_date').first()
+            'finished_date').first()
         # acceptance_date IS NOT NULL AND execution_date IS NULL AND return_date IS NULL
         if acceptance_date is not None and refused_date is None and execution_date is None and return_date is None \
                 and validated_date is not None and blocked_payment_date is None:

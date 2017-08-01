@@ -8,7 +8,6 @@ from lawsuit.models import Movement, LawSuit, TypeMovement
 
 class MovementETL(GenericETL):
     query = "SELECT " \
-            "pm.Codigo_comp AS Cod_Comp, " \
             "pm.M_Distribuicao AS law_suit_legacy_code, " \
             "pm.Ident AS legacy_code, " \
             "pm.Advogado AS person_lawyer_legacy_code, " \
@@ -17,7 +16,7 @@ class MovementETL(GenericETL):
             "FROM Jurid_ProcMov AS pm " \
             "INNER JOIN Jurid_Pastas AS p " \
             "ON pm.Codigo_Comp = p.Codigo_Comp " \
-            "WHERE (p.Status = 'Ativa' OR p.Dt_Saida IS NULL)" \
+            "WHERE (p.Status = 'Ativa' OR p.Dt_Saida IS NULL) " \
             " order by pm.ident  DESC "
     # " AND pm.data BETWEEN '2017-07-18 00:00' AND '2017-07-19 23:59:59'"
     model = Movement

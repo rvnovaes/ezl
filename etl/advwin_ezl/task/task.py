@@ -8,8 +8,22 @@ from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus
 
 
+def get_status_by_substatus(substatus):
+    if substatus == 100:
+        return TaskStatus.FINISHED
+    elif substatus == 90:
+        return TaskStatus.BLOCKEDPAYMENT
+    elif substatus == 80:
+        return TaskStatus.REFUSED
+    elif substatus == 30:
+        return TaskStatus.OPEN
+    else:
+        return TaskStatus.INVALID
+
+
 class TaskETL(GenericETL):
     query = "SELECT " \
+            "a.Data_confirmacao AS blocked_or_finished_date, " \
             "a.SubStatus AS status_code_advwin, " \
             "a.ident AS legacy_code, " \
             "a.Mov AS movement_legacy_code, " \
@@ -25,8 +39,10 @@ class TaskETL(GenericETL):
             "INNER JOIN Jurid_Pastas AS p ON " \
             "a.Pasta = p.Codigo_Comp " \
             "WHERE " \
-            "(p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND " \
-            "((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0)) " \
+            "(p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND a.Ident =2254258 AND " \
+            "((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0) OR " \
+            "(a.SubStatus = 90 AND a.Status = 1) " \
+            "OR (a.SubStatus = 100)) " \
             "ORDER BY a.ident DESC "
     # "and a.Data BETWEEN '2017-07-18 00:00' and '2017-07-19 23:59:59'"
     model = Task
@@ -35,7 +51,7 @@ class TaskETL(GenericETL):
 
     def load_etl(self, rows, user, rows_count):
         for row in rows:
-            print(rows_count, 'type_task:', row['type_task_legacy_code'])
+            print(rows_count)
             rows_count -= 1
 
             legacy_code = row['legacy_code']
@@ -45,7 +61,7 @@ class TaskETL(GenericETL):
             type_task_legacy_code = row['type_task_legacy_code']
             delegation_date = timezone.make_aware(row['delegation_date'], timezone.get_current_timezone()) if row[
                 'delegation_date'] else None
-            status_code_advwin = row['status_code_advwin']
+            status_code_advwin = get_status_by_substatus(row['status_code_advwin'])
             reminder_deadline_date = timezone.make_aware(row['reminder_deadline_date'],
                                                          timezone.get_current_timezone()) if row[
                 'reminder_deadline_date'] else None
@@ -53,6 +69,9 @@ class TaskETL(GenericETL):
                 row['final_deadline_date'] else None
 
             description = row['description']
+            blocked_or_finished_date = timezone.make_aware(row['blocked_or_finished_date'],
+                                                           timezone.get_current_timezone()) if \
+                row['blocked_or_finished_date'] else None
 
             task = Task.objects.filter(legacy_code=legacy_code, system_prefix=LegacySystem.ADVWIN.value).first()
 
@@ -74,17 +93,22 @@ class TaskETL(GenericETL):
                 task.reminder_deadline_date = reminder_deadline_date
                 task.final_deadline_date = final_deadline_date
                 task.description = description
-
+                task.task_status = status_code_advwin
                 update_fields = ['delegation_date', 'reminder_deadline_date', 'final_deadline_date', 'description',
                                  'task_status']
-                if status_code_advwin == 80:
+                if status_code_advwin == TaskStatus.RETURN:
                     task.refused_date = timezone.now()
                     task.execution_date = None
-                    task.task_status = TaskStatus.REFUSED
-                    update_fields.append('refused_date')
+                    update_fields.append('return_date')
                     update_fields.append('execution_date')
-                elif status_code_advwin == 30:
-                    task.task_status = TaskStatus.OPEN
+                elif status_code_advwin == TaskStatus.BLOCKEDPAYMENT:
+                    task.blocked_payment_date = blocked_or_finished_date
+                    update_fields.append('blocked_payment_date')
+                elif status_code_advwin == TaskStatus.FINISHED:
+                    task.finished_date = blocked_or_finished_date
+                    update_fields.append('finished_date')
+                elif status_code_advwin == TaskStatus.OPEN:
+
                     task.save(update_fields=update_fields)
             else:
                 self.model.objects.create(movement=movement,
@@ -99,7 +123,7 @@ class TaskETL(GenericETL):
                                           reminder_deadline_date=reminder_deadline_date,
                                           final_deadline_date=final_deadline_date,
                                           description=description,
-                                          task_status=TaskStatus.OPEN)
+                                          task_status=status_code_advwin)
         super(TaskETL, self).load_etl(rows, user, rows_count)
 
 
