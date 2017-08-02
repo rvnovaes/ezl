@@ -153,6 +153,20 @@ class Task(Audit, LegacyCode):
     def __str__(self):
         return self.legacy_code  # TODO verificar campo para toString
 
+    @property
+    def court_district(self):
+        return self.movement.law_suit.court_district
+
+    @property
+    def court(self):
+        return self.movement.law_suit.person_court
+
+    # TODO fazer composição para buscar no endereço completo
+    @property
+    def address(self):
+        address = self.movement.law_suit.person_court.address_set.first()
+        return address if address else ''
+
 
 def get_dir_name(self, filename):
     upload_dir = os.path.join('opt', 'media', 'GEDs', str(self.task_id))
