@@ -116,12 +116,52 @@ class PersonCreateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
     success_url = reverse_lazy('person_list')
     success_message = new_success
 
+    def form_valid(self, form):
 
-class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, UpdateView):
+        user = User.objects.get(id=self.request.user.id)
+
+        if form.instance.id is None:
+            form.instance.create_user = user
+        else:
+            form.instance.alter_user = user
+
+        legal_type = self.request.POST['legal_type']
+        cnpj = self.request.POST['cnpj']
+        cpf = self.request.POST['cpf']
+
+        if legal_type is 'F' and cpf:
+            form.instance.cpf_cnpj = cpf
+        elif legal_type is 'J' and cnpj:
+            form.instance.cpf_cnpj = cnpj
+        form.save()
+
+        super(PersonCreateView, self).form_valid(form)
+        return HttpResponseRedirect(self.success_url)
+
+
+class PersonUpdateView(LoginRequiredMixin, BaseCustomView, SuccessMessageMixin, UpdateView):
     model = Person
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
     success_message = update_success
+
+    # def get(self, request, *args, **kwargs):
+    #     self.object = self.get_object()
+    #     context = self.get_context_data(object=self.object)
+    #     return self.render_to_response(context)
+
+    def form_valid(self, form):
+        legal_type = self.request.POST['legal_type']
+        cnpj = self.request.POST['cnpj']
+        cpf = self.request.POST['cpf']
+
+        if legal_type is 'F' and cpf:
+            form.instance.cpf_cnpj = cpf
+        elif legal_type is 'J' and cnpj:
+            form.instance.cpf_cnpj = cnpj
+        form.save()
+
+        return super(PersonUpdateView, self).form_valid(form)
 
 
 class PersonDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):

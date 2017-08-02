@@ -1,10 +1,10 @@
 {% extends 'inicial.html' %}
-{#{% load staticfiles %}#}
+{% load staticfiles %}
 {#{% load formset_tags %}#}
 
 {% block content %}
     {% include 'core/widgets/messages.html' %}
-
+    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
     <form action="" method="post">{% csrf_token %}
         <div class="col-lg-12 ">
             <fieldset>
@@ -15,11 +15,33 @@
                         </div>
                         <div class="panel-body">
                             {% for field in form %}
-                                <div class="form-group">
-                                    <label>
-                                        {{ field.label }}{{ field }}
-                                    </label>
-                                </div>
+
+                                {% if field.name == 'cpf' %}
+
+                                    <div id="cpf_container"
+                                         class="form-group {% if form.instance.legal_type == 'J' %} hidden {% endif %}">
+                                        <label>
+                                            {{ field.label }}{{ field }}
+                                        </label>
+                                    </div>
+                                {% endif %}
+                                {% if field.name == 'cnpj' %}
+                                    <div id="cnpj_container"
+                                         class="form-group {% if form.instance.legal_type == 'F' or not form.instance.id %}
+                                          hidden {% endif %}">
+                                        <label>
+                                            {{ field.label }}{{ field }}
+
+                                        </label>
+                                    </div>
+                                {% elif field.name != 'cnpj' and field.name != 'cpf' %}
+                                    <div class="form-group">
+                                        <label>
+                                            {{ field.label }}{{ field }}
+                                        </label>
+                                    </div>
+                                {% endif %}
+
                             {% endfor %}
                             <div class="form-row  text-center">
                                 <a class="btn btn-sm btn-raised btn-default"
@@ -37,7 +59,87 @@
                 </div>
             </fieldset>
         </div>
+        <script>
 
+
+            var legal_type = document.getElementById('id_legal_type');
+            {#            console.log(legal_type);#}
+
+            var div_cnpj = document.getElementById("cnpj_container");
+            {#            console.log('cnpj ' + div_cnpj);#}
+            var div_cpf = document.getElementById("cpf_container");
+            {#            console.log('cpf ' + div_cpf);#}
+            var cnpj = document.getElementById('id_cnpj');
+            var cpf = document.getElementById('id_cpf');
+
+            if (legal_type.getAttribute('value') === 'J')
+                cnpj.required = true;
+            else if (legal_type.getAttribute('value') === 'F')
+                cpf.required = true;
+            {#            cnpj.addEventListener('input',function () {#}
+            {#                 cnpj.value = cnpj.value.trim();#}
+            {#            },false);#}
+
+            {#            cpf.setAttribute('data-mask', '000.000.000-00');#}
+            {##}
+            {#            cnpj.setAttribute('data-mask', '00.000.000/0000-00');#}
+
+
+            cnpj.addEventListener('change', function () {
+                spaces = cnpj.value;
+                if (!spaces.replace(/\s/g, '').length) {
+                    // string only contained whitespace (ie. spaces, tabs or line breaks)
+                    console.log('Entrou');
+                    {#                spaces.trim();#}
+                    cnpj.required = true;
+                    console.log(spaces.length);
+                    cnpj.value = spaces.replace(/\s/g, '');
+                    cnpj.removeAttribute('value');
+
+                }
+            });
+
+            cpf.addEventListener('change', function () {
+                spaces = cpf.value;
+                if (!spaces.replace(/\s/g, '').length) {
+                    // string only contained whitespace (ie. spaces, tabs or line breaks)
+                    console.log('Entrou');
+                    {#                spaces.trim();#}
+                    cpf.required = true;
+                    console.log(spaces.length);
+                    cpf.value = spaces.replace(/\s/g, '');
+                    cpf.removeAttribute('value');
+
+                }
+            });
+
+            legal_type.addEventListener("change", function () {
+
+                if ($(this).prop('value') === 'J') {
+                    cnpj.required = true;
+                    div_cnpj.setAttribute('class', 'form-group');
+
+                    cpf.required = false;
+                    cpf.value = '';
+                    cpf.removeAttribute('value');
+                    div_cpf.setAttribute('class', 'form-group hidden');
+                } else {
+                    cpf.required = true;
+                    div_cpf.setAttribute('class', 'form-group');
+                    cnpj.required = false;
+                    cnpj.value = '';
+                    cnpj.removeAttribute('value');
+                    div_cnpj.setAttribute('class', 'form-group hidden');
+
+                }
+            }, false);
+
+            {#            $(document).ready(function () {#}
+            {#                console.log('foi');#}
+            {#                $('#cpf').mask('000.000.000-00', {reverse: true});#}
+            {#                $('#cnpj').mask('00.000.000/0000-00', {reverse: true});#}
+            {#            });#}
+        </script>
     </form>
 
 {% endblock content %}

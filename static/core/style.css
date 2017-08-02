@@ -7,7 +7,7 @@
     text-align: center !important;
 }
 
-#row-file{
+#row-file {
     display: flex;
     align-items: center;
 }
@@ -120,20 +120,20 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
 
 .RETURN {
     color: white !important;
-    background: linear-gradient(60deg, #ef5350, #e53935);
-    box-shadow: 0 12px 20px -10px rgba(244, 67, 54, 0.28), 0 4px 20px 0px rgba(0, 0, 0, 0.12), 0 7px 8px -5px rgba(244, 67, 54, 0.2);
+    background: linear-gradient(60deg, #8F0F0E, #8F0000);
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
 .OPEN {
     color: white !important;
-    background: linear-gradient(60deg, #ffa726, #fb8c00);
-    box-shadow: 0 12px 20px -10px rgba(255, 152, 0, 0.28), 0 4px 20px 0px rgba(0, 0, 0, 0.12), 0 7px 8px -5px rgba(255, 152, 0, 0.2);
+    background: linear-gradient(60deg, #DBCA34, #DBCA34);
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
 .ACCEPTED {
     color: white !important;
-    background: linear-gradient(60deg, #26c6da, #00acc1);
-    box-shadow: 0 12px 20px -10px rgba(0, 188, 212, 0.28), 0 4px 20px 0px rgba(0, 0, 0, 0.12), 0 7px 8px -5px rgba(0, 188, 212, 0.2);
+    background: linear-gradient(60deg, #CC6905, #CC6905);
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
 .REFUSED {
@@ -145,19 +145,19 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
 
 .DONE {
     color: white !important;
-    background: linear-gradient(60deg, #66bb6a, #43a047);
-    box-shadow: 0 12px 20px -10px rgba(76, 175, 80, 0.28), 0 4px 20px 0px rgba(0, 0, 0, 0.12), 0 7px 8px -5px rgba(76, 175, 80, 0.2);
+    background: linear-gradient(60deg, #5472F4, #5472F2);
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
 .BLOCKEDPAYMENT {
     color: white !important;
-    background: linear-gradient(60deg, #140F33, #293E70);
+    background: linear-gradient(60deg, #673AB7, #673AB0);
     box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
 .FINISHED {
     color: white !important;
-    background: linear-gradient(60deg, #66bb6a, #43a047);
+    background: linear-gradient(60deg, #20911F, #20901F);
     box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
@@ -166,11 +166,11 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
 }
 
 .loader {
-  border: 16px solid #f3f3f3;
-  border-radius: 50%;
-  border-top: 16px solid #3498db;
-  width: 30px;
-  height: 30px;
-  -webkit-animation: spin 2s linear infinite;
-  animation: spin 2s linear infinite;
+    border: 16px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 16px solid #3498db;
+    width: 30px;
+    height: 30px;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
 }

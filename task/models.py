@@ -121,15 +121,15 @@ class Task(Audit, LegacyCode):
             'finished_date').first()
         # acceptance_date IS NOT NULL AND execution_date IS NULL AND return_date IS NULL
         if acceptance_date is not None and refused_date is None and execution_date is None and return_date is None \
-                and finished_date is not None and blocked_payment_date is None:
+                and finished_date is None and blocked_payment_date is None:
             return TaskStatus.ACCEPTED
         # return_date IS NOT NULL
         elif acceptance_date is not None and refused_date is None and execution_date is None and return_date is not None \
-                and finished_date is not None and blocked_payment_date is None:
+                and finished_date is None and blocked_payment_date is None:
             return TaskStatus.RETURN
         # acceptance_date IS NULL
         elif acceptance_date is None and refused_date is None and execution_date is None and return_date is None \
-                and finished_date is not None and blocked_payment_date is None:
+                and finished_date is None and blocked_payment_date is None:
             return TaskStatus.OPEN
         # execution_date IS NOT NUL
         elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is None \
@@ -152,6 +152,20 @@ class Task(Audit, LegacyCode):
 
     def __str__(self):
         return self.legacy_code  # TODO verificar campo para toString
+
+    @property
+    def court_district(self):
+        return self.movement.law_suit.court_district
+
+    @property
+    def court(self):
+        return self.movement.law_suit.person_court
+
+    # TODO fazer composição para buscar no endereço completo
+    @property
+    def address(self):
+        address = self.movement.law_suit.person_court.address_set.first()
+        return address if address else ''
 
 
 def get_dir_name(self, filename):

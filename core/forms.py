@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.forms import ModelForm
+from localflavor.br.forms import BRCPFField, BRCNPJField
 
 from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, Country, City, State, ContactMechanism
@@ -69,9 +70,17 @@ class ContactMechanismForm(ModelForm, forms.Form):
 
 
 class PersonForm(BaseForm, forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(PersonForm, self).__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            if field_name is 'cpf' and self.instance.legal_type == 'F':
+                field.initial = self.instance.cpf_cnpj
+            elif field_name is 'cnpj' and self.instance.legal_type == 'J':
+                field.initial = self.instance.cpf_cnpj
+
     class Meta:
         model = Person
-        fields = ['legal_name', 'name', 'is_lawyer', "is_correspondent", 'is_court', 'legal_type', 'cpf_cnpj',
+        fields = ['legal_name', 'name', 'is_lawyer', "is_correspondent", 'is_court', 'legal_type', 'cpf', 'cnpj',
                   'auth_user', 'is_active', 'is_customer', 'is_supplier']
 
     legal_name = forms.CharField(
@@ -91,7 +100,7 @@ class PersonForm(BaseForm, forms.Form):
     is_correspondent = CustomBooleanField(
         required=False,
     )
-    
+
     is_customer = CustomBooleanField(
         required=False,
     )
@@ -111,11 +120,8 @@ class PersonForm(BaseForm, forms.Form):
                   ('J', u'Jurídica')])
     )
 
-    cpf_cnpj = forms.CharField(
-        label=u"CPF/CNPJ",
-        required=False,
-        max_length=255,
-    )
+    cpf = BRCPFField(label="CPF", required=False, max_length=14, min_length=11)
+    cnpj = BRCNPJField(label="CNPJ", required=False, min_length=14, max_length=18)
 
     auth_user = forms.ModelChoiceField(
         queryset=User.objects.all(),

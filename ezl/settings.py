@@ -53,8 +53,8 @@ INSTALLED_APPS = [
     # Enable plugins
     'dal_select2',
     'dal_queryset_sequence',
-    #Test
-    
+    # Test
+    'localflavor'
 
 ]
 

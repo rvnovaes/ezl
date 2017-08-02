@@ -10,3 +10,6 @@ password_sftp = "mta@2017"
 username_sftp = "admin.ezl"
 local_path = '/opt/files_easy_lawyer/GEDs/'
 log_file = '/tmp/etl_ged.log'
+
+# nome de usuário utilizado na exportação EZL -> Advwin
+create_user = 'six'
