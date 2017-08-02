@@ -7,18 +7,84 @@ from .forms import *
 from model_mommy import mommy
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+from core.models import Person, State
 import datetime
 
 #TODO LawSuit, Views
+
+#Status 200: conseguiu acessar a pagina
+#Status 300: Redirecionamento
+#Status 404: Nao encontrado      
+#model_mommy serve apenas para testes em modelos. Testes na view tem que ser feitos da maneira convencional  
+
+class LawSuitTest(TestCase):
+
+    def setUp(self):
+        
+        user = User.objects.create_user(username='username', password='password')
+        self.client.login(username='username', password='password')
+
+        
+    def test_routine(self):
+
+        c_inst = mommy.make(LawSuit)                    
+        self.assertTrue(isinstance(c_inst, LawSuit))
+
+    def test_valid_LawSuitForm(self):
+    
+        person_lawyer = mommy.make(Person,name= 'Adv',is_lawyer = True, is_active=True).id
+        folder = mommy.make(Folder).id
+        instance = mommy.make(Instance).id
+        court_district = mommy.make(CourtDistrict).id
+        person_court = mommy.make(Person,name= 'Court',is_active=True, is_court = True).id
+        court_division = mommy.make(CourtDivision,is_active=True).id
+        law_suit_number = '12345'
+        
+        data = {'person_lawyer':person_lawyer,
+                'folder':folder,
+                'instance':instance,
+                'court_district':court_district,
+                'person_court':person_court,
+                'court_division':court_division,
+                'law_suit_number':law_suit_number}
+                
+        form = LawSuitForm(data=data)
+        print(form.errors)
+        self.assertTrue(form.is_valid())
+          
+    def test_list_view(self):
+    
+        
+        url = reverse('lawsuit_list')
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        
+        
+    def test_create_view(self):
+    
+        
+        url = reverse('lawsuit_add')
+        resp = self.client.get(url)
+        
+        self.assertEqual(resp.status_code, 200)
+        
+    def test_update_view(self):
+    
+        c_inst = mommy.make(LawSuit)
+        url = reverse('lawsuit_update',kwargs={'pk':c_inst.id})
+        resp = self.client.get(url)
+        
+        self.assertEqual(resp.status_code, 200)        
+
       
-#model_mommy serve apenas para testes em modelos. Testes na view tem que ser feitos da maneira convencional        
 class InstanceTest(TestCase):
 
     def setUp(self):
         
         user = User.objects.create_user(username='username', password='password')
         self.client.login(username='username', password='password')
-        #self.c_inst = mommy.make(Instance,name='Random')       
+  
           
         
     #Jeito antigo
@@ -67,16 +133,15 @@ class InstanceTest(TestCase):
         
         self.assertEqual(resp.status_code, 200)
     
-    '''    
-    def test_delete_view(self):
+        
+    #def test_delete_view(self):
     
+    #    c_inst = mommy.make(Instance,name='123')
+    #    url = reverse('instance_delete',kwargs={'pk':c_inst.id})
+    #    resp = self.client.get(url)
         
-        url = reverse('instance_delete',kwargs={})
-        resp = self.client.get(url)
-        
-        self.assertEqual(resp.status_code, 200)
-    '''       
- 
+    #    self.assertEqual(resp.status_code, 200)
+    
 
 class FolderTest(TestCase):
 

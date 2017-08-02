@@ -1,32 +1,117 @@
+from django.utils.timezone import now
+from django.contrib.auth.models import User
 from django.test import TestCase
-from models import *
+from .models import *
+from .views import *
+from .forms import *
+from model_mommy import mommy
 from django.core.urlresolvers import reverse
-from forms import *
+from django.contrib.auth.models import User
+
     
-# models test
 class PersonTest(TestCase):
 
-    def create_person(self,legal_name = "Teste Unitario Usuario", 
-                           name = "Teste Unitario Usuario", 
-                           is_lawyer = False, 
-                           is_correspondent = False, 
-                           is_court = False, 
-                           legal_type = 'F', 
-                           cpf_cnpj = '1234567890', 
-                           is_customer = False, 
-                           is_supplier = False)
-        return Person.objects.create(legal_name = legal_name, 
-                                     name = name, 
-                                     is_lawyer = is_lawyer, 
-                                     is_correspondent = is_correspondent, 
-                                     is_court = is_court, 
-                                     legal_type = legal_type, 
-                                     cpf_cnpj = cpf_cnpj, 
-                                     is_customer = is_customer, 
-                                     is_supplier = is_customer)
+    def setUp(self):
+        
+        user = User.objects.create_user(username='username', password='password')
+        self.client.login(username='username', password='password')
+   
+    def test_model(self):
+        
+        #mommy deixa as coisas bem mais faaceis
+        c_inst = mommy.make(Person,name='Random')
+        self.assertTrue(isinstance(c_inst, Person))
+    
+    
+    def test_valid_PersonForm(self):
+    
+        legal_type = 'F'
+        
+        data = {'legal_type': legal_type} #Unico requerido
+        form = PersonForm(data=data)
+        print(form.errors)
+        self.assertTrue(form.is_valid())   
+      
+    def test_list_view(self):
+    
+        
+        url = reverse('person_list')
+        resp = self.client.get(url)
 
-    def test_person_creation(self):
-        w = self.create_whatever()
-        self.assertTrue(isinstance(w, Person))
-        self.assertEqual(w.__unicode__(), w.title)
+        self.assertEqual(resp.status_code, 200) #Se consegue alcancar a pagina
+        
+       
+    def test_create_view(self):
+    
+        
+        url = reverse('person_add')
+        resp = self.client.get(url)
+        
+        self.assertEqual(resp.status_code, 200)
+    
+       
+    def test_update_view(self):
+    
+        c_inst = mommy.make(Person,legal_type='F')
+        url = reverse('person_update',kwargs={'pk':c_inst.id})
+        resp = self.client.get(url)
+        
+        self.assertEqual(resp.status_code, 200)
+    
+class AdressTest(TestCase):
+
+
+    def test_model_city(self):
+    
+        c_inst = mommy.make(City)
+        self.assertTrue(isinstance(c_inst, City))
+        
+    def test_model_country(self):
+    
+        c_inst = mommy.make(Country)
+        self.assertTrue(isinstance(c_inst, Country))
+        
+    def test_model_state(self):
+    
+        c_inst = mommy.make(State)
+        self.assertTrue(isinstance(c_inst, State))
+    
+    def test_valid_AddressForm(self):
+    
+        street = 'Grao Mogol'
+        number = '123'
+        city_region = 'Carmo'
+        zip_code = '99999-999'
+        country = mommy.make(Country,id=1).id #Conforme os forms
+        state = mommy.make(State,id=13,country_id=country).id
+        city = mommy.make(City,state_id=state).id
+        
+        
+        data = {'street': street,
+                'number': number,
+                'city_region': city_region,
+                'zip_code': zip_code,
+                'country':country,
+                'state':state,
+                'city':city}
+                
+        form = AddressForm(data=data)
+        print(form.errors)
+        self.assertTrue(form.is_valid()) 
+
+
+class ContactMechanismTest(TestCase):
+
+    def test_model(self):
+    
+        c_inst = mommy.make(ContactMechanism)
+        self.assertTrue(isinstance(c_inst, ContactMechanism))
+
+
+class ContactUsTest(TestCase):
+
+     def test_model(self):
+         c_inst = mommy.make(ContactUs)
+         self.assertTrue(isinstance(c_inst, ContactUs))  
+     
 
