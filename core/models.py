@@ -129,6 +129,22 @@ class Person(Audit, LegacyCode):
     is_customer = models.BooleanField(null=False, default=False, verbose_name="É Cliente?")
     is_supplier = models.BooleanField(null=False, default=False, verbose_name="É Fornecedor?")
 
+    @property
+    def cpf(self):
+        return self.cpf_cnpj
+
+    @cpf.setter
+    def cpf(self, value):
+        self.cpf = value
+
+    @property
+    def cnpj(self):
+        return self.cpf_cnpj
+
+    @cnpj.setter
+    def cnpj(self, value):
+        self.cnpj = value
+
     class Meta:
         db_table = "person"
         ordering = ['-id']
