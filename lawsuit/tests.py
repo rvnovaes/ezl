@@ -75,6 +75,16 @@ class LawSuitTest(TestCase):
         url = reverse('lawsuit_update',kwargs={'pk':c_inst.id})
         resp = self.client.get(url)
         
+        self.assertEqual(resp.status_code, 200)
+        
+    def test_delete_view(self):
+    
+        c_inst = mommy.make(LawSuit)
+        data = {'lawsuit_list':{c_inst.id}}
+        url = reverse('lawsuit_delete')
+        resp = self.client.post(url,data,follow=True)
+        #print(resp.context)
+        
         self.assertEqual(resp.status_code, 200)        
 
       
@@ -134,13 +144,15 @@ class InstanceTest(TestCase):
         self.assertEqual(resp.status_code, 200)
     
         
-    #def test_delete_view(self):
+    def test_delete_view(self):
     
-    #    c_inst = mommy.make(Instance,name='123')
-    #    url = reverse('instance_delete',kwargs={'pk':c_inst.id})
-    #    resp = self.client.get(url)
+        c_inst = mommy.make(Instance,name='123')
+        data = {'instance_list':{c_inst.id}}
+        url = reverse('instance_delete')
+        resp = self.client.post(url,data,follow=True)
+        #print(resp.context)
         
-    #    self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
     
 
 class FolderTest(TestCase):
@@ -193,13 +205,15 @@ class FolderTest(TestCase):
         
         self.assertEqual(resp.status_code, 200)
         
-    #def test_delete_view(self):
+    def test_delete_view(self):
     
+        c_inst = mommy.make(Folder)
+        data = {'folder_list':{c_inst.id}}
+        url = reverse('folder_delete')
+        resp = self.client.post(url,data,follow=True)
+        #print(resp.context)
         
-    #    url = reverse('folder_delete')
-    #    resp = self.client.get(url)
-        
-    #    self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
 
 
 class CourtDivisionTest(TestCase):
@@ -249,12 +263,15 @@ class CourtDivisionTest(TestCase):
         
         self.assertEqual(resp.status_code, 200)
         
-    #def test_delete_view(self):
+    def test_delete_view(self):
     
-    #    url = reverse('courtdivision_delete')
-    #    resp = self.client.get(url)
+        c_inst = mommy.make(CourtDivision)
+        data = {'courtdivision_list':{c_inst.id}}
+        url = reverse('courtdivision_delete')
+        resp = self.client.post(url,data,follow=True)
+        #print(resp.context)
         
-    #    self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
 
 
 class CourtDistrictTest(TestCase):
@@ -303,12 +320,15 @@ class CourtDistrictTest(TestCase):
         
         self.assertEqual(resp.status_code, 200)
         
-    #def test_delete_view(self):
+    def test_delete_view(self):
     
-    #    url = reverse('courtdistrict_delete')
-    #    resp = self.client.get(url)
+        c_inst = mommy.make(CourtDistrict)
+        data = {'courtdistrict_list':{c_inst.id}}
+        url = reverse('courtdistrict_delete')
+        resp = self.client.post(url,data,follow=True)
+        #print(resp.context)
         
-    #    self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
 
 
 class MovementTest(TestCase):
@@ -369,12 +389,16 @@ class MovementTest(TestCase):
         
         self.assertEqual(resp.status_code, 200)
         
-    #def test_delete_view(self):
+    def test_delete_view(self):
     
-    #    url = reverse('movement_delete')
-    #    resp = self.client.get(url)
+        c_inst = mommy.make(Movement)
+        data = {'movement_list':{c_inst.id}}
+        url = reverse('movement_delete')
+        resp = self.client.post(url,data,follow=True)
+        #print(resp.context)
         
-    #    self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
+
 
         
 class TypeMovementTest(TestCase):
@@ -424,12 +448,16 @@ class TypeMovementTest(TestCase):
         
         self.assertEqual(resp.status_code, 200)
         
-    #def test_delete_view(self):
+    def test_delete_view(self):
     
-    #    url = reverse('type_movement_delete')
-    #    resp = self.client.get(url)
+        c_inst = mommy.make(TypeMovement)
+        data = {'type_movement_list':{c_inst.id}}
+        url = reverse('type_movement_delete')
+        resp = self.client.post(url,data,follow=True)
+        #print(resp.context)
         
-    #    self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
+
 
 
 

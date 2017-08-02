@@ -164,17 +164,27 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
 
 class EcmCreateView(LoginRequiredMixin, CreateView):
+
     def post(self, request, *args, **kwargs):
+        
+        
         files = request.FILES.getlist('path')
         task = kwargs['pk']
 
+        data = {'success': False,
+                'message': exception_create()
+                        }
         for file in files:
+        
+            
             ecm = Ecm(path=file,
+            
                       task=Task.objects.get(id=task),
                       create_user_id=str(request.user.id),
                       create_date=timezone.now()
                       )
-
+             
+             
             try:
                 ecm.save()
                 data = {'success': True,
@@ -202,8 +212,8 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
                 data = {'success': False,
                         'message': exception_create()
                         }
-
-            return JsonResponse(data)
+        
+        return JsonResponse(data)
 
 
 class TypeTaskListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -363,3 +373,4 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         return context
+        

@@ -57,6 +57,16 @@ class PersonTest(TestCase):
         resp = self.client.get(url)
         
         self.assertEqual(resp.status_code, 200)
+        
+    def test_delete_view(self):
+    
+        c_inst = mommy.make(Person,name='Random')
+        data = {'person_list':{c_inst.id}}
+        url = reverse('person_delete')
+        resp = self.client.post(url,data,follow=True)
+        #print(resp.context)
+        
+        self.assertEqual(resp.status_code, 200) 
     
 class AdressTest(TestCase):
 
