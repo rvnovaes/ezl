@@ -1,10 +1,10 @@
 {% extends 'inicial.html' %}
-{#{% load staticfiles %}#}
+{% load staticfiles %}
 {#{% load formset_tags %}#}
 
 {% block content %}
     {% include 'core/widgets/messages.html' %}
-
+    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
     <form action="" method="post">{% csrf_token %}
         <div class="col-lg-12 ">
             <fieldset>
@@ -80,6 +80,11 @@
             {#                 cnpj.value = cnpj.value.trim();#}
             {#            },false);#}
 
+            {#            cpf.setAttribute('data-mask', '000.000.000-00');#}
+            {##}
+            {#            cnpj.setAttribute('data-mask', '00.000.000/0000-00');#}
+
+
             cnpj.addEventListener('change', function () {
                 spaces = cnpj.value;
                 if (!spaces.replace(/\s/g, '').length) {
@@ -115,20 +120,25 @@
                     div_cnpj.setAttribute('class', 'form-group');
 
                     cpf.required = false;
-                    cpf.setAttribute('value', '');
+                    cpf.value = '';
                     cpf.removeAttribute('value');
                     div_cpf.setAttribute('class', 'form-group hidden');
                 } else {
                     cpf.required = true;
                     div_cpf.setAttribute('class', 'form-group');
                     cnpj.required = false;
-                    cnpj.setAttribute('value', '');
+                    cnpj.value = '';
                     cnpj.removeAttribute('value');
                     div_cnpj.setAttribute('class', 'form-group hidden');
 
                 }
             }, false);
 
+            {#            $(document).ready(function () {#}
+            {#                console.log('foi');#}
+            {#                $('#cpf').mask('000.000.000-00', {reverse: true});#}
+            {#                $('#cnpj').mask('00.000.000/0000-00', {reverse: true});#}
+            {#            });#}
         </script>
     </form>
 
