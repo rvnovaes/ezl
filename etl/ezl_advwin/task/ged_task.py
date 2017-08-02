@@ -2,7 +2,6 @@ import os
 # os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ezl.settings")
 # import django
 # django.setup()
-
 from datetime import datetime
 from etl.advwin_ezl import settings
 from pathlib import Path
@@ -17,9 +16,6 @@ class EcmETL:
     advwin_cfg_file = os.path.join(os.path.abspath(os.path.dirname(connections.__file__)), 'advwin_ho.cfg')
     advwin_engine = connect_db(advwin_cfg_file)
     model = Ecm
-    query = None
-    advwin_table = None
-    has_status = None
 
     def extract_data(self):
         return self.model.objects.filter(updated=True)
