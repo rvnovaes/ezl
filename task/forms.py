@@ -19,7 +19,7 @@ class TaskForm(BaseForm):
         fields = ['legacy_code', 'movement', 'person_asked_by', "person_executed_by", 'type_task',
                   'delegation_date', 'acceptance_date', "reminder_deadline_date", "final_deadline_date",
                   'execution_date',
-                  'return_date', 'refused_date', 'is_active']
+                  'return_date', 'refused_date', 'block_payment_date', 'finished_date', 'is_active']
 
     legacy_code = forms.CharField(
         label=u"Código Legado",
@@ -88,6 +88,16 @@ class TaskForm(BaseForm):
                                        widget=MDDatePicker(attrs={'class': 'form-control'},
                                                            format='DD/MM/YYYY')
                                        )
+
+    block_payment_date = forms.DateTimeField(required=False,
+                                             widget=MDDatePicker(attrs={'class': 'form-control'},
+                                                                 format='DD/MM/YYYY')
+                                             )
+
+    finished_date = forms.DateTimeField(required=False,
+                                        widget=MDDatePicker(attrs={'class': 'form-control'},
+                                                            format='DD/MM/YYYY')
+                                        )
 
 
 class TaskDetailForm(ModelForm):

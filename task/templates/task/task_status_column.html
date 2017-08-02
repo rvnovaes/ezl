@@ -11,4 +11,11 @@
        title="Cumprida">assignment_turned_in</i>
 {% elif value.name == 'REFUSED' %}
     <i class="material-icons REFUSED" data-toggle="tooltip" data-placement="bottom" title="Recusada">assignment_late</i>
+{% elif value.name == 'BLOCKEDPAYMENT' %}
+    <i class="material-icons BLOCKEDPAYMENT" data-toggle="tooltip" data-placement="bottom"
+       title="Glosada">money_off</i>
+{% elif value.name == 'FINISHED' %}
+    <i class="material-icons FINISHED" data-toggle="tooltip" data-placement="bottom"
+       title="Finalizada">gavel</i>
 {% endif %}
+

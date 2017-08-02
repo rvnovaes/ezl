@@ -121,15 +121,15 @@ class Task(Audit, LegacyCode):
             'finished_date').first()
         # acceptance_date IS NOT NULL AND execution_date IS NULL AND return_date IS NULL
         if acceptance_date is not None and refused_date is None and execution_date is None and return_date is None \
-                and finished_date is not None and blocked_payment_date is None:
+                and finished_date is None and blocked_payment_date is None:
             return TaskStatus.ACCEPTED
         # return_date IS NOT NULL
         elif acceptance_date is not None and refused_date is None and execution_date is None and return_date is not None \
-                and finished_date is not None and blocked_payment_date is None:
+                and finished_date is None and blocked_payment_date is None:
             return TaskStatus.RETURN
         # acceptance_date IS NULL
         elif acceptance_date is None and refused_date is None and execution_date is None and return_date is None \
-                and finished_date is not None and blocked_payment_date is None:
+                and finished_date is None and blocked_payment_date is None:
             return TaskStatus.OPEN
         # execution_date IS NOT NUL
         elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is None \
