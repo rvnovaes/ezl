@@ -67,22 +67,29 @@ class DashboardView(MultiTableMixin, TemplateView):
         data = {}
         if status == TaskStatus.OPEN:
             data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
-                                       refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True)
+                                       refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True,
+                                       blocked_payment_date__isnull=True,
+                                       finished_date__isnull=True)
         elif status == TaskStatus.ACCEPTED:
             data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                       refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True)
+                                       refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True,
+                                       blocked_payment_date__isnull=True,
+                                       finished_date__isnull=True)
         elif status == TaskStatus.REFUSED:
             data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
                                        refused_date__isnull=False, execution_date__isnull=True,
-                                       return_date__isnull=True)
+                                       return_date__isnull=True, blocked_payment_date__isnull=True,
+                                       finished_date__isnull=True)
         elif status == TaskStatus.DONE:
             data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
                                        refused_date__isnull=True, execution_date__isnull=False,
-                                       return_date__isnull=True)
+                                       return_date__isnull=True, blocked_payment_date__isnull=True,
+                                       finished_date__isnull=True)
         elif status == TaskStatus.RETURN:
             data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
                                        refused_date__isnull=True, execution_date__isnull=True,
-                                       return_date__isnull=False)
+                                       return_date__isnull=False, blocked_payment_date__isnull=True,
+                                       finished_date__isnull=True)
 
         elif status == TaskStatus.BLOCKEDPAYMENT:
             data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
