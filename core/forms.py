@@ -120,7 +120,7 @@ class PersonForm(BaseForm, forms.Form):
                   ('J', u'Jurídica')])
     )
 
-    cpf = BRCPFField(label="CPF", required=False, max_length=14, min_length=11)
+    cpf = BRCPFField(label="CPF", required=False, max_length=14, min_length=11, empty_value=None)
     cnpj = BRCNPJField(label="CNPJ", required=False, min_length=14, max_length=18)
 
     auth_user = forms.ModelChoiceField(

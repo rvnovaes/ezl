@@ -1,6 +1,6 @@
 {% extends 'inicial.html' %}
 {% load staticfiles %}
-{#{% load formset_tags %}#}
+{#{% load formset_tags   %}#}
 
 {% block content %}
     {% include 'core/widgets/messages.html' %}
@@ -59,16 +59,19 @@
                 </div>
             </fieldset>
         </div>
-        <script>
+        <script type="text/javascript">
+            $(function () {
 
+                $('#id_cnpj').mask('00.000.000/0000-00', {reverse: true});
+                $('#id_cpf').mask('000.000.000-00', {reverse: true});
+
+            });
 
             var legal_type = document.getElementById('id_legal_type');
-            {#            console.log(legal_type);#}
 
             var div_cnpj = document.getElementById("cnpj_container");
-            {#            console.log('cnpj ' + div_cnpj);#}
             var div_cpf = document.getElementById("cpf_container");
-            {#            console.log('cpf ' + div_cpf);#}
+
             var cnpj = document.getElementById('id_cnpj');
             var cpf = document.getElementById('id_cpf');
 
@@ -76,13 +79,6 @@
                 cnpj.required = true;
             else if (legal_type.getAttribute('value') === 'F')
                 cpf.required = true;
-            {#            cnpj.addEventListener('input',function () {#}
-            {#                 cnpj.value = cnpj.value.trim();#}
-            {#            },false);#}
-
-            {#            cpf.setAttribute('data-mask', '000.000.000-00');#}
-            {##}
-            {#            cnpj.setAttribute('data-mask', '00.000.000/0000-00');#}
 
 
             cnpj.addEventListener('change', function () {
@@ -90,7 +86,7 @@
                 if (!spaces.replace(/\s/g, '').length) {
                     // string only contained whitespace (ie. spaces, tabs or line breaks)
                     console.log('Entrou');
-                    {#                spaces.trim();#}
+                    spaces.trim();
                     cnpj.required = true;
                     console.log(spaces.length);
                     cnpj.value = spaces.replace(/\s/g, '');
@@ -104,7 +100,7 @@
                 if (!spaces.replace(/\s/g, '').length) {
                     // string only contained whitespace (ie. spaces, tabs or line breaks)
                     console.log('Entrou');
-                    {#                spaces.trim();#}
+                    spaces.trim();
                     cpf.required = true;
                     console.log(spaces.length);
                     cpf.value = spaces.replace(/\s/g, '');
@@ -134,11 +130,7 @@
                 }
             }, false);
 
-            {#            $(document).ready(function () {#}
-            {#                console.log('foi');#}
-            {#                $('#cpf').mask('000.000.000-00', {reverse: true});#}
-            {#                $('#cnpj').mask('00.000.000/0000-00', {reverse: true});#}
-            {#            });#}
+
         </script>
     </form>
 
