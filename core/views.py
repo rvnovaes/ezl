@@ -1,4 +1,3 @@
-from compat import JsonResponse
 from dal import autocomplete
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -8,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import ProtectedError
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
@@ -198,39 +197,6 @@ class PersonCreateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
 
         # super(PersonCreateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
-
-    # def post(self, request, *args, **kwargs):
-    #
-    #     person_form = PersonForm(request.POST)
-    #
-    #     if person_form.is_valid():
-    #         person_form.instance.create_date = datetime.now()
-    #         person_form.instance.create_user = User.objects.get(id=self.request.user.id)
-    #         person = person_form.save()
-    #         addresses_form = AddressFormSet(self.request.POST, instance=Person.objects.get(id=person.id))
-    #
-    #         if addresses_form.is_valid():
-    #             for address in addresses_form:
-    #
-    #                 if address.cleaned_data['id']:
-    #                     id_form = address.cleaned_data['id'].id
-    #                     pass
-    #
-    #                 else:
-    #                     address.instance.create_date = datetime.now()
-    #                     address.instance.create_user = User.objects.get(id=self.request.user.id)
-    #                     address.save()
-    #             messages.success(self.request, self.success_message)
-    #
-    #         else:
-    #             for error in addresses_form.errors:
-    #                 messages.error(request, error)
-    #
-    #             return HttpResponseRedirect(self.success_url)
-    #
-    #         messages.success(request, self.success_message)
-    #         super(PersonCreateView, self).post(request, *args, **kwargs)
-    #         return HttpResponseRedirect(self.success_url)
 
     def get_context_data(self, **kwargs):
         context = super(PersonCreateView, self).get_context_data(**kwargs)
