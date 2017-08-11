@@ -213,8 +213,53 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="panel panel-primary">
+                <div class="panel-heading " data-toggle="collapse" data-target="#history" id="header-attachment"
+                     onclick="toggleArrowHist()">
+                    <div class="panel-title"><i class="material-icons">history</i>
+                        <b>Histórico</b>
+                        <i class="material-icons" style="float: right;" id="down_hist">arrow_drop_down</i>
+                        <i class="material-icons" style="float: right; display: none;" id="up_hist">arrow_drop_up</i>
+                    </div>
+                </div>
 
+                <div id="history" class="panel-collapse collapse">
+                    <div class="panel-body form-group is-focused">
+
+                        {% if not task_history %}
+                            <p style="text-align: center;">Nenhum histórico disponível</p>
+
+                        {% else %}
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <td class="col-xs-4"
+                                        style="font-size: small; font-weight: 500; text-align: center;">Data da Mudança
+                                    </td>
+                                    <td class="col-xs-4"
+                                        style="font-size: small; font-weight: 500; text-align: center;">Usuário
+                                    </td>
+                                    <td class="col-xs-4"
+                                        style="font-size: small; font-weight: 500; text-align: center;">Status
+                                    </td>
+                                </tr>
+                                </thead>
+                                {% for history in task_history %}
+                                    <tr>
+                                        <td class="col-xs-4"
+                                            style="font-size: small; font-weight: 100; text-align: center;">{{ history.create_date }}</td>
+                                        <td class="col-xs-4"
+                                            style="font-size: small; font-weight: 100; text-align: center;">{{ history.create_user }}</td>
+                                        <td class="col-xs-4"
+                                            style="font-size: small; font-weight: 100; text-align: center;">{{ history.status }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -418,6 +463,25 @@
              a medida que for adicionando novos arquivos -->
         <div id="scripts">
         </div>
+
+        <script>
+            var expanded = false;
+
+            function toggleArrowHist() {
+
+                if (expanded) {
+                    expanded = false;
+                    document.getElementById("up_hist").style.display = "none";
+                    document.getElementById("down_hist").style.display = "block";
+                }
+                else {
+                    expanded = true;
+                    document.getElementById("up_hist").style.display = "block";
+                    document.getElementById("down_hist").style.display = "none";
+                }
+            }
+        </script>
+
         <script>
             var expanded = false;
 
