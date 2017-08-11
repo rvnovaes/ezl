@@ -4,8 +4,9 @@ from django.forms import ModelForm
 from localflavor.br.forms import BRCPFField, BRCNPJField
 
 from core.fields import CustomBooleanField
-from core.models import ContactUs, Person, Address, Country, City, State, ContactMechanism
+from core.models import ContactUs, Person, Address, Country, City, State, ContactMechanism, AddressType
 from lawsuit.forms import BaseForm
+from django.forms.models import inlineformset_factory
 
 
 class ContactForm(ModelForm, forms.Form):
@@ -134,14 +135,14 @@ class PersonForm(BaseForm, forms.Form):
 class AddressForm(ModelForm, forms.Form):
     class Meta:
         model = Address
-        fields = ['type', 'street', 'number', 'complement', 'city_region', 'zip_code', 'notes', 'home_address',
-                  'business_address', 'country', 'state', 'city', 'is_active']
+        fields = ['address_type', 'street', 'number', 'complement', 'city_region', 'zip_code', 'notes', 'country',
+                  'state', 'city',
+                  'is_active']
 
-    type = forms.CharField(
-        label=u"Tipo de endereço",
-        required=False,
-        max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
+    address_type = forms.ModelChoiceField(
+        label=u"Tipo de Endereço",
+        queryset=AddressType.objects.filter(id__gte=1),
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     street = forms.CharField(
@@ -184,17 +185,17 @@ class AddressForm(ModelForm, forms.Form):
         widget=forms.Textarea(attrs={'class': 'form-control input-sm'})
     )
 
-    home_address = forms.BooleanField(
-        label=u"Endereço residencial",
-        required=False,
-        widget=forms.CheckboxInput
-    )
-
-    business_address = forms.BooleanField(
-        label=u"Endereço comercial",
-        required=False,
-        widget=forms.CheckboxInput
-    )
+    # home_address = forms.BooleanField(
+    #     label=u"Endereço residencial",
+    #     required=False,
+    #     widget=forms.CheckboxInput
+    # )
+    #
+    # business_address = forms.BooleanField(
+    #     label=u"Endereço comercial",
+    #     required=False,
+    #     widget=forms.CheckboxInput
+    # )
 
     country = forms.ModelChoiceField(
         label=u"País",
@@ -207,7 +208,8 @@ class AddressForm(ModelForm, forms.Form):
     state = forms.ModelChoiceField(
         label=u"Estado",
         # queryset=State.objects.none(),
-        queryset=State.objects.filter(country_id=1).order_by('name'),
+        # queryset=State.objects.filter(country_id=-1).order_by('name'),
+        queryset=State.objects.filter(id__gt=1).order_by('name'),
         required=True,
         widget=forms.Select(attrs={'class': 'form-control input-sm'})
     )
@@ -216,7 +218,8 @@ class AddressForm(ModelForm, forms.Form):
     city = forms.ModelChoiceField(
         label=u"Município",
         # queryset=City.objects.none(),
-        queryset=City.objects.filter(state_id=13).order_by('name'),
+        # queryset=City.objects.filter(state_id=-1).order_by('name'),
+        queryset=City.objects.filter(id__gt=1).order_by('name'),
         required=True,
         widget=forms.Select(attrs={
             'onchange': "",
@@ -224,3 +227,6 @@ class AddressForm(ModelForm, forms.Form):
         },
         )
     )
+
+
+AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=3)

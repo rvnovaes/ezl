@@ -44,3 +44,35 @@ def file_exists_error_delete():
 
 def exception_delete():
     return "Erro: impossível excluir o arquivo."
+
+
+def address_sucess_deleted():
+    return "Endereço excluído com sucesso."
+
+
+def address_error_deleted():
+    return "Erro ao excluir o endereço."
+
+
+def address_success_create():
+    return "Endereço cadastrado com sucesso."
+
+
+def address_error_create():
+    return "Erro ao cadastrar endereço."
+
+
+def address_success_update():
+    return "Endereço atualizado com sucesso."
+
+
+def address_error_update():
+    return "Erro ao atualizar o endereço."
+
+
+def address_and_person_created():
+    return "Dados cadastrados com sucesso."
+
+
+def address_and_person_not_created():
+    return "Erro ao cadastrar os dados."

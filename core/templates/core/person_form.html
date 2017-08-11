@@ -1,13 +1,19 @@
 {% extends 'inicial.html' %}
 {% load staticfiles %}
-{#{% load formset_tags   %}#}
+{#{% load formset_tags %}#}
 
 {% block content %}
     {% include 'core/widgets/messages.html' %}
     <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
-    <form action="" method="post">{% csrf_token %}
+    <style>
+        #label_id_is_active, #id_is_active, #update_id_address {
+            display: none !important;
+        }
+    </style>
+    <form id="person_form" action="" method="post">{% csrf_token %}
+
         <div class="col-lg-12 ">
-            <fieldset>
+            <div>
                 <div class="form-row">
                     <div class="panel panel-primary">
                         <div class="panel-heading">
@@ -17,7 +23,6 @@
                             {% for field in form %}
 
                                 {% if field.name == 'cpf' %}
-
                                     <div id="cpf_container"
                                          class="form-group {% if form.instance.legal_type == 'J' %} hidden {% endif %}">
                                         <label>
@@ -43,95 +48,994 @@
                                 {% endif %}
 
                             {% endfor %}
-                            <div class="form-row  text-center">
-                                <a class="btn btn-sm btn-raised btn-default"
-                                   href="{% url 'person_list' %}"><i
-                                        class="material-icons left">clear</i>
-                                    Cancelar
-                                </a>
-                                <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
-                                        class="material-icons left">done</i>
-                                    Salvar
-                                </button>
+
+                            <div id="fields_formset" style="display: none;">
+                                <p id="extra_fields"></p>
+
+                                <input type="text" name="address_set-INITIAL_FORMS"
+                                       id="form_management_initial_forms"
+                                       class="form-control" maxlength="255" value="0">
+
+                                <input type="text" name="address_set-MAX_NUM_FORMS"
+                                       id="form_management_max_num_forms"
+                                       class="form-control" maxlength="255" value="1000">
+
+                                <input type="text" name="address_set-TOTAL_FORMS"
+                                       id="form_management_total_forms"
+                                       class="form-control" maxlength="255" value="{{ addresses|length }}">
+
+                                {% for address in addresses %}
+
+                                    <input type="text" name="address_set-{{ forloop.counter0 }}-id"
+                                           id="id_address_set-{{ forloop.counter0 }}-id"
+                                           class="form-control" maxlength="255" value="{{ address.id }}">
+
+                                    <input type="text" name="address_set-{{ forloop.counter0 }}-street"
+                                           id="id_address_set-{{ forloop.counter0 }}-street"
+                                           class="form-control" maxlength="255" value="{{ address.street }}"
+                                           style="display: none !important;">
+
+                                    <input type="text" name="address_set-{{ forloop.counter0 }}-number"
+                                           id="id_address_set-{{ forloop.counter0 }}-number"
+                                           class="form-control" maxlength="255" value="{{ address.number }}">
+
+                                    <input type="text" name="address_set-{{ forloop.counter0 }}-complement"
+                                           id="id_address_set-{{ forloop.counter0 }}-complement"
+                                           class="form-control" maxlength="255" value="{{ address.complement }}">
+
+                                    <input type="text" name="address_set-{{ forloop.counter0 }}-city_region"
+                                           id="id_address_set-{{ forloop.counter0 }}-city_region"
+                                           class="form-control" maxlength="255" value="{{ address.city_region }}">
+
+                                    <input type="text" name="address_set-{{ forloop.counter0 }}-zip_code"
+                                           id="id_address_set-{{ forloop.counter0 }}-zip_code"
+                                           class="form-control" maxlength="255" value="{{ address.zip_code }}">
+
+                                    <textarea name="address_set-{{ forloop.counter0 }}-notes" cols="40" rows="10"
+                                              class="form-control"
+                                              id="id_address_set-{{ forloop.counter0 }}-notes">{{ address.notes }}</textarea>
+
+                                    <input value="{{ address.home_address }}" type="checkbox"
+                                           name="address_set-{{ forloop.counter0 }}-home_address"
+                                           id="id_address_set-{{ forloop.counter0 }}-home_address"
+
+                                            {% if address.home_address == True or address.home_address == 'on' %}
+                                           checked
+                                            {% endif %}
+                                    >
+
+                                    <input type="checkbox" value="{{ address.business_address }}"
+                                           name="address_set-{{ forloop.counter0 }}-business_address"
+                                           id="id_address_set-{{ forloop.counter0 }}-business_address"
+
+                                            {% if address.business_address == True or address.business_address == 'on' %}
+                                           checked
+                                            {% endif %}
+                                    >
+
+                                    <select name="address_set-{{ forloop.counter0 }}-country" class="form-control"
+                                            id="id_address_set-{{ forloop.counter0 }}-country">
+                                        <option value="{{ address.country_id }}" selected>{{ address.country }}</option>
+                                    </select>
+
+                                    <input type="text" name="address_set-{{ forloop.counter0 }}-state"
+                                           id="id_address_set-{{ forloop.counter0 }}-state"
+                                           value="{{ address.state_id }}">
+
+                                    <input type="text" name="address_set-{{ forloop.counter0 }}-city"
+                                           id="id_address_set-{{ forloop.counter0 }}-city"
+                                           value="{{ address.city_id }}">
+
+                                    <input type="checkbox" name="address_set-{{ forloop.counter0 }}-is_active"
+                                           id="id_address_set-{{ forloop.counter0 }}-is_active"
+                                            {% if address.is_active == True or address.is_active == 'on' %}
+                                           checked
+                                            {% endif %}
+                                    >
+
+                                    <select name="address_set-{{ forloop.counter0 }}-address_type"
+                                            id="id_address_set-{{ forloop.counter0 }}-address_type">
+                                        <option value="{{ address.address_type_id }}"
+                                                selected>{{ address.address_type }}</option>
+                                    </select>
+
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
                 </div>
-            </fieldset>
-        </div>
-        <script type="text/javascript">
-            $(function () {
-
-                $('#id_cnpj').mask('00.000.000/0000-00', {reverse: true});
-                $('#id_cpf').mask('000.000.000-00', {reverse: true});
-
-            });
-
-            var legal_type = document.getElementById('id_legal_type');
-
-            var div_cnpj = document.getElementById("cnpj_container");
-            var div_cpf = document.getElementById("cpf_container");
-
-            var cnpj = document.getElementById('id_cnpj');
-            var cpf = document.getElementById('id_cpf');
-
-            if (legal_type.getAttribute('value') === 'J')
-                cnpj.required = true;
-            else if (legal_type.getAttribute('value') === 'F')
-                cpf.required = true;
-
-
-            cnpj.addEventListener('change', function () {
-                spaces = cnpj.value;
-                if (!spaces.replace(/\s/g, '').length) {
-                    // string only contained whitespace (ie. spaces, tabs or line breaks)
-                    console.log('Entrou');
-                    spaces.trim();
-                    cnpj.required = true;
-                    console.log(spaces.length);
-                    cnpj.value = spaces.replace(/\s/g, '');
-                    cnpj.removeAttribute('value');
-
-                }
-            });
-
-            cpf.addEventListener('change', function () {
-                spaces = cpf.value;
-                if (!spaces.replace(/\s/g, '').length) {
-                    // string only contained whitespace (ie. spaces, tabs or line breaks)
-                    console.log('Entrou');
-                    spaces.trim();
-                    cpf.required = true;
-                    console.log(spaces.length);
-                    cpf.value = spaces.replace(/\s/g, '');
-                    cpf.removeAttribute('value');
-
-                }
-            });
-
-            legal_type.addEventListener("change", function () {
-
-                if ($(this).prop('value') === 'J') {
-                    cnpj.required = true;
-                    div_cnpj.setAttribute('class', 'form-group');
-
-                    cpf.required = false;
-                    cpf.value = '';
-                    cpf.removeAttribute('value');
-                    div_cpf.setAttribute('class', 'form-group hidden');
-                } else {
-                    cpf.required = true;
-                    div_cpf.setAttribute('class', 'form-group');
-                    cnpj.required = false;
-                    cnpj.value = '';
-                    cnpj.removeAttribute('value');
-                    div_cnpj.setAttribute('class', 'form-group hidden');
-
-                }
-            }, false);
-
-
-        </script>
+            </div>
+            <br><br>
     </form>
 
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h1 class="panel-title text-center">Endereços</h1>
+        </div>
+
+        <div class="panel-body">
+            <table id="addresses" class="table table-hover "
+                   style="text-align:center !important; font-weight: 100 !important; font-size: unset;">
+                <thead>
+                <tr>
+                    <th style="text-align: center;">Logradouro</th>
+                    <th style="text-align: center;">Nº</th>
+                    <th style="text-align: center;">Complemento</th>
+                    <th style="text-align: center;">Bairro</th>
+                    <th style="text-align: center;">Cidade</th>
+                    <th style="text-align: center;">Estado</th>
+                    <th style="text-align: center;">CEP</th>
+                    <th style="text-align: center;">País</th>
+                    <th style="text-align: center;">Observação</th>
+                    <th style="text-align: center;">Tipo</th>
+                    <th>Ativo</th>
+                    <th style="text-align: center;">Excluir</th>
+                    <th></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for address in addresses %}
+                    <tr id="row-{{ address.id }}" name="{{ forloop.counter0 }}">
+                        <th style="text-align: center; font-weight: 100;"
+                            id="street-{{ address.id }}">{{ address.street }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="number-{{ address.id }}">{{ address.number }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="complement-{{ address.id }}">{{ address.complement }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="city_region-{{ address.id }}">{{ address.city_region }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="city-{{ address.id }}">{{ address.city }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="state-{{ address.id }}">{{ address.state }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="zip_code-{{ address.id }}">{{ address.zip_code }}</th>
+
+                        <th style="text-align: center; font-weight: 100;"
+                            id="country-{{ address.id }}">{{ address.country }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="notes-{{ address.id }}">{{ address.notes }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="address_type-{{ address.id }}">{{ address.address_type }}</th>
+
+                        <th style="text-align: center; font-weight: 100;"
+                            id="is_active-{{ address.id }}">
+
+                            {% if address.is_active == True or address.is_active == 'on' %}
+                                <i class="material-icons" style="font-size: larger;">check</i>
+                            {% else %}
+                                <i class="material-icons" style="font-size: larger;">close</i>
+                            {% endif %}
+
+                        </th>
+
+                        <th style="text-align: center;">
+                            <input type="checkbox" class="check" name="address_set-{{ forloop.counter0 }}-DELETE"
+                                   id="id_address_set-{{ forloop.counter0 }}-DELETE"/>
+                        </th>
+                        <th style="text-align: center;">
+                            <i class="material-icons update_address"
+                               id="{{ address.id }}"
+                               style="text-decoration: none; cursor: pointer;font-size: larger;">
+                                mode_edit
+                            </i>
+                        </th>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="modal" id="form_address_update">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"
+                                    aria-hidden="true">
+                                ×
+                            </button>
+                            <h4 class="modal-title">Atualizar Endereço</h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <form action="" method="POST" id="form_new_address">
+                                <div id="message_error"></div>
+                                {% csrf_token %}
+
+                                <span id="label_id_address_type">Tipo de Endereço</span>
+                                <select name="address_type" required
+                                        id="update_id_address_type" class="form-control">
+                                    <option value="" selected>---------</option>
+
+                                    <option value="1">Casa</option>
+
+                                </select>
+
+                                <span id="label_id_street">Logradouro</span>
+                                <input type="text" name="street" id="update_id_street"
+                                       class="form-control input-sm" maxlength="255"
+                                       required/>
+
+                                <span id="label_id_number">Número</span>
+                                <input type="text" name="number" id="update_id_number"
+                                       class="form-control input-sm" maxlength="255"
+                                       required/>
+
+                                <span id="label_id_complement">Complemento</span>
+                                <input type="text" name="complement"
+                                       class="form-control input-sm" maxlength="255"
+                                       id="update_id_complement"/>
+
+                                <span id="label_id_city_region">Bairro</span>
+                                <input type="text" name="city_region"
+                                       id="update_id_city_region"
+                                       class="form-control input-sm" maxlength="255"
+                                       required/>
+
+                                <span id="label_id_zip_code">CEP</span>
+                                <input type="text" name="zip_code"
+                                       id="update_id_zip_code"
+                                       class="form-control input-sm" maxlength="255"
+                                       required/>
+
+                                <span id="label_id_notes">Observações</span>
+                                <textarea name="notes" id="update_id_notes" cols="40"
+                                          rows="10" class="form-control input-sm">
+                                                                    </textarea>
+
+                                <span id="label_id_country">País</span>
+                                <select name="country" id="update_id_country"
+                                        class="form-control input-sm" required>
+                                </select>
+
+                                <span id="label_id_state">Estado</span>
+                                <select name="state" id="update_id_state"
+                                        class="form-control input-sm" required>
+                                </select>
+
+                                <span id="label_id_city">Município</span>
+                                <select name="city" id="update_id_city"
+                                        class="form-control input-sm"
+                                        required>
+                                    <option value="" selected>---------</option>
+
+                                </select>
+
+                                <span id="label_update_id_is_active">Ativo</span>
+                                <input type="checkbox" name="is_active" checked
+                                       id="update_id_is_active"/>
+
+
+                                <input type="text" name="id"
+                                       id="update_id_address"
+                                       class="form-control input-sm" maxlength="255"/>
+                                <br><br><br>
+                                <div class="text-center">
+                                    <input type="button" id="save_updated_address"
+                                           class="btn btn-primary btn-raised"
+                                           value="Salvar">
+
+                                    <input type="button"
+                                           class="btn btn-raised btn-danger"
+                                           data-dismiss="modal"
+                                           value="Cancelar"/>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-right" style="margin: auto">
+                <a class="btn btn-fab btn-primary" href="#new_address"
+
+                   onclick="$('#new_address').modal('show');"
+                   style="height: 30px !important; width: 30px !important; min-width: 30px !important;">
+                    <i class="material-icons">add</i></a>
+            </div>
+        </div>
+    </div>
+
+    <input type="submit" class="btn btn-primary btn-raised"/>
+
+    <div class="modal" id="modal_message">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p id="message_text" style="text-align: center;"></p>
+                </div>
+                <div class="modal-footer" style="text-align: center;">
+                    <input type="button" data-dismiss="modal" value="OK"
+                           class="btn btn-primary btn-raised"
+                           style="max-width: 100px;"/>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal_redirect_page">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p id="message_text_redirect_page" style="text-align: center;"></p>
+                </div>
+                <div class="modal-footer" style="text-align: center;">
+                    <input type="button" data-dismiss="modal" value="OK"
+                           class="btn btn-primary btn-raised"
+                           style="max-width: 100px;"
+                           id="btn_redirect_page"/>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="new_address">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        ×
+                    </button>
+                    <h4 class="modal-title">Adicionar Endereço</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="message_errors"></div>
+                    <br>
+                    <form action="" method="POST" id="form_new_address">
+                        <div id="message_error"></div>
+                        {% csrf_token %}
+                        {% for field in form_address %}
+                            <span id="label_{{ field.id_for_label }}">{{ field.label }}</span>
+                            {{ field }}
+                        {% endfor %}
+                        <br><br><br>
+
+                        <input type="hidden" name="legal_type" id="id_new_legal_type"
+                               maxlength="255"
+                               class="form-control">
+
+                        <input type="hidden" name="legal_name" id="id_new_legal_name"
+                               maxlength="255"
+                               class="form-control">
+
+                        <div class="text-center">
+
+                            <input type="button" id="save_address"
+                                   class="btn btn-primary btn-raised"
+                                   value="Adicionar">
+
+                            <input type="button" class="btn btn-raised btn-danger"
+                                   data-dismiss="modal"
+                                   value="Cancelar"/>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </fieldset>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            var url = '{% url 'address_country' %}';
+            $.ajax({
+                url: url,
+                success: function (data) {
+                    var obj = JSON.parse(data);
+                    var length = obj.number;
+                    document.getElementById("id_country").options.length = 0;
+                    document.getElementById("update_id_country").options.length = 0;
+                    document.getElementById("id_city").options.length = 0;
+                    document.getElementById("update_id_city").options.length = 0;
+                    document.getElementById("id_state").options.length = 0;
+                    document.getElementById("update_id_state").options.length = 0;
+                    for (i = 0; i < length; i++) {
+                        if (i == 0) {
+                            $('#id_country').append($('<option>', {
+                                value: "",
+                                text: " Selecione"
+                            }));
+
+                            $('#id_state').append($('<option>', {
+                                value: "",
+                                text: " Selecione"
+                            }));
+
+                            $('#id_city').append($('<option>', {
+                                value: "",
+                                text: " Selecione"
+                            }));
+
+                            $('#update_id_state').append($('<option>', {
+                                value: "",
+                                text: " Selecione"
+                            }));
+
+                            $('#update_id_city').append($('<option>', {
+                                value: "",
+                                text: " Selecione"
+                            }));
+                        }
+
+                        $('#id_country').append($('<option>', {
+                            value: obj.countries[i].id,
+                            text: obj.countries[i].name
+                        }));
+
+                        $('#update_id_country').append($('<option>', {
+                            value: obj.countries[i].id,
+                            text: obj.countries[i].name
+                        }));
+                    }
+                }
+            })
+        })
+    </script>
+    <script>
+        $("#update_id_state").change(function () {
+
+            var option = $(this).val();
+            var url = '{% url 'address_city' 999 %}'.replace(999, option);
+            $.ajax({
+                url: url,
+                success: function (data) {
+                    var obj = JSON.parse(data);
+                    var length = obj.number;
+                    document.getElementById("update_id_city").options.length = 0;
+                    if (length == 0) {
+
+                        $('#id_city').append($('<option>', {
+                            value: " ",
+                            text: " ------ "
+                        }));
+                    }
+                    else {
+
+                        $('#update_id_city').append($('<option>', {
+                            value: " ",
+                            text: "Selecione"
+                        }));
+
+                        for (i = 0; i <= length; i++) {
+
+                            $('#update_id_city').append($('<option>', {
+                                value: obj.cities[i].id,
+                                text: obj.cities[i].name
+                            }));
+                        }
+                    }
+                }
+            })
+        })
+    </script>
+
+    <script>
+        $("#id_state").change(function () {
+            var option = $(this).val();
+            var url = '{% url 'address_city' 999 %}'.replace(999, option);
+            $.ajax({
+                url: url,
+                success: function (data) {
+                    var obj = JSON.parse(data);
+                    var length = obj.number;
+                    document.getElementById("id_city").options.length = 0;
+
+                    if (length == 0) {
+
+                        $('#id_city').append($('<option>', {
+                            value: " ",
+                            text: " ------ "
+                        }));
+                    }
+                    else {
+
+                        $('#update_id_city').append($('<option>', {
+                            value: " ",
+                            text: "Selecione"
+                        }));
+
+                        for (i = 0; i < length; i++) {
+
+                            $('#id_city').append($('<option>', {
+                                value: obj.cities[i].id,
+                                text: obj.cities[i].name
+                            }));
+                        }
+                    }
+                }
+            })
+        })
+    </script>
+
+    <script>
+        $("#update_id_country").change(function () {
+
+            var option = $(this).val();
+            var url = '{% url 'address_state' 999 %}'.replace(999, option);
+            $.ajax({
+                url: url,
+                success: function (data) {
+
+                    var obj = JSON.parse(data);
+                    var length = obj.number;
+                    document.getElementById("update_id_state").options.length = 0;
+
+                    if (length == 0) {
+
+                        document.getElementById("update_id_city").options.length = 0;
+                        $('#update_id_state').append($('<option>', {
+                            value: " ",
+                            text: " ------ "
+                        }));
+
+                        $('#update_id_city').append($('<option>', {
+                            value: " ",
+                            text: " ------ "
+                        }));
+                    }
+
+                    else {
+                        for (i = 0; i < length; i++) {
+
+                            $('#update_id_state').append($('<option>', {
+                                value: obj.states[i].id,
+                                text: obj.states[i].name
+                            }));
+                        }
+                    }
+                }
+            })
+        })
+    </script>
+
+    <script>
+        $("#id_country").change(function () {
+
+            var option = $(this).val();
+            var url = '{% url 'address_state' 999 %}'.replace(999, option);
+            $.ajax({
+                url: url,
+                success: function (data) {
+                    var obj = JSON.parse(data);
+                    var length = obj.number;
+                    document.getElementById("id_state").options.length = 0;
+
+                    if (length == 0) {
+
+                        document.getElementById("id_city").options.length = 0;
+                        $('#id_city').append($('<option>', {
+                            value: " ",
+                            text: " ------ "
+                        }));
+
+                        $('#id_state').append($('<option>', {
+                            value: " ",
+                            text: " ------ "
+                        }));
+                    }
+
+                    else {
+                        for (i = 0; i < length; i++) {
+
+                            $('#id_state').append($('<option>', {
+                                value: obj.states[i].id,
+                                text: obj.states[i].name
+                            }));
+
+                        }
+                    }
+                }
+            })
+        })
+    </script>
+
+    <script>
+        $(".update_address").click(function () {
+            var id = (this).id;
+            var url = '{% url 'person_address_information' 999 %}'.replace(999, id);
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+
+                    $('#update_id_address').val(id);
+                    $('#update_id_street').val(data.street);
+                    $('#update_id_number').val(data.number);
+                    $('#update_id_complement').val(data.complement);
+                    $('#update_id_city_region').val(data.city_region);
+                    $('#update_id_notes').val(data.notes);
+                    $('#update_id_zip_code').val(data.zip_code);
+
+                    $('#update_id_country').val("0").trigger("click");
+                    $('#update_id_country').val(data.country_id).trigger("change");
+                    $('#update_id_address_type select').val(data.address_type);
+
+                    if (data.is_active)
+                        $('#update_id_is_active').prop('checked', true);
+
+                    else
+                        $('#update_id_is_active').prop('checked', false);
+
+                    $('#update_id_address_type').val(data.address_type_id).trigger("change");
+                    $('#form_address_update').modal('show');
+                }
+            })
+        })
+    </script>
+
+    <script>
+        function getCookie(c_name) {
+            if (document.cookie.length > 0) {
+                c_start = document.cookie.indexOf(c_name + "=");
+                if (c_start != -1) {
+                    c_start = c_start + c_name.length + 1;
+                    c_end = document.cookie.indexOf(";", c_start);
+                    if (c_end == -1) c_end = document.cookie.length;
+                    return unescape(document.cookie.substring(c_start, c_end));
+                }
+            }
+            return "";
+        }
+
+        $("#save_updated_address").click(function () {
+
+            id = $('#update_id_address').val();
+            formset_index = $("#row-" + id).attr('name');
+
+            street = $("#update_id_street").val();
+            number_person = $("#update_id_number").val();
+            complement = $("#update_id_complement").val();
+            city_region = $("#update_id_city_region").val();
+            zip_code = $("#update_id_zip_code").val();
+            notes = $("#update_id_notes").val();
+            country = $("#update_id_country").val();
+            country_text = $("#update_id_country option:selected").text();
+            state = $("#update_id_state").val();
+            state_text = $("#update_id_state option:selected").text();
+            city = $("#update_id_city").val();
+            city_text = $("#update_id_city option:selected").text();
+            csrf_token = $("#csrfmiddlewaretoken").val();
+            address_type = $("#update_id_address_type").val();
+            address_type_text = $("#update_id_address_type option:selected").text();
+            is_active = $("#update_id_is_active").prop('checked');
+
+            var message = "Os seguintes campos não podem estar vazios: ";
+            var is_valid = true;
+
+            if (street === null || street === "") {
+                message = message + "Logradouro, ";
+                is_valid = false;
+            }
+
+            if (number_person === null || number_person === "") {
+                message = message + "Número, ";
+                is_valid = false;
+            }
+
+            if (city_region === null || city_region === "") {
+                message = message + "Bairro, ";
+                is_valid = false;
+            }
+
+            if (zip_code === null || zip_code === "") {
+                message = message + "CEP, ";
+                is_valid = false;
+            }
+
+            if (country === null || country === "") {
+                message = message + "País, ";
+                is_valid = false;
+            }
+
+            if (state === null || state === "") {
+                message = message + "Estado, ";
+                is_valid = false;
+            }
+
+            if (city === null || city === "") {
+                message = message + "Cidade";
+                is_valid = false;
+            }
+
+            if (is_valid) {
+
+
+                $("#street-" + id).text($("#update_id_street").val());
+                $("#id_address_set-" + formset_index + "-street").val($("#update_id_street").val());
+
+                $("#number-" + id).text($("#update_id_number").val());
+                $("#id_address_set-" + formset_index + "-number").val($("#update_id_number").val());
+
+                $("#complement-" + id).text($("#update_id_complement").val());
+                $("#id_address_set-" + formset_index + "-complement").val($("#update_id_complement").val());
+
+                $("#city_region-" + id).text($("#update_id_city_region").val());
+                $("#id_address_set-" + formset_index + "-city_region").val($("#update_id_city_region").val());
+
+                $("#zip_code-" + id).text($("#update_id_zip_code").val());
+                $("#id_address_set-" + formset_index + "-zip_code").val($("#update_id_zip_code").val());
+
+                $("#city-" + id).text(city_text);
+                $("#id_address_set-" + formset_index + "-city").val($("#update_id_city").val());
+
+                $("#state-" + id).text(state_text);
+                $("#id_address_set-" + formset_index + "-state").val($("#update_id_state").val());
+
+                {#            $("#update_id_state").val()#}
+
+                $("#country-" + id).text(country_text);
+                $("#id_address_set-" + formset_index + "-country").val($("#update_id_country").val());
+
+                is_active = $("#update_id_is_active").prop('checked');
+
+                if (is_active || is_active === "on") {
+                    $("#is_active-" + id).text("");
+                    $("#id_address_set-" + formset_index + "-is_active").prop('checked', true);
+                    $("#is_active-" + id).append("<i class='material-icons' style='font-size: larger;'>check</i>");
+                }
+                else {
+                    $("#is_active-" + id).text("");
+                    $("#id_address_set-" + formset_index + "-is_active").prop('checked', false);
+                    $("#is_active-" + id).append("<i class='material-icons' style='font-size: larger;'>close</i>");
+                }
+
+                $("#address_type-" + id).text(address_type_text);
+                $("#id_address_set-" + formset_index + "-address_type").val($("#update_id_address_type").val());
+
+                $("#notes-" + id).text($("#update_id_notes").val());
+                $("#id_address_set-" + formset_index + "-notes").val($("#update_id_notes").val());
+
+                document.getElementById("message_text").innerHTML = "Endereço atualizado com sucesso";
+                $('#form_address_update').modal('hide');
+                $('#modal_message').modal('show');
+            }
+
+            else {
+
+                document.getElementById("message_error").innerHTML = '<div class="alert alert-danger">' +
+                    message +
+                    '</div>';
+            }
+
+        });
+    </script>
+
+    <script type="text/javascript">
+
+        function getCookie(c_name) {
+            if (document.cookie.length > 0) {
+                c_start = document.cookie.indexOf(c_name + "=");
+                if (c_start != -1) {
+                    c_start = c_start + c_name.length + 1;
+                    c_end = document.cookie.indexOf(";", c_start);
+                    if (c_end == -1) c_end = document.cookie.length;
+                    return unescape(document.cookie.substring(c_start, c_end));
+                }
+            }
+            return "";
+        }
+
+        $(document).ready(function () {
+
+            var num_addresses = ({{ addresses|length }}) - 1;
+
+            $("#save_address").click(function () {
+
+
+                num_addresses++;
+
+                $("#form_management_total_forms").val(String(num_addresses + 1));
+                street = $("#id_street").val();
+                number_person = $("#id_number").val();
+                complement = $("#id_complement").val();
+                city_region = $("#id_city_region").val();
+                zip_code = $("#id_zip_code").val();
+                notes = $("#id_notes").val();
+                {#                home_address = $("#id_home_address").prop('checked');#}
+                {#                business_address = $("#id_business_address").prop('checked');#}
+                country = $("#id_country option:selected").text();
+                country_id = $("#id_country option:selected").val();
+                state = $("#id_state option:selected").text();
+                state_id = $("#id_state option:selected").val();
+                city = $("#id_city option:selected").text();
+                city_id = $("#id_city option:selected").val();
+                csrf_token = $("#csrfmiddlewaretoken").val();
+                address_type = $("#id_address_type option:selected").text();
+                address_type_id = $("#id_address_type option:selected").val();
+                vlegal_type = $("#id_new_legal_type").val();
+                legal_name = $("#id_new_legal_name").val();
+                name = $("#id_name").val();
+                is_lawyer = $("#id_is_lawyer").prop('checked');
+                is_correspondent = $("#id_is_correspondent").prop('checked');
+                is_court = $("#id_is_court").prop('checked');
+                vcpf = $("#id_cpf").val();
+                vcnpj = $("#id_cnpj").val();
+                auth_user = $("#id_auth_user").val();
+                is_active = $("#id_is_active").prop('checked');
+                is_customer = $("#id_is_customer").prop('checked');
+                is_supplier = $("#id_is_supplier").prop('checked');
+
+                var message = "Os seguintes campos não podem estar vazios: ";
+                var is_valid = true;
+
+                if (street === null || street === "") {
+                    message = message + "Logradouro, ";
+                    is_valid = false;
+                }
+
+                if (number_person === null || number_person === "") {
+                    message = message + "Número, ";
+                    is_valid = false;
+                }
+
+                if (city_region === null || city_region === "") {
+                    message = message + "Bairro, ";
+                    is_valid = false;
+                }
+
+                if (zip_code === null || zip_code === "") {
+                    message = message + "CEP, ";
+                    is_valid = false;
+                }
+
+                if (country_id === null || country_id === "") {
+                    message = message + "País, ";
+                    is_valid = false;
+                }
+
+                if (state_id === null || state_id === "") {
+                    message = message + "Estado, ";
+                    is_valid = false;
+                }
+
+                if (city_id === null || city_id === "") {
+                    message = message + "Cidade";
+                    is_valid = false;
+                }
+
+                if (is_valid) {
+                    var table = document.getElementById("addresses");
+                    var row = table.insertRow(1);
+                    var cel1 = row.insertCell(0).innerHTML = street;
+                    var cel2 = row.insertCell(1).innerHTML = number_person;
+                    var cel3 = row.insertCell(2).innerHTML = complement;
+                    var cel4 = row.insertCell(3).innerHTML = city_region;
+                    var cel5 = row.insertCell(4).innerHTML = city;
+                    var cel6 = row.insertCell(5).innerHTML = state;
+                    var cel7 = row.insertCell(6).innerHTML = zip_code;
+                    var cel10 = row.insertCell(7).innerHTML = country;
+                    var cel11 = row.insertCell(8).innerHTML = notes;
+                    var cel12 = row.insertCell(9).innerHTML = address_type;
+                    var cel12 = row.insertCell(10).innerHTML = "<i class='material-icons' style='font-size: larger;'>check</i>";
+                    var cel13 = row.insertCell(11).innerHTML = "";
+
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-street" id="num_addresses_set-' + num_addresses + '-street" value="' + street + '" style="display:none;"">');
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-number" id="num_addresses_set-' + num_addresses + '-number" value="' + number_person + '" style="display:none;"">');
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-complement" id="num_addresses_set-' + num_addresses + '-complement" value="' + complement + '" style="display:none;">');
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-city_region" id="num_addresses_set-' + num_addresses + '-city_region" value="' + city_region + '" style="display:none;">');
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-zip_code" id="num_addresses_set-' + num_addresses + '-zip_code" value="' + zip_code + '" style="display:none;">');
+                    $('form#person_form').append('<textarea name="address_set-' + num_addresses + '-notes" cols="40" rows="10" id="num_addresses_set-' + num_addresses + '-notes" style="display:none;">' + notes + '</textarea>');
+                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-country" id="num_addresses_set-' + num_addresses + '-country" style="display:none;">' +
+                        '<option value=' + country_id + ' selected>país</option>' +
+                        '</select>');
+                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-state" id="num_addresses_set-' + num_addresses + '-state" style="display:none;">' +
+                        '<option value="' + state_id + '" selected>estado</option>' +
+                        '</select>');
+                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-city" id="num_addresses_set-' + num_addresses + '-city" style="display:none;">' +
+                        '<option value="' + city_id + '" selected>cidade</option>' +
+                        '</select>');
+
+                    if (is_active)
+                        $('form#person_form').append('<input type="checkbox" name="address_set-' + num_addresses + '-is_active" id="num_addresses_set-' + num_addresses + '-is_active" checked style="display:none;">');
+
+                    else
+                        $('form#person_form').append('<input type="checkbox" name="address_set-' + num_addresses + '-is_active" id="num_addresses_set-' + num_addresses + '-is_active" style="display:none;">');
+
+                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-address_type" id="num_addresses_set-' + num_addresses + '-address_type" style="display:none;">' +
+                        '<option value="' + address_type_id + '" selected>type</option> ' +
+                        '</select>');
+
+                    $('#new_address').modal('hide');
+                    document.getElementById("message_text").innerHTML = "Endereço adicionado com successo";
+                    $('#modal_message').modal('show');
+                    document.getElementById("form_new_address").reset();
+                }
+
+                else {
+
+                    document.getElementById("message_errors").innerHTML = '<div class="alert alert-danger">' +
+                        message +
+                        '</div>';
+                }
+            });
+        });
+    </script>
+
+    <script>
+
+    </script>
+    <script type="text/javascript">
+        $(function () {
+
+            $('#id_cnpj').mask('00.000.000/0000-00', {reverse: true});
+            $('#id_cpf').mask('000.000.000-00', {reverse: true});
+
+        });
+
+        var legal_type = document.getElementById('id_legal_type');
+
+        var div_cnpj = document.getElementById("cnpj_container");
+        var div_cpf = document.getElementById("cpf_container");
+
+        var cnpj = document.getElementById('id_cnpj');
+        var cpf = document.getElementById('id_cpf');
+
+        if (legal_type.getAttribute('value') === 'J')
+            cnpj.required = true;
+        else if (legal_type.getAttribute('value') === 'F')
+            cpf.required = true;
+
+
+        cnpj.addEventListener('change', function () {
+            spaces = cnpj.value;
+            if (!spaces.replace(/\s/g, '').length) {
+                // string only contained whitespace (ie. spaces, tabs or line breaks)
+                console.log('Entrou');
+                spaces.trim();
+                cnpj.required = true;
+                console.log(spaces.length);
+                cnpj.value = spaces.replace(/\s/g, '');
+                cnpj.removeAttribute('value');
+
+            }
+        });
+
+        cpf.addEventListener('change', function () {
+            spaces = cpf.value;
+            if (!spaces.replace(/\s/g, '').length) {
+                // string only contained whitespace (ie. spaces, tabs or line breaks)
+                console.log('Entrou');
+                spaces.trim();
+                cpf.required = true;
+                console.log(spaces.length);
+                cpf.value = spaces.replace(/\s/g, '');
+                cpf.removeAttribute('value');
+
+            }
+        });
+
+        legal_type.addEventListener("change", function () {
+
+            if ($(this).prop('value') === 'J') {
+                cnpj.required = true;
+                div_cnpj.setAttribute('class', 'form-group');
+
+                cpf.required = false;
+                cpf.value = '';
+                cpf.removeAttribute('value');
+                div_cpf.setAttribute('class', 'form-group hidden');
+            } else {
+                cpf.required = true;
+                div_cpf.setAttribute('class', 'form-group');
+                cnpj.required = false;
+                cnpj.value = '';
+                cnpj.removeAttribute('value');
+                div_cnpj.setAttribute('class', 'form-group hidden');
+
+            }
+        }, false);
+
+
+    </script>
 {% endblock content %}
