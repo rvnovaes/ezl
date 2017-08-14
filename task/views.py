@@ -60,7 +60,7 @@ class DashboardView(MultiTableMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        context['title_page'] = u"Dashboard do Correpondente"
+        context['title_page'] = u"Dashboard do Correspondente"
         return self.render_to_response(context)
 
     def load_task_by_status(self, status, person):
