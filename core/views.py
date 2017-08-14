@@ -272,8 +272,10 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
                     address.instance.create_date = datetime.now()
                     address.instance.create_user = User.objects.get(id=self.request.user.id)
                     address.save()
-
-        return super(PersonUpdateView, self).post(request, *args, **kwargs)
+        else:
+            for error in addresses_form.errors:
+                messages.error(self.request, error)
+        return HttpResponseRedirect(self.success_url)
 
 
 class PersonDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
@@ -291,7 +293,7 @@ class ClientAutocomplete(autocomplete.Select2QuerySetView):
         qs = Person.objects.none()
 
         if self.q:
-            qs = Person.objects.filter(name__istartswith=self.q, is_customer=True)
+            qs = Person.objects.filter(name__unaccent__istartswith=self.q, is_customer=True)
 
         return qs
 

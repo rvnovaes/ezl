@@ -710,43 +710,51 @@
             address_type_text = $("#update_id_address_type option:selected").text();
             is_active = $("#update_id_is_active").prop('checked');
 
-            var message = "Os seguintes campos não podem estar vazios: ";
+            var message = "Os seguintes campos não podem estar vazios: <ul>";
             var is_valid = true;
 
+
+            if (address_type_id === null || address_type_id === "") {
+                message = message + "<li>Tipo de Endereço</li>";
+                is_valid = false;
+            }
+
             if (street === null || street === "") {
-                message = message + "Logradouro, ";
+                message = message + "<li>Logradouro</li>";
                 is_valid = false;
             }
 
             if (number_person === null || number_person === "") {
-                message = message + "Número, ";
+                message = message + "<li>Número</li>";
                 is_valid = false;
             }
 
             if (city_region === null || city_region === "") {
-                message = message + "Bairro, ";
+                message = message + "<li>Bairro</li>";
                 is_valid = false;
             }
 
             if (zip_code === null || zip_code === "") {
-                message = message + "CEP, ";
+                message = message + "<li>CEP</li>";
                 is_valid = false;
             }
 
             if (country === null || country === "") {
-                message = message + "País, ";
+                message = message + "<li>País</li>";
                 is_valid = false;
             }
 
             if (state === null || state === "") {
-                message = message + "Estado, ";
+                message = message + "<li>Estado</li>";
                 is_valid = false;
             }
 
             if (city === null || city === "") {
-                message = message + "Cidade";
+                message = message + "<li>Cidade</li>";
                 is_valid = false;
             }
+
+            message = message + "</ul>";
 
             if (is_valid) {
 
@@ -866,43 +874,50 @@
                 is_customer = $("#id_is_customer").prop('checked');
                 is_supplier = $("#id_is_supplier").prop('checked');
 
-                var message = "Os seguintes campos não podem estar vazios: ";
+                var message = "Os seguintes campos não podem estar vazios:<ul> ";
                 var is_valid = true;
 
+
+                if (address_type_id === null || address_type_id === "") {
+                    message = message + "<li>Tipo de Endereço</li> ";
+                    is_valid = false;
+                }
+
                 if (street === null || street === "") {
-                    message = message + "Logradouro, ";
+                    message = message + "<li>Logradouro</li>";
                     is_valid = false;
                 }
 
                 if (number_person === null || number_person === "") {
-                    message = message + "Número, ";
+                    message = message + "<li>Número</li>";
                     is_valid = false;
                 }
 
                 if (city_region === null || city_region === "") {
-                    message = message + "Bairro, ";
+                    message = message + "<li>Bairro</li>";
                     is_valid = false;
                 }
 
                 if (zip_code === null || zip_code === "") {
-                    message = message + "CEP, ";
+                    message = message + "<li>CEP</li>";
                     is_valid = false;
                 }
 
                 if (country_id === null || country_id === "") {
-                    message = message + "País, ";
+                    message = message + "<li>País</li>";
                     is_valid = false;
                 }
 
                 if (state_id === null || state_id === "") {
-                    message = message + "Estado, ";
+                    message = message + "<li>Estado</li>";
                     is_valid = false;
                 }
 
                 if (city_id === null || city_id === "") {
-                    message = message + "Cidade";
+                    message = message + "<li>Cidade</li>";
                     is_valid = false;
                 }
+                message = message + "</ul>";
 
                 if (is_valid) {
                     var table = document.getElementById("addresses");
