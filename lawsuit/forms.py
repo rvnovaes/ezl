@@ -3,11 +3,13 @@ from django.core.exceptions import FieldDoesNotExist
 from django.forms import ModelForm
 from django.forms.models import fields_for_model
 
-# from django.contrib.admin.widgets import AdminDateWidget #TODO Verificar se será utilizado datepicker
 from core.fields import CustomBooleanField
 from core.models import Person, State
-from core.widgets import MDModelSelect2
+from core.widgets import MDModelSelect2, MDDatePicker
 from .models import TypeMovement, Instance, Movement, Folder, CourtDistrict, LawSuit, CourtDivision
+
+
+# from django.contrib.admin.widgets import AdminDateWidget #TODO Verificar se será utilizado datepicker
 
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
@@ -96,7 +98,10 @@ class MovementForm(BaseForm):
     )
 
     deadline = forms.DateTimeField(
-        label=u"Data da Movimentação"
+        label=u"Data da Movimentação",
+        widget=MDDatePicker(attrs={'class': 'form-control'},
+                            format='DD/MM/YYYY'
+                            )
     )
 
 
@@ -112,7 +117,7 @@ class FolderForm(BaseForm):
     )
 
     person_customer = forms.ModelChoiceField(
-        queryset=Person.objects.filter(is_active=True),
+        queryset=Person.objects.filter(is_active=True, is_customer=True),
         empty_label=u"Selecione...",
         widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'})
     )
@@ -127,7 +132,7 @@ class LawSuitForm(BaseForm):
 
     person_lawyer = forms.ModelChoiceField(
         empty_label=u"Selecione",
-        queryset=Person.objects.filter(is_active=True, is_lawyer=True), required=True
+        queryset=Person.objects.filter(is_active=True, is_lawyer=True).only('legal_name'), required=True
     )
     folder = forms.ModelChoiceField(
         empty_label=u"Selecione",

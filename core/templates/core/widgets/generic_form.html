@@ -1,10 +1,8 @@
-{% extends 'inicial.html' %}
 {% load render_table from django_tables2 %}
 {% load static %}
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
 {% block content %}
-    {% include 'core/widgets/messages.html' %}
     {% if table.page %}
         <div class="table-container">
     {% endif %}
@@ -111,8 +109,12 @@
                     <input type="button" data-toggle="modal" data-target="#confirmDelete" disabled id="delete_button"
                            class="btn btn-fab btn-warning material-icons"
                            value="remove">
-                    <a class="btn btn-fab btn-primary" href="{% url link_add %}">
-                        <i class="material-icons">add</i></a>
+                    {% if not view.kwargs.pk %}
+                        <a class="btn btn-fab btn-primary disabled">
+                    {% else %}
+                        <a class="btn btn-fab btn-primary" href="{% url link_add  view.kwargs.pk %}">
+                    {% endif %}
+                    <i class="material-icons">add</i></a>
                 </div>
             </div>
         {% endblock table %}
@@ -136,7 +138,9 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Sim</button>
+                        <button type="submit" name="parent_class" value="{{ form.instance.id }}"
+                                class="btn btn-primary">Sim
+                        </button>
                     </div>
                 </div>
             </div>

@@ -1,18 +1,19 @@
 # esse import deve vir antes de todos porque ele executa o __init__.py
-import os
 import ntpath
-from etl.advwin_ezl.advwin_ezl import GenericETL
+import os
+
+import paramiko
+
 from core.utils import LegacySystem
+from etl.advwin_ezl import settings
+from etl.advwin_ezl.advwin_ezl import GenericETL
 from task.models import Ecm
 from task.models import Task
-import paramiko
-from etl.advwin_ezl import settings
-from ezl import settings as ezl_settings
 
 
 class EcmETL(GenericETL):
-    query = "SELECT " \
-            "   G.ID_doc, " \
+    import_query = "SELECT " \
+                   "   G.ID_doc, " \
             "   A.Ident,   " \
             "   G.Link      " \
             " FROM Jurid_Ged_Main AS G" \
@@ -26,7 +27,7 @@ class EcmETL(GenericETL):
     advwin_table = 'Jurid_Ged_Main'
     has_status = False
 
-    def load_etl(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count):
 
         # paramiko.util.log_to_file(settings.log_file)
         transport = paramiko.Transport((settings.host_sftp, settings.port_sftp))

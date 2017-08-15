@@ -11,8 +11,8 @@ class LawsuitETL(GenericETL):
     model = LawSuit
     advwin_table = 'Jurid_Pastas'
 
-    query = "SELECT " \
-            "   p.Codigo_Comp AS folder_legacy_code, " \
+    import_query = "SELECT top 1000" \
+                   "   p.Codigo_Comp AS folder_legacy_code, " \
             "   case when (d.D_Atual is null) then 'False' else d.D_Atual end as is_current_instance, " \
             "   p.Advogado AS person_legacy_code, " \
             "   case when (rtrim(ltrim(d.D_Codigo)) LIKE '') or (d.D_Codigo is null) then " \
@@ -38,11 +38,11 @@ class LawsuitETL(GenericETL):
             "   ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') or " \
             "    (d.Codigo_Comp IS NOT NULL AND d.Codigo_Comp <> '')) AND" \
             "   ((p.Instancia IS NOT NULL AND p.Instancia <> '') or " \
-            "    (d.D_Codigo_Inst IS NOT NULL AND d.D_Codigo_Inst <> '')) "
+                   "    (d.D_Codigo_Inst IS NOT NULL AND d.D_Codigo_Inst <> '')) ORDER BY p.Dt_Cad DESC "
 
     has_status = True
 
-    def load_etl(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count):
         for row in rows:
             print(rows_count)
             rows_count -= 1
@@ -124,7 +124,7 @@ class LawsuitETL(GenericETL):
                     legacy_code=legacy_code,
                     system_prefix=LegacySystem.ADVWIN.value)
 
-            super(LawsuitETL, self).load_etl(rows, user, rows_count)
+            super(LawsuitETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == "__main__":

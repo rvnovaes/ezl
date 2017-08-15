@@ -12,7 +12,7 @@ urlpatterns = [
         name='courtdistrict_update'),
     url(r'^comarcas/excluir$', login_required(views.CourtDistrictDeleteView.as_view()),
         name='courtdistrict_delete'),
-        
+
     # Varas
     url(r'^varas/listar/$', login_required(views.CourtDivisionListView.as_view()), name='courtdivision_list'),
     url(r'^varas/$', login_required(views.CourtDivisionCreateView.as_view()), name='courtdivision_add'),
@@ -20,7 +20,7 @@ urlpatterns = [
         name='courtdivision_update'),
     url(r'^varas/excluir$', login_required(views.CourtDivisionDeleteView.as_view()),
         name='courtdivision_delete'),
-        
+
     # Pastas
     url(r'^pastas/listar/$', login_required(login_required(views.FolderListView.as_view())), name='folder_list'),
     url(r'^pastas/$', login_required(login_required(views.FolderCreateView.as_view())), name='folder_add'),
@@ -31,15 +31,19 @@ urlpatterns = [
 
     # Processos
     url(r'^processos/listar/$', login_required(views.LawSuitListView.as_view()), name='lawsuit_list'),
-    url(r'^processos/$', login_required(views.LawSuitCreateView.as_view()), name='lawsuit_add'),
-    url(r'^processos/(?P<pk>[0-9]+)/$', login_required(views.LawSuitUpdateView.as_view()), name='lawsuit_update'),
+    url(r'^processos/(?P<folder>[0-9]+)/$', login_required(views.LawsuitMovementCreateView.as_view()),
+        name='lawsuit_add'),
+    url(r'^processos/(?P<folder>[0-9]+)/(?P<pk>[0-9]+)/$', login_required(views.LawsuitMovementUpdateView.as_view()),
+        name='lawsuit_update'),
     url(r'^processos/excluir$', login_required(views.LawSuitDeleteView.as_view()),
         name='lawsuit_delete'),
 
     # Movimentacao
     url(r'^movimentacao/listar/$', login_required(views.MovementListView.as_view()), name='movement_list'),
-    url(r'^movimentacao/$', login_required(views.MovementCreateView.as_view()), name='movement_add'),
-    url(r'^movimentacao/(?P<pk>[0-9]+)/$', login_required(views.MovementUpdateView.as_view()), name='movement_update'),
+    url(r'^movimentacao/(?P<lawsuit>[0-9]+)$', login_required(views.MovementTaskCreateView.as_view()),
+        name='movement_add'),
+    url(r'^movimentacao/(?P<lawsuit>[0-9]+)/(?P<pk>[0-9]+)/$', login_required(views.MovementTaskUpdateView.as_view()),
+        name='movement_update'),
     url(r'^movimentacao/excluir$', login_required(views.MovementDeleteView.as_view()),
         name='movement_delete'),
 
@@ -59,4 +63,9 @@ urlpatterns = [
     url(r'instancias/(?P<pk>[0-9]+)/$', login_required(views.InstanceUpdateView.as_view()), name='instance_update'),
     url(r'instancias/excluir$', login_required(views.InstanceDeleteView.as_view()),
         name='instance_delete'),
+
+    # Teste Rapido
+    url(r'cadastro_rapido/$', login_required(views.FolderLawsuitCreateView.as_view()), name='fast'),
+    url(r'cadastro_rapido/(?P<pk>[0-9]+)/$', login_required(views.FolderLawsuitUpdateView.as_view()),
+        name='fast_update'),
 ]

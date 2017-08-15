@@ -43,7 +43,21 @@ def load_luigi_scheduler():
     if subprocess.run(['pgrep', '-f', 'luigid'], stdout=subprocess.PIPE).stdout.decode("utf-8") is '':
         os.system('echo %s|sudo -S %s %s' % ('123456', 'luigid', '--background'))
         # tempo necessário para inicialização do luigi scheduler antes da primeira tarefa NAO REMOVER
-        sleep(1)
+        sleep(2)
+
+
+class MigrationTask(luigi.Task):
+    def output(self):
+        return luigi.LocalTarget(
+            path=get_folder_ipc(self))
+
+    def run(self):
+        signals
+        call_command(migrate.Command(), verbosity=0)
+        print('Migration finalizada...')
+        f = open(get_folder_ipc(self),
+                 'w')
+        f.close()
 
 
 # task inicial
@@ -52,9 +66,13 @@ class ConfigTask(luigi.Task):
         return luigi.LocalTarget(
             path=get_folder_ipc(self))
 
+    def requires(self):
+        yield MigrationTask()
+
     def run(self):
         signals
-        call_command(migrate.Command(), verbosity=0)
+        # call_command(migrate.Command(), verbosity=0)
+        # sleep(5)
         InvalidObjectFactory().restart_table_id()
         InvalidObjectFactory.create()
         load_fixtures()
@@ -139,8 +157,8 @@ class LawsuitTask(luigi.Task):
         return luigi.LocalTarget(
             path=get_folder_ipc(self))
 
-    def requires(self):
-        yield FolderTask()
+    # def requires(self):
+    #     yield FolderTask()
 
     def run(self):
         f = open(get_folder_ipc(self), 'w')
@@ -195,13 +213,13 @@ class TaskTask(luigi.Task):
         return luigi.LocalTarget(
             path=get_folder_ipc(self))
 
-    def requires(self):
-        yield MovementTask()
+    # def requires(self):
+    #     yield MovementTask()
 
     def run(self):
         f = open(get_folder_ipc(self), 'w')
         f.close()
-        TaskETL().import_data()
+        TaskETL().export_data()
 
 
 if __name__ == "__main__":

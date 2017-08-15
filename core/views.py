@@ -61,7 +61,6 @@ class BaseCustomView(FormView):
 
     def form_valid(self, form):
         user = User.objects.get(id=self.request.user.id)
-
         if form.instance.id is None:
             # todo: nao precisa salvar o create_date e o alter_date pq o model já faz isso. tirar de todos os lugares
             form.instance.create_date = timezone.now()
@@ -92,6 +91,7 @@ class MultiDeleteViewMixin(DeleteView):
     def delete(self, request, *args, **kwargs):
         if request.method == "POST":
             pks = request.POST.getlist("selection")
+            folder = kwargs['folder']
             try:
                 self.model.objects.filter(pk__in=pks).delete()
                 messages.success(self.request, self.success_message)
@@ -175,10 +175,39 @@ class ClientAutocomplete(autocomplete.Select2QuerySetView):
         # Don't forget to filter out results depending on the visitor !
         # if not self.request.user.is_authenticated():
         #     return Person.objects.none()
-
+        testee = self.request.user.is_authenticated()
         qs = Person.objects.none()
 
         if self.q:
-            qs = Person.objects.filter(name__istartswith=self.q, is_customer=True)
+            qs = Person.objects.filter(legal_name__istartswith=str(self.q), is_active=True, is_customer=True)
 
         return qs
+
+
+class GenericFormOneToMany(FormView, SingleTableView):
+    def get_initial(self):
+
+        if isinstance(self, CreateView):
+            self.form_class.declared_fields['is_active'].initial = True
+            self.form_class.declared_fields['is_active'].disabled = True
+
+        elif isinstance(self, UpdateView):
+            self.form_class.declared_fields['is_active'].disabled = False
+        return self.initial.copy()
+
+    def form_valid(self, form):
+        user = User.objects.get(id=self.request.user.id)
+
+        if form.instance.id is None:
+            # todo: nao precisa salvar o create_date e o alter_date pq o model já faz isso. tirar de todos os lugares
+            form.instance.create_date = timezone.now()
+            form.instance.create_user = user
+        else:
+
+            form.instance.alter_date = timezone.now()
+            form.instance.alter_user = user
+            form.save()
+        super(GenericFormOneToMany, self).form_valid(form)
+        return HttpResponseRedirect(self.success_url)
+
+    success_message = None

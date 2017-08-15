@@ -14,14 +14,14 @@ from lawsuit.models import Instance
 
 
 class InstanceETL(GenericETL):
-    query = "SELECT Codigo, Descicao FROM Jurid_Instancia AS i1 WHERE Descicao IS NOT NULL AND Codigo = " \
-            "(SELECT min (Codigo) FROM Jurid_Instancia AS i2 WHERE i1.Descicao = i2.Descicao)"
+    import_query = "SELECT Codigo, Descicao FROM Jurid_Instancia AS i1 WHERE Descicao IS NOT NULL AND Codigo = " \
+                   "(SELECT min (Codigo) FROM Jurid_Instancia AS i2 WHERE i1.Descicao = i2.Descicao)"
 
     model = Instance
     advwin_table = 'Jurid_Instancia'
     has_status = False
 
-    def load_etl(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count):
         for row in rows:
             print(rows_count)
             rows_count -= 1
@@ -45,7 +45,7 @@ class InstanceETL(GenericETL):
                     alter_user=user,
                     create_user=user,
                     system_prefix=LegacySystem.ADVWIN.value)
-        super(InstanceETL, self).load_etl(rows, user, rows_count)
+        super(InstanceETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == "__main__":

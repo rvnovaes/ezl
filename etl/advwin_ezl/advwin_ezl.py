@@ -31,9 +31,11 @@ class GenericETL(object):
     advwin_cfg_file = os.path.join(os.path.abspath(os.path.dirname(connections.__file__)), 'advwin_ho.cfg')
     advwin_engine = connect_db(advwin_cfg_file)
     model = None
-    query = None
+    import_query = None
+    export_query_set = None
     advwin_table = None
     has_status = None
+    advwin_model = None
 
     class Meta:
         abstract = True
@@ -60,7 +62,7 @@ class GenericETL(object):
         if not settings.TRUNCATE_ALL_TABLES:
             self.model.objects.all().update(is_active=False)
 
-    def load_etl(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count):
         pass
 
     def import_data(self):
@@ -70,11 +72,33 @@ class GenericETL(object):
 
         connection = self.advwin_engine.connect()
 
-        cursor = self.advwin_engine.execute(text(self.query))
+        cursor = self.advwin_engine.execute(text(self.import_query))
         rows = cursor.fetchall()
         rows_count = len(rows)
         user = User.objects.get(pk=settings.USER)
 
-        self.load_etl(rows, user, rows_count)
+        self.config_import(rows, user, rows_count)
 
+        connection.close()
+
+    def config_export(self):
+        pass
+
+    # método para tratar o retorno da query de exportação
+    def post_export_handler(self, result):
+        pass
+
+    def export_data(self):
+        self.config_export()
+        connection = self.advwin_engine.connect()
+
+        for query in self.export_query_set:
+            trans = connection.begin()
+            try:
+                result = self.advwin_engine.execute(text(query))
+                self.post_export_handler(result)
+                trans.commit()
+            except:
+                trans.rollback()
+                raise
         connection.close()
