@@ -20,7 +20,7 @@ from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixi
 from task.signals import send_notes_execution_date
 from .filters import TaskFilter
 from .forms import TaskForm, TaskDetailForm, TypeTaskForm
-from .models import Task, TaskStatus, Ecm, TypeTask
+from .models import Task, TaskStatus, Ecm, TypeTask, TaskHistory
 from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
 
 
@@ -167,31 +167,30 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(TaskDetailView, self).get_context_data(**kwargs)
         context['geds'] = Ecm.objects.filter(task_id=self.object.id)
+        context['task_history'] = TaskHistory.objects.filter(task_id=self.object.id)
         return context
 
 
 class EcmCreateView(LoginRequiredMixin, CreateView):
-
     def post(self, request, *args, **kwargs):
-        
-        
+
         files = request.FILES.getlist('path')
         task = kwargs['pk']
+        data = {'success': False,
+                'message': exception_create()}
 
         data = {'success': False,
                 'message': exception_create()
-                        }
+                }
         for file in files:
-        
-            
+
             ecm = Ecm(path=file,
-            
+
                       task=Task.objects.get(id=task),
                       create_user_id=str(request.user.id),
                       create_date=timezone.now()
                       )
-             
-             
+
             try:
                 ecm.save()
                 data = {'success': True,
@@ -219,7 +218,9 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
                 data = {'success': False,
                         'message': exception_create()
                         }
-        
+
+        return JsonResponse(data)
+
         return JsonResponse(data)
 
 
@@ -380,4 +381,3 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         return context
-        
