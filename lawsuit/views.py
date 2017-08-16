@@ -347,7 +347,8 @@ class MovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView
         return HttpResponseRedirect(self.success_url)
 
     def get_success_url(self):
-        self.success_url = reverse('lawsuit_update', kwargs={'pk': self.kwargs['lawsuit']})
+        self.success_url = reverse('lawsuit_update',
+                                   kwargs={'folder': self.kwargs['folder'], 'pk': self.kwargs['lawsuit']})
         super(MovementUpdateView, self).get_success_url()
 
 

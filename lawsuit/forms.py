@@ -39,7 +39,8 @@ class TypeMovementForm(BaseForm):
     class Meta:
         model = TypeMovement
         fields = fields_for_model(TypeMovement,
-                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix'})
+                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
+                                           'legacy_code', 'uses_wo'})
 
     name = forms.CharField(
         max_length=255,
@@ -47,16 +48,16 @@ class TypeMovementForm(BaseForm):
         error_messages={'required': 'O campo de descrição é obrigatório'}
     )
 
-    legacy_code = forms.CharField(
-        max_length=255,
-        required=False,
-        error_messages={'required': 'O campo de código legado é obrigatório'}
-    )
+    # legacy_code = forms.CharField(
+    #     max_length=255,
+    #     required=False,
+    #     error_messages={'required': 'O campo de código legado é obrigatório'}
+    # )
 
-    uses_wo = CustomBooleanField(
-        initial=False,
-        required=False,
-    )
+    # uses_wo = CustomBooleanField(
+    #     initial=False,
+    #     required=False,
+    # )
 
 
 class InstanceForm(BaseForm):
@@ -74,23 +75,23 @@ class InstanceForm(BaseForm):
 class MovementForm(BaseForm):
     class Meta:
         model = Movement
-        fields = ['legacy_code', 'person_lawyer', 'type_movement', 'law_suit', 'deadline', 'is_active']
+        fields = ['person_lawyer', 'type_movement', 'deadline', 'is_active']
 
-    legacy_code = forms.CharField(
-        label=u"Código Legado",
-        max_length=255,
-        required=False
-    )
+    # legacy_code = forms.CharField(
+    #     label=u"Código Legado",
+    #     max_length=255,
+    #     required=False
+    # )
 
     person_lawyer = forms.ModelChoiceField(
         queryset=Person.objects.filter(is_active=True, is_lawyer=True),
         empty_label=u"Selecione...",
     )
 
-    law_suit = forms.ModelChoiceField(
-        queryset=LawSuit.objects.filter(is_active=True),
-        empty_label=u"Selecione...",
-    )
+    # law_suit = forms.ModelChoiceField(
+    #     queryset=LawSuit.objects.filter(is_active=True),
+    #     empty_label=u"Selecione...",
+    # )
 
     type_movement = forms.ModelChoiceField(
         queryset=TypeMovement.objects.filter(is_active=True),
@@ -109,12 +110,13 @@ class FolderForm(BaseForm):
     class Meta:
         model = Folder
         fields = fields_for_model(Folder,
-                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix'})
+                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
+                                           'legacy_code'})
 
-    legacy_code = forms.CharField(
-        max_length=255,
-        required=False
-    )
+    # legacy_code = forms.CharField(
+    #     max_length=255,
+    #     required=False
+    # )
 
     person_customer = forms.ModelChoiceField(
         queryset=Person.objects.filter(is_active=True, is_customer=True),
@@ -128,16 +130,16 @@ class LawSuitForm(BaseForm):
         model = LawSuit
         fields = fields_for_model(LawSuit,
                                   exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
-                                           'legacy_code'})
+                                           'legacy_code', 'folder'})
 
     person_lawyer = forms.ModelChoiceField(
         empty_label=u"Selecione",
         queryset=Person.objects.filter(is_active=True, is_lawyer=True).only('legal_name'), required=True
     )
-    folder = forms.ModelChoiceField(
-        empty_label=u"Selecione",
-        queryset=Folder.objects.filter(is_active=True), required=True
-    )
+    # folder = forms.ModelChoiceField(
+    #     empty_label=u"Selecione",
+    #     queryset=Folder.objects.filter(is_active=True), required=True
+    # )
     instance = forms.ModelChoiceField(
         queryset=Instance.objects.filter(is_active=True),
         empty_label=u"Selecione", required=True
@@ -161,16 +163,18 @@ class CourtDivisionForm(BaseForm):
     class Meta:
         model = CourtDivision
         fields = fields_for_model(CourtDivision,
-                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix'])
+                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
+                                           'legacy_code'])
 
-    legacy_code = forms.CharField(max_length=255, required=False)
+        # legacy_code = forms.CharField(max_length=255, required=False)
 
 
 class CourtDistrictForm(BaseForm):
     class Meta:
         model = CourtDistrict
         fields = fields_for_model(CourtDistrict,
-                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
+                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user', 'legacy_code',
+                                           'system_prefix'])
 
     state = forms.ModelChoiceField(
         queryset=State.objects.filter(is_active=True),

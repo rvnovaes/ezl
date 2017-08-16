@@ -25,9 +25,9 @@ class TypeMovementTable(tables.Table):
                              args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'name', 'legacy_code', 'uses_wo', 'is_active')
+        sequence = ('selection', 'name', 'legacy_code', 'is_active')
         model = TypeMovement
-        fields = ['selection', 'name', 'legacy_code', 'uses_wo', 'is_active']
+        fields = ['selection', 'name', 'legacy_code', 'is_active']
         attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem tipos de movimentação cadastrados"
 

@@ -9,29 +9,29 @@ from core.models import Person
 from core.widgets import MDDateTimepicker, MDDatePicker
 from ezl import settings
 from lawsuit.forms import BaseForm
-from lawsuit.models import Movement
 from .models import Task, Ecm, TypeTask
 
 
 class TaskForm(BaseForm):
     class Meta:
         model = Task
-        fields = ['legacy_code', 'movement', 'person_asked_by', "person_executed_by", 'type_task',
+        fields = ['person_asked_by', "person_executed_by", 'type_task',
                   'delegation_date', 'acceptance_date', "reminder_deadline_date", "final_deadline_date",
                   'execution_date',
                   'return_date', 'refused_date', 'blocked_payment_date', 'finished_date', 'is_active']
 
-    legacy_code = forms.CharField(
-        label=u"Código Legado",
-        max_length=255,
-        required=False
-    )
+    #
+    # legacy_code = forms.CharField(
+    #     label=u"Código Legado",
+    #     max_length=255,
+    #     required=False
+    # )
 
-    movement = forms.ModelChoiceField(
-        queryset=Movement.objects.filter(is_active=True),
-        empty_label=u"Selecione...",
-        label=u"Movimentação"
-    )
+    # movement = forms.ModelChoiceField(
+    #     queryset=Movement.objects.filter(is_active=True),
+    #     empty_label=u"Selecione...",
+    #     label=u"Movimentação"
+    # )
 
     person_asked_by = forms.ModelChoiceField(
         empty_label=u"Selecione...",

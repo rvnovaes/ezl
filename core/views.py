@@ -22,6 +22,8 @@ from core.messages import new_success, update_success, delete_error_protected, d
     address_success_update
 from core.models import Person, Address, City, State, Country
 from core.tables import PersonTable
+from lawsuit.models import Folder, Movement, LawSuit
+from task.models import Task
 
 
 def login(request):
@@ -371,6 +373,20 @@ class GenericFormOneToMany(FormView, SingleTableView):
 
     def form_valid(self, form):
         user = User.objects.get(id=self.request.user.id)
+        folder = self.kwargs.get('folder') or None
+        lawsuit = self.kwargs.get('lawsuit') or None
+        movement = self.kwargs.get('movement') or None
+        pk = self.kwargs.get('pk')
+        if form.instance.id is None:
+            if folder:
+                form.instance.folder = Folder.objects.get(id=folder)
+                form.instance.law_suit = LawSuit.objects.get(id=pk)
+            elif lawsuit:
+                form.instance.law_suit = LawSuit.objects.get(id=lawsuit)
+                form.instance.movement = Movement.objects.get(id=pk)
+            elif movement:
+                form.instance.movement = Movement.objects.get(id=movement)
+                form.instance.task = Task.objects.get(id=pk)
 
         if form.instance.id is None:
             # todo: nao precisa salvar o create_date e o alter_date pq o model já faz isso. tirar de todos os lugares
