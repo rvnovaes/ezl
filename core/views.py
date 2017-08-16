@@ -300,21 +300,21 @@ class ClientAutocomplete(autocomplete.Select2QuerySetView):
 
 @login_required
 def person_address_search_country(request):
-    countries = Country.objects.filter(id__gt=1).values('name', 'id')
+    countries = Country.objects.filter(id__gt=1).values('name', 'id').order_by('name')
     countries_json = json.dumps({'number': len(countries), 'countries': list(countries)}, cls=DjangoJSONEncoder)
     return JsonResponse(countries_json, safe=False)
 
 
 @login_required
 def person_address_search_state(request, pk):
-    states = State.objects.filter(country_id=pk).values('name', 'id')
+    states = State.objects.filter(country_id=pk).values('name', 'id').order_by('name')
     states_json = json.dumps({'number': len(states), 'states': list(states)}, cls=DjangoJSONEncoder)
     return JsonResponse(states_json, safe=False)
 
 
 @login_required
 def person_address_search_city(request, pk):
-    cities = City.objects.filter(state_id=pk).values('name', 'id')
+    cities = City.objects.filter(state_id=pk).values('name', 'id').order_by('name')
     cities_json = json.dumps({'number': len(cities), 'cities': list(cities)}, cls=DjangoJSONEncoder)
     return JsonResponse(cities_json, safe=False)
 
