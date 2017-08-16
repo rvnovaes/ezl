@@ -62,7 +62,7 @@ class LawsuitETL(GenericETL):
             instance = Instance.objects.filter(legacy_code=instance_legacy_code).first()
             # __iexact - Case-insensitive exact match.
             # https://docs.djangoproject.com/en/1.11/ref/models/querysets/#std:fieldlookup-iexact
-            court_district = CourtDistrict.objects.filter(name__iexact=court_district_legacy_code).first()
+            court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_legacy_code).first()
             person_court = Person.objects.filter(legacy_code=person_court_legacy_code).first()
             court_division = CourtDivision.objects.filter(legacy_code=court_division_legacy_code).first()
 

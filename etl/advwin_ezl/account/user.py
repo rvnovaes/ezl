@@ -79,7 +79,7 @@ class UserETL(GenericETL):
             last_name = (" ".join(name_user.split(' ')[1:]))[:30]
 
             # tenta encontrar o usuario pelo username (unique)
-            instance = User.objects.filter(username=username).first() or None
+            instance = User.objects.filter(username__unaccent=username).first() or None
 
             # todo: fazer usuario independente do usuario do django (extend, override or custom user???)
             # todo: deve herdar de LegacyCode e Audit e já deve criar person ao criar o usuário

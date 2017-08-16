@@ -11,5 +11,8 @@ username_sftp = "admin.ezl"
 local_path = '/opt/files_easy_lawyer/GEDs/'
 log_file = '/tmp/etl_ged.log'
 
+# Utilização na importação EZL -> Advwin
+
 # nome de usuário utilizado na exportação EZL -> Advwin
 create_user = 'six'
+config_file = 'advwin_ho.cfg'

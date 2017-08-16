@@ -65,7 +65,7 @@ class EcmETL(GenericETL):
                 # Assim, só adiciona um novo registro caso não haja outro como o mesmo Patch
                 id_task = Task.objects.get(legacy_code=task_legacy_code).id
                 is_ecm = False
-                if self.model.objects.filter(path='GEDs/' + str(id_task) + '/' + file):
+                if self.model.objects.filter(path__unaccent='GEDs/' + str(id_task) + '/' + file):
                     is_ecm = True
 
                 task = Task.objects.filter(legacy_code=task_legacy_code).first()
