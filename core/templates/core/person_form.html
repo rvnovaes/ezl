@@ -132,12 +132,9 @@
                                            checked
                                             {% endif %}
                                     >
-
-                                    <select name="address_set-{{ forloop.counter0 }}-address_type"
-                                            id="id_address_set-{{ forloop.counter0 }}-address_type">
-                                        <option value="{{ address.address_type_id }}"
-                                                selected>{{ address.address_type }}</option>
-                                    </select>
+                                    <input type="text" name="address_set-{{ forloop.counter0 }}-address_type"
+                                           id="id_address_set-{{ forloop.counter0 }}-address_type"
+                                           value="{{ address.address_type_id }}">
 
                                 {% endfor %}
                             </div>
@@ -245,10 +242,7 @@
                                 <span id="label_id_address_type">Tipo de Endereço</span>
                                 <select name="address_type" required
                                         id="update_id_address_type" class="form-control">
-                                    <option value="" selected>---------</option>
-
-                                    <option value="1">Casa</option>
-
+                                    <option value="" selected>---------</option>s
                                 </select>
 
                                 <span id="label_id_street">Logradouro</span>
@@ -505,7 +499,7 @@
                             text: "Selecione"
                         }));
 
-                        for (i = 0; i <= length; i++) {
+                        for (i = 0; i < length; i++) {
 
                             $('#update_id_city').append($('<option>', {
                                 value: obj.cities[i].id,
@@ -644,6 +638,38 @@
             var url = '{% url 'person_address_information' 999 %}'.replace(999, id);
 
             $.ajax({
+                url: '{% url 'addresses_types' %}',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    var obj = JSON.parse(data);
+                    var length = obj.number;
+                    document.getElementById("id_state").options.length = 0;
+
+                    if (length == 0) {
+
+                        document.getElementById("update_id_address_type").options.length = 0;
+                        $('#update_id_address_type').append($('<option>', {
+                            value: " ",
+                            text: " ------ "
+                        }));
+
+                    }
+
+                    else {
+                        for (i = 0; i < length; i++) {
+
+                            $('#update_id_address_type').append($('<option>', {
+                                value: obj.addresses_types[i].id,
+                                text: obj.addresses_types[i].name
+                            }));
+
+                        }
+                    }
+                }
+            });
+
+            $.ajax({
                 url: url,
                 type: 'GET',
                 dataType: 'json',
@@ -659,7 +685,7 @@
 
                     $('#update_id_country').val("0").trigger("click");
                     $('#update_id_country').val(data.country_id).trigger("change");
-                    $('#update_id_address_type select').val(data.address_type);
+{#                    $('#update_id_address_type select').val(data.address_type);#}
 
                     if (data.is_active)
                         $('#update_id_is_active').prop('checked', true);
@@ -667,7 +693,7 @@
                     else
                         $('#update_id_is_active').prop('checked', false);
 
-                    $('#update_id_address_type').val(data.address_type_id).trigger("change");
+{#                    $('#update_id_address_type').val(data.address_type_id).trigger("change");#}
                     $('#form_address_update').modal('show');
                 }
             })

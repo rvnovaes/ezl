@@ -349,3 +349,11 @@ def person_address_information(request, pk):
         }
 
     return JsonResponse(data)
+
+
+@login_required
+def person_address_search_address_type(request):
+    addresses_types = AddressType.objects.all().values('name', 'id')
+    addresses_types_json = json.dumps({'number': len(addresses_types), 'addresses_types': list(addresses_types)},
+                                      cls=DjangoJSONEncoder)
+    return JsonResponse(addresses_types_json, safe=False)

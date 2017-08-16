@@ -19,5 +19,6 @@ urlpatterns = [
     url(r'^pessoas/endereco/pais/$', views.person_address_search_country, name='address_country'),
     url(r'^pessoas/endereco/(?P<pk>[0-9]+)/estado/$', views.person_address_search_state, name='address_state'),
     url(r'^pessoas/endereco/(?P<pk>[0-9]+)/cidade/$', views.person_address_search_city, name='address_city'),
+    url(r'^pessoas/endereco/tipo$', views.person_address_search_address_type, name='addresses_types'),
 
 ]
