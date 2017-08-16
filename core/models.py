@@ -99,7 +99,7 @@ class State(Audit):
 
 
 class City(Audit):
-    name = models.CharField(max_length=255, null=False, unique=True)
+    name = models.CharField(max_length=255, null=False)
     state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False)
 
     court_district = models.ForeignKey('lawsuit.CourtDistrict', on_delete=models.PROTECT, blank=False, null=False,
@@ -108,6 +108,7 @@ class City(Audit):
     class Meta:
         db_table = "city"
         verbose_name = "Cidade"
+        unique_together = (('name', 'state'),)
 
     def __str__(self):
         return self.name
