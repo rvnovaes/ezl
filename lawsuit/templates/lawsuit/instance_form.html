@@ -13,13 +13,15 @@
                         </div>
                         <div class="panel-body">
                             {% for field in form %}
-                                <div class="form-group">
+                                <div class="form-group col-sm-2">
                                     <label>
                                         {{ field.label }}{{ field }}
                                     </label>
                                 </div>
                             {% endfor %}
-                            <div class="form-row  text-center">
+
+                        </div>
+                        <div class="form-row  text-center">
                                 <a class="btn btn-sm btn-raised btn-default"
                                    href="{% url 'instance_list' %}"><i
                                         class="material-icons left">clear</i>
@@ -30,7 +32,6 @@
                                     Salvar
                                 </button>
                             </div>
-                        </div>
                     </div>
                 </div>
             </fieldset>

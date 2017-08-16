@@ -10,8 +10,8 @@ class PersonETL(GenericETL):
     advwin_table = ['Jurid_Tribunais', 'Jurid_Advogado', 'Jurid_Clifor']
     model = Person
 
-    query = "select" \
-            "  t1.Descricao as legal_name, " \
+    import_query = "select" \
+                   "  t1.Descricao as legal_name, " \
             "  t1.Descricao as name, " \
             "  t1.Codigo as legacy_code, " \
             "  'J' as legal_type, " \
@@ -47,8 +47,8 @@ class PersonETL(GenericETL):
                                                                                                   "  a1.Codigo not in ( " \
                                                                                                   "  select cf.Codigo " \
                                                                                                   "  from " + \
-            advwin_table[2] + " as cf " \
-                              "  where " \
+                   advwin_table[2] + " as cf " \
+                                     "  where " \
                               "      cf.Status = 'Ativo' and " \
                               "      cf.Razao is not null and cf.Razao <> '') " \
                               " " \
@@ -70,7 +70,7 @@ class PersonETL(GenericETL):
 
     has_status = True
 
-    def load_etl(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count):
         log_file = open('log_file.txt', 'w')
         for row in rows:
             print(rows_count)
@@ -165,7 +165,7 @@ class PersonETL(GenericETL):
                 except IntegrityError:
                     log_file.write(str(row) + '')
 
-            super(PersonETL, self).load_etl(rows, user, rows_count)
+            super(PersonETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == "__main__":

@@ -13,23 +13,24 @@
                         </div>
                         <div class="panel-body">
                             {% for field in form %}
-                                <div class="form-group">
+                                <div class="form-group col-sm-3">
                                     <label>
                                         {{ field.label }}{{ field }}
                                     </label>
                                 </div>
                             {% endfor %}
-                            <div class="form-row  text-center">
-                                <a class="btn btn-sm btn-raised btn-default"
-                                   href="{% url 'task_list' %}"><i
-                                        class="material-icons left">clear</i>
-                                    Cancelar
-                                </a>
-                                <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
-                                        class="material-icons left">done</i>
-                                    Salvar
-                                </button>
-                            </div>
+
+                        </div>
+                        <div class="form-row  text-center">
+                            <a class="btn btn-sm btn-raised btn-default"
+                               href="{% url 'task_list' %}"><i
+                                    class="material-icons left">clear</i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
+                                    class="material-icons left">done</i>
+                                Salvar
+                            </button>
                         </div>
                     </div>
                 </div>

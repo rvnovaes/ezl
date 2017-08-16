@@ -1,0 +1,47 @@
+{% extends 'inicial.html' %}
+{% block content %}
+    {% include 'core/widgets/messages.html' %}
+    <div>
+        {#            {% if form.title == 'Pasta' %}#}
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="panel panel-primary">
+
+                <div class="panel-heading ">
+                    <div class="panel-title form-row"><i class="material-icons">folder</i>
+                        <b>{{ form.title }}</b>
+                    </div>
+                </div>
+                <div class="panel-body form-group">
+                    <div class="row">
+                        {% for field in form %}
+                            <div class="form-group col-sm-4">
+
+                                <label>
+                                    {{ field.label }}{{ field }}
+                                </label>
+                            </div>
+                        {% endfor %}
+
+                    </div>
+                    <div class="">
+                        <br>
+                        <div class="form-group  text-center">
+                            <a class="btn btn-sm btn-raised btn-default"
+                               href="{% url 'folder_list' %}"><i
+                                    class="material-icons left">clear</i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
+                                    class="material-icons left">done</i>
+                                Salvar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{ form.media }}
+        </form>
+        {% include 'core/widgets/generic_form.html' with link_ex=delete link_add=create %}
+    </div>
+{% endblock %}

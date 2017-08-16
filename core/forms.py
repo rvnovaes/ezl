@@ -1,12 +1,12 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.forms import ModelForm
+from django.forms.models import inlineformset_factory
 from localflavor.br.forms import BRCPFField, BRCNPJField
 
 from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, Country, City, State, ContactMechanism, AddressType
 from lawsuit.forms import BaseForm
-from django.forms.models import inlineformset_factory
 
 
 class ContactForm(ModelForm, forms.Form):

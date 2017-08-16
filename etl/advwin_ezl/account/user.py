@@ -13,8 +13,8 @@ from etl.advwin_ezl.signals import new_person, temp_disconnect_signal
 class UserETL(GenericETL):
     advwin_table = 'ADVWeb_usuario'
     model = User
-    query = "SELECT  u1.usuarioLogin AS username," \
-            "u1.usuarioNome AS name_user, " \
+    import_query = "SELECT  u1.usuarioLogin AS username," \
+                   "u1.usuarioNome AS name_user, " \
             "u1.usuarioEmail AS email, " \
             "a1.Razao AS legal_name, " \
             "a1.Nome AS name, " \
@@ -36,7 +36,7 @@ class UserETL(GenericETL):
     # todo: fazer model de usuario pra ter herança com LegacyCode e Audit
     # has_status = True
 
-    def load_etl(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count):
         for row in rows:
             created = False
             person_id = None
@@ -161,7 +161,7 @@ class UserETL(GenericETL):
                                     system_prefix=LegacySystem.ADVWIN.value),
                                 created=created)
 
-            super(UserETL, self).load_etl(rows, user, rows_count)
+            super(UserETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == "__main__":

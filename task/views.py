@@ -263,7 +263,7 @@ def delete_ecm(request, pk):
     task = query.values('task_id').first()
 
     try:
-        # query = Ecm.objects.filter(id=pk).delete()
+        # import_query = Ecm.objects.filter(id=pk).delete()
         query.delete()
         num_ged = Ecm.objects.filter(task_id=task['task_id']).count()
         data = {'is_deleted': True,
