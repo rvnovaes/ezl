@@ -6,6 +6,7 @@ from sqlalchemy import text
 
 import connections
 from connections.db_connection import connect_db
+from etl.advwin_ezl import settings
 
 
 def import_data():
@@ -14,8 +15,8 @@ def import_data():
     # restart identity - reinica o id da tabela
     engine.execute(text('truncate table city restart identity cascade;').execution_options(autocommit=True))
 
-    # pega o diretorio do arquivo __init__.py do diretorio corrente e junta com o 'state_city.json'
-    json_file_path = os.path.join(os.path.dirname(__file__), 'state_city.json')
+    # pega o diretorio do arquivo __init__.py do diretorio corrente e junta com o 'city.json'
+    json_file_path = os.path.join(os.path.dirname(__file__), 'city.json')
     json_file_path = json_file_path.replace('\\', '/')
 
     json_file = open(json_file_path, encoding="utf8")
@@ -24,14 +25,27 @@ def import_data():
 
     for data in city_dict:
         city_name = str(data['name']).replace("'", "''")
+        court_district = str(data['court_district']).replace("'", "''")
+
+        query = "select id from state where initials = '" + data['state'] + "';"
+        connection = engine.connect()
+        result = connection.execute(query)
+        state_id = ''
+        for row in result:
+            state_id = str(row['id'])
+
+        if state_id == '':
+            print(query)
 
         # todo: ainda nao existe uma lista com a comarca (court_district_id) de cada cidade
-        query = "insert into city(create_date, name, create_user_id, state_id, is_active) " \
-                "values('{0}', '{1}', {2}, {3}, {4})"\
+        query = "insert into city(create_date, name, court_district_id, create_user_id, state_id, is_active) " \
+                "values('{0}', '{1}', {2}, {3}, {4}, {5})"\
             .format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     city_name,
-                    '1',
-                    "(select id from state where name = '" + data['state_name'] + "')",
+                    "(select id from court_district where "
+                    "name = '" + court_district + "' and state_id = " + state_id + ")",
+                    settings.USER,
+                    state_id,
                     True)
 
         connection = engine.connect()

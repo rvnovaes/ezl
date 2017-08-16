@@ -2,7 +2,7 @@
 <django-objects version="1.0">
     <object model="core.state" pk="2">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -12,7 +12,7 @@
     </object>
     <object model="core.state" pk="3">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -22,7 +22,7 @@
     </object>
     <object model="core.state" pk="4">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -32,7 +32,7 @@
     </object>
     <object model="core.state" pk="5">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -42,7 +42,7 @@
     </object>
     <object model="core.state" pk="6">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -52,7 +52,7 @@
     </object>
     <object model="core.state" pk="7">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -62,7 +62,7 @@
     </object>
     <object model="core.state" pk="8">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -72,7 +72,7 @@
     </object>
     <object model="core.state" pk="9">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -82,7 +82,7 @@
     </object>
     <object model="core.state" pk="10">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -92,7 +92,7 @@
     </object>
     <object model="core.state" pk="11">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -102,7 +102,7 @@
     </object>
     <object model="core.state" pk="12">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -112,7 +112,7 @@
     </object>
     <object model="core.state" pk="13">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -122,7 +122,17 @@
     </object>
     <object model="core.state" pk="14">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField"><None></None></field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Mato Grosso do Sul</field>
+        <field name="initials" type="CharField">MS</field>
+        <field name="country" rel="ManyToOneRel" to="core.country">2</field>
+    </object>
+    <object model="core.state" pk="15">
+        <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -130,9 +140,9 @@
         <field name="initials" type="CharField">PA</field>
         <field name="country" rel="ManyToOneRel" to="core.country">2</field>
     </object>
-    <object model="core.state" pk="15">
+    <object model="core.state" pk="16">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -140,9 +150,9 @@
         <field name="initials" type="CharField">PB</field>
         <field name="country" rel="ManyToOneRel" to="core.country">2</field>
     </object>
-    <object model="core.state" pk="16">
+    <object model="core.state" pk="17">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -150,9 +160,9 @@
         <field name="initials" type="CharField">PE</field>
         <field name="country" rel="ManyToOneRel" to="core.country">2</field>
     </object>
-    <object model="core.state" pk="17">
+    <object model="core.state" pk="18">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -160,9 +170,9 @@
         <field name="initials" type="CharField">PI</field>
         <field name="country" rel="ManyToOneRel" to="core.country">2</field>
     </object>
-    <object model="core.state" pk="18">
+    <object model="core.state" pk="19">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -170,9 +180,9 @@
         <field name="initials" type="CharField">PR</field>
         <field name="country" rel="ManyToOneRel" to="core.country">2</field>
     </object>
-    <object model="core.state" pk="19">
+    <object model="core.state" pk="20">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -180,9 +190,9 @@
         <field name="initials" type="CharField">RJ</field>
         <field name="country" rel="ManyToOneRel" to="core.country">2</field>
     </object>
-    <object model="core.state" pk="20">
+    <object model="core.state" pk="21">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -190,9 +200,9 @@
         <field name="initials" type="CharField">RN</field>
         <field name="country" rel="ManyToOneRel" to="core.country">2</field>
     </object>
-    <object model="core.state" pk="21">
+    <object model="core.state" pk="22">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -200,9 +210,9 @@
         <field name="initials" type="CharField">RO</field>
         <field name="country" rel="ManyToOneRel" to="core.country">2</field>
     </object>
-    <object model="core.state" pk="22">
+    <object model="core.state" pk="23">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -210,9 +220,9 @@
         <field name="initials" type="CharField">RR</field>
         <field name="country" rel="ManyToOneRel" to="core.country">2</field>
     </object>
-    <object model="core.state" pk="23">
+    <object model="core.state" pk="24">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -220,9 +230,9 @@
         <field name="initials" type="CharField">RS</field>
         <field name="country" rel="ManyToOneRel" to="core.country">2</field>
     </object>
-    <object model="core.state" pk="24">
+    <object model="core.state" pk="25">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -230,9 +240,9 @@
         <field name="initials" type="CharField">SC</field>
         <field name="country" rel="ManyToOneRel" to="core.country">2</field>
     </object>
-    <object model="core.state" pk="25">
+    <object model="core.state" pk="26">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -240,9 +250,9 @@
         <field name="initials" type="CharField">SE</field>
         <field name="country" rel="ManyToOneRel" to="core.country">2</field>
     </object>
-    <object model="core.state" pk="26">
+    <object model="core.state" pk="27">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
@@ -250,9 +260,9 @@
         <field name="initials" type="CharField">SP</field>
         <field name="country" rel="ManyToOneRel" to="core.country">2</field>
     </object>
-    <object model="core.state" pk="27">
+    <object model="core.state" pk="28">
         <field name="create_date" type="DateTimeField">2017-06-02T12:11:51.963579+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="alter_date" type="DateTimeField"><None></None></field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
