@@ -7,8 +7,8 @@ from lawsuit.models import Movement, LawSuit, TypeMovement
 
 
 class MovementETL(GenericETL):
-    query = "SELECT " \
-            "pm.M_Distribuicao AS law_suit_legacy_code, " \
+    import_query = "SELECT top 1000 " \
+                   "pm.M_Distribuicao AS law_suit_legacy_code, " \
             "pm.Ident AS legacy_code, " \
             "pm.Advogado AS person_lawyer_legacy_code, " \
             "pm.CodMov AS type_movement_legacy_code, " \
@@ -23,7 +23,7 @@ class MovementETL(GenericETL):
     advwin_table = "Jurid_ProcMov"
     has_status = True
 
-    def load_etl(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count):
         for row in rows:
             print(rows_count)
             rows_count -= 1
@@ -76,7 +76,7 @@ class MovementETL(GenericETL):
                                           person_lawyer=person_lawyer
                                           )
 
-        super(MovementETL, self).load_etl(rows, user, rows_count)
+        super(MovementETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == "__main__":

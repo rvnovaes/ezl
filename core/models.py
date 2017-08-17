@@ -2,6 +2,7 @@ from enum import Enum
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from .utils import LegacySystem
@@ -212,3 +213,7 @@ class ContactUs(Audit):
 
     def __str__(self):
         return self.name
+
+
+class ModelExportHistory(models.Model):
+    model = models.CharField(max_length=255, unique=True, null=False)

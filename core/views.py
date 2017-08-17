@@ -1,3 +1,6 @@
+import json
+from datetime import datetime
+
 from dal import autocomplete
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -5,22 +8,22 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import ProtectedError
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django_tables2 import SingleTableView, RequestConfig
-from datetime import datetime
+
 from core.forms import PersonForm, AddressForm, AddressFormSet
-from core.messages import new_success, update_success, delete_error_protected, delete_success, address_sucess_deleted, \
-    address_error_deleted, address_success_create, address_error_create, address_error_update, address_success_update, \
-    address_and_person_created, address_and_person_not_created
+from core.messages import new_success, update_success, delete_error_protected, delete_success, address_error_update, \
+    address_success_update
 from core.models import Person, Address, City, State, Country, AddressType
 from core.tables import PersonTable
-import json
-from django.core.serializers.json import DjangoJSONEncoder
+from lawsuit.models import Folder, Movement, LawSuit
+from task.models import Task
 
 
 def login(request):
@@ -101,6 +104,7 @@ class MultiDeleteViewMixin(DeleteView):
     def delete(self, request, *args, **kwargs):
         if request.method == "POST":
             pks = request.POST.getlist("selection")
+            folder = kwargs['folder']
             try:
                 self.model.objects.filter(pk__in=pks).delete()
                 messages.success(self.request, self.success_message)
@@ -217,6 +221,11 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
     success_message = update_success
+
+    # def get(self, request, *args, **kwargs):
+    #     self.object = self.get_object()
+    #     context = self.get_context_data(object=self.object)
+    #     return self.render_to_response(context)
 
     def form_valid(self, form):
         legal_type = self.request.POST['legal_type']
@@ -357,3 +366,48 @@ def person_address_search_address_type(request):
     addresses_types_json = json.dumps({'number': len(addresses_types), 'addresses_types': list(addresses_types)},
                                       cls=DjangoJSONEncoder)
     return JsonResponse(addresses_types_json, safe=False)
+
+
+class GenericFormOneToMany(FormView, SingleTableView):
+    def get_initial(self):
+        if self.kwargs.get('lawsuit'):
+            folder_id = LawSuit.objects.get(id=self.kwargs.get('lawsuit')).folder.id
+            self.kwargs['folder'] = folder_id
+        if isinstance(self, CreateView):
+            self.form_class.declared_fields['is_active'].initial = True
+            self.form_class.declared_fields['is_active'].disabled = True
+
+        elif isinstance(self, UpdateView):
+            self.form_class.declared_fields['is_active'].disabled = False
+        return self.initial.copy()
+
+    def form_valid(self, form):
+        user = User.objects.get(id=self.request.user.id)
+        folder = self.kwargs.get('folder') or None
+        lawsuit = self.kwargs.get('lawsuit') or None
+        movement = self.kwargs.get('movement') or None
+        pk = self.kwargs.get('pk')
+        if form.instance.id is None:
+            if folder:
+                form.instance.folder = Folder.objects.get(id=folder)
+                form.instance.law_suit = LawSuit.objects.get(id=pk)
+            elif lawsuit:
+                form.instance.law_suit = LawSuit.objects.get(id=lawsuit)
+                form.instance.movement = Movement.objects.get(id=pk)
+            elif movement:
+                form.instance.movement = Movement.objects.get(id=movement)
+                form.instance.task = Task.objects.get(id=pk)
+
+        if form.instance.id is None:
+            # todo: nao precisa salvar o create_date e o alter_date pq o model já faz isso. tirar de todos os lugares
+            form.instance.create_date = timezone.now()
+            form.instance.create_user = user
+        else:
+
+            form.instance.alter_date = timezone.now()
+            form.instance.alter_user = user
+            form.save()
+        super(GenericFormOneToMany, self).form_valid(form)
+        return HttpResponseRedirect(self.success_url)
+
+    success_message = None

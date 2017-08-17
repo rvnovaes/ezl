@@ -100,11 +100,11 @@ WSGI_APPLICATION = 'ezl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'etl_ezl',
+        'NAME': 'ezl3',
         'USER': 'ezl',
         'PASSWORD': 'ezl',
-        'HOST': '13.68.213.60',
-        # 'HOST': '127.0.0.1',
+        # 'HOST': '13.68.213.60',
+        'HOST': '127.0.0.1',
         'PORT': '5432'
     }
 }
@@ -112,9 +112,9 @@ DATABASES = {
 try:
 
     from .local_settings import *
-        
+
 except ImportError:
-    
+
     pass
 
 # Password validation

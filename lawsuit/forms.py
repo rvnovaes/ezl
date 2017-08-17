@@ -3,11 +3,13 @@ from django.core.exceptions import FieldDoesNotExist
 from django.forms import ModelForm
 from django.forms.models import fields_for_model
 
-# from django.contrib.admin.widgets import AdminDateWidget #TODO Verificar se será utilizado datepicker
 from core.fields import CustomBooleanField
 from core.models import Person, State
-from core.widgets import MDModelSelect2
+from core.widgets import MDModelSelect2, MDDatePicker
 from .models import TypeMovement, Instance, Movement, Folder, CourtDistrict, LawSuit, CourtDivision
+
+
+# from django.contrib.admin.widgets import AdminDateWidget #TODO Verificar se será utilizado datepicker
 
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
@@ -37,7 +39,8 @@ class TypeMovementForm(BaseForm):
     class Meta:
         model = TypeMovement
         fields = fields_for_model(TypeMovement,
-                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix'})
+                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
+                                           'legacy_code', 'uses_wo'})
 
     name = forms.CharField(
         max_length=255,
@@ -45,16 +48,16 @@ class TypeMovementForm(BaseForm):
         error_messages={'required': 'O campo de descrição é obrigatório'}
     )
 
-    legacy_code = forms.CharField(
-        max_length=255,
-        required=False,
-        error_messages={'required': 'O campo de código legado é obrigatório'}
-    )
+    # legacy_code = forms.CharField(
+    #     max_length=255,
+    #     required=False,
+    #     error_messages={'required': 'O campo de código legado é obrigatório'}
+    # )
 
-    uses_wo = CustomBooleanField(
-        initial=False,
-        required=False,
-    )
+    # uses_wo = CustomBooleanField(
+    #     initial=False,
+    #     required=False,
+    # )
 
 
 class InstanceForm(BaseForm):
@@ -72,23 +75,23 @@ class InstanceForm(BaseForm):
 class MovementForm(BaseForm):
     class Meta:
         model = Movement
-        fields = ['legacy_code', 'person_lawyer', 'type_movement', 'law_suit', 'deadline', 'is_active']
+        fields = ['person_lawyer', 'type_movement', 'deadline', 'is_active']
 
-    legacy_code = forms.CharField(
-        label=u"Código Legado",
-        max_length=255,
-        required=False
-    )
+    # legacy_code = forms.CharField(
+    #     label=u"Código Legado",
+    #     max_length=255,
+    #     required=False
+    # )
 
     person_lawyer = forms.ModelChoiceField(
         queryset=Person.objects.filter(is_active=True, is_lawyer=True),
         empty_label=u"Selecione...",
     )
 
-    law_suit = forms.ModelChoiceField(
-        queryset=LawSuit.objects.filter(is_active=True),
-        empty_label=u"Selecione...",
-    )
+    # law_suit = forms.ModelChoiceField(
+    #     queryset=LawSuit.objects.filter(is_active=True),
+    #     empty_label=u"Selecione...",
+    # )
 
     type_movement = forms.ModelChoiceField(
         queryset=TypeMovement.objects.filter(is_active=True),
@@ -96,7 +99,10 @@ class MovementForm(BaseForm):
     )
 
     deadline = forms.DateTimeField(
-        label=u"Data da Movimentação"
+        label=u"Data da Movimentação",
+        widget=MDDatePicker(attrs={'class': 'form-control'},
+                            format='DD/MM/YYYY'
+                            )
     )
 
 
@@ -104,15 +110,16 @@ class FolderForm(BaseForm):
     class Meta:
         model = Folder
         fields = fields_for_model(Folder,
-                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix'})
+                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
+                                           'legacy_code'})
 
-    legacy_code = forms.CharField(
-        max_length=255,
-        required=False
-    )
+    # legacy_code = forms.CharField(
+    #     max_length=255,
+    #     required=False
+    # )
 
     person_customer = forms.ModelChoiceField(
-        queryset=Person.objects.filter(is_active=True),
+        queryset=Person.objects.filter(is_active=True, is_customer=True),
         empty_label=u"Selecione...",
         widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'})
     )
@@ -123,16 +130,16 @@ class LawSuitForm(BaseForm):
         model = LawSuit
         fields = fields_for_model(LawSuit,
                                   exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
-                                           'legacy_code'})
+                                           'legacy_code', 'folder'})
 
     person_lawyer = forms.ModelChoiceField(
         empty_label=u"Selecione",
-        queryset=Person.objects.filter(is_active=True, is_lawyer=True), required=True
+        queryset=Person.objects.filter(is_active=True, is_lawyer=True).only('legal_name'), required=True
     )
-    folder = forms.ModelChoiceField(
-        empty_label=u"Selecione",
-        queryset=Folder.objects.filter(is_active=True), required=True
-    )
+    # folder = forms.ModelChoiceField(
+    #     empty_label=u"Selecione",
+    #     queryset=Folder.objects.filter(is_active=True), required=True
+    # )
     instance = forms.ModelChoiceField(
         queryset=Instance.objects.filter(is_active=True),
         empty_label=u"Selecione", required=True
@@ -156,16 +163,18 @@ class CourtDivisionForm(BaseForm):
     class Meta:
         model = CourtDivision
         fields = fields_for_model(CourtDivision,
-                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix'])
+                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
+                                           'legacy_code'])
 
-    legacy_code = forms.CharField(max_length=255, required=False)
+        # legacy_code = forms.CharField(max_length=255, required=False)
 
 
 class CourtDistrictForm(BaseForm):
     class Meta:
         model = CourtDistrict
         fields = fields_for_model(CourtDistrict,
-                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user'])
+                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user', 'legacy_code',
+                                           'system_prefix'])
 
     state = forms.ModelChoiceField(
         queryset=State.objects.filter(is_active=True),

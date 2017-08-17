@@ -2,7 +2,7 @@ import django_tables2 as tables
 from django_tables2 import A
 
 from core.tables import CheckBoxMaterial
-from .models import TypeMovement, Movement, LawSuit, Folder, CourtDistrict, Instance, LawSuit
+from .models import TypeMovement, Movement, Folder, CourtDistrict, Instance, LawSuit
 
 
 class InstanceTable(tables.Table):
@@ -25,9 +25,9 @@ class TypeMovementTable(tables.Table):
                              args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'name', 'legacy_code', 'uses_wo', 'is_active')
+        sequence = ('selection', 'name', 'legacy_code', 'is_active')
         model = TypeMovement
-        fields = ['selection', 'name', 'legacy_code', 'uses_wo', 'is_active']
+        fields = ['selection', 'name', 'legacy_code', 'is_active']
         attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem tipos de movimentação cadastrados"
 
@@ -36,7 +36,7 @@ class MovementTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     legacy_code = tables.LinkColumn(viewname='movement_update', attrs={'a': {'target': 'movement_update'}},
-                                    args=[A('pk')])
+                                    args=[A('law_suit.pk'), A('pk')])
 
     class Meta:
         sequence = ('selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit', 'deadline',
@@ -64,7 +64,7 @@ class FolderTable(tables.Table):
 class LawSuitTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
     law_suit_number = tables.LinkColumn(viewname='lawsuit_update',
-                                        attrs={'a': {'target': 'lawsuit_update'}}, args=[A('pk')])
+                                        attrs={'a': {'target': 'lawsuit_update'}}, args=[A('folder.pk'), A('pk')])
 
     class Meta:
         sequence = ('selection', 'folder', 'instance', 'court_district', 'person_court', 'court_division',

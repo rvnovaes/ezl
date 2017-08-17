@@ -4,8 +4,8 @@ from lawsuit.models import TypeMovement
 
 
 class TypeMovementETL(GenericETL):
-    query = "SELECT  tm.Codigo,  tm.Descricao FROM Jurid_CodMov AS tm  " \
-            "WHERE right(tm.Codigo, 1) <> '.'  " \
+    import_query = "SELECT  tm.Codigo,  tm.Descricao FROM Jurid_CodMov AS tm  " \
+                   "WHERE right(tm.Codigo, 1) <> '.'  " \
             "   AND (tm.UsarOS = 0 OR tm.UsarOS IS NULL)  " \
             "   AND tm.Status = 'Ativo'  " \
             "   AND tm.Codigo= (SELECT MIN(tm2.codigo)    " \
@@ -14,7 +14,7 @@ class TypeMovementETL(GenericETL):
     advwin_table = 'Jurid_CodMov'
     has_status = True
 
-    def load_etl(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count):
         for row in rows:
             code = row['Codigo']
             name = row['Descricao']
@@ -34,7 +34,7 @@ class TypeMovementETL(GenericETL):
                                           system_prefix=LegacySystem.ADVWIN.value,
                                           create_user=user,
                                           alter_user=user)
-        super(TypeMovementETL, self).load_etl(rows, user, rows_count)
+        super(TypeMovementETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == '__main__':

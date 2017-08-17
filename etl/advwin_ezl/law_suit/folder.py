@@ -8,8 +8,8 @@ from lawsuit.models import Folder
 class FolderETL(GenericETL):
     advwin_table = 'Jurid_Pastas'
     model = Folder
-    query = "SELECT \n" \
-            "    t1.Codigo_Comp, \n" \
+    import_query = "SELECT \n" \
+                   "    t1.Codigo_Comp, \n" \
             "    t1.Cliente \n" \
             "FROM " + advwin_table + " AS t1 \n" \
             "WHERE \n" \
@@ -24,10 +24,10 @@ class FolderETL(GenericETL):
             "    t2.Status = 'Ativa' AND \n" \
             "    t2.Codigo_Comp IS NOT NULL AND t2.Codigo_Comp <> '' AND \n" \
             "    t2.Cliente IS NOT NULL AND t2.Cliente <> '' AND \n" \
-            "    t1.Codigo_Comp = t2.Codigo_Comp)"
+                                     "    t1.Codigo_Comp = t2.Codigo_Comp) order by t1.Dt_Cad DESC"
     has_status = True
 
-    def load_etl(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count):
         log_file = open('log_file.txt', 'w')
         for row in rows:
             print(rows_count)
@@ -62,7 +62,7 @@ class FolderETL(GenericETL):
                                      alter_user=user)
                     obj.save()
 
-                super(FolderETL, self).load_etl(rows, user, rows_count)
+                super(FolderETL, self).config_import(rows, user, rows_count)
             else:
                 log_file.write(str(row) + '\n')
 

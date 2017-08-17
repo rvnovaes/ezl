@@ -9,8 +9,8 @@ survey_dict = {'audienciaCorrespondente': 'COURTHEARING',
 
 class TypeTaskETL(GenericETL):
     model = TypeTask
-    query = "SELECT  tm.Codigo,  tm.Descricao, tm.formulario_id FROM Jurid_CodMov AS tm  " \
-            "WHERE right(tm.Codigo, 1) <> '.'  " \
+    import_query = "SELECT  tm.Codigo,  tm.Descricao, tm.formulario_id FROM Jurid_CodMov AS tm  " \
+                   "WHERE right(tm.Codigo, 1) <> '.'  " \
             "   AND (tm.UsarOS = 1 AND tm.UsarOS IS NOT NULL)  " \
             "   AND tm.Status = 'Ativo'  " \
             "   AND tm.Codigo= (SELECT MIN(tm2.codigo)    " \
@@ -18,7 +18,7 @@ class TypeTaskETL(GenericETL):
     advwin_table = 'Jurid_CodMov'
     has_status = True
 
-    def load_etl(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count):
         for row in rows:
             code = row['Codigo']
             name = row['Descricao']
@@ -43,7 +43,7 @@ class TypeTaskETL(GenericETL):
                                           system_prefix=LegacySystem.ADVWIN.value,
                                           create_user=user,
                                           alter_user=user)
-        super(TypeTaskETL, self).load_etl(rows, user, rows_count)
+        super(TypeTaskETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == "__main__":

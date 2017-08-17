@@ -4,9 +4,6 @@ import json
 import os
 
 import connections
-
-from sqlalchemy import text
-
 from connections.db_connection import connect_db
 from etl.advwin_ezl import settings
 

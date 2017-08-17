@@ -1,6 +1,5 @@
-#Renomear esse arquivo local_settings.py
-#Apos renomeado, deve ser inserido no hgignore
-import os
+# Renomear esse arquivo local_settings.py
+# Apos renomeado, deve ser inserido no hgignore
 
 DEBUG = True
 

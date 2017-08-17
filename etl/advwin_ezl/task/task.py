@@ -1,11 +1,17 @@
-from django.utils import timezone
+from itertools import chain
 
+from django.utils import timezone
+from sqlalchemy import update
+
+from advwin_models.advwin import JuridAgendaTable
 from core.models import Person
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import Movement
-from task.models import Task, TypeTask, TaskStatus
+from task.models import Task, TypeTask, TaskStatus, TaskHistory
+
+default_justify = 'Aceita por Correspondente: %s'
 
 
 def get_status_by_substatus(substatus):
@@ -22,34 +28,35 @@ def get_status_by_substatus(substatus):
 
 
 class TaskETL(GenericETL):
-    query = "SELECT " \
-            "a.Data_confirmacao AS blocked_or_finished_date, " \
-            "a.SubStatus AS status_code_advwin, " \
-            "a.ident AS legacy_code, " \
-            "a.Mov AS movement_legacy_code, " \
-            "a.Advogado_sol AS person_asked_by_legacy_code, " \
-            "a.Advogado AS person_executed_by_legacy_code, " \
-            "a.CodMov AS type_task_legacy_code, " \
-            "a.OBS AS description, " \
-            "CASE WHEN (a.Data_delegacao IS NULL) THEN " \
-            "a.Data ELSE a.Data_delegacao END AS delegation_date, " \
-            "a.Data_Prazo AS reminder_deadline_date, " \
-            "a.prazo_fatal AS final_deadline_date " \
-            "FROM Jurid_agenda_table AS a " \
-            "INNER JOIN Jurid_Pastas AS p ON " \
-            "a.Pasta = p.Codigo_Comp " \
-            "WHERE " \
-            "(p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND a.Ident =2254258 AND " \
-            "((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0) OR " \
-            "(a.SubStatus = 90 AND a.Status = 1) " \
-            "OR (a.SubStatus = 100)) " \
-            "ORDER BY a.ident DESC "
+    import_query = "SELECT TOP 1000" \
+                   "a.Data_confirmacao AS blocked_or_finished_date, " \
+                   "a.SubStatus AS status_code_advwin, " \
+                   "a.ident AS legacy_code, " \
+                   "a.Mov AS movement_legacy_code, " \
+                   "a.Advogado_sol AS person_asked_by_legacy_code, " \
+                   "a.Advogado AS person_executed_by_legacy_code, " \
+                   "a.CodMov AS type_task_legacy_code, " \
+                   "a.OBS AS description, " \
+                   "CASE WHEN (a.Data_delegacao IS NULL) THEN " \
+                   "a.Data ELSE a.Data_delegacao END AS delegation_date, " \
+                   "a.Data_Prazo AS reminder_deadline_date, " \
+                   "a.prazo_fatal AS final_deadline_date " \
+                   "FROM Jurid_agenda_table AS a " \
+                   "INNER JOIN Jurid_Pastas AS p ON " \
+                   "a.Pasta = p.Codigo_Comp " \
+                   "WHERE " \
+                   "(p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND a.Ident =2254258 AND " \
+                   "((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0) OR " \
+                   "(a.SubStatus = 90 AND a.Status = 1) " \
+                   "OR (a.SubStatus = 100)) " \
+                   "ORDER BY a.ident DESC "
     # "and a.Data BETWEEN '2017-07-18 00:00' and '2017-07-19 23:59:59'"
     model = Task
     advwin_table = 'Jurid_agenda_table'
+    advwin_model = JuridAgendaTable
     has_status = False
 
-    def load_etl(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count):
         for row in rows:
             print(rows_count)
             rows_count -= 1
@@ -124,8 +131,208 @@ class TaskETL(GenericETL):
                                           final_deadline_date=final_deadline_date,
                                           description=description,
                                           task_status=status_code_advwin)
-        super(TaskETL, self).load_etl(rows, user, rows_count)
+        super(TaskETL, self).config_import(rows, user, rows_count)
 
+    def config_export(self):
+        accpeted_tasks = self.model.objects.filter(legacy_code__isnull=False,
+                                                   task_status=TaskStatus.ACCEPTED)
+
+        done_tasks = self.model.objects.filter(legacy_code__isnull=False,
+                                               task_status=TaskStatus.DONE)
+
+        refused_tasks = self.model.objects.filter(legacy_code__isnull=False,
+                                                  task_status=TaskStatus.REFUSED)
+        #     INSERT
+        #     INTO
+        #     Jurid_Correspondente_Hist
+        #     (codigo_adv_correspondente,
+        #      usuario,
+        #      ident_agenda,
+        #      status,
+        #      SubStatus,
+        #      data_operacao,
+        #      descricao,
+        #      justificativa)
+        #
+        # VALUES
+        # ('cp.cp',
+        #  'WEB: cp.cp',
+        #  2254239,
+        #  0,
+        #  50,
+        #  GETDATE(),
+        #  'Aceita por Correspondente: cp.cp',
+        #  'aceita iasmini')
+
+        #
+        #     UPDATE
+        #     Jurid_Agenda_Table
+        #     SET
+        #     Status_correspondente = 0,
+        #     prazo_lido = 1,
+        #     envio_alerta = 0,
+        #     Ag_statusExecucao = 'Em Execucao',
+        #     data_correspondente = GETDATE(),
+        #     SubStatus = 50
+        #
+        # WHERE
+        # ident = 2254239
+
+
+        accpeted_tasks = map(
+            lambda x: (
+                update(JuridAgendaTable.__table__).values(
+                    {JuridAgendaTable.SubStatus: 50, JuridAgendaTable.status_correspondente: 0,
+                     JuridAgendaTable.prazo_lido: 0, JuridAgendaTable.envio_alerta: 0,
+                     JuridAgendaTable.Ag_StatusExecucao: 'Em execucao',
+                     JuridAgendaTable.Data_correspondente: x.acceptance_date}).where(
+                    JuridAgendaTable.Ident == x.legacy_code)),
+            accpeted_tasks)
+
+        # insert(JuridCorrespondenteHist).values({
+        #     JuridCorrespondenteHist.codigo_adv_correspondente: x.person_executed_by.legacy_code or None,
+        #     JuridCorrespondenteHist.ident_agenda: x.legacy_code,
+        #     JuridCorrespondenteHist.status: 0,
+        #     JuridCorrespondenteHist.SubStatus: 50,
+        #     JuridCorrespondenteHist.data_operacao: datetime.datetime.utcnow,
+        #     JuridCorrespondenteHist.descricao: default_justify % x.person_executed_by.auth_user or '',
+        #     JuridCorrespondenteHist.justificativa: default_justify % x.person_executed_by.auth_user or ''
+        #
+        # })
+
+        task_history = TaskHistory.objects.filter()
+
+        #         SQL
+        #         DO
+        #         CUMPRIMENTO
+        #         UPDATE
+        #         jurid_agenda
+        #         SET
+        #         Obs = deixar
+        #         o
+        #         que
+        #         já
+        #         está
+        #         e
+        #         concatenar
+        #         com
+        #         a
+        #         obs
+        #         do
+        #         ezl
+        #         Status = 2,
+        #         Data_Fech = data
+        #         do
+        #         cumprimento
+        #         no
+        #         ezl,
+        #         prazo_lido = 1,
+        #         prazo_interm = 1,
+        #         Ag_statusExecucao = '',
+        #
+        #     Data_cumprimento = data
+        #     do
+        #     cumprimento
+        #     no
+        #     ezl,
+        #     Substatus = 70
+        #     WHERE
+        #     Ident = 1809647
+        #
+        #
+        # INSERT
+        # INTO
+        # Jurid_Correspondente_Hist
+        # (codigo_adv_correspondente,
+        #  usuario,
+        #  ident_agenda,
+        #  status,
+        #  SubStatus,
+        #  data_operacao,
+        #  descricao,
+        #  justificativa
+        #  )
+        # VALUES
+        # ('cp.cp',
+        #  'WEB: cp.cp',
+        #  2254239,
+        #  1,
+        #  70,
+        #  GETDATE(),
+        #  'Cumprida por Correspondente: cp.cp',
+        #  'nao retirado'
+        #  )
+
+        done_tasks = map(
+            lambda x: (
+                update(JuridAgendaTable.__table__).values(
+                    {JuridAgendaTable.SubStatus: 70, JuridAgendaTable.Status: 2,
+                     JuridAgendaTable.Data_Fech: x.execution_date,
+                     JuridAgendaTable.prazo_lido: 1, JuridAgendaTable.Prazo_Interm: 1,
+                     JuridAgendaTable.Ag_StatusExecucao: '',
+                     JuridAgendaTable.Data_cumprimento: x.execution_date}).where(
+                    JuridAgendaTable.Ident == x.legacy_code)),
+            done_tasks)
+
+        refused_tasks = map(
+            lambda x: (
+                update(JuridAgendaTable.__table__).values(
+                    {JuridAgendaTable.SubStatus: 20, JuridAgendaTable.Status: 1,
+                     JuridAgendaTable.prazo_lido: 1, JuridAgendaTable.Prazo_Interm: 1,
+                     JuridAgendaTable.Data_cumprimento: x.execution_date}).where(
+                    JuridAgendaTable.Ident == x.legacy_code)),
+            refused_tasks)
+
+        # ,
+        #
+        # insert(JuridCorrespondenteHist).values({
+        #     JuridCorrespondenteHist.codigo_adv_correspondente: x.person_executed_by.legacy_code or None,
+        #     JuridCorrespondenteHist.ident_agenda: x.legacy_code,
+        #     JuridCorrespondenteHist.status: 1,
+        #     JuridCorrespondenteHist.SubStatus: 70,
+        #     JuridCorrespondenteHist.data_operacao: datetime.datetime.utcnow,
+        #     JuridCorrespondenteHist.descricao: default_justify % x.person_executed_by.auth_user or '',
+        #     JuridCorrespondenteHist.justificativa: default_justify % x.person_executed_by.auth_user or ''
+        #
+        # })
+
+
+        # tasks = {done_tasks, accpeted_tasks, refused_tasks}
+
+        tasks = chain(done_tasks, accpeted_tasks, refused_tasks)
+        for task in tasks:
+            print(task)
+        #
+        # for x in accpeted_tasks:
+        #     print('----Aceitas----')
+        #     print(x)
+        # #
+        # for y in done_tasks:
+        #     print('----Cumpridas----')
+        #     print(y)
+        #
+        # for z in refused_tasks:
+        #     print('----Recusadas----')
+        #     print(z)  # 1) user.no_of_logins += 1
+
+        self.export_query_set = tasks
+
+
+# session.commit()
+#
+# 2) session.query().\
+#        filter(User.username == form.username.data).\
+#        update({"no_of_logins": (User.no_of_logins +1)})
+#    session.commit()
+#
+# 3) conn = engine.connect()
+#    stmt = User.update().\
+#        values(User.no_of_logins = (User.no_of_logins + 1)).\
+#        where(User.username == form.username.data)
+#    conn.execute(stmt)
+#
+# 4) setattr(user, 'no_of_logins', user.no_of_logins+1)
+#    session.commit()
 
 if __name__ == '__main__':
-    TaskETL().import_data()
+    TaskETL().config_export()

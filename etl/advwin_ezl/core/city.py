@@ -27,7 +27,7 @@ def import_data():
         city_name = str(data['name']).replace("'", "''")
         court_district = str(data['court_district']).replace("'", "''")
 
-        query = "select id from state where initials = '" + data['state'] + "';"
+        query = "SELECT id FROM state WHERE initials = '" + data['state'] + "';"
         connection = engine.connect()
         result = connection.execute(query)
         state_id = ''
@@ -39,7 +39,7 @@ def import_data():
 
         # todo: ainda nao existe uma lista com a comarca (court_district_id) de cada cidade
         query = "insert into city(create_date, name, court_district_id, create_user_id, state_id, is_active) " \
-                "values('{0}', '{1}', {2}, {3}, {4}, {5})"\
+                "values('{0}', '{1}', {2}, {3}, {4}, {5})" \
             .format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     city_name,
                     "(select id from court_district where "
