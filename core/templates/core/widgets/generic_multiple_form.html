@@ -27,11 +27,27 @@
                     <div class="">
                         <br>
                         <div class="form-group  text-center">
-                            <a class="btn btn-sm btn-raised btn-default"
-                               href="{% url 'folder_list' %}"><i
-                                    class="material-icons left">clear</i>
-                                Cancelar
-                            </a>
+                            {% if param1 and param2 %}
+                                <a class="btn btn-sm btn-raised btn-default"
+                                   href="{% url previous_page param1 param2 %}">
+                                    <i class="material-icons left">clear</i>
+                                    Cancelar
+                                </a>
+                            {% elif param1 %}
+                                <a class="btn btn-sm btn-raised btn-default"
+                                   href="{% url previous_page param1 %}">
+                                    <i class="material-icons left">clear</i>
+                                    Cancelar
+                                </a>
+                            {% else %}
+                                <a class="btn btn-sm btn-raised btn-default"
+                                   href="{% url previous_page %}">
+                                    <i class="material-icons left">clear</i>
+                                    Cancelar
+                                </a>
+                            {% endif %}
+
+
                             <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
                                     class="material-icons left">done</i>
                                 Salvar

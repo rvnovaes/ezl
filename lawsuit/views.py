@@ -232,7 +232,7 @@ class LawSuitCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView,
     success_message = new_success
 
     def get_success_url(self):
-        self.success_url = reverse('fast_update', kwargs={'pk': self.kwargs['folder']})
+        self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
         super(LawSuitCreateView, self).get_success_url()
 
 
@@ -242,7 +242,7 @@ class LawSuitUpdateView(LoginRequiredMixin, BaseCustomView, UpdateView):
     success_message = update_success
 
     def get_success_url(self):
-        self.success_url = reverse('fast_update', kwargs={'pk': self.kwargs['folder']})
+        self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
         super(LawSuitUpdateView, self).get_success_url()
 
 
@@ -262,7 +262,7 @@ class LawSuitDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
                            delete_error_protected(self.model._meta.verbose_name
                                                   , qs.__str__()))
         return HttpResponseRedirect(
-            reverse('fast_update',
+            reverse('folder_update',
                     kwargs={'pk': parent_class}))
 
 
@@ -286,7 +286,7 @@ class LawsuitMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, Generic
         return context
 
     def get_success_url(self):
-        self.success_url = reverse('fast_update', kwargs={'pk': self.kwargs['folder']})
+        self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
         super(LawsuitMovementCreateView, self).get_success_url()
 
 
@@ -311,7 +311,7 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
         return context
 
     def get_success_url(self):
-        self.success_url = reverse('fast_update', kwargs={'pk': self.kwargs['folder']})
+        self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
         super(LawsuitMovementUpdateView, self).get_success_url()
 
 
@@ -395,7 +395,7 @@ class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
         super(MovementTaskCreateView, self).get_success_url()
 
 
-class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany, CreateView):
+class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany, UpdateView):
     model = Movement
     related_model = Task
     form_class = MovementForm

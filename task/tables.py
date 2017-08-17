@@ -13,8 +13,8 @@ class TaskTable(tables.Table):
         self.length = self.rows.__len__()
 
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
-    legacy_code = tables.LinkColumn(viewname='task_update', attrs={'a': {'target': 'task_update'}},
-                                    args=[A('movement.id'), A('pk')])
+    movement = tables.LinkColumn(viewname='task_update', attrs={'a': {'target': 'task_update'}},
+                                 args=[A('movement.id'), A('pk')])
 
     status = tables.TemplateColumn(template_name="task/task_status_column.html",
                                    orderable=False)

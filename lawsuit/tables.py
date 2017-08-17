@@ -51,7 +51,7 @@ class MovementTable(tables.Table):
 class FolderTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
-    legacy_code = tables.LinkColumn(viewname='fast_update', attrs={'a': {'target': 'fast_update'}}, args=[A('pk')])
+    legacy_code = tables.LinkColumn(viewname='folder_update', attrs={'a': {'target': 'folder_update'}}, args=[A('pk')])
 
     class Meta:
         sequence = ('selection', 'legacy_code', 'person_customer', 'is_active', '...')

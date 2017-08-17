@@ -21,13 +21,7 @@ urlpatterns = [
     url(r'^varas/excluir$', login_required(views.CourtDivisionDeleteView.as_view()),
         name='courtdivision_delete'),
 
-    # Pastas
-    url(r'^pastas/listar/$', login_required(login_required(views.FolderListView.as_view())), name='folder_list'),
-    url(r'^pastas/$', login_required(login_required(views.FolderCreateView.as_view())), name='folder_add'),
-    url(r'^pastas/(?P<pk>[0-9]+)/$', login_required(login_required(views.FolderUpdateView.as_view())),
-        name='folder_update'),
-    url(r'^pastas/excluir$', login_required(login_required(views.FolderDeleteView.as_view())),
-        name='folder_delete'),
+
 
     # Processos
     url(r'^processos/listar/$', login_required(views.LawSuitListView.as_view()), name='lawsuit_list'),
@@ -65,7 +59,15 @@ urlpatterns = [
         name='instance_delete'),
 
     # Teste Rapido
-    url(r'cadastro_rapido/$', login_required(views.FolderLawsuitCreateView.as_view()), name='fast'),
-    url(r'cadastro_rapido/(?P<pk>[0-9]+)/$', login_required(views.FolderLawsuitUpdateView.as_view()),
-        name='fast_update'),
+    # url(r'cadastro_rapido/$', login_required(views.FolderLawsuitCreateView.as_view()), name='fast'),
+    # url(r'cadastro_rapido/(?P<pk>[0-9]+)/$', login_required(views.FolderLawsuitUpdateView.as_view()),
+    #     name='fast_update'),
+
+    # Pastas
+    url(r'^pastas/listar/$', login_required(login_required(views.FolderListView.as_view())), name='folder_list'),
+    url(r'^pastas/$', login_required(login_required(views.FolderLawsuitCreateView.as_view())), name='folder_add'),
+    url(r'^pastas/(?P<pk>[0-9]+)/$', login_required(login_required(views.FolderLawsuitUpdateView.as_view())),
+        name='folder_update'),
+    url(r'^pastas/excluir$', login_required(login_required(views.FolderDeleteView.as_view())),
+        name='folder_delete'),
 ]

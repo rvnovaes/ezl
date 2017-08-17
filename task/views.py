@@ -7,7 +7,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.db import IntegrityError, OperationalError
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic import CreateView, UpdateView, TemplateView
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
@@ -17,6 +17,7 @@ from core.messages import operational_error_create, ioerror_create, exception_cr
     file_exists_error_delete, exception_delete, success_sent, success_delete
 from core.models import Person
 from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin
+from lawsuit.models import Movement
 from task.signals import send_notes_execution_date
 from .filters import TaskFilter
 from .forms import TaskForm, TaskDetailForm, TypeTaskForm
@@ -38,12 +39,57 @@ class TaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Cr
     success_url = reverse_lazy('task_list')
     success_message = new_success
 
+    def get_initial(self):
+        if self.kwargs.get('movement'):
+            lawsuit_id = Movement.objects.get(id=self.kwargs.get('movement')).law_suit_id
+            self.kwargs['lawsuit'] = lawsuit_id
+        if isinstance(self, CreateView):
+            self.form_class.declared_fields['is_active'].initial = True
+            self.form_class.declared_fields['is_active'].disabled = True
+
+        elif isinstance(self, UpdateView):
+            self.form_class.declared_fields['is_active'].disabled = False
+        return self.initial.copy()
+
+    def form_valid(self, form):
+        form.instance.movement_id = self.kwargs.get('movement')
+        self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
+        super(TaskCreateView, self).form_valid(form)
+        return HttpResponseRedirect(self.success_url)
+
+    def get_success_url(self):
+        self.success_url = reverse('movement_update',
+                                   kwargs={'lawsuit': self.kwargs['lawsuit'], 'pk': self.kwargs['movement']})
+        super(TaskCreateView, self).get_success_url()
+
 
 class TaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
     model = Task
     form_class = TaskForm
     success_url = reverse_lazy('task_list')
     success_message = update_success
+
+    def get_initial(self):
+        if self.kwargs.get('movement'):
+            lawsuit_id = Movement.objects.get(id=self.kwargs.get('movement')).law_suit_id
+            self.kwargs['lawsuit'] = lawsuit_id
+        if isinstance(self, CreateView):
+            self.form_class.declared_fields['is_active'].initial = True
+            self.form_class.declared_fields['is_active'].disabled = True
+
+        elif isinstance(self, UpdateView):
+            self.form_class.declared_fields['is_active'].disabled = False
+        return self.initial.copy()
+
+    def form_valid(self, form):
+        self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
+        super(TaskUpdateView, self).form_valid(form)
+        return HttpResponseRedirect(self.success_url)
+
+    def get_success_url(self):
+        self.success_url = reverse('movement_update',
+                                   kwargs={'lawsuit': self.kwargs['lawsuit'], 'pk': self.kwargs['movement']})
+        super(TaskUpdateView, self).get_success_url()
 
 
 class TaskDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):

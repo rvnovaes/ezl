@@ -370,7 +370,9 @@ def person_address_search_address_type(request):
 
 class GenericFormOneToMany(FormView, SingleTableView):
     def get_initial(self):
-
+        if self.kwargs.get('lawsuit'):
+            folder_id = LawSuit.objects.get(id=self.kwargs.get('lawsuit')).folder.id
+            self.kwargs['folder'] = folder_id
         if isinstance(self, CreateView):
             self.form_class.declared_fields['is_active'].initial = True
             self.form_class.declared_fields['is_active'].disabled = True
