@@ -205,6 +205,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
                                        execution_date=execution_date, survey_result=survey_result)
+
         form.save()
 
         super(TaskDetailView, self).form_valid(form)

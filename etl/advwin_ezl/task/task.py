@@ -2,12 +2,11 @@ from itertools import chain
 
 from django.utils import timezone
 from sqlalchemy import update
-
-from advwin_models.advwin import JuridAgendaTable
 from core.models import Person
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL
 from etl.advwin_ezl.factory import InvalidObjectFactory
+from etl.ezl_advwin.advwin_models.advwin import JuridAgendaTable
 from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
 
@@ -36,6 +35,7 @@ class TaskETL(GenericETL):
                    "a.Advogado_sol AS person_asked_by_legacy_code, " \
                    "a.Advogado AS person_executed_by_legacy_code, " \
                    "a.CodMov AS type_task_legacy_code, " \
+                   "a.Advogado_or AS person_distributed_by_legacy_code," \
                    "a.OBS AS description, " \
                    "CASE WHEN (a.Data_delegacao IS NULL) THEN " \
                    "a.Data ELSE a.Data_delegacao END AS delegation_date, " \
@@ -65,6 +65,7 @@ class TaskETL(GenericETL):
             movement_legacy_code = row['movement_legacy_code']
             person_asked_by_legacy_code = row['person_asked_by_legacy_code']
             person_executed_by_legacy_code = row['person_executed_by_legacy_code']
+            person_distributed_by_legacy_code = row['person_distributed_by_legacy_code']
             type_task_legacy_code = row['type_task_legacy_code']
             delegation_date = timezone.make_aware(row['delegation_date'], timezone.get_current_timezone()) if row[
                 'delegation_date'] else None
@@ -89,6 +90,8 @@ class TaskETL(GenericETL):
                 legacy_code=person_asked_by_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
             person_executed_by = Person.objects.filter(
                 legacy_code=person_executed_by_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
+            person_distributed_by = Person.objects.filter(
+                legacy_code=person_distributed_by_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
             type_task = TypeTask.objects.filter(
                 legacy_code=type_task_legacy_code).first() or InvalidObjectFactory.get_invalid_model(TypeTask)
 
@@ -125,6 +128,7 @@ class TaskETL(GenericETL):
                                           alter_user=user,
                                           person_asked_by=person_asked_by,
                                           person_executed_by=person_executed_by,
+                                          person_distributed_by=person_distributed_by,
                                           type_task=type_task,
                                           delegation_date=delegation_date,
                                           reminder_deadline_date=reminder_deadline_date,

@@ -100,10 +100,10 @@ WSGI_APPLICATION = 'ezl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'etl_ezl',
-        'USER': 'ezl',
-        'PASSWORD': 'ezl',
-        'HOST': '13.68.213.60',
+        'NAME': 'ezl5',
+        'USER': 'postgres',
+        'PASSWORD': '123',
+        'HOST': 'localhost',
         # 'HOST': '127.0.0.1',
         'PORT': '5432'
     }
@@ -182,3 +182,5 @@ EMAIL_HOST_USER = 'testedevmta@gmail.com'
 EMAIL_HOST_PASSWORD = 'abc12345678'
 
 INTERNAL_IPS = '127.0.0.1'
+PROJECT_NAME = 'Easy Lawyer'
+PROJECT_LINK = 'https://ezl.mtostes.com.br'
