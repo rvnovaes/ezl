@@ -57,6 +57,7 @@ class DashboardStatusTable(tables.Table):
         self.length = self.rows.__len__()
 
     legacy_code = tables.LinkColumn(viewname='task_detail', attrs={'a': {'target': 'task_detail'}}, args=[A('pk')])
+
     client = tables.Column(orderable=False)
 
     class Meta:

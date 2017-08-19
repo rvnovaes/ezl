@@ -150,6 +150,8 @@ class Task(Audit, LegacyCode):
     @property
     def client(self):
         folder = Folder.objects.get(folders__law_suits__task__exact=self)
+        # Person.objects.get(persons__folders__law_suits__task__exact=self)
+        # self.movement.law_suit.folder.person_customer
         return folder.person_customer
 
     def __str__(self):

@@ -37,7 +37,7 @@
                 <div class="panel-heading {{ form.instance.status.name }}">
                     <div class="panel-title"><i class="material-icons">{{ form.instance.status.get_icon }}</i>
                         <b>{{ form.instance.status|default_if_none:"" }}
-                            #{{ form.instance.legacy_code|default_if_none:"" }}
+                            #{{ form.instance.id|default_if_none:"" }}
                             - {{ form.instance.type_task|lower|capfirst }}</b>
                     </div>
                 </div>

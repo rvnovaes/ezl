@@ -104,80 +104,101 @@ class DashboardView(MultiTableMixin, TemplateView):
         'per_page': 5
     }
 
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
+    def get_context_data(self, **kwargs):
+        context = super(DashboardView, self).get_context_data(**kwargs)
         context['title_page'] = u"Dashboard do Correspondente"
-        return self.render_to_response(context)
+        return context
 
-    def load_task_by_status(self, status, person):
-        data = {}
-        if status == TaskStatus.OPEN:
-            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
-                                       refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True,
-                                       blocked_payment_date__isnull=True,
-                                       finished_date__isnull=True)
-        elif status == TaskStatus.ACCEPTED:
-            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                       refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True,
-                                       blocked_payment_date__isnull=True,
-                                       finished_date__isnull=True)
-        elif status == TaskStatus.REFUSED:
-            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
-                                       refused_date__isnull=False, execution_date__isnull=True,
-                                       return_date__isnull=True, blocked_payment_date__isnull=True,
-                                       finished_date__isnull=True)
-        elif status == TaskStatus.DONE:
-            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                       refused_date__isnull=True, execution_date__isnull=False,
-                                       return_date__isnull=True, blocked_payment_date__isnull=True,
-                                       finished_date__isnull=True)
-        elif status == TaskStatus.RETURN:
-            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                       refused_date__isnull=True, execution_date__isnull=True,
-                                       return_date__isnull=False, blocked_payment_date__isnull=True,
-                                       finished_date__isnull=True)
-
-        elif status == TaskStatus.BLOCKEDPAYMENT:
-            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                       refused_date__isnull=True, execution_date__isnull=False,
-                                       return_date__isnull=True, blocked_payment_date__isnull=False,
-                                       finished_date__isnull=True)
-        elif status == TaskStatus.FINISHED:
-            data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                       refused_date__isnull=True, execution_date__isnull=False,
-                                       return_date__isnull=True, blocked_payment_date__isnull=True,
-                                       finished_date__isnull=False)
-        # TODO Adicionar metodo para filtrar dashboard do coordenador
-        if person.is_correspondent:
-            return data.filter(person_executed_by=person.id)
-        else:
-            return data.filter(person_asked_by=person.id)
+    # def load_task_by_status(self, status, person):
+    #     data = {}
+    #     if status == TaskStatus.OPEN:
+    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
+    #                                    refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True,
+    #                                    blocked_payment_date__isnull=True,
+    #                                    finished_date__isnull=True)
+    #     elif status == TaskStatus.ACCEPTED:
+    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
+    #                                    refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True,
+    #                                    blocked_payment_date__isnull=True,
+    #                                    finished_date__isnull=True)
+    #     elif status == TaskStatus.REFUSED:
+    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
+    #                                    refused_date__isnull=False, execution_date__isnull=True,
+    #                                    return_date__isnull=True, blocked_payment_date__isnull=True,
+    #                                    finished_date__isnull=True)
+    #     elif status == TaskStatus.DONE:
+    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
+    #                                    refused_date__isnull=True, execution_date__isnull=False,
+    #                                    return_date__isnull=True, blocked_payment_date__isnull=True,
+    #                                    finished_date__isnull=True)
+    #     elif status == TaskStatus.RETURN:
+    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
+    #                                    refused_date__isnull=True, execution_date__isnull=True,
+    #                                    return_date__isnull=False, blocked_payment_date__isnull=True,
+    #                                    finished_date__isnull=True)
+    #
+    #     elif status == TaskStatus.BLOCKEDPAYMENT:
+    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
+    #                                    refused_date__isnull=True, execution_date__isnull=False,
+    #                                    return_date__isnull=True, blocked_payment_date__isnull=False,
+    #                                    finished_date__isnull=True)
+    #     elif status == TaskStatus.FINISHED:
+    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
+    #                                    refused_date__isnull=True, execution_date__isnull=False,
+    #                                    return_date__isnull=True, blocked_payment_date__isnull=True,
+    #                                    finished_date__isnull=False)
+    #     # TODO Adicionar metodo para filtrar dashboard do coordenador
+    #     if person.is_correspondent:
+    #         return data.filter(person_executed_by=person.id)
+    #     else:
+    #         return data.filter(person_asked_by=person.id)
 
     def get_tables(self):
 
-        person = Person.objects.get(auth_user=self.request.user)
-        if person:
-            return_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.RETURN, person), title="Retornadas",
-                                                status=TaskStatus.RETURN, order_by="-alter_date")
+        dynamic_query = Q()
 
-            accepted_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.ACCEPTED, person),
+        person = Person.objects.get(auth_user=self.request.user)
+        if person.is_correspondent:
+            dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+        else:
+            dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+
+        data = Task.objects.filter(dynamic_query)
+
+        grouped = dict()
+        for obj in data:
+            grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
+
+        returned = grouped.get(TaskStatus.RETURN) or {}
+        accepted = grouped.get(TaskStatus.ACCEPTED) or {}
+        opened = grouped.get(TaskStatus.OPEN) or {}
+        done = grouped.get(TaskStatus.DONE) or {}
+        refused = grouped.get(TaskStatus.REFUSED) or {}
+        blocked_payment = grouped.get(TaskStatus.BLOCKEDPAYMENT) or {}
+        finished = grouped.get(TaskStatus.FINISHED) or {}
+
+        if person:
+            return_table = DashboardStatusTable(returned, title="Retornadas",
+                                                status=TaskStatus.RETURN)
+
+            accepted_table = DashboardStatusTable(accepted,
                                                   title="A Cumprir", status=TaskStatus.ACCEPTED,
                                                   order_by="-alter_date")
 
-            open_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.OPEN, person), title="Em Aberto",
+            open_table = DashboardStatusTable(opened, title="Em Aberto",
                                               status=TaskStatus.OPEN, order_by="-alter_date")
 
-            done_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.DONE, person), title="Cumpridas",
+            done_table = DashboardStatusTable(done, title="Cumpridas",
                                               status=TaskStatus.DONE, order_by="-alter_date")
 
-            refused_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.REFUSED, person),
+            refused_table = DashboardStatusTable(refused,
                                                  title="Recusadas", status=TaskStatus.REFUSED, order_by="-alter_date"
                                                  )
-            blocked_payment_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.BLOCKEDPAYMENT, person),
+            blocked_payment_table = DashboardStatusTable(blocked_payment,
                                                          title="Glosadas", status=TaskStatus.BLOCKEDPAYMENT,
                                                          order_by="-alter_date"
                                                          )
-            finished_table = DashboardStatusTable(self.load_task_by_status(TaskStatus.FINISHED, person),
+            finished_table = DashboardStatusTable(finished,
                                                   title="Finalizadas", status=TaskStatus.FINISHED,
                                                   order_by="-alter_date"
                                                   )
@@ -274,14 +295,6 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
 class TypeTaskListView(LoginRequiredMixin, SingleTableViewMixin):
     model = TypeTask
     table_class = TypeTaskTable
-
-    # def get_context_data(self, **kwargs):
-    #     context = super(CourtDistrictListView, self).get_context_data(**kwargs)
-    #     context['nav_courtdistrict'] = True
-    #     table = CourtDistrictTable(CourtDistrict.objects.all().order_by('-pk'))
-    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-    #     context['table'] = table
-    #     return context
 
 
 class TypeTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):

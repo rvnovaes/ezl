@@ -22,17 +22,6 @@ from .tables import MovementTable, FolderTable, LawSuitTable, CourtDistrictTable
 class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Instance
     table_class = InstanceTable
-    # queryset = Instance.objects.all()
-    # ordering = ['-id']
-
-    # def get_context_data(self, **kwargs):
-    #     context = super(InstanceListView, self).get_context_data(**kwargs)
-    #     context['nav_instance'] = True
-    #     context['form_name_plural'] = Instance._meta.verbose_name_plural
-    #     table = InstanceTable(Instance.objects.all().order_by('-pk'))
-    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-    #     context['table'] = table
-    #     return context
 
 
 class InstanceCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
@@ -56,16 +45,6 @@ class InstanceDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteVie
 class TypeMovementListView(LoginRequiredMixin, SingleTableViewMixin):
     model = TypeMovement
     table_class = TypeMovementTable
-
-    # def get_context_data(self, **kwargs):
-    #     context = super(TypeMovementListView, self).get_context_data(**kwargs)
-    #     context['nav_type_movement'] = True
-    #     context['form_name'] = TypeMovement._meta.verbose_name
-    #     context['form_name_plural'] = TypeMovement._meta.verbose_name_plural
-    #     table = TypeMovementTable(TypeMovement.objects.all().order_by('-pk'))
-    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-    #     context['table'] = table
-    #     return context
 
 
 class TypeMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
@@ -117,14 +96,6 @@ class CourtDistrictListView(LoginRequiredMixin, SingleTableViewMixin):
     model = CourtDistrict
     table_class = CourtDistrictTable
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(CourtDistrictListView, self).get_context_data(**kwargs)
-    #     context['nav_courtdistrict'] = True
-    #     table = CourtDistrictTable(CourtDistrict.objects.all().order_by('-pk'))
-    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-    #     context['table'] = table
-    #     return context
-
 
 class CourtDistrictCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
     model = CourtDistrict
@@ -149,14 +120,6 @@ class CourtDistrictDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteVie
 class CourtDivisionListView(LoginRequiredMixin, SingleTableViewMixin):
     model = CourtDivision
     table_class = CourtDivisionTable
-
-    # def get_context_data(self, **kwargs):
-    #     context = super(CourtDistrictListView, self).get_context_data(**kwargs)
-    #     context['nav_courtdistrict'] = True
-    #     table = CourtDistrictTable(CourtDistrict.objects.all().order_by('-pk'))
-    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-    #     context['table'] = table
-    #     return context
 
 
 class CourtDivisionCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
