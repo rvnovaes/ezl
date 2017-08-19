@@ -1,13 +1,12 @@
 from django.db.models.signals import post_init, pre_save, post_save
 from django.dispatch import receiver, Signal
 from django.template.loader import render_to_string
-from django.urls import reverse
 from django.utils import timezone
-from ezl import settings
-from task.models import Task, TaskStatus, TaskHistory
+
 from core.models import ContactMechanism, ContactMechanismType
+from ezl import settings
 from task.mail import SendMail, MailTaskSubject
-import socket
+from task.models import Task, TaskStatus, TaskHistory
 
 send_notes_execution_date = Signal(providing_args=["notes", "instance", "execution_date"])
 
@@ -28,21 +27,22 @@ def receive_notes_execution_date(notes, instance, execution_date, survey_result,
 def new_task(sender, instance, **kwargs):
     # Envia email para o correspondente na abertura da Task
     if instance.status == TaskStatus.OPEN:
-        id_email = ContactMechanismType.objects.get(name__iexact='email').id
-        mails = ContactMechanism.objects.filter(contact_mechanism_type_id=id_email,
+        contact_mechanism = ContactMechanismType.objects.filter(name__iexact='email').first()
+        if contact_mechanism:
+            mails = ContactMechanism.objects.filter(contact_mechanism=contact_mechanism,
                                                 person=instance.person_executed_by_id)
-        mail_list = []
+            mail_list = []
 
-        for mail in mails:
-            mail_list.append(mail.description)
+            for mail in mails:
+                mail_list.append(mail.description)
 
-        mail = SendMail()
-        mail.subject = MailTaskSubject.subject_task_open
-        mail.message = render_to_string('mail/task_open.html',
-                                        {'server': settings.PROJECT_LINK, 'pk': instance.pk,
-                                         'project_name': settings.PROJECT_NAME})
-        mail.to_mail = mail_list
-        mail.send()
+            mail = SendMail()
+            mail.subject = MailTaskSubject.subject_task_open
+            mail.message = render_to_string('mail/task_open.html',
+                                            {'server': settings.PROJECT_LINK, 'pk': instance.pk,
+                                             'project_name': settings.PROJECT_NAME})
+            mail.to_mail = mail_list
+            mail.send()
 
 
 @receiver(pre_save, sender=Task)

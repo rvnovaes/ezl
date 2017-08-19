@@ -153,7 +153,7 @@ class Task(Audit, LegacyCode):
         return folder.person_customer
 
     def __str__(self):
-        return self.legacy_code  # TODO verificar campo para toString
+        return self.type_task.name
 
     @property
     def court_district(self):

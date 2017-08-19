@@ -13,8 +13,8 @@ class TaskTable(tables.Table):
         self.length = self.rows.__len__()
 
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
-    movement = tables.LinkColumn(viewname='task_update', attrs={'a': {'target': 'task_update'}},
-                                 args=[A('movement.id'), A('pk')])
+    type_task = tables.LinkColumn(viewname='task_update', attrs={'a': {'target': 'task_update'}},
+                                  args=[A('movement.id'), A('pk')])
 
     status = tables.TemplateColumn(template_name="task/task_status_column.html",
                                    orderable=False)
@@ -31,11 +31,11 @@ class TaskTable(tables.Table):
 
     class Meta:
         model = Task
-        fields = ['selection', 'status', 'legacy_code', 'movement', 'person_asked_by', 'person_executed_by',
-                  'type_task',
+        fields = ['selection', 'type_task', 'status', 'movement', 'person_asked_by', 'person_executed_by',
+
                   'delegation_date',
                   'acceptance_date', 'reminder_deadline_date', 'final_deadline_date', 'execution_date', 'return_date',
-                  'refused_date']
+                  'refused_date', 'legacy_code']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem providências cadastradas"
 

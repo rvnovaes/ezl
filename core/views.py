@@ -390,13 +390,16 @@ class GenericFormOneToMany(FormView, SingleTableView):
         if form.instance.id is None:
             if folder:
                 form.instance.folder = Folder.objects.get(id=folder)
-                form.instance.law_suit = LawSuit.objects.get(id=pk)
-            elif lawsuit:
+                if isinstance(self, UpdateView):
+                    form.instance.law_suit = LawSuit.objects.get(id=pk)
+            if lawsuit:
                 form.instance.law_suit = LawSuit.objects.get(id=lawsuit)
-                form.instance.movement = Movement.objects.get(id=pk)
-            elif movement:
+                if isinstance(self, UpdateView):
+                    form.instance.movement = Movement.objects.get(id=pk)
+            if movement:
                 form.instance.movement = Movement.objects.get(id=movement)
-                form.instance.task = Task.objects.get(id=pk)
+                if isinstance(self, UpdateView):
+                    form.instance.task = Task.objects.get(id=pk)
 
         if form.instance.id is None:
             # todo: nao precisa salvar o create_date e o alter_date pq o model já faz isso. tirar de todos os lugares
@@ -406,7 +409,7 @@ class GenericFormOneToMany(FormView, SingleTableView):
 
             form.instance.alter_date = timezone.now()
             form.instance.alter_user = user
-            form.save()
+        form.save()
         super(GenericFormOneToMany, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 

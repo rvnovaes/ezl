@@ -116,4 +116,4 @@ class Movement(Audit, LegacyCode):
         verbose_name_plural = "Movimentações"
 
     def __str__(self):
-        return self.legacy_code  # TODO verificar novos campos e refatorar o toString
+        return self.type_movement.name  # TODO verificar novos campos e refatorar o toString

@@ -35,12 +35,12 @@ class TypeMovementTable(tables.Table):
 class MovementTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
-    legacy_code = tables.LinkColumn(viewname='movement_update', attrs={'a': {'target': 'movement_update'}},
-                                    args=[A('law_suit.pk'), A('pk')])
+    type_movement = tables.LinkColumn(viewname='movement_update', attrs={'a': {'target': 'movement_update'}},
+                                      args=[A('law_suit.pk'), A('pk')])
 
     class Meta:
-        sequence = ('selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit', 'deadline',
-                    'is_active')
+        sequence = ('selection', 'type_movement', 'law_suit', 'person_lawyer', 'deadline',
+                    'is_active', 'legacy_code')
         model = Movement
         attrs = {"class": "table-striped table-bordered"}
         fields = ['selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit', 'deadline',
@@ -67,8 +67,9 @@ class LawSuitTable(tables.Table):
                                         attrs={'a': {'target': 'lawsuit_update'}}, args=[A('folder.pk'), A('pk')])
 
     class Meta:
-        sequence = ('selection', 'folder', 'instance', 'court_district', 'person_court', 'court_division',
-                    'law_suit_number', 'person_lawyer', 'is_active', 'is_current_instance')
+        sequence = (
+            'selection', 'law_suit_number', 'folder', 'instance', 'court_district', 'person_court', 'court_division',
+            'person_lawyer', 'is_active', 'is_current_instance')
         model = LawSuit
         fields = ['selection', 'folder', 'instance', 'court_district', 'person_court', 'court_division',
                   'law_suit_number', 'person_lawyer', 'is_active', 'is_current_instance']

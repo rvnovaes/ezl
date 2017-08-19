@@ -391,8 +391,8 @@ class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
         return context
 
     def get_success_url(self):
-        self.success_url = reverse('lawsuit_update', kwargs={'pk': self.kwargs['lawsuit']})
-        super(MovementTaskCreateView, self).get_success_url()
+        self.success_url = reverse('lawsuit_update',
+                                   kwargs={'folder': self.kwargs['folder'], 'pk': self.kwargs['lawsuit']})
 
 
 class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany, UpdateView):
@@ -415,5 +415,5 @@ class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
         return context
 
     def get_success_url(self):
-        self.success_url = reverse('lawsuit_update', kwargs={'pk': self.kwargs['lawsuit']})
-        super(MovementTaskUpdateView, self).get_success_url()
+        self.success_url = reverse('lawsuit_update',
+                                   kwargs={'folder': self.kwargs['folder'], 'pk': self.kwargs['lawsuit']})
