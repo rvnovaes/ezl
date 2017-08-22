@@ -1,6 +1,6 @@
 {% extends 'mail/base.html' %}
 
 {% block content %}
-    Uma nova providência teve o pagamento recusado no {{ project_name }}. Para visualizar mais detalhes,
+    A providência {{ number }} teve o pagamento recusado no {{ project_name }}. Para visualizar mais detalhes,
     <a href="{{ server }}{% url 'task_detail' pk %}">clique aqui</a>.
 {% endblock %}
