@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'f5*(8sgk)n1!i52xijv0yt@jtewp28%g%sp1rx*=y68ocgg+!2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -161,7 +161,8 @@ STATICFILES_DIRS = (
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/opt/files_easy_lawyer/'
 
-# STATIC_ROOT = '/opt/mta/easy_lawyer_django/static/'
+
+STATIC_ROOT = '/opt/easy_lawyer_django/static/'
 LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
 
 AUTHENTICATION_BACKENDS = (
