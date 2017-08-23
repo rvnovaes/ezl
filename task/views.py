@@ -235,7 +235,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(TaskDetailView, self).get_context_data(**kwargs)
         context['geds'] = Ecm.objects.filter(task_id=self.object.id)
-        context['task_history'] = TaskHistory.objects.filter(task_id=self.object.id)
+        context['task_history'] = TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
         return context
 
 
