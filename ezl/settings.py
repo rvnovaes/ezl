@@ -104,7 +104,6 @@ DATABASES = {
         'USER': 'ezl',
         'PASSWORD': 'ezl',
         'HOST': '13.68.213.60',
-        # 'HOST': '127.0.0.1',
         'PORT': '5432'
     }
 }
