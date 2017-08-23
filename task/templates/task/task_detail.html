@@ -251,7 +251,7 @@
                                 {% for history in task_history %}
                                     <tr>
                                         <td class="col-xs-4"
-                                            style="font-size: small; font-weight: 100; text-align: center;">{{ history.create_date }}</td>
+                                            style="font-size: small; font-weight: 100; text-align: center;">{{ history.create_date|date:"d \d\e F \d\e Y \à\s H:i:s" }}</td>
                                         <td class="col-xs-4"
                                             style="font-size: small; font-weight: 100; text-align: center;">{{ history.create_user }}</td>
                                         <td class="col-xs-4"

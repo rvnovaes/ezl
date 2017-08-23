@@ -1,14 +1,18 @@
+from etl.advwin_ezl.advwin_ezl import GenericETL
+import pytz
+from django.db.models.signals import pre_save, post_save
 from itertools import chain
-
 from django.utils import timezone
 from sqlalchemy import update
 from core.models import Person
 from core.utils import LegacySystem
-from etl.advwin_ezl.advwin_ezl import GenericETL
 from etl.advwin_ezl.factory import InvalidObjectFactory
-from etl.ezl_advwin.advwin_models.advwin import JuridAgendaTable
+from advwin_models.advwin import JuridAgendaTable
+from ezl import settings
 from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
+from task.signals import new_task, change_status
+from django.utils.timezone import localtime
 
 default_justify = 'Aceita por Correspondente: %s'
 
@@ -27,7 +31,7 @@ def get_status_by_substatus(substatus):
 
 
 class TaskETL(GenericETL):
-    import_query = "SELECT TOP 1000" \
+    import_query = "SELECT " \
                    "a.Data_confirmacao AS blocked_or_finished_date, " \
                    "a.SubStatus AS status_code_advwin, " \
                    "a.ident AS legacy_code, " \
@@ -45,7 +49,7 @@ class TaskETL(GenericETL):
                    "INNER JOIN Jurid_Pastas AS p ON " \
                    "a.Pasta = p.Codigo_Comp " \
                    "WHERE " \
-                   "(p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND a.Ident =2254258 AND " \
+                   "(p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND " \
                    "((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0) OR " \
                    "(a.SubStatus = 90 AND a.Status = 1) " \
                    "OR (a.SubStatus = 100)) " \
@@ -60,26 +64,32 @@ class TaskETL(GenericETL):
         for row in rows:
             print(rows_count)
             rows_count -= 1
-
             legacy_code = row['legacy_code']
             movement_legacy_code = row['movement_legacy_code']
             person_asked_by_legacy_code = row['person_asked_by_legacy_code']
             person_executed_by_legacy_code = row['person_executed_by_legacy_code']
             person_distributed_by_legacy_code = row['person_distributed_by_legacy_code']
             type_task_legacy_code = row['type_task_legacy_code']
-            delegation_date = timezone.make_aware(row['delegation_date'], timezone.get_current_timezone()) if row[
-                'delegation_date'] else None
+
+            if row['delegation_date']:
+                delegation_date = pytz.timezone(settings.TIME_ZONE).localize(row['delegation_date'])
+            else:
+                delegation_date = None
+
             status_code_advwin = get_status_by_substatus(row['status_code_advwin'])
-            reminder_deadline_date = timezone.make_aware(row['reminder_deadline_date'],
-                                                         timezone.get_current_timezone()) if row[
-                'reminder_deadline_date'] else None
-            final_deadline_date = timezone.make_aware(row['final_deadline_date'], timezone.get_current_timezone()) if \
-                row['final_deadline_date'] else None
+
+            if row['reminder_deadline_date']:
+                reminder_deadline_date = pytz.timezone(settings.TIME_ZONE).localize(row['reminder_deadline_date'])
+            else:
+                reminder_deadline_date = None
+
+            if row['final_deadline_date']:
+                final_deadline_date = pytz.timezone(settings.TIME_ZONE).localize(row['final_deadline_date'])
+            else:
+                final_deadline_date = None
 
             description = row['description']
-            blocked_or_finished_date = timezone.make_aware(row['blocked_or_finished_date'],
-                                                           timezone.get_current_timezone()) if \
-                row['blocked_or_finished_date'] else None
+            blocked_or_finished_date = row['blocked_or_finished_date']
 
             task = Task.objects.filter(legacy_code=legacy_code, system_prefix=LegacySystem.ADVWIN.value).first()
 
@@ -118,8 +128,11 @@ class TaskETL(GenericETL):
                     task.finished_date = blocked_or_finished_date
                     update_fields.append('finished_date')
                 elif status_code_advwin == TaskStatus.OPEN:
+                    pass
 
-                    task.save(update_fields=update_fields)
+                task.save(update_fields=update_fields)
+
+
             else:
                 self.model.objects.create(movement=movement,
                                           legacy_code=legacy_code,
@@ -339,4 +352,4 @@ class TaskETL(GenericETL):
 #    session.commit()
 
 if __name__ == '__main__':
-    TaskETL().config_export()
+    TaskETL().import_data()
