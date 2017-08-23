@@ -111,7 +111,7 @@ class TaskDetailForm(ModelForm):
 
     class Meta:
         model = Task
-        fields = ['execution_date', 'survey_result', 'task_status', 'legacy_code', 'type_task']
+        fields = ['execution_date', 'survey_result']
 
     survey_result = forms.CharField(required=False, initial=None)
 

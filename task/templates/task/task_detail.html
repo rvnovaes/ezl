@@ -33,7 +33,6 @@
             </script>
             {% include 'core/widgets/messages.html' %}
             <div class="panel">
-
                 <div class="panel-heading {{ form.instance.status.name }}">
                     <div class="panel-title"><i class="material-icons">{{ form.instance.status.get_icon }}</i>
                         <b>{{ form.instance.status|default_if_none:"" }}
@@ -106,7 +105,7 @@
                 </div>
                 <div id="attachment" class="panel-collapse collapse">
                     <div class="panel-body form-group is-focused">
-                        {% if not form.instance.status.name == 'OPEN' and not form.instance.status.name == 'REFUSED' %}
+                        {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
                             <button type="button" class="btn btn-sm btn-primary btn-raised js-upload-files"
                                     style="color: #fff !important;">
                                 <i class="material-icons">cloud_upload</i> &nbsp; Enviar Arquivo(s)
@@ -153,7 +152,7 @@
                                             <a href="/media/{{ ged.path }}" download
                                                style="text-decoration: none;">{{ ged.filename }}</a>
                                         </td>
-                                        {% if not form.instance.status.name == 'DONE' %}
+                                        {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
                                             <td id="cell-table" style="font-size: small">
                                                 <i class="material-icons" id=""
                                                    style="cursor: pointer; font-size: medium;"
