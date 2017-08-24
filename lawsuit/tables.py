@@ -11,7 +11,7 @@ class InstanceTable(tables.Table):
                              args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'name', 'is_active')
+        sequence = ('selection', 'name', 'is_active', 'legacy_code')
         model = Instance
         fields = ['name', 'is_active']
         attrs = {"class": "table stable-striped table-bordered"}
@@ -25,7 +25,7 @@ class TypeMovementTable(tables.Table):
                              args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'name', 'legacy_code', 'is_active')
+        sequence = ('selection', 'name',  'is_active','legacy_code')
         model = TypeMovement
         fields = ['selection', 'name', 'legacy_code', 'is_active']
         attrs = {"class": "table-striped table-bordered"}
@@ -54,7 +54,7 @@ class FolderTable(tables.Table):
     legacy_code = tables.LinkColumn(viewname='folder_update', attrs={'a': {'target': 'folder_update'}}, args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'legacy_code', 'person_customer', 'is_active', '...')
+        sequence = ('selection',  'person_customer', 'is_active', 'legacy_code')
         model = Folder
         fields = ['selection', 'legacy_code', 'person_customer', 'is_active']
         # attrs = {"class": "table-striped table-bordered"}
@@ -69,10 +69,10 @@ class LawSuitTable(tables.Table):
     class Meta:
         sequence = (
             'selection', 'law_suit_number', 'folder', 'instance', 'court_district', 'person_court', 'court_division',
-            'person_lawyer', 'is_active', 'is_current_instance')
+            'person_lawyer', 'is_active', 'is_current_instance','legacy_code')
         model = LawSuit
         fields = ['selection', 'folder', 'instance', 'court_district', 'person_court', 'court_division',
-                  'law_suit_number', 'person_lawyer', 'is_active', 'is_current_instance']
+                  'law_suit_number', 'person_lawyer', 'is_active', 'is_current_instance','legacy_code']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem processos cadastrados"
 
@@ -86,7 +86,7 @@ class CourtDivisionTable(tables.Table):
                              args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'legacy_code', 'name', 'is_active')
+        sequence = ('selection', 'name', 'is_active','legacy_code')
         model = CourtDistrict
         fields = ['selection', 'legacy_code', 'name', 'is_active']
         # attrs = {"class": "table-striped table-bordered"}
@@ -100,8 +100,8 @@ class CourtDistrictTable(tables.Table):
                              args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'name', 'state', 'is_active')
+        sequence = ('selection', 'name', 'state', 'is_active','legacy_code')
         model = CourtDistrict
-        fields = ['selection', 'name', 'state', 'is_active']
+        fields = ['selection', 'name', 'state', 'is_active','legacy_code']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem comarcas cadastradas"

@@ -54,9 +54,9 @@ class PersonTable(tables.Table):
     class Meta:
         sequecence = (
             'selection', 'name', 'is_lawyer', 'is_correspondent', 'is_court', 'legal_type', 'auth_user',
-            'cpf_cnpj', 'is_active', 'is_customer', 'is_supplier')
+            'cpf_cnpj', 'is_active', 'is_customer', 'is_supplier','legacy_code')
         model = Person
         fields = ['selection', 'name', 'is_lawyer', 'is_correspondent', 'is_court', 'legal_type', 'auth_user',
-                  'cpf_cnpj', 'is_active','is_customer','is_supplier']
+                  'cpf_cnpj', 'is_active','is_customer','is_supplier','legacy_code']
         attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem pessoas cadastradas"

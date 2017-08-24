@@ -68,11 +68,11 @@ class DashboardStatusTable(tables.Table):
 
 class TypeTaskTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
-    legacy_code = tables.LinkColumn(viewname='typetask_update', attrs={'a': {'target': 'typetask_update'}},
+    name = tables.LinkColumn(viewname='typetask_update', attrs={'a': {'target': 'typetask_update'}},
                                     args=[A('pk')])
 
     class Meta:
-        sequence = ('selection', 'legacy_code', 'name', 'survey_type', 'is_active')
+        sequence = ('selection', 'name', 'survey_type', 'is_active','legacy_code')
         model = TypeTask
         fields = ['selection', 'legacy_code', 'name', 'is_active', 'survey_type']
         empty_text = "Não existem tipos de serviço cadastrados"
