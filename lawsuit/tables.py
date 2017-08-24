@@ -13,7 +13,7 @@ class InstanceTable(tables.Table):
     class Meta:
         sequence = ('selection', 'name', 'is_active', 'legacy_code')
         model = Instance
-        fields = ['name', 'is_active']
+        fields = ['name', 'is_active','legacy_code']
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existem instâncias cadastradas"
 
