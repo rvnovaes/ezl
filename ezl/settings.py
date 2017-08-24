@@ -155,14 +155,14 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static/extras'),
+    os.path.join(BASE_DIR, 'static'),
 )
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/opt/files_easy_lawyer/'
 
 
-STATIC_ROOT = '/opt/easy_lawyer_django/static/'
 LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
 
 AUTHENTICATION_BACKENDS = (
