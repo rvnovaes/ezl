@@ -255,7 +255,7 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
             for address in addresses_form:
 
                 # Form foi marcado para deleção
-                if address.cleaned_data['DELETE']:
+                if address.cleaned_data['DELETE'] and self.request.POST['is_delete'] == '3':
                     Address.objects.get(id=address.cleaned_data['id'].id).delete()
 
                 # Endereço já existe no banco
@@ -271,7 +271,13 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
                     a.notes = address.instance.notes
                     a.address_type = address.instance.address_type
                     a.zip_code = address.instance.zip_code
-                    a.is_active = address.instance.is_active
+
+                    if address.instance.is_active is True or address.instance.is_active is 'on':
+                        a.is_active = True
+                    else:
+                        a.is_active = False
+
+                    # a.is_active = address.instance.is_active
 
                     a.save(update_fields=['street', 'number', 'complement', 'city_region', 'country', 'state', 'city',
                                           'notes', 'address_type', 'zip_code', 'is_active'])
@@ -341,6 +347,7 @@ def person_address_information(request, pk):
             'state_id': str(address.state_id),
             'state': str(address.state),
             'city': str(address.city),
+            'city_id': str(address.city_id),
             'address_type': str(address.address_type),
             'address_type_id': str(address.address_type_id),
             'zip_code': address.zip_code,

@@ -185,18 +185,6 @@ class AddressForm(ModelForm, forms.Form):
         widget=forms.Textarea(attrs={'class': 'form-control input-sm'})
     )
 
-    # home_address = forms.BooleanField(
-    #     label=u"Endereço residencial",
-    #     required=False,
-    #     widget=forms.CheckboxInput
-    # )
-    #
-    # business_address = forms.BooleanField(
-    #     label=u"Endereço comercial",
-    #     required=False,
-    #     widget=forms.CheckboxInput
-    # )
-
     country = forms.ModelChoiceField(
         label=u"País",
         queryset=Country.objects.all(),
@@ -212,6 +200,11 @@ class AddressForm(ModelForm, forms.Form):
         queryset=State.objects.filter(id__gt=1).order_by('name'),
         required=True,
         widget=forms.Select(attrs={'class': 'form-control input-sm'})
+
+    )
+
+    is_active = CustomBooleanField(
+        required=False
     )
 
     # todo: alterar o id de acordo com o estato
@@ -229,4 +222,4 @@ class AddressForm(ModelForm, forms.Form):
     )
 
 
-AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=3)
+AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=3, can_delete=True)

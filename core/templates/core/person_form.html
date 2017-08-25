@@ -10,7 +10,13 @@
             display: none !important;
         }
     </style>
+
+    {#    Este form, deve ter o índice 0, favor não alterar a ordem dos forms deste arquivo#}
     <form id="person_form" action="" method="post">{% csrf_token %}
+
+        <div style="display: none;">
+            <input type="text" id="inp_delete" name="is_delete" value="0"/>
+        </div>
 
         <div class="col-lg-12 ">
             <div>
@@ -155,6 +161,7 @@
                    style="text-align:center !important; font-weight: 100 !important; font-size: unset;">
                 <thead>
                 <tr>
+                    <th style="text-align: center;">Excluir</th>
                     <th style="text-align: center;">Logradouro</th>
                     <th style="text-align: center;">Nº</th>
                     <th style="text-align: center;">Complemento</th>
@@ -166,38 +173,55 @@
                     <th style="text-align: center;">Observação</th>
                     <th style="text-align: center;">Tipo</th>
                     <th>Ativo</th>
-                    <th style="text-align: center;">Excluir</th>
                     <th></th>
                 </tr>
                 </thead>
 
                 <tbody>
+
                 {% for address in addresses %}
-                    <tr id="row-{{ address.id }}" name="{{ forloop.counter0 }}">
-                        <th style="text-align: center; font-weight: 100;"
-                            id="street-{{ address.id }}">{{ address.street }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="number-{{ address.id }}">{{ address.number }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="complement-{{ address.id }}">{{ address.complement }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="city_region-{{ address.id }}">{{ address.city_region }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="city-{{ address.id }}">{{ address.city }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="state-{{ address.id }}">{{ address.state }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="zip_code-{{ address.id }}">{{ address.zip_code }}</th>
+                    <tr id="row-{{ address.id }}" name="{{ forloop.counter0 }}"
+                        style="cursor: pointer;">
+
+                        <th style="text-align: center;" id="delete_checkbox">
+                            <label style="margin-top: -5px !important;">
+                                <div class="checkbox">
+                                    <input onchange="delete_buttom($(this).prop('checked'))" type="checkbox"
+                                           name="address_set-{{ forloop.counter0 }}-DELETE"
+                                           id="id_address_set-{{ forloop.counter0 }}-DELETE" class="delete_check">
+                                    <span class="checkbox-material">
+                                    <span class="check"></span>
+                                </span>
+                                </div>
+                            </label>
+                            {#                            <input type="checkbox" class="check" name="address_set-{{ forloop.counter0 }}-DELETE"#}
+                            {#                                   id="id_address_set-{{ forloop.counter0 }}-DELETE"/>#}
+                        </th>
 
                         <th style="text-align: center; font-weight: 100;"
-                            id="country-{{ address.id }}">{{ address.country }}</th>
+                            id="street-{{ address.id }}" class="update_address">{{ address.street }}</th>
                         <th style="text-align: center; font-weight: 100;"
-                            id="notes-{{ address.id }}">{{ address.notes }}</th>
+                            id="number-{{ address.id }}" class="update_address">{{ address.number }}</th>
                         <th style="text-align: center; font-weight: 100;"
-                            id="address_type-{{ address.id }}">{{ address.address_type }}</th>
+                            id="complement-{{ address.id }}" class="update_address">{{ address.complement }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="city_region-{{ address.id }}" class="update_address">{{ address.city_region }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="city-{{ address.id }}" class="update_address">{{ address.city }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="state-{{ address.id }}" class="update_address">{{ address.state }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="zip_code-{{ address.id }}" class="update_address">{{ address.zip_code }}</th>
 
                         <th style="text-align: center; font-weight: 100;"
-                            id="is_active-{{ address.id }}">
+                            id="country-{{ address.id }}" class="update_address">{{ address.country }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="notes-{{ address.id }}" class="update_address">{{ address.notes }}</th>
+                        <th style="text-align: center; font-weight: 100;"
+                            id="address_type-{{ address.id }}" class="update_address">{{ address.address_type }}</th>
+
+                        <th style="text-align: center; font-weight: 100;"
+                            id="is_active-{{ address.id }}" class="update_address">
 
                             {% if address.is_active == True or address.is_active == 'on' %}
                                 <i class="material-icons" style="font-size: larger;">check</i>
@@ -206,18 +230,13 @@
                             {% endif %}
 
                         </th>
-
-                        <th style="text-align: center;">
-                            <input type="checkbox" class="check" name="address_set-{{ forloop.counter0 }}-DELETE"
-                                   id="id_address_set-{{ forloop.counter0 }}-DELETE"/>
-                        </th>
-                        <th style="text-align: center;">
-                            <i class="material-icons update_address"
-                               id="{{ address.id }}"
-                               style="text-decoration: none; cursor: pointer;font-size: larger;">
-                                mode_edit
-                            </i>
-                        </th>
+                        {#                        <th style="text-align: center;">#}
+                        {#                            <i class="material-icons update_address"#}
+                        {#                               id="{{ address.id }}"#}
+                        {#                               style="text-decoration: none; cursor: pointer;font-size: larger;">#}
+                        {#                                mode_edit#}
+                        {#                            </i>#}
+                        {#                        </th>#}
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -242,7 +261,7 @@
                                 <span id="label_id_address_type">Tipo de Endereço</span>
                                 <select name="address_type" required
                                         id="update_id_address_type" class="form-control">
-                                    <option value="" selected>---------</option>s
+                                    <option value="" selected>---------</option>
                                 </select>
 
                                 <span id="label_id_street">Logradouro</span>
@@ -272,7 +291,7 @@
                                        class="form-control input-sm" maxlength="255"
                                        required/>
 
-                                <span id="label_id_notes">Observações</span>
+                                <span id="label_id_notes">Observação</span>
                                 <textarea name="notes" id="update_id_notes" cols="40"
                                           rows="10" class="form-control input-sm">
                                                                     </textarea>
@@ -296,8 +315,19 @@
                                 </select>
 
                                 <span id="label_update_id_is_active">Ativo</span>
-                                <input type="checkbox" name="is_active" checked
-                                       id="update_id_is_active"/>
+                                {#                                <input type="checkbox" name="is_active" checked#}
+                                {#                                       id="update_id_is_active"/>#}
+
+                                <label>
+                                    <div class="checkbox">
+                                        <input type="checkbox"
+                                               name="is_active"
+                                               id="update_id_is_active" class="delete_check">
+                                        <span class="checkbox-material">
+                                            <span class="check"></span>
+                                        </span>
+                                    </div>
+                                </label>
 
 
                                 <input type="text" name="id"
@@ -322,16 +352,22 @@
                 </div>
             </div>
             <div class="text-right" style="margin: auto">
+                <input type="button" data-toggle="modal" data-target="#confirmDelete" id="delete_button"
+                       class="btn btn-fab btn-warning material-icons" value="remove"
+                       style="height: 30px !important; width: 30px !important; min-width: 30px !important;"
+                       onclick="can_delete_addresses()" disabled>
+
                 <a class="btn btn-fab btn-primary" href="#new_address"
 
                    onclick="$('#new_address').modal('show');"
                    style="height: 30px !important; width: 30px !important; min-width: 30px !important;">
                     <i class="material-icons">add</i></a>
+
             </div>
         </div>
     </div>
 
-    <input type="submit" class="btn btn-primary btn-raised"/>
+    <input type="submit" class="btn btn-primary btn-raised" value="Salvar"/>
 
     <div class="modal" id="modal_message">
         <div class="modal-dialog">
@@ -418,8 +454,31 @@
     </fieldset>
     </div>
 
+    <!-- Modal -->
+    <div id="confirmDelete" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><i class="material-icons">warning</i></h4>
+                    <h4 class="modal-title">Atenção!</h4>
+                </div>
+                <div class="modal-body">
+                    Tem certeza que deseja excluir os endereços selecionados ?
+                </div>
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button onclick="document.forms[0].submit()" type="submit" class="btn btn-primary">Sim</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function () {
+
             var url = '{% url 'address_country' %}';
             $.ajax({
                 url: url,
@@ -476,7 +535,7 @@
     </script>
     <script>
         $("#update_id_state").change(function () {
-
+            ''
             var option = $(this).val();
             var url = '{% url 'address_city' 999 %}'.replace(999, option);
             $.ajax({
@@ -624,7 +683,6 @@
                                 value: obj.states[i].id,
                                 text: obj.states[i].name
                             }));
-
                         }
                     }
                 }
@@ -634,40 +692,47 @@
 
     <script>
         $(".update_address").click(function () {
-            var id = (this).id;
+
+            var n = (this).id.indexOf("-");
+            var id = (this).id.slice(n + 1);
             var url = '{% url 'person_address_information' 999 %}'.replace(999, id);
 
-            $.ajax({
-                url: '{% url 'addresses_types' %}',
-                type: 'GET',
-                dataType: 'json',
-                success: function (data) {
-                    var obj = JSON.parse(data);
-                    var length = obj.number;
-                    document.getElementById("id_state").options.length = 0;
+            length = $('#update_id_address_type').children('option').length;
 
-                    if (length == 0) {
+            if (length <= 1) {
 
-                        document.getElementById("update_id_address_type").options.length = 0;
-                        $('#update_id_address_type').append($('<option>', {
-                            value: " ",
-                            text: " ------ "
-                        }));
+                // Recupera todos os tipos de endereço
+                $.ajax({
+                    url: '{% url 'addresses_types' %}',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        var obj = JSON.parse(data);
+                        var length = obj.number;
+                        document.getElementById("id_state").options.length = 0;
 
-                    }
+                        if (length == 0) {
 
-                    else {
-                        for (i = 0; i < length; i++) {
-
+                            document.getElementById("update_id_address_type").options.length = 0;
                             $('#update_id_address_type').append($('<option>', {
-                                value: obj.addresses_types[i].id,
-                                text: obj.addresses_types[i].name
+                                value: " ",
+                                text: " ------ "
                             }));
 
                         }
+
+                        else {
+                            for (i = 0; i < length; i++) {
+
+                                $('#update_id_address_type').append($('<option>', {
+                                    value: obj.addresses_types[i].id,
+                                    text: obj.addresses_types[i].name
+                                }));
+                            }
+                        }
                     }
-                }
-            });
+                });
+            }
 
             $.ajax({
                 url: url,
@@ -675,6 +740,7 @@
                 dataType: 'json',
                 success: function (data) {
 
+                    $('#update_id_address_type').val(data.address_type_id);
                     $('#update_id_address').val(id);
                     $('#update_id_street').val(data.street);
                     $('#update_id_number').val(data.number);
@@ -685,7 +751,18 @@
 
                     $('#update_id_country').val("0").trigger("click");
                     $('#update_id_country').val(data.country_id).trigger("change");
-{#                    $('#update_id_address_type select').val(data.address_type);#}
+
+                    setTimeout(function () {
+                        $('#update_id_state').val(data.state_id).change();
+                    }, 1000);
+
+                    setTimeout(function () {
+                        $('#update_id_city').val(data.city_id).change();
+                    }, 2000);
+
+
+                    {#                    $('#update_id_address_type select').val(data.address_type);#}
+                    // $('#update_id_state').val("0").trigger("click");
 
                     if (data.is_active)
                         $('#update_id_is_active').prop('checked', true);
@@ -693,10 +770,12 @@
                     else
                         $('#update_id_is_active').prop('checked', false);
 
-{#                    $('#update_id_address_type').val(data.address_type_id).trigger("change");#}
+                    {#                    $('#update_id_address_type').val(data.address_type_id).trigger("change");#}
+
                     $('#form_address_update').modal('show');
                 }
-            })
+            });
+
         })
     </script>
 
@@ -948,18 +1027,19 @@
                 if (is_valid) {
                     var table = document.getElementById("addresses");
                     var row = table.insertRow(1);
-                    var cel1 = row.insertCell(0).innerHTML = street;
-                    var cel2 = row.insertCell(1).innerHTML = number_person;
-                    var cel3 = row.insertCell(2).innerHTML = complement;
-                    var cel4 = row.insertCell(3).innerHTML = city_region;
-                    var cel5 = row.insertCell(4).innerHTML = city;
-                    var cel6 = row.insertCell(5).innerHTML = state;
-                    var cel7 = row.insertCell(6).innerHTML = zip_code;
-                    var cel10 = row.insertCell(7).innerHTML = country;
-                    var cel11 = row.insertCell(8).innerHTML = notes;
-                    var cel12 = row.insertCell(9).innerHTML = address_type;
-                    var cel12 = row.insertCell(10).innerHTML = "<i class='material-icons' style='font-size: larger;'>check</i>";
-                    var cel13 = row.insertCell(11).innerHTML = "";
+                    var cel1 = row.insertCell(0).innerHTML = "";
+                    var cel1 = row.insertCell(1).innerHTML = street;
+                    var cel2 = row.insertCell(2).innerHTML = number_person;
+                    var cel3 = row.insertCell(3).innerHTML = complement;
+                    var cel4 = row.insertCell(4).innerHTML = city_region;
+                    var cel5 = row.insertCell(5).innerHTML = city;
+                    var cel6 = row.insertCell(6).innerHTML = state;
+                    var cel7 = row.insertCell(7).innerHTML = zip_code;
+                    var cel10 = row.insertCell(8).innerHTML = country;
+                    var cel11 = row.insertCell(9).innerHTML = notes;
+                    var cel12 = row.insertCell(10).innerHTML = address_type;
+                    var cel12 = row.insertCell(11).innerHTML = "<i class='material-icons' style='font-size: larger;'>check</i>";
+                    var cel13 = row.insertCell(12).innerHTML = "";
 
                     $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-street" id="num_addresses_set-' + num_addresses + '-street" value="' + street + '" style="display:none;"">');
                     $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-number" id="num_addresses_set-' + num_addresses + '-number" value="' + number_person + '" style="display:none;"">');
@@ -999,12 +1079,73 @@
                         message +
                         '</div>';
                 }
+
+                // Limpa o formulario e volta ao estado original
+
+                $("#id_address_type").val($("#id_address_type option:first").val());
+                $("#id_country").val($("#id_country option:first").val());
+                $("#id_state").empty();
+                $("#id_city").empty();
+
+                $('#id_state').append($('<option>', {
+                    value: " ",
+                    text: "Selecione"
+                }));
+
+                $('#id_city').append($('<option>', {
+                    value: " ",
+                    text: "Selecione"
+                }));
+
+                $('#id_street').val(null);
+                $('#id_number').val(null);
+                $('#id_complement').val(null);
+                $('#id_city_region').val(null);
+                $('#id_zip_code').val(null);
+                $('#id_notes').val(null);
+
+                $('#id_number').val(null);
+                $('#id_number').val(null);
+                $('#id_number').val(null);
+                $('#id_number').val(null);
+                $('#update_id_number').value = null;
             });
         });
     </script>
 
     <script>
 
+    </script>
+
+    <script>
+        var itens_checked_to_delete = 0;
+        function delete_buttom(check) {
+            is_delete = document.getElementById("inp_delete");
+            if (check) {
+                itens_checked_to_delete++;
+            }
+            else {
+                itens_checked_to_delete--;
+            }
+
+            if (itens_checked_to_delete === 0) {
+                is_delete.value = "0";
+                document.getElementById('delete_button').disabled = true;
+            }
+            else {
+                is_delete.value = "1";
+                document.getElementById('delete_button').disabled = false;
+            }
+        }
+
+        function can_delete_addresses() {
+            is_delete = document.getElementById("inp_delete");
+
+            if (is_delete.value === '1') {
+                is_delete.value = "3";
+            }
+
+        }
     </script>
     <script type="text/javascript">
         $(function () {
