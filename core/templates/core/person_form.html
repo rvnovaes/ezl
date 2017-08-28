@@ -1186,22 +1186,10 @@
                     $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-zip_code" id="id_address_set-' + num_addresses + '-zip_code" value="' + zip_code + '" style="display:none;">');
                     $('form#person_form').append('<textarea name="address_set-' + num_addresses + '-notes" cols="40" rows="10" id="id_address_set-' + num_addresses + '-notes" style="display:none;">' + notes + '</textarea>');
 
-                    {#                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-country" id="id_address_set-' + num_addresses + '-country" style="display:none;">' +#}
-                    {#                        '<option value=' + country_id + ' selected>país</option>' +#}
-                    {#                        '</select>');#}
-                    {#                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-state" id="id_address_set-' + num_addresses + '-state" style="display:none;">' +#}
-                    {#                        '<option value="' + state_id + '" selected>estado</option>' +#}
-                    {#                        '</select>');#}
-
                     $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-state" id="id_address_set-' + num_addresses + '-state" value="' + state_id + '" style="display:none;"">');
                     $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-city" id="id_address_set-' + num_addresses + '-city" value="' + city_id + '" style="display:none;"">');
                     $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-country" id="id_address_set-' + num_addresses + '-country" value="' + country_id + '" style="display:none;"">');
                     $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-address_type" id="id_address_set-' + num_addresses + '-address_type" value="' + address_type_id + '" style="display:none;"">');
-
-
-                    {#                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-city" id="id_address_set-' + num_addresses + '-city" style="display:none;">' +#}
-                    {#                        '<option value="' + city_id + '" selected>cidade</option>' +#}
-                    {#                        '</select>');#}
 
                     if (is_active)
                         $('form#person_form').append('<input type="checkbox" name="address_set-' + num_addresses + '-is_active" id="id_address_set-' + num_addresses + '-is_active" checked style="display:none;">');
@@ -1209,14 +1197,36 @@
                     else
                         $('form#person_form').append('<input type="checkbox" name="address_set-' + num_addresses + '-is_active" id="id_address_set-' + num_addresses + '-is_active" style="display:none;">');
 
-                    {#                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-address_type" id="id_address_set-' + num_addresses + '-address_type" style="display:none;">' +#}
-                    {#                        '<option value="' + address_type_id + '" selected>type</option> ' +#}
-                    {#                        '</select>');#}
-
                     $('#new_address').modal('hide');
                     document.getElementById("message_text").innerHTML = "Endereço adicionado com successo";
                     $('#modal_message').modal('show');
-                    document.getElementById("form_new_address").reset();
+
+                    $("#id_address_type").val($("#id_address_type option:first").val());
+                    $("#id_country").val($("#id_country option:first").val());
+                    $("#id_state").empty();
+                    $("#id_city").empty();
+                    $('#id_state').append($('<option>', {
+                        value: " ",
+                        text: "Selecione"
+                    }));
+                    $('#id_city').append($('<option>', {
+                        value: " ",
+                        text: "Selecione"
+                    }));
+
+                    // Limpa o formulario e volta ao estado original
+                    $('#id_street').val(null);
+                    $('#id_number').val(null);
+                    $('#id_complement').val(null);
+                    $('#id_city_region').val(null);
+                    $('#id_zip_code').val(null);
+                    $('#id_notes').val(null);
+
+                    $('#id_number').val(null);
+                    $('#id_number').val(null);
+                    $('#id_number').val(null);
+                    $('#id_number').val(null);
+                    $('#update_id_number').value = null;
                 }
 
                 else {
@@ -1226,36 +1236,6 @@
                         '</div>';
                     $('#new_address').animate({scrollTop: 0}, 'slow');
                 }
-
-                // Limpa o formulario e volta ao estado original
-
-                $("#id_address_type").val($("#id_address_type option:first").val());
-                $("#id_country").val($("#id_country option:first").val());
-                $("#id_state").empty();
-                $("#id_city").empty();
-
-                $('#id_state').append($('<option>', {
-                    value: " ",
-                    text: "Selecione"
-                }));
-
-                $('#id_city').append($('<option>', {
-                    value: " ",
-                    text: "Selecione"
-                }));
-
-                $('#id_street').val(null);
-                $('#id_number').val(null);
-                $('#id_complement').val(null);
-                $('#id_city_region').val(null);
-                $('#id_zip_code').val(null);
-                $('#id_notes').val(null);
-
-                $('#id_number').val(null);
-                $('#id_number').val(null);
-                $('#id_number').val(null);
-                $('#id_number').val(null);
-                $('#update_id_number').value = null;
             });
         });
     </script>
