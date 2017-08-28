@@ -260,6 +260,9 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
                 # Form foi marcado para deleção
                 if address.cleaned_data['DELETE'] and self.request.POST['is_delete'] == '3':
                     Address.objects.get(id=address.cleaned_data['id'].id).delete()
+                    messages.success(request, "Registro(s) excluídos com sucesso")
+                    return HttpResponseRedirect(self.request.path)
+
 
                 # Endereço já existe no banco
                 elif address.cleaned_data['id']:
