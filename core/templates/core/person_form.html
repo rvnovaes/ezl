@@ -18,7 +18,7 @@
             <input type="text" id="inp_delete" name="is_delete" value="0"/>
         </div>
 
-        <div class="col-lg-12 ">
+        <div>
             <div>
                 <div class="form-row">
                     <div class="panel panel-primary">
@@ -26,9 +26,11 @@
                             <h1 class="panel-title text-center">{{ form.title }}</h1>
                         </div>
                         <div class="panel-body">
-                            {% for field in form %}
 
+
+                            {% for field in form %}
                                 {% if field.name == 'cpf' %}
+
                                     <div id="cpf_container"
                                          class="form-group {% if form.instance.legal_type == 'J' %} hidden {% endif %}">
                                         <label>
@@ -39,21 +41,22 @@
                                 {% if field.name == 'cnpj' %}
                                     <div id="cnpj_container"
                                          class="form-group {% if form.instance.legal_type == 'F' or not form.instance.id %}
-                                          hidden {% endif %}">
+                                                  hidden {% endif %}">
                                         <label>
                                             {{ field.label }}{{ field }}
 
                                         </label>
                                     </div>
-                                {% elif field.name != 'cnpj' and field.name != 'cpf' %}
+                                {% endif %}
+                                {% if field.name != 'cnpj' and field.name != 'cpf' %}
                                     <div class="form-group">
                                         <label>
                                             {{ field.label }}{{ field }}
                                         </label>
                                     </div>
                                 {% endif %}
-
                             {% endfor %}
+
 
                             <div id="fields_formset" style="display: none;">
                                 <p id="extra_fields"></p>
@@ -101,24 +104,6 @@
                                               class="form-control"
                                               id="id_address_set-{{ forloop.counter0 }}-notes">{{ address.notes }}</textarea>
 
-                                    {#                                <input value="{{ address.home_address }}" type="checkbox"#}
-                                    {#                                       name="address_set-{{ forloop.counter0 }}-home_address"#}
-                                    {#                                       id="id_address_set-{{ forloop.counter0 }}-home_address"#}
-                                    {##}
-                                    {#                                        {% if address.home_address == True or address.home_address == 'on' %}#}
-                                    {#                                       checked#}
-                                    {#                                        {% endif %}#}
-                                    {#                                >#}
-                                    {##}
-                                    {#                                <input type="checkbox" value="{{ address.business_address }}"#}
-                                    {#                                       name="address_set-{{ forloop.counter0 }}-business_address"#}
-                                    {#                                       id="id_address_set-{{ forloop.counter0 }}-business_address"#}
-                                    {##}
-                                    {#                                        {% if address.business_address == True or address.business_address == 'on' %}#}
-                                    {#                                       checked#}
-                                    {#                                        {% endif %}#}
-                                    {#                                >#}
-
                                     <select name="address_set-{{ forloop.counter0 }}-country" class="form-control"
                                             id="id_address_set-{{ forloop.counter0 }}-country">
                                         <option value="{{ address.country.id }}" selected>{{ address.country }}</option>
@@ -141,334 +126,416 @@
                                     <input type="text" name="address_set-{{ forloop.counter0 }}-address_type"
                                            id="id_address_set-{{ forloop.counter0 }}-address_type"
                                            value="{{ address.address_type.id }}">
-
                                 {% endfor %}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <br><br>
-    </form>
-
-    <div class="panel panel-primary">
-        <div class="panel-heading">
-            <h1 class="panel-title text-center">Endereços</h1>
         </div>
 
-        <div class="panel-body">
-            <table id="addresses" class="table table-hover "
-                   style="text-align:center !important; font-weight: 100 !important; font-size: unset;">
-                <thead>
-                <tr>
-                    <th style="text-align: center;">Excluir</th>
-                    <th style="text-align: center;">Logradouro</th>
-                    <th style="text-align: center;">Nº</th>
-                    <th style="text-align: center;">Complemento</th>
-                    <th style="text-align: center;">Bairro</th>
-                    <th style="text-align: center;">Cidade</th>
-                    <th style="text-align: center;">Estado</th>
-                    <th style="text-align: center;">CEP</th>
-                    <th style="text-align: center;">País</th>
-                    <th style="text-align: center;">Observação</th>
-                    <th style="text-align: center;">Tipo</th>
-                    <th>Ativo</th>
-                    <th></th>
-                </tr>
-                </thead>
 
-                <tbody>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h1 class="panel-title text-center">Endereços</h1>
+            </div>
 
-                {% for address in addresses %}
-                    <tr id="row-{{ address.id }}" name="{{ forloop.counter0 }}"
-                        style="cursor: pointer;">
+            <div class="panel-body">
+                <table id="addresses" class="table table-hover "
+                       style="text-align:center !important; font-weight: 100 !important; font-size: unset;">
+                    <thead>
+                    <tr>
+                        <th style="text-align: center;">Excluir</th>
+                        <th style="text-align: center;">Logradouro</th>
+                        <th style="text-align: center;">Nº</th>
+                        <th style="text-align: center;">Complemento</th>
+                        <th style="text-align: center;">Bairro</th>
+                        <th style="text-align: center;">Cidade</th>
+                        <th style="text-align: center;">Estado</th>
+                        <th style="text-align: center;">CEP</th>
+                        <th style="text-align: center;">País</th>
+                        <th style="text-align: center;">Observação</th>
+                        <th style="text-align: center;">Tipo</th>
+                        <th>Ativo</th>
+                        <th></th>
+                    </tr>
+                    </thead>
 
-                        <th style="text-align: center;" id="delete_checkbox">
-                            {% if address.id != None %}
-                                <label style="margin-top: -5px !important;">
-                                    <div class="checkbox">
-                                        <input onchange="delete_buttom($(this).prop('checked'))" type="checkbox"
-                                               name="address_set-{{ forloop.counter0 }}-DELETE"
-                                               id="id_address_set-{{ forloop.counter0 }}-DELETE" class="delete_check">
-                                        <span class="checkbox-material">
+                    <tbody>
+
+                    {% for address in addresses %}
+                        <tr id="row-{{ address.id }}" name="{{ forloop.counter0 }}"
+                            style="cursor: pointer;">
+
+                            <th style="text-align: center;" id="delete_checkbox">
+                                {% if address.id != None %}
+                                    <label style="margin-top: -5px !important;">
+                                        <div class="checkbox">
+                                            <input onchange="delete_buttom($(this).prop('checked'))" type="checkbox"
+                                                   name="address_set-{{ forloop.counter0 }}-DELETE"
+                                                   id="id_address_set-{{ forloop.counter0 }}-DELETE"
+                                                   class="delete_check">
+                                            <span class="checkbox-material">
                                     <span class="check"></span>
                                 </span>
-                                    </div>
-                                </label>
-                            {% endif %}
-                            {#                            <input type="checkbox" class="check" name="address_set-{{ forloop.counter0 }}-DELETE"#}
-                            {#                                   id="id_address_set-{{ forloop.counter0 }}-DELETE"/>#}
-                        </th>
+                                        </div>
+                                    </label>
+                                {% endif %}
+                            </th>
 
-                        <th style="text-align: center; font-weight: 100;"
-                            id="street-{{ address.id }}" class="update_address">{{ address.street }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="number-{{ address.id }}" class="update_address">{{ address.number }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="complement-{{ address.id }}" class="update_address">{{ address.complement }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="city_region-{{ address.id }}" class="update_address">{{ address.city_region }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="city-{{ address.id }}" class="update_address">{{ address.city }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="state-{{ address.id }}" class="update_address">{{ address.state }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="zip_code-{{ address.id }}" class="update_address">{{ address.zip_code }}</th>
+                            <th style="text-align: center; font-weight: 100;"
+                                id="street-{{ address.id }}" class="update_address">{{ address.street }}</th>
+                            <th style="text-align: center; font-weight: 100;"
+                                id="number-{{ address.id }}" class="update_address">{{ address.number }}</th>
+                            <th style="text-align: center; font-weight: 100;"
+                                id="complement-{{ address.id }}" class="update_address">{{ address.complement }}</th>
+                            <th style="text-align: center; font-weight: 100;"
+                                id="city_region-{{ address.id }}" class="update_address">{{ address.city_region }}</th>
+                            <th style="text-align: center; font-weight: 100;"
+                                id="city-{{ address.id }}" class="update_address">{{ address.city }}</th>
+                            <th style="text-align: center; font-weight: 100;"
+                                id="state-{{ address.id }}" class="update_address">{{ address.state }}</th>
+                            <th style="text-align: center; font-weight: 100;"
+                                id="zip_code-{{ address.id }}" class="update_address">{{ address.zip_code }}</th>
 
-                        <th style="text-align: center; font-weight: 100;"
-                            id="country-{{ address.id }}" class="update_address">{{ address.country }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="notes-{{ address.id }}" class="update_address">{{ address.notes }}</th>
-                        <th style="text-align: center; font-weight: 100;"
-                            id="address_type-{{ address.id }}" class="update_address">{{ address.address_type }}</th>
+                            <th style="text-align: center; font-weight: 100;"
+                                id="country-{{ address.id }}" class="update_address">{{ address.country }}</th>
+                            <th style="text-align: center; font-weight: 100;"
+                                id="notes-{{ address.id }}" class="update_address">{{ address.notes }}</th>
+                            <th style="text-align: center; font-weight: 100;"
+                                id="address_type-{{ address.id }}"
+                                class="update_address">{{ address.address_type }}</th>
 
-                        <th style="text-align: center; font-weight: 100;"
-                            id="is_active-{{ address.id }}" class="update_address">
+                            <th style="text-align: center; font-weight: 100;"
+                                id="is_active-{{ address.id }}" class="update_address">
 
-                            {% if address.is_active == True or address.is_active == 'on' %}
-                                <i class="material-icons" style="font-size: larger;">check</i>
-                            {% else %}
-                                <i class="material-icons" style="font-size: larger;">close</i>
-                            {% endif %}
+                                {% if address.is_active == True or address.is_active == 'on' %}
+                                    <i class="material-icons" style="font-size: larger;">check</i>
+                                {% else %}
+                                    <i class="material-icons" style="font-size: larger;">close</i>
+                                {% endif %}
 
-                        </th>
-                        {#                        <th style="text-align: center;">#}
-                        {#                            <i class="material-icons update_address"#}
-                        {#                               id="{{ address.id }}"#}
-                        {#                               style="text-decoration: none; cursor: pointer;font-size: larger;">#}
-                        {#                                mode_edit#}
-                        {#                            </i>#}
-                        {#                        </th>#}
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                            </th>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
 
-            <div class="modal fade" id="modal-wait" data-backdrop="static" data-keyboard="false">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title" style="text-align: center">Aguarde ...</h4>
-                        </div>
-                        <div class="modal-body">
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 100%;">100%</div>
+                <div class="modal fade" id="modal-wait" data-backdrop="static" data-keyboard="false">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" style="text-align: center">Aguarde ...</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" style="width: 100%;">100%</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="modal" id="form_address_update">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal"
-                                    aria-hidden="true">
-                                ×
-                            </button>
-                            <h4 class="modal-title">Atualizar Endereço</h4>
-                        </div>
-                        <div class="modal-body">
+                <div class="modal" id="form_address_update">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"
+                                        aria-hidden="true">
+                                    ×
+                                </button>
+                                <h4 class="modal-title">Atualizar Endereço</h4>
+                            </div>
+                            <div class="modal-body">
 
-                            <form action="" method="POST" id="form_new_address">
-                                <div id="message_error"></div>
-                                {% csrf_token %}
+                                <form action="" method="POST" id="form_new_address">
+                                    <div id="message_error"></div>
+                                    {% csrf_token %}
 
-                                <span id="label_id_address_type">Tipo de Endereço</span>
-                                <select name="address_type" required
-                                        id="update_id_address_type" class="form-control">
-                                    <option value="" selected>---------</option>
-                                </select>
+                                    <span id="label_id_address_type">Tipo de Endereço</span>
+                                    <select name="address_type" required
+                                            id="update_id_address_type" class="form-control">
+                                        <option value="" selected></option>
+                                    </select>
 
-                                <span id="label_id_street">Logradouro</span>
-                                <input type="text" name="street" id="update_id_street"
-                                       class="form-control input-sm" maxlength="255"
-                                       required/>
+                                    <span id="label_id_street">Logradouro</span>
+                                    <input type="text" name="street" id="update_id_street"
+                                           class="form-control input-sm" maxlength="255"
+                                           required/>
 
-                                <span id="label_id_number">Número</span>
-                                <input type="text" name="number" id="update_id_number"
-                                       class="form-control input-sm" maxlength="255"
-                                       required/>
+                                    <span id="label_id_number">Número</span>
+                                    <input type="text" name="number" id="update_id_number"
+                                           class="form-control input-sm" maxlength="255"
+                                           required/>
 
-                                <span id="label_id_complement">Complemento</span>
-                                <input type="text" name="complement"
-                                       class="form-control input-sm" maxlength="255"
-                                       id="update_id_complement"/>
+                                    <span id="label_id_complement">Complemento</span>
+                                    <input type="text" name="complement"
+                                           class="form-control input-sm" maxlength="255"
+                                           id="update_id_complement"/>
 
-                                <span id="label_id_city_region">Bairro</span>
-                                <input type="text" name="city_region"
-                                       id="update_id_city_region"
-                                       class="form-control input-sm" maxlength="255"
-                                       required/>
+                                    <span id="label_id_city_region">Bairro</span>
+                                    <input type="text" name="city_region"
+                                           id="update_id_city_region"
+                                           class="form-control input-sm" maxlength="255"
+                                           required/>
 
-                                <span id="label_id_zip_code">CEP</span>
-                                <input type="text" name="zip_code"
-                                       id="update_id_zip_code"
-                                       class="form-control input-sm" maxlength="255"
-                                       required/>
+                                    <span id="label_id_zip_code">CEP</span>
+                                    <input type="text" name="zip_code"
+                                           id="update_id_zip_code"
+                                           class="form-control input-sm" maxlength="255"
+                                           required/>
 
-                                <span id="label_id_notes">Observação</span>
-                                <textarea name="notes" id="update_id_notes" cols="40"
-                                          rows="10" class="form-control input-sm">
+                                    <span id="label_id_notes">Observação</span>
+                                    <textarea name="notes" id="update_id_notes" cols="40"
+                                              rows="10" class="form-control input-sm">
                                                                     </textarea>
 
-                                <span id="label_id_country">País</span>
-                                <select name="country" id="update_id_country"
-                                        class="form-control input-sm" required>
-                                </select>
+                                    <span id="label_id_country">País</span>
+                                    <select name="country" id="update_id_country"
+                                            class="form-control input-sm" required>
+                                    </select>
 
-                                <span id="label_id_state">Estado</span>
-                                <select name="state" id="update_id_state"
-                                        class="form-control input-sm" required>
-                                </select>
+                                    <span id="label_id_state">Estado</span>
+                                    <select name="state" id="update_id_state"
+                                            class="form-control input-sm" required>
+                                    </select>
 
-                                <span id="label_id_city">Município</span>
-                                <select name="city" id="update_id_city"
-                                        class="form-control input-sm"
-                                        required>
-                                    <option value="" selected>---------</option>
+                                    <span id="label_id_city">Município</span>
+                                    <select name="city" id="update_id_city"
+                                            class="form-control input-sm"
+                                            required>
+                                        <option value="" selected></option>
 
-                                </select>
+                                    </select>
 
-                                <span id="label_update_id_is_active">Ativo</span>
+                                    <span id="label_update_id_is_active">Ativo</span>
 
-                                <label>
-                                    <div class="checkbox" id="check">
-                                        <input type="checkbox"
-                                               name="is_active"
-                                               id="update_id_is_active" class="delete_check">
-                                        <span class="checkbox-material">
+                                    <label>
+                                        <div class="checkbox" id="check">
+                                            <input type="checkbox"
+                                                   name="is_active"
+                                                   id="update_id_is_active" class="delete_check">
+                                            <span class="checkbox-material">
                                             <span class="check"></span>
                                         </span>
+                                        </div>
+                                    </label>
+
+
+                                    <input type="text" name="id"
+                                           id="update_id_address"
+                                           class="form-control input-sm" maxlength="255"/>
+                                    <br><br><br>
+                                    <div class="text-center">
+                                        <input type="button" id="save_updated_address"
+                                               class="btn btn-primary btn-raised"
+                                               value="Adicionar">
+
+                                        <input type="button"
+                                               class="btn btn-raised btn-danger"
+                                               data-dismiss="modal"
+                                               value="Cancelar"/>
                                     </div>
-                                </label>
-
-
-                                <input type="text" name="id"
-                                       id="update_id_address"
-                                       class="form-control input-sm" maxlength="255"/>
-                                <br><br><br>
-                                <div class="text-center">
-                                    <input type="button" id="save_updated_address"
-                                           class="btn btn-primary btn-raised"
-                                           value="Adicionar">
-
-                                    <input type="button"
-                                           class="btn btn-raised btn-danger"
-                                           data-dismiss="modal"
-                                           value="Cancelar"/>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="text-right" style="margin: auto">
-                <input type="button" data-toggle="modal" data-target="#confirmDelete" id="delete_button"
-                       class="btn btn-fab btn-warning material-icons" value="remove"
-                       style="height: 30px !important; width: 30px !important; min-width: 30px !important;"
-                       onclick="can_delete_addresses()" disabled>
+                <div class="text-right" style="margin: auto">
+                    <input type="button" data-toggle="modal" data-target="#confirmDelete" id="delete_button"
+                           class="btn btn-fab btn-warning material-icons" value="remove"
+                           style="height: 30px !important; width: 30px !important; min-width: 30px !important;"
+                           onclick="can_delete_addresses()" disabled>
 
-                <a class="btn btn-fab btn-primary" href="#new_address"
+                    <a class="btn btn-fab btn-primary" href="#new_address"
 
-                   onclick="$('#new_address').modal('show');"
-                   style="height: 30px !important; width: 30px !important; min-width: 30px !important;">
-                    <i class="material-icons">add</i></a>
+                       onclick="$('#new_address').modal('show');"
+                       style="height: 30px !important; width: 30px !important; min-width: 30px !important;">
+                        <i class="material-icons">add</i></a>
 
-            </div>
-        </div>
-    </div>
-
-    <input type="submit" class="btn btn-primary btn-raised" value="Salvar"/>
-
-    <div class="modal" id="modal_message">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <p id="message_text" style="text-align: center;"></p>
-                </div>
-                <div class="modal-footer" style="text-align: center;">
-                    <input type="button" data-dismiss="modal" value="OK"
-                           class="btn btn-primary btn-raised"
-                           style="max-width: 100px;"/>
-                    <br>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal" id="modal_redirect_page">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <p id="message_text_redirect_page" style="text-align: center;"></p>
-                </div>
-                <div class="modal-footer" style="text-align: center;">
-                    <input type="button" data-dismiss="modal" value="OK"
-                           class="btn btn-primary btn-raised"
-                           style="max-width: 100px;"
-                           id="btn_redirect_page"/>
-                    <br>
-                </div>
-            </div>
-        </div>
-    </div>
+        <input type="submit" class="btn btn-primary btn-raised"
+               onclick="document.getElementById('person_form').submit()" value="Salvar"/>
 
-    <div class="modal" id="new_address">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        ×
-                    </button>
-                    <h4 class="modal-title">Adicionar Endereço</h4>
-                </div>
-                <div class="modal-body">
-                    <div id="message_errors"></div>
-                    <br>
-                    <form action="" method="POST" id="form_new_address">
-                        <div id="message_error"></div>
-                        {% csrf_token %}
-                        {% for field in form_address %}
-                            <span id="label_{{ field.id_for_label }}">{{ field.label }}</span>
-                            {{ field }}
-
-                        {% endfor %}
-                        <br><br><br>
-
-                        <input type="hidden" name="legal_type" id="id_new_legal_type"
-                               maxlength="255"
-                               class="form-control">
-
-                        <input type="hidden" name="legal_name" id="id_new_legal_name"
-                               maxlength="255"
-                               class="form-control">
-
-                        <div class="text-center">
-
-                            <input type="button" id="save_address"
-                                   class="btn btn-primary btn-raised"
-                                   value="Adicionar">
-
-                            <input type="button" class="btn btn-raised btn-danger"
-                                   data-dismiss="modal"
-                                   value="Cancelar"/>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
+        <div class="modal" id="modal_message">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <p id="message_text" style="text-align: center;"></p>
+                    </div>
+                    <div class="modal-footer" style="text-align: center;">
+                        <input type="button" data-dismiss="modal" value="OK"
+                               class="btn btn-primary btn-raised"
+                               style="max-width: 100px;"/>
+                        <br>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    </fieldset>
-    </div>
+
+        <div class="modal" id="modal_redirect_page">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <p id="message_text_redirect_page" style="text-align: center;"></p>
+                    </div>
+                    <div class="modal-footer" style="text-align: center;">
+                        <input type="button" data-dismiss="modal" value="OK"
+                               class="btn btn-primary btn-raised"
+                               style="max-width: 100px;"
+                               id="btn_redirect_page"/>
+                        <br>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="new_address">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            ×
+                        </button>
+                        <h4 class="modal-title">Adicionar Endereço</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div id="message_errors"></div>
+                        <br>
+                        <form action="" method="POST" id="form_new_address">
+                            <div id="message_error"></div>
+                            {% csrf_token %}
+                            <div class="row">
+                                {% for field in form_address %}
+
+                                    {% if field.name == 'address_type' %}
+                                        <div class="col-sm-12">
+                                            <div class="form-group label-floating is-empty">
+                                                <label class="control-label"
+                                                       required="">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
+                                        </div>
+                                    {% elif field.name == 'street' %}
+                                        <div class="col-sm-6">
+                                            <div class="form-group label-floating is-empty">
+                                                <label class="control-label"
+                                                       required="">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
+                                        </div>
+                                    {% elif field.name == 'number' %}
+                                        <div class="col-sm-3">
+                                            <div class="form-group label-floating is-empty">
+                                                <label class="control-label"
+                                                       required="">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
+                                        </div>
+                                    {% elif field.name == 'complement' %}
+                                        <div class="col-sm-3">
+                                            <div class="form-group label-floating is-empty">
+                                                <label class="control-label"
+                                                       required="">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
+                                        </div>
+                                    {% elif field.name == 'city_region' %}
+                                        <div class="col-sm-6">
+                                            <div class="form-group label-floating is-empty">
+                                                <label class="control-label"
+                                                       required="">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
+                                        </div>
+
+                                    {% elif field.name == 'zip_code' %}
+                                        <div class="col-sm-6">
+                                            <div class="form-group label-floating is-empty">
+                                                <label class="control-label"
+                                                       required="">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
+                                        </div>
+
+                                    {% elif field.name == 'country' %}
+                                        <div class="col-sm-4">
+                                            <div class="form-group label-floating is-empty">
+                                                <label class="control-label"
+                                                       required="">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
+                                        </div>
+
+                                    {% elif field.name == 'state' %}
+                                        <div class="col-sm-4">
+                                            <div class="form-group label-floating is-empty">
+                                                <label class="control-label"
+                                                       required="">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
+                                        </div>
+
+                                    {% elif field.name == 'city' %}
+                                        <div class="col-sm-4">
+                                            <div class="form-group label-floating is-empty">
+                                                <label class="control-label"
+                                                       required="">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
+                                        </div>
+
+                                    {% elif field.name == 'notes' %}
+                                        <div class="col-sm-12">
+                                            <div class="form-group label-floating is-empty">
+                                                <label class="control-label"
+                                                       required="">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                {% endfor %}
+                            </div>
+                            <br><br><br>
+
+                            <input type="hidden" name="legal_type" id="id_new_legal_type"
+                                   maxlength="255"
+                                   class="form-control">
+
+                            <input type="hidden" name="legal_name" id="id_new_legal_name"
+                                   maxlength="255"
+                                   class="form-control">
+
+                            <div class="text-center">
+
+                                <input type="button" id="save_address"
+                                       class="btn btn-primary btn-raised"
+                                       value="Adicionar">
+
+                                <input type="button" class="btn btn-raised btn-danger"
+                                       data-dismiss="modal"
+                                       value="Cancelar"/>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        </div>
+        </div>
+        </fieldset>
+        </div>
+
+    </form>
 
     <!-- Modal -->
     <div id="confirmDelete" class="modal">
@@ -495,7 +562,7 @@
     <script>
         $(document).ready(function () {
 
-
+            document.getElementById("id_address_type").options[0].text=""
             // Recupera todos os tipos de endereço
             $.ajax({
                 url: '{% url 'addresses_types' %}',
@@ -511,7 +578,7 @@
                         document.getElementById("update_id_address_type").options.length = 0;
                         $('#update_id_address_type').append($('<option>', {
                             value: " ",
-                            text: " ------ "
+                            text: ""
                         }));
 
                     }
@@ -544,27 +611,27 @@
                         if (i == 0) {
                             $('#id_country').append($('<option>', {
                                 value: "",
-                                text: " Selecione"
+                                text: ""
                             }));
 
                             $('#id_state').append($('<option>', {
                                 value: "",
-                                text: " Selecione"
+                                text: ""
                             }));
 
                             $('#id_city').append($('<option>', {
                                 value: "",
-                                text: " Selecione"
+                                text: ""
                             }));
 
                             $('#update_id_state').append($('<option>', {
                                 value: "",
-                                text: " Selecione"
+                                text: ""
                             }));
 
                             $('#update_id_city').append($('<option>', {
                                 value: "",
-                                text: " Selecione"
+                                text: ""
                             }));
                         }
 
@@ -582,6 +649,7 @@
             })
         })
     </script>
+
     <script>
         $("#update_id_state").change(function () {
             ''
@@ -597,14 +665,14 @@
 
                         $('#id_city').append($('<option>', {
                             value: " ",
-                            text: " ------ "
+                            text: ""
                         }));
                     }
                     else {
 
                         $('#update_id_city').append($('<option>', {
                             value: " ",
-                            text: "Selecione"
+                            text: ""
                         }));
 
                         for (i = 0; i < length; i++) {
@@ -635,14 +703,14 @@
 
                         $('#id_city').append($('<option>', {
                             value: " ",
-                            text: " ------ "
+                            text: ""
                         }));
                     }
                     else {
 
                         $('#update_id_city').append($('<option>', {
                             value: " ",
-                            text: "Selecione"
+                            text: ""
                         }));
 
                         for (i = 0; i < length; i++) {
@@ -676,12 +744,12 @@
                         document.getElementById("update_id_city").options.length = 0;
                         $('#update_id_state').append($('<option>', {
                             value: " ",
-                            text: " ------ "
+                            text: ""
                         }));
 
                         $('#update_id_city').append($('<option>', {
                             value: " ",
-                            text: " ------ "
+                            text: ""
                         }));
                     }
 
@@ -716,12 +784,12 @@
                         document.getElementById("id_city").options.length = 0;
                         $('#id_city').append($('<option>', {
                             value: " ",
-                            text: " ------ "
+                            text: ""
                         }));
 
                         $('#id_state').append($('<option>', {
                             value: " ",
-                            text: " ------ "
+                            text: ""
                         }));
                     }
 
@@ -789,43 +857,6 @@
             var id = (this).id.slice(n + 1);
             var url = '{% url 'person_address_information' 999 %}'.replace(999, id);
 
-            {#            length = $('#update_id_address_type').children('option').length;#}
-            {##}
-            {#            if (length <= 1) {#}
-            {##}
-            {#                // Recupera todos os tipos de endereço#}
-            {#                $.ajax({#}
-            {#                    url: '{% url 'addresses_types' %}',#}
-            {#                    type: 'GET',#}
-            {#                    dataType: 'json',#}
-            {#                    success: function (data) {#}
-            {#                        var obj = JSON.parse(data);#}
-            {#                        var length = obj.number;#}
-            {#                        document.getElementById("id_state").options.length = 0;#}
-            {##}
-            {#                        if (length == 0) {#}
-            {##}
-            {#                            document.getElementById("update_id_address_type").options.length = 0;#}
-            {#                            $('#update_id_address_type').append($('<option>', {#}
-            {#                                value: " ",#}
-            {#                                text: " ------ "#}
-            {#                            }));#}
-            {##}
-            {#                        }#}
-            {##}
-            {#                        else {#}
-            {#                            for (i = 0; i < length; i++) {#}
-            {##}
-            {#                                $('#update_id_address_type').append($('<option>', {#}
-            {#                                    value: obj.addresses_types[i].id,#}
-            {#                                    text: obj.addresses_types[i].name#}
-            {#                                }));#}
-            {#                            }#}
-            {#                        }#}
-            {#                    }#}
-            {#                });#}
-            {#            }#}
-
             $.ajax({
                 url: url,
                 type: 'GET',
@@ -867,11 +898,8 @@
 
 
                     }, 2000);
-
-
                 }
             });
-
         })
     </script>
 
@@ -1306,7 +1334,6 @@
                 console.log(spaces.length);
                 cnpj.value = spaces.replace(/\s/g, '');
                 cnpj.removeAttribute('value');
-
             }
         });
 
@@ -1344,7 +1371,5 @@
 
             }
         }, false);
-
-
     </script>
 {% endblock content %}
