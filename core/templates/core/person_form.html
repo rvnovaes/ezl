@@ -74,12 +74,12 @@
 
                                     <input type="text" name="address_set-{{ forloop.counter0 }}-id"
                                            id="id_address_set-{{ forloop.counter0 }}-id"
-                                           class="form-control" maxlength="255" value="{{ address.id }}">
+                                           class="form-control" maxlength="255"
+                                           value="{% if address.id != None %}{{ address.id }}{% endif %}">
 
                                     <input type="text" name="address_set-{{ forloop.counter0 }}-street"
                                            id="id_address_set-{{ forloop.counter0 }}-street"
-                                           class="form-control" maxlength="255" value="{{ address.street }}"
-                                           style="display: none !important;">
+                                           class="form-control" maxlength="255" value="{{ address.street }}">
 
                                     <input type="text" name="address_set-{{ forloop.counter0 }}-number"
                                            id="id_address_set-{{ forloop.counter0 }}-number"
@@ -101,36 +101,36 @@
                                               class="form-control"
                                               id="id_address_set-{{ forloop.counter0 }}-notes">{{ address.notes }}</textarea>
 
-                                    <input value="{{ address.home_address }}" type="checkbox"
-                                           name="address_set-{{ forloop.counter0 }}-home_address"
-                                           id="id_address_set-{{ forloop.counter0 }}-home_address"
-
-                                            {% if address.home_address == True or address.home_address == 'on' %}
-                                           checked
-                                            {% endif %}
-                                    >
-
-                                    <input type="checkbox" value="{{ address.business_address }}"
-                                           name="address_set-{{ forloop.counter0 }}-business_address"
-                                           id="id_address_set-{{ forloop.counter0 }}-business_address"
-
-                                            {% if address.business_address == True or address.business_address == 'on' %}
-                                           checked
-                                            {% endif %}
-                                    >
+                                    {#                                <input value="{{ address.home_address }}" type="checkbox"#}
+                                    {#                                       name="address_set-{{ forloop.counter0 }}-home_address"#}
+                                    {#                                       id="id_address_set-{{ forloop.counter0 }}-home_address"#}
+                                    {##}
+                                    {#                                        {% if address.home_address == True or address.home_address == 'on' %}#}
+                                    {#                                       checked#}
+                                    {#                                        {% endif %}#}
+                                    {#                                >#}
+                                    {##}
+                                    {#                                <input type="checkbox" value="{{ address.business_address }}"#}
+                                    {#                                       name="address_set-{{ forloop.counter0 }}-business_address"#}
+                                    {#                                       id="id_address_set-{{ forloop.counter0 }}-business_address"#}
+                                    {##}
+                                    {#                                        {% if address.business_address == True or address.business_address == 'on' %}#}
+                                    {#                                       checked#}
+                                    {#                                        {% endif %}#}
+                                    {#                                >#}
 
                                     <select name="address_set-{{ forloop.counter0 }}-country" class="form-control"
                                             id="id_address_set-{{ forloop.counter0 }}-country">
-                                        <option value="{{ address.country_id }}" selected>{{ address.country }}</option>
+                                        <option value="{{ address.country.id }}" selected>{{ address.country }}</option>
                                     </select>
 
                                     <input type="text" name="address_set-{{ forloop.counter0 }}-state"
                                            id="id_address_set-{{ forloop.counter0 }}-state"
-                                           value="{{ address.state_id }}">
+                                           value="{{ address.state.id }}">
 
                                     <input type="text" name="address_set-{{ forloop.counter0 }}-city"
                                            id="id_address_set-{{ forloop.counter0 }}-city"
-                                           value="{{ address.city_id }}">
+                                           value="{{ address.city.id }}">
 
                                     <input type="checkbox" name="address_set-{{ forloop.counter0 }}-is_active"
                                            id="id_address_set-{{ forloop.counter0 }}-is_active"
@@ -140,7 +140,7 @@
                                     >
                                     <input type="text" name="address_set-{{ forloop.counter0 }}-address_type"
                                            id="id_address_set-{{ forloop.counter0 }}-address_type"
-                                           value="{{ address.address_type_id }}">
+                                           value="{{ address.address_type.id }}">
 
                                 {% endfor %}
                             </div>
@@ -184,16 +184,18 @@
                         style="cursor: pointer;">
 
                         <th style="text-align: center;" id="delete_checkbox">
-                            <label style="margin-top: -5px !important;">
-                                <div class="checkbox">
-                                    <input onchange="delete_buttom($(this).prop('checked'))" type="checkbox"
-                                           name="address_set-{{ forloop.counter0 }}-DELETE"
-                                           id="id_address_set-{{ forloop.counter0 }}-DELETE" class="delete_check">
-                                    <span class="checkbox-material">
+                            {% if address.id != None %}
+                                <label style="margin-top: -5px !important;">
+                                    <div class="checkbox" >
+                                        <input onchange="delete_buttom($(this).prop('checked'))" type="checkbox"
+                                               name="address_set-{{ forloop.counter0 }}-DELETE"
+                                               id="id_address_set-{{ forloop.counter0 }}-DELETE" class="delete_check">
+                                        <span class="checkbox-material">
                                     <span class="check"></span>
                                 </span>
-                                </div>
-                            </label>
+                                    </div>
+                                </label>
+                            {% endif %}
                             {#                            <input type="checkbox" class="check" name="address_set-{{ forloop.counter0 }}-DELETE"#}
                             {#                                   id="id_address_set-{{ forloop.counter0 }}-DELETE"/>#}
                         </th>
@@ -317,7 +319,7 @@
                                 <span id="label_update_id_is_active">Ativo</span>
 
                                 <label>
-                                    <div class="checkbox">
+                                    <div class="checkbox" id="check">
                                         <input type="checkbox"
                                                name="is_active"
                                                id="update_id_is_active" class="delete_check">
@@ -335,7 +337,7 @@
                                 <div class="text-center">
                                     <input type="button" id="save_updated_address"
                                            class="btn btn-primary btn-raised"
-                                           value="Salvar">
+                                           value="Adicionar">
 
                                     <input type="button"
                                            class="btn btn-raised btn-danger"
@@ -418,6 +420,7 @@
                         {% for field in form_address %}
                             <span id="label_{{ field.id_for_label }}">{{ field.label }}</span>
                             {{ field }}
+
                         {% endfor %}
                         <br><br><br>
 
@@ -476,6 +479,39 @@
 
     <script>
         $(document).ready(function () {
+
+
+            // Recupera todos os tipos de endereço
+            $.ajax({
+                url: '{% url 'addresses_types' %}',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    var obj = JSON.parse(data);
+                    var length = obj.number;
+                    document.getElementById("id_state").options.length = 0;
+
+                    if (length == 0) {
+
+                        document.getElementById("update_id_address_type").options.length = 0;
+                        $('#update_id_address_type').append($('<option>', {
+                            value: " ",
+                            text: " ------ "
+                        }));
+
+                    }
+
+                    else {
+                        for (i = 0; i < length; i++) {
+
+                            $('#update_id_address_type').append($('<option>', {
+                                value: obj.addresses_types[i].id,
+                                text: obj.addresses_types[i].name
+                            }));
+                        }
+                    }
+                }
+            });
 
             var url = '{% url 'address_country' %}';
             $.ajax({
@@ -689,48 +725,87 @@
     </script>
 
     <script>
+        function update_new_address(id) {
+
+            address_type = $("#address_type-" + id).text();
+            val_address_type = $("#update_id_address_type").find("option:contains(" + address_type + ")").val();
+            $('#update_id_address_type').val(val_address_type);
+            $('#update_id_address').val(id);
+            $('#update_id_street').val($('#street-' + id).text());
+            $('#update_id_number').val($('#number-' + id).text());
+            $('#update_id_complement').val($('#complement-' + id).text());
+            $('#update_id_city_region').val($('#city_region-' + id).text());
+            $('#update_id_notes').val($('#notes-' + id).text());
+            $('#update_id_zip_code').val($('#zip_code-' + id).text());
+
+            country = $("#country-" + id).text();
+            val_country = $("#update_id_country").find("option:contains(" + country + ")").val();
+            $('#update_id_country').val(val_country).change();
+
+            setTimeout(function () {
+                state = $("#state-" + id).text();
+                val_state = $("#update_id_state").find("option:contains(" + state + ")").val();
+                $('#update_id_state').val(val_state).change();
+            }, 1500);
+
+            setTimeout(function () {
+                city = $("#city-" + id).text();
+                val_city = $("#update_id_city").find("option:contains(" + city + ")").val();
+                $('#update_id_city').val(val_city).change();
+            }, 3000);
+
+            $("#update_id_is_active").prop('checked', true);
+            document.getElementById("label_update_id_is_active").style="display: none;";
+            document.getElementById("check").style="display: none;";
+
+
+            $('#form_address_update').modal('show');
+        }
+    </script>
+
+    <script>
         $(".update_address").click(function () {
 
             var n = (this).id.indexOf("-");
             var id = (this).id.slice(n + 1);
             var url = '{% url 'person_address_information' 999 %}'.replace(999, id);
 
-            length = $('#update_id_address_type').children('option').length;
-
-            if (length <= 1) {
-
-                // Recupera todos os tipos de endereço
-                $.ajax({
-                    url: '{% url 'addresses_types' %}',
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (data) {
-                        var obj = JSON.parse(data);
-                        var length = obj.number;
-                        document.getElementById("id_state").options.length = 0;
-
-                        if (length == 0) {
-
-                            document.getElementById("update_id_address_type").options.length = 0;
-                            $('#update_id_address_type').append($('<option>', {
-                                value: " ",
-                                text: " ------ "
-                            }));
-
-                        }
-
-                        else {
-                            for (i = 0; i < length; i++) {
-
-                                $('#update_id_address_type').append($('<option>', {
-                                    value: obj.addresses_types[i].id,
-                                    text: obj.addresses_types[i].name
-                                }));
-                            }
-                        }
-                    }
-                });
-            }
+{#            length = $('#update_id_address_type').children('option').length;#}
+{##}
+{#            if (length <= 1) {#}
+{##}
+{#                // Recupera todos os tipos de endereço#}
+{#                $.ajax({#}
+{#                    url: '{% url 'addresses_types' %}',#}
+{#                    type: 'GET',#}
+{#                    dataType: 'json',#}
+{#                    success: function (data) {#}
+{#                        var obj = JSON.parse(data);#}
+{#                        var length = obj.number;#}
+{#                        document.getElementById("id_state").options.length = 0;#}
+{##}
+{#                        if (length == 0) {#}
+{##}
+{#                            document.getElementById("update_id_address_type").options.length = 0;#}
+{#                            $('#update_id_address_type').append($('<option>', {#}
+{#                                value: " ",#}
+{#                                text: " ------ "#}
+{#                            }));#}
+{##}
+{#                        }#}
+{##}
+{#                        else {#}
+{#                            for (i = 0; i < length; i++) {#}
+{##}
+{#                                $('#update_id_address_type').append($('<option>', {#}
+{#                                    value: obj.addresses_types[i].id,#}
+{#                                    text: obj.addresses_types[i].name#}
+{#                                }));#}
+{#                            }#}
+{#                        }#}
+{#                    }#}
+{#                });#}
+{#            }#}
 
             $.ajax({
                 url: url,
@@ -746,6 +821,7 @@
                     $('#update_id_city_region').val(data.city_region);
                     $('#update_id_notes').val(data.notes);
                     $('#update_id_zip_code').val(data.zip_code);
+
 
                     $('#update_id_country').val("0").trigger("click");
                     $('#update_id_country').val(data.country_id).trigger("change");
@@ -794,8 +870,9 @@
         $("#save_updated_address").click(function () {
 
             id = $('#update_id_address').val();
-            formset_index = $("#row-" + id).attr('name');
 
+            //formset_index = $("#row-" + id).attr('name');
+            formset_index = $("tr[id*='row-"+ id +"']").attr('name');
             street = $("#update_id_street").val();
             number_person = $("#update_id_number").val();
             complement = $("#update_id_complement").val();
@@ -861,7 +938,6 @@
 
             if (is_valid) {
 
-
                 $("#street-" + id).text($("#update_id_street").val());
                 $("#id_address_set-" + formset_index + "-street").val($("#update_id_street").val());
 
@@ -917,6 +993,7 @@
                 document.getElementById("message_error").innerHTML = '<div class="alert alert-danger">' +
                     message +
                     '</div>';
+                $('#form_address_update').animate({ scrollTop: 0 }, 'slow');
             }
 
         });
@@ -1025,45 +1102,94 @@
                 if (is_valid) {
                     var table = document.getElementById("addresses");
                     var row = table.insertRow(1);
-                    var cel1 = row.insertCell(0).innerHTML = "";
-                    var cel1 = row.insertCell(1).innerHTML = street;
-                    var cel2 = row.insertCell(2).innerHTML = number_person;
-                    var cel3 = row.insertCell(3).innerHTML = complement;
-                    var cel4 = row.insertCell(4).innerHTML = city_region;
-                    var cel5 = row.insertCell(5).innerHTML = city;
-                    var cel6 = row.insertCell(6).innerHTML = state;
-                    var cel7 = row.insertCell(7).innerHTML = zip_code;
-                    var cel10 = row.insertCell(8).innerHTML = country;
-                    var cel11 = row.insertCell(9).innerHTML = notes;
-                    var cel12 = row.insertCell(10).innerHTML = address_type;
-                    var cel12 = row.insertCell(11).innerHTML = "<i class='material-icons' style='font-size: larger;'>check</i>";
-                    var cel13 = row.insertCell(12).innerHTML = "";
+                    row.id = 'update_new_address row-' + num_addresses;
+                    row.setAttribute('name', num_addresses);
+                    row.setAttribute('onclick', 'update_new_address(' + num_addresses + ');');
+                    row.style = 'cursor: pointer;';
 
-                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-street" id="num_addresses_set-' + num_addresses + '-street" value="' + street + '" style="display:none;"">');
-                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-number" id="num_addresses_set-' + num_addresses + '-number" value="' + number_person + '" style="display:none;"">');
-                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-complement" id="num_addresses_set-' + num_addresses + '-complement" value="' + complement + '" style="display:none;">');
-                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-city_region" id="num_addresses_set-' + num_addresses + '-city_region" value="' + city_region + '" style="display:none;">');
-                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-zip_code" id="num_addresses_set-' + num_addresses + '-zip_code" value="' + zip_code + '" style="display:none;">');
-                    $('form#person_form').append('<textarea name="address_set-' + num_addresses + '-notes" cols="40" rows="10" id="num_addresses_set-' + num_addresses + '-notes" style="display:none;">' + notes + '</textarea>');
-                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-country" id="num_addresses_set-' + num_addresses + '-country" style="display:none;">' +
-                        '<option value=' + country_id + ' selected>país</option>' +
-                        '</select>');
-                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-state" id="num_addresses_set-' + num_addresses + '-state" style="display:none;">' +
-                        '<option value="' + state_id + '" selected>estado</option>' +
-                        '</select>');
-                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-city" id="num_addresses_set-' + num_addresses + '-city" style="display:none;">' +
-                        '<option value="' + city_id + '" selected>cidade</option>' +
-                        '</select>');
+                    var cel1 = row.insertCell(0).innerHTML = "";
+                    var cel1 = row.insertCell(1);
+                    cel1.id = 'street-' + num_addresses;
+                    cel1.innerHTML = street;
+
+                    var cel2 = row.insertCell(2);
+                    cel2.id = 'number-' + num_addresses;
+                    cel2.innerHTML = number_person;
+
+                    var cel3 = row.insertCell(3);
+                    cel3.id = 'complement-' + num_addresses;
+                    cel3.innerHTML = complement;
+
+                    var cel4 = row.insertCell(4);
+                    cel4.id = 'city_region-' + num_addresses;
+                    cel4.innerHTML = city_region;
+
+                    var cel5 = row.insertCell(5);
+                    cel5.id = 'city-' + num_addresses;
+                    cel5.innerHTML = city;
+
+                    var cel6 = row.insertCell(6);
+                    cel6.id = 'state-' + num_addresses;
+                    cel6.innerHTML = state;
+
+                    var cel7 = row.insertCell(7);
+                    cel7.id = 'zip_code-' + num_addresses;
+                    cel7.innerHTML = zip_code;
+
+                    var cel10 = row.insertCell(8);
+                    cel10.id = 'country-' + num_addresses;
+                    cel10.innerHTML = country;
+
+                    var cel11 = row.insertCell(9);
+                    cel11.id = 'notes-' + num_addresses;
+                    cel11.innerHTML = notes;
+
+                    var cel12 = row.insertCell(10);
+                    cel12.id = 'address_type-' + num_addresses;
+                    cel12.innerHTML = address_type;
+
+                    var cel12 = row.insertCell(11);
+                    cel12.id = 'is_active-' + num_addresses;
+                    cel12.innerHTML = "<i class='material-icons' style='font-size: larger;'>check</i>";
+
+
+                    var cel13 = row.insertCell(12).innerHTML = "";
+                    cel13.id = '' + num_addresses;
+
+                    //Gera os campos para o FormSet
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-street" id="id_address_set-' + num_addresses + '-street" value="' + street + '" style="display:none;"">');
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-number" id="id_address_set-' + num_addresses + '-number" value="' + number_person + '" style="display:none;"">');
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-complement" id="id_address_set-' + num_addresses + '-complement" value="' + complement + '" style="display:none;">');
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-city_region" id="id_address_set-' + num_addresses + '-city_region" value="' + city_region + '" style="display:none;">');
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-zip_code" id="id_address_set-' + num_addresses + '-zip_code" value="' + zip_code + '" style="display:none;">');
+                    $('form#person_form').append('<textarea name="address_set-' + num_addresses + '-notes" cols="40" rows="10" id="id_address_set-' + num_addresses + '-notes" style="display:none;">' + notes + '</textarea>');
+
+                    {#                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-country" id="id_address_set-' + num_addresses + '-country" style="display:none;">' +#}
+{#                        '<option value=' + country_id + ' selected>país</option>' +#}
+{#                        '</select>');#}
+{#                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-state" id="id_address_set-' + num_addresses + '-state" style="display:none;">' +#}
+{#                        '<option value="' + state_id + '" selected>estado</option>' +#}
+{#                        '</select>');#}
+
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-state" id="id_address_set-' + num_addresses + '-state" value="' + state_id + '" style="display:none;"">');
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-city" id="id_address_set-' + num_addresses + '-city" value="' + city_id + '" style="display:none;"">');
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-country" id="id_address_set-' + num_addresses + '-country" value="' + country_id + '" style="display:none;"">');
+                    $('form#person_form').append('<input type="text" name="address_set-' + num_addresses + '-address_type" id="id_address_set-' + num_addresses + '-address_type" value="' + address_type_id + '" style="display:none;"">');
+
+
+{#                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-city" id="id_address_set-' + num_addresses + '-city" style="display:none;">' +#}
+{#                        '<option value="' + city_id + '" selected>cidade</option>' +#}
+{#                        '</select>');#}
 
                     if (is_active)
-                        $('form#person_form').append('<input type="checkbox" name="address_set-' + num_addresses + '-is_active" id="num_addresses_set-' + num_addresses + '-is_active" checked style="display:none;">');
+                        $('form#person_form').append('<input type="checkbox" name="address_set-' + num_addresses + '-is_active" id="id_address_set-' + num_addresses + '-is_active" checked style="display:none;">');
 
                     else
-                        $('form#person_form').append('<input type="checkbox" name="address_set-' + num_addresses + '-is_active" id="num_addresses_set-' + num_addresses + '-is_active" style="display:none;">');
+                        $('form#person_form').append('<input type="checkbox" name="address_set-' + num_addresses + '-is_active" id="id_address_set-' + num_addresses + '-is_active" style="display:none;">');
 
-                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-address_type" id="num_addresses_set-' + num_addresses + '-address_type" style="display:none;">' +
-                        '<option value="' + address_type_id + '" selected>type</option> ' +
-                        '</select>');
+{#                    $('form#person_form').append('<select name="address_set-' + num_addresses + '-address_type" id="id_address_set-' + num_addresses + '-address_type" style="display:none;">' +#}
+{#                        '<option value="' + address_type_id + '" selected>type</option> ' +#}
+{#                        '</select>');#}
 
                     $('#new_address').modal('hide');
                     document.getElementById("message_text").innerHTML = "Endereço adicionado com successo";
@@ -1076,6 +1202,7 @@
                     document.getElementById("message_errors").innerHTML = '<div class="alert alert-danger">' +
                         message +
                         '</div>';
+                    $('#new_address').animate({ scrollTop: 0 }, 'slow');
                 }
 
                 // Limpa o formulario e volta ao estado original

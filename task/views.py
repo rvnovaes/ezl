@@ -218,6 +218,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     template_name = "task/task_detail.html"
 
     def form_valid(self, form):
+
         form.instance.task_status = TaskStatus[self.request.POST['action']] or TaskStatus.INVALID
         form.instance.alter_user = User.objects.get(id=self.request.user.id)
         notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None
@@ -227,7 +228,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
                                        execution_date=execution_date, survey_result=survey_result)
 
-        # form.save()
+        #form.save()
 
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))

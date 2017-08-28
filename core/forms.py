@@ -180,7 +180,7 @@ class AddressForm(ModelForm, forms.Form):
     )
 
     notes = forms.CharField(
-        label=u"Observações",
+        label=u"Observação",
         required=False,
         widget=forms.Textarea(attrs={'class': 'form-control input-sm'})
     )
@@ -204,7 +204,8 @@ class AddressForm(ModelForm, forms.Form):
     )
 
     is_active = CustomBooleanField(
-        required=False
+        required=False,
+        widget=(forms.HiddenInput())
     )
 
     # todo: alterar o id de acordo com o estato

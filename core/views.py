@@ -1,4 +1,5 @@
 import json
+import urllib.parse
 from datetime import datetime
 
 from dal import autocomplete
@@ -11,7 +12,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import ProtectedError
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, QueryDict
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
@@ -152,6 +153,7 @@ class PersonCreateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
     success_message = new_success
+    addresses_form = AddressForm(initial={'street': 'teste'})
 
     def form_valid(self, form):
 
@@ -204,12 +206,13 @@ class PersonCreateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
 
     def get_context_data(self, **kwargs):
         context = super(PersonCreateView, self).get_context_data(**kwargs)
-        context['form_address'] = AddressForm
+        context['form_address'] = AddressForm()
         context['has_person'] = False
-        context['address_formset'] = AddressFormSet()
+        # context['address_formset'] = AddressFormSet()
 
         if self.request.POST:
-            context['formset'] = AddressFormSet(self.request.POST)
+            address_formset = AddressFormSet(self.request.POST)
+            context['addresses'] = address_formset.cleaned_data
 
         else:
             context['formset'] = AddressFormSet()
@@ -272,7 +275,7 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
                     a.address_type = address.instance.address_type
                     a.zip_code = address.instance.zip_code
 
-                    if address.instance.is_active is True or address.instance.is_active is 'on':
+                    if address.cleaned_data['is_active'] is True or address.cleaned_data['is_active'] is 'on':
                         a.is_active = True
                     else:
                         a.is_active = False
