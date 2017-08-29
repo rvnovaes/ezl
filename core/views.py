@@ -230,7 +230,13 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
     #     context = self.get_context_data(object=self.object)
     #     return self.render_to_response(context)
 
+    def form_invalid(self, form):
+
+        messages.error(self.request, form.errors)
+        return HttpResponseRedirect(self.request.path)
+
     def form_valid(self, form):
+
         legal_type = self.request.POST['legal_type']
         cnpj = self.request.POST['cnpj']
         cpf = self.request.POST['cpf']
@@ -244,10 +250,12 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
         return super(PersonUpdateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
+
         context = super(PersonUpdateView, self).get_context_data(**kwargs)
         context['addresses'] = Address.objects.filter(person=self.object.id)
         context['form_address'] = AddressForm()
         context['address_formset'] = AddressFormSet()
+
         return context
 
     def post(self, request, *args, **kwargs):

@@ -91,52 +91,52 @@
                                             </div>
                                         </div>
 
-{#                                    {% elif field.name == 'is_lawyer' %}#}
-{#                                        <div class="col-sm-2">#}
-{#                                                <label>#}
-{#                                                    {{ field.label }}{{ field }}#}
-{##}
-{#                                                </label>#}
-{#                                        </div>#}
-{#                                    {% elif field.name == 'is_correspondent' %}#}
-{#                                        <div class="col-sm-2">#}
-{#                                                <label>#}
-{#                                                    {{ field.label }}{{ field }}#}
-{##}
-{#                                                </label>#}
-{#                                        </div>#}
-{##}
-{#                                    {% elif field.name == 'is_court' %}#}
-{#                                        <div class="col-sm-2">#}
-{#                                                <label>#}
-{#                                                    {{ field.label }}{{ field }}#}
-{##}
-{#                                                </label>#}
-{#                                        </div>#}
-{##}
-{#                                    {% elif field.name == 'is_customer' %}#}
-{#                                        <div class="col-sm-2">#}
-{#                                                <label>#}
-{#                                                    {{ field.label }}{{ field }}#}
-{##}
-{#                                                </label>#}
-{#                                        </div>#}
-{##}
-{##}
-{#                                    {% elif field.name == 'is_supplier' %}#}
-{#                                        <div class="col-sm-2">#}
-{#                                                <label>#}
-{#                                                    {{ field.label }}{{ field }}#}
-{##}
-{#                                                </label>#}
-{#                                        </div>#}
-{#                                    {% elif field.name == 'is_active' %}#}
-{#                                        <div class="col-sm-2">#}
-{#                                                <label>#}
-{#                                                    {{ field.label }}{{ field }}#}
-{##}
-{#                                                </label>#}
-{#                                        </div>#}
+                                        {#                                    {% elif field.name == 'is_lawyer' %}#}
+                                        {#                                        <div class="col-sm-2">#}
+                                        {#                                                <label>#}
+                                        {#                                                    {{ field.label }}{{ field }}#}
+                                        {##}
+                                        {#                                                </label>#}
+                                        {#                                        </div>#}
+                                        {#                                    {% elif field.name == 'is_correspondent' %}#}
+                                        {#                                        <div class="col-sm-2">#}
+                                        {#                                                <label>#}
+                                        {#                                                    {{ field.label }}{{ field }}#}
+                                        {##}
+                                        {#                                                </label>#}
+                                        {#                                        </div>#}
+                                        {##}
+                                        {#                                    {% elif field.name == 'is_court' %}#}
+                                        {#                                        <div class="col-sm-2">#}
+                                        {#                                                <label>#}
+                                        {#                                                    {{ field.label }}{{ field }}#}
+                                        {##}
+                                        {#                                                </label>#}
+                                        {#                                        </div>#}
+                                        {##}
+                                        {#                                    {% elif field.name == 'is_customer' %}#}
+                                        {#                                        <div class="col-sm-2">#}
+                                        {#                                                <label>#}
+                                        {#                                                    {{ field.label }}{{ field }}#}
+                                        {##}
+                                        {#                                                </label>#}
+                                        {#                                        </div>#}
+                                        {##}
+                                        {##}
+                                        {#                                    {% elif field.name == 'is_supplier' %}#}
+                                        {#                                        <div class="col-sm-2">#}
+                                        {#                                                <label>#}
+                                        {#                                                    {{ field.label }}{{ field }}#}
+                                        {##}
+                                        {#                                                </label>#}
+                                        {#                                        </div>#}
+                                        {#                                    {% elif field.name == 'is_active' %}#}
+                                        {#                                        <div class="col-sm-2">#}
+                                        {#                                                <label>#}
+                                        {#                                                    {{ field.label }}{{ field }}#}
+                                        {##}
+                                        {#                                                </label>#}
+                                        {#                                        </div>#}
                                     {% endif %}
                                 {% endfor %}
                             </div>
@@ -248,59 +248,121 @@
                     <tbody>
 
                     {% for address in addresses %}
-                        <tr id="row-{{ address.id }}" name="{{ forloop.counter0 }}"
-                            style="cursor: pointer;">
 
-                            <th style="text-align: center;" id="delete_checkbox">
-                                {% if address.id != None %}
-                                    <label style="margin-top: -5px !important;">
-                                        <div class="checkbox">
-                                            <input onchange="delete_buttom($(this).prop('checked'))" type="checkbox"
-                                                   name="address_set-{{ forloop.counter0 }}-DELETE"
-                                                   id="id_address_set-{{ forloop.counter0 }}-DELETE"
-                                                   class="delete_check">
-                                            <span class="checkbox-material">
+{#                        Caso a lista Address venha de endereço que ainda não foi salvo, o mesmo não possuirá ID. #}
+{#                        Assim, o índice na tabela deve ser pelo forloop.counter0 para recuperar corretamente as informações #}
+{#                        ao atualizar o endereço ainda não salvo no BD#}
+
+                        {% if address.id == None %}
+                            <tr id="update_new_address row-{{ forloop.counter0 }}" onclick="update_new_address(0);" name="{{ forloop.counter0 }}"
+                                style="cursor: pointer;">
+
+                                <th style="text-align: center;" id="delete_checkbox">
+                                    {% if address.id != None %}
+                                        <label style="margin-top: -5px !important;">
+                                            <div class="checkbox">
+                                                <input onchange="delete_buttom($(this).prop('checked'))" type="checkbox"
+                                                       name="address_set-{{ forloop.counter0 }}-DELETE"
+                                                       id="id_address_set-{{ forloop.counter0 }}-DELETE"
+                                                       class="delete_check">
+                                                <span class="checkbox-material">
                                     <span class="check"></span>
                                 </span>
-                                        </div>
-                                    </label>
-                                {% endif %}
-                            </th>
+                                            </div>
+                                        </label>
+                                    {% endif %}
+                                </th>
 
-                            <th style="text-align: center; font-weight: 100;"
-                                id="street-{{ address.id }}" class="update_address">{{ address.street }}</th>
-                            <th style="text-align: center; font-weight: 100;"
-                                id="number-{{ address.id }}" class="update_address">{{ address.number }}</th>
-                            <th style="text-align: center; font-weight: 100;"
-                                id="complement-{{ address.id }}" class="update_address">{{ address.complement }}</th>
-                            <th style="text-align: center; font-weight: 100;"
-                                id="city_region-{{ address.id }}" class="update_address">{{ address.city_region }}</th>
-                            <th style="text-align: center; font-weight: 100;"
-                                id="city-{{ address.id }}" class="update_address">{{ address.city }}</th>
-                            <th style="text-align: center; font-weight: 100;"
-                                id="state-{{ address.id }}" class="update_address">{{ address.state }}</th>
-                            <th style="text-align: center; font-weight: 100;"
-                                id="zip_code-{{ address.id }}" class="update_address">{{ address.zip_code }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="street-{{ forloop.counter0 }}">{{ address.street }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="number-{{ forloop.counter0 }}">{{ address.number }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="complement-{{ forloop.counter0 }}">{{ address.complement }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="city_region-{{ forloop.counter0 }}">{{ address.city_region }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="city-{{ forloop.counter0 }}">{{ address.city }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="state-{{ forloop.counter0 }}">{{ address.state }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="zip_code-{{ forloop.counter0 }}">{{ address.zip_code }}</th>
 
-                            <th style="text-align: center; font-weight: 100;"
-                                id="country-{{ address.id }}" class="update_address">{{ address.country }}</th>
-                            <th style="text-align: center; font-weight: 100;"
-                                id="notes-{{ address.id }}" class="update_address">{{ address.notes }}</th>
-                            <th style="text-align: center; font-weight: 100;"
-                                id="address_type-{{ address.id }}"
-                                class="update_address">{{ address.address_type }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="country-{{forloop.counter0}}">{{ address.country }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="notes-{{ forloop.counter0 }}">{{ address.notes }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="address_type-{{ forloop.counter0 }}">{{ address.address_type }}</th>
 
-                            <th style="text-align: center; font-weight: 100;"
-                                id="is_active-{{ address.id }}" class="update_address">
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="is_active-{{ forloop.counter0 }}">
 
-                                {% if address.is_active == True or address.is_active == 'on' %}
-                                    <i class="material-icons" style="font-size: larger;">check</i>
-                                {% else %}
-                                    <i class="material-icons" style="font-size: larger;">close</i>
-                                {% endif %}
+                                    {% if address.is_active == True or address.is_active == 'on' %}
+                                        <i class="material-icons" style="font-size: larger;">check</i>
+                                    {% else %}
+                                        <i class="material-icons" style="font-size: larger;">close</i>
+                                    {% endif %}
 
-                            </th>
-                        </tr>
+                                </th>
+                            </tr>
+                        {% else %}
+                            <tr id="row-{{ address.id }}" name="{{ forloop.counter0 }}"
+                                style="cursor: pointer;">
+
+                                <th style="text-align: center;" id="delete_checkbox">
+                                    {% if address.id != None %}
+                                        <label style="margin-top: -5px !important;">
+                                            <div class="checkbox">
+                                                <input onchange="delete_buttom($(this).prop('checked'))" type="checkbox"
+                                                       name="address_set-{{ forloop.counter0 }}-DELETE"
+                                                       id="id_address_set-{{ forloop.counter0 }}-DELETE"
+                                                       class="delete_check">
+                                                <span class="checkbox-material">
+                                    <span class="check"></span>
+                                </span>
+                                            </div>
+                                        </label>
+                                    {% endif %}
+                                </th>
+
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="street-{{ address.id }}" class="update_address">{{ address.street }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="number-{{ address.id }}" class="update_address">{{ address.number }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="complement-{{ address.id }}"
+                                    class="update_address">{{ address.complement }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="city_region-{{ address.id }}"
+                                    class="update_address">{{ address.city_region }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="city-{{ address.id }}" class="update_address">{{ address.city }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="state-{{ address.id }}" class="update_address">{{ address.state }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="zip_code-{{ address.id }}" class="update_address">{{ address.zip_code }}</th>
+
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="country-{{ address.id }}" class="update_address">{{ address.country }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="notes-{{ address.id }}" class="update_address">{{ address.notes }}</th>
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="address_type-{{ address.id }}"
+                                    class="update_address">{{ address.address_type }}</th>
+
+                                <th style="text-align: center; font-weight: 100;"
+                                    id="is_active-{{ address.id }}" class="update_address">
+
+                                    {% if address.is_active == True or address.is_active == 'on' %}
+                                        <i class="material-icons" style="font-size: larger;">check</i>
+                                    {% else %}
+                                        <i class="material-icons" style="font-size: larger;">close</i>
+                                    {% endif %}
+
+                                </th>
+                            </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -336,74 +398,117 @@
                                     <div id="message_error"></div>
                                     {% csrf_token %}
 
-                                    <span id="label_id_address_type">Tipo de Endereço</span>
-                                    <select name="address_type" required
-                                            id="update_id_address_type" class="form-control">
-                                        <option value="" selected></option>
-                                    </select>
+                                    <div class="row">
 
-                                    <span id="label_id_street">Logradouro</span>
-                                    <input type="text" name="street" id="update_id_street"
-                                           class="form-control input-sm" maxlength="255"
-                                           required/>
+                                        <div class="col-sm-12">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label" for="update_id_address_type">Tipo de
+                                                    Endereço</label>
+                                                <select name="address_type" required
+                                                        id="update_id_address_type" class="form-control">
+                                                    <option value=" " selected></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label" for="update_id_street">Logradouro</label>
+                                                <input type="text" name="street" id="update_id_street"
+                                                       class="form-control" maxlength="255" value=" "
+                                                       required/>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label" for="update_id_number">Número</label>
+                                                <input type="text" name="number" id="update_id_number"
+                                                       class="form-control" maxlength="255" value=" "
+                                                       required/>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label"
+                                                       for="update_id_complement">Complemento</label>
+                                                <input type="text" name="complement"
+                                                       class="form-control" maxlength="255" value=" "
+                                                       id="update_id_complement"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label" for="update_id_city_region">Bairro</label>
+                                                <input type="text" name="city_region"
+                                                       id="update_id_city_region"
+                                                       class="form-control" maxlength="255" value=" "
+                                                       required/>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label" for="update_id_zip_code">CEP</label>
+                                                <input type="text" name="zip_code"
+                                                       id="update_id_zip_code" value=" "
+                                                       class="form-control" maxlength="255"
+                                                       required/>
+                                            </div>
+                                        </div>
 
-                                    <span id="label_id_number">Número</span>
-                                    <input type="text" name="number" id="update_id_number"
-                                           class="form-control input-sm" maxlength="255"
-                                           required/>
-
-                                    <span id="label_id_complement">Complemento</span>
-                                    <input type="text" name="complement"
-                                           class="form-control input-sm" maxlength="255"
-                                           id="update_id_complement"/>
-
-                                    <span id="label_id_city_region">Bairro</span>
-                                    <input type="text" name="city_region"
-                                           id="update_id_city_region"
-                                           class="form-control input-sm" maxlength="255"
-                                           required/>
-
-                                    <span id="label_id_zip_code">CEP</span>
-                                    <input type="text" name="zip_code"
-                                           id="update_id_zip_code"
-                                           class="form-control input-sm" maxlength="255"
-                                           required/>
-
-                                    <span id="label_id_notes">Observação</span>
-                                    <textarea name="notes" id="update_id_notes" cols="40"
-                                              rows="10" class="form-control input-sm">
+                                        <div class="col-sm-4">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label" for="update_id_country">País</label>
+                                                <select name="country" id="update_id_country"
+                                                        class="form-control" required>
+                                                    <option value=" " selected></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label" for="update_id_state">Estado</label>
+                                                <select name="state" id="update_id_state"
+                                                        class="form-control" required>
+                                                    <option value=" " selected></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label" for="update_id_city">Município</label>
+                                                <select name="city" id="update_id_city"
+                                                        class="form-control"
+                                                        required>
+                                                    <option value=" " selected></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label"
+                                                       for="update_id_notes">Observação</label>
+                                                <textarea name="notes" id="update_id_notes" cols="40"
+                                                          rows="2" class="form-control">
                                                                     </textarea>
+                                            </div>
+                                        </div>
 
-                                    <span id="label_id_country">País</span>
-                                    <select name="country" id="update_id_country"
-                                            class="form-control input-sm" required>
-                                    </select>
 
-                                    <span id="label_id_state">Estado</span>
-                                    <select name="state" id="update_id_state"
-                                            class="form-control input-sm" required>
-                                    </select>
+                                    </div>
 
-                                    <span id="label_id_city">Município</span>
-                                    <select name="city" id="update_id_city"
-                                            class="form-control input-sm"
-                                            required>
-                                        <option value="" selected></option>
-
-                                    </select>
-
-                                    <span id="label_update_id_is_active">Ativo</span>
-
-                                    <label>
-                                        <div class="checkbox" id="check">
-                                            <input type="checkbox"
-                                                   name="is_active"
-                                                   id="update_id_is_active" class="delete_check">
-                                            <span class="checkbox-material">
+                                    <div class="form-group label-floating">
+                                        <label class="control-label" for="update_id_is_active"
+                                               id="label_update_id_is_active">Ativo</label>
+                                        <label>
+                                            <div class="checkbox" id="check">
+                                                <input type="checkbox"
+                                                       name="is_active"
+                                                       id="update_id_is_active" class="delete_check">
+                                                <span class="checkbox-material">
                                             <span class="check"></span>
                                         </span>
-                                        </div>
-                                    </label>
+                                            </div>
+                                        </label>
+                                    </div>
 
 
                                     <input type="text" name="id"
@@ -413,7 +518,7 @@
                                     <div class="text-center">
                                         <input type="button" id="save_updated_address"
                                                class="btn btn-primary btn-raised"
-                                               value="Adicionar">
+                                               value="Atualizar">
 
                                         <input type="button"
                                                class="btn btn-raised btn-danger"
@@ -646,7 +751,7 @@
     <script>
         $(document).ready(function () {
 
-            document.getElementById("id_address_type").options[0].text = ""
+            document.getElementById("id_address_type").options[0].text = "";
             // Recupera todos os tipos de endereço
             $.ajax({
                 url: '{% url 'addresses_types' %}',
@@ -748,7 +853,7 @@
                     if (length == 0) {
 
                         $('#id_city').append($('<option>', {
-                            value: " ",
+                            value: null,
                             text: ""
                         }));
                     }
@@ -766,6 +871,8 @@
                                 text: obj.cities[i].name
                             }));
                         }
+
+                        $('#update_id_city :nth-child(1)').prop('selected', true).change();
                     }
                 }
             })
@@ -786,7 +893,7 @@
                     if (length == 0) {
 
                         $('#id_city').append($('<option>', {
-                            value: " ",
+                            value: null,
                             text: ""
                         }));
                     }
@@ -804,6 +911,8 @@
                                 text: obj.cities[i].name
                             }));
                         }
+
+                        $('#id_city :nth-child(1)').prop('selected', true).change();
                     }
                 }
             })
@@ -827,12 +936,12 @@
 
                         document.getElementById("update_id_city").options.length = 0;
                         $('#update_id_state').append($('<option>', {
-                            value: " ",
+                            value: null,
                             text: ""
                         }));
 
                         $('#update_id_city').append($('<option>', {
-                            value: " ",
+                            value: null,
                             text: ""
                         }));
                     }
@@ -845,6 +954,10 @@
                                 text: obj.states[i].name
                             }));
                         }
+
+                        $('#update_id_state :nth-child(1)').prop('selected', true).change();
+
+
                     }
                 }
             })
@@ -853,7 +966,6 @@
 
     <script>
         $("#id_country").change(function () {
-
             var option = $(this).val();
             var url = '{% url 'address_state' 999 %}'.replace(999, option);
             $.ajax({
@@ -867,12 +979,12 @@
 
                         document.getElementById("id_city").options.length = 0;
                         $('#id_city').append($('<option>', {
-                            value: " ",
+                            value: null,
                             text: ""
                         }));
 
                         $('#id_state').append($('<option>', {
-                            value: " ",
+                            value: null,
                             text: ""
                         }));
                     }
@@ -885,6 +997,8 @@
                                 text: obj.states[i].name
                             }));
                         }
+                        $('#id_state :nth-child(1)').prop('selected', true).change();
+
                     }
                 }
             })
@@ -1237,6 +1351,7 @@
                     var table = document.getElementById("addresses");
                     var row = table.insertRow(1);
                     row.id = 'update_new_address row-' + num_addresses;
+                    //row.setAttribute('id', 'update_new_address row-' + num_addresses);
                     row.setAttribute('name', num_addresses);
                     row.setAttribute('onclick', 'update_new_address(' + num_addresses + ');');
                     row.style = 'cursor: pointer;';
