@@ -256,12 +256,10 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
 
         if addresses_form.is_valid():
             for address in addresses_form:
-
                 # Form foi marcado para deleção
                 if address.cleaned_data['DELETE'] and self.request.POST['is_delete'] == '3':
                     Address.objects.get(id=address.cleaned_data['id'].id).delete()
-                    messages.success(request, "Registro(s) excluídos com sucesso")
-                    return HttpResponseRedirect(self.request.path)
+                    messages.success(request, "Registro(s) excluído(s) com sucesso")
 
 
                 # Endereço já existe no banco
@@ -296,7 +294,7 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
         else:
             for error in addresses_form.errors:
                 messages.error(self.request, error)
-        return HttpResponseRedirect(self.success_url)
+        return HttpResponseRedirect(self.request.path)
 
 
 class PersonDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):

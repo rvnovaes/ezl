@@ -27,35 +27,119 @@
                         </div>
                         <div class="panel-body">
 
+                            <div class="row">
+                                {% for field in form %}
 
-                            {% for field in form %}
-                                {% if field.name == 'cpf' %}
 
-                                    <div id="cpf_container"
-                                         class="form-group {% if form.instance.legal_type == 'J' %} hidden {% endif %}">
-                                        <label>
-                                            {{ field.label }}{{ field }}
-                                        </label>
-                                    </div>
-                                {% endif %}
-                                {% if field.name == 'cnpj' %}
-                                    <div id="cnpj_container"
-                                         class="form-group {% if form.instance.legal_type == 'F' or not form.instance.id %}
+                                    {% if field.name == 'legal_name' %}
+                                        <div class="col-sm-4">
+                                            <label>
+                                                {{ field.label }}{{ field }}
+                                            </label>
+                                        </div>
+
+                                    {% elif field.name == 'name' %}
+                                        <div class="col-sm-4">
+                                            <label>
+                                                {{ field.label }}{{ field }}
+                                            </label>
+                                        </div>
+
+                                    {% elif field.name == 'auth_user' %}
+                                        <div class="col-sm-4">
+                                            <label>
+                                                {{ field.label }}{{ field }}
+                                            </label>
+                                        </div>
+
+                                    {% elif field.name == 'legal_type' %}
+                                        <div class="col-sm-4">
+                                            <label>
+                                                {{ field.label }}{{ field }}
+                                            </label>
+                                        </div>
+
+
+                                    {% elif field.name == 'cpf' %}
+                                        <div class="col-sm-8">
+                                            <div id="cpf_container"
+                                                 class="form-group {% if form.instance.legal_type == 'J' %} hidden {% endif %}">
+                                                <label>
+                                                    {{ field.label }}{{ field }}
+                                                </label>
+                                            </div>
+                                        </div>
+
+
+                                    {% elif field.name == 'cnpj' %}
+                                        <div class="col-sm-8">
+                                            <div id="cnpj_container"
+                                                 class="form-group {% if form.instance.legal_type == 'F' or not form.instance.id %}
                                                   hidden {% endif %}">
-                                        <label>
-                                            {{ field.label }}{{ field }}
+                                                <label>
+                                                    {{ field.label }}{{ field }}
 
-                                        </label>
-                                    </div>
-                                {% endif %}
-                                {% if field.name != 'cnpj' and field.name != 'cpf' %}
-                                    <div class="form-group">
-                                        <label>
-                                            {{ field.label }}{{ field }}
-                                        </label>
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>
+                                                    {{ field.label }}{{ field }}
+                                                </label>
+                                            </div>
+                                        </div>
+
+{#                                    {% elif field.name == 'is_lawyer' %}#}
+{#                                        <div class="col-sm-2">#}
+{#                                                <label>#}
+{#                                                    {{ field.label }}{{ field }}#}
+{##}
+{#                                                </label>#}
+{#                                        </div>#}
+{#                                    {% elif field.name == 'is_correspondent' %}#}
+{#                                        <div class="col-sm-2">#}
+{#                                                <label>#}
+{#                                                    {{ field.label }}{{ field }}#}
+{##}
+{#                                                </label>#}
+{#                                        </div>#}
+{##}
+{#                                    {% elif field.name == 'is_court' %}#}
+{#                                        <div class="col-sm-2">#}
+{#                                                <label>#}
+{#                                                    {{ field.label }}{{ field }}#}
+{##}
+{#                                                </label>#}
+{#                                        </div>#}
+{##}
+{#                                    {% elif field.name == 'is_customer' %}#}
+{#                                        <div class="col-sm-2">#}
+{#                                                <label>#}
+{#                                                    {{ field.label }}{{ field }}#}
+{##}
+{#                                                </label>#}
+{#                                        </div>#}
+{##}
+{##}
+{#                                    {% elif field.name == 'is_supplier' %}#}
+{#                                        <div class="col-sm-2">#}
+{#                                                <label>#}
+{#                                                    {{ field.label }}{{ field }}#}
+{##}
+{#                                                </label>#}
+{#                                        </div>#}
+{#                                    {% elif field.name == 'is_active' %}#}
+{#                                        <div class="col-sm-2">#}
+{#                                                <label>#}
+{#                                                    {{ field.label }}{{ field }}#}
+{##}
+{#                                                </label>#}
+{#                                        </div>#}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
 
 
                             <div id="fields_formset" style="display: none;">
@@ -562,7 +646,7 @@
     <script>
         $(document).ready(function () {
 
-            document.getElementById("id_address_type").options[0].text=""
+            document.getElementById("id_address_type").options[0].text = ""
             // Recupera todos os tipos de endereço
             $.ajax({
                 url: '{% url 'addresses_types' %}',
