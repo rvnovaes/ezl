@@ -24,7 +24,7 @@ class AuditCreate(models.Model):
     # auto_now_add - toda vez que for criado
     create_date = models.DateTimeField('Criado em', auto_now_add=True)
     create_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
-                                    related_name='%(class)s_create_user')
+                                    related_name='%(class)s_create_user', verbose_name='Criado por')
 
     class Meta:
         abstract = True
@@ -34,7 +34,7 @@ class AuditAlter(models.Model):
     # auto_now - toda vez que for salvo
     alter_date = models.DateTimeField('Atualizado em', auto_now=True, blank=True, null=True)
     alter_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True,
-                                   related_name='%(class)s_alter_user')
+                                   related_name='%(class)s_alter_user', verbose_name='Alterado por')
 
     class Meta:
         abstract = True

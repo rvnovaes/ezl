@@ -19,12 +19,18 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormVi
 from django_tables2 import SingleTableView, RequestConfig
 
 from core.forms import PersonForm, AddressForm, AddressFormSet
-from core.messages import new_success, update_success, delete_error_protected, delete_success, address_error_update, \
+from core.messages import new_success, update_success, delete_error_protected, delete_success, \
+    address_error_update, \
     address_success_update
 from core.models import Person, Address, City, State, Country, AddressType
 from core.tables import PersonTable
 from lawsuit.models import Folder, Movement, LawSuit
 from task.models import Task
+from core.generic_search import GenericSearchFormat
+from core.generic_search import GenericSearchForeignKey
+from core.generic_search import set_search_model_attrs
+from django.db.models import Q
+import importlib
 
 
 def login(request):
@@ -88,13 +94,25 @@ class BaseCustomView(FormView):
 
 
 class SingleTableViewMixin(SingleTableView):
+    @set_search_model_attrs
     def get_context_data(self, **kwargs):
         context = super(SingleTableViewMixin, self).get_context_data(**kwargs)
-        context['nav_' + self.model._meta.verbose_name] = True
-        context['form_name'] = self.model._meta.verbose_name
-        context['form_name_plural'] = self.model._meta.verbose_name_plural
-        table = self.table_class(self.model.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        try:
+            context['module'] = self.model.__module__
+            context['model'] = self.model.__name__
+            context['nav_' + self.model._meta.verbose_name] = True
+            context['form_name'] = self.model._meta.verbose_name
+            context['form_name_plural'] = self.model._meta.verbose_name_plural
+            generic_search = GenericSearchFormat(self.request, self.model, self.model._meta.fields)
+            args = generic_search.despatch()
+            if args:
+                table = eval(args)
+            else:
+                table = self.table_class(self.model.objects.all().order_by('-pk'))
+            RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+            context['table'] = table
+        except:
+            table = self.table_class(self.model.objects.none())
         context['table'] = table
         return context
 
@@ -260,7 +278,8 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
 
     def post(self, request, *args, **kwargs):
         super(PersonUpdateView, self).post(request, *args, **kwargs)
-        addresses_form = AddressFormSet(self.request.POST, instance=Person.objects.get(id=kwargs['pk']))
+        addresses_form = AddressFormSet(self.request.POST,
+                                        instance=Person.objects.get(id=kwargs['pk']))
 
         if addresses_form.is_valid():
             for address in addresses_form:
@@ -291,8 +310,10 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
 
                     # a.is_active = address.instance.is_active
 
-                    a.save(update_fields=['street', 'number', 'complement', 'city_region', 'country', 'state', 'city',
-                                          'notes', 'address_type', 'zip_code', 'is_active'])
+                    a.save(
+                        update_fields=['street', 'number', 'complement', 'city_region', 'country',
+                                       'state', 'city',
+                                       'notes', 'address_type', 'zip_code', 'is_active'])
 
                 # Endereço não existe no banco (novo endereço) e será salvo
                 else:
@@ -321,14 +342,30 @@ class ClientAutocomplete(autocomplete.Select2QuerySetView):
 
         if self.q:
             qs = Person.objects.filter(name__unaccent__istartswith=self.q, is_customer=True)
-
         return qs
+
+
+class GenericAutocompleteForeignKey(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        try:
+            module = importlib.import_module(self.request.GET.get('module'))
+            model = getattr(module, self.request.GET.get('model'))
+            field_name = self.request.GET.get('name')
+            qs = model.objects.none()
+            if self.q:
+                generic_search = GenericSearchForeignKey(model)
+                ids = generic_search.get_related_values(self.q, field_name)
+                qs = list(filter(lambda i: i.id in ids, eval('model.{0}.get_queryset()'.format(field_name))))
+            return qs
+        except:
+            return []
 
 
 @login_required
 def person_address_search_country(request):
     countries = Country.objects.filter(id__gt=1).values('name', 'id').order_by('name')
-    countries_json = json.dumps({'number': len(countries), 'countries': list(countries)}, cls=DjangoJSONEncoder)
+    countries_json = json.dumps({'number': len(countries), 'countries': list(countries)},
+                                cls=DjangoJSONEncoder)
     return JsonResponse(countries_json, safe=False)
 
 
@@ -382,8 +419,9 @@ def person_address_information(request, pk):
 @login_required
 def person_address_search_address_type(request):
     addresses_types = AddressType.objects.all().values('name', 'id')
-    addresses_types_json = json.dumps({'number': len(addresses_types), 'addresses_types': list(addresses_types)},
-                                      cls=DjangoJSONEncoder)
+    addresses_types_json = json.dumps(
+        {'number': len(addresses_types), 'addresses_types': list(addresses_types)},
+        cls=DjangoJSONEncoder)
     return JsonResponse(addresses_types_json, safe=False)
 
 
@@ -431,5 +469,35 @@ class GenericFormOneToMany(FormView, SingleTableView):
         form.save()
         super(GenericFormOneToMany, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
+
+    @set_search_model_attrs
+    def get_context_data(self, **kwargs):
+        context = super(GenericFormOneToMany, self).get_context_data(**kwargs)
+        try:
+            related_model_id = self.kwargs.get('pk')
+            context['module'] = self.related_model.__module__
+            context['model'] = self.related_model.__name__
+            context['nav_' + self.related_model._meta.verbose_name] = True
+            context['form_name'] = self.related_model._meta.verbose_name
+            context['form_name_plural'] = self.related_model._meta.verbose_name_plural
+            fields_related = list(filter(lambda i: i.get_internal_type() == 'ForeignKey', self.related_model._meta.fields))
+            field_related = list(filter(lambda i: i.related_model == self.model, fields_related))[0]
+            generic_search = GenericSearchFormat(self.request, self.related_model, self.related_model._meta.fields,
+                                                 related_id=related_model_id, field_name_related=field_related.name)
+            args = generic_search.despatch()
+            if args:
+                table = eval(args.replace('.model.', '.related_model.'))
+            else:
+                table = self.table_class(self.related_model.objects.none())
+                if related_model_id:
+                    table_class = 'self.table_class(self.related_model.objects.filter({0}__id=related_model_id).order_by("-pk"))'.format(
+                        field_related.name)
+                    table = eval(table_class)
+            RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+            context['table'] = table
+        except:
+            table = self.table_class(self.related_model.objects.none())
+        context['table'] = table
+        return context
 
     success_message = None

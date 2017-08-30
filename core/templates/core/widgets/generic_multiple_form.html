@@ -58,6 +58,7 @@
             </div>
             {{ form.media }}
         </form>
+        {% include 'core/widgets/generic_search_view.html'%}
         {% include 'core/widgets/generic_form.html' with link_ex=delete link_add=create %}
     </div>
 {% endblock %}

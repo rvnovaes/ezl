@@ -153,12 +153,7 @@ class FolderLawsuitCreateView(SuccessMessageMixin, GenericFormOneToMany, CreateV
 
     def get_context_data(self, **kwargs):
         context = super(FolderLawsuitCreateView, self).get_context_data(**kwargs)
-        context['nav_' + self.related_model._meta.verbose_name] = True
-        context['form_name'] = self.related_model._meta.verbose_name
-        context['form_name_plural'] = self.related_model._meta.verbose_name_plural
-        table = self.table_class(self.related_model.objects.none())
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
 
 
@@ -174,13 +169,6 @@ class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateV
 
     def get_context_data(self, **kwargs):
         context = super(FolderLawsuitUpdateView, self).get_context_data(**kwargs)
-        related_model_id = self.kwargs['pk']
-        context['nav_' + self.related_model._meta.verbose_name] = True
-        context['form_name'] = self.related_model._meta.verbose_name
-        context['form_name_plural'] = self.related_model._meta.verbose_name_plural
-        table = self.table_class(self.related_model.objects.filter(folder__id=related_model_id).order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
         return context
 
 
@@ -264,13 +252,6 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
 
     def get_context_data(self, **kwargs):
         context = super(LawsuitMovementUpdateView, self).get_context_data(**kwargs)
-        related_model_id = self.kwargs['pk']
-        context['nav_' + self.related_model._meta.verbose_name] = True
-        context['form_name'] = self.related_model._meta.verbose_name
-        context['form_name_plural'] = self.related_model._meta.verbose_name_plural
-        table = self.table_class(self.related_model.objects.filter(law_suit__id=related_model_id).order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
         return context
 
     def get_success_url(self):
@@ -368,13 +349,6 @@ class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
 
     def get_context_data(self, **kwargs):
         context = super(MovementTaskUpdateView, self).get_context_data(**kwargs)
-        related_model_id = self.kwargs['pk']
-        context['nav_' + self.related_model._meta.verbose_name] = True
-        context['form_name'] = self.related_model._meta.verbose_name
-        context['form_name_plural'] = self.related_model._meta.verbose_name_plural
-        table = self.table_class(self.related_model.objects.filter(movement_id=related_model_id).order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
         return context
 
     def get_success_url(self):

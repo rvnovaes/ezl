@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 
-from core.views import ClientAutocomplete
+from core.views import ClientAutocomplete, GenericAutocompleteForeignKey
 from ezl import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView
 
@@ -23,6 +23,8 @@ urlpatterns = [
                   url(r'^client_form',
                       login_required(ClientAutocomplete.as_view()),
                       name='client_autocomplete'),
+                  url(r'^generic_autocomplete_foreignkey', login_required(GenericAutocompleteForeignKey.as_view()),
+                      name='generic_autocomplete'),
                   url(r'^qa/$', TemplateView.as_view(template_name="questionnaire/generic_survey.html")),
 
               ] + static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, "static/")) + static(
