@@ -9,7 +9,7 @@
                 $.ajax({
                     url: 'http://13.68.213.60:8001',
                     method: 'POST',
-                    data: { "is_ezl": "true" },
+                    data: {"is_ezl": "true"},
                     timeout: 45000,
                     success: function (data) {
                         $('#modal-wait').modal('hide');
@@ -136,7 +136,9 @@
                     <input class="form-control" id="password" type="password" name="password" required>
                 </div>
                 <div>
-                    <button class="btn btn-raised btn-primary" type="submit" value="Entrar">Entrar</button>
+                        <button class="btn btn-raised btn-primary" type="submit" value="Entrar" style="width: 100%;">Recuperar</button>
+                        <br>
+                        <button class="btn btn-raised btn-primary" formaction="/" formnovalidate style="width: 100%;">Página Inicial</button>
                 </div>
             </fieldset>
         </form>
