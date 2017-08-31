@@ -221,12 +221,28 @@ class TaskTask(luigi.Task):
         f.close()
         TaskETL().export_data()
 
-
+#Modifiicar
 if __name__ == "__main__":
-    load_luigi_scheduler()
+    #load_luigi_scheduler()
     luigi.run(main_task_cls=TaskTask())
     dir = settings.BASE_DIR + '/etl/advwin_ezl/tmp/'  # luigi.run(main_task_cls=UserTask())
-    os.system('echo %s|sudo -S rm -rf %s*.ezl' % ('123456', dir))
+    #os.system('echo %s|sudo -S rm -rf %s*.ezl' % ('123456', dir))
     # os.system('sudo kill $(pgrep -f luigid)',)
     # os.system('echo %s'%'123')
     # '| sudo kill $(pgrep -f luigid)' % '123456')
+    
+def main():
+
+    #load_luigi_scheduler()
+    luigi.run(main_task_cls=TaskTask())
+    dir = settings.BASE_DIR + '/etl/advwin_ezl/tmp/'  # luigi.run(main_task_cls=UserTask())
+    #os.system('echo %s|sudo -S rm -rf %s*.ezl' % ('123456', dir))
+    # os.system('sudo kill $(pgrep -f luigid)',)
+    # os.system('echo %s'%'123')
+    # '| sudo kill $(pgrep -f luigid)' % '123456')
+    
+               
+
+
+    
+    

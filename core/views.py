@@ -123,7 +123,8 @@ class MultiDeleteViewMixin(DeleteView):
     def delete(self, request, *args, **kwargs):
         if request.method == "POST":
             pks = request.POST.getlist("selection")
-            folder = kwargs['folder']
+            #print (kwargs)
+            #folder = kwargs['folder']
             try:
                 self.model.objects.filter(pk__in=pks).delete()
                 messages.success(self.request, self.success_message)

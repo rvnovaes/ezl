@@ -107,24 +107,29 @@ class MovementForm(BaseForm):
 
 
 class FolderForm(BaseForm):
+    
     class Meta:
         model = Folder
         fields = fields_for_model(Folder,
                                   exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
                                            'legacy_code'})
 
-    # legacy_code = forms.CharField(
+    #legacy_code = forms.CharField(
     #     max_length=255,
     #     required=False
-    # )
+    #)
+    
+    
+
+    folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}),initial=Folder.increment())
 
     person_customer = forms.ModelChoiceField(
         queryset=Person.objects.filter(is_active=True, is_customer=True),
         empty_label=u"Selecione...",
         widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'})
     )
-
-
+    
+    
 class LawSuitForm(BaseForm):
     class Meta:
         model = LawSuit

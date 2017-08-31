@@ -56,7 +56,8 @@ class FolderTable(tables.Table):
     class Meta:
         sequence = ('selection',  'person_customer', 'is_active', 'legacy_code')
         model = Folder
-        fields = ['selection', 'legacy_code', 'person_customer', 'is_active']
+        fields = ['folder_number','selection', 'legacy_code', 'person_customer', 'is_active']
+        readonly_fields = ['folder_number']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem pastas cadastradas"
 

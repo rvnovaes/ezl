@@ -225,6 +225,7 @@ class LawsuitMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, Generic
     template_name = 'lawsuit/lawsuit_movement_form.html'
     # success_url = reverse_lazy('lawsuit_list')
     success_message = new_success
+    object_list = []
 
     def get_context_data(self, **kwargs):
         context = super(LawsuitMovementCreateView, self).get_context_data(**kwargs)
@@ -249,7 +250,8 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
     template_name = 'lawsuit/lawsuit_movement_form.html'
     success_message = update_success
     delete_message = delete_success(related_model._meta.verbose_name_plural)
-
+    object_list = []
+        
     def get_context_data(self, **kwargs):
         context = super(LawsuitMovementUpdateView, self).get_context_data(**kwargs)
         return context
