@@ -4,7 +4,7 @@ from datetime import datetime
 
 from dal import autocomplete
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
@@ -21,7 +21,7 @@ from django_tables2 import SingleTableView, RequestConfig
 from core.forms import PersonForm, AddressForm, AddressFormSet
 from core.messages import new_success, update_success, delete_error_protected, delete_success, \
     address_error_update, \
-    address_success_update
+    address_success_update, recover_database_not_permitted, recover_database_login_incorrect
 from core.models import Person, Address, City, State, Country, AddressType
 from core.tables import PersonTable
 from lawsuit.models import Folder, Movement, LawSuit
@@ -244,15 +244,23 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
     success_url = reverse_lazy('person_list')
     success_message = update_success
 
-    # def get(self, request, *args, **kwargs):
-    #     self.object = self.get_object()
-    #     context = self.get_context_data(object=self.object)
-    #     return self.render_to_response(context)
+    def get(self, request, *args, **kwargs):
+
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
 
     def form_invalid(self, form):
 
         messages.error(self.request, form.errors)
-        return HttpResponseRedirect(self.request.path)
+        return super(PersonUpdateView, self).form_invalid(form)
+        # context = self.get_context_data()
+        # context['person'].cpf_cnpj = '111.111.111-11'
+        # context['object'].cpf_cnpj = '111.111.111-11'
+        # form.cleaned_data['cpf_cnpj'] = '111.111.111-11'
+
+
+        # return HttpResponseRedirect(self.request.path)
 
     def form_valid(self, form):
 
@@ -268,14 +276,14 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
 
         return super(PersonUpdateView, self).form_valid(form)
 
-    def get_context_data(self, **kwargs):
-
-        context = super(PersonUpdateView, self).get_context_data(**kwargs)
-        context['addresses'] = Address.objects.filter(person=self.object.id)
-        context['form_address'] = AddressForm()
-        context['address_formset'] = AddressFormSet()
-
-        return context
+    # def get_context_data(self, **kwargs):
+    #
+    #     context = super(PersonUpdateView, self).get_context_data(**kwargs)
+    #     context['addresses'] = Address.objects.filter(person=self.object.id)
+    #     context['form_address'] = AddressForm()
+    #     context['address_formset'] = AddressFormSet()
+    #
+    #     return context
 
     def post(self, request, *args, **kwargs):
         super(PersonUpdateView, self).post(request, *args, **kwargs)
@@ -288,7 +296,6 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
                 if address.cleaned_data['DELETE'] and self.request.POST['is_delete'] == '3':
                     Address.objects.get(id=address.cleaned_data['id'].id).delete()
                     messages.success(request, "Registro(s) excluído(s) com sucesso")
-
 
                 # Endereço já existe no banco
                 elif address.cleaned_data['id']:
@@ -481,7 +488,8 @@ class GenericFormOneToMany(FormView, SingleTableView):
             context['nav_' + self.related_model._meta.verbose_name] = True
             context['form_name'] = self.related_model._meta.verbose_name
             context['form_name_plural'] = self.related_model._meta.verbose_name_plural
-            fields_related = list(filter(lambda i: i.get_internal_type() == 'ForeignKey', self.related_model._meta.fields))
+            fields_related = list(
+                filter(lambda i: i.get_internal_type() == 'ForeignKey', self.related_model._meta.fields))
             field_related = list(filter(lambda i: i.related_model == self.model, fields_related))[0]
             generic_search = GenericSearchFormat(self.request, self.related_model, self.related_model._meta.fields,
                                                  related_id=related_model_id, field_name_related=field_related.name)
@@ -502,3 +510,30 @@ class GenericFormOneToMany(FormView, SingleTableView):
         return context
 
     success_message = None
+
+
+def recover_database(request):
+    if request.POST:
+        login = request.POST['login']
+        password = request.POST['password']
+
+        user = authenticate(username=login, password=password)
+
+        if user:
+            if user.is_superuser:
+
+                context = {
+                    'host': 'http://13.68.213.60:8001',
+                    'request': True
+                }
+                return render(request, 'core/recover_database.html', context)
+
+            elif not user.is_superuser:
+                messages.error(request, recover_database_not_permitted())
+                return render(request, 'core/recover_database.html', {'request': False})
+        else:
+            messages.error(request, recover_database_login_incorrect())
+            return render(request, 'core/recover_database.html', {'request': False})
+
+    else:
+        return render(request, 'core/recover_database.html', {'request': False})

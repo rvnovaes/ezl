@@ -76,3 +76,11 @@ def address_and_person_created():
 
 def address_and_person_not_created():
     return "Erro ao cadastrar os dados."
+
+
+def recover_database_not_permitted():
+    return "Usuário sem permissão de continuar com a operação"
+
+
+def recover_database_login_incorrect():
+    return "O nome de usuário e/ou senha especificados não estão corretos."
