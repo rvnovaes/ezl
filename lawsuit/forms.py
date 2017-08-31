@@ -120,7 +120,6 @@ class FolderForm(BaseForm):
     #)
     
     
-
     folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}),initial=Folder.increment())
 
     person_customer = forms.ModelChoiceField(

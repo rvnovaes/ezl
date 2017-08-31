@@ -54,7 +54,7 @@ class FolderTable(tables.Table):
     legacy_code = tables.LinkColumn(viewname='folder_update', attrs={'a': {'target': 'folder_update'}}, args=[A('pk')])
 
     class Meta:
-        sequence = ('selection',  'person_customer', 'is_active', 'legacy_code')
+        sequence = ('selection', 'folder_number', 'person_customer', 'is_active', 'legacy_code')
         model = Folder
         fields = ['folder_number','selection', 'legacy_code', 'person_customer', 'is_active']
         readonly_fields = ['folder_number']
