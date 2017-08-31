@@ -42,7 +42,7 @@ class Folder(Audit, LegacyCode):
             return no + 1
 
 
-    folder_number = models.IntegerField(verbose_name='Número da Pasta', unique=True, default=increment,editable=False)
+    folder_number = models.IntegerField(verbose_name='Número da Pasta', unique=False, null=True, default=increment,editable=False)
     person_customer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                         verbose_name='Cliente')
 
