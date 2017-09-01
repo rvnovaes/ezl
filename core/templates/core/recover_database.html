@@ -12,6 +12,7 @@
                     method: 'POST',
                     data: {"is_ezl": "true"},
                     timeout: {{ timeout }},
+                    crossDomain: true,
                     success: function (data) {
                         $('#modal-wait').modal('hide');
                         var obj = JSON.parse(data);
