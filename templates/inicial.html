@@ -2,7 +2,7 @@
 {% load staticfiles %}
 {% block body %}
     {% if user.is_authenticated %}
-        <div class="navbar navbar-default">
+        <div class="navbar navbar-default navbar-fixed-top">
             <div class="container-fluid">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle" data-toggle="collapse"
@@ -55,7 +55,7 @@
             </div>
         </div>
 
-        <div style="margin: 20px">
+        <div class="content-block">
             {% block content %}
                 {% include 'core/widgets/messages.html' %}
             {% endblock content %}

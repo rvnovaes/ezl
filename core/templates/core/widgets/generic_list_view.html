@@ -49,7 +49,7 @@
 
     }
 </script>
-    {% include 'core/widgets/generic_search_view.html'%}
+{% include 'core/widgets/generic_search_view.html' %}
 <form action="{% url link_ex %}" method="post">
     {% csrf_token %}
     {% block table %}
@@ -83,7 +83,7 @@
                         <tbody>
                         {% for row in table.page.object_list|default:table.rows %} {# support pagination #}
                             {% block table.tbody.row %}
-                                <tr class="{% cycle "odd" "even" %}">
+                                <tr class="{% cycle "odd" "even" %}" data-href="{{ row.attrs.data_href }}">
                                     {% for column, cell in row.items %}
                                         <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                                     {% endfor %}
@@ -111,11 +111,13 @@
                 {% endblock pagination %}
             {% endif %}
             <div class="text-right" style="margin: auto">
-                <input type="button" data-toggle="modal" data-target="#confirmDelete" disabled id="delete_button"
-                       class="btn btn-fab btn-warning material-icons"
-                       value="remove">
-                <a class="btn btn-fab btn-primary" href="{% url link_add %}">
-                    <i class="material-icons">add</i></a>
+                <div class="fixed-btn">
+                    <input type="button" data-toggle="modal" data-target="#confirmDelete" disabled id="delete_button"
+                           class="btn btn-fab btn-warning material-icons"
+                           value="remove">
+                    <a class="btn btn-fab btn-primary" href="{% url link_add %}">
+                        <i class="material-icons">add</i></a>
+                </div>
             </div>
         </div>
     {% endblock table %}

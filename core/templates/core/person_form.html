@@ -29,65 +29,59 @@
 
                             <div class="row">
                                 {% for field in form %}
-
-
                                     {% if field.name == 'legal_name' %}
-                                        <div class="col-sm-4">
-                                            <label>
-                                                {{ field.label }}{{ field }}
-                                            </label>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>{{ field.label }}{{ field }}</label>
+                                            </div>
                                         </div>
 
                                     {% elif field.name == 'name' %}
-                                        <div class="col-sm-4">
-                                            <label>
-                                                {{ field.label }}{{ field }}
-                                            </label>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>{{ field.label }}{{ field }}</label>
+                                            </div>
                                         </div>
 
                                     {% elif field.name == 'auth_user' %}
-                                        <div class="col-sm-4">
-                                            <label>
-                                                {{ field.label }}{{ field }}
-                                            </label>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>{{ field.label }}{{ field }}</label>
+                                            </div>
                                         </div>
 
                                     {% elif field.name == 'legal_type' %}
-                                        <div class="col-sm-4">
-                                            <label>
-                                                {{ field.label }}{{ field }}
-                                            </label>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label id="id_legal_type_label">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
                                         </div>
 
 
                                     {% elif field.name == 'cpf' %}
-                                        <div class="col-sm-8">
+                                        <div class="col-sm-2 cpf-display">
                                             <div id="cpf_container"
                                                  class="form-group {% if form.instance.legal_type == 'J' %} hidden {% endif %}">
-                                                <label>
-                                                    {{ field.label }}{{ field }}
-                                                </label>
+                                                <div class="form-group">
+                                                    <label>{{ field.label }}{{ field }}</label>
+                                                </div>
                                             </div>
                                         </div>
 
 
                                     {% elif field.name == 'cnpj' %}
-                                        <div class="col-sm-8">
+                                        <div class="col-sm-2 cnpj-display" style="display: none">
                                             <div id="cnpj_container"
                                                  class="form-group {% if form.instance.legal_type == 'F' or not form.instance.id %}
                                                   hidden {% endif %}">
-                                                <label>
-                                                    {{ field.label }}{{ field }}
-
-                                                </label>
+                                                <label>{{ field.label }}{{ field }}</label>
                                             </div>
                                         </div>
                                     {% else %}
-                                        <div class="col-sm-2">
+                                        <div class="col-sm-3">
                                             <div class="form-group">
-                                                <label>
-                                                    {{ field.label }}{{ field }}
-                                                </label>
+                                                <label>{{ field.label }}{{ field }}</label>
                                             </div>
                                         </div>
 
@@ -249,12 +243,13 @@
 
                     {% for address in addresses %}
 
-{#                        Caso a lista Address venha de endereço que ainda não foi salvo, o mesmo não possuirá ID. #}
-{#                        Assim, o índice na tabela deve ser pelo forloop.counter0 para recuperar corretamente as informações #}
-{#                        ao atualizar o endereço ainda não salvo no BD#}
+                        {#                        Caso a lista Address venha de endereço que ainda não foi salvo, o mesmo não possuirá ID. #}
+                        {#                        Assim, o índice na tabela deve ser pelo forloop.counter0 para recuperar corretamente as informações #}
+                        {#                        ao atualizar o endereço ainda não salvo no BD#}
 
                         {% if address.id == None %}
-                            <tr id="update_new_address row-{{ forloop.counter0 }}" onclick="update_new_address(0);" name="{{ forloop.counter0 }}"
+                            <tr id="update_new_address row-{{ forloop.counter0 }}" onclick="update_new_address(0);"
+                                name="{{ forloop.counter0 }}"
                                 style="cursor: pointer;">
 
                                 <th style="text-align: center;" id="delete_checkbox">
@@ -289,7 +284,7 @@
                                     id="zip_code-{{ forloop.counter0 }}">{{ address.zip_code }}</th>
 
                                 <th style="text-align: center; font-weight: 100;"
-                                    id="country-{{forloop.counter0}}">{{ address.country }}</th>
+                                    id="country-{{ forloop.counter0 }}">{{ address.country }}</th>
                                 <th style="text-align: center; font-weight: 100;"
                                     id="notes-{{ forloop.counter0 }}">{{ address.notes }}</th>
                                 <th style="text-align: center; font-weight: 100;"
@@ -604,7 +599,7 @@
 
                                     {% if field.name == 'address_type' %}
                                         <div class="col-sm-12">
-                                            <div class="form-group label-floating is-empty">
+                                            <div class="form-group label-floating">
                                                 <label class="control-label"
                                                        required="">{{ field.label }}</label>
                                                 {{ field }}
@@ -1473,6 +1468,7 @@
 
     <script>
         var itens_checked_to_delete = 0;
+
         function delete_buttom(check) {
             is_delete = document.getElementById("inp_delete");
             if (check) {
@@ -1560,6 +1556,8 @@
                 cpf.value = '';
                 cpf.removeAttribute('value');
                 div_cpf.setAttribute('class', 'form-group hidden');
+                $('#cnpj_container').closest('.cnpj-display').css('display', 'block');
+                $('#cpf_container').closest('.cpf-display').css('display', 'none');
             } else {
                 cpf.required = true;
                 div_cpf.setAttribute('class', 'form-group');
@@ -1567,7 +1565,8 @@
                 cnpj.value = '';
                 cnpj.removeAttribute('value');
                 div_cnpj.setAttribute('class', 'form-group hidden');
-
+                $('#cnpj_container').closest('.cnpj-display').css('display', 'none');
+                $('#cpf_container').closest('.cpf-display').css('display', 'block')
             }
         }, false);
     </script>

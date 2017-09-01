@@ -174,3 +174,45 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
     -webkit-animation: spin 2s linear infinite;
     animation: spin 2s linear infinite;
 }
+
+tr[data-href]:hover {
+    cursor: pointer;
+}
+
+div[data-toggle="collapse"] {
+    cursor: pointer;
+}
+
+.content-block {
+    margin-top: 70px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.fixed-btn {
+    position: fixed;
+    right: 23px;
+    bottom: 23px;
+    padding-top: 15px;
+    margin-bottom: 0;
+    z-index: 998;
+}
+
+.fixed-btn .btn[disabled] {
+    display: none;
+}
+
+.fixed-btn .btn.btn-fab.btn-primary:hover{
+    background-color: rgba(0, 150, 136, 0.9) !important;
+}
+
+.fixed-btn .btn.btn-fab.btn-warning:hover{
+    background-color: rgba(255, 87, 34, 0.9) !important;
+}
+.fixed-btn .btn.btn-fab.btn-warning:focus{
+    background-color: rgba(255, 87, 34, 1) !important;
+}
+
+#id_legal_type_label{
+    margin: 0;
+}

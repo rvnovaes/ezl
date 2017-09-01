@@ -38,6 +38,9 @@ class TaskTable(tables.Table):
                   'refused_date', 'legacy_code']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem providências cadastradas"
+        row_attrs = {
+            'data_href': lambda record: '/providencias/providencias/' + str(record.movement.id) + '/' + str(record.pk) + '/'
+        }
 
 
 class DashboardStatusTable(tables.Table):
@@ -64,7 +67,9 @@ class DashboardStatusTable(tables.Table):
         model = Task
         fields = ['id', 'type_task', 'delegation_date', 'reminder_deadline_date', 'client']
         empty_text = "Não existem providências a serem exibidas"
-
+        row_attrs = {
+            'data_href': lambda record: '/dashboard/' + str(record.pk) + '/'
+        }
 
 class TypeTaskTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
@@ -76,3 +81,6 @@ class TypeTaskTable(tables.Table):
         model = TypeTask
         fields = ['selection', 'legacy_code', 'name', 'is_active', 'survey_type']
         empty_text = "Não existem tipos de serviço cadastrados"
+        row_attrs = {
+            'data_href': lambda record: '/providencias/tipo_servico/' + str(record.pk) + '/'
+        }

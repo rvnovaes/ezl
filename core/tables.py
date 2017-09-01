@@ -30,7 +30,7 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         default = {
             'type': 'checkbox',
             'name': bound_column.name,
-            'value': value
+            'value': value,
         }
         if self.is_checked(value, record):
             default.update({
@@ -60,3 +60,8 @@ class PersonTable(tables.Table):
                   'cpf_cnpj', 'is_active','is_customer','is_supplier','legacy_code']
         attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem pessoas cadastradas"
+        row_attrs = {
+            'data_href': lambda record: '/pessoas/' + str(record.pk) + '/'
+        }
+
+
