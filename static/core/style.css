@@ -198,6 +198,15 @@ div[data-toggle="collapse"] {
     z-index: 998;
 }
 
+.pagination-fixed {
+    position: fixed;
+    right: 23px;
+    bottom: 23px;
+    padding-top: 15px;
+    margin-bottom: 0;
+    z-index: 998;
+}
+
 .fixed-btn .btn[disabled] {
     display: none;
 }
@@ -217,10 +226,6 @@ div[data-toggle="collapse"] {
     margin: 0;
 }
 
-.form-group {
-
-    margin: 5px;
-}
 
 .odd:hover{
     background-color: rgba(209, 209, 209, 0.9) !important;
