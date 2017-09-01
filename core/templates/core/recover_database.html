@@ -5,12 +5,13 @@
     {% if request %}
         <script>
             $(document).ready(function () {
+
                 $('#modal-wait').modal('show');
                 $.ajax({
-                    url: 'http://13.68.213.60:8001',
+                    url: '{{ host }}',
                     method: 'POST',
                     data: {"is_ezl": "true"},
-                    timeout: 45000,
+                    timeout: {{ timeout }},
                     success: function (data) {
                         $('#modal-wait').modal('hide');
                         var obj = JSON.parse(data);
@@ -35,6 +36,13 @@
                         if (textstatus === "timeout") {
                             document.getElementById("title_message").innerHTML = "Erro";
                             document.getElementById("message_text").innerHTML = "Tempo máximo atingido ao realizar a comunicação com o servidor.";
+                            document.getElementById("message_log").innerHTML = message;
+                            $("#modal_message").modal('show');
+                        }
+
+                        else{
+                            document.getElementById("title_message").innerHTML = "Erro";
+                            document.getElementById("message_text").innerHTML = "Erro ao recuperar o banco de dados.";
                             document.getElementById("message_log").innerHTML = message;
                             $("#modal_message").modal('show');
                         }

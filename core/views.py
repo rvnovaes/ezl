@@ -31,7 +31,7 @@ from core.generic_search import GenericSearchForeignKey
 from core.generic_search import set_search_model_attrs
 from django.db.models import Q
 import importlib
-
+from ezl import settings
 
 def login(request):
     if request.user.is_authenticated:
@@ -523,8 +523,9 @@ def recover_database(request):
             if user.is_superuser:
 
                 context = {
-                    'host': 'http://13.68.213.60:8001',
-                    'request': True
+                    'host': settings.LINK_TO_RESTORE_DB_DEMO,
+                    'request': True,
+                    'timeout': 45000
                 }
                 return render(request, 'core/recover_database.html', context)
 

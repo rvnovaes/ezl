@@ -184,3 +184,5 @@ EMAIL_HOST_PASSWORD = 'abc12345678'
 INTERNAL_IPS = '127.0.0.1'
 PROJECT_NAME = 'Easy Lawyer'
 PROJECT_LINK = 'https://ezl.mtostes.com.br'
+
+LINK_TO_RESTORE_DB_DEMO = 'http://13.68.213.60:8001'
