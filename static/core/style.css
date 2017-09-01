@@ -217,10 +217,6 @@ div[data-toggle="collapse"] {
     margin: 0;
 }
 
-.form-group {
-
-    margin: 5px;
-}
 
 .odd:hover{
     background-color: rgba(209, 209, 209, 0.9) !important;
