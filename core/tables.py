@@ -49,8 +49,6 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
 class PersonTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
-    name = tables.LinkColumn(viewname='person_update', attrs={'a': {'target': '_blank'}}, args=[A('pk')])
-
     class Meta:
         sequecence = (
             'selection', 'name', 'is_lawyer', 'is_correspondent', 'is_court', 'legal_type', 'auth_user',

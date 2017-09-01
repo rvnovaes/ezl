@@ -13,9 +13,6 @@ class TaskTable(tables.Table):
         self.length = self.rows.__len__()
 
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
-    type_task = tables.LinkColumn(viewname='task_update', attrs={'a': {'target': 'task_update'}},
-                                  args=[A('movement.id'), A('pk')])
-
     status = tables.TemplateColumn(template_name="task/task_status_column.html",
                                    orderable=False)
 
@@ -59,8 +56,6 @@ class DashboardStatusTable(tables.Table):
         self.order_by = '-alter_date'
         self.length = self.rows.__len__()
 
-    id = tables.LinkColumn(viewname='task_detail', attrs={'a': {'target': 'task_detail'}}, args=[A('pk')])
-
     client = tables.Column(orderable=False)
 
     class Meta:
@@ -71,10 +66,9 @@ class DashboardStatusTable(tables.Table):
             'data_href': lambda record: '/dashboard/' + str(record.pk) + '/'
         }
 
+
 class TypeTaskTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
-    name = tables.LinkColumn(viewname='typetask_update', attrs={'a': {'target': 'typetask_update'}},
-                                    args=[A('pk')])
 
     class Meta:
         sequence = ('selection', 'name', 'survey_type', 'is_active','legacy_code')

@@ -216,3 +216,16 @@ div[data-toggle="collapse"] {
 #id_legal_type_label{
     margin: 0;
 }
+
+.form-group {
+
+    margin: 5px;
+}
+
+.odd:hover{
+    background-color: rgba(209, 209, 209, 0.9) !important;
+}
+
+.even:hover{
+    background-color: rgba(209, 209, 209, 0.9) !important;
+}

@@ -7,8 +7,6 @@ from .models import TypeMovement, Movement, Folder, CourtDistrict, Instance, Law
 
 class InstanceTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
-    name = tables.LinkColumn(viewname='instance_update', attrs={'a': {'target': 'instance_update'}},
-                             args=[A('pk')])
 
     class Meta:
         sequence = ('selection', 'name', 'is_active', 'legacy_code')
@@ -24,9 +22,6 @@ class InstanceTable(tables.Table):
 class TypeMovementTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
-    name = tables.LinkColumn(viewname='type_movement_update', attrs={'a': {'target': 'type_movement_update'}},
-                             args=[A('pk')])
-
     class Meta:
         sequence = ('selection', 'name',  'is_active','legacy_code')
         model = TypeMovement
@@ -40,9 +35,6 @@ class TypeMovementTable(tables.Table):
 
 class MovementTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
-
-    type_movement = tables.LinkColumn(viewname='movement_update', attrs={'a': {'target': 'movement_update'}},
-                                      args=[A('law_suit.pk'), A('pk')])
 
     class Meta:
         sequence = ('selection', 'type_movement', 'law_suit', 'person_lawyer', 'deadline',
@@ -60,8 +52,6 @@ class MovementTable(tables.Table):
 class FolderTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
-    legacy_code = tables.LinkColumn(viewname='folder_update', attrs={'a': {'target': 'folder_update'}}, args=[A('pk')])
-
     class Meta:
         sequence = ('selection', 'folder_number', 'person_customer', 'is_active', 'legacy_code')
         model = Folder
@@ -76,8 +66,6 @@ class FolderTable(tables.Table):
 
 class LawSuitTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
-    law_suit_number = tables.LinkColumn(viewname='lawsuit_update',
-                                        attrs={'a': {'target': 'lawsuit_update'}}, args=[A('folder.pk'), A('pk')])
 
     class Meta:
         sequence = (
@@ -96,11 +84,6 @@ class LawSuitTable(tables.Table):
 class CourtDivisionTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
-    legacy_code = tables.LinkColumn(viewname='courtdivision_update', attrs={'a': {'target': 'courtdivision_update'}},
-                                    args=[A('pk')])
-    name = tables.LinkColumn(viewname='courtdivision_update', attrs={'a': {'target': 'courtdivision_update'}},
-                             args=[A('pk')])
-
     class Meta:
         sequence = ('selection', 'name', 'is_active','legacy_code')
         model = CourtDistrict
@@ -114,9 +97,6 @@ class CourtDivisionTable(tables.Table):
 
 class CourtDistrictTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
-
-    name = tables.LinkColumn(viewname='courtdistrict_update', attrs={'a': {'target': 'courtdistrict_update'}},
-                             args=[A('pk')])
 
     class Meta:
         sequence = ('selection', 'name', 'state', 'is_active','legacy_code')
