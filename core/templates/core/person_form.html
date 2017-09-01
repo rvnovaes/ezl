@@ -219,148 +219,153 @@
             </div>
 
             <div class="panel-body">
-                <table id="addresses" class="table table-hover "
-                       style="text-align:center !important; font-weight: 100 !important; font-size: unset;">
-                    <thead>
-                    <tr>
-                        <th style="text-align: center;">Excluir</th>
-                        <th style="text-align: center;">Logradouro</th>
-                        <th style="text-align: center;">Nº</th>
-                        <th style="text-align: center;">Complemento</th>
-                        <th style="text-align: center;">Bairro</th>
-                        <th style="text-align: center;">Cidade</th>
-                        <th style="text-align: center;">Estado</th>
-                        <th style="text-align: center;">CEP</th>
-                        <th style="text-align: center;">País</th>
-                        <th style="text-align: center;">Observação</th>
-                        <th style="text-align: center;">Tipo</th>
-                        <th>Ativo</th>
-                        <th></th>
-                    </tr>
-                    </thead>
+                <div class="table-responsive">
+                    <table id="addresses" class="table table-hover "
+                           style="text-align:center !important; font-weight: 100 !important; font-size: unset;">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center;">Excluir</th>
+                            <th style="text-align: center;">Logradouro</th>
+                            <th style="text-align: center;">Nº</th>
+                            <th style="text-align: center;">Complemento</th>
+                            <th style="text-align: center;">Bairro</th>
+                            <th style="text-align: center;">Cidade</th>
+                            <th style="text-align: center;">Estado</th>
+                            <th style="text-align: center;">CEP</th>
+                            <th style="text-align: center;">País</th>
+                            <th style="text-align: center;">Observação</th>
+                            <th style="text-align: center;">Tipo</th>
+                            <th>Ativo</th>
+                            <th></th>
+                        </tr>
+                        </thead>
 
-                    <tbody>
+                        <tbody>
 
-                    {% for address in addresses %}
+                        {% for address in addresses %}
 
-                        {#                        Caso a lista Address venha de endereço que ainda não foi salvo, o mesmo não possuirá ID. #}
-                        {#                        Assim, o índice na tabela deve ser pelo forloop.counter0 para recuperar corretamente as informações #}
-                        {#                        ao atualizar o endereço ainda não salvo no BD#}
+                            {#                        Caso a lista Address venha de endereço que ainda não foi salvo, o mesmo não possuirá ID. #}
+                            {#                        Assim, o índice na tabela deve ser pelo forloop.counter0 para recuperar corretamente as informações #}
+                            {#                        ao atualizar o endereço ainda não salvo no BD#}
 
-                        {% if address.id == None %}
-                            <tr id="update_new_address row-{{ forloop.counter0 }}" onclick="update_new_address(0);"
-                                name="{{ forloop.counter0 }}"
-                                style="cursor: pointer;">
+                            {% if address.id == None %}
+                                <tr id="update_new_address row-{{ forloop.counter0 }}" onclick="update_new_address(0);"
+                                    name="{{ forloop.counter0 }}"
+                                    style="cursor: pointer;">
 
-                                <th style="text-align: center;" id="delete_checkbox">
-                                    {% if address.id != None %}
-                                        <label style="margin-top: -5px !important;">
-                                            <div class="checkbox">
-                                                <input onchange="delete_buttom($(this).prop('checked'))" type="checkbox"
-                                                       name="address_set-{{ forloop.counter0 }}-DELETE"
-                                                       id="id_address_set-{{ forloop.counter0 }}-DELETE"
-                                                       class="delete_check">
-                                                <span class="checkbox-material">
+                                    <th style="text-align: center;" id="delete_checkbox">
+                                        {% if address.id != None %}
+                                            <label style="margin-top: -5px !important;">
+                                                <div class="checkbox">
+                                                    <input onchange="delete_buttom($(this).prop('checked'))"
+                                                           type="checkbox"
+                                                           name="address_set-{{ forloop.counter0 }}-DELETE"
+                                                           id="id_address_set-{{ forloop.counter0 }}-DELETE"
+                                                           class="delete_check">
+                                                    <span class="checkbox-material">
                                     <span class="check"></span>
                                 </span>
-                                            </div>
-                                        </label>
-                                    {% endif %}
-                                </th>
+                                                </div>
+                                            </label>
+                                        {% endif %}
+                                    </th>
 
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="street-{{ forloop.counter0 }}">{{ address.street }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="number-{{ forloop.counter0 }}">{{ address.number }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="complement-{{ forloop.counter0 }}">{{ address.complement }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="city_region-{{ forloop.counter0 }}">{{ address.city_region }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="city-{{ forloop.counter0 }}">{{ address.city }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="state-{{ forloop.counter0 }}">{{ address.state }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="zip_code-{{ forloop.counter0 }}">{{ address.zip_code }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="street-{{ forloop.counter0 }}">{{ address.street }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="number-{{ forloop.counter0 }}">{{ address.number }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="complement-{{ forloop.counter0 }}">{{ address.complement }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="city_region-{{ forloop.counter0 }}">{{ address.city_region }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="city-{{ forloop.counter0 }}">{{ address.city }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="state-{{ forloop.counter0 }}">{{ address.state }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="zip_code-{{ forloop.counter0 }}">{{ address.zip_code }}</th>
 
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="country-{{ forloop.counter0 }}">{{ address.country }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="notes-{{ forloop.counter0 }}">{{ address.notes }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="address_type-{{ forloop.counter0 }}">{{ address.address_type }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="country-{{ forloop.counter0 }}">{{ address.country }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="notes-{{ forloop.counter0 }}">{{ address.notes }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="address_type-{{ forloop.counter0 }}">{{ address.address_type }}</th>
 
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="is_active-{{ forloop.counter0 }}">
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="is_active-{{ forloop.counter0 }}">
 
-                                    {% if address.is_active == True or address.is_active == 'on' %}
-                                        <i class="material-icons" style="font-size: larger;">check</i>
-                                    {% else %}
-                                        <i class="material-icons" style="font-size: larger;">close</i>
-                                    {% endif %}
+                                        {% if address.is_active == True or address.is_active == 'on' %}
+                                            <i class="material-icons" style="font-size: larger;">check</i>
+                                        {% else %}
+                                            <i class="material-icons" style="font-size: larger;">close</i>
+                                        {% endif %}
 
-                                </th>
-                            </tr>
-                        {% else %}
-                            <tr id="row-{{ address.id }}" name="{{ forloop.counter0 }}"
-                                style="cursor: pointer;">
+                                    </th>
+                                </tr>
+                            {% else %}
+                                <tr id="row-{{ address.id }}" name="{{ forloop.counter0 }}"
+                                    style="cursor: pointer;">
 
-                                <th style="text-align: center;" id="delete_checkbox">
-                                    {% if address.id != None %}
-                                        <label style="margin-top: -5px !important;">
-                                            <div class="checkbox">
-                                                <input onchange="delete_buttom($(this).prop('checked'))" type="checkbox"
-                                                       name="address_set-{{ forloop.counter0 }}-DELETE"
-                                                       id="id_address_set-{{ forloop.counter0 }}-DELETE"
-                                                       class="delete_check">
-                                                <span class="checkbox-material">
+                                    <th style="text-align: center;" id="delete_checkbox">
+                                        {% if address.id != None %}
+                                            <label style="margin-top: -5px !important;">
+                                                <div class="checkbox">
+                                                    <input onchange="delete_buttom($(this).prop('checked'))"
+                                                           type="checkbox"
+                                                           name="address_set-{{ forloop.counter0 }}-DELETE"
+                                                           id="id_address_set-{{ forloop.counter0 }}-DELETE"
+                                                           class="delete_check">
+                                                    <span class="checkbox-material">
                                     <span class="check"></span>
                                 </span>
-                                            </div>
-                                        </label>
-                                    {% endif %}
-                                </th>
+                                                </div>
+                                            </label>
+                                        {% endif %}
+                                    </th>
 
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="street-{{ address.id }}" class="update_address">{{ address.street }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="number-{{ address.id }}" class="update_address">{{ address.number }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="complement-{{ address.id }}"
-                                    class="update_address">{{ address.complement }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="city_region-{{ address.id }}"
-                                    class="update_address">{{ address.city_region }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="city-{{ address.id }}" class="update_address">{{ address.city }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="state-{{ address.id }}" class="update_address">{{ address.state }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="zip_code-{{ address.id }}" class="update_address">{{ address.zip_code }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="street-{{ address.id }}" class="update_address">{{ address.street }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="number-{{ address.id }}" class="update_address">{{ address.number }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="complement-{{ address.id }}"
+                                        class="update_address">{{ address.complement }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="city_region-{{ address.id }}"
+                                        class="update_address">{{ address.city_region }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="city-{{ address.id }}" class="update_address">{{ address.city }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="state-{{ address.id }}" class="update_address">{{ address.state }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="zip_code-{{ address.id }}"
+                                        class="update_address">{{ address.zip_code }}</th>
 
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="country-{{ address.id }}" class="update_address">{{ address.country }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="notes-{{ address.id }}" class="update_address">{{ address.notes }}</th>
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="address_type-{{ address.id }}"
-                                    class="update_address">{{ address.address_type }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="country-{{ address.id }}" class="update_address">{{ address.country }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="notes-{{ address.id }}" class="update_address">{{ address.notes }}</th>
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="address_type-{{ address.id }}"
+                                        class="update_address">{{ address.address_type }}</th>
 
-                                <th style="text-align: center; font-weight: 100;"
-                                    id="is_active-{{ address.id }}" class="update_address">
+                                    <th style="text-align: center; font-weight: 100;"
+                                        id="is_active-{{ address.id }}" class="update_address">
 
-                                    {% if address.is_active == True or address.is_active == 'on' %}
-                                        <i class="material-icons" style="font-size: larger;">check</i>
-                                    {% else %}
-                                        <i class="material-icons" style="font-size: larger;">close</i>
-                                    {% endif %}
+                                        {% if address.is_active == True or address.is_active == 'on' %}
+                                            <i class="material-icons" style="font-size: larger;">check</i>
+                                        {% else %}
+                                            <i class="material-icons" style="font-size: larger;">close</i>
+                                        {% endif %}
 
-                                </th>
-                            </tr>
-                        {% endif %}
-                    {% endfor %}
-                    </tbody>
-                </table>
+                                    </th>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="modal fade" id="modal-wait" data-backdrop="static" data-keyboard="false">
                     <div class="modal-dialog">
@@ -396,7 +401,7 @@
                                     <div class="row">
 
                                         <div class="col-sm-12">
-                                            <div class="form-group label-floating">
+                                            <div class="form-group">
                                                 <label class="control-label" for="update_id_address_type">Tipo de
                                                     Endereço</label>
                                                 <select name="address_type" required
@@ -406,7 +411,7 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
-                                            <div class="form-group label-floating">
+                                            <div class="form-group">
                                                 <label class="control-label" for="update_id_street">Logradouro</label>
                                                 <input type="text" name="street" id="update_id_street"
                                                        class="form-control" maxlength="255" value=" "
@@ -414,7 +419,7 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-3">
-                                            <div class="form-group label-floating">
+                                            <div class="form-group ">
                                                 <label class="control-label" for="update_id_number">Número</label>
                                                 <input type="text" name="number" id="update_id_number"
                                                        class="form-control" maxlength="255" value=" "
@@ -422,7 +427,7 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-3">
-                                            <div class="form-group label-floating">
+                                            <div class="form-group ">
                                                 <label class="control-label"
                                                        for="update_id_complement">Complemento</label>
                                                 <input type="text" name="complement"
@@ -431,7 +436,7 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
-                                            <div class="form-group label-floating">
+                                            <div class="form-group ">
                                                 <label class="control-label" for="update_id_city_region">Bairro</label>
                                                 <input type="text" name="city_region"
                                                        id="update_id_city_region"
@@ -440,7 +445,7 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
-                                            <div class="form-group label-floating">
+                                            <div class="form-group ">
                                                 <label class="control-label" for="update_id_zip_code">CEP</label>
                                                 <input type="text" name="zip_code"
                                                        id="update_id_zip_code" value=" "
@@ -450,7 +455,7 @@
                                         </div>
 
                                         <div class="col-sm-4">
-                                            <div class="form-group label-floating">
+                                            <div class="form-group ">
                                                 <label class="control-label" for="update_id_country">País</label>
                                                 <select name="country" id="update_id_country"
                                                         class="form-control" required>
@@ -459,7 +464,7 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-4">
-                                            <div class="form-group label-floating">
+                                            <div class="form-group ">
                                                 <label class="control-label" for="update_id_state">Estado</label>
                                                 <select name="state" id="update_id_state"
                                                         class="form-control" required>
@@ -468,7 +473,7 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-4">
-                                            <div class="form-group label-floating">
+                                            <div class="form-group ">
                                                 <label class="control-label" for="update_id_city">Município</label>
                                                 <select name="city" id="update_id_city"
                                                         class="form-control"
@@ -478,7 +483,7 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-12">
-                                            <div class="form-group label-floating">
+                                            <div class="form-group ">
                                                 <label class="control-label"
                                                        for="update_id_notes">Observação</label>
                                                 <textarea name="notes" id="update_id_notes" cols="40"
@@ -490,7 +495,7 @@
 
                                     </div>
 
-                                    <div class="form-group label-floating">
+                                    <div class="form-group ">
                                         <label class="control-label" for="update_id_is_active"
                                                id="label_update_id_is_active">Ativo</label>
                                         <label>
@@ -504,22 +509,24 @@
                                             </div>
                                         </label>
                                     </div>
-
-
                                     <input type="text" name="id"
                                            id="update_id_address"
                                            class="form-control input-sm" maxlength="255"/>
                                     <br><br><br>
+
                                     <div class="text-center">
+
+                                        <input type="button"
+                                               class="btn btn-raised btn-default"
+                                               data-dismiss="modal"
+                                               value="Cancelar"/>
+                                        
                                         <input type="button" id="save_updated_address"
                                                class="btn btn-primary btn-raised"
                                                value="Atualizar">
-
-                                        <input type="button"
-                                               class="btn btn-raised btn-danger"
-                                               data-dismiss="modal"
-                                               value="Cancelar"/>
                                     </div>
+
+
                                 </form>
                             </div>
                             <div class="modal-footer">
@@ -538,14 +545,19 @@
                        onclick="$('#new_address').modal('show');"
                        style="height: 30px !important; width: 30px !important; min-width: 30px !important;">
                         <i class="material-icons">add</i></a>
-
                 </div>
             </div>
         </div>
+        <div style="text-align: center;">
+            <input type="submit" class="btn btn-primary btn-raised"
+                   onclick="document.getElementById('person_form').submit()" value="Salvar"/>
 
-        <input type="submit" class="btn btn-primary btn-raised"
-               onclick="document.getElementById('person_form').submit()" value="Salvar"/>
-
+            <a class="btn btn-sm btn-raised btn-default" href="{% url 'person_list' %}">
+                <i class="material-icons left">clear</i>
+                Cancelar
+                <div class="ripple-container"></div>
+            </a>
+        </div>
         <div class="modal" id="modal_message">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -599,7 +611,7 @@
 
                                     {% if field.name == 'address_type' %}
                                         <div class="col-sm-12">
-                                            <div class="form-group label-floating">
+                                            <div class="form-group ">
                                                 <label class="control-label"
                                                        required="">{{ field.label }}</label>
                                                 {{ field }}
@@ -607,7 +619,7 @@
                                         </div>
                                     {% elif field.name == 'street' %}
                                         <div class="col-sm-6">
-                                            <div class="form-group label-floating is-empty">
+                                            <div class="form-group  is-empty">
                                                 <label class="control-label"
                                                        required="">{{ field.label }}</label>
                                                 {{ field }}
@@ -615,7 +627,7 @@
                                         </div>
                                     {% elif field.name == 'number' %}
                                         <div class="col-sm-3">
-                                            <div class="form-group label-floating is-empty">
+                                            <div class="form-group  is-empty">
                                                 <label class="control-label"
                                                        required="">{{ field.label }}</label>
                                                 {{ field }}
@@ -623,7 +635,7 @@
                                         </div>
                                     {% elif field.name == 'complement' %}
                                         <div class="col-sm-3">
-                                            <div class="form-group label-floating is-empty">
+                                            <div class="form-group  is-empty">
                                                 <label class="control-label"
                                                        required="">{{ field.label }}</label>
                                                 {{ field }}
@@ -631,7 +643,7 @@
                                         </div>
                                     {% elif field.name == 'city_region' %}
                                         <div class="col-sm-6">
-                                            <div class="form-group label-floating is-empty">
+                                            <div class="form-group  is-empty">
                                                 <label class="control-label"
                                                        required="">{{ field.label }}</label>
                                                 {{ field }}
@@ -640,7 +652,7 @@
 
                                     {% elif field.name == 'zip_code' %}
                                         <div class="col-sm-6">
-                                            <div class="form-group label-floating is-empty">
+                                            <div class="form-group  is-empty">
                                                 <label class="control-label"
                                                        required="">{{ field.label }}</label>
                                                 {{ field }}
@@ -649,7 +661,7 @@
 
                                     {% elif field.name == 'country' %}
                                         <div class="col-sm-4">
-                                            <div class="form-group label-floating is-empty">
+                                            <div class="form-group  is-empty">
                                                 <label class="control-label"
                                                        required="">{{ field.label }}</label>
                                                 {{ field }}
@@ -658,7 +670,7 @@
 
                                     {% elif field.name == 'state' %}
                                         <div class="col-sm-4">
-                                            <div class="form-group label-floating is-empty">
+                                            <div class="form-group  is-empty">
                                                 <label class="control-label"
                                                        required="">{{ field.label }}</label>
                                                 {{ field }}
@@ -667,7 +679,7 @@
 
                                     {% elif field.name == 'city' %}
                                         <div class="col-sm-4">
-                                            <div class="form-group label-floating is-empty">
+                                            <div class="form-group  is-empty">
                                                 <label class="control-label"
                                                        required="">{{ field.label }}</label>
                                                 {{ field }}
@@ -676,7 +688,7 @@
 
                                     {% elif field.name == 'notes' %}
                                         <div class="col-sm-12">
-                                            <div class="form-group label-floating is-empty">
+                                            <div class="form-group  is-empty">
                                                 <label class="control-label"
                                                        required="">{{ field.label }}</label>
                                                 {{ field }}
@@ -698,13 +710,15 @@
 
                             <div class="text-center">
 
+                                <input type="button" class="btn btn-raised btn-default"
+                                       data-dismiss="modal"
+                                       value="Cancelar"/>
+
                                 <input type="button" id="save_address"
                                        class="btn btn-primary btn-raised"
                                        value="Adicionar">
 
-                                <input type="button" class="btn btn-raised btn-danger"
-                                       data-dismiss="modal"
-                                       value="Cancelar"/>
+
                             </div>
                         </form>
                     </div>
@@ -1570,4 +1584,20 @@
             }
         }, false);
     </script>
+
+    {% if cpf_cnpj_invalid %}
+        <script>
+            $(document).ready(function () {
+                alert("Enviado");
+
+                if ($("#id_legal_type").val() === 'F')
+                    document.getElementById("id_cpf").value = "{{ cpf_cnpj_invalid }}";
+
+
+                else
+                    document.getElementById("id_cnpj").value = "{{ cpf_cnpj_invalid }}";
+
+            })
+        </script>
+    {% endif %}
 {% endblock content %}
