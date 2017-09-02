@@ -26,7 +26,7 @@ from core.messages import new_success, update_success, delete_error_protected, d
     address_error_update, \
     address_success_update, recover_database_not_permitted, recover_database_login_incorrect
 from core.models import Person, Address, City, State, Country, AddressType
-from core.signals import  create_person
+from core.signals import create_person
 from core.tables import PersonTable, UserTable
 from lawsuit.models import Folder, Movement, LawSuit
 from task.models import Task
@@ -34,8 +34,9 @@ from task.models import Task
 
 def login(request):
     if request.user.is_authenticated:
-        user_groups = set(group.name for group in request.user.groups.all())
+        user_groups = list(group.name for group in request.user.groups.all())
         request.session['user_groups'] = user_groups
+        request.session['permiissions'] = list(permission.codename for permission in request.user.get_all_permissions())
         return HttpResponseRedirect(reverse_lazy('dashboard'))
     else:
         return render(request, 'account/login.html')
@@ -47,6 +48,7 @@ def inicial(request):
         title_page = {'title_page': 'Principal - Easy Lawyer'}
         user_groups = list(group.name for group in request.user.groups.all())
         request.session['user_groups'] = user_groups
+        request.session['permiissions'] = list(permission.codename for permission in request.user.get_all_permissions())
         return render(request, 'task/task_dashboard.html', title_page)
     else:
         return HttpResponseRedirect('/')

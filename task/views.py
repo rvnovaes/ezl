@@ -104,6 +104,10 @@ class DashboardView(MultiTableMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
         context['title_page'] = u"Dashboard do Correspondente"
+        user_groups = list(group.name for group in self.request.user.groups.all())
+        self.request.session['user_groups'] = user_groups
+        self.request.session['permissions'] = list(
+            permission.replace("task.","") for permission in self.request.user.get_all_permissions())
         return context
 
     # def load_task_by_status(self, status, person):
@@ -234,6 +238,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context = super(TaskDetailView, self).get_context_data(**kwargs)
         context['geds'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
+
         return context
 
 

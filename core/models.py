@@ -21,6 +21,7 @@ class Profile(Enum):
     COORDINATOR = "Coordenador"
     CORREPONDENT = "Correspondente"
     SUPERVISOR = "Supervisor"
+    SERVICE = "Service"
 
 
 class LegalType(Enum):
