@@ -1,7 +1,11 @@
 from django import forms
-from django.contrib.auth.models import User
-from django.forms import ModelForm
+from django.contrib.auth import password_validation
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.models import User, Group
+from django.core.exceptions import FieldDoesNotExist
+from django.forms import ModelForm, models, TextInput
 from django.forms.models import inlineformset_factory
+from django.utils.translation import ugettext_lazy as _
 from localflavor.br.forms import BRCPFField, BRCNPJField
 
 from core.fields import CustomBooleanField
@@ -222,4 +226,148 @@ class AddressForm(ModelForm, forms.Form):
     )
 
 
-AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=3, can_delete=True)
+AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=3)
+
+
+class UserCreateForm(BaseForm, UserCreationForm):
+    first_name = forms.CharField(
+        label="Nome",
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    last_name = forms.CharField(
+        label="Sobrenome",
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    email = forms.CharField(
+        label="Email",
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    username = forms.CharField(
+        label="Usuário",
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    password1 = forms.CharField(
+        label=_("Senha"),
+        strip=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'type': 'password'}),
+        help_text=password_validation.password_validators_help_text_html(),
+    )
+    password2 = forms.CharField(
+        label=_("Confirmação de Senha"),
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'type': 'password'}),
+        strip=False,
+        help_text=_("Enter the same password as before, for verification."),
+    )
+
+    groups = forms.ModelMultipleChoiceField(label="Perfis", required=False, queryset=Group.objects.all(),
+                                            widget=forms.SelectMultiple(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'username','password1','password2', 'is_active',
+                  'email', 'groups']
+
+
+class UserUpdateForm(UserChangeForm):
+
+
+    first_name = forms.CharField(
+        label="Nome",
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    last_name = forms.CharField(
+        label="Sobrenome",
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    email = forms.CharField(
+        label="Email",
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    username = forms.CharField(
+        label="Usuário",
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+
+    groups = forms.ModelMultipleChoiceField(label="Perfis", required=False, queryset=Group.objects.all(),
+                                            widget=forms.SelectMultiple(attrs={'class': 'form-control'}))
+
+    is_active = CustomBooleanField(
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(UserUpdateForm, self).__init__(*args, **kwargs)
+        self.title = self._meta.model._meta.verbose_name
+        for field_name, field in self.fields.items():
+            if isinstance(field.widget,TextInput):
+                if field.widget.input_type != 'checkbox':
+                    field.widget.attrs['class'] = 'form-control'
+                if field.widget.input_type == 'text':
+                    field.widget.attrs['style'] = 'width: 100%; display: table-cell; '
+
+            # Preenche o o label de cada field do form de acordo com o verbose_name preenchido no modelo
+
+            try:
+                field.label = self._meta.model._meta.get_field(field_name).verbose_name
+            except FieldDoesNotExist:
+                pass
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'username', 'password', 'is_active',
+                  'email', 'groups']
+
+
+                # # data for 'profiles' field
+        # def __init__(self, *args, **kwargs):
+        #     # Only in case we build the form from an instance
+        #     # (otherwise, 'profiles' list should be empty)
+        #     if kwargs.get('instance'):
+        #         # We get the 'initial' keyword argument or initialize it
+        #         # as a dict if it didn't exist.
+        #         initial = kwargs.setdefault('initial', {})
+        #         # The widget for a ModelMultipleChoiceField expects
+        #         # a list of primary key for the selected data.
+        #         initial['groups'] = [t.pk for t in kwargs['instance'].groups.all()]
+        #
+        #     forms.ModelForm.__init__(self, *args, **kwargs)
+
+        # Overriding save allows us to process the value of 'profiles' field
+        # def save(self, commit=True):
+        #     # Get the unsave UserEZL instance
+        #     instance = forms.ModelForm.save(self, False)
+        #
+        #     # Prepare a 'save_m2m' method for the form,
+        #     old_save_m2m = self.save_m2m
+        #
+        #     def save_m2m():
+        #         old_save_m2m()
+        #         # This is where we actually link the UserEZL with profiles
+        #         instance.groups.clear()
+        #         for group in self.cleaned_data['groups']:
+        #             instance.groups.add(group)
+        #
+        #     self.save_m2m = save_m2m

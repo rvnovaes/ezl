@@ -17,13 +17,14 @@
                     <ul class="nav navbar-nav">
                         <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
                         <li><a href="{% url 'task_search' %}">Pesquisar</a></li>
-                        {% if user.is_superuser %}
+                        {% if 'Administrador' in request.session.user_groups  or 'Supervisor' in request.session.user_groups  %}
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle"
                                    data-toggle="dropdown" role="button"
                                    aria-haspopup="true" aria-expanded="false">Cadastros<span
                                         class="caret"></span></a>
                                 <ul class="dropdown-menu">
+                                    <li><a href="{% url 'user_list' %}">Usuários</a></li>
                                     <li><a href="{% url 'person_list' %}">Pessoas</a></li>
                                     <li><a href="{% url 'courtdistrict_list' %}">Comarcas</a></li>
                                     {#                                    <li><a href="{% url 'lawsuit_list' %}">Processos</a></li>#}

@@ -13,7 +13,10 @@
                     ACCEPTED: {text: "aceitar", icon: "assignment_ind"},
                     REFUSED: {text: "recusar", icon: "assignment"},
                     DELEGATED: {text: "delegar", icon: "assignment_returned"},
-                    DONE: {text: "Cumprir", icon: "assignment_turned_in"}
+                    DONE: {text: "Cumprir", icon: "assignment_turned_in"},
+                    FINISHED: {text: "Finalizar", icon: "gavel"},
+                    BLOCKEDPAYMENT: {text: "Glosar", icon: "money_off"},
+                    RETURN: {text: "Persistir", icon: "assignment_late"}
                 };
                 function getId(value) {
                     var actionButton = document.getElementById("actionButton");
@@ -79,6 +82,25 @@
                                 class="material-icons left" style="color: white">assignment_return</i>
                             Delegar
                         </a>
+                        <a id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle="modal" data-target="#confirmAction"
+                           class="btn btn-sm btn-raised BLOCKEDPAYMENT {% if not form.instance.status.name == 'DONE' and 'Administrador' in request.session.user_groups  %}hidden{% endif %}"><i
+                                class="material-icons left" style="color: white;">money_off</i>
+                            Bloquear
+                        </a>
+                        <a id="FINISHED" onclick="getId(this)" data-toggle="modal" data-target="#confirmAction"
+                           class="btn btn-sm btn-raised FINISHED {% if not form.instance.status.name == 'DONE' and 'Administrador' in request.session.user_groups %}hidden{% endif %}"
+                           href=""><i
+                                class="material-icons left" style="color: white">gavel</i>
+                            Finalizar
+                        </a>
+
+                         <a id="RETURN" onclick="getId(this)" data-toggle="modal" data-target="#confirmAction"
+                           class="btn btn-sm btn-raised RETURN {% if  not form.instance.status.name == 'DONE'  and 'Administrador' in request.session.user_groups %}hidden{% endif %}"
+                           href=""><i
+                                class="material-icons left" style="color: white">assignment_return</i>
+                            Persistir
+                        </a>
+
                         {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
                             <a>{{ form.execution_date }}</a>
                             <a onclick="getId(this)" id="DONE" type="submit" data-toggle="modal"

@@ -1,0 +1,41 @@
+{% extends 'inicial.html' %}
+{#{% load staticfiles %}#}
+{#{% load formset_tags %}#}
+
+{% block content %}
+    {% include 'core/widgets/messages.html' %}
+
+    <form action="" method="post">{% csrf_token %}
+            <fieldset>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h1 class="panel-title text-center">{{ form.title|capfirst }}</h1>
+                    </div>
+                    <div class="panel-body">
+                        {% for field in form %}
+                            <div class="form-group col-sm-3">
+                                <label>
+                                    {{ field.label|capfirst }}{{ field }}
+                                </label>
+                            </div>
+                        {% endfor %}
+
+                    </div>
+                    <div class="form-row  text-center">
+                        <a class="btn btn-sm btn-raised btn-default"
+                           href="{% url 'user_list' %}"><i
+                                class="material-icons left">clear</i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
+                                class="material-icons left">done</i>
+                            Salvar
+                        </button>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+    </form>
+
+{% endblock content %}

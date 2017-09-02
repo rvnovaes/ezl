@@ -1,11 +1,26 @@
 from enum import Enum
 
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from .utils import LegacySystem
+
+
+class Profile(Enum):
+    # TYPE_PROFILE
+    # enum
+    # Correspondente - 0
+    # Advogado_Solicitante - 0
+    # Supervisor - 0
+    # Coordenador - 0
+    # Admin - 0
+    ADMIN = "Admin"
+    LAWYER = "Advogado Solicitante"
+    COORDINATOR = "Coordenador"
+    CORREPONDENT = "Correspondente"
+    SUPERVISOR = "Supervisor"
 
 
 class LegalType(Enum):
@@ -217,3 +232,4 @@ class ContactUs(Audit):
 
 class ModelExportHistory(models.Model):
     model = models.CharField(max_length=255, unique=True, null=False)
+

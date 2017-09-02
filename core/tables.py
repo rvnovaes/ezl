@@ -1,4 +1,5 @@
 import django_tables2 as tables
+from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django_tables2.utils import A, AttributeDict  # alias for Accessor
 
@@ -63,3 +64,23 @@ class PersonTable(tables.Table):
         }
 
 
+class UserTable(tables.Table):
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
+    is_staff = tables.BooleanColumn()
+    is_superuser = tables.BooleanColumn()
+
+
+    class Meta:
+        sequecence = (
+            'selection', 'username', 'first_name', 'last_name', 'email',
+            'last_login', 'date_joined', 'is_active', )
+        model = User
+        fields = ['selection', 'username', 'first_name', 'last_name', 'email', 'is_active'
+                  'last_login', 'date_joined']
+        attrs = {"class": "table-striped table-bordered"}
+
+        empty_text = "Não existem usuários cadastradas"
+
+        row_attrs = {
+            'data_href': lambda record: '/usuarios/' + str(record.pk) + '/'
+        }

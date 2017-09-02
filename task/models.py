@@ -29,6 +29,7 @@ class TaskStatus(Enum):
     FINISHED = "Finalizada"
     INVALID = "Inválida"
 
+
     def get_icon(self):
         return icon_dict[self.name]
 

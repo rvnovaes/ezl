@@ -20,6 +20,10 @@ urlpatterns = [
     url(r'^pessoas/endereco/(?P<pk>[0-9]+)/estado/$', views.person_address_search_state, name='address_state'),
     url(r'^pessoas/endereco/(?P<pk>[0-9]+)/cidade/$', views.person_address_search_city, name='address_city'),
     url(r'^pessoas/endereco/tipo$', views.person_address_search_address_type, name='addresses_types'),
-    url(r'^recover_database', views.recover_database, name='recover_database')
+    url(r'^recover_database', views.recover_database, name='recover_database'),
 
+    url(r'^usuarios/listar/$', login_required(views.UserListView.as_view()), name='user_list'),
+    url(r'^usuarios/$', login_required(views.UserCreateView.as_view()), name='user_add'),
+    url(r'^usuarios/(?P<pk>[0-9]+)/$', login_required(views.UserUpdateView.as_view()), name='user_update'),
+    url(r'^usuarios/excluir$', login_required(views.UserDeleteView.as_view()), name='user_delete'),
 ]

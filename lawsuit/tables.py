@@ -1,5 +1,4 @@
 import django_tables2 as tables
-from django_tables2 import A
 
 from core.tables import CheckBoxMaterial
 from .models import TypeMovement, Movement, Folder, CourtDistrict, Instance, LawSuit
@@ -11,7 +10,7 @@ class InstanceTable(tables.Table):
     class Meta:
         sequence = ('selection', 'name', 'is_active', 'legacy_code')
         model = Instance
-        fields = ['name', 'is_active','legacy_code']
+        fields = ['name', 'is_active', 'legacy_code']
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existem instâncias cadastradas"
         row_attrs = {
@@ -23,7 +22,7 @@ class TypeMovementTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'name',  'is_active','legacy_code')
+        sequence = ('selection', 'name', 'is_active', 'legacy_code')
         model = TypeMovement
         fields = ['selection', 'name', 'legacy_code', 'is_active']
         attrs = {"class": "table-striped table-bordered"}
@@ -45,7 +44,8 @@ class MovementTable(tables.Table):
                   'is_active']
         empty_text = "Não existem movimentações cadastrados"
         row_attrs = {
-            'data_href': lambda record: '/processos/movimentacao/' + str(record.law_suit.pk) + '/' + str(record.pk) + '/'
+            'data_href': lambda record: '/processos/movimentacao/' + str(record.law_suit.pk) + '/' + str(
+                record.pk) + '/'
         }
 
 
@@ -55,7 +55,7 @@ class FolderTable(tables.Table):
     class Meta:
         sequence = ('selection', 'folder_number', 'person_customer', 'is_active', 'legacy_code')
         model = Folder
-        fields = ['folder_number','selection', 'legacy_code', 'person_customer', 'is_active']
+        fields = ['folder_number', 'selection', 'legacy_code', 'person_customer', 'is_active']
         readonly_fields = ['folder_number']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem pastas cadastradas"
@@ -73,7 +73,7 @@ class LawSuitTable(tables.Table):
             'person_lawyer', 'is_current_instance', 'is_active', 'legacy_code')
         model = LawSuit
         fields = ['selection', 'folder', 'instance', 'court_district', 'person_court', 'court_division',
-                  'law_suit_number', 'person_lawyer', 'is_active', 'is_current_instance','legacy_code']
+                  'law_suit_number', 'person_lawyer', 'is_active', 'is_current_instance', 'legacy_code']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem processos cadastrados"
         row_attrs = {
@@ -85,7 +85,7 @@ class CourtDivisionTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'name', 'is_active','legacy_code')
+        sequence = ('selection', 'name', 'is_active', 'legacy_code')
         model = CourtDistrict
         fields = ['selection', 'legacy_code', 'name', 'is_active']
         # attrs = {"class": "table-striped table-bordered"}
@@ -99,12 +99,11 @@ class CourtDistrictTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'name', 'state', 'is_active','legacy_code')
+        sequence = ('selection', 'name', 'state', 'is_active', 'legacy_code')
         model = CourtDistrict
-        fields = ['selection', 'name', 'state', 'is_active','legacy_code']
+        fields = ['selection', 'name', 'state', 'is_active', 'legacy_code']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem comarcas cadastradas"
         row_attrs = {
             'data_href': lambda record: '/processos/comarcas/' + str(record.pk) + '/'
         }
-

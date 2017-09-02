@@ -1,5 +1,5 @@
+import importlib
 import json
-import urllib.parse
 from datetime import datetime
 
 from dal import autocomplete
@@ -12,29 +12,30 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import ProtectedError
-from django.http import HttpResponseRedirect, JsonResponse, QueryDict
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django_tables2 import SingleTableView, RequestConfig
 
-from core.forms import PersonForm, AddressForm, AddressFormSet
+from core.forms import PersonForm, AddressForm, AddressFormSet, UserUpdateForm, UserCreateForm
+from core.generic_search import GenericSearchForeignKey
+from core.generic_search import GenericSearchFormat
+from core.generic_search import set_search_model_attrs
 from core.messages import new_success, update_success, delete_error_protected, delete_success, \
     address_error_update, \
     address_success_update, recover_database_not_permitted, recover_database_login_incorrect
 from core.models import Person, Address, City, State, Country, AddressType
-from core.tables import PersonTable
+from core.signals import  create_person
+from core.tables import PersonTable, UserTable
 from lawsuit.models import Folder, Movement, LawSuit
 from task.models import Task
-from core.generic_search import GenericSearchFormat
-from core.generic_search import GenericSearchForeignKey
-from core.generic_search import set_search_model_attrs
-from django.db.models import Q
-import importlib
-from ezl import settings
+
 
 def login(request):
     if request.user.is_authenticated:
+        user_groups = set(group.name for group in request.user.groups.all())
+        request.session['user_groups'] = user_groups
         return HttpResponseRedirect(reverse_lazy('dashboard'))
     else:
         return render(request, 'account/login.html')
@@ -44,6 +45,8 @@ def login(request):
 def inicial(request):
     if request.user.is_authenticated:
         title_page = {'title_page': 'Principal - Easy Lawyer'}
+        user_groups = list(group.name for group in request.user.groups.all())
+        request.session['user_groups'] = user_groups
         return render(request, 'task/task_dashboard.html', title_page)
     else:
         return HttpResponseRedirect('/')
@@ -123,8 +126,8 @@ class MultiDeleteViewMixin(DeleteView):
     def delete(self, request, *args, **kwargs):
         if request.method == "POST":
             pks = request.POST.getlist("selection")
-            #print (kwargs)
-            #folder = kwargs['folder']
+            # print (kwargs)
+            # folder = kwargs['folder']
             try:
                 self.model.objects.filter(pk__in=pks).delete()
                 messages.success(self.request, self.success_message)
@@ -532,3 +535,50 @@ def recover_database(request):
 
     else:
         return render(request, 'core/recover_database.html', {'request': False})
+
+
+class UserListView(LoginRequiredMixin, SingleTableView):
+    model = User
+    table_class = UserTable
+    template_name = 'auth/user_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(UserListView, self).get_context_data(**kwargs)
+        context['nav_user'] = True
+        context['form_name'] = 'Usuário'
+        context['form_name_plural'] = 'Usuários'
+        table = self.table_class(self.model.objects.all().order_by('-pk'))
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        context['table'] = table
+        return context
+
+
+class UserCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+    model = User
+    form_class = UserCreateForm
+    success_url = reverse_lazy('user_list')
+    success_message = new_success
+
+    def get_success_url(self):
+        create_person
+        return reverse_lazy('user_list')
+
+
+class UserUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
+    model = User
+
+    form_class = UserUpdateForm
+    success_url = reverse_lazy('user_list')
+    success_message = update_success
+
+    def get_success_url(self):
+        return reverse_lazy('user_list')
+
+
+class UserDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
+    model = User
+    success_url = reverse_lazy('user_list')
+    success_message = delete_success('usuários')
+
+    def get_success_url(self):
+        return reverse_lazy('user_list')

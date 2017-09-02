@@ -25,9 +25,6 @@ from .models import Task, TaskStatus, Ecm, TypeTask, TaskHistory
 from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
 
 
-# from .utils import PagedFilteredTableView
-
-
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Task
     table_class = TaskTable
@@ -164,7 +161,7 @@ class DashboardView(MultiTableMixin, TemplateView):
             dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
         data = Task.objects.filter(dynamic_query)
-
+        # print(str(Task.objects.filter(dynamic_query).query))
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
@@ -218,17 +215,17 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     template_name = "task/task_detail.html"
 
     def form_valid(self, form):
-
         form.instance.task_status = TaskStatus[self.request.POST['action']] or TaskStatus.INVALID
         form.instance.alter_user = User.objects.get(id=self.request.user.id)
         notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None
-        execution_date = form.cleaned_data['execution_date'] if form.cleaned_data['execution_date'] else None
+        if form.cleaned_data['execution_date'] and not form.instance.execution_date:
+            execution_date = form.cleaned_data['execution_date']
         survey_result = form.cleaned_data['survey_result'] if form.cleaned_data['survey_result'] else None
 
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
                                        execution_date=execution_date, survey_result=survey_result)
 
-        #form.save()
+        # form.save()
 
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))

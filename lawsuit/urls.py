@@ -1,5 +1,6 @@
 from django.conf.urls import url
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import Group
 
 from lawsuit import views
 
@@ -20,8 +21,6 @@ urlpatterns = [
         name='courtdivision_update'),
     url(r'^varas/excluir$', login_required(views.CourtDivisionDeleteView.as_view()),
         name='courtdivision_delete'),
-
-
 
     # Processos
     url(r'^processos/listar/$', login_required(views.LawSuitListView.as_view()), name='lawsuit_list'),
@@ -52,22 +51,24 @@ urlpatterns = [
     # url(r'^tipo-movimentacao/excluir$', login_required(views.typemovement_delete_by_pks),name='type_movement_delete'),
 
     # Intancias
-    url(r'^instancias/listar/$', login_required(views.InstanceListView.as_view()), name='instance_list'),
-    url(r'instancias/$', login_required(views.InstanceCreateView.as_view()), name='instance_create'),
-    url(r'instancias/(?P<pk>[0-9]+)/$', login_required(views.InstanceUpdateView.as_view()), name='instance_update'),
-    url(r'instancias/excluir$', login_required(views.InstanceDeleteView.as_view()),
-        name='instance_delete'),
+    url(r'^instancias/listar/$', user_passes_test(lambda u: Group.objects.get(name='Administrador') in u.groups.all())(
+        login_required(views.InstanceListView.as_view())), name='instance_list'),
+        url(r'instancias/$', user_passes_test(lambda u: Group.objects.filter(name__in={"Adminiastrador","Correspondente"}) in u.groups.all())(
+            login_required(views.InstanceCreateView.as_view())), name='instance_create'),
+        url(r'instancias/(?P<pk>[0-9]+)/$', login_required(views.InstanceUpdateView.as_view()), name='instance_update'),
+        url(r'instancias/excluir$', login_required(views.InstanceDeleteView.as_view()),
+            name='instance_delete'),
 
-    # Teste Rapido
-    # url(r'cadastro_rapido/$', login_required(views.FolderLawsuitCreateView.as_view()), name='fast'),
-    # url(r'cadastro_rapido/(?P<pk>[0-9]+)/$', login_required(views.FolderLawsuitUpdateView.as_view()),
-    #     name='fast_update'),
+        # Teste Rapido
+        # url(r'cadastro_rapido/$', login_required(views.FolderLawsuitCreateView.as_view()), name='fast'),
+        # url(r'cadastro_rapido/(?P<pk>[0-9]+)/$', login_required(views.FolderLawsuitUpdateView.as_view()),
+        #     name='fast_update'),
 
-    # Pastas
-    url(r'^pastas/listar/$', login_required(login_required(views.FolderListView.as_view())), name='folder_list'),
-    url(r'^pastas/$', login_required(login_required(views.FolderLawsuitCreateView.as_view())), name='folder_add'),
-    url(r'^pastas/(?P<pk>[0-9]+)/$', login_required(login_required(views.FolderLawsuitUpdateView.as_view())),
-        name='folder_update'),
-    url(r'^pastas/excluir$', login_required(login_required(views.FolderDeleteView.as_view())),
-        name='folder_delete'),
+        # Pastas
+        url(r'^pastas/listar/$', login_required(login_required(views.FolderListView.as_view())), name='folder_list'),
+        url(r'^pastas/$', login_required(login_required(views.FolderLawsuitCreateView.as_view())), name='folder_add'),
+        url(r'^pastas/(?P<pk>[0-9]+)/$', login_required(login_required(views.FolderLawsuitUpdateView.as_view())),
+            name='folder_update'),
+        url(r'^pastas/excluir$', login_required(login_required(views.FolderDeleteView.as_view())),
+            name='folder_delete'),
 ]

@@ -1,13 +1,12 @@
 from django.db.models.signals import post_init, pre_save, post_save
 from django.dispatch import receiver, Signal
 from django.template.loader import render_to_string
-from django.urls import reverse
 from django.utils import timezone
-from ezl import settings
-from task.models import Task, TaskStatus, TaskHistory
+
 from core.models import ContactMechanism, ContactMechanismType
+from ezl import settings
 from task.mail import SendMail
-import socket
+from task.models import Task, TaskStatus, TaskHistory
 
 send_notes_execution_date = Signal(providing_args=["notes", "instance", "execution_date"])
 
@@ -20,13 +19,13 @@ def load_previous_status(sender, instance, **kwargs):
 @receiver(send_notes_execution_date)
 def receive_notes_execution_date(notes, instance, execution_date, survey_result, **kwargs):
     instance.__notes = notes if notes else ''
-    instance.execution_date = execution_date if execution_date else None
+    if execution_date and not instance.execution_date:
+        instance.execution_date = execution_date
     instance.survey_result = survey_result if survey_result else None
 
 
 @receiver(post_save, sender=Task)
 def new_task(sender, instance, **kwargs):
-
     # prev_status = instance.prev_status.task_status
     # if not instance.prev_status == instance.task_status and instance.prev_status == TaskStatus.OPEN:
     id_email = ContactMechanismType.objects.get(name__iexact='email').id
@@ -159,7 +158,6 @@ def change_status(sender, instance, **kwargs):
     try:
 
         if new_status is not previous_status:
-
             if new_status is TaskStatus.ACCEPTED:
                 instance.acceptance_date = now_date
             elif new_status is TaskStatus.REFUSED:
@@ -167,8 +165,12 @@ def change_status(sender, instance, **kwargs):
             elif new_status is TaskStatus.DONE:
                 instance.return_date = None
             elif new_status is TaskStatus.RETURN:
-                instance.execution_date = None
-                instance.refused_date = now_date
+                instance.execution = None
+                instance.return_date = now_date
+            elif new_status is TaskStatus.BLOCKEDPAYMENT:
+                instance.blocked_payment_date = now_date
+            elif new_status is TaskStatus.FINISHED:
+                instance.finished_date = now_date
 
             instance.alter_date = now_date
 

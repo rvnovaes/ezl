@@ -31,24 +31,22 @@ class Instance(Audit, LegacyCode):
 
 
 class Folder(Audit, LegacyCode):
-
-
     def increment():
         no = Folder.objects.latest('id').id
-        
+
         if no == None:
             return 1
         else:
             return no + 1
 
-
-    folder_number = models.IntegerField(verbose_name='Número da Pasta', unique=False, null=True, default=increment,editable=False)
+    folder_number = models.IntegerField(verbose_name='Número da Pasta', unique=False, null=True, default=increment,
+                                        editable=False)
     person_customer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                         verbose_name='Cliente')
 
     def save(self):
         super(Folder, self).save()
-    
+
     class Meta:
         db_table = "folder"
         ordering = ['-id']
@@ -129,7 +127,7 @@ class Movement(Audit, LegacyCode):
         ordering = ['-id']
         verbose_name = "Movimentação"
         verbose_name_plural = "Movimentações"
-        #unique_together = (('law_suit'),)
+        # unique_together = (('law_suit'),)
 
     def __str__(self):
         return self.type_movement.name  # TODO verificar novos campos e refatorar o toString
