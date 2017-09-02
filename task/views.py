@@ -107,7 +107,7 @@ class DashboardView(MultiTableMixin, TemplateView):
         user_groups = list(group.name for group in self.request.user.groups.all())
         self.request.session['user_groups'] = user_groups
         self.request.session['permissions'] = list(
-            permission.replace("task.","") for permission in self.request.user.get_all_permissions())
+            permission.replace("task.", "") for permission in self.request.user.get_all_permissions())
         return context
 
     # def load_task_by_status(self, status, person):
@@ -157,13 +157,17 @@ class DashboardView(MultiTableMixin, TemplateView):
     def get_tables(self):
 
         dynamic_query = Q()
-
+        # if
+        # permissions = self.request.session['permissions']
         person = Person.objects.get(auth_user=self.request.user)
-        if person.is_correspondent:
-            dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-        else:
-            dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+        # if permissions:
+        if not self.request.user.has_perm('task.view_all_tasks'):
 
+            if self.request.user.has_perm('task.view_delegated_tasks'):
+                dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+            elif self.request.user.has_perm('task.view_requested_tasks'):
+                dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+        self.request.user.get_all_permissions()
         data = Task.objects.filter(dynamic_query)
         # print(str(Task.objects.filter(dynamic_query).query))
         grouped = dict()
@@ -207,7 +211,7 @@ class DashboardView(MultiTableMixin, TemplateView):
             tables = [return_table, accepted_table, open_table, done_table, refused_table, blocked_payment_table,
                       finished_table]
         else:
-            tables = None
+            tables = {}
         return tables
 
 

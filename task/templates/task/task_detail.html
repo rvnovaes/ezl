@@ -78,7 +78,7 @@
                                 Recusar
                             </a>
                         {% endif %}
-                        {% if 'view_delegated_tasks' in request.session.permissions %}
+                        {% if 'delegate_tasks' in request.session.permissions %}
                             <a id="DELEGATE" onclick="getId(this)" data-toggle="modal" data-target="#confirmAction"
                                class="btn btn-sm btn-raised DELEGATE {% if not form.instance.status.name == 'DELEGATE' %}hidden{% endif %}"
                                href=""><i
@@ -109,7 +109,6 @@
                                     class="material-icons left" style="color: white">assignment_return</i>
                                 Persistir
                             </a>
-                           {{ request.session.permissions }}
                         {% endif %}
                         {% if 'view_requested_tasks' in request.session.permissions %}
                             {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
