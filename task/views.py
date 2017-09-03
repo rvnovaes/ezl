@@ -155,8 +155,12 @@ class DashboardView(MultiTableMixin, TemplateView):
     #         return data.filter(person_asked_by=person.id)
 
     def get_tables(self):
-
+        query = 'SELECT task.*, person.name AS client FROM task INNER JOIN' \
+                ' movement ON task.movement_id = movement.id  INNER JOIN law_suit ' \
+                'ON movement.law_suit_id = law_suit.id INNER JOIN folder ' \
+                'ON law_suit.folder_id = folder.id INNER JOIN person ON folder.person_customer_id = person.id WHERE task.person_executed_by_id = 2'
         dynamic_query = Q()
+        tasks = Task.objects.raw(query)
         person = Person.objects.get(auth_user=self.request.user)
         if self.request.user.has_perm('task.view_all_tasks'):
             dynamic_query.add(Q(delegation_date__isnull=False), Q.AND)
@@ -167,7 +171,7 @@ class DashboardView(MultiTableMixin, TemplateView):
                 dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
         self.request.user.get_all_permissions()
         data = Task.objects.filter(dynamic_query)
-        # print(str(Task.objects.filter(dynamic_query).query))
+
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
@@ -221,6 +225,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     template_name = "task/task_detail.html"
 
     def form_valid(self, form):
+        execution_date = None
         form.instance.task_status = TaskStatus[self.request.POST['action']] or TaskStatus.INVALID
         form.instance.alter_user = User.objects.get(id=self.request.user.id)
         notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None
@@ -291,8 +296,6 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
                 data = {'success': False,
                         'message': exception_create()
                         }
-
-        return JsonResponse(data)
 
         return JsonResponse(data)
 
