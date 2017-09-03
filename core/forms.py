@@ -3,7 +3,7 @@ from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import FieldDoesNotExist
-from django.forms import ModelForm, models, TextInput
+from django.forms import ModelForm, TextInput
 from django.forms.models import inlineformset_factory
 from django.utils.translation import ugettext_lazy as _
 from localflavor.br.forms import BRCPFField, BRCNPJField
@@ -276,13 +276,11 @@ class UserCreateForm(BaseForm, UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username','password1','password2', 'is_active',
+        fields = ['first_name', 'last_name', 'username', 'password1', 'password2', 'is_active',
                   'email', 'groups']
 
 
 class UserUpdateForm(UserChangeForm):
-
-
     first_name = forms.CharField(
         label="Nome",
         required=True,
@@ -311,7 +309,6 @@ class UserUpdateForm(UserChangeForm):
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
-
     groups = forms.ModelMultipleChoiceField(label="Perfis", required=False, queryset=Group.objects.all(),
                                             widget=forms.SelectMultiple(attrs={'class': 'form-control'}))
 
@@ -323,7 +320,7 @@ class UserUpdateForm(UserChangeForm):
         super(UserUpdateForm, self).__init__(*args, **kwargs)
         self.title = self._meta.model._meta.verbose_name
         for field_name, field in self.fields.items():
-            if isinstance(field.widget,TextInput):
+            if isinstance(field.widget, TextInput):
                 if field.widget.input_type != 'checkbox':
                     field.widget.attrs['class'] = 'form-control'
                 if field.widget.input_type == 'text':
@@ -335,13 +332,14 @@ class UserUpdateForm(UserChangeForm):
                 field.label = self._meta.model._meta.get_field(field_name).verbose_name
             except FieldDoesNotExist:
                 pass
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'username', 'password', 'is_active',
                   'email', 'groups']
 
 
-                # # data for 'profiles' field
+        # # data for 'profiles' field
         # def __init__(self, *args, **kwargs):
         #     # Only in case we build the form from an instance
         #     # (otherwise, 'profiles' list should be empty)

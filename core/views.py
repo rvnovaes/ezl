@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth import logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy
@@ -34,9 +34,9 @@ from task.models import Task
 
 def login(request):
     if request.user.is_authenticated:
-        user_groups = list(group.name for group in request.user.groups.all())
-        request.session['user_groups'] = user_groups
-        request.session['permissions'] = list(permission.codename for permission in request.user.get_all_permissions())
+        # user_groups = list(group.name for group in request.user.groups.all())
+        # request.session['user_groups'] = user_groups
+        # request.session['permissions'] = list(permission for permission in request.user.get_all_permissions())
         return HttpResponseRedirect(reverse_lazy('dashboard'))
     else:
         return render(request, 'account/login.html')
@@ -46,9 +46,9 @@ def login(request):
 def inicial(request):
     if request.user.is_authenticated:
         title_page = {'title_page': 'Principal - Easy Lawyer'}
-        user_groups = list(group.name for group in request.user.groups.all())
-        request.session['user_groups'] = user_groups
-        request.session['permissions'] = list(permission.codename for permission in request.user.get_all_permissions())
+        # user_groups = list(group.name for group in request.user.groups.all())
+        # request.session['user_groups'] = user_groups
+        # request.session['permissions'] = list(permission for permission in request.user.get_all_permissions())
         return render(request, 'task/task_dashboard.html', title_page)
     else:
         return HttpResponseRedirect('/')
@@ -565,6 +565,15 @@ class UserCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Cr
         create_person
         return reverse_lazy('user_list')
 
+    def form_valid(self, form):
+        def form_valid(self, form):
+            form.save()
+            if form.is_valid:
+                groups = form.cleaned_data['groups']
+                ids = list(group.id for group in groups)
+                (group.user_set.add(form.instance) for group in Group.objects.filter(id__in=ids))
+        return HttpResponseRedirect(self.success_url)
+
 
 class UserUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
     model = User
@@ -575,6 +584,16 @@ class UserUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Up
 
     def get_success_url(self):
         return reverse_lazy('user_list')
+
+    def form_valid(self, form):
+
+        form.save()
+        if form.is_valid:
+            groups = form.cleaned_data['groups']
+            ids = list(group.id for group in groups)
+            (group.user_set.add(form.instance) for group in Group.objects.filter(id__in=ids))
+        super(UserUpdateView, self).form_valid(form)
+        return HttpResponseRedirect(self.success_url)
 
 
 class UserDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):

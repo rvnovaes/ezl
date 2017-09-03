@@ -104,10 +104,10 @@ class DashboardView(MultiTableMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
         context['title_page'] = u"Dashboard do Correspondente"
-        user_groups = list(group.name for group in self.request.user.groups.all())
-        self.request.session['user_groups'] = user_groups
-        self.request.session['permissions'] = list(
-            permission.replace("task.", "") for permission in self.request.user.get_all_permissions())
+        # user_groups = list(group.name for group in self.request.user.groups.all())
+        # self.request.session['user_groups'] = user_groups
+        # self.request.session['permissions'] = list(
+        #     permission.replace("task.", "") for permission in self.request.user.get_all_permissions())
         return context
 
     # def load_task_by_status(self, status, person):
@@ -157,12 +157,10 @@ class DashboardView(MultiTableMixin, TemplateView):
     def get_tables(self):
 
         dynamic_query = Q()
-        # if
-        # permissions = self.request.session['permissions']
         person = Person.objects.get(auth_user=self.request.user)
-        # if permissions:
-        if not self.request.user.has_perm('task.view_all_tasks'):
-
+        if self.request.user.has_perm('task.view_all_tasks'):
+            dynamic_query.add(Q(delegation_date__isnull=False), Q.AND)
+        else:
             if self.request.user.has_perm('task.view_delegated_tasks'):
                 dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
             elif self.request.user.has_perm('task.view_requested_tasks'):
