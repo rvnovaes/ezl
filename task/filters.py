@@ -1,9 +1,8 @@
-from django import forms
-from django_filters import FilterSet, BooleanFilter, ModelChoiceFilter, CharFilter
+from django_filters import FilterSet, BooleanFilter, ModelChoiceFilter
 
 from core.models import Person
 from core.widgets import MDCheckboxInput, MDDateTimeRangeFilter, MDModelSelect2
-from .models import Task
+from .models import Task, DashboardViewModel
 
 
 class TaskFilter(FilterSet):
@@ -12,6 +11,8 @@ class TaskFilter(FilterSet):
     refused = BooleanFilter(required=False, widget=MDCheckboxInput, label="Recusadas", name='refused')
     done = BooleanFilter(required=False, widget=MDCheckboxInput, label="Cumpridas", name='done')
     returned = BooleanFilter(required=False, widget=MDCheckboxInput, label="Retornadas", name='returned')
+    blocked = BooleanFilter(required=False, widget=MDCheckboxInput, label="Glosadas", name='blocked_payment')
+    finished = BooleanFilter(required=False, widget=MDCheckboxInput, label="Finalizadas", name='finished')
 
     reminder = MDDateTimeRangeFilter(name="Prazo Inicial", label="Prazo Inicial",
                                      )
@@ -23,10 +24,7 @@ class TaskFilter(FilterSet):
                                name='client',
                                widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'}))
 
-    legacy_code = CharFilter(label='Código Legado', name='legacy_code',lookup_expr='legacy_cod',
-                             widget=forms.TextInput(attrs={'class': 'form-control input-sm'}))
-
     class Meta:
-        model = Task
+        model = DashboardViewModel
         fields = []
         order_by = ['final_deadline_date']

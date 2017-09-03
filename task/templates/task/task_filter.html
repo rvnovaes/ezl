@@ -29,7 +29,7 @@
             <div id="filterCollapse" class="panel-body panel-collapse collapse">
                 <fieldset>
                     <div class="row">
-                        <div class="col-sm-2">
+                        <div class="col-sm-1">
                             <div class="form-group">
                                 <label>
                                     {{ filter.form.openned.label }}
@@ -37,7 +37,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-1">
                             <div class="form-group">
                                 <label>
                                     {{ filter.form.accepted.label }}
@@ -45,7 +45,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-1">
                             <div class="form-group">
                                 <label>
                                     {{ filter.form.returned.label }}
@@ -53,7 +53,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-1">
                             <div class="form-group">
                                 <label>
                                     {{ filter.form.refused.label }}
@@ -61,11 +61,27 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-1">
                             <div class="form-group">
                                 <label>
                                     {{ filter.form.done.label }}
                                     {{ filter.form.done }}
+                                </label>
+                            </div>
+                        </div>
+                         <div class="col-sm-1">
+                            <div class="form-group">
+                                <label>
+                                    {{ filter.form.blocked.label }}
+                                    {{ filter.form.blocked }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-sm-1">
+                            <div class="form-group">
+                                <label>
+                                    {{ filter.form.finished.label }}
+                                    {{ filter.form.finished }}
                                 </label>
                             </div>
                         </div>
@@ -92,22 +108,12 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class=" col-sm-6" style="padding-left: 0px!important;">
+                        <div class=" col-sm-6">
                             <div class="form-group">
                                 <label>
                                     Prazo final
                                 </label>
                                 {{ filter.form.deadline }}
-                            </div>
-
-                        </div>
-                        <div class=" col-sm-4"  >
-                            <div class="form-group">
-                                <label>
-                                  Código Legado
-                                    {{ filter.form.legacy_code }}
-                                </label>
-
                             </div>
 
                         </div>

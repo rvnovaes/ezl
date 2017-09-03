@@ -21,7 +21,7 @@ from lawsuit.models import Movement
 from task.signals import send_notes_execution_date
 from .filters import TaskFilter
 from .forms import TaskForm, TaskDetailForm, TypeTaskForm
-from .models import Task, TaskStatus, Ecm, TypeTask, TaskHistory
+from .models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
 
 
@@ -101,81 +101,23 @@ class DashboardView(MultiTableMixin, TemplateView):
         'per_page': 5
     }
 
-    def get_context_data(self, **kwargs):
-        context = super(DashboardView, self).get_context_data(**kwargs)
-        context['title_page'] = u"Dashboard do Correspondente"
-        # user_groups = list(group.name for group in self.request.user.groups.all())
-        # self.request.session['user_groups'] = user_groups
-        # self.request.session['permissions'] = list(
-        #     permission.replace("task.", "") for permission in self.request.user.get_all_permissions())
-        return context
-
-    # def load_task_by_status(self, status, person):
-    #     data = {}
-    #     if status == TaskStatus.OPEN:
-    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
-    #                                    refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True,
-    #                                    blocked_payment_date__isnull=True,
-    #                                    finished_date__isnull=True)
-    #     elif status == TaskStatus.ACCEPTED:
-    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-    #                                    refused_date__isnull=True, execution_date__isnull=True, return_date__isnull=True,
-    #                                    blocked_payment_date__isnull=True,
-    #                                    finished_date__isnull=True)
-    #     elif status == TaskStatus.REFUSED:
-    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=True,
-    #                                    refused_date__isnull=False, execution_date__isnull=True,
-    #                                    return_date__isnull=True, blocked_payment_date__isnull=True,
-    #                                    finished_date__isnull=True)
-    #     elif status == TaskStatus.DONE:
-    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-    #                                    refused_date__isnull=True, execution_date__isnull=False,
-    #                                    return_date__isnull=True, blocked_payment_date__isnull=True,
-    #                                    finished_date__isnull=True)
-    #     elif status == TaskStatus.RETURN:
-    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-    #                                    refused_date__isnull=True, execution_date__isnull=True,
-    #                                    return_date__isnull=False, blocked_payment_date__isnull=True,
-    #                                    finished_date__isnull=True)
-    #
-    #     elif status == TaskStatus.BLOCKEDPAYMENT:
-    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-    #                                    refused_date__isnull=True, execution_date__isnull=False,
-    #                                    return_date__isnull=True, blocked_payment_date__isnull=False,
-    #                                    finished_date__isnull=True)
-    #     elif status == TaskStatus.FINISHED:
-    #         data = Task.objects.filter(delegation_date__isnull=False, acceptance_date__isnull=False,
-    #                                    refused_date__isnull=True, execution_date__isnull=False,
-    #                                    return_date__isnull=True, blocked_payment_date__isnull=True,
-    #                                    finished_date__isnull=False)
-    #     # TODO Adicionar metodo para filtrar dashboard do coordenador
-    #     if person.is_correspondent:
-    #         return data.filter(person_executed_by=person.id)
-    #     else:
-    #         return data.filter(person_asked_by=person.id)
-
     def get_tables(self):
-        query = 'SELECT task.*, person.name AS client FROM task INNER JOIN' \
-                ' movement ON task.movement_id = movement.id  INNER JOIN law_suit ' \
-                'ON movement.law_suit_id = law_suit.id INNER JOIN folder ' \
-                'ON law_suit.folder_id = folder.id INNER JOIN person ON folder.person_customer_id = person.id WHERE task.person_executed_by_id = 2'
+
         dynamic_query = Q()
-        tasks = Task.objects.raw(query)
+        # tasks = Task.objects.raw(query2)
         person = Person.objects.get(auth_user=self.request.user)
-        if self.request.user.has_perm('task.view_all_tasks'):
-            dynamic_query.add(Q(delegation_date__isnull=False), Q.AND)
-        else:
+        if not self.request.user.has_perm('task.view_all_tasks'):
+            # dynamic_query.add(Q(delegation_date__isnull=False), Q.AND)
+
             if self.request.user.has_perm('task.view_delegated_tasks'):
                 dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
             elif self.request.user.has_perm('task.view_requested_tasks'):
                 dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
-        self.request.user.get_all_permissions()
-        data = Task.objects.filter(dynamic_query)
+        data = DashboardViewModel.objects.filter(dynamic_query)
 
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
-
         returned = grouped.get(TaskStatus.RETURN) or {}
         accepted = grouped.get(TaskStatus.ACCEPTED) or {}
         opened = grouped.get(TaskStatus.OPEN) or {}
@@ -189,25 +131,25 @@ class DashboardView(MultiTableMixin, TemplateView):
                                                 status=TaskStatus.RETURN)
 
             accepted_table = DashboardStatusTable(accepted,
-                                                  title="A Cumprir", status=TaskStatus.ACCEPTED,
-                                                  order_by="-alter_date")
+                                                  title="A Cumprir", status=TaskStatus.ACCEPTED
+                                                  )
 
             open_table = DashboardStatusTable(opened, title="Em Aberto",
-                                              status=TaskStatus.OPEN, order_by="-alter_date")
+                                              status=TaskStatus.OPEN)
 
             done_table = DashboardStatusTable(done, title="Cumpridas",
-                                              status=TaskStatus.DONE, order_by="-alter_date")
+                                              status=TaskStatus.DONE)
 
             refused_table = DashboardStatusTable(refused,
-                                                 title="Recusadas", status=TaskStatus.REFUSED, order_by="-alter_date"
+                                                 title="Recusadas", status=TaskStatus.REFUSED
                                                  )
             blocked_payment_table = DashboardStatusTable(blocked_payment,
-                                                         title="Glosadas", status=TaskStatus.BLOCKEDPAYMENT,
-                                                         order_by="-alter_date"
+                                                         title="Glosadas", status=TaskStatus.BLOCKEDPAYMENT
+
                                                          )
             finished_table = DashboardStatusTable(finished,
-                                                  title="Finalizadas", status=TaskStatus.FINISHED,
-                                                  order_by="-alter_date"
+                                                  title="Finalizadas", status=TaskStatus.FINISHED
+
                                                   )
 
             tables = [return_table, accepted_table, open_table, done_table, refused_table, blocked_payment_table,
@@ -359,7 +301,7 @@ def delete_ecm(request, pk):
 
 
 class DashboardSearchView(LoginRequiredMixin, SingleTableView):
-    model = Task
+    model = DashboardViewModel
     filter_class = TaskFilter
     template_name = 'task/task_filter.html'
     context_object_name = 'task_filter'
@@ -367,8 +309,10 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
     ordering = ['-id']
     table_class = DashboardStatusTable
 
-    def query_builder(self, person):
+    def query_builder(self):
         query_set = {}
+        person = Person.objects.get(auth_user=self.request.user)
+
         request = self.request.GET
         task_filter = TaskFilter(request)
         task_form = task_filter.form
@@ -379,31 +323,30 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             person_dynamic_query = Q()
             reminder_dynamic_query = Q()
             deadline_dynamic_query = Q()
-            if person.is_correspondent:
-                person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-            else:
-                person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+            client_query = Q()
+
+            if not self.request.user.has_perm('task.view_all_tasks'):
+                # dynamic_query.add(Q(delegation_date__isnull=False), Q.AND)
+
+                if self.request.user.has_perm('task.view_delegated_tasks'):
+                    person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+                elif self.request.user.has_perm('task.view_requested_tasks'):
+                    person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
             if data['openned']:
-                status_dynamic_query.add(Q(delegation_date__isnull=False, acceptance_date__isnull=True,
-                                           refused_date__isnull=True, execution_date__isnull=True,
-                                           return_date__isnull=True), Q.OR)
+                status_dynamic_query.add(Q(task_status=TaskStatus.OPEN.value), Q.OR)
             if data['accepted']:
-                status_dynamic_query.add(Q(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                           refused_date__isnull=True, execution_date__isnull=True,
-                                           return_date__isnull=True), Q.OR)
+                status_dynamic_query.add(Q(task_status=TaskStatus.ACCEPTED.value), Q.OR)
             if data['refused']:
-                status_dynamic_query.add(Q(delegation_date__isnull=False, acceptance_date__isnull=True,
-                                           refused_date__isnull=False, execution_date__isnull=True,
-                                           return_date__isnull=True), Q.OR)
+                status_dynamic_query.add(Q(task_status=TaskStatus.REFUSED.value), Q.OR)
             if data['done']:
-                status_dynamic_query.add(Q(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                           refused_date__isnull=True, execution_date__isnull=False,
-                                           return_date__isnull=True), Q.OR)
+                status_dynamic_query.add(Q(task_status=TaskStatus.DONE.value), Q.OR)
             if data['returned']:
-                status_dynamic_query.add(Q(delegation_date__isnull=False, acceptance_date__isnull=False,
-                                           refused_date__isnull=True, execution_date__isnull=True,
-                                           return_date__isnull=False), Q.OR)
+                status_dynamic_query.add(Q(task_status=TaskStatus.RETURN.value), Q.OR)
+            if data['blocked']:
+                status_dynamic_query.add(Q(task_status=TaskStatus.BLOCKEDPAYMENT.value), Q.OR)
+            if data['finished']:
+                status_dynamic_query.add(Q(task_status=TaskStatus.FINISHED.value), Q.OR)
             if data['reminder']:
                 if data['reminder'].start:
                     reminder_dynamic_query.add(
@@ -418,28 +361,20 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
                 if data['deadline'].stop:
                     deadline_dynamic_query.add(
                         Q(final_deadline_date__lte=data['deadline'].stop.replace(hour=23, minute=59)), Q.AND)
-
-            person_dynamic_query.add(status_dynamic_query, Q.AND).add(Q(reminder_dynamic_query), Q.AND).add(
-                Q(deadline_dynamic_query), Q.AND)
-
-            query_set = Task.objects.filter(person_dynamic_query)
-
             if data['client']:
-                query_set = list(filter(lambda x: x.client.pk == data['client'].id, query_set))
+                client_query.add(Q(client=data['client']), Q.AND)
+            person_dynamic_query.add(status_dynamic_query, Q.AND).add(Q(reminder_dynamic_query), Q.AND).add(
+                Q(deadline_dynamic_query), Q.AND).add(Q(client_query), Q.AND)
+
+            query_set = DashboardViewModel.objects.filter(person_dynamic_query)
 
         return query_set, task_filter
 
     def get_queryset(self, **kwargs):
-        task_list = {}
-        person = Person.objects.get(auth_user=self.request.user)
 
-        if bool(self.request.GET):
-            task_list, task_filter = self.query_builder(person)
-            self.filter = task_filter
-        else:
-            if person.is_correspondent:
-                task_list = Task.objects.filter(person_executed_by=person)
-            self.filter = TaskFilter(queryset={})
+        task_list, task_filter = self.query_builder()
+        self.filter = task_filter
+
         return task_list
 
     def get_context_data(self, **kwargs):

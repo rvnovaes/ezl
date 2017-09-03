@@ -2,7 +2,7 @@ import django_tables2 as tables
 from django_tables2 import A
 
 from core.tables import CheckBoxMaterial
-from .models import Task, TypeTask
+from .models import Task, TypeTask, DashboardViewModel
 
 
 class TaskTable(tables.Table):
@@ -27,7 +27,7 @@ class TaskTable(tables.Table):
     # order_by = sorted(Task.objects.all(), key=lambda t: str(t.status.value))
 
     class Meta:
-        model = Task
+        model = DashboardViewModel
         fields = ['selection', 'type_task', 'status', 'movement', 'person_asked_by', 'person_executed_by',
 
                   'delegation_date',
@@ -41,26 +41,25 @@ class TaskTable(tables.Table):
 
 
 class DashboardStatusTable(tables.Table):
-    def __init__(self, *args, delegation_date='Delegação', reminder_deadline_date='Prazo', service="Serviço",
+    def __init__(self, *args, delegation_date='Delegação', reminder_deadline_date='Prazo',
                  client="Cliente", legacy_code="Número",
                  title="", status="",
                  **kwargs):
         super().__init__(*args, **kwargs)
-        self.base_columns['type_task'].verbose_name = service
-        self.base_columns['client'].verbose_name = client
         self.base_columns['id'].verbose_name = legacy_code
         self.base_columns['reminder_deadline_date'].verbose_name = reminder_deadline_date
         self.base_columns['delegation_date'].verbose_name = delegation_date
         self.title = title
         self.status = status
-        self.order_by = '-alter_date'
+
         self.length = self.rows.__len__()
 
     client = tables.Column(orderable=False)
+    type_service = tables.Column(orderable=True)
 
     class Meta:
-        model = Task
-        fields = ['id', 'type_task', 'delegation_date', 'reminder_deadline_date', 'client']
+        model = DashboardViewModel
+        fields = ['id',  'delegation_date', 'reminder_deadline_date', 'client','type_service']
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {
             'data_href': lambda record: '/dashboard/' + str(record.pk) + '/'
