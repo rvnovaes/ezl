@@ -516,14 +516,18 @@
 
                                     <div class="text-center">
 
-                                        <input type="button"
-                                               class="btn btn-raised btn-default"
-                                               data-dismiss="modal"
-                                               value="Cancelar"/>
-                                        
-                                        <input type="button" id="save_updated_address"
-                                               class="btn btn-primary btn-raised"
-                                               value="Atualizar">
+                                        <a class="btn btn-sm btn-raised btn-default" href="{% url 'person_list' %}"
+                                           data-dismiss="modal">
+                                            <i class="material-icons left">clear</i>
+                                            Cancelar
+                                            <div class="ripple-container"></div>
+                                        </a>
+
+                                        <button type="button" class="btn btn-sm btn-raised btn-primary"
+                                                id="save_updated_address">
+                                            <i class="material-icons left">done</i>
+                                            Atualizar
+                                        </button>
                                     </div>
 
 
@@ -535,6 +539,7 @@
                     </div>
                 </div>
                 <div class="text-right" style="margin: auto">
+
                     <input type="button" data-toggle="modal" data-target="#confirmDelete" id="delete_button"
                            class="btn btn-fab btn-warning material-icons" value="remove"
                            style="height: 30px !important; width: 30px !important; min-width: 30px !important;"
@@ -549,14 +554,19 @@
             </div>
         </div>
         <div style="text-align: center;">
-            <input type="submit" class="btn btn-primary btn-raised"
-                   onclick="document.getElementById('person_form').submit()" value="Salvar"/>
 
             <a class="btn btn-sm btn-raised btn-default" href="{% url 'person_list' %}">
                 <i class="material-icons left">clear</i>
                 Cancelar
                 <div class="ripple-container"></div>
             </a>
+
+            <button type="submit" class="btn btn-sm btn-raised btn-primary"
+                    onclick="document.getElementById('person_form').submit()"><i
+                    class="material-icons left">done</i>
+                Salvar
+            </button>
+
         </div>
         <div class="modal" id="modal_message">
             <div class="modal-dialog">
@@ -710,13 +720,18 @@
 
                             <div class="text-center">
 
-                                <input type="button" class="btn btn-raised btn-default"
-                                       data-dismiss="modal"
-                                       value="Cancelar"/>
+                                <a class="btn btn-sm btn-raised btn-default" href="{% url 'person_list' %}"
+                                   data-dismiss="modal">
+                                    <i class="material-icons left">clear</i>
+                                    Cancelar
+                                    <div class="ripple-container"></div>
+                                </a>
 
-                                <input type="button" id="save_address"
-                                       class="btn btn-primary btn-raised"
-                                       value="Adicionar">
+                                <button type="button" class="btn btn-sm btn-raised btn-primary"
+                                        id="save_address">
+                                    <i class="material-icons left">done</i>
+                                    Adicionar
+                                </button>
 
 
                             </div>

@@ -1,7 +1,7 @@
 syntax: glob
 *.pyc
 *.orig
-ezl/**
+local_settings.py
 venv/**
 
 syntax: regexp
