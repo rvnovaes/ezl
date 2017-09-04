@@ -201,10 +201,20 @@ div[data-toggle="collapse"] {
 .pagination-fixed {
     position: fixed;
     right: 23px;
-    bottom: 23px;
+    bottom: 5px;
     padding-top: 15px;
     margin-bottom: 0;
     z-index: 998;
+}
+
+.pagination>li>a, .pagination>li>span {
+    color: rgba(0, 150, 136, 1);
+}
+
+.pagination > .active > a, .pagination > .active > a:focus, .pagination > .active > a:hover, .pagination > .active >
+span, .pagination > .active > span:focus, .pagination > .active > span:hover {
+    background-color: rgba(0, 150, 136, 1);
+    border-color: rgba(0, 150, 136, 1);
 }
 
 .fixed-btn .btn[disabled] {
