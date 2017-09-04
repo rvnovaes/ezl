@@ -28,11 +28,9 @@ class TaskTable(tables.Table):
 
     class Meta:
         model = DashboardViewModel
-        fields = ['selection', 'type_task', 'status', 'movement', 'person_asked_by', 'person_executed_by',
-
-                  'delegation_date',
-                  'acceptance_date', 'reminder_deadline_date', 'final_deadline_date', 'execution_date', 'return_date',
-                  'refused_date', 'legacy_code']
+        fields = ['selection', 'status', 'person_asked_by', 'person_executed_by', 'type_task', 'movement',
+                  'delegation_date', 'acceptance_date', 'reminder_deadline_date', 'final_deadline_date',
+                  'execution_date', 'return_date', 'refused_date', 'legacy_code']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem providências cadastradas"
         row_attrs = {

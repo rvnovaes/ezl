@@ -126,13 +126,13 @@ class FolderForm(BaseForm):
 
     def __init__(self, *args, **kwargs):
         super(FolderForm, self).__init__(*args, **kwargs)
-        self.order_fields(['folder_number', 'person_customer', 'is_active'])
+        self.order_fields(['person_customer', 'folder_number', 'is_active'])
 
     
 class LawSuitForm(BaseForm):
     class Meta:
         model = LawSuit
-        fields = ['person_lawyer', 'instance', 'court_district', 'person_court', 'court_division', 'law_suit_number',
+        fields = ['law_suit_number', 'court_district', 'instance', 'person_court', 'court_division', 'person_lawyer',
                   'is_current_instance', 'is_active']
 
     person_lawyer = forms.ModelChoiceField(

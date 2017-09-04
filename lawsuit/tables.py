@@ -36,8 +36,7 @@ class MovementTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'type_movement', 'law_suit', 'person_lawyer', 'deadline',
-                    'is_active', 'legacy_code')
+        sequence = ('selection',  'law_suit', 'person_lawyer', 'deadline', 'type_movement', 'is_active', 'legacy_code')
         model = Movement
         attrs = {"class": "table-striped table-bordered"}
         fields = ['selection', 'legacy_code', 'person_lawyer', 'type_movement', 'law_suit', 'deadline',
@@ -53,7 +52,7 @@ class FolderTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'folder_number', 'person_customer', 'is_active', 'legacy_code')
+        sequence = ('selection', 'person_customer', 'folder_number', 'is_active', 'legacy_code')
         model = Folder
         fields = ['folder_number', 'selection', 'legacy_code', 'person_customer', 'is_active']
         readonly_fields = ['folder_number']
@@ -69,7 +68,7 @@ class LawSuitTable(tables.Table):
 
     class Meta:
         sequence = (
-            'selection', 'law_suit_number', 'folder', 'instance', 'court_district', 'person_court', 'court_division',
+            'selection', 'law_suit_number', 'folder', 'court_district', 'instance', 'person_court', 'court_division',
             'person_lawyer', 'is_current_instance', 'is_active', 'legacy_code')
         model = LawSuit
         fields = ['selection', 'folder', 'instance', 'court_district', 'person_court', 'court_division',
