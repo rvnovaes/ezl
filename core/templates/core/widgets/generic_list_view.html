@@ -59,7 +59,7 @@
         </div>
         <div class="panel-body">
             <div class="table-responsive">
-                <table class="table table-striped table-hover">
+                <table class="table table-striped table-hover" paginate-fixed>
                     {% block table.thead %}
                         <thead>
                         <tr>
@@ -105,11 +105,13 @@
                     {% endblock table.tfoot %}
                 </table>
             </div>
-            {% if table.page %}
-                {% block pagination %}
-                    {% bootstrap_pagination table.page url=request.get_full_path %}
-                {% endblock pagination %}
-            {% endif %}
+            <div class="pagination-fixed">
+                {% if table.page %}
+                    {% block pagination %}
+                        {% bootstrap_pagination table.page url=request.get_full_path %}
+                    {% endblock pagination %}
+                {% endif %}
+            </div>
             <div class="text-right" style="margin: auto">
                 <div class="fixed-btn">
                     <input type="button" data-toggle="modal" data-target="#confirmDelete" disabled id="delete_button"
