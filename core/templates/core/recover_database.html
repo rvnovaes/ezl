@@ -2,116 +2,121 @@
 
 {% block body %}
 
-    {% if request %}
-        <script>
-            $(document).ready(function () {
+    <script>
+        function recover_action() {
 
-                $('#modal-wait').modal('show');
-                $.ajax({
-                    url: '{{ host }}',
-                    method: 'POST',
-                    data: {"is_ezl": "true"},
-                    timeout: {{ timeout }},
-                    crossDomain: true,
-                    success: function (data) {
-                        $('#modal-wait').modal('hide');
-                        var obj = JSON.parse(data);
-                        if (obj.result) {
-                            document.getElementById("title_message").innerHTML = "Sucesso";
-                            document.getElementById("message_text").innerHTML = "O banco de dados foi restaurado com sucesso ao seu ponto original.";
-                            document.getElementById("message_log").innerHTML = obj.message;
-                            $("#modal_message").modal('show');
-                        }
+            login = $("#login").val();
+            password = $("#password").val();
 
-                        else {
-                            document.getElementById("title_message").innerHTML = "Erro";
-                            document.getElementById("message_text").innerHTML = "Erro ao recuperar o banco de dados.";
-                            document.getElementById("message_log").innerHTML = obj.message;
-                            $("#modal_message").modal('show');
-                        }
-                    },
-
-                    error: function (xmlhttprequest, textstatus, message) {
-
-                        $('#modal-wait').modal('hide');
-                        if (textstatus === "timeout") {
-                            document.getElementById("title_message").innerHTML = "Erro";
-                            document.getElementById("message_text").innerHTML = "Tempo máximo atingido ao realizar a comunicação com o servidor.";
-                            document.getElementById("message_log").innerHTML = message;
-                            $("#modal_message").modal('show');
-                        }
-
-                        else{
-                            document.getElementById("title_message").innerHTML = "Erro";
-                            document.getElementById("message_text").innerHTML = "Erro ao recuperar o banco de dados.";
-                            document.getElementById("message_log").innerHTML = message;
-                            $("#modal_message").modal('show');
-                        }
+            $('#modal-wait').modal('show');
+            $.ajax({
+                url: '{{ host }}',
+                method: 'POST',
+                data: {
+                    "is_ezl": "true",
+                    "login": login,
+                    "password": password
+                },
+                timeout: '{{ timeout }}',
+                crossDomain: true,
+                success: function (data) {
+                    $('#modal-wait').modal('hide');
+                    var obj = JSON.parse(data);
+                    if (obj.result) {
+                        document.getElementById("title_message").innerHTML = "";
+                        document.getElementById("message_text").innerHTML = "";
+                        document.getElementById("message_log").innerHTML = obj.message;
+                        $("#modal_message").modal('show');
                     }
 
-                });
+                    else {
+                        document.getElementById("title_message").innerHTML = "Erro";
+                        document.getElementById("message_text").innerHTML = "Erro ao recuperar o banco de dados.";
+                        document.getElementById("message_log").innerHTML = obj.message;
+                        $("#modal_message").modal('show');
+                    }
+                },
+
+                error: function (xmlhttprequest, textstatus, message) {
+
+                    $('#modal-wait').modal('hide');
+                    if (textstatus === "timeout") {
+                        document.getElementById("title_message").innerHTML = "Erro";
+                        document.getElementById("message_text").innerHTML = "Tempo máximo atingido ao realizar a comunicação com o servidor.";
+                        document.getElementById("message_log").innerHTML = message;
+                        $("#modal_message").modal('show');
+                    }
+
+                    else {
+                        document.getElementById("title_message").innerHTML = "Erro";
+                        document.getElementById("message_text").innerHTML = "Erro ao recuperar o banco de dados.";
+                        document.getElementById("message_log").innerHTML = message;
+                        $("#modal_message").modal('show');
+                    }
+                }
+
             });
-        </script>
 
-        <div class="modal fade" id="modal-wait" data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" style="text-align: center">Recuperação em progresso ...</h4>
-                    </div>
-                    <div class="modal-body">
-                        <div class="progress">
-                            <div class="progress-bar progress-bar-animated" role="progressbar" style="width: 100%;">
-                                100%
-                            </div>
+        }
+    </script>
+
+    <div class="modal fade" id="modal-wait" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" style="text-align: center">Por favor, aguarde ...</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-animated" role="progressbar" style="width: 100%;">
+                            100%
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="modal" id="modal_message">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 id="title_message"></h3>
-                    </div>
-                    <div class="modal-body">
-                        <p id="message_text"></p>
-                        <br>
+    <div class="modal" id="modal_message">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="title_message"></h3>
+                </div>
+                <div class="modal-body">
+                    <p id="message_text"></p>
+                    <br>
 
-                        <div class="panel panel-primary" style="cursor: pointer;">
-                            <div class="panel-heading " data-toggle="collapse" data-target="#log"
-                                 id="header-attachment"
-                                 onclick="toggleArrowHist()">
-                                <div class="panel-title"><i class="material-icons">assignment</i>
-                                    <b>Ver log do servidor</b>
-                                    <i class="material-icons" style="float: right;" id="down_hist">arrow_drop_down</i>
-                                    <i class="material-icons" style="float: right; display: none;" id="up_hist">arrow_drop_up</i>
-                                </div>
-                            </div>
-
-                            <div id="log" class="panel-collapse collapse">
-                                <div class="panel-body form-group is-focused">
-                                    <p id="message_log"></p>
-                                </div>
+                    <div class="panel panel-primary" style="cursor: pointer;">
+                        <div class="panel-heading " data-toggle="collapse" data-target="#log"
+                             id="header-attachment"
+                             onclick="toggleArrowHist()">
+                            <div class="panel-title"><i class="material-icons">assignment</i>
+                                <b>Ver log do servidor</b>
+                                <i class="material-icons" style="float: right;" id="down_hist">arrow_drop_down</i>
+                                <i class="material-icons" style="float: right; display: none;" id="up_hist">arrow_drop_up</i>
                             </div>
                         </div>
 
+                        <div id="log" class="panel-collapse collapse">
+                            <div class="panel-body form-group is-focused">
+                                <p id="message_log"></p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="modal-footer" style="text-align: center;">
-                        <input type="button" data-dismiss="modal" value="OK"
-                               class="btn btn-primary btn-raised"
-                               style="max-width: 100px;"/>
-                        <br>
-                    </div>
-
 
                 </div>
+                <div class="modal-footer" style="text-align: center;">
+                    <input type="button" data-dismiss="modal" value="OK"
+                           class="btn btn-primary btn-raised"
+                           style="max-width: 100px;"/>
+                    <br>
+                </div>
+
+
             </div>
         </div>
-
-    {% endif %}
+    </div>
 
     <div class="page-header col-md-4 col-md-offset-4">
         <h2 style="text-align: center">Recuperar Banco de Dados</h2>
@@ -130,14 +135,15 @@
             <div class="table-container">
         {% endif %}
 
-        Informe as suas credenciais de administrador para continuar com a operação.
+        Informe o usuário e senha do banco de dados para continuar com a operação.
+
         <form method="POST" action="">
             <fieldset>
                 {% csrf_token %}
 
                 <div class="form-group label-floating">
                     <label class="control-label" for="first_name" required>Login</label>
-                    <input class="form-control" id="first_name" type="text" name="login">
+                    <input class="form-control" id="login" type="text" name="login">
                 </div>
 
                 <div class="form-group label-floating">
@@ -145,12 +151,19 @@
                     <input class="form-control" id="password" type="password" name="password" required>
                 </div>
                 <div>
-                        <button class="btn btn-raised btn-primary" type="submit" value="Entrar" style="width: 100%;">Recuperar</button>
-                        <br>
-                        <button class="btn btn-raised btn-primary" formaction="/" formnovalidate style="width: 100%;">Página Inicial</button>
+
                 </div>
             </fieldset>
         </form>
+
+        <button class="btn btn-raised btn-primary" onclick="recover_action();" id="recover_buttoms"
+                value="Entrar" style="width: 100%;">
+            Recuperar
+        </button>
+        <br>
+        <button class="btn btn-raised btn-primary" onclick="window.location.href='/';" formnovalidate style="width: 100%;">Página
+            Inicial
+        </button>
 
         </div>
 

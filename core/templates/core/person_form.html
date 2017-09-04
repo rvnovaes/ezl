@@ -212,344 +212,351 @@
             </div>
         </div>
 
-
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <h1 class="panel-title text-center">Endereços</h1>
-            </div>
-
-            <div class="panel-body">
-                <div class="table-responsive">
-                    <table id="addresses" class="table table-hover "
-                           style="text-align:center !important; font-weight: 100 !important; font-size: unset;">
-                        <thead>
-                        <tr>
-                            <th style="text-align: center;">Excluir</th>
-                            <th style="text-align: center;">Logradouro</th>
-                            <th style="text-align: center;">Nº</th>
-                            <th style="text-align: center;">Complemento</th>
-                            <th style="text-align: center;">Bairro</th>
-                            <th style="text-align: center;">Cidade</th>
-                            <th style="text-align: center;">Estado</th>
-                            <th style="text-align: center;">CEP</th>
-                            <th style="text-align: center;">País</th>
-                            <th style="text-align: center;">Observação</th>
-                            <th style="text-align: center;">Tipo</th>
-                            <th>Ativo</th>
-                            <th></th>
-                        </tr>
-                        </thead>
-
-                        <tbody>
-
-                        {% for address in addresses %}
-
-                            {#                        Caso a lista Address venha de endereço que ainda não foi salvo, o mesmo não possuirá ID. #}
-                            {#                        Assim, o índice na tabela deve ser pelo forloop.counter0 para recuperar corretamente as informações #}
-                            {#                        ao atualizar o endereço ainda não salvo no BD#}
-
-                            {% if address.id == None %}
-                                <tr id="update_new_address row-{{ forloop.counter0 }}" onclick="update_new_address(0);"
-                                    name="{{ forloop.counter0 }}"
-                                    style="cursor: pointer;">
-
-                                    <th style="text-align: center;" id="delete_checkbox">
-                                        {% if address.id != None %}
-                                            <label style="margin-top: -5px !important;">
-                                                <div class="checkbox">
-                                                    <input onchange="delete_buttom($(this).prop('checked'))"
-                                                           type="checkbox"
-                                                           name="address_set-{{ forloop.counter0 }}-DELETE"
-                                                           id="id_address_set-{{ forloop.counter0 }}-DELETE"
-                                                           class="delete_check">
-                                                    <span class="checkbox-material">
-                                    <span class="check"></span>
-                                </span>
-                                                </div>
-                                            </label>
-                                        {% endif %}
-                                    </th>
-
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="street-{{ forloop.counter0 }}">{{ address.street }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="number-{{ forloop.counter0 }}">{{ address.number }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="complement-{{ forloop.counter0 }}">{{ address.complement }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="city_region-{{ forloop.counter0 }}">{{ address.city_region }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="city-{{ forloop.counter0 }}">{{ address.city }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="state-{{ forloop.counter0 }}">{{ address.state }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="zip_code-{{ forloop.counter0 }}">{{ address.zip_code }}</th>
-
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="country-{{ forloop.counter0 }}">{{ address.country }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="notes-{{ forloop.counter0 }}">{{ address.notes }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="address_type-{{ forloop.counter0 }}">{{ address.address_type }}</th>
-
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="is_active-{{ forloop.counter0 }}">
-
-                                        {% if address.is_active == True or address.is_active == 'on' %}
-                                            <i class="material-icons" style="font-size: larger;">check</i>
-                                        {% else %}
-                                            <i class="material-icons" style="font-size: larger;">close</i>
-                                        {% endif %}
-
-                                    </th>
-                                </tr>
-                            {% else %}
-                                <tr id="row-{{ address.id }}" name="{{ forloop.counter0 }}"
-                                    style="cursor: pointer;">
-
-                                    <th style="text-align: center;" id="delete_checkbox">
-                                        {% if address.id != None %}
-                                            <label style="margin-top: -5px !important;">
-                                                <div class="checkbox">
-                                                    <input onchange="delete_buttom($(this).prop('checked'))"
-                                                           type="checkbox"
-                                                           name="address_set-{{ forloop.counter0 }}-DELETE"
-                                                           id="id_address_set-{{ forloop.counter0 }}-DELETE"
-                                                           class="delete_check">
-                                                    <span class="checkbox-material">
-                                    <span class="check"></span>
-                                </span>
-                                                </div>
-                                            </label>
-                                        {% endif %}
-                                    </th>
-
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="street-{{ address.id }}" class="update_address">{{ address.street }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="number-{{ address.id }}" class="update_address">{{ address.number }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="complement-{{ address.id }}"
-                                        class="update_address">{{ address.complement }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="city_region-{{ address.id }}"
-                                        class="update_address">{{ address.city_region }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="city-{{ address.id }}" class="update_address">{{ address.city }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="state-{{ address.id }}" class="update_address">{{ address.state }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="zip_code-{{ address.id }}"
-                                        class="update_address">{{ address.zip_code }}</th>
-
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="country-{{ address.id }}" class="update_address">{{ address.country }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="notes-{{ address.id }}" class="update_address">{{ address.notes }}</th>
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="address_type-{{ address.id }}"
-                                        class="update_address">{{ address.address_type }}</th>
-
-                                    <th style="text-align: center; font-weight: 100;"
-                                        id="is_active-{{ address.id }}" class="update_address">
-
-                                        {% if address.is_active == True or address.is_active == 'on' %}
-                                            <i class="material-icons" style="font-size: larger;">check</i>
-                                        {% else %}
-                                            <i class="material-icons" style="font-size: larger;">close</i>
-                                        {% endif %}
-
-                                    </th>
-                                </tr>
-                            {% endif %}
-                        {% endfor %}
-                        </tbody>
-                    </table>
+        <div class="row">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h1 class="panel-title text-center">Endereços</h1>
                 </div>
 
-                <div class="modal fade" id="modal-wait" data-backdrop="static" data-keyboard="false">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title" style="text-align: center">Aguarde ...</h4>
-                            </div>
-                            <div class="modal-body">
-                                <div class="progress">
-                                    <div class="progress-bar" role="progressbar" style="width: 100%;">100%</div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table id="addresses" class="table table-hover "
+                               style="text-align:center !important; font-weight: 100 !important; font-size: unset;">
+                            <thead>
+                            <tr>
+                                <th style="text-align: center;">Excluir</th>
+                                <th style="text-align: center;">Logradouro</th>
+                                <th style="text-align: center;">Nº</th>
+                                <th style="text-align: center;">Complemento</th>
+                                <th style="text-align: center;">Bairro</th>
+                                <th style="text-align: center;">Cidade</th>
+                                <th style="text-align: center;">Estado</th>
+                                <th style="text-align: center;">CEP</th>
+                                <th style="text-align: center;">País</th>
+                                <th style="text-align: center;">Observação</th>
+                                <th style="text-align: center;">Tipo</th>
+                                <th>Ativo</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+
+                            {% for address in addresses %}
+
+                                {#                        Caso a lista Address venha de endereço que ainda não foi salvo, o mesmo não possuirá ID. #}
+                                {#                        Assim, o índice na tabela deve ser pelo forloop.counter0 para recuperar corretamente as informações #}
+                                {#                        ao atualizar o endereço ainda não salvo no BD#}
+
+                                {% if address.id == None %}
+                                    <tr id="update_new_address row-{{ forloop.counter0 }}"
+                                        onclick="update_new_address(0);"
+                                        name="{{ forloop.counter0 }}"
+                                        style="cursor: pointer;">
+
+                                        <th style="text-align: center;" id="delete_checkbox">
+                                            {% if address.id != None %}
+                                                <label style="margin-top: -5px !important;">
+                                                    <div class="checkbox">
+                                                        <input onchange="delete_buttom($(this).prop('checked'))"
+                                                               type="checkbox"
+                                                               name="address_set-{{ forloop.counter0 }}-DELETE"
+                                                               id="id_address_set-{{ forloop.counter0 }}-DELETE"
+                                                               class="delete_check">
+                                                        <span class="checkbox-material">
+                                    <span class="check"></span>
+                                </span>
+                                                    </div>
+                                                </label>
+                                            {% endif %}
+                                        </th>
+
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="street-{{ forloop.counter0 }}">{{ address.street }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="number-{{ forloop.counter0 }}">{{ address.number }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="complement-{{ forloop.counter0 }}">{{ address.complement }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="city_region-{{ forloop.counter0 }}">{{ address.city_region }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="city-{{ forloop.counter0 }}">{{ address.city }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="state-{{ forloop.counter0 }}">{{ address.state }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="zip_code-{{ forloop.counter0 }}">{{ address.zip_code }}</th>
+
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="country-{{ forloop.counter0 }}">{{ address.country }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="notes-{{ forloop.counter0 }}">{{ address.notes }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="address_type-{{ forloop.counter0 }}">{{ address.address_type }}</th>
+
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="is_active-{{ forloop.counter0 }}">
+
+                                            {% if address.is_active == True or address.is_active == 'on' %}
+                                                <i class="material-icons" style="font-size: larger;">check</i>
+                                            {% else %}
+                                                <i class="material-icons" style="font-size: larger;">close</i>
+                                            {% endif %}
+
+                                        </th>
+                                    </tr>
+                                {% else %}
+                                    <tr id="row-{{ address.id }}" name="{{ forloop.counter0 }}"
+                                        style="cursor: pointer;">
+
+                                        <th style="text-align: center;" id="delete_checkbox">
+                                            {% if address.id != None %}
+                                                <label style="margin-top: -5px !important;">
+                                                    <div class="checkbox">
+                                                        <input onchange="delete_buttom($(this).prop('checked'))"
+                                                               type="checkbox"
+                                                               name="address_set-{{ forloop.counter0 }}-DELETE"
+                                                               id="id_address_set-{{ forloop.counter0 }}-DELETE"
+                                                               class="delete_check">
+                                                        <span class="checkbox-material">
+                                    <span class="check"></span>
+                                </span>
+                                                    </div>
+                                                </label>
+                                            {% endif %}
+                                        </th>
+
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="street-{{ address.id }}"
+                                            class="update_address">{{ address.street }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="number-{{ address.id }}"
+                                            class="update_address">{{ address.number }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="complement-{{ address.id }}"
+                                            class="update_address">{{ address.complement }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="city_region-{{ address.id }}"
+                                            class="update_address">{{ address.city_region }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="city-{{ address.id }}" class="update_address">{{ address.city }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="state-{{ address.id }}" class="update_address">{{ address.state }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="zip_code-{{ address.id }}"
+                                            class="update_address">{{ address.zip_code }}</th>
+
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="country-{{ address.id }}"
+                                            class="update_address">{{ address.country }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="notes-{{ address.id }}" class="update_address">{{ address.notes }}</th>
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="address_type-{{ address.id }}"
+                                            class="update_address">{{ address.address_type }}</th>
+
+                                        <th style="text-align: center; font-weight: 100;"
+                                            id="is_active-{{ address.id }}" class="update_address">
+
+                                            {% if address.is_active == True or address.is_active == 'on' %}
+                                                <i class="material-icons" style="font-size: larger;">check</i>
+                                            {% else %}
+                                                <i class="material-icons" style="font-size: larger;">close</i>
+                                            {% endif %}
+
+                                        </th>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="modal fade" id="modal-wait" data-backdrop="static" data-keyboard="false">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" style="text-align: center">Aguarde ...</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width: 100%;">100%</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="modal" id="form_address_update">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal"
-                                        aria-hidden="true">
-                                    ×
-                                </button>
-                                <h4 class="modal-title">Atualizar Endereço</h4>
-                            </div>
-                            <div class="modal-body">
+                    <div class="modal" id="form_address_update">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal"
+                                            aria-hidden="true">
+                                        ×
+                                    </button>
+                                    <h4 class="modal-title">Atualizar Endereço</h4>
+                                </div>
+                                <div class="modal-body">
 
-                                <form action="" method="POST" id="form_new_address">
-                                    <div id="message_error"></div>
-                                    {% csrf_token %}
+                                    <form action="" method="POST" id="form_new_address">
+                                        <div id="message_error"></div>
+                                        {% csrf_token %}
 
-                                    <div class="row">
+                                        <div class="row">
 
-                                        <div class="col-sm-12">
-                                            <div class="form-group">
-                                                <label class="control-label" for="update_id_address_type">Tipo de
-                                                    Endereço</label>
-                                                <select name="address_type" required
-                                                        id="update_id_address_type" class="form-control">
-                                                    <option value=" " selected></option>
-                                                </select>
+                                            <div class="col-sm-12">
+                                                <div class="form-group">
+                                                    <label class="control-label" for="update_id_address_type">Tipo de
+                                                        Endereço</label>
+                                                    <select name="address_type" required
+                                                            id="update_id_address_type" class="form-control">
+                                                        <option value=" " selected></option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="form-group">
-                                                <label class="control-label" for="update_id_street">Logradouro</label>
-                                                <input type="text" name="street" id="update_id_street"
-                                                       class="form-control" maxlength="255" value=" "
-                                                       required/>
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label class="control-label"
+                                                           for="update_id_street">Logradouro</label>
+                                                    <input type="text" name="street" id="update_id_street"
+                                                           class="form-control" maxlength="255" value=" "
+                                                           required/>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-3">
-                                            <div class="form-group ">
-                                                <label class="control-label" for="update_id_number">Número</label>
-                                                <input type="text" name="number" id="update_id_number"
-                                                       class="form-control" maxlength="255" value=" "
-                                                       required/>
+                                            <div class="col-sm-3">
+                                                <div class="form-group ">
+                                                    <label class="control-label" for="update_id_number">Número</label>
+                                                    <input type="text" name="number" id="update_id_number"
+                                                           class="form-control" maxlength="255" value=" "
+                                                           required/>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-3">
-                                            <div class="form-group ">
-                                                <label class="control-label"
-                                                       for="update_id_complement">Complemento</label>
-                                                <input type="text" name="complement"
-                                                       class="form-control" maxlength="255" value=" "
-                                                       id="update_id_complement"/>
+                                            <div class="col-sm-3">
+                                                <div class="form-group ">
+                                                    <label class="control-label"
+                                                           for="update_id_complement">Complemento</label>
+                                                    <input type="text" name="complement"
+                                                           class="form-control" maxlength="255" value=" "
+                                                           id="update_id_complement"/>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="form-group ">
-                                                <label class="control-label" for="update_id_city_region">Bairro</label>
-                                                <input type="text" name="city_region"
-                                                       id="update_id_city_region"
-                                                       class="form-control" maxlength="255" value=" "
-                                                       required/>
+                                            <div class="col-sm-6">
+                                                <div class="form-group ">
+                                                    <label class="control-label"
+                                                           for="update_id_city_region">Bairro</label>
+                                                    <input type="text" name="city_region"
+                                                           id="update_id_city_region"
+                                                           class="form-control" maxlength="255" value=" "
+                                                           required/>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="form-group ">
-                                                <label class="control-label" for="update_id_zip_code">CEP</label>
-                                                <input type="text" name="zip_code"
-                                                       id="update_id_zip_code" value=" "
-                                                       class="form-control" maxlength="255"
-                                                       required/>
+                                            <div class="col-sm-6">
+                                                <div class="form-group ">
+                                                    <label class="control-label" for="update_id_zip_code">CEP</label>
+                                                    <input type="text" name="zip_code"
+                                                           id="update_id_zip_code" value=" "
+                                                           class="form-control" maxlength="255"
+                                                           required/>
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-sm-4">
-                                            <div class="form-group ">
-                                                <label class="control-label" for="update_id_country">País</label>
-                                                <select name="country" id="update_id_country"
-                                                        class="form-control" required>
-                                                    <option value=" " selected></option>
-                                                </select>
+                                            <div class="col-sm-4">
+                                                <div class="form-group ">
+                                                    <label class="control-label" for="update_id_country">País</label>
+                                                    <select name="country" id="update_id_country"
+                                                            class="form-control" required>
+                                                        <option value=" " selected></option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <div class="form-group ">
-                                                <label class="control-label" for="update_id_state">Estado</label>
-                                                <select name="state" id="update_id_state"
-                                                        class="form-control" required>
-                                                    <option value=" " selected></option>
-                                                </select>
+                                            <div class="col-sm-4">
+                                                <div class="form-group ">
+                                                    <label class="control-label" for="update_id_state">Estado</label>
+                                                    <select name="state" id="update_id_state"
+                                                            class="form-control" required>
+                                                        <option value=" " selected></option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <div class="form-group ">
-                                                <label class="control-label" for="update_id_city">Município</label>
-                                                <select name="city" id="update_id_city"
-                                                        class="form-control"
-                                                        required>
-                                                    <option value=" " selected></option>
-                                                </select>
+                                            <div class="col-sm-4">
+                                                <div class="form-group ">
+                                                    <label class="control-label" for="update_id_city">Município</label>
+                                                    <select name="city" id="update_id_city"
+                                                            class="form-control"
+                                                            required>
+                                                        <option value=" " selected></option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-12">
-                                            <div class="form-group ">
-                                                <label class="control-label"
-                                                       for="update_id_notes">Observação</label>
-                                                <textarea name="notes" id="update_id_notes" cols="40"
-                                                          rows="2" class="form-control">
+                                            <div class="col-sm-12">
+                                                <div class="form-group ">
+                                                    <label class="control-label"
+                                                           for="update_id_notes">Observação</label>
+                                                    <textarea name="notes" id="update_id_notes" cols="40"
+                                                              rows="2" class="form-control">
                                                                     </textarea>
+                                                </div>
                                             </div>
+
+
                                         </div>
 
-
-                                    </div>
-
-                                    <div class="form-group ">
-                                        <label class="control-label" for="update_id_is_active"
-                                               id="label_update_id_is_active">Ativo</label>
-                                        <label>
-                                            <div class="checkbox" id="check">
-                                                <input type="checkbox"
-                                                       name="is_active"
-                                                       id="update_id_is_active" class="delete_check">
-                                                <span class="checkbox-material">
+                                        <div class="form-group ">
+                                            <label class="control-label" for="update_id_is_active"
+                                                   id="label_update_id_is_active">Ativo</label>
+                                            <label>
+                                                <div class="checkbox" id="check">
+                                                    <input type="checkbox"
+                                                           name="is_active"
+                                                           id="update_id_is_active" class="delete_check">
+                                                    <span class="checkbox-material">
                                             <span class="check"></span>
                                         </span>
-                                            </div>
-                                        </label>
-                                    </div>
-                                    <input type="text" name="id"
-                                           id="update_id_address"
-                                           class="form-control input-sm" maxlength="255"/>
-                                    <br><br><br>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <input type="text" name="id"
+                                               id="update_id_address"
+                                               class="form-control input-sm" maxlength="255"/>
+                                        <br><br><br>
 
-                                    <div class="text-center">
+                                        <div class="text-center">
 
-                                        <a class="btn btn-sm btn-raised btn-default" href="{% url 'person_list' %}"
-                                           data-dismiss="modal">
-                                            <i class="material-icons left">clear</i>
-                                            Cancelar
-                                            <div class="ripple-container"></div>
-                                        </a>
+                                            <a class="btn btn-sm btn-raised btn-default" href="{% url 'person_list' %}"
+                                               data-dismiss="modal">
+                                                <i class="material-icons left">clear</i>
+                                                Cancelar
+                                                <div class="ripple-container"></div>
+                                            </a>
 
-                                        <button type="button" class="btn btn-sm btn-raised btn-primary"
-                                                id="save_updated_address">
-                                            <i class="material-icons left">done</i>
-                                            Atualizar
-                                        </button>
-                                    </div>
+                                            <button type="button" class="btn btn-sm btn-raised btn-primary"
+                                                    id="save_updated_address">
+                                                <i class="material-icons left">done</i>
+                                                Atualizar
+                                            </button>
+                                        </div>
 
 
-                                </form>
-                            </div>
-                            <div class="modal-footer">
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="text-right" style="margin: auto">
+                    <div class="text-right" style="margin: auto">
 
-                    <input type="button" data-toggle="modal" data-target="#confirmDelete" id="delete_button"
-                           class="btn btn-fab btn-warning material-icons" value="remove"
-                           style="height: 30px !important; width: 30px !important; min-width: 30px !important;"
-                           onclick="can_delete_addresses()" disabled>
+                        <input type="button" data-toggle="modal" data-target="#confirmDelete" id="delete_button"
+                               class="btn btn-fab btn-warning material-icons" value="remove"
+                               style="height: 30px !important; width: 30px !important; min-width: 30px !important;"
+                               onclick="can_delete_addresses()" disabled>
 
-                    <a class="btn btn-fab btn-primary" href="#new_address"
+                        <a class="btn btn-fab btn-primary" href="#new_address"
 
-                       onclick="$('#new_address').modal('show');"
-                       style="height: 30px !important; width: 30px !important; min-width: 30px !important;">
-                        <i class="material-icons">add</i></a>
+                           onclick="$('#new_address').modal('show');"
+                           style="height: 30px !important; width: 30px !important; min-width: 30px !important;">
+                            <i class="material-icons">add</i></a>
+                    </div>
                 </div>
             </div>
         </div>

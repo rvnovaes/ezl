@@ -30,6 +30,7 @@ from core.signals import create_person
 from core.tables import PersonTable, UserTable
 from lawsuit.models import Folder, Movement, LawSuit
 from task.models import Task
+from ezl import settings
 
 
 def login(request):
@@ -515,31 +516,12 @@ class GenericFormOneToMany(FormView, SingleTableView):
 
 
 def recover_database(request):
-    if request.POST:
-        login = request.POST['login']
-        password = request.POST['password']
-
-        user = authenticate(username=login, password=password)
-
-        if user:
-            if user.is_superuser:
-
-                context = {
-                    'host': settings.LINK_TO_RESTORE_DB_DEMO,
-                    'request': True,
-                    'timeout': 45000
-                }
-                return render(request, 'core/recover_database.html', context)
-
-            elif not user.is_superuser:
-                messages.error(request, recover_database_not_permitted())
-                return render(request, 'core/recover_database.html', {'request': False})
-        else:
-            messages.error(request, recover_database_login_incorrect())
-            return render(request, 'core/recover_database.html', {'request': False})
-
-    else:
-        return render(request, 'core/recover_database.html', {'request': False})
+    return render(request, 'core/recover_database.html',
+                  {'request': False,
+                   'host': settings.LINK_TO_RESTORE_DB_DEMO,
+                   'timeout': 45000
+                   }
+                  )
 
 
 class UserListView(LoginRequiredMixin, SingleTableView):
