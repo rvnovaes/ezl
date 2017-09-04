@@ -105,7 +105,10 @@ class SingleTableViewMixin(SingleTableView):
         try:
             context['module'] = self.model.__module__
             context['model'] = self.model.__name__
-            context['nav_' + self.model._meta.verbose_name] = True
+            try:
+                context['nav_' + str(self.model._meta.verbose_name)] = True
+            except:
+                pass
             context['form_name'] = self.model._meta.verbose_name
             context['form_name_plural'] = self.model._meta.verbose_name_plural
             generic_search = GenericSearchFormat(self.request, self.model, self.model._meta.fields)
