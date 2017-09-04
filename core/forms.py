@@ -245,14 +245,14 @@ class UserCreateForm(BaseForm, UserCreationForm):
     )
 
     email = forms.CharField(
-        label="Email",
+        label="E-mail",
         required=True,
         max_length=255,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
     username = forms.CharField(
-        label="Usuário",
+        label="Nome de usuário (login)",
         required=True,
         max_length=255,
         widget=forms.TextInput(attrs={'class': 'form-control'})
@@ -276,8 +276,8 @@ class UserCreateForm(BaseForm, UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'password1', 'password2',
-                  'email', 'groups', 'is_active']
+        fields = ['first_name', 'last_name', 'username','email', 'password1', 'password2',
+                   'groups', 'is_active']
 
 
 class UserUpdateForm(UserChangeForm):
@@ -296,14 +296,14 @@ class UserUpdateForm(UserChangeForm):
     )
 
     email = forms.CharField(
-        label="Email",
+        label="E-mail",
         required=True,
         max_length=255,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
     username = forms.CharField(
-        label="Usuário",
+        label="Nome de usuário (login)",
         required=True,
         max_length=255,
         widget=forms.TextInput(attrs={'class': 'form-control'})
@@ -316,56 +316,16 @@ class UserUpdateForm(UserChangeForm):
         required=False,
     )
 
-    def __init__(self, *args, **kwargs):
-        super(UserUpdateForm, self).__init__(*args, **kwargs)
-        self.title = self._meta.model._meta.verbose_name
-        for field_name, field in self.fields.items():
-            if isinstance(field.widget, TextInput):
-                if field.widget.input_type != 'checkbox':
-                    field.widget.attrs['class'] = 'form-control'
-                if field.widget.input_type == 'text':
-                    field.widget.attrs['style'] = 'width: 100%; display: table-cell; '
+    password = forms.CharField(
+        label="Senha",
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control','type':'password'})
+    )
 
-            # Preenche o o label de cada field do form de acordo com o verbose_name preenchido no modelo
-
-            try:
-                field.label = self._meta.model._meta.get_field(field_name).verbose_name
-            except FieldDoesNotExist:
-                pass
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'password', 'is_active',
-                  'email', 'groups']
+        fields = ['first_name', 'last_name', 'username','email', 'password',
+                   'groups', 'is_active']
 
-
-        # # data for 'profiles' field
-        # def __init__(self, *args, **kwargs):
-        #     # Only in case we build the form from an instance
-        #     # (otherwise, 'profiles' list should be empty)
-        #     if kwargs.get('instance'):
-        #         # We get the 'initial' keyword argument or initialize it
-        #         # as a dict if it didn't exist.
-        #         initial = kwargs.setdefault('initial', {})
-        #         # The widget for a ModelMultipleChoiceField expects
-        #         # a list of primary key for the selected data.
-        #         initial['groups'] = [t.pk for t in kwargs['instance'].groups.all()]
-        #
-        #     forms.ModelForm.__init__(self, *args, **kwargs)
-
-        # Overriding save allows us to process the value of 'profiles' field
-        # def save(self, commit=True):
-        #     # Get the unsave UserEZL instance
-        #     instance = forms.ModelForm.save(self, False)
-        #
-        #     # Prepare a 'save_m2m' method for the form,
-        #     old_save_m2m = self.save_m2m
-        #
-        #     def save_m2m():
-        #         old_save_m2m()
-        #         # This is where we actually link the UserEZL with profiles
-        #         instance.groups.clear()
-        #         for group in self.cleaned_data['groups']:
-        #             instance.groups.add(group)
-        #
-        #     self.save_m2m = save_m2m

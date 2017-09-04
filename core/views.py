@@ -4,7 +4,7 @@ from datetime import datetime
 
 from dal import autocomplete
 from django.contrib import messages
-from django.contrib.auth import logout, authenticate
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User, Group
@@ -24,13 +24,13 @@ from core.generic_search import GenericSearchFormat
 from core.generic_search import set_search_model_attrs
 from core.messages import new_success, update_success, delete_error_protected, delete_success, \
     address_error_update, \
-    address_success_update, recover_database_not_permitted, recover_database_login_incorrect
+    address_success_update
 from core.models import Person, Address, City, State, Country, AddressType
 from core.signals import create_person
 from core.tables import PersonTable, UserTable
+from ezl import settings
 from lawsuit.models import Folder, Movement, LawSuit
 from task.models import Task
-from ezl import settings
 
 
 def login(request):
@@ -524,20 +524,20 @@ def recover_database(request):
                   )
 
 
-class UserListView(LoginRequiredMixin, SingleTableView):
+class UserListView(LoginRequiredMixin, SingleTableViewMixin):
     model = User
     table_class = UserTable
     template_name = 'auth/user_list.html'
 
-    def get_context_data(self, **kwargs):
-        context = super(UserListView, self).get_context_data(**kwargs)
-        context['nav_user'] = True
-        context['form_name'] = 'Usuário'
-        context['form_name_plural'] = 'Usuários'
-        table = self.table_class(self.model.objects.all().order_by('-pk'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(UserListView, self).get_context_data(**kwargs)
+    #     context['nav_user'] = True
+    #     context['form_name'] = 'Usuário'
+    #     context['form_name_plural'] = 'Usuários'
+    #     # table = self.table_class(self.model.objects.all().order_by('-pk'))
+    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+    #     context['table'] = table
+    #     return context
 
 
 class UserCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
@@ -551,12 +551,12 @@ class UserCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Cr
         return reverse_lazy('user_list')
 
     def form_valid(self, form):
-        def form_valid(self, form):
-            form.save()
-            if form.is_valid:
-                groups = form.cleaned_data['groups']
-                ids = list(group.id for group in groups)
-                (group.user_set.add(form.instance) for group in Group.objects.filter(id__in=ids))
+        form.save()
+        if form.is_valid:
+            groups = form.cleaned_data['groups']
+            ids = list(group.id for group in groups)
+            (group.user_set.add(form.instance) for group in Group.objects.filter(id__in=ids))
+        super(UserCreateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
 
@@ -567,11 +567,15 @@ class UserUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Up
     success_url = reverse_lazy('user_list')
     success_message = update_success
 
+    def get_initial(self):
+        self.form_class.declared_fields['password'].disabled = True
+        self.form_class.declared_fields['username'].disabled = True
+        return self.initial.copy()
+
     def get_success_url(self):
         return reverse_lazy('user_list')
 
     def form_valid(self, form):
-
         form.save()
         if form.is_valid:
             groups = form.cleaned_data['groups']

@@ -1,7 +1,7 @@
 import django_tables2 as tables
 from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
-from django_tables2.utils import A, AttributeDict  # alias for Accessor
+from django_tables2.utils import AttributeDict  # alias for Accessor
 
 from .models import Person
 
@@ -69,14 +69,25 @@ class UserTable(tables.Table):
     is_staff = tables.BooleanColumn()
     is_superuser = tables.BooleanColumn()
 
-
+    def __init__(self, *args, first_name='Nome', last_name='Sobrenome', is_active="Ativo",
+                 username="Nome de usuário (login)", email="e-mail", last_login="Último acesso",
+                 date_joined="Data de registro"
+                 ,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        self.base_columns['first_name'].verbose_name = first_name
+        self.base_columns['last_name'].verbose_name = last_name
+        self.base_columns['username'].verbose_name = username
+        self.base_columns['email'].verbose_name = email
+        self.base_columns['is_active'].verbose_name = is_active
+        self.base_columns['last_login'].verbose_name = last_login
+        self.base_columns['date_joined'].verbose_name = date_joined
+        self.exclude = ('is_staff','is_superuser')
     class Meta:
-        sequecence = (
-            'selection', 'username', 'first_name', 'last_name', 'email',
-            'last_login', 'date_joined', 'is_active', )
+
         model = User
-        fields = ['selection', 'username', 'first_name', 'last_name', 'email', 'is_active'
-                  'last_login', 'date_joined']
+        fields = ['selection', 'first_name', 'last_name', 'username', 'email',
+                  'last_login', 'date_joined', 'is_active']
         attrs = {"class": "table-striped table-bordered"}
 
         empty_text = "Não existem usuários cadastradas"

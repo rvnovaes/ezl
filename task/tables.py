@@ -40,19 +40,21 @@ class TaskTable(tables.Table):
 
 class DashboardStatusTable(tables.Table):
     def __init__(self, *args, delegation_date='Delegação', reminder_deadline_date='Prazo',
-                 client="Cliente", legacy_code="Número",
+                 client="Cliente", legacy_code="Número",type_service="Serviço",
                  title="", status="",
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.base_columns['id'].verbose_name = legacy_code
         self.base_columns['reminder_deadline_date'].verbose_name = reminder_deadline_date
         self.base_columns['delegation_date'].verbose_name = delegation_date
+        self.base_columns['client'].verbose_name = client
+        self.base_columns['type_service'].verbose_name = type_service
         self.title = title
         self.status = status
 
         self.length = self.rows.__len__()
 
-    client = tables.Column(orderable=False)
+    client = tables.Column(orderable=True)
     type_service = tables.Column(orderable=True)
 
     class Meta:
