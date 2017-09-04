@@ -85,8 +85,8 @@ class PersonForm(BaseForm, forms.Form):
 
     class Meta:
         model = Person
-        fields = ['legal_name', 'name', 'legal_type', 'cpf', 'cnpj', 'auth_user',
-                  'is_lawyer', "is_correspondent", 'is_court', 'is_customer', 'is_supplier', 'is_active']
+        fields = ['legal_name', 'name', 'legal_type', 'cpf', 'cnpj', 'is_lawyer', "is_correspondent", 'is_court',
+                  'is_customer', 'is_supplier', 'auth_user', 'is_active']
 
     legal_name = forms.CharField(
         required=False,

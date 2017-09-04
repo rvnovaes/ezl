@@ -123,7 +123,11 @@ class FolderForm(BaseForm):
         empty_label=u"Selecione...",
         widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'})
     )
-    
+
+    def __init__(self, *args, **kwargs):
+        super(FolderForm, self).__init__(*args, **kwargs)
+        self.order_fields(['folder_number', 'person_customer', 'is_active'])
+
     
 class LawSuitForm(BaseForm):
     class Meta:
