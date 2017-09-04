@@ -276,8 +276,8 @@ class UserCreateForm(BaseForm, UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'password1', 'password2', 'is_active',
-                  'email', 'groups']
+        fields = ['first_name', 'last_name', 'username', 'password1', 'password2',
+                  'email', 'groups', 'is_active']
 
 
 class UserUpdateForm(UserChangeForm):

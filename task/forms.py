@@ -145,3 +145,4 @@ class TypeTaskForm(BaseForm):
         fields = fields_for_model(TypeTask,
                                   exclude=['create_user', 'alter_date', 'create_date', 'alter_user',
                                            'legacy_code', 'system_prefix'])
+        fields = ['name', 'survey_type', 'is_active']

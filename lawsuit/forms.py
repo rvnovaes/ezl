@@ -38,9 +38,7 @@ class BaseForm(ModelForm):
 class TypeMovementForm(BaseForm):
     class Meta:
         model = TypeMovement
-        fields = fields_for_model(TypeMovement,
-                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
-                                           'legacy_code', 'uses_wo'})
+        fields = ['name', 'is_active']
 
     name = forms.CharField(
         max_length=255,
@@ -107,19 +105,17 @@ class MovementForm(BaseForm):
 
 
 class FolderForm(BaseForm):
-    
+
     class Meta:
         model = Folder
-        fields = fields_for_model(Folder,
-                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
-                                           'legacy_code'})
+        fields = ['person_customer', 'is_active']
 
     #legacy_code = forms.CharField(
     #     max_length=255,
     #     required=False
     #)
-    
-    
+
+
     folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}),initial=Folder.increment())
 
     person_customer = forms.ModelChoiceField(
@@ -132,9 +128,8 @@ class FolderForm(BaseForm):
 class LawSuitForm(BaseForm):
     class Meta:
         model = LawSuit
-        fields = fields_for_model(LawSuit,
-                                  exclude={'create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
-                                           'legacy_code', 'folder'})
+        fields = ['person_lawyer', 'instance', 'court_district', 'person_court', 'court_division', 'law_suit_number',
+                  'is_current_instance', 'is_active']
 
     person_lawyer = forms.ModelChoiceField(
         empty_label=u"Selecione",
@@ -166,9 +161,7 @@ class LawSuitForm(BaseForm):
 class CourtDivisionForm(BaseForm):
     class Meta:
         model = CourtDivision
-        fields = fields_for_model(CourtDivision,
-                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user', 'system_prefix',
-                                           'legacy_code'])
+        fields = ['name', 'is_active']
 
         # legacy_code = forms.CharField(max_length=255, required=False)
 
@@ -176,9 +169,7 @@ class CourtDivisionForm(BaseForm):
 class CourtDistrictForm(BaseForm):
     class Meta:
         model = CourtDistrict
-        fields = fields_for_model(CourtDistrict,
-                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user', 'legacy_code',
-                                           'system_prefix'])
+        fields = ['name', 'state', 'is_active']
 
     state = forms.ModelChoiceField(
         queryset=State.objects.filter(is_active=True),
