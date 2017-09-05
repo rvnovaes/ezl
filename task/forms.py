@@ -15,10 +15,9 @@ from .models import Task, Ecm, TypeTask
 class TaskForm(BaseForm):
     class Meta:
         model = Task
-        fields = ['person_asked_by', "person_executed_by", 'type_task',
-                  'delegation_date', 'acceptance_date', "reminder_deadline_date", "final_deadline_date",
-                  'execution_date',
-                  'return_date', 'refused_date', 'blocked_payment_date', 'finished_date', 'is_active']
+        fields = ['type_task', "person_executed_by", 'person_asked_by', "reminder_deadline_date",
+                  "final_deadline_date", 'delegation_date', 'acceptance_date', 'refused_date', 'execution_date',
+                  'return_date', 'blocked_payment_date', 'finished_date', 'is_active']
 
     #
     # legacy_code = forms.CharField(

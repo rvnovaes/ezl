@@ -73,7 +73,7 @@ class InstanceForm(BaseForm):
 class MovementForm(BaseForm):
     class Meta:
         model = Movement
-        fields = ['person_lawyer', 'type_movement', 'deadline', 'is_active']
+        fields = ['type_movement', 'deadline', 'person_lawyer', 'is_active']
 
     # legacy_code = forms.CharField(
     #     label=u"Código Legado",
@@ -126,7 +126,7 @@ class FolderForm(BaseForm):
 
     def __init__(self, *args, **kwargs):
         super(FolderForm, self).__init__(*args, **kwargs)
-        self.order_fields(['person_customer', 'folder_number', 'is_active'])
+        self.order_fields(['folder_number', 'person_customer', 'is_active'])
 
     
 class LawSuitForm(BaseForm):
