@@ -85,25 +85,25 @@ class AdressTest(TestCase):
     
         c_inst = mommy.make(State)
         self.assertTrue(isinstance(c_inst, State))
-    
+
     def test_valid_AddressForm(self):
-    
         street = 'Grao Mogol'
         number = '123'
         city_region = 'Carmo'
         zip_code = '99999-999'
-        country = mommy.make(Country,id=1).id #Conforme os forms
-        state = mommy.make(State,id=13,country_id=country).id
-        city = mommy.make(City,state_id=state).id
-        
-        
+        country = mommy.make(Country, id=1).id  # Conforme os forms
+        state = mommy.make(State, id=13, country_id=country).id
+        city = mommy.make(City, state_id=state).id
+        address_type = mommy.make(AddressType, name='comercial').id
+
         data = {'street': street,
                 'number': number,
                 'city_region': city_region,
                 'zip_code': zip_code,
-                'country':country,
-                'state':state,
-                'city':city}
+                'country': country,
+                'state': state,
+                'city': city,
+                'address_type': address_type}
                 
         form = AddressForm(data=data)
         print(form.errors)

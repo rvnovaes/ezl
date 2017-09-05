@@ -16,9 +16,11 @@ from .forms import *
 # model_mommy serve apenas para testes em modelos. Testes na view tem que ser feitos da maneira convencional
 
 class LawSuitTest(TestCase):
+
     def setUp(self):
         user = User.objects.create_user(username='username', password='password')
         self.client.login(username='username', password='password')
+
 
     def test_routine(self):
         c_inst = mommy.make(LawSuit)
@@ -52,21 +54,21 @@ class LawSuitTest(TestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_create_view(self):
-        url = reverse('lawsuit_add', kwargs={'pk': 1})
+        url = reverse('lawsuit_add', kwargs={'folder': 1})
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 200)
 
     def test_update_view(self):
         c_inst = mommy.make(LawSuit)
-        url = reverse('lawsuit_update', kwargs={'pk': c_inst.id})
+        url = reverse('lawsuit_update', kwargs={'folder': c_inst.folder.id, 'pk': c_inst.id})
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 200)
 
     def test_delete_view(self):
         c_inst = mommy.make(LawSuit)
-        data = {'lawsuit_list': {c_inst.id}}
+        data = {'lawsuit_list': {c_inst.id}, 'parent_class': c_inst.folder.id}
         url = reverse('lawsuit_delete')
         resp = self.client.post(url, data, follow=True)
         # print(resp.context)
@@ -138,7 +140,7 @@ class FolderTest(TestCase):
 
     def test_valid_FolderForm(self):
         legacy_code = '9999'
-        person_customer = mommy.make(Person, name='Joao', is_active=True).id
+        person_customer = mommy.make(Person, name='Joao', is_active=True, is_customer=True).id
 
         data = {'legacy_code': legacy_code,
                 'person_customer': person_customer}
@@ -303,21 +305,21 @@ class MovementTest(TestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_create_view(self):
-        url = reverse('movement_add')
+        c_inst = mommy.make(Movement)
+        url = reverse('movement_add', kwargs={'lawsuit': c_inst.law_suit.id})
         resp = self.client.get(url)
-
         self.assertEqual(resp.status_code, 200)
 
     def test_update_view(self):
         c_inst = mommy.make(Movement)
-        url = reverse('movement_update', kwargs={'pk': c_inst.id})
+        url = reverse('movement_update', kwargs={'pk': c_inst.id, 'lawsuit': c_inst.law_suit.id})
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 200)
 
     def test_delete_view(self):
         c_inst = mommy.make(Movement)
-        data = {'movement_list': {c_inst.id}}
+        data = {'movement_list': {c_inst.id}, 'parent_class': c_inst.law_suit.id}
         url = reverse('movement_delete')
         resp = self.client.post(url, data, follow=True)
         # print(resp.context)

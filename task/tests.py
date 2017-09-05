@@ -5,7 +5,7 @@ from .models import *
 from .views import *
 from .forms import *
 from lawsuit.models import Movement
-from core.models import Person
+from core.models import Person, ContactMechanismType
 from model_mommy import mommy
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -77,8 +77,8 @@ class TaskTest(TestCase):
         #self.c_inst = mommy.make(Instance,name='Random')    
 
     def test_model(self):
-        
         #mommy deixa as coisas bem mais faaceis
+        mommy.make(ContactMechanismType, name='email')
         c_inst = mommy.make(Task)
         self.assertTrue(isinstance(c_inst, Task))
         
@@ -108,35 +108,32 @@ class TaskTest(TestCase):
         self.assertEqual(resp.status_code, 200)
     
     def test_create_view(self):
-    
-        url = reverse('task_add')
+        movement = mommy.make(Movement).id
+        url = reverse('task_add', kwargs={'movement': movement})
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 200)
     
     def test_update_view(self):
-    
         #Task tem algumas fk, o que pode causar erros se instanciados diretamente pelo mommy.
         #Neste caso deve-se instanciar cada objeto separadamente
-        c_inst = mommy.make(Task,movement=mommy.make(Movement,legacy_code='999'), 
-                                 person_asked_by=mommy.make(Person,is_active=True,is_lawyer=True),
-                                 person_executed_by=mommy.make(Person,is_lawyer=True),
-                                 type_task=mommy.make(TypeTask))
+        mommy.make(ContactMechanismType, name='email')
+        c_inst = mommy.make(Task, movement=mommy.make(Movement, legacy_code='999'),
+                            person_asked_by=mommy.make(Person, is_active=True, is_lawyer=True),
+                            person_executed_by=mommy.make(Person, is_lawyer=True),
+                            type_task=mommy.make(TypeTask))
         
         print("Printou",c_inst.id)
-        url = reverse('task_update',kwargs={'pk':str(c_inst.id)})
+        url = reverse('task_update', kwargs={'pk': str(c_inst.id), 'movement': c_inst.movement.id})
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-    
-    
+
     def test_delete_view(self):
-    
+        mommy.make(ContactMechanismType, name='email')
         c_inst = mommy.make(Task)
-        data = {'task_list':{c_inst.id}}
+        data = {'task_list': {c_inst.id}}
         url = reverse('task_delete')
-        resp = self.client.post(url,data,follow=True)
-        #print(resp.context)
-        
+        resp = self.client.post(url, data, follow=True)
         self.assertEqual(resp.status_code, 200)
 
 
@@ -145,6 +142,7 @@ class TaskHistoryTest(TestCase):
     def test_model(self):
         
         #mommy deixa as coisas bem mais faaceis
+        mommy.make(ContactMechanismType, name='email')
         c_inst = mommy.make(TaskHistory)
         self.assertTrue(isinstance(c_inst, TaskHistory))
         
@@ -157,13 +155,11 @@ class EcmTest(TestCase):
 
 
     def test_model(self):
-        
-        #mommy deixa as coisas bem mais faaceis
+        # mommy deixa as coisas bem mais faaceis
         c_inst = mommy.make(Ecm)
-        self.assertTrue(isinstance(c_inst, Ecm)) #Para fazer esse test e preciso criar uma pasta em /opt/files_easy_lawyer com permissao para escrita
+        self.assertTrue(isinstance(c_inst, Ecm))  # Para fazer esse test e preciso criar uma pasta em /opt/files_easy_lawyer com permissao para escrita
         
     def test_valid_EcmForm(self):
-    
         task = mommy.make(Task).id
         file_path = 'arquivo_exemplo.txt' #tem que ta na pasta raiz
         path = SimpleUploadedFile(name=file_path, content=open(file_path, 'rb').read())
@@ -172,22 +168,19 @@ class EcmTest(TestCase):
         form = EcmForm(data=data,files=file_dict) #ATENCAO!!!!!!!!! ARQUIVO SE PASSA PELO PARAMETRO "files" (oh god D:)
         print(form.errors)
         self.assertTrue(form.is_valid())
-        
-        
+
     def test_create_view(self):
-    
-        task = mommy.make(Task,movement=mommy.make(Movement,legacy_code='999'), 
-                                 person_asked_by=mommy.make(Person,name='joao',is_active=True,is_lawyer=True),
-                                 person_executed_by=mommy.make(Person,name='pedro',is_lawyer=True),
-                                 type_task=mommy.make(TypeTask,name='TT123')).id       
-        url = reverse('ecm_add',kwargs={'pk':task})
+        task = mommy.make(Task, movement=mommy.make(Movement, legacy_code='999'),
+                          person_asked_by=mommy.make(Person, name='joao', is_active=True, is_lawyer=True),
+                          person_executed_by=mommy.make(Person, name='pedro', is_lawyer=True),
+                          type_task=mommy.make(TypeTask, name='TT123')).id
+        url = reverse('ecm_add', kwargs={'pk': task})
         resp = self.client.post(url)
 
         self.assertEqual(resp.status_code, 200)
     
     def test_delete_view(self):
-    
-        task = mommy.make(Task,movement=mommy.make(Movement,legacy_code='999'), 
+        task = mommy.make(Task,movement=mommy.make(Movement,legacy_code='999'),
                                  person_asked_by=mommy.make(Person,name='joao',is_active=True,is_lawyer=True),
                                  person_executed_by=mommy.make(Person,name='pedro',is_lawyer=True),
                                  type_task=mommy.make(TypeTask,name='TT123')).id       
