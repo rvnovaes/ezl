@@ -271,8 +271,8 @@ class UserCreateForm(BaseForm, UserCreationForm):
         help_text=_("Enter the same password as before, for verification."),
     )
 
-    groups = forms.ModelMultipleChoiceField(label="Perfis", required=False, queryset=Group.objects.all(),
-                                            widget=forms.SelectMultiple(attrs={'class': 'form-control'}))
+    groups = forms.ModelMultipleChoiceField(label="Perfis", required=False, queryset=Group.objects.all().order_by('name'),
+                                            widget=forms.SelectMultiple(attrs={'class': 'form-control profile-selector'}))
 
     class Meta:
         model = User
@@ -309,11 +309,11 @@ class UserUpdateForm(UserChangeForm):
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
-    groups = forms.ModelMultipleChoiceField(label="Perfis", required=False, queryset=Group.objects.all(),
-                                            widget=forms.SelectMultiple(attrs={'class': 'form-control'}))
+    groups = forms.ModelMultipleChoiceField(label="Perfis", required=False, queryset=Group.objects.all().order_by('name'),
+                                            widget=forms.SelectMultiple(attrs={'class': 'form-control profile-selector'}))
 
     is_active = CustomBooleanField(
-        required=False,
+        required=False,label="Ativo"
     )
 
     password = forms.CharField(

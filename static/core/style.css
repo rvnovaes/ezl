@@ -252,3 +252,8 @@ span, .pagination > .active > span:focus, .pagination > .active > span:hover {
 .form-group{
     margin: 13px 0 0 0;
 }
+
+.profile-selector{
+    width: 200px;
+    height: 90px;
+}
