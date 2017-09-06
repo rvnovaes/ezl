@@ -25,9 +25,12 @@ def receive_notes_execution_date(notes, instance, execution_date, survey_result,
 
 
 @receiver(post_save, sender=Task)
-def new_task(sender, instance, **kwargs):
-    # prev_status = instance.prev_status.task_status
-    # if not instance.prev_status == instance.task_status and instance.prev_status == TaskStatus.OPEN:
+def new_task(sender, instance, created,**kwargs):
+    # Criação do histório inicial da task
+    if created:
+        TaskHistory.objects.create(task=instance, create_user=instance.create_user, status=instance.task_status,
+                                   create_date=instance.alter_date, notes='Nova providência')
+
     id_email = ContactMechanismType.objects.get(name__iexact='email').id
 
     if instance.legacy_code:
@@ -157,7 +160,7 @@ def change_status(sender, instance, **kwargs):
 
     try:
 
-        if new_status is not previous_status:
+        if new_status is not previous_status and instance.id:
             if new_status is TaskStatus.ACCEPTED:
                 instance.acceptance_date = now_date
             elif new_status is TaskStatus.REFUSED:
@@ -177,7 +180,6 @@ def change_status(sender, instance, **kwargs):
             TaskHistory.objects.create(task=instance, create_user=instance.alter_user, status=instance.task_status,
                                        create_date=now_date, notes=instance.__notes)
             instance.__previous_status = instance.task_status
-
 
     except Exception as e:
         print(e)

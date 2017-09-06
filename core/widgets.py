@@ -37,7 +37,7 @@ class MDDatePicker(DateTimeBaseInput):
         if self.min_date:
             context['widget']['min_date'] = timezone.localtime(self.min_date).strftime('%d/%m/%Y')
 
-        if value:
+        if value and not (value is ''):
             context['widget']['value'] = value.strftime('%d/%m/%Y')
             # self.value = value.strftime('%d/%m/%Y %H:%M')
         return context

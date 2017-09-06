@@ -10,7 +10,7 @@ $(document).ready(function () {
                         $(this).on('click', function () {
                             window.open(
                                 $url,
-                                '_blank'
+                                '_self'
                             )
                         })
                     }

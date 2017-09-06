@@ -192,7 +192,9 @@ class Address(Audit):
         db_table = "address"
 
     def __str__(self):
-        return self.street  # TODO refazer o retorno padrao para descrever o endereço
+        return self.street + ", " + self.number + ", " + (
+        self.complement + ", " if self.complement else '') + str(self.city) + ", " + str(
+            self.state)+", "+str(self.country)  # TODO refazer o retorno padrao para descrever o endereço
 
 
 class ContactMechanismType(Audit):
@@ -233,4 +235,3 @@ class ContactUs(Audit):
 
 class ModelExportHistory(models.Model):
     model = models.CharField(max_length=255, unique=True, null=False)
-
