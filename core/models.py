@@ -132,7 +132,7 @@ class City(Audit):
 
 
 class Person(Audit, LegacyCode):
-    legal_name = models.CharField(max_length=255, verbose_name="Razão social/Nome completo")
+    legal_name = models.CharField(max_length=255, blank=False, verbose_name="Razão social/Nome completo")
     name = models.CharField(max_length=255, null=True, blank=True, default=legal_name,
                             verbose_name="Nome Fantasia/Apelido")
     is_lawyer = models.BooleanField(null=False, default=False, verbose_name="É Advogado?")

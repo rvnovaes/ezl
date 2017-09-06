@@ -89,7 +89,7 @@ class PersonForm(BaseForm, forms.Form):
                   'is_customer', 'is_supplier', 'auth_user', 'is_active']
 
     legal_name = forms.CharField(
-        required=False,
+        required=True,
         max_length=255,
     )
 
