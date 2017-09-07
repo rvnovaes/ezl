@@ -1,5 +1,5 @@
-new_success = "Registro Criado com Sucesso"
-update_success = "Registro Atualizado com Sucesso"
+new_success = "Registro criado com sucesso"
+update_success = "Registro atualizado com sucesso"
 
 
 def delete_success(model_name):

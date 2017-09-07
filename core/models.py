@@ -192,9 +192,11 @@ class Address(Audit):
         db_table = "address"
 
     def __str__(self):
-        return self.street + ", " + self.number + (", " + self.complement if self.complement else "") + ", " + str(
-            self.city) + ", " + str(
-            self.state) + ", " + str(self.country)
+        return '{street}, {city_region}, {city} - {state} - CEP {zip_code}'.format(
+            street=self.street, city_region=self.city_region, city=self.city.name,
+            state=self.state.name, zip_code=self.zip_code
+    )
+
 
 
 class ContactMechanismType(Audit):
@@ -235,3 +237,4 @@ class ContactUs(Audit):
 
 class ModelExportHistory(models.Model):
     model = models.CharField(max_length=255, unique=True, null=False)
+

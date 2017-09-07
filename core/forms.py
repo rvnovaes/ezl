@@ -85,7 +85,7 @@ class PersonForm(BaseForm, forms.Form):
 
     class Meta:
         model = Person
-        fields = ['legal_name', 'name', 'legal_type', 'cpf', 'cnpj', 'auth_user', 'is_lawyer', "is_correspondent", 'is_court',
+        fields = ['legal_name', 'name', 'legal_type', 'cpf', 'cnpj', 'is_lawyer', "is_correspondent", 'is_court',
                   'is_customer', 'is_supplier', 'is_active']
 
     legal_name = forms.CharField(
@@ -127,13 +127,6 @@ class PersonForm(BaseForm, forms.Form):
 
     cpf = BRCPFField(label="CPF", required=False, max_length=14, min_length=11, empty_value=None)
     cnpj = BRCNPJField(label="CNPJ", required=False, min_length=14, max_length=18)
-
-    auth_user = forms.ModelChoiceField(
-        queryset=User.objects.all(),
-        required=False,
-        empty_label="Selecione..."
-
-    )
 
 
 class AddressForm(ModelForm, forms.Form):

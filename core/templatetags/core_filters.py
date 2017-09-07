@@ -60,3 +60,11 @@ def get_class_field(type_field):
 @register.filter
 def get_fields_order(fields):
     return fields.sort()
+
+
+@register.filter
+def append_ast_if_req (field):
+    if field.field.required:
+        return field.label + '*'
+    else:
+        return field.label

@@ -8,11 +8,7 @@
             {% include 'questionnaire/generic_survey.html' with generic_survey=form.instance.type_task.survey_type %}
 
             <script type="text/javascript">
-                function clearNotes() {
 
-                    document.getElementById("notes_id").innerHTML = "Teste";
-                    alert("chgeou");
-                }
                 var nextState = {
                     ACCEPTED: {text: "aceitar", icon: "assignment_ind"},
                     REFUSED: {text: "recusar", icon: "assignment"},
@@ -22,14 +18,6 @@
                     BLOCKEDPAYMENT: {text: "Glosar", icon: "money_off"},
                     RETURN: {text: "Retornar", icon: "assignment_late"}
                 };
-
-                function clearNotes(){
-                    console.log("chegou")
-                  console.log(document.getElementById("notes_id"));
-
-
-
-                }
                 function getId(value) {
                     var actionButton = document.getElementById("actionButton");
                     var nextText = document.getElementById("actionText");
@@ -75,6 +63,7 @@
                         <span>Local: {{ form.instance.court|lower|capfirst|default_if_none:"" }}</span>
                         <br>
                         <span>Endereço: {{ form.instance.address|default_if_none:"" }}</span>
+                        <span>Endereço: {{ form.instance.address|capfirst|default_if_none:"" }}</span>
                         <div class="hidden form-control">{{ form.survey_result }}</div>
                     </div>
                     <div class="form-group text-center">

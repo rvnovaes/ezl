@@ -20,18 +20,18 @@ class TaskForm(BaseForm):
 
     person_asked_by = forms.ModelChoiceField(
         empty_label=u"Selecione...",
-        queryset=Person.objects.filter(is_active=True, is_correspondent=False)
+        queryset=Person.objects.filter(is_active=True, is_correspondent=False).order_by('name')
 
     )
 
     person_executed_by = forms.ModelChoiceField(
         empty_label=u"Selecione...",
-        queryset=Person.objects.filter(is_active=True, is_correspondent=True)
+        queryset=Person.objects.filter(is_active=True, is_correspondent=True).order_by('name')
 
     )
 
     type_task = forms.ModelChoiceField(
-        queryset=TypeTask.objects.filter(is_active=True),
+        queryset=TypeTask.objects.filter(is_active=True).order_by('name'),
         empty_label=u"Selecione...",
         label=u"Tipo de Serviço"
     )

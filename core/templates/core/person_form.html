@@ -1,5 +1,6 @@
 {% extends 'inicial.html' %}
 {% load staticfiles %}
+{% load core_filters %}
 {#{% load formset_tags %}#}
 
 {% block content %}
@@ -32,54 +33,47 @@
                                     {% if field.name == 'legal_name' %}
                                         <div class="col-sm-3">
                                             <div class="form-group">
-                                                <label>{{ field.label }}{{ field }}</label>
+                                                <label>{{ field | append_ast_if_req }}{{ field }}</label>
                                             </div>
                                         </div>
 
                                     {% elif field.name == 'name' %}
                                         <div class="col-sm-3">
                                             <div class="form-group">
-                                                <label>{{ field.label }}{{ field }}</label>
-                                            </div>
-                                        </div>
-
-                                    {% elif field.name == 'auth_user' %}
-                                        <div class="col-sm-2">
-                                            <div class="form-group">
-                                                <label>{{ field.label }}{{ field }}</label>
+                                                <label>{{ field | append_ast_if_req }} {{ field }}</label>
                                             </div>
                                         </div>
 
                                     {% elif field.name == 'legal_type' %}
-                                        <div class="col-sm-2">
+                                        <div class="col-sm-3">
                                             <div class="form-group">
-                                                <label id="id_legal_type_label">{{ field.label }}</label>
+                                                <label id="id_legal_type_label">{{ field | append_ast_if_req }} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
 
 
                                     {% elif field.name == 'cpf' %}
-                                        <div class="col-sm-2 cpf-display">
+                                        <div class="col-sm-3 cpf-display">
                                             <div id="cpf_container"
                                                  class="form-group {% if form.instance.legal_type == 'J' %} hidden {% endif %}">
-                                                    <label>{{ field.label }}{{ field }}</label>
+                                                <label>{{ field | append_ast_if_req }} {{ field }}</label>
                                             </div>
                                         </div>
 
 
                                     {% elif field.name == 'cnpj' %}
-                                        <div class="col-sm-2 cnpj-display" style="display: none">
+                                        <div class="col-sm-3 cnpj-display" style="display: none">
                                             <div id="cnpj_container"
                                                  class="form-group {% if form.instance.legal_type == 'F' or not form.instance.id %}
                                                   hidden {% endif %}">
-                                                <label>{{ field.label }}{{ field }}</label>
+                                                <label>{{ field | append_ast_if_req }} {{ field }}</label>
                                             </div>
                                         </div>
                                     {% else %}
                                         <div class="col-sm-2">
                                             <div class="form-group">
-                                                <label>{{ field.label }}{{ field }}</label>
+                                                <label>{{ field | append_ast_if_req }} {{ field }}</label>
                                             </div>
                                         </div>
 
@@ -147,59 +141,78 @@
 
                                 <input type="text" name="address_set-TOTAL_FORMS"
                                        id="form_management_total_forms"
-                                       class="form-control" maxlength="255" value="{{ addresses|length }}">
+                                       class="form-control" maxlength="255"
+                                       value="{{ addresses|length }}">
 
                                 {% for address in addresses %}
 
                                     <input type="text" name="address_set-{{ forloop.counter0 }}-id"
                                            id="id_address_set-{{ forloop.counter0 }}-id"
                                            class="form-control" maxlength="255"
-                                           value="{% if address.id != None %}{{ address.id }}{% endif %}">
+                                           value="
+                                                   {% if address.id != None %}{{ address.id }}{% endif %}">
 
-                                    <input type="text" name="address_set-{{ forloop.counter0 }}-street"
+                                    <input type="text"
+                                           name="address_set-{{ forloop.counter0 }}-street"
                                            id="id_address_set-{{ forloop.counter0 }}-street"
-                                           class="form-control" maxlength="255" value="{{ address.street }}">
+                                           class="form-control" maxlength="255"
+                                           value="{{ address.street }}">
 
-                                    <input type="text" name="address_set-{{ forloop.counter0 }}-number"
+                                    <input type="text"
+                                           name="address_set-{{ forloop.counter0 }}-number"
                                            id="id_address_set-{{ forloop.counter0 }}-number"
-                                           class="form-control" maxlength="255" value="{{ address.number }}">
+                                           class="form-control" maxlength="255"
+                                           value="{{ address.number }}">
 
-                                    <input type="text" name="address_set-{{ forloop.counter0 }}-complement"
+                                    <input type="text"
+                                           name="address_set-{{ forloop.counter0 }}-complement"
                                            id="id_address_set-{{ forloop.counter0 }}-complement"
-                                           class="form-control" maxlength="255" value="{{ address.complement }}">
+                                           class="form-control" maxlength="255"
+                                           value="{{ address.complement }}">
 
-                                    <input type="text" name="address_set-{{ forloop.counter0 }}-city_region"
+                                    <input type="text"
+                                           name="address_set-{{ forloop.counter0 }}-city_region"
                                            id="id_address_set-{{ forloop.counter0 }}-city_region"
-                                           class="form-control" maxlength="255" value="{{ address.city_region }}">
+                                           class="form-control" maxlength="255"
+                                           value="{{ address.city_region }}">
 
-                                    <input type="text" name="address_set-{{ forloop.counter0 }}-zip_code"
+                                    <input type="text"
+                                           name="address_set-{{ forloop.counter0 }}-zip_code"
                                            id="id_address_set-{{ forloop.counter0 }}-zip_code"
-                                           class="form-control" maxlength="255" value="{{ address.zip_code }}">
+                                           class="form-control" maxlength="255"
+                                           value="{{ address.zip_code }}">
 
-                                    <textarea name="address_set-{{ forloop.counter0 }}-notes" cols="40" rows="10"
+                                    <textarea name="address_set-{{ forloop.counter0 }}-notes"
+                                              cols="40" rows="10"
                                               class="form-control"
                                               id="id_address_set-{{ forloop.counter0 }}-notes">{{ address.notes }}</textarea>
 
-                                    <select name="address_set-{{ forloop.counter0 }}-country" class="form-control"
+                                    <select name="address_set-{{ forloop.counter0 }}-country"
+                                            class="form-control"
                                             id="id_address_set-{{ forloop.counter0 }}-country">
-                                        <option value="{{ address.country.id }}" selected>{{ address.country }}</option>
+                                        <option value="{{ address.country.id }}"
+                                                selected>{{ address.country }}</option>
                                     </select>
 
-                                    <input type="text" name="address_set-{{ forloop.counter0 }}-state"
+                                    <input type="text"
+                                           name="address_set-{{ forloop.counter0 }}-state"
                                            id="id_address_set-{{ forloop.counter0 }}-state"
                                            value="{{ address.state.id }}">
 
-                                    <input type="text" name="address_set-{{ forloop.counter0 }}-city"
+                                    <input type="text"
+                                           name="address_set-{{ forloop.counter0 }}-city"
                                            id="id_address_set-{{ forloop.counter0 }}-city"
                                            value="{{ address.city.id }}">
 
-                                    <input type="checkbox" name="address_set-{{ forloop.counter0 }}-is_active"
+                                    <input type="checkbox"
+                                           name="address_set-{{ forloop.counter0 }}-is_active"
                                            id="id_address_set-{{ forloop.counter0 }}-is_active"
                                             {% if address.is_active == True or address.is_active == 'on' %}
                                            checked
                                             {% endif %}
-                                    >
-                                    <input type="text" name="address_set-{{ forloop.counter0 }}-address_type"
+                                            >
+                                    <input type="text"
+                                           name="address_set-{{ forloop.counter0 }}-address_type"
                                            id="id_address_set-{{ forloop.counter0 }}-address_type"
                                            value="{{ address.address_type.id }}">
                                 {% endfor %}
@@ -295,9 +308,11 @@
                                             id="is_active-{{ forloop.counter0 }}">
 
                                             {% if address.is_active == True or address.is_active == 'on' %}
-                                                <i class="material-icons" style="font-size: larger;">check</i>
+                                                <i class="material-icons"
+                                                   style="font-size: larger;">check</i>
                                             {% else %}
-                                                <i class="material-icons" style="font-size: larger;">close</i>
+                                                <i class="material-icons"
+                                                   style="font-size: larger;">close</i>
                                             {% endif %}
 
                                         </th>
@@ -336,9 +351,11 @@
                                             id="city_region-{{ address.id }}"
                                             class="update_address">{{ address.city_region }}</th>
                                         <th style="text-align: center; font-weight: 100;"
-                                            id="city-{{ address.id }}" class="update_address">{{ address.city }}</th>
+                                            id="city-{{ address.id }}"
+                                            class="update_address">{{ address.city }}</th>
                                         <th style="text-align: center; font-weight: 100;"
-                                            id="state-{{ address.id }}" class="update_address">{{ address.state }}</th>
+                                            id="state-{{ address.id }}"
+                                            class="update_address">{{ address.state }}</th>
                                         <th style="text-align: center; font-weight: 100;"
                                             id="zip_code-{{ address.id }}"
                                             class="update_address">{{ address.zip_code }}</th>
@@ -347,7 +364,8 @@
                                             id="country-{{ address.id }}"
                                             class="update_address">{{ address.country }}</th>
                                         <th style="text-align: center; font-weight: 100;"
-                                            id="notes-{{ address.id }}" class="update_address">{{ address.notes }}</th>
+                                            id="notes-{{ address.id }}"
+                                            class="update_address">{{ address.notes }}</th>
                                         <th style="text-align: center; font-weight: 100;"
                                             id="address_type-{{ address.id }}"
                                             class="update_address">{{ address.address_type }}</th>
@@ -356,9 +374,11 @@
                                             id="is_active-{{ address.id }}" class="update_address">
 
                                             {% if address.is_active == True or address.is_active == 'on' %}
-                                                <i class="material-icons" style="font-size: larger;">check</i>
+                                                <i class="material-icons"
+                                                   style="font-size: larger;">check</i>
                                             {% else %}
-                                                <i class="material-icons" style="font-size: larger;">close</i>
+                                                <i class="material-icons"
+                                                   style="font-size: larger;">close</i>
                                             {% endif %}
 
                                         </th>
@@ -369,15 +389,19 @@
                         </table>
                     </div>
 
-                    <div class="modal fade" id="modal-wait" data-backdrop="static" data-keyboard="false">
+                    <div class="modal fade" id="modal-wait" data-backdrop="static"
+                         data-keyboard="false">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h4 class="modal-title" style="text-align: center">Aguarde ...</h4>
+                                    <h4 class="modal-title" style="text-align: center">Aguarde
+                                        ...</h4>
                                 </div>
                                 <div class="modal-body">
                                     <div class="progress">
-                                        <div class="progress-bar" role="progressbar" style="width: 100%;">100%</div>
+                                        <div class="progress-bar" role="progressbar"
+                                             style="width: 100%;">100%
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -404,53 +428,60 @@
 
                                             <div class="col-sm-12">
                                                 <div class="form-group">
-                                                    <label class="control-label" for="update_id_address_type">Tipo de
+                                                    <label for="update_id_address_type">Tipo de
                                                         Endereço</label>
                                                     <select name="address_type" required
-                                                            id="update_id_address_type" class="form-control">
+                                                            id="update_id_address_type"
+                                                            class="form-control">
                                                         <option value=" " selected></option>
                                                     </select>
                                                 </div>
                                             </div>
                                             <div class="col-sm-6">
                                                 <div class="form-group">
-                                                    <label class="control-label"
-                                                           for="update_id_street">Logradouro</label>
-                                                    <input type="text" name="street" id="update_id_street"
-                                                           class="form-control" maxlength="255" value=" "
+                                                    <label
+                                                            for="update_id_street">Logradouro</label>
+                                                    <input type="text" name="street"
+                                                           id="update_id_street"
+                                                           class="form-control" maxlength="255"
+                                                           value=" "
                                                            required/>
                                                 </div>
                                             </div>
                                             <div class="col-sm-3">
                                                 <div class="form-group ">
-                                                    <label class="control-label" for="update_id_number">Número</label>
-                                                    <input type="text" name="number" id="update_id_number"
-                                                           class="form-control" maxlength="255" value=" "
+                                                    <label for="update_id_number">Número</label>
+                                                    <input type="text" name="number"
+                                                           id="update_id_number"
+                                                           class="form-control" maxlength="255"
+                                                           value=" "
                                                            required/>
                                                 </div>
                                             </div>
                                             <div class="col-sm-3">
                                                 <div class="form-group ">
-                                                    <label class="control-label"
-                                                           for="update_id_complement">Complemento</label>
+                                                    <label
+                                                            for="update_id_complement">Complemento</label>
                                                     <input type="text" name="complement"
-                                                           class="form-control" maxlength="255" value=" "
+                                                           class="form-control" maxlength="255"
+                                                           value=" "
                                                            id="update_id_complement"/>
                                                 </div>
                                             </div>
                                             <div class="col-sm-6">
                                                 <div class="form-group ">
-                                                    <label class="control-label"
-                                                           for="update_id_city_region">Bairro</label>
+                                                    <label
+                                                            for="update_id_city_region">Bairro</label>
                                                     <input type="text" name="city_region"
                                                            id="update_id_city_region"
-                                                           class="form-control" maxlength="255" value=" "
+                                                           class="form-control" maxlength="255"
+                                                           value=" "
                                                            required/>
                                                 </div>
                                             </div>
                                             <div class="col-sm-6">
                                                 <div class="form-group ">
-                                                    <label class="control-label" for="update_id_zip_code">CEP</label>
+                                                    <label for="update_id_zip_code">CEP</label>
                                                     <input type="text" name="zip_code"
                                                            id="update_id_zip_code" value=" "
                                                            class="form-control" maxlength="255"
@@ -460,7 +491,7 @@
 
                                             <div class="col-sm-4">
                                                 <div class="form-group ">
-                                                    <label class="control-label" for="update_id_country">País</label>
+                                                    <label for="update_id_country">País</label>
                                                     <select name="country" id="update_id_country"
                                                             class="form-control" required>
                                                         <option value=" " selected></option>
@@ -469,7 +500,7 @@
                                             </div>
                                             <div class="col-sm-4">
                                                 <div class="form-group ">
-                                                    <label class="control-label" for="update_id_state">Estado</label>
+                                                    <label for="update_id_state">Estado</label>
                                                     <select name="state" id="update_id_state"
                                                             class="form-control" required>
                                                         <option value=" " selected></option>
@@ -478,7 +509,7 @@
                                             </div>
                                             <div class="col-sm-4">
                                                 <div class="form-group ">
-                                                    <label class="control-label" for="update_id_city">Município</label>
+                                                    <label for="update_id_city">Município</label>
                                                     <select name="city" id="update_id_city"
                                                             class="form-control"
                                                             required>
@@ -488,9 +519,10 @@
                                             </div>
                                             <div class="col-sm-12">
                                                 <div class="form-group ">
-                                                    <label class="control-label"
-                                                           for="update_id_notes">Observação</label>
-                                                    <textarea name="notes" id="update_id_notes" cols="40"
+                                                    <label
+                                                            for="update_id_notes">Observação</label>
+                                                    <textarea name="notes" id="update_id_notes"
+                                                              cols="40"
                                                               rows="2" class="form-control">
                                                                     </textarea>
                                                 </div>
@@ -500,13 +532,14 @@
                                         </div>
 
                                         <div class="form-group ">
-                                            <label class="control-label" for="update_id_is_active"
+                                            <label for="update_id_is_active"
                                                    id="label_update_id_is_active">Ativo</label>
                                             <label>
                                                 <div class="checkbox" id="check">
                                                     <input type="checkbox"
                                                            name="is_active"
-                                                           id="update_id_is_active" class="delete_check">
+                                                           id="update_id_is_active"
+                                                           class="delete_check">
                                                     <span class="checkbox-material">
                                             <span class="check"></span>
                                         </span>
@@ -520,14 +553,16 @@
 
                                         <div class="text-center">
 
-                                            <a class="btn btn-sm btn-raised btn-default" href="{% url 'person_list' %}"
+                                            <a class="btn btn-sm btn-raised btn-default"
+                                               href="{% url 'person_list' %}"
                                                data-dismiss="modal">
                                                 <i class="material-icons left">clear</i>
                                                 Cancelar
                                                 <div class="ripple-container"></div>
                                             </a>
 
-                                            <button type="button" class="btn btn-sm btn-raised btn-primary"
+                                            <button type="button"
+                                                    class="btn btn-sm btn-raised btn-primary"
                                                     id="save_updated_address">
                                                 <i class="material-icons left">done</i>
                                                 Atualizar
@@ -544,7 +579,8 @@
                     </div>
                     <div class="text-right" style="margin: auto">
 
-                        <input type="button" data-toggle="modal" data-target="#confirmDelete" id="delete_button"
+                        <input type="button" data-toggle="modal" data-target="#confirmDelete"
+                               id="delete_button"
                                class="btn btn-fab btn-warning material-icons" value="remove"
                                style="height: 30px !important; width: 30px !important; min-width: 30px !important;"
                                onclick="can_delete_addresses()" disabled>
@@ -618,6 +654,7 @@
                     <div class="modal-body">
                         <div id="message_errors"></div>
                         <br>
+
                         <form action="" method="POST" id="form_new_address">
                             <div id="message_error"></div>
                             {% csrf_token %}
@@ -627,40 +664,40 @@
                                     {% if field.name == 'address_type' %}
                                         <div class="col-sm-12">
                                             <div class="form-group ">
-                                                <label class="control-label"
-                                                       required="">{{ field.label }}</label>
+                                                <label
+                                                        required="">{{ field | append_ast_if_req }} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
                                     {% elif field.name == 'street' %}
                                         <div class="col-sm-6">
                                             <div class="form-group  is-empty">
-                                                <label class="control-label"
-                                                       required="">{{ field.label }}</label>
+                                                <label
+                                                        required="">{{ field | append_ast_if_req }} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
                                     {% elif field.name == 'number' %}
                                         <div class="col-sm-3">
                                             <div class="form-group  is-empty">
-                                                <label class="control-label"
-                                                       required="">{{ field.label }}</label>
+                                                <label
+                                                        required="">{{ field | append_ast_if_req }} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
                                     {% elif field.name == 'complement' %}
                                         <div class="col-sm-3">
                                             <div class="form-group  is-empty">
-                                                <label class="control-label"
-                                                       required="">{{ field.label }}</label>
+                                                <label
+                                                        required="">{{ field | append_ast_if_req }} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
                                     {% elif field.name == 'city_region' %}
                                         <div class="col-sm-6">
                                             <div class="form-group  is-empty">
-                                                <label class="control-label"
-                                                       required="">{{ field.label }}</label>
+                                                <label
+                                                        required="">{{ field | append_ast_if_req }} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
@@ -668,8 +705,8 @@
                                     {% elif field.name == 'zip_code' %}
                                         <div class="col-sm-6">
                                             <div class="form-group  is-empty">
-                                                <label class="control-label"
-                                                       required="">{{ field.label }}</label>
+                                                <label
+                                                        required="">{{ field | append_ast_if_req }} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
@@ -677,8 +714,8 @@
                                     {% elif field.name == 'country' %}
                                         <div class="col-sm-4">
                                             <div class="form-group  is-empty">
-                                                <label class="control-label"
-                                                       required="">{{ field.label }}</label>
+                                                <label
+                                                        required="">{{ field | append_ast_if_req }} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
@@ -686,8 +723,8 @@
                                     {% elif field.name == 'state' %}
                                         <div class="col-sm-4">
                                             <div class="form-group  is-empty">
-                                                <label class="control-label"
-                                                       required="">{{ field.label }}</label>
+                                                <label
+                                                        required="">{{ field | append_ast_if_req }} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
@@ -695,8 +732,8 @@
                                     {% elif field.name == 'city' %}
                                         <div class="col-sm-4">
                                             <div class="form-group  is-empty">
-                                                <label class="control-label"
-                                                       required="">{{ field.label }}</label>
+                                                <label
+                                                        required="">{{ field | append_ast_if_req }} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
@@ -704,8 +741,8 @@
                                     {% elif field.name == 'notes' %}
                                         <div class="col-sm-12">
                                             <div class="form-group  is-empty">
-                                                <label class="control-label"
-                                                       required="">{{ field.label }}</label>
+                                                <label
+                                                        required="">{{ field | append_ast_if_req }} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
@@ -725,7 +762,8 @@
 
                             <div class="text-center">
 
-                                <a class="btn btn-sm btn-raised btn-default" href="{% url 'person_list' %}"
+                                <a class="btn btn-sm btn-raised btn-default"
+                                   href="{% url 'person_list' %}"
                                    data-dismiss="modal">
                                     <i class="material-icons left">clear</i>
                                     Cancelar
@@ -760,7 +798,8 @@
         <div class="modal-dialog">
             <div class="modal-content ">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                    </button>
                     <h4 class="modal-title"><i class="material-icons">warning</i></h4>
                     <h4 class="modal-title">Atenção!</h4>
                 </div>
@@ -769,8 +808,11 @@
                 </div>
                 <div class="modal-footer">
 
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                    <button onclick="document.forms[0].submit()" type="submit" class="btn btn-primary">Sim</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar
+                    </button>
+                    <button onclick="document.forms[0].submit()" type="submit"
+                            class="btn btn-primary">Sim
+                    </button>
 
                 </div>
             </div>
@@ -1262,14 +1304,13 @@
 
                 document.getElementById("message_text").innerHTML = "Endereço atualizado com sucesso";
                 $('#form_address_update').modal('hide');
-                $('#modal_message').modal('show');
             }
 
             else {
 
                 document.getElementById("message_error").innerHTML = '<div class="alert alert-danger">' +
-                    message +
-                    '</div>';
+                        message +
+                        '</div>';
                 $('#form_address_update').animate({scrollTop: 0}, 'slow');
             }
 
@@ -1455,7 +1496,6 @@
 
                     $('#new_address').modal('hide');
                     document.getElementById("message_text").innerHTML = "Endereço adicionado com successo";
-                    $('#modal_message').modal('show');
 
                     $("#id_address_type").val($("#id_address_type option:first").val());
                     $("#id_country").val($("#id_country option:first").val());
@@ -1488,8 +1528,8 @@
                 else {
 
                     document.getElementById("message_errors").innerHTML = '<div class="alert alert-danger">' +
-                        message +
-                        '</div>';
+                            message +
+                            '</div>';
                     $('#new_address').animate({scrollTop: 0}, 'slow');
                 }
             });
