@@ -8,6 +8,7 @@ $(document).ready(function () {
                 if ($(this).attr('class') !== 'selection') {
                     if ($url.length > 0) {
                         $(this).on('click', function () {
+                            window.location.href = $url;
                             window.open(
                                 $url,
                                 '_self'
