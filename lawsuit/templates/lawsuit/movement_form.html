@@ -1,6 +1,7 @@
 {% extends 'inicial.html' %}
 {#{% load staticfiles %}#}
 {#{% load formset_tags %}#}
+{% load core_filters %}
 {% block content %}
     {% include 'core/widgets/messages.html' %}
     <form action="" method="post">{% csrf_token %}
@@ -14,7 +15,7 @@
                         {% for field in form %}
                             <div class="form-group">
                                 <label>
-                                    {{ field.label }}{{ field }}
+                                    {{ field | append_ast_if_req }}{{ field }}
                                 </label>
                             </div>
                         {% endfor %}

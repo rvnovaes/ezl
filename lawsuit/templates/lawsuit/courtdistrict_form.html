@@ -1,6 +1,7 @@
 {% extends 'inicial.html' %}
 {#{% load staticfiles %}#}
 {#{% load formset_tags %}#}
+{% load core_filters %}
 
 {% block content %}
     {% include 'core/widgets/messages.html' %}
@@ -16,7 +17,7 @@
                         {% for field in form %}
                             <div class="form-group col-md-2">
                                 <label>
-                                    {{ field.label }}{{ field }}
+                                    {{ field | append_ast_if_req }}{{ field }}
                                 </label>
                             </div>
                         {% endfor %}

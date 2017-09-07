@@ -9,13 +9,13 @@ import lawsuit.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lawsuit', '0035_auto_20170831_1111'),
+        # ('lawsuit', '0035_auto_20170831_1111'),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='folder',
-            name='folder_number',
-            field=models.IntegerField(default=lawsuit.models.Folder.increment, editable=False, null=True, verbose_name='Número da Pasta'),
-        ),
+        # migrations.AlterField(
+        #     model_name='folder',
+        #     name='folder_number',
+        #     field=models.IntegerField(default=lawsuit.models.Folder.increment, editable=False, null=True, verbose_name='Número da Pasta'),
+        # ),
     ]

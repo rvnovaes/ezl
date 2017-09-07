@@ -82,7 +82,7 @@ class MovementForm(BaseForm):
     # )
 
     person_lawyer = forms.ModelChoiceField(
-        queryset=Person.objects.filter(is_active=True, is_lawyer=True),
+        queryset=Person.objects.filter(is_active=True, is_lawyer=True).order_by('name'),
         empty_label=u"Selecione...",
     )
 
@@ -92,7 +92,7 @@ class MovementForm(BaseForm):
     # )
 
     type_movement = forms.ModelChoiceField(
-        queryset=TypeMovement.objects.filter(is_active=True),
+        queryset=TypeMovement.objects.filter(is_active=True).order_by('name'),
         empty_label=u"Selecione...",
     )
 
@@ -137,25 +137,25 @@ class LawSuitForm(BaseForm):
 
     person_lawyer = forms.ModelChoiceField(
         empty_label=u"Selecione",
-        queryset=Person.objects.filter(is_active=True, is_lawyer=True).only('legal_name'), required=True
+        queryset=Person.objects.filter(is_active=True, is_lawyer=True).only('legal_name').order_by('name'), required=True
     )
     # folder = forms.ModelChoiceField(
     #     empty_label=u"Selecione",
     #     queryset=Folder.objects.filter(is_active=True), required=True
     # )
     instance = forms.ModelChoiceField(
-        queryset=Instance.objects.filter(is_active=True),
+        queryset=Instance.objects.filter(is_active=True).order_by('name'),
         empty_label=u"Selecione", required=True
     )
     court_district = forms.ModelChoiceField(
-        queryset=CourtDistrict.objects.filter(is_active=True),
+        queryset=CourtDistrict.objects.filter(is_active=True).order_by('name'),
         empty_label=u"Selecione", required=True
     )
     person_court = forms.ModelChoiceField(
-        queryset=Person.objects.filter(is_active=True, is_court=True),
+        queryset=Person.objects.filter(is_active=True, is_court=True).order_by('name'),
         empty_label=u"Selecione", required=True)
     court_division = forms.ModelChoiceField(
-        queryset=CourtDivision.objects.filter(is_active=True),
+        queryset=CourtDivision.objects.filter(is_active=True).order_by('name'),
         empty_label=u"Selecione", required=True
     )
     law_suit_number = forms.CharField(max_length=255, required=True)

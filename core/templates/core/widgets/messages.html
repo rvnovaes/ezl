@@ -1,27 +1,25 @@
 {#<div class="container text-center">#}
-    {% if form.errors %}
-        {% for field in form %}
-            {% for error in field.errors %}
-                <div class="alert alert-dismissable alert-danger">
-                    <button type="button" class="close" data-dismiss="alert">×</button>
-                    <strong>{{ error|escape }}</strong>
-                </div>
-            {% endfor %}
+{% if form.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+            <script>
+                showToast('error', '{{ error|escape }}', 'Atenção!', 0, false)
+            </script>
         {% endfor %}
-        {% for error in form.non_field_errors %}
-            <div class="alert alert-dismissable  alert-danger">
-                <button type="button" class="close" data-dismiss="alert">×</button>
-                <strong>{{ error|escape }}</strong>
-            </div>
-        {% endfor %}
-    {% endif %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+        <script>
+            showToast('error', '{{ error|escape }}', 'Atenção!', 0, false)
+        </script>
+    {% endfor %}
+{% endif %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-dismissible alert-{{ message.tags }}">
-                <button type="button" class="close" data-dismiss="alert">×</button>
-                <div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-            </div>
-        {% endfor %}
-    {% endif %}
+{% if messages %}
+    {% for message in messages %}
+        <script>
+            showToast('{{ message.tags }}', '{{ message }}', '', 3000, true)
+        </script>
+    {% endfor %}
+{% endif %}
 {#</div>#}
+
