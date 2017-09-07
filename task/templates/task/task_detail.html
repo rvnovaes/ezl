@@ -22,6 +22,14 @@
                     BLOCKEDPAYMENT: {text: "Glosar", icon: "money_off"},
                     RETURN: {text: "Retornar", icon: "assignment_late"}
                 };
+
+                function clearNotes(){
+                    console.log("chegou")
+                  console.log(document.getElementById("notes_id"));
+
+
+
+                }
                 function getId(value) {
                     var actionButton = document.getElementById("actionButton");
                     var nextText = document.getElementById("actionText");
@@ -325,7 +333,7 @@
                             <div class="form-group text-center">
                                 <button type="reset" style="width: 95px!important;" onclick="clearNotes()"
                                         class="btn btn-sm btn-raised btn-default"
-                                        data-dismiss="modal">
+                                        data-dismiss="modal" onclick="clearNotes()">
                                     Cancelar
                                 </button>
 
