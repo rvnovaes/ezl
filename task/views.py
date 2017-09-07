@@ -178,8 +178,6 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
                                        execution_date=execution_date, survey_result=survey_result)
 
-        # form.save()
-
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
@@ -273,7 +271,6 @@ def delete_ecm(request, pk):
     task = query.values('task_id').first()
 
     try:
-        # import_query = Ecm.objects.filter(id=pk).delete()
         query.delete()
         num_ged = Ecm.objects.filter(task_id=task['task_id']).count()
         data = {'is_deleted': True,
@@ -290,7 +287,6 @@ def delete_ecm(request, pk):
         data = {'is_deleted': False,
                 'message': file_exists_error_delete()
                 }
-
 
     except Exception:
         data = {'is_deleted': False,
@@ -326,8 +322,6 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             client_query = Q()
 
             if not self.request.user.has_perm('task.view_all_tasks'):
-                # dynamic_query.add(Q(delegation_date__isnull=False), Q.AND)
-
                 if self.request.user.has_perm('task.view_delegated_tasks'):
                     person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
                 elif self.request.user.has_perm('task.view_requested_tasks'):

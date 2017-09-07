@@ -24,8 +24,6 @@ class TaskTable(tables.Table):
     return_date = tables.DateColumn(format="d/m/Y")
     refused_date = tables.DateColumn(format="d/m/Y")
 
-    # order_by = sorted(Task.objects.all(), key=lambda t: str(t.status.value))
-
     class Meta:
         model = DashboardViewModel
         sequence = ['selection', 'status', 'type_task', "person_executed_by", 'person_asked_by', "reminder_deadline_date",
@@ -68,7 +66,6 @@ class DashboardStatusTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/dashboard/' + str(record.pk) + '/'
         }
-
 
 class TypeTaskTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)

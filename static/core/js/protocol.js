@@ -4,7 +4,7 @@ window.survey = new Survey.Model(
             {
                 name: "page3",
                 elements: [
-                    {
+                    {   isRequired: true,
                         type: "radiogroup",
                         name: "protocoloRealizado",
                         title: "Protocolo realizado ?",
@@ -27,7 +27,7 @@ window.survey = new Survey.Model(
                         title: "Data de protocolo",
                         inputType: "date"
                     },
-                    {
+                    {   isRequired: true,
                         type: "radiogroup",
                         name: "question1",
                         visible: false,

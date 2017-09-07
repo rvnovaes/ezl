@@ -26,7 +26,7 @@ window.survey = new Survey.Model(
                         visible: false,
                         visibleIf: "{alvaraRetiradoAutos} = 'N'"
                     },
-                    {
+                    {   isRequired: true,
                         type: "radiogroup",
                         name: "viaOriginalEnviada",
                         visible: false,
@@ -89,7 +89,7 @@ window.survey = new Survey.Model(
                         visibleIf: "{alvaraLevadoBanco} = 'N'",
                         title: "Justificativa Alvará não retirado: "
                     },
-                    {
+                    {   isRequired: true,
                         type: "radiogroup",
                         name: "despReembolsaveis",
                         title: "Despesas reembolsáveis ? ",

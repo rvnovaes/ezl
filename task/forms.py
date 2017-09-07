@@ -3,7 +3,6 @@ from datetime import datetime
 import pytz
 from django import forms
 from django.forms import ModelForm
-from django.forms.models import fields_for_model
 
 from core.models import Person
 from core.widgets import MDDateTimepicker, MDDatePicker
@@ -18,19 +17,6 @@ class TaskForm(BaseForm):
         fields = ['type_task', "person_executed_by", 'person_asked_by', "reminder_deadline_date",
                   "final_deadline_date", 'delegation_date', 'acceptance_date', 'refused_date', 'execution_date',
                   'return_date', 'blocked_payment_date', 'finished_date', 'is_active']
-
-    #
-    # legacy_code = forms.CharField(
-    #     label=u"Código Legado",
-    #     max_length=255,
-    #     required=False
-    # )
-
-    # movement = forms.ModelChoiceField(
-    #     queryset=Movement.objects.filter(is_active=True),
-    #     empty_label=u"Selecione...",
-    #     label=u"Movimentação"
-    # )
 
     person_asked_by = forms.ModelChoiceField(
         empty_label=u"Selecione...",
@@ -51,12 +37,12 @@ class TaskForm(BaseForm):
     )
     # TODO verificar como aplicar os formulários com dateTimeField
 
-    delegation_date = forms.DateTimeField(
-
-        widget=MDDatePicker(attrs={'class': 'form-control'},
-                            format='DD/MM/YYYY'
-                            )
-    )
+    delegation_date = forms.DateTimeField(show_hidden_initial=True, initial=datetime.now(),
+                                          required=True,
+                                          widget=MDDatePicker(attrs={'class': 'form-control'},
+                                                              format='DD/MM/YYYY'
+                                                              )
+                                          )
 
     acceptance_date = forms.DateTimeField(required=False,
                                           widget=MDDatePicker(attrs={'class': 'form-control'},
@@ -64,7 +50,7 @@ class TaskForm(BaseForm):
                                                               )
                                           )
 
-    reminder_deadline_date = forms.DateTimeField(required=False,
+    reminder_deadline_date = forms.DateTimeField(required=True,
                                                  widget=MDDatePicker(attrs={'class': 'form-control'},
                                                                      format='DD/MM/YYYY')
                                                  )
@@ -90,7 +76,7 @@ class TaskForm(BaseForm):
 
     blocked_payment_date = forms.DateTimeField(required=False,
                                                widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                                 format='DD/MM/YYYY')
+                                                                   format='DD/MM/YYYY')
                                                )
 
     finished_date = forms.DateTimeField(required=False,
@@ -103,10 +89,6 @@ class TaskDetailForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
         self.fields['execution_date'].widget.min_date = self.instance.acceptance_date
-        # self.fields['status'] = self.instance.status
-
-    # def deliver_notes(self, notes):
-    #     send_notes_execution_date.send(sender=self.__class__, notes=notes)
 
     class Meta:
         model = Task
@@ -118,14 +100,14 @@ class TaskDetailForm(ModelForm):
                                          initial=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE)),
                                          label=u"Data de Cumprimento",
                                          widget=MDDateTimepicker(attrs={'class': 'form-control'},
-                                                                 format='DD/MM/YYYY HH:mm'
+                                                                 format='DD/MM/YYYY HH:mm',
                                                                  ))
     notes = forms.CharField(
         required=True,
         initial="",
         label=u"Insira um comentário",
         widget=forms.Textarea(
-            attrs={'class': 'form-control', 'type': 'text', 'cols': '5', 'id': 'textarea1'}
+            attrs={'class': 'form-control', 'cols': '5', 'id': 'notes_id'}
         )
     )
 
@@ -141,7 +123,4 @@ class EcmForm(BaseForm):
 class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
-        fields = fields_for_model(TypeTask,
-                                  exclude=['create_user', 'alter_date', 'create_date', 'alter_user',
-                                           'legacy_code', 'system_prefix'])
         fields = ['name', 'survey_type', 'is_active']
