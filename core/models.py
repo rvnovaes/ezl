@@ -192,7 +192,11 @@ class Address(Audit):
         db_table = "address"
 
     def __str__(self):
-        return self.street  # TODO refazer o retorno padrao para descrever o endereço
+        return '{street}, {city_region}, {city} - {state} - CEP {zip_code}'.format(
+            street=self.street, city_region=self.city_region, city=self.city.name,
+            state=self.state.name, zip_code=self.zip_code
+    )
+
 
 
 class ContactMechanismType(Audit):
