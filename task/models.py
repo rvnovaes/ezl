@@ -1,4 +1,3 @@
-# from asyncio import Task
 import os
 from enum import Enum
 
@@ -90,7 +89,7 @@ class Task(Audit, LegacyCode):
                                   verbose_name="Tipo de Serviço")
     delegation_date = models.DateTimeField(default=timezone.now, verbose_name="Data de Delegação")
     acceptance_date = models.DateTimeField(null=True, verbose_name="Data de Aceitação")
-    reminder_deadline_date = models.DateTimeField(null=True, verbose_name="Primeiro Prazo")
+    reminder_deadline_date = models.DateTimeField(null=False, verbose_name="Primeiro Prazo")
     final_deadline_date = models.DateTimeField(null=True, verbose_name="Segundo Prazo")
     execution_date = models.DateTimeField(null=True, verbose_name="Data de Cumprimento")
 
@@ -118,35 +117,6 @@ class Task(Audit, LegacyCode):
     @property
     def status(self):
         return TaskStatus(self.task_status)
-        # acceptance_date, return_date, execution_date, refused_date, blocked_payment_date, finished_date = Task.objects.filter(
-        #     id=self.id).values_list(
-        #     'acceptance_date', 'return_date', 'execution_date', 'refused_date', 'blocked_payment_date',
-        #     'finished_date').first()
-        # # acceptance_date IS NOT NULL AND execution_date IS NULL AND return_date IS NULL
-        # if acceptance_date is not None and refused_date is None and execution_date is None and return_date is None \
-        #         and finished_date is None and blocked_payment_date is None:
-        #     return TaskStatus.ACCEPTED
-        # # return_date IS NOT NULL
-        # elif acceptance_date is not None and refused_date is None and execution_date is None and return_date is not None \
-        #         and finished_date is None and blocked_payment_date is None:
-        #     return TaskStatus.RETURN
-        # # acceptance_date IS NULL
-        # elif acceptance_date is None and refused_date is None and execution_date is None and return_date is None \
-        #         and finished_date is None and blocked_payment_date is None:
-        #     return TaskStatus.OPEN
-        # # execution_date IS NOT NUL
-        # elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is None \
-        #         and finished_date is None and blocked_payment_date is None:
-        #     return TaskStatus.DONE
-        # # refused_date IS NOT NULL
-        # elif acceptance_date is None and refused_date is not None and execution_date is None and return_date is None:
-        #     return TaskStatus.REFUSED
-        # elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is None \
-        #         and finished_date is None and blocked_payment_date is not None:
-        #     return TaskStatus.BLOCKEDPAYMENT
-        # elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is None \
-        #         and finished_date is not None and blocked_payment_date is None:
-        #     return TaskStatus.FINISHED
 
     @property
     def client(self):
@@ -236,8 +206,8 @@ class DashboardViewModel(models.Model):
     task_status = models.CharField(null=False, verbose_name=u"", max_length=30,
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
                                    default=TaskStatus.OPEN)
-    client = models.CharField(null=True,verbose_name="Cliente",max_length=255)
-    type_service = models.CharField(null=True,verbose_name="Serviço",max_length=255)
+    client = models.CharField(null=True, verbose_name="Cliente", max_length=255)
+    type_service = models.CharField(null=True, verbose_name="Serviço", max_length=255)
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
@@ -251,42 +221,6 @@ class DashboardViewModel(models.Model):
     @property
     def status(self):
         return TaskStatus(self.task_status)
-        # acceptance_date, return_date, execution_date, refused_date, blocked_payment_date, finished_date = Task.objects.filter(
-        #     id=self.id).values_list(
-        #     'acceptance_date', 'return_date', 'execution_date', 'refused_date', 'blocked_payment_date',
-        #     'finished_date').first()
-        # # acceptance_date IS NOT NULL AND execution_date IS NULL AND return_date IS NULL
-        # if acceptance_date is not None and refused_date is None and execution_date is None and return_date is None \
-        #         and finished_date is None and blocked_payment_date is None:
-        #     return TaskStatus.ACCEPTED
-        # # return_date IS NOT NULL
-        # elif acceptance_date is not None and refused_date is None and execution_date is None and return_date is not None \
-        #         and finished_date is None and blocked_payment_date is None:
-        #     return TaskStatus.RETURN
-        # # acceptance_date IS NULL
-        # elif acceptance_date is None and refused_date is None and execution_date is None and return_date is None \
-        #         and finished_date is None and blocked_payment_date is None:
-        #     return TaskStatus.OPEN
-        # # execution_date IS NOT NUL
-        # elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is None \
-        #         and finished_date is None and blocked_payment_date is None:
-        #     return TaskStatus.DONE
-        # # refused_date IS NOT NULL
-        # elif acceptance_date is None and refused_date is not None and execution_date is None and return_date is None:
-        #     return TaskStatus.REFUSED
-        # elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is None \
-        #         and finished_date is None and blocked_payment_date is not None:
-        #     return TaskStatus.BLOCKEDPAYMENT
-        # elif acceptance_date is not None and refused_date is None and execution_date is not None and return_date is None \
-        #         and finished_date is not None and blocked_payment_date is None:
-        #     return TaskStatus.FINISHED
-
-    # @property
-    # def client(self):
-    #     folder = Folder.objects.get(folders__law_suits__task__exact=self)
-    #     # Person.objects.get(persons__folders__law_suits__task__exact=self)
-    #     # self.movement.law_suit.folder.person_customer
-    #     return folder.person_customer
 
     def __str__(self):
         return self.type_task.name

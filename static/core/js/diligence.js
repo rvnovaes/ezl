@@ -24,7 +24,7 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    {
+                    {   isRequired: true,
                         type: "radiogroup",
                         name: "docLegivel",
                         visible: false,
@@ -41,7 +41,7 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    {
+                    {   isRequired: true,
                         type: "radiogroup",
                         name: "despReembolsaveis",
                         visible: false,
