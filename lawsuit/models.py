@@ -31,16 +31,8 @@ class Instance(Audit, LegacyCode):
 
 
 class Folder(Audit, LegacyCode):
-    def increment():
-        no = Folder.objects.latest('id').id
-
-        if no == None:
-            return 1
-        else:
-            return no + 1
-
-    folder_number = models.IntegerField(verbose_name='Número da Pasta', unique=False, null=True, default=increment,
-                                        editable=False)
+    # todo: esta sendo criado pela migration, ver como faz pra criar no modelo sem atualizar o banco
+    # folder_number = models.IntegerField(verbose_name='Número da Pasta', unique=False, null=True, editable=False)
     person_customer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                         verbose_name='Cliente')
 
@@ -54,7 +46,7 @@ class Folder(Audit, LegacyCode):
         verbose_name_plural = "Pastas"
 
     def __str__(self):
-        return str(self.legacy_code)
+        return str(self.folder_number)
 
 
 class CourtDivision(Audit, LegacyCode):

@@ -110,13 +110,7 @@ class FolderForm(BaseForm):
         model = Folder
         fields = ['person_customer', 'is_active']
 
-    #legacy_code = forms.CharField(
-    #     max_length=255,
-    #     required=False
-    #)
-
-
-    folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}),initial=Folder.increment())
+    folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
 
     person_customer = forms.ModelChoiceField(
         queryset=Person.objects.filter(is_active=True, is_customer=True),
@@ -128,7 +122,11 @@ class FolderForm(BaseForm):
         super(FolderForm, self).__init__(*args, **kwargs)
         self.order_fields(['folder_number', 'person_customer', 'is_active'])
 
-    
+        if not self.instance.pk:
+            # Since the pk is set this is not a new instance
+            self.fields.pop('folder_number')
+
+
 class LawSuitForm(BaseForm):
     class Meta:
         model = LawSuit
