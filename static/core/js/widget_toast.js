@@ -1,4 +1,9 @@
-var showToast = function (type, title, message, timeout, tapToDismiss) {
+var showToast = function (type, message, title, timeout, tapToDismiss) {
+    if (type === 'error'){
+        title = 'Atenção!';
+        timeout = 0;
+        tapToDismiss = false
+    }
     toastr.options = {
         "closeButton": true,
         "debug": false,
@@ -17,5 +22,5 @@ var showToast = function (type, title, message, timeout, tapToDismiss) {
         "hideMethod": "fadeOut",
         "tapToDismiss": tapToDismiss
     };
-    toastr[type](title, message)
+    toastr[type](message, title)
 };

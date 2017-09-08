@@ -48,6 +48,7 @@
 
     }
 </script>
+{% include 'core/widgets/messages.html' %}
 {% include 'core/widgets/generic_search_view.html' %}
 <form action="{% url link_ex %}" method="post">
     {% csrf_token %}
