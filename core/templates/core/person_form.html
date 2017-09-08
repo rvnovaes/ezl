@@ -63,7 +63,7 @@
 
 
                                     {% elif field.name == 'cnpj' %}
-                                        <div class="col-sm-3 cnpj-display" style="display: none">
+                                        <div class="col-sm-3 cnpj-display" {% if form.instance.legal_type == 'F' or not form.instance.id %} style="display: none" {% endif %}>
                                             <div id="cnpj_container"
                                                  class="form-group {% if form.instance.legal_type == 'F' or not form.instance.id %}
                                                   hidden {% endif %}">
