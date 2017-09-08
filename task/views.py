@@ -23,6 +23,7 @@ from .filters import TaskFilter
 from .forms import TaskForm, TaskDetailForm, TypeTaskForm
 from .models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
+from urllib.parse import urlparse
 
 
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -91,8 +92,11 @@ class TaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Up
 
 class TaskDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
     model = Task
-    success_url = reverse_lazy('task_list')
     success_message = delete_success(model._meta.verbose_name_plural)
+
+    def post(self, request, *args, **kwargs):
+        self.success_url = urlparse(request.environ.get('HTTP_REFERER')).path
+        return super(TaskDeleteView, self).post(request, *args, **kwargs)
 
 
 class DashboardView(MultiTableMixin, TemplateView):

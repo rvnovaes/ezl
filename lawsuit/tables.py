@@ -26,7 +26,7 @@ class TypeMovementTable(tables.Table):
         model = TypeMovement
         fields = ['selection', 'name', 'legacy_code', 'is_active']
         attrs = {"class": "table-striped table-bordered"}
-        empty_text = "Não existem tipos de movimentação cadastrados"
+        empty_text = "Não existem tipos de movimentações cadastradas"
         row_attrs = {
             'data_href': lambda record: '/processos/tipo-movimentacao/' + str(record.pk) + '/'
         }
@@ -41,7 +41,7 @@ class MovementTable(tables.Table):
         attrs = {"class": "table-striped table-bordered"}
         fields = ['selection', 'legacy_code', 'person_lawyer', 'type_movement', 'deadline',
                   'is_active']
-        empty_text = "Não existem movimentações cadastrados"
+        empty_text = "Não existem movimentações cadastradas"
         row_attrs = {
             'data_href': lambda record: '/processos/movimentacao/' + str(record.law_suit.pk) + '/' + str(
                 record.pk) + '/'
