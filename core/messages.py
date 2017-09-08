@@ -84,3 +84,14 @@ def recover_database_not_permitted():
 
 def recover_database_login_incorrect():
     return "O nome de usuário e/ou senha especificados não estão corretos."
+
+
+def duplicate_cpf(cpf):
+    if cpf is not None:
+        return "O número de CPF " + cpf + " já existe na base de dados"
+    else:
+        return "O Número de CPF informado já existe na base de dados"
+
+
+def duplicate_cnpj():
+    return "Número de CNPJ já existente"

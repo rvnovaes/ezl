@@ -8,10 +8,12 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User, Group
+from django.contrib.messages import storage
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import ProtectedError
+from django.db.utils import IntegrityError
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -24,7 +26,7 @@ from core.generic_search import GenericSearchFormat
 from core.generic_search import set_search_model_attrs
 from core.messages import new_success, update_success, delete_error_protected, delete_success, \
     address_error_update, \
-    address_success_update
+    address_success_update, duplicate_cpf, duplicate_cnpj
 from core.models import Person, Address, City, State, Country, AddressType
 from core.signals import create_person
 from core.tables import PersonTable, UserTable
@@ -197,15 +199,27 @@ class PersonCreateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
         cnpj = self.request.POST['cnpj']
         cpf = self.request.POST['cpf']
 
+        message = 'CPF/CNPJ já existente'
+
         if legal_type is 'F' and cpf:
             person_form.instance.cpf_cnpj = cpf
+            message = duplicate_cpf(None)
         elif legal_type is 'J' and cnpj:
             person_form.instance.cpf_cnpj = cnpj
+            message = duplicate_cnpj()
 
         if person_form.is_valid():
             person_form.instance.create_date = datetime.now()
             person_form.instance.create_user = User.objects.get(id=self.request.user.id)
-            person = person_form.save()
+
+            try:
+                person = person_form.save()
+
+            except IntegrityError:
+                messages.error(self.request, message)
+                context = self.get_context_data()
+                return render(self.request, 'core/person_form.html', context)
+
             addresses_form = AddressFormSet(self.request.POST, instance=Person.objects.get(id=person.id))
 
             if addresses_form.is_valid():
@@ -259,10 +273,10 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
     #     context = self.get_context_data(object=self.object)
     #     return self.render_to_response(context)
 
-    def form_invalid(self, form):
-
-        messages.error(self.request, form.errors)
-        return super(PersonUpdateView, self).form_invalid(form)
+    # def form_invalid(self, form):
+    #
+    #     messages.error(self.request, form.errors)
+    #     return super(PersonUpdateView, self).form_invalid(form)
 
         # return HttpResponseRedirect(self.request.path)
 
@@ -272,11 +286,22 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
         cnpj = self.request.POST['cnpj']
         cpf = self.request.POST['cpf']
 
+        message = 'CPF/CNPJ já existente'
         if legal_type is 'F' and cpf:
             form.instance.cpf_cnpj = cpf
+            message = duplicate_cpf(cpf)
+
         elif legal_type is 'J' and cnpj:
             form.instance.cpf_cnpj = cnpj
-        form.save()
+            message = duplicate_cnpj()
+
+        try:
+            form.save()
+
+        except IntegrityError:
+            messages.error(self.request, message)
+            context = self.get_context_data()
+            return render(self.request, 'core/person_list.html', context)
 
         return super(PersonUpdateView, self).form_valid(form)
 
@@ -334,6 +359,7 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
         else:
             for error in addresses_form.errors:
                 messages.error(self.request, error)
+
         return HttpResponseRedirect(self.request.path)
 
 
