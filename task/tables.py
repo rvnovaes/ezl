@@ -64,7 +64,7 @@ class DashboardStatusTable(tables.Table):
         fields = ['id',  'delegation_date', 'reminder_deadline_date', 'client','type_service']
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {
-            'data_href': lambda record: '/dashboard/' + str(record.pk) + '/'
+            'data_new_href': lambda record: '/dashboard/' + str(record.pk) + '/'
         }
 
 class TypeTaskTable(tables.Table):

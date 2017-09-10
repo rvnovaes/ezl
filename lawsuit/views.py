@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -251,7 +253,7 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
     success_message = update_success
     delete_message = delete_success(related_model._meta.verbose_name_plural)
     object_list = []
-        
+
     def get_context_data(self, **kwargs):
         context = super(LawsuitMovementUpdateView, self).get_context_data(**kwargs)
         return context
@@ -302,20 +304,9 @@ class MovementDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixi
     model = Movement
     success_message = delete_success(model._meta.verbose_name_plural)
 
-    def delete(self, request, *args, **kwargs):
-        pks = self.request.POST.getlist("selection")
-        parent_class = self.request.POST['parent_class']
-        try:
-            self.model.objects.filter(pk__in=pks).delete()
-            messages.success(self.request, delete_success(self.model._meta.verbose_name_plural))
-        except ProtectedError as e:
-            qs = e.protected_objects.first()
-            messages.error(self.request,
-                           delete_error_protected(self.model._meta.verbose_name
-                                                  , qs.__str__()))
-        return HttpResponseRedirect(
-            reverse('lawsuit_update',
-                    kwargs={'pk': parent_class}))
+    def post(self, request, *args, **kwargs):
+        self.success_url = urlparse(request.environ.get('HTTP_REFERER')).path
+        return super(MovementDeleteView, self).post(request, *args, **kwargs)
 
 
 class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany, CreateView):

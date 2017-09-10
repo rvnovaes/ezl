@@ -58,11 +58,10 @@
                         <br>
                         <span>Serviço solicitado: {{ form.instance.type_task|lower|capfirst|default_if_none:"" }}</span>
                         <br>
-                        <span>Vara: {{ form.instance.court_district|lower|capfirst|default_if_none:"" }}</span>
+                        <span>Vara: {{ form.instance.court_division|lower|capfirst|default_if_none:"" }}</span>
                         <br>
-                        <span>Local: {{ form.instance.court|lower|capfirst|default_if_none:"" }}</span>
+                        <span>Orgão: {{ form.instance.court|lower|capfirst|default_if_none:"" }}</span>
                         <br>
-                        <span>Endereço: {{ form.instance.address|default_if_none:"" }}</span>
                         <span>Endereço: {{ form.instance.address|capfirst|default_if_none:"" }}</span>
                         <div class="hidden form-control">{{ form.survey_result }}</div>
                     </div>
@@ -315,14 +314,14 @@
                         <div class="modal-body">
                             <div class="form-group" style="margin: auto">
                                 <label> {{ form.notes.label }}</label>
-                                    {{ form.notes }}
+                                {{ form.notes }}
                             </div>
                         </div>
                         <div class="modal-footer">
                             <div class="form-group text-center">
-                                <button type="reset" style="width: 95px!important;" onclick="clearNotes()"
+                                <button style="width: 95px!important;" onClick="this.form.reset()"
                                         class="btn btn-sm btn-raised btn-default"
-                                        data-dismiss="modal" onclick="clearNotes()">
+                                        data-dismiss="modal">
                                     Cancelar
                                 </button>
 

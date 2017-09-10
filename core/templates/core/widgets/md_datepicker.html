@@ -1,5 +1,5 @@
 <script>
-    $(function () {
+        $(function () {
         $('#{{ widget.name }}').datetimepicker({
             {#            locale: 'pt-br',#}
             tooltips: {
@@ -24,8 +24,6 @@
         ;
     });
 
-    console.log(moment("{{ widget.value }}", "DD_MM_YYYY").tz("America/Sao_Paulo").format());
-    console.log("{{ widget.value }}");
 </script>
 <span>
     <span>
@@ -33,7 +31,8 @@
                 <input class="form-control text-center" type="text" readonly
                        name="{{ widget.name }}" data-toggle="tooltip" data-placement="top"
                        title="Clique no ícone ao lado"
-                        {% if widget.value != None %} value="{{ widget.value }}" {% endif %} />
+                        {% if widget.value != None %}
+                       value="{{ widget.value }}" {% endif %}{% include "django/forms/widgets/attrs.html" %} />
             <span class="input-group-addon">
                 <span class="material-icons event" style="color: #009688">event</span>
                     </span>

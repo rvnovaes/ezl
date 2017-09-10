@@ -47,7 +47,6 @@ urlpatterns = [
         name='type_movement_update'),
     url(r'^tipo-movimentacao/excluir$', login_required(views.TypeMovementDeleteView.as_view()),
         name='type_movement_delete'),
-    # url(r'^tipo-movimentacao/excluir$', login_required(views.typemovement_delete_by_pks),name='type_movement_delete'),
 
     # Intancias
     url(r'^instancias/listar/$', login_required(views.InstanceListView.as_view()), name='instance_list'),
@@ -55,11 +54,6 @@ urlpatterns = [
     url(r'instancias/(?P<pk>[0-9]+)/$', login_required(views.InstanceUpdateView.as_view()), name='instance_update'),
     url(r'instancias/excluir$', login_required(views.InstanceDeleteView.as_view()),
         name='instance_delete'),
-
-    # Teste Rapido
-    # url(r'cadastro_rapido/$', login_required(views.FolderLawsuitCreateView.as_view()), name='fast'),
-    # url(r'cadastro_rapido/(?P<pk>[0-9]+)/$', login_required(views.FolderLawsuitUpdateView.as_view()),
-    #     name='fast_update'),
 
     # Pastas
     url(r'^pastas/listar/$', login_required(login_required(views.FolderListView.as_view())), name='folder_list'),

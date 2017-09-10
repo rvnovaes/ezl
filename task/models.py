@@ -89,7 +89,7 @@ class Task(Audit, LegacyCode):
                                   verbose_name="Tipo de Serviço")
     delegation_date = models.DateTimeField(default=timezone.now, verbose_name="Data de Delegação")
     acceptance_date = models.DateTimeField(null=True, verbose_name="Data de Aceitação")
-    reminder_deadline_date = models.DateTimeField(null=False, verbose_name="Primeiro Prazo")
+    reminder_deadline_date = models.DateTimeField(null=False,default=timezone.now, verbose_name="Primeiro Prazo")
     final_deadline_date = models.DateTimeField(null=True, verbose_name="Segundo Prazo")
     execution_date = models.DateTimeField(null=True, verbose_name="Data de Cumprimento")
 
@@ -129,8 +129,8 @@ class Task(Audit, LegacyCode):
         return self.type_task.name
 
     @property
-    def court_district(self):
-        return self.movement.law_suit.court_district
+    def court_division(self):
+        return self.movement.law_suit.court_division
 
     @property
     def court(self):

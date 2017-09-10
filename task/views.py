@@ -55,6 +55,7 @@ class TaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Cr
         super(TaskCreateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
+
     def get_success_url(self):
         self.success_url = reverse('movement_update',
                                    kwargs={'lawsuit': self.kwargs['lawsuit'], 'pk': self.kwargs['movement']})

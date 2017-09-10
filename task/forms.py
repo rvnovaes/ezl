@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytz
 from django import forms
@@ -50,10 +50,12 @@ class TaskForm(BaseForm):
                                                               )
                                           )
 
-    reminder_deadline_date = forms.DateTimeField(required=True,
-                                                 widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                                     format='DD/MM/YYYY')
-                                                 )
+    reminder_deadline_date = forms.DateField(required=True,
+                                             initial=datetime.now()+timedelta(days=2),
+                                             # widget=forms.DateInput()
+                                             widget=MDDatePicker(attrs={'class': 'form-control'},
+                                                                 format='DD/MM/YYYY')
+                                             )
 
     final_deadline_date = forms.DateTimeField(required=False,
                                               widget=MDDatePicker(attrs={'class': 'form-control'},
