@@ -37,9 +37,6 @@ from task.models import Task
 
 def login(request):
     if request.user.is_authenticated:
-        # user_groups = list(group.name for group in request.user.groups.all())
-        # request.session['user_groups'] = user_groups
-        # request.session['permissions'] = list(permission for permission in request.user.get_all_permissions())
         return HttpResponseRedirect(reverse_lazy('dashboard'))
     else:
         return render(request, 'account/login.html')
@@ -49,9 +46,6 @@ def login(request):
 def inicial(request):
     if request.user.is_authenticated:
         title_page = {'title_page': 'Principal - Easy Lawyer'}
-        # user_groups = list(group.name for group in request.user.groups.all())
-        # request.session['user_groups'] = user_groups
-        # request.session['permissions'] = list(permission for permission in request.user.get_all_permissions())
         return render(request, 'task/task_dashboard.html', title_page)
     else:
         return HttpResponseRedirect('/')

@@ -27,7 +27,9 @@
                         <input class="form-control" id="password" type="password" name="password" required>
                     </div>
                     <div>
-
+                        {% if redirect_field_value %}
+                            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                        {% endif %}
                         <button class="btn btn-raised btn-primary" type="submit" value="Entrar">Entrar</button>
                         <h4>
                             <br>
@@ -45,7 +47,8 @@
 
         </div>
 
-        <div class="text-center">Desenvolvido por: <img onclick="window.open('http://www.mttech.com.br')" src="/static/core/img/logo.png" height="20" />
+        <div class="text-center">Desenvolvido por: <img onclick="window.open('http://www.mttech.com.br')"
+                                                        src="/static/core/img/logo.png" height="20"/>
         </div>
     </div>
 
