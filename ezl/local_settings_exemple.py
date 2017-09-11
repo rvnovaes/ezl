@@ -14,7 +14,15 @@ DATABASES = {
         'PORT': '5432'
     }
 }
-
 # Os password validators sao usados para impor requisitos de seguranca as senhas.
-# Na maquina local, nao eh necessario usar nenhum, portanto a lista abaixo deve ficar vazia
-AUTH_PASSWORD_VALIDATORS = []
+# Na maquina local, nao eh necessario usar nenhum validator alem do MinimumLengthValidator
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 1,
+        }
+    },
+]
+
+
