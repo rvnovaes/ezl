@@ -18,7 +18,8 @@ class AddressETL(GenericETL):
                   uf          AS state,
                   numero_end  AS number,
                   complemento AS complement,
-                  pais        AS country
+                  pais        AS country, 
+                  'comercial'      AS address_type
                 FROM jurid_advogado AS ADV_END
                 WHERE ADV_END.Status = 'Ativo'
                       AND ADV_END.Nome IS NOT NULL
@@ -36,7 +37,8 @@ class AddressETL(GenericETL):
                   uf          AS state,
                   Numero      AS number,
                   complemento AS complement,
-                  pais        AS country
+                  pais        AS country,
+                  'comercial'      AS address_type
                 FROM Jurid_CliFor AS CLIFOR_END
                 WHERE CLIFOR_END.Status = 'Ativo' AND CLIFOR_END.Razao IS NOT NULL AND CLIFOR_END.Razao <> ''
                 UNION
@@ -49,7 +51,8 @@ class AddressETL(GenericETL):
                   Cob_UF          AS state,
                   Cob_Numero      AS number,
                   Cob_Complemento AS complement,
-                  Cob_pais        AS country
+                  Cob_pais        AS country, 
+                  'cobranca'      AS address_type
                 FROM Jurid_CliFor AS CLIFOR_END_COB
                 WHERE CLIFOR_END_COB.Status = 'Ativo' AND CLIFOR_END_COB.Razao IS NOT NULL AND CLIFOR_END_COB.Razao <> ''
                     """
@@ -62,10 +65,10 @@ class AddressETL(GenericETL):
             rows_count -= 1
             legacy_code = row['legacy_code']
             persons = Person.objects.filter(legacy_code=legacy_code)
-            address_type = AddressType.objects.filter(name__iexact='comercial')
+            address_type = AddressType.objects.filter(name__iexact=row['address_type'])
             if not address_type:
-                AddressType.objects.create(name='comercial', create_user=user)
-                address_type = AddressType.objects.filter(name__iexact='comercial')
+                AddressType.objects.create(name=row['address_type'], create_user=user)
+                address_type = AddressType.objects.filter(name__iexact=row['address_type'])
             address_type = address_type[0]
             for person in persons:
                 country = Country.objects.filter(name__unaccent__iexact=row['country']) or Country.objects.filter(
