@@ -63,7 +63,9 @@
 
 
                                     {% elif field.name == 'cnpj' %}
-                                        <div class="col-sm-3 cnpj-display" {% if form.instance.legal_type == 'F' or not form.instance.id %} style="display: none" {% endif %}>
+                                        <div class="col-sm-3 cnpj-display"
+                                                {% if form.instance.legal_type == 'F' or not form.instance.id %}
+                                             style="display: none" {% endif %}>
                                             <div id="cnpj_container"
                                                  class="form-group {% if form.instance.legal_type == 'F' or not form.instance.id %}
                                                   hidden {% endif %}">
@@ -76,59 +78,12 @@
                                                 <label>{{ field | append_ast_if_req }} {{ field }}</label>
                                             </div>
                                         </div>
-
-                                        {#                                    {% elif field.name == 'is_lawyer' %}#}
-                                        {#                                        <div class="col-sm-2">#}
-                                        {#                                                <label>#}
-                                        {#                                                    {{ field.label }}{{ field }}#}
-                                        {##}
-                                        {#                                                </label>#}
-                                        {#                                        </div>#}
-                                        {#                                    {% elif field.name == 'is_correspondent' %}#}
-                                        {#                                        <div class="col-sm-2">#}
-                                        {#                                                <label>#}
-                                        {#                                                    {{ field.label }}{{ field }}#}
-                                        {##}
-                                        {#                                                </label>#}
-                                        {#                                        </div>#}
-                                        {##}
-                                        {#                                    {% elif field.name == 'is_court' %}#}
-                                        {#                                        <div class="col-sm-2">#}
-                                        {#                                                <label>#}
-                                        {#                                                    {{ field.label }}{{ field }}#}
-                                        {##}
-                                        {#                                                </label>#}
-                                        {#                                        </div>#}
-                                        {##}
-                                        {#                                    {% elif field.name == 'is_customer' %}#}
-                                        {#                                        <div class="col-sm-2">#}
-                                        {#                                                <label>#}
-                                        {#                                                    {{ field.label }}{{ field }}#}
-                                        {##}
-                                        {#                                                </label>#}
-                                        {#                                        </div>#}
-                                        {##}
-                                        {##}
-                                        {#                                    {% elif field.name == 'is_supplier' %}#}
-                                        {#                                        <div class="col-sm-2">#}
-                                        {#                                                <label>#}
-                                        {#                                                    {{ field.label }}{{ field }}#}
-                                        {##}
-                                        {#                                                </label>#}
-                                        {#                                        </div>#}
-                                        {#                                    {% elif field.name == 'is_active' %}#}
-                                        {#                                        <div class="col-sm-2">#}
-                                        {#                                                <label>#}
-                                        {#                                                    {{ field.label }}{{ field }}#}
-                                        {##}
-                                        {#                                                </label>#}
-                                        {#                                        </div>#}
                                     {% endif %}
                                 {% endfor %}
                             </div>
 
 
-                            <div id="fields_formset" style="display: none;">
+                            <div id="fields_formset" style="display: block;">
                                 <p id="extra_fields"></p>
 
                                 <input type="text" name="address_set-INITIAL_FORMS"
@@ -210,7 +165,7 @@
                                             {% if address.is_active == True or address.is_active == 'on' %}
                                            checked
                                             {% endif %}
-                                            >
+                                    >
                                     <input type="text"
                                            name="address_set-{{ forloop.counter0 }}-address_type"
                                            id="id_address_set-{{ forloop.counter0 }}-address_type"
@@ -1309,8 +1264,8 @@
             else {
 
                 document.getElementById("message_error").innerHTML = '<div class="alert alert-danger">' +
-                        message +
-                        '</div>';
+                    message +
+                    '</div>';
                 $('#form_address_update').animate({scrollTop: 0}, 'slow');
             }
 
@@ -1528,8 +1483,8 @@
                 else {
 
                     document.getElementById("message_errors").innerHTML = '<div class="alert alert-danger">' +
-                            message +
-                            '</div>';
+                        message +
+                        '</div>';
                     $('#new_address').animate({scrollTop: 0}, 'slow');
                 }
             });
@@ -1643,6 +1598,16 @@
                 $('#cpf_container').closest('.cpf-display').css('display', 'block')
             }
         }, false);
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            if ($("#id_legal_type").val() == 'J') {
+                $('div[class*="cnpj-display"]').css('display', 'block');
+                $('div[id*="cnpj_container"]').removeClass('hidden');
+            }
+
+        });
     </script>
 
     {% if cpf_cnpj_invalid %}

@@ -200,7 +200,7 @@ class PersonCreateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
             message = duplicate_cpf(None)
         elif legal_type is 'J' and cnpj:
             person_form.instance.cpf_cnpj = cnpj
-            message = duplicate_cnpj()
+            message = duplicate_cnpj(cnpj)
 
         if person_form.is_valid():
             person_form.instance.create_date = datetime.now()
@@ -261,18 +261,10 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
     success_url = reverse_lazy('person_list')
     success_message = update_success
 
-    # def get(self, request, *args, **kwargs):
-    #
-    #     self.object = self.get_object()
-    #     context = self.get_context_data(object=self.object)
-    #     return self.render_to_response(context)
+    def form_invalid(self, form):
 
-    # def form_invalid(self, form):
-    #
-    #     messages.error(self.request, form.errors)
-    #     return super(PersonUpdateView, self).form_invalid(form)
-
-        # return HttpResponseRedirect(self.request.path)
+        messages.error(self.request, form.errors)
+        return super(PersonUpdateView, self).form_invalid(form)
 
     def form_valid(self, form):
 
@@ -287,7 +279,7 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
 
         elif legal_type is 'J' and cnpj:
             form.instance.cpf_cnpj = cnpj
-            message = duplicate_cnpj()
+            message = duplicate_cnpj(cnpj)
 
         try:
             form.save()
@@ -295,7 +287,7 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
         except IntegrityError:
             messages.error(self.request, message)
             context = self.get_context_data()
-            return render(self.request, 'core/person_list.html', context)
+            return HttpResponseRedirect(self.request.environ.get('PATH_INFO'))
 
         return super(PersonUpdateView, self).form_valid(form)
 
