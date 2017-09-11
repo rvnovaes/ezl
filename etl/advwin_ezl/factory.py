@@ -9,7 +9,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ezl.settings")
 django.setup()
 
 from django.contrib.auth.models import User
-from core.models import Country, State, City, Person
+from core.models import Country, State, City, Person, Address, AddressType
 from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, Movement
 from task.models import TypeTask, Task, TaskStatus, TaskHistory
 from core import signals
@@ -83,6 +83,25 @@ class InvalidObjectFactory(object):
             create_user=user, law_suit=invalid_law_suit,
             person_lawyer=invalid_person,
             type_movement=invalid_type_movement)
+
+        invalid_address_type, created = AddressType.objects.get_or_create(
+            name=AddressType._meta.verbose_name.upper() + invalid_registry, create_user=user
+        )
+
+        invalid_address, created = Address.objects.get_or_create(
+            address_type=invalid_address_type,
+            street=Address._meta.verbose_name.upper() + invalid_registry,
+            number=Address._meta.verbose_name.upper() + invalid_registry,
+            complement=Address._meta.verbose_name.upper() + invalid_registry,
+            city_region=Address._meta.verbose_name.upper() + invalid_registry,
+            zip_code=Address._meta.verbose_name.upper() + invalid_registry,
+            notes=Address._meta.verbose_name.upper() + invalid_registry,
+            city=invalid_city,
+            state=invalid_state,
+            country=invalid_country,
+            person=invalid_person,
+            create_user=user
+        )
 
         # Registros inválidos para o app Task
         invalid_type_task, created = TypeTask.objects.get_or_create(create_user=user, legacy_code=invalid_legacy_code,
