@@ -104,8 +104,7 @@
                                     <input type="text" name="address_set-{{ forloop.counter0 }}-id"
                                            id="id_address_set-{{ forloop.counter0 }}-id"
                                            class="form-control" maxlength="255"
-                                           value="
-                                                   {% if address.id != None %}{{ address.id }}{% endif %}">
+                                           value="{% if address.id != None %}{{ address.id }}{% endif %}">
 
                                     <input type="text"
                                            name="address_set-{{ forloop.counter0 }}-street"
