@@ -9,7 +9,7 @@ survey_dict = {'audienciaCorrespondente': 'COURTHEARING',
 
 class TypeTaskETL(GenericETL):
     model = TypeTask
-    import_query = "SELECT  tm.Codigo,  tm.Descricao, tm.formulario_id FROM Jurid_CodMov AS tm  " \
+    import_query = "SELECT tm.Codigo,  tm.Descricao, tm.formulario_id FROM Jurid_CodMov AS tm  " \
                    "WHERE right(tm.Codigo, 1) <> '.'  " \
             "   AND (tm.UsarOS = 1 AND tm.UsarOS IS NOT NULL)  " \
             "   AND tm.Status = 'Ativo'  " \

@@ -36,9 +36,6 @@ class Folder(Audit, LegacyCode):
     person_customer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                         verbose_name='Cliente')
 
-    def save(self):
-        super(Folder, self).save()
-
     class Meta:
         db_table = "folder"
         ordering = ['-id']
