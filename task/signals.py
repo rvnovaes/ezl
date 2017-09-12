@@ -37,118 +37,46 @@ def new_task(sender, instance, created, **kwargs):
     else:
         number = instance.id
 
-    # Envia email para o correspondente. Status: Em aberto, retornada e glosada
-    if instance.task_status is TaskStatus.OPEN or instance.task_status is TaskStatus.RETURN or instance.task_status is TaskStatus.BLOCKEDPAYMENT:
-        if instance.person_executed_by:
-            mails = ContactMechanism.objects.filter(contact_mechanism_type_id=id_email,
-                                                    person=instance.person_executed_by_id)
-            mail_list = []
+    person_to_receive = None
+    custom_text = ''
+    short_message = {TaskStatus.ACCEPTED: 'foi aceita', TaskStatus.BLOCKEDPAYMENT: 'foi glosada',
+                     TaskStatus.DONE: 'foi cumprida', TaskStatus.FINISHED: 'foi finalizada',
+                     TaskStatus.OPEN: 'foi aberta', TaskStatus.REFUSED: 'foi recusada',
+                     TaskStatus.RETURN: 'foi retornada'}
 
-            for mail in mails:
-                mail_list.append(mail.description)
+    if instance.task_status in [TaskStatus.OPEN, TaskStatus.FINISHED]:
+        custom_text = ' pelo(a) solicitante ' + str(instance.person_asked_by).title()
+        person_to_receive = instance.person_executed_by_id
+    elif instance.task_status in [TaskStatus.BLOCKEDPAYMENT, TaskStatus.RETURN]:
+        custom_text = ''
+        person_to_receive = instance.person_executed_by_id
+    elif instance.task_status in [TaskStatus.DONE]:
+        custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
+        person_to_receive = instance.person_asked_by_id
+    elif instance.task_status in [TaskStatus.ACCEPTED, TaskStatus.REFUSED]:
+        custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
+        person_to_receive = instance.person_distributed_by_id
 
-            if instance.task_status is TaskStatus.OPEN:
-                mail = SendMail()
-                mail.subject = 'Providência ' + str(number) + ': Em aberto - ' + settings.PROJECT_NAME
-                mail.message = render_to_string('mail/task_open.html',
-                                                {'server': settings.PROJECT_LINK, 'pk': instance.pk,
-                                                 'project_name': settings.PROJECT_NAME,
-                                                 'number': str(number),
-                                                 'person_asked_by': str(instance.person_asked_by).title(),
-                                                 })
-                mail.to_mail = mail_list
-                mail.send()
+    if person_to_receive:
+        mails = ContactMechanism.objects.filter(contact_mechanism_type_id=id_email,
+                                                person_id=person_to_receive)
+        mail_list = []
 
-            elif instance.task_status is TaskStatus.RETURN:
-                mail = SendMail()
-                mail.subject = 'Providência ' + str(number) + ': Em retorno - ' + settings.PROJECT_NAME
-                mail.message = render_to_string('mail/task_return.html',
-                                                {'server': settings.PROJECT_LINK, 'pk': instance.pk,
-                                                 'project_name': settings.PROJECT_NAME,
-                                                 'number': str(number)
-                                                 })
-                mail.to_mail = mail_list
-                mail.send()
+        for mail in mails:
+            mail_list.append(mail.description)
 
-            elif instance.task_status is TaskStatus.BLOCKEDPAYMENT:
-                mail = SendMail()
-                mail.subject = 'Providência ' + str(number) + ': Glosada - ' + settings.PROJECT_NAME
-                mail.message = render_to_string('mail/task_bocked_payment.html',
-                                                {'server': settings.PROJECT_LINK, 'pk': instance.pk,
-                                                 'project_name': settings.PROJECT_NAME,
-                                                 'number': str(number)
-                                                 })
-                mail.to_mail = mail_list
-                mail.send()
-
-    # Envia email para o Solicitante. Status: Cumprida e Fechada
-    elif instance.task_status is TaskStatus.DONE or instance.task_status is TaskStatus.FINISHED:
-        if instance.person_asked_by:
-            mails = ContactMechanism.objects.filter(contact_mechanism_type_id=id_email,
-                                                    person=instance.person_asked_by_id)
-            mail_list = []
-
-            for mail in mails:
-                mail_list.append(mail.description)
-
-            if instance.task_status is TaskStatus.DONE:
-                mail = SendMail()
-
-                mail.subject = 'Providencia ' + str(number) + ': Cumprida - ' + settings.PROJECT_NAME
-                mail.message = render_to_string('mail/task_done.html',
-                                                {'server': settings.PROJECT_LINK, 'pk': instance.pk,
-                                                 'project_name': settings.PROJECT_NAME,
-                                                 'number': str(number),
-                                                 'person_executed_by': str(instance.person_executed_by).title(),
-                                                 })
-                mail.to_mail = mail_list
-                mail.send()
-
-            if instance.task_status is TaskStatus.FINISHED:
-                mail = SendMail()
-                mail.subject = 'Providência' + str(number) + ': Finalizada - ' + settings.PROJECT_NAME
-                mail.message = render_to_string('mail/task_finished.html',
-                                                {'server': settings.PROJECT_LINK, 'pk': instance.pk,
-                                                 'project_name': settings.PROJECT_NAME,
-                                                 'number': str(number),
-                                                 'person_executed_by': str(instance.person_executed_by).title(),
-                                                 })
-                mail.to_mail = mail_list
-                mail.send()
-
-    # Envia email para o Service. Status: Aceita e Recusada
-    elif instance.task_status is TaskStatus.ACCEPTED or instance.task_status is TaskStatus.REFUSED:
-        if instance.person_distributed_by:
-            mails = ContactMechanism.objects.filter(contact_mechanism_type_id=id_email,
-                                                    person=instance.person_distributed_by_id)
-            mail_list = []
-
-            for mail in mails:
-                mail_list.append(mail.description)
-
-            if instance.task_status is TaskStatus.ACCEPTED:
-                mail = SendMail()
-                mail.subject = 'Providência ' + str(number) + ' : A cumprir - ' + settings.PROJECT_NAME
-                mail.message = render_to_string('mail/task_accepted.html',
-                                                {'server': settings.PROJECT_LINK, 'pk': instance.pk,
-                                                 'project_name': settings.PROJECT_NAME,
-                                                 'person_executed_by': str(instance.person_executed_by).title(),
-                                                 'number': str(number)
-                                                 })
-                mail.to_mail = mail_list
-                mail.send()
-
-            if instance.task_status is TaskStatus.REFUSED:
-                mail = SendMail()
-                mail.subject = 'Providência ' + str(number) + ': Recusada - ' + settings.PROJECT_NAME
-                mail.message = render_to_string('mail/task_refused.html',
-                                                {'server': settings.PROJECT_LINK, 'pk': instance.pk,
-                                                 'project_name': settings.PROJECT_NAME,
-                                                 'person_executed_by': str(instance.person_executed_by).title(),
-                                                 'number': str(number)
-                                                 })
-                mail.to_mail = mail_list
-                mail.send()
+        mail = SendMail()
+        mail.subject = 'Providência ' + str(
+            number) + ': ' + instance.task_status.value + ' - ' + settings.PROJECT_NAME
+        mail.message = render_to_string('mail/base.html',
+                                        {'server': settings.PROJECT_LINK, 'pk': instance.pk,
+                                         'project_name': settings.PROJECT_NAME,
+                                         'number': str(number),
+                                         'short_message': short_message[instance.task_status],
+                                         'custom_text': custom_text,
+                                         })
+        mail.to_mail = mail_list
+        mail.send()
 
 
 @receiver(pre_save, sender=Task)
