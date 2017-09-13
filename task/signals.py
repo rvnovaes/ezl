@@ -34,7 +34,7 @@ def new_task(sender, instance, created, **kwargs):
     if not contact_mechanism_type:
         return
 
-    id_email = contact_mechanism_type.id
+    id_email = contact_mechanism_type[0].id
 
     if instance.legacy_code:
         number = instance.legacy_code
