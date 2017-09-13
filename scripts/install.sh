@@ -64,7 +64,7 @@ sudo kill -9 `ps -aux | grep -i luigi_jobs.py | awk {'print $2'} | head -1`
 
 # Rodando ETL
 
-python3.5 etl/advwin_ezl/luigi_jobs.py --user=thiago password=souferacamisa1
+python3.5 etl/advwin_ezl/luigi_jobs.py --user=usuario password=senha
 
 # Rodando o projeto
 python3.5 manage.py runserver 0.0.0.0:8004
