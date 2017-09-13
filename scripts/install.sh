@@ -25,6 +25,7 @@ pip3.5 install -r requirements.txt
 # Criando banco de teste
 db=ezl_teste_`date +'%Y%m%d%H%M%S'`
 createdb -U ezl $db
+psql --username=ezl --dbname=$db --command="CREATE EXTENSION unaccent;"
 
 # Criando local_settings para configuracao local do projeto
 sudo touch ezl/local_settings.py
@@ -63,7 +64,7 @@ sudo kill -9 `ps -aux | grep -i luigi_jobs.py | awk {'print $2'} | head -1`
 
 # Rodando ETL
 
-python3.5 etl/advwin_ezl/luigi_jobs.py --user=usuario password=senha
+python3.5 etl/advwin_ezl/luigi_jobs.py --user=thiago password=souferacamisa1
 
 # Rodando o projeto
 python3.5 manage.py runserver 0.0.0.0:8004
