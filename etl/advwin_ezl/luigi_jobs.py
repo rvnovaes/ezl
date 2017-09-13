@@ -31,8 +31,12 @@ from django.core.management.commands import loaddata, migrate
 import luigi
 from ezl import settings
 
+LINUX_PASSWORD = None
+
+
 # A ordem de inclusão das fixtures é importante, favor não alterar
-fixtures = ['country.xml', 'state.xml', 'court_district.xml', 'city.xml', 'type_movement.xml', 'type_task.xml']
+fixtures = ['country.xml', 'state.xml', 'court_district.xml', 'city.xml', 'type_movement.xml',
+            'type_task.xml']
 
 
 def get_folder_ipc(task):
@@ -257,9 +261,21 @@ class EcmTask(luigi.Task):
 
 
 if __name__ == "__main__":
-    # E necessario remover os arquivos.ezl dentro do diretorio tmp para executar novamente
-    os.system('rm -rf ' + settings.BASE_DIR + '/etl/advwin_ezl/tmp/*.ezl')
-    #Todo: os.system('echo %s|sudo -S rm -rf %s*.ezl' % ('123456', dir))
-    # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
-    luigi.run(main_task_cls=EcmTask())
-    dir = settings.BASE_DIR + '/etl/advwin_ezl/tmp/'
+    try:
+        args = dict(map(lambda x: x.lstrip('-').split('='), sys.argv[1:]))
+
+        sys.argv.pop(1)
+        sys.argv.pop(1)
+        if not all(map(lambda i: i in args.keys(), ['user', 'password'])):
+            raise Exception
+        # E necessario remover os arquivos.ezl dentro do diretorio tmp para executar novamente
+        LINUX_PASSWORD = args.get('password')
+        os.system('echo {0}|sudo -S rm -rf ' + settings.BASE_DIR + '/etl/advwin_ezl/tmp/*.ezl'.format(
+            LINUX_PASSWORD))
+        # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
+        load_luigi_scheduler()
+        luigi.run(main_task_cls=EcmTask())
+    except Exception:
+        print('Nao foi informado usuario e senha para execucao do script')
+        # Usuario e senha deve, ser os primeiros parametros
+        print('Ex: python3.5 luigi_jobs.py --user=USUARIO --password=SENHA')
