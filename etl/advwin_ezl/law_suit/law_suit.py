@@ -11,7 +11,7 @@ class LawsuitETL(GenericETL):
     model = LawSuit
     advwin_table = 'Jurid_Pastas'
 
-    import_query = "SELECT " \
+    import_query = "SELECT" \
                    "   p.Codigo_Comp AS folder_legacy_code, " \
             "   case when (d.D_Atual is null) then 'False' else d.D_Atual end as is_current_instance, " \
             "   p.Advogado AS person_legacy_code, " \

@@ -1,5 +1,3 @@
-import django  # todo remover
-django.setup()  # todo remover
 from core.models import Address, Person, AddressType, City, State, Country
 from django.db import IntegrityError
 from etl.advwin_ezl.advwin_ezl import GenericETL
@@ -18,7 +16,7 @@ class AddressETL(GenericETL):
                   uf          AS state,
                   numero_end  AS number,
                   complemento AS complement,
-                  pais        AS country, 
+                  pais        AS country,
                   'comercial'      AS address_type
                 FROM jurid_advogado AS ADV_END
                 WHERE ADV_END.Status = 'Ativo'
@@ -51,7 +49,7 @@ class AddressETL(GenericETL):
                   Cob_UF          AS state,
                   Cob_Numero      AS number,
                   Cob_Complemento AS complement,
-                  Cob_pais        AS country, 
+                  Cob_pais        AS country,
                   'cobranca'      AS address_type
                 FROM Jurid_CliFor AS CLIFOR_END_COB
                 WHERE CLIFOR_END_COB.Status = 'Ativo' AND CLIFOR_END_COB.Razao IS NOT NULL AND CLIFOR_END_COB.Razao <> ''
@@ -71,11 +69,14 @@ class AddressETL(GenericETL):
                 address_type = AddressType.objects.filter(name__iexact=row['address_type'])
             address_type = address_type[0]
             for person in persons:
-                country = Country.objects.filter(name__unaccent__iexact=row['country']) or Country.objects.filter(
+                country = Country.objects.filter(
+                    name__unaccent__iexact=row['country'].strip() if row['country'] else '') or Country.objects.filter(
                     name__unaccent__iexact='PAÍS-INVÁLIDO')
-                state = State.objects.filter(initials__iexact=row['state']) or State.objects.filter(
+                state = State.objects.filter(
+                    initials__iexact=row['state'].strip() if row['state'] else '') or State.objects.filter(
                     name__iexact='ESTADO-INVÁLIDO')
-                city = City.objects.filter(name__unaccent__iexact=row['city'], state=state) or City.objects.filter(
+                city = City.objects.filter(name__unaccent__iexact=row['city'].strip() if row['city'] else '',
+                                           state=state) or City.objects.filter(
                     name__unaccent__iexact='CIDADE-INVÁLIDO')
                 obj = self.model(person=person,
                                  street=row['street'] or '',

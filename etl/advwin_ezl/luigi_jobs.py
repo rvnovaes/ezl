@@ -1,9 +1,16 @@
-import os
-import subprocess
 import sys
-from time import sleep
-
 import django
+import os
+
+dir = os.path.dirname(os.path.realpath(__file__))
+position = dir.find('easy_lawyer_django')
+sys.path.append(dir[:position] + 'easy_lawyer_django/')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ezl.settings'
+django.setup()
+
+import subprocess
+
+from time import sleep
 
 from etl.advwin_ezl import signals
 from etl.advwin_ezl.account.user import UserETL
@@ -18,17 +25,18 @@ from etl.advwin_ezl.law_suit.movement import MovementETL
 from etl.advwin_ezl.law_suit.type_movement import TypeMovementETL
 from etl.advwin_ezl.task.task import TaskETL
 from etl.advwin_ezl.task.type_task import TypeTaskETL
-from ezl import settings
-
-sys.path.append("ezl")
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ezl.settings")
-django.setup()
+from etl.advwin_ezl.task.ged_task import EcmETL
 from django.core.management import call_command
 from django.core.management.commands import loaddata, migrate
 import luigi
+from ezl import settings
+
+LINUX_PASSWORD = None
+
 
 # A ordem de inclusão das fixtures é importante, favor não alterar
-fixtures = ['country.xml', 'state.xml', 'court_district.xml']
+fixtures = ['country.xml', 'state.xml', 'court_district.xml', 'city.xml', 'type_movement.xml',
+            'type_task.xml']
 
 
 def get_folder_ipc(task):
@@ -42,6 +50,7 @@ def load_fixtures():
 
 def load_luigi_scheduler():
     if subprocess.run(['pgrep', '-f', 'luigid'], stdout=subprocess.PIPE).stdout.decode("utf-8") is '':
+        #Todo: Colocar usario e senha que ira executar o luigi
         os.system('echo %s|sudo -S %s %s' % ('123456', 'luigid', '--background'))
         # tempo necessário para inicialização do luigi scheduler antes da primeira tarefa NAO REMOVER
         sleep(2)
@@ -159,7 +168,7 @@ class FolderTask(luigi.Task):
             path=get_folder_ipc(self))
 
     def requires(self):
-        yield PersonTask()
+        yield AddressTask()
 
     def run(self):
         f = open(get_folder_ipc(self), 'w')
@@ -172,8 +181,8 @@ class LawsuitTask(luigi.Task):
         return luigi.LocalTarget(
             path=get_folder_ipc(self))
 
-    # def requires(self):
-    #     yield FolderTask()
+    def requires(self):
+        yield FolderTask()
 
     def run(self):
         f = open(get_folder_ipc(self), 'w')
@@ -228,36 +237,45 @@ class TaskTask(luigi.Task):
         return luigi.LocalTarget(
             path=get_folder_ipc(self))
 
-    # def requires(self):
-    #     yield MovementTask()
+    def requires(self):
+        yield MovementTask()
 
     def run(self):
         f = open(get_folder_ipc(self), 'w')
         f.close()
-        TaskETL().export_data()
+        TaskETL().import_data()
 
-#Modifiicar
+
+class EcmTask(luigi.Task):
+    def output(self):
+        return luigi.LocalTarget(
+            path=get_folder_ipc(self))
+
+    def requires(self):
+        yield TaskTask()
+
+    def run(self):
+        f = open(get_folder_ipc(self), 'w')
+        f.close()
+        EcmETL().import_data()
+
+
 if __name__ == "__main__":
-    #load_luigi_scheduler()
-    luigi.run(main_task_cls=TaskTask())
-    dir = settings.BASE_DIR + '/etl/advwin_ezl/tmp/'  # luigi.run(main_task_cls=UserTask())
-    #os.system('echo %s|sudo -S rm -rf %s*.ezl' % ('123456', dir))
-    # os.system('sudo kill $(pgrep -f luigid)',)
-    # os.system('echo %s'%'123')
-    # '| sudo kill $(pgrep -f luigid)' % '123456')
-    
-def main():
+    try:
+        args = dict(map(lambda x: x.lstrip('-').split('='), sys.argv[1:]))
 
-    #load_luigi_scheduler()
-    luigi.run(main_task_cls=TaskTask())
-    dir = settings.BASE_DIR + '/etl/advwin_ezl/tmp/'  # luigi.run(main_task_cls=UserTask())
-    #os.system('echo %s|sudo -S rm -rf %s*.ezl' % ('123456', dir))
-    # os.system('sudo kill $(pgrep -f luigid)',)
-    # os.system('echo %s'%'123')
-    # '| sudo kill $(pgrep -f luigid)' % '123456')
-    
-               
-
-
-    
-    
+        sys.argv.pop(1)
+        sys.argv.pop(1)
+        if not all(map(lambda i: i in args.keys(), ['user', 'password'])):
+            raise Exception
+        # E necessario remover os arquivos.ezl dentro do diretorio tmp para executar novamente
+        LINUX_PASSWORD = args.get('password')
+        os.system('echo {0}|sudo -S rm -rf ' + settings.BASE_DIR + '/etl/advwin_ezl/tmp/*.ezl'.format(
+            LINUX_PASSWORD))
+        # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
+        load_luigi_scheduler()
+        luigi.run(main_task_cls=EcmTask())
+    except Exception:
+        print('Nao foi informado usuario e senha para execucao do script')
+        # Usuario e senha deve, ser os primeiros parametros
+        print('Ex: python3.5 luigi_jobs.py --user=USUARIO --password=SENHA')

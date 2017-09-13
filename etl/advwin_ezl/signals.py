@@ -22,11 +22,6 @@ def create_person(person, created, **kwargs):
                                    'is_supplier'])
 
 
-        # @receiver(post_save)
-        # def create_person2(sender,instance,created,**kwargs)
-        #
-
-
 class temp_disconnect_signal():
     """ Temporarily disconnect a model from a signal """
 

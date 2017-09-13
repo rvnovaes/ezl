@@ -30,7 +30,11 @@ def new_task(sender, instance, created, **kwargs):
         TaskHistory.objects.create(task=instance, create_user=instance.create_user, status=instance.task_status,
                                    create_date=instance.create_date, notes="Nova providência")
 
-    id_email = ContactMechanismType.objects.get(name__iexact='email').id
+    contact_mechanism_type = ContactMechanismType.objects.filter(name__iexact='email')
+    if not contact_mechanism_type:
+        return
+
+    id_email = contact_mechanism_type[0].id
 
     if instance.legacy_code:
         number = instance.legacy_code

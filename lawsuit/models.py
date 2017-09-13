@@ -45,7 +45,6 @@ class Folder(Audit, LegacyCode):
         if not self.pk:
             self.folder_number = get_folder_number()
         super(Folder, self).save(*args, **kwargs)
-
     class Meta:
         db_table = "folder"
         ordering = ['-id']
