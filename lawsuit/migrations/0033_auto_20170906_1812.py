@@ -86,6 +86,3 @@ class Migration(migrations.Migration):
         ),
     ]
 
-    sql = "ALTER TABLE folder ADD COLUMN folder_number SERIAL NOT NULL;"
-
-    operations.append(migrations.RunSQL(sql))
