@@ -1,10 +1,7 @@
 from enum import Enum
 
 from django.conf import settings
-from django.contrib.auth.models import User, Group
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
-
 from .utils import LegacySystem
 
 

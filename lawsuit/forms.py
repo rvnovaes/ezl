@@ -1,15 +1,14 @@
 from django import forms
 from django.core.exceptions import FieldDoesNotExist
 from django.forms import ModelForm
-from django.forms.models import fields_for_model
 
 from core.fields import CustomBooleanField
 from core.models import Person, State
 from core.widgets import MDModelSelect2, MDDatePicker
 from .models import TypeMovement, Instance, Movement, Folder, CourtDistrict, LawSuit, CourtDivision
 
-
-# from django.contrib.admin.widgets import AdminDateWidget #TODO Verificar se será utilizado datepicker
+#TODO Verificar se será utilizado datepicker
+# from django.contrib.admin.widgets import AdminDateWidget
 
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
@@ -46,17 +45,6 @@ class TypeMovementForm(BaseForm):
         error_messages={'required': 'O campo de descrição é obrigatório'}
     )
 
-    # legacy_code = forms.CharField(
-    #     max_length=255,
-    #     required=False,
-    #     error_messages={'required': 'O campo de código legado é obrigatório'}
-    # )
-
-    # uses_wo = CustomBooleanField(
-    #     initial=False,
-    #     required=False,
-    # )
-
 
 class InstanceForm(BaseForm):
     class Meta:
@@ -75,21 +63,10 @@ class MovementForm(BaseForm):
         model = Movement
         fields = ['type_movement', 'deadline', 'person_lawyer', 'is_active']
 
-    # legacy_code = forms.CharField(
-    #     label=u"Código Legado",
-    #     max_length=255,
-    #     required=False
-    # )
-
     person_lawyer = forms.ModelChoiceField(
         queryset=Person.objects.filter(is_active=True, is_lawyer=True).order_by('name'),
         empty_label=u"Selecione...",
     )
-
-    # law_suit = forms.ModelChoiceField(
-    #     queryset=LawSuit.objects.filter(is_active=True),
-    #     empty_label=u"Selecione...",
-    # )
 
     type_movement = forms.ModelChoiceField(
         queryset=TypeMovement.objects.filter(is_active=True).order_by('name'),
@@ -108,7 +85,7 @@ class FolderForm(BaseForm):
 
     class Meta:
         model = Folder
-        fields = ['person_customer', 'is_active']
+        fields = ['folder_number', 'person_customer', 'is_active']
 
     folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
 
@@ -123,10 +100,10 @@ class FolderForm(BaseForm):
         self.order_fields(['folder_number', 'person_customer', 'is_active'])
 
         if not self.instance.pk:
-            # Since the pk is set this is not a new instance
+            # Since the pk is set this is not a new instance            
             self.fields.pop('folder_number')
-
-
+                      
+        
 class LawSuitForm(BaseForm):
     class Meta:
         model = LawSuit

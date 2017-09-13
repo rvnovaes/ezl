@@ -72,13 +72,16 @@ class TypeMovementDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
 class FolderListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Folder
     table_class = FolderTable
+    
 
 
 class FolderCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
     model = Folder
+    
     form_class = FolderForm
     success_url = reverse_lazy('folder_list')
     success_message = new_success
+    
 
 
 class FolderUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
@@ -347,3 +350,5 @@ class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
     def get_success_url(self):
         self.success_url = reverse('lawsuit_update',
                                    kwargs={'folder': self.kwargs['folder'], 'pk': self.kwargs['lawsuit']})
+                                   
+

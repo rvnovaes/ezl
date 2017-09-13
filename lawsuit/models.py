@@ -1,7 +1,13 @@
 from django.db import models
-
 from core.models import Audit, Person, State, LegacyCode
+from sequences import get_next_value
+from django.db import transaction
 
+
+@transaction.atomic
+def get_folder_number():
+    return get_next_value('lawsuit_folder_folder_number')
+    
 
 class TypeMovement(Audit, LegacyCode):
     name = models.CharField(max_length=255, blank=False, null=False, default="", unique=True, verbose_name='Nome')
@@ -31,13 +37,14 @@ class Instance(Audit, LegacyCode):
 
 
 class Folder(Audit, LegacyCode):
-    # todo: esta sendo criado pela migration, ver como faz pra criar no modelo sem atualizar o banco
-    # folder_number = models.IntegerField(verbose_name='Número da Pasta', unique=False, null=True, editable=False)
+    folder_number = models.IntegerField(verbose_name='Número da Pasta', null=False, default=0)
     person_customer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                         verbose_name='Cliente')
 
-    def save(self):
-        super(Folder, self).save()
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.folder_number = get_folder_number()
+        super(Folder, self).save(*args, **kwargs)
 
     class Meta:
         db_table = "folder"
@@ -123,3 +130,6 @@ class Movement(Audit, LegacyCode):
 
     def __str__(self):
         return self.type_movement.name  # TODO verificar novos campos e refatorar o toString
+        
+         
+

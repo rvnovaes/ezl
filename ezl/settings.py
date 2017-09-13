@@ -55,8 +55,9 @@ INSTALLED_APPS = [
     'dal_select2',
     'dal_queryset_sequence',
     # Test
-    'localflavor'
-
+    'localflavor',
+    #Sequences
+    'sequences.apps.SequencesConfig'
 ]
 
 MIDDLEWARE = [
