@@ -1,6 +1,6 @@
 # ordem de importação
 # factory
-# user - inserir id do usuário configurado em etl/advwin/settings.py
+# user
 # country
 # state
 # court_district
@@ -14,8 +14,6 @@
 # type_task
 # movement
 # task
-# todo: acho que tem que ser feito um script que roda todos os scripts de etl na ordem correta pra não dar erro de fk
-# todo: ou pode ser usado o luigi com o crontab
 import os
 
 from django.contrib.auth.models import User
@@ -40,17 +38,6 @@ class GenericETL(object):
     class Meta:
         abstract = True
 
-    # apaga registros das tabelas
-    def truncate_table(self):
-        if settings.TRUNCATE_ALL_TABLES:
-            self.model.objects.all().delete()
-
-    @staticmethod
-    def truncate_tables(table_list):
-        if settings.TRUNCATE_ALL_TABLES:
-            for table in table_list:
-                table.objects.all().delete()
-
     # inativa todos os registros já existentes para não ter que consultar ativos e inativos do legado
     def deactivate_records(self):
         if not settings.TRUNCATE_ALL_TABLES:
@@ -66,7 +53,6 @@ class GenericETL(object):
         pass
 
     def import_data(self):
-        self.truncate_table()
         if self.has_status:
             self.deactivate_all()
 

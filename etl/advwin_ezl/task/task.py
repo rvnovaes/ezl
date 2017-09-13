@@ -149,7 +149,7 @@ class TaskETL(GenericETL):
         super(TaskETL, self).config_import(rows, user, rows_count)
 
     def config_export(self):
-        accpeted_tasks = self.model.objects.filter(legacy_code__isnull=False,
+        accepted_tasks = self.model.objects.filter(legacy_code__isnull=False,
                                                    task_status=TaskStatus.ACCEPTED)
 
         done_tasks = self.model.objects.filter(legacy_code__isnull=False,
@@ -157,44 +157,8 @@ class TaskETL(GenericETL):
 
         refused_tasks = self.model.objects.filter(legacy_code__isnull=False,
                                                   task_status=TaskStatus.REFUSED)
-        #     INSERT
-        #     INTO
-        #     Jurid_Correspondente_Hist
-        #     (codigo_adv_correspondente,
-        #      usuario,
-        #      ident_agenda,
-        #      status,
-        #      SubStatus,
-        #      data_operacao,
-        #      descricao,
-        #      justificativa)
-        #
-        # VALUES
-        # ('cp.cp',
-        #  'WEB: cp.cp',
-        #  2254239,
-        #  0,
-        #  50,
-        #  GETDATE(),
-        #  'Aceita por Correspondente: cp.cp',
-        #  'aceita iasmini')
 
-        #
-        #     UPDATE
-        #     Jurid_Agenda_Table
-        #     SET
-        #     Status_correspondente = 0,
-        #     prazo_lido = 1,
-        #     envio_alerta = 0,
-        #     Ag_statusExecucao = 'Em Execucao',
-        #     data_correspondente = GETDATE(),
-        #     SubStatus = 50
-        #
-        # WHERE
-        # ident = 2254239
-
-
-        accpeted_tasks = map(
+        accepted_tasks = map(
             lambda x: (
                 update(JuridAgendaTable.__table__).values(
                     {JuridAgendaTable.SubStatus: 50, JuridAgendaTable.status_correspondente: 0,
@@ -202,81 +166,9 @@ class TaskETL(GenericETL):
                      JuridAgendaTable.Ag_StatusExecucao: 'Em execucao',
                      JuridAgendaTable.Data_correspondente: x.acceptance_date}).where(
                     JuridAgendaTable.Ident == x.legacy_code)),
-            accpeted_tasks)
-
-        # insert(JuridCorrespondenteHist).values({
-        #     JuridCorrespondenteHist.codigo_adv_correspondente: x.person_executed_by.legacy_code or None,
-        #     JuridCorrespondenteHist.ident_agenda: x.legacy_code,
-        #     JuridCorrespondenteHist.status: 0,
-        #     JuridCorrespondenteHist.SubStatus: 50,
-        #     JuridCorrespondenteHist.data_operacao: datetime.datetime.utcnow,
-        #     JuridCorrespondenteHist.descricao: default_justify % x.person_executed_by.auth_user or '',
-        #     JuridCorrespondenteHist.justificativa: default_justify % x.person_executed_by.auth_user or ''
-        #
-        # })
+            accepted_tasks)
 
         task_history = TaskHistory.objects.filter()
-
-        #         SQL
-        #         DO
-        #         CUMPRIMENTO
-        #         UPDATE
-        #         jurid_agenda
-        #         SET
-        #         Obs = deixar
-        #         o
-        #         que
-        #         já
-        #         está
-        #         e
-        #         concatenar
-        #         com
-        #         a
-        #         obs
-        #         do
-        #         ezl
-        #         Status = 2,
-        #         Data_Fech = data
-        #         do
-        #         cumprimento
-        #         no
-        #         ezl,
-        #         prazo_lido = 1,
-        #         prazo_interm = 1,
-        #         Ag_statusExecucao = '',
-        #
-        #     Data_cumprimento = data
-        #     do
-        #     cumprimento
-        #     no
-        #     ezl,
-        #     Substatus = 70
-        #     WHERE
-        #     Ident = 1809647
-        #
-        #
-        # INSERT
-        # INTO
-        # Jurid_Correspondente_Hist
-        # (codigo_adv_correspondente,
-        #  usuario,
-        #  ident_agenda,
-        #  status,
-        #  SubStatus,
-        #  data_operacao,
-        #  descricao,
-        #  justificativa
-        #  )
-        # VALUES
-        # ('cp.cp',
-        #  'WEB: cp.cp',
-        #  2254239,
-        #  1,
-        #  70,
-        #  GETDATE(),
-        #  'Cumprida por Correspondente: cp.cp',
-        #  'nao retirado'
-        #  )
 
         done_tasks = map(
             lambda x: (
@@ -298,56 +190,11 @@ class TaskETL(GenericETL):
                     JuridAgendaTable.Ident == x.legacy_code)),
             refused_tasks)
 
-        # ,
-        #
-        # insert(JuridCorrespondenteHist).values({
-        #     JuridCorrespondenteHist.codigo_adv_correspondente: x.person_executed_by.legacy_code or None,
-        #     JuridCorrespondenteHist.ident_agenda: x.legacy_code,
-        #     JuridCorrespondenteHist.status: 1,
-        #     JuridCorrespondenteHist.SubStatus: 70,
-        #     JuridCorrespondenteHist.data_operacao: datetime.datetime.utcnow,
-        #     JuridCorrespondenteHist.descricao: default_justify % x.person_executed_by.auth_user or '',
-        #     JuridCorrespondenteHist.justificativa: default_justify % x.person_executed_by.auth_user or ''
-        #
-        # })
-
-
-        # tasks = {done_tasks, accpeted_tasks, refused_tasks}
-
-        tasks = chain(done_tasks, accpeted_tasks, refused_tasks)
+        tasks = chain(done_tasks, accepted_tasks, refused_tasks)
         for task in tasks:
             print(task)
-        #
-        # for x in accpeted_tasks:
-        #     print('----Aceitas----')
-        #     print(x)
-        # #
-        # for y in done_tasks:
-        #     print('----Cumpridas----')
-        #     print(y)
-        #
-        # for z in refused_tasks:
-        #     print('----Recusadas----')
-        #     print(z)  # 1) user.no_of_logins += 1
 
         self.export_query_set = tasks
-
-
-# session.commit()
-#
-# 2) session.query().\
-#        filter(User.username == form.username.data).\
-#        update({"no_of_logins": (User.no_of_logins +1)})
-#    session.commit()
-#
-# 3) conn = engine.connect()
-#    stmt = User.update().\
-#        values(User.no_of_logins = (User.no_of_logins + 1)).\
-#        where(User.username == form.username.data)
-#    conn.execute(stmt)
-#
-# 4) setattr(user, 'no_of_logins', user.no_of_logins+1)
-#    session.commit()
 
 if __name__ == '__main__':
     TaskETL().import_data()

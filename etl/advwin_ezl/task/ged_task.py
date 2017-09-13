@@ -1,6 +1,14 @@
 # esse import deve vir antes de todos porque ele executa o __init__.py
-import ntpath
 import os
+import sys
+import django
+dir = os.path.dirname(os.path.realpath(__file__))
+position = dir.find('easy_lawyer_django')
+sys.path.append(dir[:position] + 'easy_lawyer_django/')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ezl.settings'
+django.setup()
+
+import ntpath
 
 import paramiko
 
@@ -64,71 +72,57 @@ class EcmETL(GenericETL):
                 # Um GED criado no EZL (sem legacy_code) e que já constado no Advwin, neste arquivo será lançado
                 # um erro ao tentar adicionar os dados no arquivo no banco de dados, pois os Patchs seriam identicos.
                 # Assim, só adiciona um novo registro caso não haja outro como o mesmo Patch
-                id_task = Task.objects.get(legacy_code=task_legacy_code).id
-                is_ecm = False
-                if self.model.objects.filter(path__unaccent='GEDs/' + str(id_task) + '/' + file):
-                    is_ecm = True
+                task = Task.objects.filter(legacy_code=task_legacy_code)
+                print('legacy_code' + str(task_legacy_code))
+                if task:
+                    id_task = task[0].id
+                    is_ecm = False
+                    if self.model.objects.filter(path__unaccent='GEDs/' + str(id_task) + '/' + file):
+                        is_ecm = True
 
-                task = Task.objects.filter(legacy_code=task_legacy_code).first()
-                ecm = self.model.objects.filter(legacy_code=ecm_legacy_code, task=task,
-                                                system_prefix=LegacySystem.ADVWIN.value).first() if task else None
-                if ecm:
-                    pass
-                    # Remove o arquivo para depois importar novamente, em caso de atualização do mesmo
-                    # os.remove(ezl_settings.MEDIA_ROOT + str(ecm.path))
-                    # ecm.path = 'GEDs/' + str(task.id) + '/' + file
-                    # ecm.task = task
-                    # ecm.is_active = True
-                    # ecm.alter_user = user
-                    # ecm.updated = False
-                    # ecm.save(update_fields=[
-                    #     'path',
-                    #     'task',
-                    #     'is_active',
-                    #     'alter_user',
-                    #     'alter_date',
-                    #     'updated'])
-
-                elif task and not is_ecm:
-                    ecm = self.model(path='GEDs/' + str(task.id) + '/' + file,
-                                     task=task,
-                                     is_active=True,
-                                     legacy_code=ecm_legacy_code,
-                                     system_prefix=LegacySystem.ADVWIN.value,
-                                     create_user=user,
-                                     alter_user=user,
-                                     updated=False
-                                     )
-                    ecm.save()
-
-                # Apenas obtem o arquivo via SFTP caso não haja nenhum GED cadastrado
-                if task and not is_ecm and path:
-                    is_file = False
-                    # Deve verificar se o arquivo está contido no diretório de GEDs do Advwin. Pois existem caminhos
-                    # de arquivos no banco mas não contém o arquivo no sistema de arquivos
-                    try:
-                        sftp.stat('Agenda\\' + file)
-                        is_file = True
-                        remote_path = 'Agenda\\' + file
-                    except:
-
+                    task = Task.objects.filter(legacy_code=task_legacy_code).first()
+                    ecm = self.model.objects.filter(legacy_code=ecm_legacy_code, task=task,
+                                                    system_prefix=LegacySystem.ADVWIN.value).first() if task else None
+                    if task and not is_ecm:
+                        ecm = self.model(path='GEDs/' + str(task.id) + '/' + file,
+                                         task=task,
+                                         is_active=True,
+                                         legacy_code=ecm_legacy_code,
+                                         system_prefix=LegacySystem.ADVWIN.value,
+                                         create_user=user,
+                                         alter_user=user,
+                                         updated=False
+                                         )
+                        ecm.save()
+                    print('antes task')
+                    # Apenas obtem o arquivo via SFTP caso não haja nenhum GED cadastrado
+                    if task and not is_ecm and path:
+                        is_file = False
+                        # Deve verificar se o arquivo está contido no diretório de GEDs do Advwin. Pois existem caminhos
+                        # de arquivos no banco mas não contém o arquivo no sistema de arquivos
                         try:
-                            sftp.stat('Agenda\\' + str(task_legacy_code) + '\\' + file)
-                            remote_path = 'Agenda\\' + str(task_legacy_code) + '\\' + file
+                            sftp.stat('Agenda\\' + file)
                             is_file = True
+                            remote_path = 'Agenda\\' + file
                         except:
-                            is_file = False
-                            print('erro no arquivo')
 
-                    if is_file:
-                        import_dir = settings.local_path + str(task.id) + '/'
+                            try:
+                                sftp.stat('Agenda\\' + str(task_legacy_code) + '\\' + file)
+                                remote_path = 'Agenda\\' + str(task_legacy_code) + '\\' + file
+                                is_file = True
+                            except:
+                                is_file = False
+                                print('erro no arquivo')
 
-                        # Se não houver nenhum diretório com o ID da task, cria um novo
-                        if not os.path.exists(import_dir):
-                            os.makedirs(import_dir)
+                        if is_file:
+                            import_dir = settings.local_path + str(task.id) + '/'
 
-                        print('Importando arquivo ' + file + ' ... ')
-                        sftp.get(remote_path, import_dir + file, callback=None)
+                            # Se não houver nenhum diretório com o ID da task, cria um novo
+                            if not os.path.exists(import_dir):
+                                os.makedirs(import_dir)
+
+                            print('Importando arquivo ' + file + ' ... ')
+                            sftp.get(remote_path, import_dir + file, callback=None)
         sftp.close()
 
 

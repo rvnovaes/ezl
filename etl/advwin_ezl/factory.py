@@ -4,6 +4,8 @@ import sys
 import django
 from django.db import connection
 
+from etl.advwin_ezl import settings
+
 sys.path.append("ezl")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ezl.settings")
 django.setup()
@@ -26,8 +28,8 @@ class InvalidObjectFactory(object):
     def create():
         # cria usuário padrão
         signals
-        user = User.objects.create_superuser('invalid_user', 'invalid_user@mttech.com.br', 'abc123456*')
-        admin = User.objects.create_superuser('admin', 'admin@mttech.com.br', 'abc123456*')
+        user = User.objects.create_superuser('invalid_user', 'invalid_user@mttech.com.br', 'admin')
+        admin = User.objects.create_superuser('admin', 'admin@mttech.com.br', 'admin')
 
         # Registros inválidos para o app core
         invalid_country, created = Country.objects.get_or_create(
@@ -128,9 +130,10 @@ class InvalidObjectFactory(object):
         return model.objects.get(id=1)
 
     def restart_table_id(self):
-        with connection.cursor() as cursor:
-            for model in self.models:
-                cursor.execute("TRUNCATE TABLE " + model._meta.db_table + " RESTART IDENTITY CASCADE;")
+        if settings.TRUNCATE_ALL_TABLES:
+            with connection.cursor() as cursor:
+                for model in self.models:
+                    cursor.execute("TRUNCATE TABLE " + model._meta.db_table + " RESTART IDENTITY CASCADE;")
 
 
 if __name__ == '__main__':
