@@ -2,6 +2,7 @@ from enum import Enum
 
 from django.conf import settings
 from django.db import models
+
 from .utils import LegacySystem
 
 
@@ -189,11 +190,10 @@ class Address(Audit):
         db_table = "address"
 
     def __str__(self):
-        return '{street}, {city_region}, {city} - {state} - CEP {zip_code}'.format(
-            street=self.street, city_region=self.city_region, city=self.city.name,
-            state=self.state.name, zip_code=self.zip_code
-    )
-
+        return '{street}, {number}{complement} - {city_region} - {city} - {state} - CEP {zip_code}'.format(
+            number=self.number, street=self.street, city_region=self.city_region, city=self.city.name,
+            state=self.state.name, zip_code=self.zip_code, complement='/' + self.complement if self.complement else ''
+        )
 
 
 class ContactMechanismType(Audit):
@@ -234,4 +234,3 @@ class ContactUs(Audit):
 
 class ModelExportHistory(models.Model):
     model = models.CharField(max_length=255, unique=True, null=False)
-
