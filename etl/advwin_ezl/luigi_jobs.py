@@ -155,20 +155,6 @@ class PersonTask(luigi.Task):
         PersonETL().import_data()
 
 
-class AddressTask(luigi.Task):
-    def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
-
-    def requires(self):
-        yield PersonTask()
-
-    def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
-        AddressETL().import_data()
-
-
 class ContactMechanismTask(luigi.Task):
     def output(self):
         return luigi.LocalTarget(
@@ -181,6 +167,20 @@ class ContactMechanismTask(luigi.Task):
         f = open(get_folder_ipc(self), 'w')
         f.close()
         ContactMechanismETL().import_data()
+
+
+class AddressTask(luigi.Task):
+    def output(self):
+        return luigi.LocalTarget(
+            path=get_folder_ipc(self))
+
+    def requires(self):
+        yield ContactMechanismTask()
+
+    def run(self):
+        f = open(get_folder_ipc(self), 'w')
+        f.close()
+        AddressETL().import_data()
 
 
 class FolderTask(luigi.Task):
