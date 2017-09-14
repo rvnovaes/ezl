@@ -110,7 +110,7 @@
                                 Retornar
                             </a>
                         {% endif %}
-                        {% if perms.task.view_requested_tasks %}
+                        {% if perms.task.view_delegated_tasks %}
                             {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
                                 <a>{{ form.execution_date }}</a>
                                 <a onclick="getId(this)" id="DONE" type="submit" data-toggle="modal"
