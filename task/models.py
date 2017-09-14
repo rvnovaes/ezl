@@ -167,7 +167,7 @@ class Ecm(Audit, LegacyCode):
 
 
 class TaskHistory(AuditCreate):
-    task = models.ForeignKey(Task, on_delete=models.PROTECT, blank=False, null=False)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, blank=False, null=False)
     notes = models.TextField(null=True, blank=True, verbose_name=u"Observações")
     status = models.CharField(max_length=10, choices=TaskStatus.choices())
 
