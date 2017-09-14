@@ -24,17 +24,14 @@
                                    aria-haspopup="true" aria-expanded="false">Cadastros<span
                                         class="caret"></span></a>
                                 <ul class="dropdown-menu">
-                                    <li><a href="{% url 'user_list' %}" target="_self">Usuários</a></li>
-                                    <li><a href="{% url 'person_list' %}" target="_self">Pessoas</a></li>
                                     <li><a href="{% url 'courtdistrict_list' %} "target="_self">Comarcas</a></li>
-                                    {#                                    <li><a href="{% url 'lawsuit_list' %}">Processos</a></li>#}
                                     <li><a href="{% url 'instance_list' %}" target="_self">Instâncias</a></li>
                                     <li><a href="{% url 'folder_list' %}" target="_self">Pastas</a></li>
-                                    {#                                    <li><a href="{% url 'task_list' %}">Providências</a></li>#}
-                                    {#                                    <li><a href="{% url 'movement_list' %}">Movimentações</a></li>#}
-                                    <li><a href="{% url 'courtdivision_list' %}" target="_self">Varas</a></li>
+                                    <li><a href="{% url 'person_list' %}" target="_self">Pessoas</a></li>
                                     <li><a href="{% url 'type_movement_list' %}" target="_self">Tipos de Movimentação</a></li>
                                     <li><a href="{% url 'typetask_list' %}" target="_self">Tipos de Serviço</a>
+                                    <li><a href="{% url 'user_list' %}" target="_self">Usuários</a></li>
+                                    <li><a href="{% url 'courtdivision_list' %}" target="_self">Varas</a></li>
                                 </ul>
                             </li>
                         {% endif %}
