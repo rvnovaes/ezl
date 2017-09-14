@@ -11,7 +11,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ezl.settings")
 django.setup()
 
 from django.contrib.auth.models import User
-from core.models import Country, State, City, Person, Address, AddressType
+from core.models import Country, State, City, Person, Address, AddressType, ContactMechanism, ContactMechanismType
 from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, Movement
 from task.models import TypeTask, Task, TaskStatus, TaskHistory
 from core import signals
@@ -107,6 +107,17 @@ class InvalidObjectFactory(object):
             country=invalid_country,
             person=invalid_person,
             create_user=user
+        )
+
+        invalid_contact_mechanism_type, created = ContactMechanismType.objects.get_or_create(
+            name=ContactMechanismType._meta.verbose_name.upper() + invalid_registry, create_user=user
+        )
+
+        invalid_contact_mechanism, created = ContactMechanism.objects.get_or_create(
+            contact_mechanism_type=invalid_contact_mechanism_type,
+            description=ContactMechanism._meta.verbose_name.upper() + invalid_registry,
+            notes=ContactMechanism._meta.verbose_name.upper() + invalid_registry,
+            person=invalid_person
         )
 
         # Registros inválidos para o app Task

@@ -1,6 +1,0 @@
-{% extends 'mail/base.html' %}
-
-{% block content %}
-    Uma providência foi marcada para retorno no {{ project_name }}. Para visualizar mais detalhes,
-    <a href="{{ server }}{% url 'task_detail' pk %}">clique aqui</a>.
-{% endblock %}
