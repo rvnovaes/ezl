@@ -50,7 +50,7 @@ class TaskETL(GenericETL):
                    "a.Pasta = p.Codigo_Comp " \
                    "WHERE " \
                    "(p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND " \
-                   "(a.prazo_lido = 0 AND a.SubStatus = 30) " \
+                   "(a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0) " \
                    " ORDER BY a.ident DESC "
     # "and a.Data BETWEEN '2017-07-18 00:00' and '2017-07-19 23:59:59'"
     model = Task
