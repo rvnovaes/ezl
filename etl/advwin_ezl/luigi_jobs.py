@@ -29,7 +29,10 @@ from etl.advwin_ezl.task.ged_task import EcmETL
 from django.core.management import call_command
 from django.core.management.commands import loaddata, migrate
 import luigi
+from luigi.interface import core
 from ezl import settings
+from etl.advwin_ezl import settings as etl_settings
+from etl.advwin_ezl.ezl_exceptions.params_exception import ParamsException
 
 LINUX_PASSWORD = None
 
@@ -51,8 +54,9 @@ def load_fixtures():
 
 def load_luigi_scheduler():
     if subprocess.run(['pgrep', '-f', 'luigid'], stdout=subprocess.PIPE).stdout.decode("utf-8") is '':
-        #Todo: Colocar usario e senha que ira executar o luigi
-        os.system('echo %s|sudo -S %s %s' % ('123456', 'luigid', '--background'))
+        command = 'echo {0}|sudo -S luigid --port {1} --background'.format(
+            LINUX_PASSWORD, etl_settings.LUIGI_PORT)
+        os.system(command)
         # tempo necessário para inicialização do luigi scheduler antes da primeira tarefa NAO REMOVER
         sleep(2)
 
@@ -265,18 +269,17 @@ class EcmTask(luigi.Task):
 if __name__ == "__main__":
     try:
         args = dict(map(lambda x: x.lstrip('-').split('='), sys.argv[1:]))
-        sys.argv.pop(1)
         if 'p' not in args.keys():
-            raise Exception
+            raise ParamsException
+        sys.argv.pop(1)
         # E necessario remover os arquivos.ezl dentro do diretorio tmp para executar novamente
         LINUX_PASSWORD = args.get('p')
-        os.system('echo {0}|sudo -S rm -rf ' + settings.BASE_DIR + '/etl/advwin_ezl/tmp/*.ezl'.format(
-            LINUX_PASSWORD))
+        os.system('echo {0}|sudo -S rm -rf {1}/etl/advwin_ezl/tmp/*.ezl'.format(
+            LINUX_PASSWORD, settings.BASE_DIR))
         # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
         load_luigi_scheduler()
         luigi.run(main_task_cls=EcmTask())
-    except Exception:
-        print('Nao foi informado a senha para execucao do script')
-        # A senha deve, ser os primeiros parametros
-        print('Ex: python3.5 luigi_jobs.py -p=SENHA DO USUARIO QUE ESTA EXECUTANDO O '
-              'SCRIPT')
+    except ParamsException as e:
+        print(e)
+    except Exception as e:
+        print(e)
