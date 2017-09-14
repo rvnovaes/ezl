@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+  <object model="auth.permission" pk="94">
+    <field name="name" type="CharField">pode ver providências abertas para seu usuário</field>
+    <field name="content_type" rel="ManyToOneRel" to="contenttypes.contenttype">25</field>
+    <field name="codename" type="CharField">view_delegated_tasks</field>
+  </object>
+  <object model="auth.permission" pk="95">
+    <field name="name" type="CharField">Can view all tasks</field>
+    <field name="content_type" rel="ManyToOneRel" to="contenttypes.contenttype">25</field>
+    <field name="codename" type="CharField">view_all_tasks</field>
+  </object>
+  <object model="auth.permission" pk="96">
+    <field name="name" type="CharField">pode persistir providências</field>
+    <field name="content_type" rel="ManyToOneRel" to="contenttypes.contenttype">25</field>
+    <field name="codename" type="CharField">return_all_tasks</field>
+  </object>
+  <object model="auth.permission" pk="97">
+    <field name="name" type="CharField">pode validar providências</field>
+    <field name="content_type" rel="ManyToOneRel" to="contenttypes.contenttype">25</field>
+    <field name="codename" type="CharField">validate_all_tasks</field>
+  </object>
+  <object model="auth.permission" pk="98">
+    <field name="name" type="CharField">pode ver providências solicitadas pelo seu usuário</field>
+    <field name="content_type" rel="ManyToOneRel" to="contenttypes.contenttype">25</field>
+    <field name="codename" type="CharField">view_requested_tasks</field>
+  </object>
+  <object model="auth.permission" pk="99">
+    <field name="name" type="CharField">pode glosar providências</field>
+    <field name="content_type" rel="ManyToOneRel" to="contenttypes.contenttype">25</field>
+    <field name="codename" type="CharField">block_payment_tasks</field>
+  </object>
+  <object model="auth.permission" pk="100">
+    <field name="name" type="CharField">pode ter acesso as telas de cadastro</field>
+    <field name="content_type" rel="ManyToOneRel" to="contenttypes.contenttype">25</field>
+    <field name="codename" type="CharField">crud_system</field>
+  </object>
+</django-objects>
