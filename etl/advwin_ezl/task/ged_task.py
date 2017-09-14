@@ -20,7 +20,7 @@ from task.models import Task
 
 
 class EcmETL(GenericETL):
-    import_query = "SELECT " \
+    import_query = "SELECT" \
                    "   G.ID_doc, " \
             "   A.Ident,   " \
             "   G.Link      " \
@@ -36,16 +36,10 @@ class EcmETL(GenericETL):
     has_status = False
 
     def config_import(self, rows, user, rows_count):
-
-        # paramiko.util.log_to_file(settings.log_file)
-        transport = paramiko.Transport((settings.host_sftp, settings.port_sftp))
-        transport.connect(username=settings.username_sftp, password=settings.password_sftp)
-        sftp = paramiko.SFTPClient.from_transport(transport)
         remote_path = ''
-        local_path = ''
-
         for row in rows:
-
+            print('Registros restantes: ' + str(rows_count))
+            rows_count -= 1
             path = row['Link']
 
             # O advwin armazena o path dos arquivos que não foram feitos checkin. Padrão dos paths (C:/caminho)
@@ -63,9 +57,7 @@ class EcmETL(GenericETL):
             # que possuem um path válido
 
             if path and is_server:
-                print('Registros restantes: ' + str(rows_count))
                 file = ntpath.basename(path)
-                rows_count -= 1
                 ecm_legacy_code = row['ID_doc']
                 task_legacy_code = row['Ident']
 
@@ -77,7 +69,7 @@ class EcmETL(GenericETL):
                 if task:
                     id_task = task[0].id
                     is_ecm = False
-                    if self.model.objects.filter(path__unaccent='GEDs/' + str(id_task) + '/' + file):
+                    if self.model.objects.filter(path='GEDs/' + str(id_task) + '/' + file):
                         is_ecm = True
 
                     task = Task.objects.filter(legacy_code=task_legacy_code).first()
@@ -94,36 +86,40 @@ class EcmETL(GenericETL):
                                          updated=False
                                          )
                         ecm.save()
-                    print('antes task')
                     # Apenas obtem o arquivo via SFTP caso não haja nenhum GED cadastrado
                     if task and not is_ecm and path:
                         is_file = False
                         # Deve verificar se o arquivo está contido no diretório de GEDs do Advwin. Pois existem caminhos
                         # de arquivos no banco mas não contém o arquivo no sistema de arquivos
                         try:
-                            sftp.stat('Agenda\\' + file)
-                            is_file = True
-                            remote_path = 'Agenda\\' + file
-                        except:
-
+                            transport = paramiko.Transport((settings.host_sftp, settings.port_sftp))
+                            transport.connect(username=settings.username_sftp, password=settings.password_sftp)
+                            sftp = paramiko.SFTPClient.from_transport(transport)
                             try:
-                                sftp.stat('Agenda\\' + str(task_legacy_code) + '\\' + file)
-                                remote_path = 'Agenda\\' + str(task_legacy_code) + '\\' + file
+                                sftp.stat('Agenda\\' + file)
                                 is_file = True
+                                remote_path = 'Agenda\\' + file
                             except:
-                                is_file = False
-                                print('erro no arquivo')
 
-                        if is_file:
-                            import_dir = settings.local_path + str(task.id) + '/'
+                                try:
+                                    sftp.stat('Agenda\\' + str(task_legacy_code) + '\\' + file)
+                                    remote_path = 'Agenda\\' + str(task_legacy_code) + '\\' + file
+                                    is_file = True
+                                except:
+                                    is_file = False
+                                    print('erro no arquivo')
+                            if is_file:
+                                import_dir = settings.local_path + str(task.id) + '/'
 
-                            # Se não houver nenhum diretório com o ID da task, cria um novo
-                            if not os.path.exists(import_dir):
-                                os.makedirs(import_dir)
+                                # Se não houver nenhum diretório com o ID da task, cria um novo
+                                if not os.path.exists(import_dir):
+                                    os.makedirs(import_dir)
 
-                            print('Importando arquivo ' + file + ' ... ')
-                            sftp.get(remote_path, import_dir + file, callback=None)
-        sftp.close()
+                                print('Importando arquivo ' + file + ' ... ')
+                                sftp.get(remote_path, import_dir + file, callback=None)
+                            sftp.close()
+                        except:
+                            print('Erro de conexao com servidor sftp')
 
 
 if __name__ == "__main__":

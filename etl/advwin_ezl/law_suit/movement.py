@@ -1,4 +1,3 @@
-
 from core.models import Person
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL
@@ -18,7 +17,6 @@ class MovementETL(GenericETL):
             "ON pm.Codigo_Comp = p.Codigo_Comp " \
             "WHERE (p.Status = 'Ativa' OR p.Dt_Saida IS NULL) " \
             " order by pm.ident  DESC "
-    # " AND pm.data BETWEEN '2017-07-18 00:00' AND '2017-07-19 23:59:59'"
     model = Movement
     advwin_table = "Jurid_ProcMov"
     has_status = True

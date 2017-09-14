@@ -62,9 +62,21 @@ python3.5 manage.py migrate
 sudo killall luigid
 sudo kill -9 `ps -aux | grep -i luigi_jobs.py | awk {'print $2'} | head -1`
 
+# Configurando a ETL
+sudo echo "
+[connection]
+server = 172.27.155.9
+user = Rvnovaes
+password = libertas
+database = Advwin_ho
+
+# postgresql ou sql_server
+db_type = sql_server
+" > connections/advwin_ho.cfg
+
 # Rodando ETL
 
-python3.5 etl/advwin_ezl/luigi_jobs.py --user=usuario password=senha
+python3.5 etl/advwin_ezl/luigi_jobs.py -p=senha
 
 # Rodando o projeto
 python3.5 manage.py runserver 0.0.0.0:8004

@@ -39,6 +39,7 @@ fixtures = ['country.xml', 'state.xml', 'court_district.xml', 'city.xml', 'type_
             'type_task.xml']
 
 
+# ipc da funcao get_folder_ipc significa inter process communication
 def get_folder_ipc(task):
     return settings.BASE_DIR + '/etl/advwin_ezl/tmp/%s.ezl' % task.task_id
 
@@ -62,6 +63,7 @@ class MigrationTask(luigi.Task):
             path=get_folder_ipc(self))
 
     def run(self):
+        # Injeção de contexto (Carrega modulo do signals)
         signals
         call_command(migrate.Command(), verbosity=0)
         print('Migration finalizada...')
@@ -263,19 +265,18 @@ class EcmTask(luigi.Task):
 if __name__ == "__main__":
     try:
         args = dict(map(lambda x: x.lstrip('-').split('='), sys.argv[1:]))
-
         sys.argv.pop(1)
-        sys.argv.pop(1)
-        if not all(map(lambda i: i in args.keys(), ['user', 'password'])):
+        if 'p' not in args.keys():
             raise Exception
         # E necessario remover os arquivos.ezl dentro do diretorio tmp para executar novamente
-        LINUX_PASSWORD = args.get('password')
+        LINUX_PASSWORD = args.get('p')
         os.system('echo {0}|sudo -S rm -rf ' + settings.BASE_DIR + '/etl/advwin_ezl/tmp/*.ezl'.format(
             LINUX_PASSWORD))
         # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
         load_luigi_scheduler()
         luigi.run(main_task_cls=EcmTask())
     except Exception:
-        print('Nao foi informado usuario e senha para execucao do script')
-        # Usuario e senha deve, ser os primeiros parametros
-        print('Ex: python3.5 luigi_jobs.py --user=USUARIO --password=SENHA')
+        print('Nao foi informado a senha para execucao do script')
+        # A senha deve, ser os primeiros parametros
+        print('Ex: python3.5 luigi_jobs.py -p=SENHA DO USUARIO QUE ESTA EXECUTANDO O '
+              'SCRIPT')
