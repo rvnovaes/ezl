@@ -128,8 +128,7 @@ class MultiDeleteViewMixin(DeleteView):
     def delete(self, request, *args, **kwargs):
         if request.method == "POST":
             pks = request.POST.getlist("selection")
-            # print (kwargs)
-            # folder = kwargs['folder']
+
             try:
                 self.model.objects.filter(pk__in=pks).delete()
                 messages.success(self.request, self.success_message)
@@ -137,10 +136,11 @@ class MultiDeleteViewMixin(DeleteView):
                 qs = e.protected_objects.first()
                 # type = type('Task')
                 messages.error(self.request,
-                               delete_error_protected(self.model._meta.verbose_name
+                               delete_error_protected(str(self.model._meta.verbose_name)
                                                       , qs.__str__()))
-        return HttpResponseRedirect(
-            self.success_url)  # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
+
+        # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
+        return HttpResponseRedirect(self.success_url)
 
 
 def address_update(request, pk):
@@ -177,7 +177,7 @@ class PersonCreateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
     success_message = new_success
-    addresses_form = AddressForm(initial={'street': 'teste'})
+    addresses_form = AddressForm()
 
     def form_valid(self, form):
 
@@ -541,16 +541,6 @@ class UserListView(LoginRequiredMixin, SingleTableViewMixin):
     table_class = UserTable
     template_name = 'auth/user_list.html'
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(UserListView, self).get_context_data(**kwargs)
-    #     context['nav_user'] = True
-    #     context['form_name'] = 'Usuário'
-    #     context['form_name_plural'] = 'Usuários'
-    #     # table = self.table_class(self.model.objects.all().order_by('-pk'))
-    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-    #     context['table'] = table
-    #     return context
-
 
 class UserCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
     model = User
@@ -567,7 +557,10 @@ class UserCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Cr
         if form.is_valid:
             groups = form.cleaned_data['groups']
             ids = list(group.id for group in groups)
-            (group.user_set.add(form.instance) for group in Group.objects.filter(id__in=ids))
+
+            for group in Group.objects.filter(id__in=ids):
+                group.user_set.add(form.instance)
+
         super(UserCreateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
@@ -592,7 +585,10 @@ class UserUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Up
         if form.is_valid:
             groups = form.cleaned_data['groups']
             ids = list(group.id for group in groups)
-            (group.user_set.add(form.instance) for group in Group.objects.filter(id__in=ids))
+
+            for group in Group.objects.filter(id__in=ids):
+                group.user_set.add(form.instance)
+
         super(UserUpdateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
