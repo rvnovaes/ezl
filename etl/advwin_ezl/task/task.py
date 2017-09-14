@@ -1,6 +1,5 @@
 from etl.advwin_ezl.advwin_ezl import GenericETL
 import pytz
-from django.db.models.signals import pre_save, post_save
 from itertools import chain
 from django.utils import timezone
 from sqlalchemy import update
@@ -11,8 +10,6 @@ from advwin_models.advwin import JuridAgendaTable
 from ezl import settings
 from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
-from task.signals import new_task, change_status
-from django.utils.timezone import localtime
 
 default_justify = 'Aceita por Correspondente: %s'
 
@@ -50,9 +47,9 @@ class TaskETL(GenericETL):
                    "a.Pasta = p.Codigo_Comp " \
                    "WHERE " \
                    "(p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND " \
-                   "(a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0) " \
+                   "((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0)) " \
                    " ORDER BY a.ident DESC "
-    # "and a.Data BETWEEN '2017-07-18 00:00' and '2017-07-19 23:59:59'"
+
     model = Task
     advwin_table = 'Jurid_agenda_table'
     advwin_model = JuridAgendaTable
