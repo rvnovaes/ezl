@@ -264,13 +264,15 @@ class UserCreateForm(BaseForm, UserCreationForm):
         help_text=_("Enter the same password as before, for verification."),
     )
 
-    groups = forms.ModelMultipleChoiceField(label="Perfis", required=False, queryset=Group.objects.all().order_by('name'),
-                                            widget=forms.SelectMultiple(attrs={'class': 'form-control profile-selector'}))
+    groups = forms.ModelMultipleChoiceField(label="Perfis", required=True,
+                                            queryset=Group.objects.all().order_by('name'),
+                                            widget=forms.SelectMultiple(
+                                                attrs={'class': 'form-control profile-selector'}))
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username','email', 'password1', 'password2',
-                   'groups', 'is_active']
+        fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2',
+                  'groups', 'is_active']
 
 
 class UserUpdateForm(UserChangeForm):
@@ -302,23 +304,24 @@ class UserUpdateForm(UserChangeForm):
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
-    groups = forms.ModelMultipleChoiceField(label="Perfis", required=False, queryset=Group.objects.all().order_by('name'),
-                                            widget=forms.SelectMultiple(attrs={'class': 'form-control profile-selector'}))
+    groups = forms.ModelMultipleChoiceField(label="Perfis", required=True,
+                                            queryset=Group.objects.all().order_by('name'),
+                                            widget=forms.SelectMultiple(
+                                                attrs={'class': 'form-control profile-selector'}))
 
     is_active = CustomBooleanField(
-        required=False,label="Ativo"
+        required=False,
+        label="Ativo"
     )
 
     password = forms.CharField(
         label="Senha",
         max_length=255,
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control','type':'password'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'password'})
     )
-
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username','email', 'password',
-                   'groups', 'is_active']
-
+        fields = ['first_name', 'last_name', 'username', 'email', 'password',
+                  'groups', 'is_active']
