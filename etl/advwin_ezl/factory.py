@@ -28,8 +28,12 @@ class InvalidObjectFactory(object):
     def create():
         # cria usuário padrão
         signals
-        user = User.objects.create_superuser('invalid_user', 'invalid_user@mttech.com.br', 'admin')
-        admin = User.objects.create_superuser('admin', 'admin@mttech.com.br', 'admin')
+        user = User.objects.filter(username='invalid_user').first()
+        admin = User.objects.filter(username='admin').first()
+        if not user:
+            user = User.objects.create_superuser('invalid_user', 'invalid_user@mttech.com.br', 'admin')
+        if not admin:
+            admin = User.objects.create_superuser('admin', 'admin@mttech.com.br', 'admin')
 
         # Registros inválidos para o app core
         invalid_country, created = Country.objects.get_or_create(
