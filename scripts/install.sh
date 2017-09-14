@@ -55,7 +55,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]" > ezl/local_settings.py
 
-# Rodando migrate do banco 
+# Rodando migrate do banco
 python3.5 manage.py migrate
 
 # Matando processos de ETL em execucao
@@ -65,7 +65,7 @@ sudo kill -9 `ps -aux | grep -i luigi_jobs.py | awk {'print $2'} | head -1`
 # Configurando a ETL
 sudo echo "
 [connection]
-server = 172.27.155.9
+server = 127.0.0.1:2000
 user = Rvnovaes
 password = libertas
 database = Advwin_ho
@@ -76,7 +76,10 @@ db_type = sql_server
 
 # Rodando ETL
 
-python3.5 etl/advwin_ezl/luigi_jobs.py -p=senha
+msg="Informe a senha do usuario `whoami`"
+echo $msg
+read -s -p 'senha: ' senha
+python3.5 etl/advwin_ezl/luigi_jobs.py -p=$senha
 
 # Rodando o projeto
 python3.5 manage.py runserver 0.0.0.0:8004

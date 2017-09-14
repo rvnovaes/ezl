@@ -16,3 +16,10 @@ log_file = '/tmp/etl_ged.log'
 # nome de usuário utilizado na exportação EZL -> Advwin
 create_user = 'six'
 config_file = 'advwin_ho.cfg'
+
+# Configuracoes do Luigi
+
+# PARA CONFIGURAR UMA PORTA DIFERENTE DA 8082 QUE E PADRAO DO LUIGI, E NECESSARIO CRIAR O ARQUIVO
+# luigi.cfg DENTRO DE /etc/luigi/ exemplo: http://luigi.readthedocs.io/en/stable/configuration.html
+# PARA A CONFIGURACAO DA PORTA O ARTRIBUTO NO luigi.cfg deve ser default-scheduler-port=porta
+LUIGI_PORT = 8082
