@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object model="lawsuit.courtdivision" pk="1">
+        <field name="create_date" type="DateTimeField">2017-08-16T12:22:13.073999+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="alter_date" type="DateTimeField">2017-08-16T12:22:13.074111+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField">REGISTRO-INVÁLIDO</field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">VARA-INVÁLIDO</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="7">
+        <field name="create_date" type="DateTimeField">2017-09-11T15:09:31.799401+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:32:39.018837+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">5ª Vara Cível</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="8">
+        <field name="create_date" type="DateTimeField">2017-09-11T15:31:21.457110+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:32:29.050191+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">1ª Vara Cível</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="9">
+        <field name="create_date" type="DateTimeField">2017-09-11T15:31:30.456049+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:32:21.753417+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">2ª Vara Cível</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="10">
+        <field name="create_date" type="DateTimeField">2017-09-11T15:31:41.251724+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:32:15.425336+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">3ª Vara Cível</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="11">
+        <field name="create_date" type="DateTimeField">2017-09-11T15:31:51.805980+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:32:08.347487+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">4ª Vara Cível</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="12">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:30:39.063532+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:30:39.063597+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">1ª  Vara do Trabalho</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="13">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:32:54.679820+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:32:54.679892+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">2ª Vara do Trabalho</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="14">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:33:01.942036+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:33:01.942102+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">3ª Vara do Trabalho</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="15">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:33:09.152977+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:33:09.153045+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">4ª Vara do Trabalho</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="16">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:33:15.467309+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:33:15.467374+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">5ª Vara do Trabalho</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="17">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:35:31.964413+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:35:31.964478+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">1ª Unidade Jurisdicional Cível</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="18">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:35:38.093902+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:35:38.093967+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">2ª Unidade Jurisdicional Cível</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="19">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:35:43.182977+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:35:43.183045+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">3ª Unidade Jurisdicional Cível</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="20">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:35:48.886160+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:35:48.886224+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">4ª Unidade Jurisdicional Cível</field>
+    </object>
+    <object model="lawsuit.courtdivision" pk="21">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:35:54.819503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:35:54.819573+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">5ª Unidade Jurisdicional Cível</field>
+    </object>
+</django-objects>
