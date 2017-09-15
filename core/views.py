@@ -33,6 +33,8 @@ from core.tables import PersonTable, UserTable
 from ezl import settings
 from lawsuit.models import Folder, Movement, LawSuit
 from task.models import Task
+from django.db.models import Q
+from functools import wraps
 
 
 def login(request):
@@ -56,6 +58,30 @@ def logout_user(request):
     logout(request)
     # Redireciona para a página de login
     return HttpResponseRedirect('/')
+
+
+def remove_invalid_registry(f):
+    """
+    Embrulha o metodo get_context_data onde deseja remover da listagem  o registro invalido gerado pela ETL.
+    :param f:
+    :return f:
+    """
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            model = args[0].model
+            class_verbose_name_invalid = model._meta.verbose_name.upper() + '-INVÁLIDO'
+            try:
+                invalid_registry = model.objects.filter(name=class_verbose_name_invalid).first()
+            except:
+                invalid_registry = model.objects.filter(legacy_code='REGISTRO-INVÁLIDO').first()
+            if invalid_registry:
+                kwargs['remove_invalid'] = invalid_registry.pk
+        except:
+            pass
+        res = f(*args, **kwargs)
+        return res
+    return wrapper
 
 
 # Implementa a alteração da data e usuários para operação de update e new
@@ -113,7 +139,11 @@ class SingleTableViewMixin(SingleTableView):
             if args:
                 table = eval(args)
             else:
-                table = self.table_class(self.model.objects.all().order_by('-pk'))
+                if kwargs.get('remove_invalid'):
+                    table = self.table_class(
+                        self.model.objects.filter(~Q(pk=kwargs.get('remove_invalid'))).order_by('-pk'))
+                else:
+                    table = self.table_class(self.model.objects.all().order_by('-pk'))
             RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
             context['table'] = table
         except:
@@ -170,6 +200,17 @@ def address_update(request, pk):
 class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Person
     table_class = PersonTable
+
+    @remove_invalid_registry
+    def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data utilizando o decorator remove_invalid_registry
+        para remover o registro invalido da listagem
+        :param kwargs:
+        :return: Retorna o contexto contendo a listatem
+        :rtype: dict
+        """
+        return super(PersonListView, self).get_context_data(**kwargs)
 
 
 class PersonCreateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, CreateView):

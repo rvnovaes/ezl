@@ -19,11 +19,17 @@ from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, Law
 from .models import Instance, Movement, LawSuit, Folder, CourtDistrict, CourtDivision, TypeMovement
 from .tables import MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, InstanceTable, \
     CourtDivisionTable, TypeMovementTable
+from core.views import remove_invalid_registry
 
 
 class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Instance
     table_class = InstanceTable
+
+    @remove_invalid_registry
+    def get_context_data(self, **kwargs):
+        ret = super(InstanceListView, self).get_context_data(**kwargs)
+        return ret
 
 
 class InstanceCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
@@ -72,7 +78,17 @@ class TypeMovementDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
 class FolderListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Folder
     table_class = FolderTable
-    
+
+    @remove_invalid_registry
+    def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data utilizando o decorator remove_invalid_registry
+        para remover o registro invalido da listagem
+        :param kwargs:
+        :return: Retorna o contexto contendo a listatem
+        :rtype: dict
+        """
+        return super(FolderListView, self).get_context_data(**kwargs)
 
 
 class FolderCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
@@ -101,6 +117,17 @@ class CourtDistrictListView(LoginRequiredMixin, SingleTableViewMixin):
     model = CourtDistrict
     table_class = CourtDistrictTable
 
+    @remove_invalid_registry
+    def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data utilizando o decorator remove_invalid_registry
+        para remover o registro invalido da listagem
+        :param kwargs:
+        :return: Retorna o contexto contendo a listatem
+        :rtype: dict
+        """
+        return super(CourtDistrictListView, self).get_context_data(**kwargs)
+
 
 class CourtDistrictCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
     model = CourtDistrict
@@ -125,6 +152,17 @@ class CourtDistrictDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteVie
 class CourtDivisionListView(LoginRequiredMixin, SingleTableViewMixin):
     model = CourtDivision
     table_class = CourtDivisionTable
+
+    @remove_invalid_registry
+    def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data utilizando o decorator remove_invalid_registry
+        para remover o registro invalido da listagem
+        :param kwargs:
+        :return: Retorna o contexto contendo a listatem
+        :rtype: dict
+        """
+        return super(CourtDivisionListView, self).get_context_data(**kwargs)
 
 
 class CourtDivisionCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):

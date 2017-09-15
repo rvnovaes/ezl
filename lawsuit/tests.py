@@ -285,13 +285,10 @@ class MovementTest(TestCase):
 
         law_suit = mommy.make(LawSuit, is_active=True).id
         type_movement = mommy.make(TypeMovement, is_active=True).id
-        deadline = datetime.date.today()
-
         data = {'legacy_code': legacy_code,
                 'person_lawyer': person_lawyer,
                 'law_suit': law_suit,
-                'type_movement': type_movement,
-                'deadline': deadline}
+                'type_movement': type_movement}
 
         form = MovementForm(data=data)
         print(form.errors)

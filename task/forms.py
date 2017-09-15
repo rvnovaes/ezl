@@ -9,6 +9,7 @@ from core.widgets import MDDateTimepicker, MDDatePicker
 from ezl import settings
 from lawsuit.forms import BaseForm
 from .models import Task, Ecm, TypeTask
+from core.utils import filter_valid_choice_form
 
 
 class TaskForm(BaseForm):
@@ -20,7 +21,7 @@ class TaskForm(BaseForm):
 
     person_asked_by = forms.ModelChoiceField(
         empty_label=u"Selecione...",
-        queryset=Person.objects.filter(is_active=True, is_correspondent=False).order_by('name')
+        queryset=filter_valid_choice_form(Person.objects.filter(is_active=True, is_correspondent=False)).order_by('name')
 
     )
 
@@ -51,8 +52,6 @@ class TaskForm(BaseForm):
                                           )
 
     reminder_deadline_date = forms.DateField(required=True,
-                                             initial=datetime.now()+timedelta(days=2),
-                                             # widget=forms.DateInput()
                                              widget=MDDatePicker(attrs={'class': 'form-control'},
                                                                  format='DD/MM/YYYY')
                                              )

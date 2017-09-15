@@ -9,7 +9,7 @@ from .models import TypeMovement, Instance, Movement, Folder, CourtDistrict, Law
 
 #TODO Verificar se será utilizado datepicker
 # from django.contrib.admin.widgets import AdminDateWidget
-
+from core.utils import filter_valid_choice_form
 
 # Cria uma Form referência e adiciona o mesmo style a todos os widgets
 class BaseForm(ModelForm):
@@ -61,7 +61,7 @@ class InstanceForm(BaseForm):
 class MovementForm(BaseForm):
     class Meta:
         model = Movement
-        fields = ['type_movement', 'deadline', 'person_lawyer', 'is_active']
+        fields = ['type_movement', 'person_lawyer', 'is_active']
 
     person_lawyer = forms.ModelChoiceField(
         queryset=Person.objects.filter(is_active=True, is_lawyer=True).order_by('name'),
@@ -71,13 +71,6 @@ class MovementForm(BaseForm):
     type_movement = forms.ModelChoiceField(
         queryset=TypeMovement.objects.filter(is_active=True).order_by('name'),
         empty_label=u"Selecione...",
-    )
-
-    deadline = forms.DateTimeField(
-        label=u"Data da Movimentação",
-        widget=MDDatePicker(attrs={'class': 'form-control'},
-                            format='DD/MM/YYYY'
-                            )
     )
 
 
@@ -112,25 +105,23 @@ class LawSuitForm(BaseForm):
 
     person_lawyer = forms.ModelChoiceField(
         empty_label=u"Selecione",
-        queryset=Person.objects.filter(is_active=True, is_lawyer=True).only('legal_name').order_by('name'), required=True
+        queryset=filter_valid_choice_form(
+            Person.objects.filter(is_active=True, is_lawyer=True)).only('legal_name').order_by('name'), required=True
     )
-    # folder = forms.ModelChoiceField(
-    #     empty_label=u"Selecione",
-    #     queryset=Folder.objects.filter(is_active=True), required=True
-    # )
     instance = forms.ModelChoiceField(
-        queryset=Instance.objects.filter(is_active=True).order_by('name'),
+        queryset=filter_valid_choice_form(Instance.objects.filter(is_active=True)).order_by('name'),
         empty_label=u"Selecione", required=True
     )
     court_district = forms.ModelChoiceField(
-        queryset=CourtDistrict.objects.filter(is_active=True).order_by('name'),
+        queryset=filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True)).order_by('name'),
         empty_label=u"Selecione", required=True
     )
     person_court = forms.ModelChoiceField(
-        queryset=Person.objects.filter(is_active=True, is_court=True).order_by('name'),
+        queryset=filter_valid_choice_form(filter_valid_choice_form(
+            Person.objects.filter(is_active=True, is_court=True))).order_by('name'),
         empty_label=u"Selecione", required=True)
     court_division = forms.ModelChoiceField(
-        queryset=CourtDivision.objects.filter(is_active=True).order_by('name'),
+        queryset=filter_valid_choice_form(CourtDivision.objects.filter(is_active=True)).order_by('name'),
         empty_label=u"Selecione", required=True
     )
     law_suit_number = forms.CharField(max_length=255, required=True)
@@ -151,6 +142,6 @@ class CourtDistrictForm(BaseForm):
         fields = ['name', 'state', 'is_active']
 
     state = forms.ModelChoiceField(
-        queryset=State.objects.filter(is_active=True),
+        queryset=filter_valid_choice_form(State.objects.filter(is_active=True)),
         empty_label=u"Selecione"
     )
