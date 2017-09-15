@@ -51,11 +51,12 @@ class InvalidObjectFactory(object):
             state=invalid_state, create_user=user,
             court_district=invalid_court_district)
 
-        invalid_person, created = Person.objects.get_or_create(
-            legacy_code=invalid_legacy_code,
-            legal_name=Person._meta.verbose_name.upper() + invalid_registry,
-            name=Person._meta.verbose_name.upper() + invalid_registry
-            , create_user=user)
+        #Atualiza os dados de invalid_person para o padrao
+        invalid_user = User.objects.filter(username='invalid_user').first().id
+        invalid_person = Person.objects.filter(auth_user_id=invalid_user).first()
+        Person.objects.filter(auth_user_id=invalid_user).update(legacy_code=invalid_legacy_code,
+                                legal_name=Person._meta.verbose_name.upper() + invalid_registry,
+                                name=Person._meta.verbose_name.upper() + invalid_registry)
         # Registros inválidos para o app lawsuit
         invalid_type_movement, created = TypeMovement.objects.get_or_create(
             legacy_code=invalid_legacy_code,
