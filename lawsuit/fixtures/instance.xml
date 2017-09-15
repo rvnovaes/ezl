@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object model="lawsuit.instance" pk="1">
+        <field name="create_date" type="DateTimeField">2017-09-05T17:28:16.212266+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="alter_date" type="DateTimeField">2017-09-05T17:28:16.212332+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField">REGISTRO-INVÁLIDO</field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">INSTÂNCIA-INVÁLIDO</field>
+    </object>
+    <object model="lawsuit.instance" pk="4">
+        <field name="create_date" type="DateTimeField">2017-09-11T13:45:12.611961+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-12T17:11:32.474539+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Primeira Instância</field>
+    </object>
+    <object model="lawsuit.instance" pk="5">
+        <field name="create_date" type="DateTimeField">2017-09-11T13:45:28.244490+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-12T17:11:18.690819+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Segunda Instância</field>
+    </object>
+    <object model="lawsuit.instance" pk="6">
+        <field name="create_date" type="DateTimeField">2017-09-11T13:48:46.325610+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-12T17:11:10.628294+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Instância Superior</field>
+    </object>
+</django-objects>
