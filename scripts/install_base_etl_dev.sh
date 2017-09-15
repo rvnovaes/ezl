@@ -48,7 +48,7 @@ sudo chmod 777 $dir
 cd $dir
 
 # Clonando o repositorio
-hg clone https://thiago_1992@bitbucket.org/marcelotostes/easy_lawyer_django
+hg clone https://bitbucket.org/marcelotostes/easy_lawyer_django
 
 # Criando ambiente virtual
 sudo apt-get install python-virtualenv
