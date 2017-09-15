@@ -1,258 +1,1200 @@
 <?xml version="1.0" encoding="utf-8"?>
 <django-objects version="1.0">
-    <object model="core.person" pk="1">
-        <field name="create_date" type="DateTimeField">2017-06-30T14:03:14.032697+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField">2017-06-30T20:39:59.979979+00:00</field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">Dev</field>
-        <field name="name" type="CharField">Dev</field>
-        <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
-        <field name="is_court" type="BooleanField">False</field>
-        <field name="legal_type" type="CharField">F</field>
-        <field name="cpf_cnpj" type="CharField"></field>
-        <field name="auth_user" rel="OneToOneRel" to="auth.user">1</field>
-        <field name="is_customer" type="BooleanField">False</field>
-        <field name="is_supplier" type="BooleanField">False</field>
-    </object>
     <object model="core.person" pk="2">
-        <field name="create_date" type="DateTimeField">2017-06-30T14:10:55.356087+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField">2017-06-30T20:41:40.921906+00:00</field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="create_date" type="DateTimeField">2017-09-05T17:28:15.977631+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T12:25:26.189211+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
         <field name="legal_name" type="CharField">admin</field>
-        <field name="name" type="CharField">admin</field>
+        <field name="name" type="CharField"></field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
-        <field name="legal_type" type="CharField">J</field>
-        <field name="cpf_cnpj" type="CharField"></field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField"><None></None></field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user">2</field>
         <field name="is_customer" type="BooleanField">False</field>
         <field name="is_supplier" type="BooleanField">False</field>
     </object>
     <object model="core.person" pk="3">
-        <field name="create_date" type="DateTimeField">2017-06-30T14:11:51.238281+00:00</field>
+        <field name="create_date" type="DateTimeField">2017-09-05T17:28:16.149766+00:00</field>
         <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField">2017-06-30T20:47:22.201467+00:00</field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user">1</field>
+        <field name="alter_date" type="DateTimeField">2017-09-05T17:28:16.149830+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField">REGISTRO-INVÁLIDO</field>
+        <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">Martins Advogados</field>
-        <field name="name" type="CharField">Martins Reis</field>
+        <field name="legal_name" type="CharField">PESSOA-INVÁLIDO</field>
+        <field name="name" type="CharField">PESSOA-INVÁLIDO</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField"><None></None></field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">1</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="29">
+        <field name="create_date" type="DateTimeField">2017-09-11T12:07:44.650204+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T12:07:44.650275+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Tomás Vitor Pereira</field>
+        <field name="name" type="CharField">Tomás Vitor Pereira</field>
         <field name="is_lawyer" type="BooleanField">False</field>
         <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
-        <field name="cpf_cnpj" type="CharField"></field>
-        <field name="auth_user" rel="OneToOneRel" to="auth.user">3</field>
+        <field name="cpf_cnpj" type="CharField">868.556.446-86</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
         <field name="is_customer" type="BooleanField">False</field>
         <field name="is_supplier" type="BooleanField">False</field>
     </object>
-    <object model="core.person" pk="4">
-        <field name="create_date" type="DateTimeField">2017-06-30T14:17:43.484814+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField"><None></None></field>
+    <object model="core.person" pk="30">
+        <field name="create_date" type="DateTimeField">2017-09-11T12:10:41.176077+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T12:10:41.176153+00:00</field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">Tcq - Consultoria Empresarial Simples Ltda</field>
-        <field name="name" type="CharField">Tcq - Consultoria Empresarial Simples Ltda</field>
+        <field name="legal_name" type="CharField">Guilherme e Breno Ferragens Ltda</field>
+        <field name="name" type="CharField">Guilherme e Breno Ferragens Ltda</field>
         <field name="is_lawyer" type="BooleanField">False</field>
         <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
-        <field name="cpf_cnpj" type="CharField">47.693.567/0001-54</field>
+        <field name="cpf_cnpj" type="CharField">94.809.937/0001-56</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
         <field name="is_customer" type="BooleanField">True</field>
         <field name="is_supplier" type="BooleanField">False</field>
     </object>
-    <object model="core.person" pk="5">
-        <field name="create_date" type="DateTimeField">2017-06-30T14:20:06.968844+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField">2017-06-30T18:21:29.939989+00:00</field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user">1</field>
+    <object model="core.person" pk="31">
+        <field name="create_date" type="DateTimeField">2017-09-11T12:21:16.566585+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T12:21:16.566653+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">Napoleão Bonaparte</field>
-        <field name="name" type="CharField">Napoleão Bonaparte</field>
+        <field name="legal_name" type="CharField">Gabriel de Araújo Lima</field>
+        <field name="name" type="CharField">Gabriel de Araújo Lima</field>
         <field name="is_lawyer" type="BooleanField">True</field>
         <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
-        <field name="cpf_cnpj" type="CharField">220.229.617-49</field>
+        <field name="cpf_cnpj" type="CharField">097.972.928-94</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
         <field name="is_customer" type="BooleanField">False</field>
         <field name="is_supplier" type="BooleanField">False</field>
     </object>
-    <object model="core.person" pk="6">
-        <field name="create_date" type="DateTimeField">2017-06-30T14:25:24.446267+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField"><None></None></field>
+    <object model="core.person" pk="32">
+        <field name="create_date" type="DateTimeField">2017-09-11T12:36:06.449621+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T12:36:06.449691+00:00</field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">Fecomércio Minas Gerais</field>
-        <field name="name" type="CharField">Fecomércio Minas Gerais</field>
+        <field name="legal_name" type="CharField">Joaquim Lucca Cavalcanti</field>
+        <field name="name" type="CharField">Joaquim Lucca Cavalcanti</field>
+        <field name="is_lawyer" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField">089.789.395-62</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="33">
+        <field name="create_date" type="DateTimeField">2017-09-11T12:51:03.361998+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T18:15:48.794366+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Tribunal de Justiça de Minas Gerais</field>
+        <field name="name" type="CharField">TJMG</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">True</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">21.154.554/0001-13</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="34">
+        <field name="create_date" type="DateTimeField">2017-09-11T12:55:02.829111+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T13:02:28.337161+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Tribunal de Justiça de São Paulo</field>
+        <field name="name" type="CharField">TJSP</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">True</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">51.174.001/0001-93</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="37">
+        <field name="create_date" type="DateTimeField">2017-09-11T13:15:11.931863+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T13:15:11.931939+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Bradesco Capitalização S/A</field>
+        <field name="name" type="CharField">Bradesco Capitalização S/A</field>
         <field name="is_lawyer" type="BooleanField">False</field>
         <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
-        <field name="cpf_cnpj" type="CharField">47.650.944/0001-78</field>
+        <field name="cpf_cnpj" type="CharField">33.010.851/0001-74</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
         <field name="is_customer" type="BooleanField">True</field>
         <field name="is_supplier" type="BooleanField">False</field>
     </object>
-    <object model="core.person" pk="10">
-        <field name="create_date" type="DateTimeField">2017-06-30T14:38:09.697196+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField"><None></None></field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+    <object model="core.person" pk="38">
+        <field name="create_date" type="DateTimeField">2017-09-11T13:27:04.477827+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T18:42:35.247625+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">Platão</field>
-        <field name="name" type="CharField">Platão</field>
+        <field name="legal_name" type="CharField">Rayana Lima</field>
+        <field name="name" type="CharField">Rayana Lima</field>
         <field name="is_lawyer" type="BooleanField">True</field>
         <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
-        <field name="cpf_cnpj" type="CharField">06427790404</field>
+        <field name="cpf_cnpj" type="CharField">009.610.736-75</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
         <field name="is_customer" type="BooleanField">False</field>
         <field name="is_supplier" type="BooleanField">False</field>
     </object>
-    <object model="core.person" pk="11">
-        <field name="create_date" type="DateTimeField">2017-06-30T14:39:09.009961+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField">2017-06-30T18:26:27.424979+00:00</field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user">1</field>
+    <object model="core.person" pk="39">
+        <field name="create_date" type="DateTimeField">2017-09-11T13:28:47.612766+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T13:33:14.357819+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">William Shakespeare</field>
-        <field name="name" type="CharField">William Shakespeare</field>
-        <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
-        <field name="is_court" type="BooleanField">False</field>
-        <field name="legal_type" type="CharField">F</field>
-        <field name="cpf_cnpj" type="CharField">577.656.711-46</field>
-        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_customer" type="BooleanField">False</field>
-        <field name="is_supplier" type="BooleanField">False</field>
-    </object>
-    <object model="core.person" pk="12">
-        <field name="create_date" type="DateTimeField">2017-06-30T14:45:09.930222+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField"><None></None></field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
-        <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">Mineradora Marsil Ltda</field>
-        <field name="name" type="CharField">Mineradora Marsil Ltda</field>
+        <field name="legal_name" type="CharField">Murilo Bryan Igor Nascimento</field>
+        <field name="name" type="CharField">Murilo Bryan Igor Nascimento</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
-        <field name="is_court" type="BooleanField">False</field>
-        <field name="legal_type" type="CharField">J</field>
-        <field name="cpf_cnpj" type="CharField">07.727.516/0001-81</field>
-        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_customer" type="BooleanField">True</field>
-        <field name="is_supplier" type="BooleanField">False</field>
-    </object>
-    <object model="core.person" pk="13">
-        <field name="create_date" type="DateTimeField">2017-06-30T14:46:13.027571+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField"><None></None></field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
-        <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">Calçados Itapuã S/A - Cisa</field>
-        <field name="name" type="CharField">Calçados Itapuã S/A - Cisa</field>
-        <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
-        <field name="is_court" type="BooleanField">False</field>
-        <field name="legal_type" type="CharField">J</field>
-        <field name="cpf_cnpj" type="CharField">38.068.246/0001-78</field>
-        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_customer" type="BooleanField">True</field>
-        <field name="is_supplier" type="BooleanField">False</field>
-    </object>
-    <object model="core.person" pk="14">
-        <field name="create_date" type="DateTimeField">2017-06-30T15:57:50.184312+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField">2017-06-30T18:23:33.943281+00:00</field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">Romeu da Julieta</field>
-        <field name="name" type="CharField">Romeu da Julieta</field>
-        <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
-        <field name="is_court" type="BooleanField">False</field>
-        <field name="legal_type" type="CharField">F</field>
-        <field name="cpf_cnpj" type="CharField">627.585.805-27</field>
-        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_customer" type="BooleanField">False</field>
-        <field name="is_supplier" type="BooleanField">False</field>
-    </object>
-    <object model="core.person" pk="15">
-        <field name="create_date" type="DateTimeField">2017-06-30T16:03:43.968789+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField">2017-06-30T18:21:43.218865+00:00</field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">Charles Darwin</field>
-        <field name="name" type="CharField">Charles Darwin</field>
-        <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
-        <field name="is_court" type="BooleanField">False</field>
-        <field name="legal_type" type="CharField">F</field>
-        <field name="cpf_cnpj" type="CharField">072.576.001-04</field>
-        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
-        <field name="is_customer" type="BooleanField">False</field>
-        <field name="is_supplier" type="BooleanField">False</field>
-    </object>
-    <object model="core.person" pk="17">
-        <field name="create_date" type="DateTimeField">2017-06-30T20:40:50.374603+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField"><None></None></field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
-        <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">Milagres e Machado</field>
-        <field name="name" type="CharField">Thiago Milagres</field>
-        <field name="is_lawyer" type="BooleanField">True</field>
         <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
-        <field name="cpf_cnpj" type="CharField">447.048.404-09</field>
+        <field name="cpf_cnpj" type="CharField">521.731.296-35</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="40">
+        <field name="create_date" type="DateTimeField">2017-09-11T13:38:53.628011+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T13:38:53.628081+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Hadassa e Augusto Telecomunicações Ltda</field>
+        <field name="name" type="CharField">Hadassa e Augusto Telecomunicações Ltda</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">93.093.966/0001-00</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
         <field name="is_customer" type="BooleanField">False</field>
         <field name="is_supplier" type="BooleanField">True</field>
     </object>
-    <object model="core.person" pk="18">
-        <field name="create_date" type="DateTimeField">2017-06-30T20:42:10.725104+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField"><None></None></field>
+    <object model="core.person" pk="41">
+        <field name="create_date" type="DateTimeField">2017-09-11T13:41:56.592326+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T13:41:56.592397+00:00</field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">Canpack Embalagens Metálicas do Brasil Ltda</field>
-        <field name="name" type="CharField">Canpack Embalagens Metálicas do Brasil Ltda</field>
+        <field name="legal_name" type="CharField">Alana e Gustavo Marketing Ltda</field>
+        <field name="name" type="CharField">Alana e Gustavo Marketing Ltda</field>
         <field name="is_lawyer" type="BooleanField">False</field>
         <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
-        <field name="cpf_cnpj" type="CharField">74.459.471/0001-07</field>
+        <field name="cpf_cnpj" type="CharField">94.198.203/0001-88</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">True</field>
+    </object>
+    <object model="core.person" pk="42">
+        <field name="create_date" type="DateTimeField">2017-09-11T15:34:28.708181+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">9</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T17:39:20.108035+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Éloa Costa</field>
+        <field name="name" type="CharField">Éloa Costa</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField">490.212.508-02</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">9</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="43">
+        <field name="create_date" type="DateTimeField">2017-09-11T17:21:49.116310+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">10</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T17:37:14.080742+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Ricardo Luz</field>
+        <field name="name" type="CharField">Ricardo Luz</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField">198.139.878-39</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">10</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="44">
+        <field name="create_date" type="DateTimeField">2017-09-11T17:43:47.986619+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">11</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T17:56:37.044012+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">João Lucas Oliveira</field>
+        <field name="name" type="CharField">João Lucas Oliveira</field>
+        <field name="is_lawyer" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField">767.833.998-42</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">11</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="45">
+        <field name="create_date" type="DateTimeField">2017-09-11T17:47:10.042438+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">12</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T18:41:44.586853+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Mayara Garbo</field>
+        <field name="name" type="CharField">Mayara Garbo</field>
+        <field name="is_lawyer" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField">817.138.528-10</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">12</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="46">
+        <field name="create_date" type="DateTimeField">2017-09-11T17:47:58.854728+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">13</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T17:53:56.984040+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Barbara Ramos</field>
+        <field name="name" type="CharField">Barbara Ramos</field>
+        <field name="is_lawyer" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField">210.282.288-56</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">13</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="47">
+        <field name="create_date" type="DateTimeField">2017-09-11T17:50:02.301309+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">14</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T17:51:49.891158+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Gabriel Viana</field>
+        <field name="name" type="CharField">Gabriel Viana</field>
+        <field name="is_lawyer" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField">420.472.648-80</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">14</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="48">
+        <field name="create_date" type="DateTimeField">2017-09-11T20:28:02.463829+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T20:28:02.463896+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Trena Terraplenagem e Construções LTDA</field>
+        <field name="name" type="CharField">Trena Terraplenagem e Construções LTDA</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">08.946.461/0001-63</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
         <field name="is_customer" type="BooleanField">True</field>
         <field name="is_supplier" type="BooleanField">False</field>
     </object>
-    <object model="core.person" pk="19">
-        <field name="create_date" type="DateTimeField">2017-06-30T20:43:49.411305+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">1</field>
-        <field name="alter_date" type="DateTimeField"><None></None></field>
+    <object model="core.person" pk="49">
+        <field name="create_date" type="DateTimeField">2017-09-11T20:31:00.156524+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T20:31:00.156593+00:00</field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">Mediphacos Ltda</field>
-        <field name="name" type="CharField">Mediphacos Ltda</field>
+        <field name="legal_name" type="CharField">Impermeabilização Isolar</field>
+        <field name="name" type="CharField">Impermeabilização Isolar</field>
         <field name="is_lawyer" type="BooleanField">False</field>
         <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
-        <field name="cpf_cnpj" type="CharField">29.345.157/0001-30</field>
+        <field name="cpf_cnpj" type="CharField">96.149.600/0001-95</field>
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
         <field name="is_customer" type="BooleanField">True</field>
         <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="50">
+        <field name="create_date" type="DateTimeField">2017-09-11T20:33:35.733485+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T20:33:35.733553+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Express Lavanderia</field>
+        <field name="name" type="CharField">Express Lavanderia</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">23.333.434/0001-09</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="51">
+        <field name="create_date" type="DateTimeField">2017-09-11T20:37:40.568943+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T20:37:40.569013+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Minas Brasil Mineração LTDA</field>
+        <field name="name" type="CharField">Minas Brasil Mineração LTDA</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">87.772.371/0001-70</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="52">
+        <field name="create_date" type="DateTimeField">2017-09-11T20:40:31.371465+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T20:43:38.715552+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Qualy Comércio De Carvão LTDA</field>
+        <field name="name" type="CharField">Qualy Comércio De Carvão LTDA</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">69.019.731/0001-85</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="55">
+        <field name="create_date" type="DateTimeField">2017-09-11T20:47:18.890827+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T20:47:18.890895+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Cobrasa Construtora Brasileira LTDA</field>
+        <field name="name" type="CharField">Cobrasa Construtora Brasileira LTDA</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">69.622.015/0001-98</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="56">
+        <field name="create_date" type="DateTimeField">2017-09-11T20:51:23.124488+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T20:51:23.124555+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Pneus Brasa LTDA</field>
+        <field name="name" type="CharField">Pneus Brasa LTDA</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">44.323.563/0001-96</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="57">
+        <field name="create_date" type="DateTimeField">2017-09-11T20:54:32.768821+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T20:54:32.768893+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Siderúrgica São Luiz LTDA</field>
+        <field name="name" type="CharField">Siderúrgica São Luiz LTDA</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">42.573.478/0001-50</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="58">
+        <field name="create_date" type="DateTimeField">2017-09-11T21:01:13.021525+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T21:01:13.021595+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Lorena Manuela Brenda Fernandes</field>
+        <field name="name" type="CharField">Lorena Manuela Brenda Fernandes</field>
+        <field name="is_lawyer" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField">305.297.412-29</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="59">
+        <field name="create_date" type="DateTimeField">2017-09-11T21:02:54.729260+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T21:02:54.729329+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Levi Otávio Paulo Fernandes</field>
+        <field name="name" type="CharField">Levi Otávio Paulo Fernandes</field>
+        <field name="is_lawyer" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField">935.361.379-54</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="60">
+        <field name="create_date" type="DateTimeField">2017-09-11T21:05:17.979483+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-11T21:05:17.979555+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Flávia Agatha Milena Martins</field>
+        <field name="name" type="CharField">Flávia Agatha Milena Martins</field>
+        <field name="is_lawyer" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField">263.165.543-54</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="61">
+        <field name="create_date" type="DateTimeField">2017-09-12T16:51:20.728938+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">15</field>
+        <field name="alter_date" type="DateTimeField">2017-09-12T16:51:20.729007+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">15</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">LuizaRodrigues Drumond</field>
+        <field name="name" type="CharField">LuizaRodrigues Drumond</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField"><None></None></field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">15</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="63">
+        <field name="create_date" type="DateTimeField">2017-09-12T17:27:20.382444+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-12T17:28:59.247182+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Banco Rural S/A</field>
+        <field name="name" type="CharField">Banco Rural</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">33.124.959/0001-98</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="65">
+        <field name="create_date" type="DateTimeField">2017-09-14T11:38:16.147778+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">16</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T15:59:14.462822+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">TaianaFarias</field>
+        <field name="name" type="CharField">TaianaFarias</field>
+        <field name="is_lawyer" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField"><None></None></field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">16</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">True</field>
+    </object>
+    <object model="core.person" pk="66">
+        <field name="create_date" type="DateTimeField">2017-09-14T11:42:16.126015+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">17</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T16:35:36.120816+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">José Aquino de Moraes</field>
+        <field name="name" type="CharField">José Aquino de Moraes</field>
+        <field name="is_lawyer" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField"><None></None></field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">17</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">True</field>
+    </object>
+    <object model="core.person" pk="67">
+        <field name="create_date" type="DateTimeField">2017-09-14T11:43:48.126669+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">18</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T11:43:48.126743+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">18</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">StefanyPinheiro de Oliveira</field>
+        <field name="name" type="CharField">StefanyPinheiro de Oliveira</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField"><None></None></field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">18</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="68">
+        <field name="create_date" type="DateTimeField">2017-09-14T11:44:50.863150+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">19</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T11:58:20.533267+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Marcos AntônioBezerra Jr</field>
+        <field name="name" type="CharField">Marcos AntônioBezerra Jr</field>
+        <field name="is_lawyer" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField"><None></None></field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">19</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="69">
+        <field name="create_date" type="DateTimeField">2017-09-14T11:46:17.807718+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">20</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T11:57:28.381366+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">MiguelFalcão de Carvalho</field>
+        <field name="name" type="CharField">MiguelFalcão de Carvalho</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField"><None></None></field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">20</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="70">
+        <field name="create_date" type="DateTimeField">2017-09-14T11:47:48.435944+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">21</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T11:57:03.936249+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">EstevanAzevedo de Lima</field>
+        <field name="name" type="CharField">EstevanAzevedo de Lima</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField"><None></None></field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">21</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="71">
+        <field name="create_date" type="DateTimeField">2017-09-14T11:48:57.426081+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">22</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T11:56:45.187180+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">LuizaDias Gonçalves</field>
+        <field name="name" type="CharField">LuizaDias Gonçalves</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField"><None></None></field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">22</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="72">
+        <field name="create_date" type="DateTimeField">2017-09-14T11:50:36.484556+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">23</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T11:56:14.199361+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">ThaisAlmeida de Carvalho</field>
+        <field name="name" type="CharField">ThaisAlmeida de Carvalho</field>
+        <field name="is_lawyer" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField"><None></None></field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">23</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="73">
+        <field name="create_date" type="DateTimeField">2017-09-14T11:51:45.046773+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">24</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T11:55:47.526208+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">GiovannaRodrigues Souza</field>
+        <field name="name" type="CharField">GiovannaRodrigues Souza</field>
+        <field name="is_lawyer" type="BooleanField">True</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">F</field>
+        <field name="cpf_cnpj" type="CharField"><None></None></field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user">24</field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="74">
+        <field name="create_date" type="DateTimeField">2017-09-14T12:52:20.208908+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T12:52:20.208983+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Laboratório Sabin de Análises Clínicas</field>
+        <field name="name" type="CharField">Laboratório Sabin de Análises Clínicas</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">87.544.727/0001-18</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="75">
+        <field name="create_date" type="DateTimeField">2017-09-14T12:52:55.974236+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T12:52:55.974307+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Consórcio Nacional Embracon</field>
+        <field name="name" type="CharField">Consórcio Nacional Embracon</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">32.891.700/0001-00</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="76">
+        <field name="create_date" type="DateTimeField">2017-09-14T12:53:35.193952+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T12:53:35.194025+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Plan B Comunicação</field>
+        <field name="name" type="CharField">Plan B Comunicação</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">64.597.629/0001-43</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="77">
+        <field name="create_date" type="DateTimeField">2017-09-14T12:54:25.061967+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T12:54:25.062035+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Kot Engenharia</field>
+        <field name="name" type="CharField">Kot Engenharia</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">10.760.126/0001-18</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="78">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:03:18.058995+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:03:18.059063+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Prumo Engenharia</field>
+        <field name="name" type="CharField">Prumo Engenharia</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">56.925.864/0001-79</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="79">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:04:07.972858+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:04:07.972928+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Tribunal de Justiça do Acre</field>
+        <field name="name" type="CharField">Tribunal de Justiça do Acre</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">True</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">05.945.116/0001-17</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="80">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:04:34.604603+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:04:34.604670+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Tribunal de Justiça do Amazonas</field>
+        <field name="name" type="CharField">Tribunal de Justiça do Amazonas</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">True</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">78.746.591/0001-38</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="81">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:05:25.949869+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:05:25.949939+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Tribunal de Justiça do Distrito Federal</field>
+        <field name="name" type="CharField">Tribunal de Justiça do Distrito Federal</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">True</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">16.575.631/0001-79</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="82">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:06:04.446532+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:06:04.446601+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Tribunal de Justiça do Maranhão</field>
+        <field name="name" type="CharField">Tribunal de Justiça do Maranhão</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">True</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">51.608.994/0001-64</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="83">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:08:31.010185+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:08:31.010254+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Tribunal de Justiça do Paraná</field>
+        <field name="name" type="CharField">Tribunal de Justiça do Paraná</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">True</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">48.670.199/0001-91</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="84">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:09:54.476537+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:09:54.476612+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Tribunal de Justiça do Rio de Janeiro</field>
+        <field name="name" type="CharField">Tribunal de Justiça do Rio de Janeiro</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">True</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">72.426.397/0001-99</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="85">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:11:02.300794+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:11:02.300862+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Junqueira Sampaio Advogados</field>
+        <field name="name" type="CharField">Junqueira Sampaio Advogados</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">05.905.451/0001-91</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">True</field>
+    </object>
+    <object model="core.person" pk="86">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:12:12.691677+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:12:12.691750+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Pio &amp; Santos Advocacia</field>
+        <field name="name" type="CharField">Pio &amp; Santos Advocacia</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">74.064.832/0001-08</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">True</field>
+    </object>
+    <object model="core.person" pk="87">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:12:44.781309+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:12:44.781378+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Abdalla Landulfo - Sociedade de Advogados</field>
+        <field name="name" type="CharField">Abdalla Landulfo - Sociedade de Advogados</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">46.035.361/0001-74</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">True</field>
+    </object>
+    <object model="core.person" pk="88">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:13:12.262634+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:13:12.262702+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Tobias e Corgosinho Advogados Associados</field>
+        <field name="name" type="CharField">Tobias e Corgosinho Advogados Associados</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">53.831.634/0001-52</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">True</field>
+    </object>
+    <object model="core.person" pk="89">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:14:48.651794+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:14:48.651863+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Veríssimo Carvalho Advocacia</field>
+        <field name="name" type="CharField">Veríssimo Carvalho Advocacia</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">88.328.227/0001-01</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">True</field>
+    </object>
+    <object model="core.person" pk="90">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:16:30.230383+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:16:30.230452+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Lincoln Louzada Advocacia &amp; Consultoria Jurídica</field>
+        <field name="name" type="CharField">Lincoln Louzada Advocacia &amp; Consultoria Jurídica</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">77.716.567/0001-93</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">True</field>
+    </object>
+    <object model="core.person" pk="91">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:22:40.066256+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:22:40.066343+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Juizado Especial Cível -  Unidade Francisco Sales</field>
+        <field name="name" type="CharField">Juizado Especial Cível -  Unidade Francisco Sales</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">True</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">15.265.241/0001-30</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="92">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:23:34.798975+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:23:34.799042+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Juizado Especial Cível - Unidade Barreiro</field>
+        <field name="name" type="CharField">Juizado Especial Cível - Unidade Barreiro</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">True</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">23.819.297/0001-17</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="93">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:26:22.879556+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:26:22.879625+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Juizado Especial da Fazenda Pública</field>
+        <field name="name" type="CharField">Juizado Especial da Fazenda Pública</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">True</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">22.376.637/0001-10</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="94">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:27:10.628295+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:27:10.628365+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Tribunal Regional do Trabalho 3ª Região</field>
+        <field name="name" type="CharField">Tribunal Regional do Trabalho 3ª Região</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">True</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">86.414.087/0001-69</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="95">
+        <field name="create_date" type="DateTimeField">2017-09-14T15:55:10.139993+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T15:55:10.140059+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Farias e Farias Advogados Associados</field>
+        <field name="name" type="CharField">Farias e Farias Advogados Associados</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">True</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">75.944.559/0001-79</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">False</field>
+        <field name="is_supplier" type="BooleanField">True</field>
     </object>
 </django-objects>

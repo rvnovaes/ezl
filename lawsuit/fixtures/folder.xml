@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object model="lawsuit.folder" pk="1">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:06:25.377033+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:06:25.392858+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="folder_number" type="IntegerField">1</field>
+        <field name="person_customer" rel="ManyToOneRel" to="core.person">77</field>
+    </object>
+    <object model="lawsuit.folder" pk="2">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:46:49.629185+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:46:56.254638+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="folder_number" type="IntegerField">2</field>
+        <field name="person_customer" rel="ManyToOneRel" to="core.person">37</field>
+    </object>
+    <object model="lawsuit.folder" pk="3">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:47:08.083413+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T14:00:36.700454+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="folder_number" type="IntegerField">3</field>
+        <field name="person_customer" rel="ManyToOneRel" to="core.person">78</field>
+    </object>
+    <object model="lawsuit.folder" pk="4">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:47:16.316098+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:47:16.331538+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="folder_number" type="IntegerField">4</field>
+        <field name="person_customer" rel="ManyToOneRel" to="core.person">76</field>
+    </object>
+    <object model="lawsuit.folder" pk="5">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:47:25.128498+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:47:25.145131+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="folder_number" type="IntegerField">5</field>
+        <field name="person_customer" rel="ManyToOneRel" to="core.person">75</field>
+    </object>
+    <object model="lawsuit.folder" pk="6">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:47:35.006594+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:47:35.022638+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="folder_number" type="IntegerField">6</field>
+        <field name="person_customer" rel="ManyToOneRel" to="core.person">74</field>
+    </object>
+    <object model="lawsuit.folder" pk="7">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:47:49.084450+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:47:49.115881+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="folder_number" type="IntegerField">7</field>
+        <field name="person_customer" rel="ManyToOneRel" to="core.person">63</field>
+    </object>
+    <object model="lawsuit.folder" pk="8">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:47:56.662685+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:47:56.678121+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="folder_number" type="IntegerField">8</field>
+        <field name="person_customer" rel="ManyToOneRel" to="core.person">57</field>
+    </object>
+    <object model="lawsuit.folder" pk="9">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:48:03.351089+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:48:03.381235+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="folder_number" type="IntegerField">9</field>
+        <field name="person_customer" rel="ManyToOneRel" to="core.person">55</field>
+    </object>
+    <object model="lawsuit.folder" pk="10">
+        <field name="create_date" type="DateTimeField">2017-09-14T13:48:10.068711+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-14T13:48:10.099954+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="folder_number" type="IntegerField">10</field>
+        <field name="person_customer" rel="ManyToOneRel" to="core.person">52</field>
+    </object>
+</django-objects>
