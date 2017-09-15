@@ -7,8 +7,8 @@ from core.models import Person
 def create_person(instance, sender, **kwargs):
     if not Person.objects.filter(auth_user=instance).first():
         Person.objects.create(
-            legal_name=instance.first_name + instance.last_name,
-            name=instance.first_name + instance.last_name,
+            legal_name=instance.first_name + ' ' + instance.last_name,
+            name=instance.first_name + ' ' + instance.last_name,
             is_lawyer=False,
             is_correspondent=False,
             is_court=False,

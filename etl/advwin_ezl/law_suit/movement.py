@@ -10,8 +10,7 @@ class MovementETL(GenericETL):
                    "pm.M_Distribuicao AS law_suit_legacy_code, " \
             "pm.Ident AS legacy_code, " \
             "pm.Advogado AS person_lawyer_legacy_code, " \
-            "pm.CodMov AS type_movement_legacy_code, " \
-            "pm.Prazo AS deadline " \
+            "pm.CodMov AS type_movement_legacy_code " \
             "FROM Jurid_ProcMov AS pm " \
             "INNER JOIN Jurid_Pastas AS p " \
             "ON pm.Codigo_Comp = p.Codigo_Comp " \
@@ -30,7 +29,6 @@ class MovementETL(GenericETL):
             law_suit_legacy_code = row['law_suit_legacy_code']
             person_lawyer_legacy_code = row['person_lawyer_legacy_code']
             type_movement_legacy_code = row['type_movement_legacy_code']
-            deadline = row['deadline']
 
             movement = self.model.objects.filter(legacy_code=legacy_code,
                                                  system_prefix=LegacySystem.ADVWIN.value).first()
@@ -52,13 +50,11 @@ class MovementETL(GenericETL):
                 movement.law_suit = lawsuit
                 movement.type_movement = type_movement
                 movement.person_lawyer = person_lawyer
-                movement.deadline = deadline
                 movement.is_active = True
                 movement.save(update_fields=['is_active',
                                              'law_suit',
                                              'type_movement',
                                              'person_lawyer',
-                                             'deadline',
                                              'alter_user',
                                              'alter_date',
                                              ])
@@ -70,7 +66,6 @@ class MovementETL(GenericETL):
                                           is_active=True,
                                           law_suit=lawsuit,
                                           type_movement=type_movement,
-                                          deadline=deadline,
                                           person_lawyer=person_lawyer
                                           )
 
