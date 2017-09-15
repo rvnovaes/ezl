@@ -1,6 +1,0 @@
-{% extends 'mail/base.html' %}
-
-{% block content %}
-    A providência {{ number }} foi aberta no {{ project_name }} pelo(a) solicitante {{ person_asked_by }}.<br>Para visualizar mais detalhes,
-    <a href="{{ server }}{% url 'task_detail' pk %}">clique aqui</a>.
-{% endblock %}
