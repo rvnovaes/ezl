@@ -69,7 +69,7 @@ class MovementForm(BaseForm):
     )
 
     type_movement = forms.ModelChoiceField(
-        queryset=TypeMovement.objects.filter(is_active=True).order_by('name'),
+        queryset=filter_valid_choice_form(TypeMovement.objects.filter(is_active=True)).order_by('name'),
         empty_label=u"Selecione...",
     )
 

@@ -32,7 +32,7 @@ class TaskForm(BaseForm):
     )
 
     type_task = forms.ModelChoiceField(
-        queryset=TypeTask.objects.filter(is_active=True).order_by('name'),
+        queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True)).order_by('name'),
         empty_label=u"Selecione...",
         label=u"Tipo de Serviço"
     )
