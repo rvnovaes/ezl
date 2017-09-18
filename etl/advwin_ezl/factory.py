@@ -118,7 +118,7 @@ class InvalidObjectFactory(object):
             contact_mechanism_type=invalid_contact_mechanism_type,
             description=ContactMechanism._meta.verbose_name.upper() + invalid_registry,
             notes=ContactMechanism._meta.verbose_name.upper() + invalid_registry,
-            person=invalid_person
+            person=invalid_person, create_user=user
         )
 
         # Registros inválidos para o app Task
