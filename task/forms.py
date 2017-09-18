@@ -1,18 +1,20 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import pytz
 from django import forms
 from django.forms import ModelForm
 
 from core.models import Person
+from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimepicker, MDDatePicker
 from ezl import settings
 from lawsuit.forms import BaseForm
 from .models import Task, Ecm, TypeTask
-from core.utils import filter_valid_choice_form
 
 
 class TaskForm(BaseForm):
+
+
     class Meta:
         model = Task
         fields = ['type_task', "person_executed_by", 'person_asked_by', "reminder_deadline_date",
@@ -21,7 +23,8 @@ class TaskForm(BaseForm):
 
     person_asked_by = forms.ModelChoiceField(
         empty_label=u"Selecione...",
-        queryset=filter_valid_choice_form(Person.objects.filter(is_active=True, is_correspondent=False)).order_by('name')
+        queryset=filter_valid_choice_form(Person.objects.filter(is_active=True, is_correspondent=False)).order_by(
+            'name')
 
     )
 
@@ -53,7 +56,8 @@ class TaskForm(BaseForm):
 
     reminder_deadline_date = forms.DateField(required=True,
                                              widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                                 format='DD/MM/YYYY')
+                                                                 format='DD/MM/YYYY',
+                                                                 min_date=datetime.utcnow().replace(tzinfo=pytz.timezone(settings.TIME_ZONE)))
                                              )
 
     final_deadline_date = forms.DateTimeField(required=False,
