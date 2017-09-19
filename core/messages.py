@@ -88,13 +88,13 @@ def recover_database_login_incorrect():
 
 def duplicate_cpf(cpf):
     if cpf is not None:
-        return "O número de CPF " + cpf + " já existe na base de dados"
+        return "O número de CPF " + cpf + " já existe."
     else:
-        return "O número de CPF informado já existe na base de dados"
+        return "O número de CPF já existe."
 
 
 def duplicate_cnpj(cnpj):
     if cnpj is not None:
-        return "O número de CNPJ " + cnpj + " já existe na base de dados"
+        return "O número de CNPJ " + cnpj + " já existe."
     else:
-        return "O número de CNPJ informado já existe na base de dados"
+        return "O número de CNPJ já existe."
