@@ -18,7 +18,7 @@
                             {% if not search_field.choices %}
                                 <div class="col-sm-3">
                                     <div class="form-group">
-                                        <label for="{{ search_field.name }}">{{ search_field.verbose_name }}</label>
+                                        <label for="{{ search_field.name }}">{{ search_field.verbose_name | capfirst }}</label>
                                         <input type="text" class="form-control input-field"
                                                id="{{ search_field.name }}"
                                                name="{{ search_field.name }}"
@@ -56,7 +56,7 @@
                         {% for search_field in search_model_fields.number %}
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label for="{{ search_field.name }}">{{ search_field.verbose_name }}</label>
+                                    <label for="{{ search_field.name }}">{{ search_field.verbose_name |capfirst }}</label>
                                     <input type="number" name="{{ search_field.name }}" class="form-control"
                                            value="{{ view.request.GET | get_item:search_field.name }}"/>
                                 </div>
@@ -66,7 +66,7 @@
                             {% if search_field.choices %}
                                 <div class="col-sm-3">
                                     <div class="form-group">
-                                        <label for="{{ search_field.name }}">{{ search_field.verbose_name }}</label>
+                                        <label for="{{ search_field.name }}">{{ search_field.verbose_name |capfirst }}</label>
                                         <select name="{{ search_field.name }}" class="form-control">
                                             <option value=""></option>
                                             {% for choice in search_field.choices %}
@@ -83,7 +83,7 @@
                         {% for search_field in search_model_fields.date %}
                             <div class='col-sm-3'>
                                 <div class="form-group">
-                                    <label for="{{ search_field.name }}_ini">{{ search_field.verbose_name }}</label>
+                                    <label for="{{ search_field.name }}_ini">{{ search_field.verbose_name |capfirst }}</label>
                                     <div class='input-group date' id='{{ search_field.name }}_ini'>
                                         <input type='text' class="form-control" name="{{ search_field.name }}_ini"
                                                placeholder="Data inicial"
@@ -131,7 +131,7 @@
                                         <label>
                                             <input type="checkbox" name="{{ search_field.name }}"
                                                     {{ view.request.GET | get_check_box_format:search_field.name }}/>
-                                            {{ search_field.verbose_name }}
+                                            {{ search_field.verbose_name |capfirst }}
                                         </label>
                                     </div>
                                 </div>

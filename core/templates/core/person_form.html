@@ -550,11 +550,7 @@
         </div>
         <div style="text-align: center;">
 
-            <a class="btn btn-sm btn-raised btn-default" href="{% url 'person_list' %}">
-                <i class="material-icons left">clear</i>
-                Cancelar
-                <div class="ripple-container"></div>
-            </a>
+            {% include 'core/widgets/cancel_button.html'  with link_list='person_list' %}
 
             <button type="submit" class="btn btn-sm btn-raised btn-primary"
                     onclick="document.getElementById('person_form').submit()"><i

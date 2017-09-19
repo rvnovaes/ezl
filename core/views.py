@@ -35,6 +35,7 @@ from lawsuit.models import Folder, Movement, LawSuit
 from task.models import Task
 from django.db.models import Q
 from functools import wraps
+from django.core.cache import cache
 
 
 def login(request):
@@ -338,10 +339,13 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
         context['addresses'] = Address.objects.filter(person=self.object.id)
         context['form_address'] = AddressForm()
         context['address_formset'] = AddressFormSet()
+        cache.set('person_page', self.request.META.get('HTTP_REFERER'))
         return context
 
     def post(self, request, *args, **kwargs):
-        super(PersonUpdateView, self).post(request, *args, **kwargs)
+        if cache.get('person_page'):
+            self.success_url = cache.get('person_page')
+        res = super(PersonUpdateView, self).post(request, *args, **kwargs)
         addresses_form = AddressFormSet(self.request.POST,
                                         instance=Person.objects.get(id=kwargs['pk']))
 
@@ -386,8 +390,7 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
         else:
             for error in addresses_form.errors:
                 messages.error(self.request, error)
-
-        return HttpResponseRedirect(self.request.path)
+        return res
 
 
 class PersonDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
@@ -632,6 +635,32 @@ class UserUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Up
 
         super(UserUpdateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
+
+    def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data e seta a ultima url acessada no cache
+        Isso e necessario para que ao salvar uma alteracao, o metodo post consiga verificar
+        a pagina da paginacao onde o usuario fez a alteracao
+        :param kwargs:
+        :return: super
+        """
+        context = super(UserUpdateView, self).get_context_data(**kwargs)
+        cache.set('user_page', self.request.META.get('HTTP_REFERER'))
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Sobrescreve o metodo post e verifica se existe cache da ultima url
+        Isso e necessario pelo fato da necessidade de retornar pra mesma paginacao
+        Que o usuario se encontrava ao fazer a alteracao
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: super
+        """
+        if cache.get('user_page'):
+            self.success_url = cache.get('user_page')
+        return super(UserUpdateView, self).post(request, *args, **kwargs)
 
 
 class UserDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):

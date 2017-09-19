@@ -16,6 +16,7 @@ from etl.advwin_ezl import signals
 from etl.advwin_ezl.account.user import UserETL
 from etl.advwin_ezl.core.person import PersonETL
 from etl.advwin_ezl.core.address import AddressETL
+from etl.advwin_ezl.core.ContactMechanism import ContactMechanismETL
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from etl.advwin_ezl.law_suit.court_division import CourtDivisionETL
 from etl.advwin_ezl.law_suit.folder import FolderETL
@@ -154,13 +155,27 @@ class PersonTask(luigi.Task):
         PersonETL().import_data()
 
 
-class AddressTask(luigi.Task):
+class ContactMechanismTask(luigi.Task):
     def output(self):
         return luigi.LocalTarget(
             path=get_folder_ipc(self))
 
     def requires(self):
         yield PersonTask()
+
+    def run(self):
+        f = open(get_folder_ipc(self), 'w')
+        f.close()
+        ContactMechanismETL().import_data()
+
+
+class AddressTask(luigi.Task):
+    def output(self):
+        return luigi.LocalTarget(
+            path=get_folder_ipc(self))
+
+    def requires(self):
+        yield ContactMechanismTask()
 
     def run(self):
         f = open(get_folder_ipc(self), 'w')

@@ -20,11 +20,7 @@
                             </div>
                         {% endfor %}
                         <div class="form-row  text-center">
-                            <a class="btn btn-sm btn-raised btn-default"
-                               href="{% url 'type_movement_list' %}"><i
-                                    class="material-icons left">clear</i>
-                                Cancelar
-                            </a>
+                            {% include 'core/widgets/cancel_button.html' with link_list='type_movement_list' %}
                             <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
                                     class="material-icons left">done</i>
                                 Salvar
