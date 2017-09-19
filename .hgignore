@@ -3,6 +3,7 @@ syntax: glob
 *.orig
 local_settings.py
 venv/**
+staticfiles/**
 
 syntax: regexp
 ^.idea/
