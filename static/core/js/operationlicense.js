@@ -20,7 +20,7 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    {
+                    {   isRequired: true,
                         type: "text",
                         name: "Justificativa de Alvará não retirado: ",
                         visible: false,
@@ -47,7 +47,7 @@ window.survey = new Survey.Model(
                         type: "text",
                         name: "dataRetiradoAutos",
                         visible: false,
-                        visibleIf: "{campo1} = 'S'",
+                        visibleIf: "{alvaraRetiradoAutos} = 'S'",
                         title: "Data da retirada do Alvará : ",
                         inputType: "datetime"
                     },
@@ -67,7 +67,7 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    {
+                    {   isRequired: true,
                         type: "text",
                         name: "vlrLevantadoBanco",
                         visible: false,
@@ -75,14 +75,14 @@ window.survey = new Survey.Model(
                         title: "Valor levantado : ",
                         inputType: "number"
                     },
-                    {
+                    {   isRequired: true,
                         type: "text",
                         name: "contaLevantamento",
                         visible: false,
                         visibleIf: "{alvaraLevadoBanco} = 'S'",
                         title: "Conta Bancária : "
                     },
-                    {
+                    {   isRequired: true,
                         type: "text",
                         name: "justAlvaraNLevantado",
                         visible: false,
@@ -104,28 +104,30 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    // {
-                    //     type: "file",
-                    //     name: "debiteDiligencia",
-                    //     visible: false,
-                    //     visibleIf: "{despReembolsaveis} = 'S'",
-                    //     title: "Debite de Diligência"
-                    // },
                     {
+                        type: "file",
+                        name: "debiteDiligencia",
+                        visible: false,
+                        visibleIf: "{despReembolsaveis} = 'S'",
+                        title: "Debite de Diligência",
+                        storeDataAsText: true, showPreview: true,imageWidth: 150
+                    },
+                    {   isRequired: true,
                         type: "text",
                         name: "obsRelevante",
                         visible: false,
                         visibleIf: "{despReembolsaveis} = 'S'",
                         title: "Observações relevantes: "
                     }
-                    // ,
-                    // {
-                    //     type: "file",
-                    //     name: "gedDiligencia",
-                    //     visible: false,
-                    //     visibleIf: "{despReembolsaveis} = 'S'",
-                    //     title: "GED de Diligência "
-                    // }
+                    ,
+                    {
+                        type: "file",
+                        name: "gedDiligencia",
+                        visible: false,
+                        visibleIf: "{despReembolsaveis} = 'S'",
+                        title: "GED de Diligência ",
+                        storeDataAsText: true, showPreview: true,imageWidth: 150
+                    }
                 ]
             }
         ]

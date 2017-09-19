@@ -24,7 +24,8 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    {   isRequired: true,
+                    {
+                        isRequired: true,
                         type: "radiogroup",
                         name: "docLegivel",
                         visible: false,
@@ -41,7 +42,8 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    {   isRequired: true,
+                    {
+                        isRequired: true,
                         type: "radiogroup",
                         name: "despReembolsaveis",
                         visible: false,
@@ -58,14 +60,16 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    // {
-                    //     type: "file",
-                    //     name: "debiteDiligencia",
-                    //     visible: false,
-                    //     visibleIf: "{cumprimento}='item1' or {cumprimento}='item2'",
-                    //     title: "Debite"
-                    // },
                     {
+                        type: "file",
+                        name: "debiteDiligencia",
+                        visible: false,
+                        visibleIf: "{cumprimento}='item1' or {cumprimento}='item2'",
+                        title: "Debite",
+                        storeDataAsText: true, showPreview: true,imageWidth: 150
+                    },
+                    {
+                        isRequired: true,
                         type: "text",
                         name: "obsRelevantes",
                         visible: false,
@@ -73,6 +77,7 @@ window.survey = new Survey.Model(
                         title: "Observações relevantes"
                     },
                     {
+                        isRequired: true,
                         type: "radiogroup",
                         name: "motivoCumprimentoParcial",
                         visible: false,
@@ -90,19 +95,22 @@ window.survey = new Survey.Model(
                         ]
                     },
                     {
+                        isRequired: true,
                         type: "text",
                         name: "Outro(a)",
                         visible: false,
                         visibleIf: "{motivoCumprimentoParcial}='item2'"
                     },
-                    // {
-                    //     type: "file",
-                    //     name: "gedDiligencia",
-                    //     visible: false,
-                    //     visibleIf: "{cumprimento}='item1' or {cumprimento}='item2'",
-                    //     title: "GED"
-                    // },
                     {
+                        type: "file",
+                        name: "gedDiligencia",
+                        visible: false,
+                        visibleIf: "{cumprimento}='item1' or {cumprimento}='item2'",
+                        title: "GED",
+                        storeDataAsText: true, showPreview: true,imageWidth: 150
+                    },
+                    {
+                        isRequired: true,
                         type: "text",
                         name: "justificativaNCumprir",
                         visible: false,

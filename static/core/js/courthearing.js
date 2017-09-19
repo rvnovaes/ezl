@@ -214,6 +214,7 @@ window.survey = new Survey.Model(
                         visibleIf: "{comparecimentoAudiencia}='S'"
                     },
                     {
+                        isRequired: true,
                         type: "text",
                         name: "advHabilitado",
                         title: "Qual Advogado?",
@@ -221,6 +222,7 @@ window.survey = new Survey.Model(
                         visibleIf: "{temAdvHabilitado}='S'"
                     },
                     {
+                        isRequired: true,
                         type: "text",
                         name: "obsRelevantes",
                         title: "Observações Relevantes",
@@ -244,8 +246,22 @@ window.survey = new Survey.Model(
                         title: "Despesas reembolsáveis?",
                         visible: false,
                         visibleIf: "{comparecimentoAudiencia}='S'"
+                    }, {
+                        type: "file",
+                        name: "debiteDiligencia",
+                        visible: false,
+                        visibleIf: "{despReembolsaveis} = 'S'",
+                        title: "Debite de Diligência",
+                        storeDataAsText: true, showPreview: true,imageWidth: 150
                     },
                     {
+                        type: "file",
+                        name: "gedDiligencia",
+                        title: "GED",
+                        storeDataAsText: true, showPreview: true,imageWidth: 150
+                    },
+                    {
+                        isRequired: true,
                         type: "text",
                         name: "justNCompAudiencia",
                         title: "Justificativa do não comparecimento",
