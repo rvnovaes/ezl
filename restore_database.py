@@ -2,8 +2,12 @@ import os
 import sys
 import subprocess
 import django
+from django.db import connection
 
-sys.path.append('/opt/venvs/demo/easy_lawyer_django/')
+# maneira de se chamar o script via terminal: python3 restore_database.py {user_bd} {pass_bd}.
+# Para o servidor da Azure: python3 restore_database.py ezl ezl
+
+sys.path.append(os.getcwd())
 os.environ['DJANGO_SETTINGS_MODULE'] = 'ezl.settings'
 django.setup()
 
@@ -31,6 +35,16 @@ if username == current_user_db and password == current_password_db:
     print('Limpando o banco ' + current_db_name + '....')
     print('<br><br>')
     subprocess.call('sudo python3 manage.py flush --noinput', shell=True)
+
+    # O comando python3 manage.py flush não apaga os dados das tabelas auth_permission, django_content_type, django_migrations, django_site.
+    # Assim, é necessário apagar manualmente os dados destas tabelas.
+
+    cursor = connection.cursor()
+    cursor.execute("TRUNCATE TABLE auth_permission CASCADE")
+    cursor.execute("TRUNCATE TABLE django_content_type CASCADE")
+    cursor.execute("TRUNCATE TABLE django_migrations CASCADE")
+    cursor.execute("TRUNCATE TABLE django_site CASCADE")
+
     print('Banco ' + db_name + ' limpado com sucesso')
     print('<br><br>')
 
@@ -38,7 +52,7 @@ if username == current_user_db and password == current_password_db:
 
     print('Realizando pg_restore no banco ' + current_db_name + ' ...')
     print('<br><br>')
-    pg_restore = 'pg_restore -a -U ezl -d ' + current_db_name + ' ' + path_dump_db
+    pg_restore = 'pg_restore -a --disable-triggers -U ezl -d ' + current_db_name + ' ' + path_dump_db
     # pg_restore = 'psql -U ezl demo < /opt/ezl.dump'
 
     subprocess.call(pg_restore, shell=True)
