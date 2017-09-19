@@ -20,6 +20,7 @@ from .models import Instance, Movement, LawSuit, Folder, CourtDistrict, CourtDiv
 from .tables import MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, InstanceTable, \
     CourtDivisionTable, TypeMovementTable
 from core.views import remove_invalid_registry
+from django.core.cache import cache
 
 
 class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -42,6 +43,32 @@ class InstanceUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView
     model = Instance
     form_class = InstanceForm
     success_url = reverse_lazy('instance_list')
+
+    def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data e seta a ultima url acessada no cache
+        Isso e necessario para que ao salvar uma alteracao, o metodo post consiga verificar
+        a pagina da paginacao onde o usuario fez a alteracao
+        :param kwargs:
+        :return: super
+        """
+        context = super(InstanceUpdateView, self).get_context_data(**kwargs)
+        cache.set('instance_page', self.request.META.get('HTTP_REFERER'))
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Sobrescreve o metodo post e verifica se existe cache da ultima url
+        Isso e necessario pelo fato da necessidade de retornar pra mesma paginacao
+        Que o usuario se encontrava ao fazer a alteracao
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: super
+        """
+        if cache.get('instance_page'):
+            self.success_url = cache.get('instance_page')
+        return super(InstanceUpdateView, self).post(request, *args, **kwargs)
 
 
 class InstanceDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
@@ -67,6 +94,32 @@ class TypeMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustom
     form_class = TypeMovementForm
     success_url = reverse_lazy('type_movement_list')
     success_message = update_success
+
+    def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data e seta a ultima url acessada no cache
+        Isso e necessario para que ao salvar uma alteracao, o metodo post consiga verificar
+        a pagina da paginacao onde o usuario fez a alteracao
+        :param kwargs:
+        :return: super
+        """
+        context = super(TypeMovementUpdateView, self).get_context_data(**kwargs)
+        cache.set('type_movement_page', self.request.META.get('HTTP_REFERER'))
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Sobrescreve o metodo post e verifica se existe cache da ultima url
+        Isso e necessario pelo fato da necessidade de retornar pra mesma paginacao
+        Que o usuario se encontrava ao fazer a alteracao
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: super
+        """
+        if cache.get('type_movement_page'):
+            self.success_url = cache.get('type_movement_page')
+        return super(TypeMovementUpdateView, self).post(request, *args, **kwargs)
 
 
 class TypeMovementDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
@@ -98,7 +151,6 @@ class FolderCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, 
     success_url = reverse_lazy('folder_list')
     success_message = new_success
     
-
 
 class FolderUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
     model = Folder
@@ -141,6 +193,32 @@ class CourtDistrictUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCusto
     form_class = CourtDistrictForm
     success_url = reverse_lazy('courtdistrict_list')
     success_message = update_success
+
+    def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data e seta a ultima url acessada no cache
+        Isso e necessario para que ao salvar uma alteracao, o metodo post consiga verificar
+        a pagina da paginacao onde o usuario fez a alteracao
+        :param kwargs:
+        :return: super
+        """
+        context = super(CourtDistrictUpdateView, self).get_context_data(**kwargs)
+        cache.set('court_district_page', self.request.META.get('HTTP_REFERER'))
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Sobrescreve o metodo post e verifica se existe cache da ultima url
+        Isso e necessario pelo fato da necessidade de retornar pra mesma paginacao
+        Que o usuario se encontrava ao fazer a alteracao
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: super
+        """
+        if cache.get('court_district_page'):
+            self.success_url = cache.get('court_district_page')
+        return super(CourtDistrictUpdateView, self).post(request, *args, **kwargs)
 
 
 class CourtDistrictDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
@@ -211,8 +289,30 @@ class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateV
     delete_message = delete_success(related_model._meta.verbose_name_plural)
 
     def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data e seta a ultima url acessada no cache
+        Isso e necessario para que ao salvar uma alteracao, o metodo post consiga verificar
+        a pagina da paginacao onde o usuario fez a alteracao
+        :param kwargs:
+        :return: super
+        """
         context = super(FolderLawsuitUpdateView, self).get_context_data(**kwargs)
+        cache.set('folder_lawsuit_page', self.request.META.get('HTTP_REFERER'))
         return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Sobrescreve o metodo post e verifica se existe cache da ultima url
+        Isso e necessario pelo fato da necessidade de retornar pra mesma paginacao
+        Que o usuario se encontrava ao fazer a alteracao
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: super
+        """
+        if cache.get('folder_lawsuit_page'):
+            self.success_url = cache.get('folder_lawsuit_page')
+        return super(FolderLawsuitUpdateView, self).post(request, *args, **kwargs)
 
 
 class LawSuitListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -297,11 +397,22 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
 
     def get_context_data(self, **kwargs):
         context = super(LawsuitMovementUpdateView, self).get_context_data(**kwargs)
+        cache.set('lawsuit_movement_page', self.request.META.get('HTTP_REFERER'))
         return context
 
-    def get_success_url(self):
-        self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
-        super(LawsuitMovementUpdateView, self).get_success_url()
+    def post(self, request, *args, **kwargs):
+        """
+        Sobrescreve o metodo post e verifica se existe cache da ultima url
+        Isso e necessario pelo fato da necessidade de retornar pra mesma paginacao
+        Que o usuario se encontrava ao fazer a alteracao
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: super
+        """
+        if cache.get('lawsuit_movement_page'):
+            self.success_url = cache.get('lawsuit_movement_page')
+        return super(LawsuitMovementUpdateView, self).post(request, *args, **kwargs)
 
 
 class MovementListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -339,6 +450,25 @@ class MovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView
         self.success_url = reverse('lawsuit_update',
                                    kwargs={'folder': self.kwargs['folder'], 'pk': self.kwargs['lawsuit']})
         super(MovementUpdateView, self).get_success_url()
+
+    def get_context_data(self, **kwargs):
+        context = super(MovementUpdateView, self).get_context_data(**kwargs)
+        cache.set('movement_page', self.request.META.get('HTTP_REFERER'))
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Sobrescreve o metodo post e verifica se existe cache da ultima url
+        Isso e necessario pelo fato da necessidade de retornar pra mesma paginacao
+        Que o usuario se encontrava ao fazer a alteracao
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: super
+        """
+        if cache.get('lawsuit_movement_page'):
+            self.success_url = cache.get('lawsuit_movement_page')
+        return super(MovementUpdateView, self).post(request, *args, **kwargs)
 
 
 class MovementDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
