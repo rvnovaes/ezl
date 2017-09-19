@@ -3,10 +3,11 @@ from django.dispatch import receiver, Signal
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-from core.models import ContactMechanism, ContactMechanismType
+from core.models import ContactMechanism, ContactMechanismType, Person
 from ezl import settings
 from task.mail import SendMail
 from task.models import Task, TaskStatus, TaskHistory
+from django.contrib.auth.models import User
 
 send_notes_execution_date = Signal(providing_args=["notes", "instance", "execution_date"])
 
@@ -69,11 +70,28 @@ def new_task(sender, instance, created, **kwargs):
         for mail in mails:
             mail_list.append(mail.description)
 
+        person = Person.objects.filter(id=person_to_receive).first()
+        mail_auth_user = User.objects.filter(id=person.auth_user_id).first()
+        if mail_auth_user:
+            mail_list.append(mail_auth_user.email)
+
+        if hasattr(instance, '_TaskCreateView__server'):
+            project_link = instance._TaskCreateView__server
+
+        elif hasattr(instance, '_TaskUpdateView__server'):
+            project_link = instance._TaskUpdateView__server
+
+        elif hasattr(instance, '_TaskDetailView__server'):
+            project_link = instance._TaskDetailView__server
+
+        else:
+            project_link = settings.PROJECT_LINK
+
         mail = SendMail()
         mail.subject = 'Providência ' + str(
             number) + ': ' + instance.task_status.value + ' - ' + settings.PROJECT_NAME
         mail.message = render_to_string('mail/base.html',
-                                        {'server': settings.PROJECT_LINK, 'pk': instance.pk,
+                                        {'server': 'http://' + project_link, 'pk': instance.pk,
                                          'project_name': settings.PROJECT_NAME,
                                          'number': str(number),
                                          'short_message': short_message[instance.task_status],
