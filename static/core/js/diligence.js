@@ -66,7 +66,7 @@ window.survey = new Survey.Model(
                         visible: false,
                         visibleIf: "{cumprimento}='item1' or {cumprimento}='item2'",
                         title: "Debite",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150
+                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
                     },
                     {
                         isRequired: true,
@@ -107,7 +107,7 @@ window.survey = new Survey.Model(
                         visible: false,
                         visibleIf: "{cumprimento}='item1' or {cumprimento}='item2'",
                         title: "GED",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150
+                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
                     },
                     {
                         isRequired: true,

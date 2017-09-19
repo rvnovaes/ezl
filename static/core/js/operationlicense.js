@@ -110,7 +110,7 @@ window.survey = new Survey.Model(
                         visible: false,
                         visibleIf: "{despReembolsaveis} = 'S'",
                         title: "Debite de Diligência",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150
+                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
                     },
                     {   isRequired: true,
                         type: "text",
@@ -126,7 +126,7 @@ window.survey = new Survey.Model(
                         visible: false,
                         visibleIf: "{despReembolsaveis} = 'S'",
                         title: "GED de Diligência ",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150
+                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
                     }
                 ]
             }

@@ -50,7 +50,7 @@ window.survey = new Survey.Model(
                         visible: false,
                         visibleIf: "{protocoloRealizado} = 'S'",
                         title: "Debite",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150
+                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
                     },
                     {  isRequired: true,
                         type: "text",
@@ -65,7 +65,7 @@ window.survey = new Survey.Model(
                         visible: false,
                         visibleIf: "{protocoloRealizado} = 'S'",
                         title: "GED",
-                        storeDataAsText: true, showPreview: true, imageWidth: 150
+                        storeDataAsText: true, showPreview: true, imageWidth: 150, imageHeight: 150
                     },
                     {   isRequired: true,
                         type: "text",

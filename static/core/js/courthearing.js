@@ -252,13 +252,13 @@ window.survey = new Survey.Model(
                         visible: false,
                         visibleIf: "{despReembolsaveis} = 'S'",
                         title: "Debite de Diligência",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150
+                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
                     },
                     {
                         type: "file",
                         name: "gedDiligencia",
                         title: "GED",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150
+                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
                     },
                     {
                         isRequired: true,
