@@ -19,7 +19,7 @@
                             <div class="form-group col-sm-4">
 
                                 <label>
-                                    {{ field | append_ast_if_req }}{{ field }}
+                                    {{ field | append_ast_if_req | label_capitalizer}}{{ field }}
                                 </label>
                             </div>
                         {% endfor %}
