@@ -8,7 +8,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">65</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">24</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">4</field>
     </object>
@@ -20,7 +19,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">65</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">24</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">6</field>
     </object>
@@ -32,7 +30,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">38</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">12</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">1</field>
     </object>
@@ -44,7 +41,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">12</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">2</field>
     </object>
@@ -56,7 +52,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">12</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">3</field>
     </object>
@@ -68,7 +63,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">12</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">5</field>
     </object>
@@ -80,7 +74,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">24</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">9</field>
     </object>
@@ -92,7 +85,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">31</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">12</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">10</field>
     </object>
@@ -104,7 +96,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">12</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">7</field>
     </object>
@@ -116,7 +107,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">68</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">12</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">8</field>
     </object>
@@ -128,7 +118,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">17</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">1</field>
     </object>
@@ -140,7 +129,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">45</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">22</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">1</field>
     </object>
@@ -152,7 +140,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">32</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">14</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">1</field>
     </object>
@@ -164,7 +151,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">17</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">2</field>
     </object>
@@ -176,7 +162,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">22</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">2</field>
     </object>
@@ -188,7 +173,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">14</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">2</field>
     </object>
@@ -200,7 +184,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">22</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">3</field>
     </object>
@@ -212,7 +195,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">59</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">17</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">3</field>
     </object>
@@ -224,7 +206,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">21</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">3</field>
     </object>
@@ -236,7 +217,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">22</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">10</field>
     </object>
@@ -248,7 +228,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">38</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">14</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">10</field>
     </object>
@@ -260,7 +239,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">14</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">8</field>
     </object>
@@ -272,7 +250,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">21</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">8</field>
     </object>
@@ -284,7 +261,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">14</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">7</field>
     </object>
@@ -296,7 +272,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">15</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">11</field>
     </object>
@@ -308,7 +283,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">31</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">14</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">9</field>
     </object>
@@ -320,7 +294,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">26</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">6</field>
     </object>
@@ -332,7 +305,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">26</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">5</field>
     </object>
@@ -344,7 +316,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">15</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">4</field>
     </object>
@@ -356,7 +327,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">59</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">22</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">4</field>
     </object>
@@ -368,7 +338,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">31</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">27</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">1</field>
     </object>
@@ -380,7 +349,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">31</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">31</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">8</field>
     </object>
@@ -392,7 +360,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">32</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">27</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">10</field>
     </object>
@@ -404,7 +371,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">26</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">4</field>
     </object>
@@ -416,7 +382,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">28</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">8</field>
     </object>
@@ -428,7 +393,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">31</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">6</field>
     </object>
@@ -440,7 +404,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">31</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">4</field>
     </object>
@@ -452,7 +415,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">46</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">30</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">1</field>
     </object>
@@ -464,7 +426,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">30</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">2</field>
     </object>
@@ -476,7 +437,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">31</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">14</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">6</field>
     </object>
@@ -488,7 +448,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">31</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">3</field>
     </object>
@@ -500,7 +459,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">32</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">30</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">3</field>
     </object>
@@ -512,7 +470,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">27</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">3</field>
     </object>
@@ -524,7 +481,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">31</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">10</field>
     </object>
@@ -536,7 +492,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">16</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">8</field>
     </object>
@@ -548,7 +503,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">16</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">11</field>
     </object>
@@ -560,7 +514,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">31</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">11</field>
     </object>
@@ -572,7 +525,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">22</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">7</field>
     </object>
@@ -584,7 +536,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">30</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">10</field>
     </object>
@@ -596,7 +547,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">31</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">27</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">9</field>
     </object>
@@ -608,7 +558,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">44</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">27</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">6</field>
     </object>
@@ -620,7 +569,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">14</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">5</field>
     </object>
@@ -632,7 +580,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">47</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">22</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">5</field>
     </object>
@@ -644,7 +591,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">73</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">27</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">4</field>
     </object>
@@ -656,7 +602,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">73</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">27</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">2</field>
     </object>
@@ -668,7 +613,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">72</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">27</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">12</field>
     </object>
@@ -680,7 +624,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">72</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">22</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">12</field>
     </object>
@@ -692,7 +635,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">72</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">16</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">12</field>
     </object>
@@ -704,7 +646,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">72</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">14</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">12</field>
     </object>
@@ -716,7 +657,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">72</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">26</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">12</field>
     </object>
@@ -728,7 +668,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">73</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">26</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">9</field>
     </object>
@@ -740,7 +679,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">73</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">27</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">11</field>
     </object>
@@ -752,7 +690,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">73</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">22</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">13</field>
     </object>
@@ -764,7 +701,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">73</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">14</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">13</field>
     </object>
@@ -776,7 +712,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">73</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">26</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">13</field>
     </object>
@@ -788,7 +723,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">73</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">21</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">13</field>
     </object>
@@ -800,7 +734,6 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="person_lawyer" rel="ManyToOneRel" to="core.person">73</field>
         <field name="type_movement" rel="ManyToOneRel" to="lawsuit.typemovement">27</field>
         <field name="law_suit" rel="ManyToOneRel" to="lawsuit.lawsuit">13</field>
     </object>
