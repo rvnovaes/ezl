@@ -227,7 +227,7 @@ class UserCreateForm(BaseForm, UserCreationForm):
         label="Nome",
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'autofocus': ''})
     )
 
     last_name = forms.CharField(
