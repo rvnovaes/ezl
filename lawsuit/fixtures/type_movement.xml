@@ -146,12 +146,12 @@
     <object model="lawsuit.typemovement" pk="22">
         <field name="create_date" type="DateTimeField">2017-09-11T14:35:29.930345+00:00</field>
         <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
-        <field name="alter_date" type="DateTimeField">2017-09-11T14:35:29.930410+00:00</field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="alter_date" type="DateTimeField">2017-09-15T11:06:39.084712+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="name" type="CharField">Liminar/Tutela</field>
+        <field name="name" type="CharField">Liminar</field>
         <field name="uses_wo" type="BooleanField">False</field>
     </object>
     <object model="lawsuit.typemovement" pk="24">
@@ -174,6 +174,72 @@
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
         <field name="name" type="CharField">Bloqueio judicial</field>
+        <field name="uses_wo" type="BooleanField">False</field>
+    </object>
+    <object model="lawsuit.typemovement" pk="26">
+        <field name="create_date" type="DateTimeField">2017-09-15T12:05:19.280948+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-15T12:05:19.281016+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Audiência de Conciliação</field>
+        <field name="uses_wo" type="BooleanField">False</field>
+    </object>
+    <object model="lawsuit.typemovement" pk="27">
+        <field name="create_date" type="DateTimeField">2017-09-15T12:05:44.315167+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-15T12:05:44.315235+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Embargos de Declaração</field>
+        <field name="uses_wo" type="BooleanField">False</field>
+    </object>
+    <object model="lawsuit.typemovement" pk="28">
+        <field name="create_date" type="DateTimeField">2017-09-15T12:05:49.933571+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-15T12:05:49.933637+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Apelação</field>
+        <field name="uses_wo" type="BooleanField">False</field>
+    </object>
+    <object model="lawsuit.typemovement" pk="29">
+        <field name="create_date" type="DateTimeField">2017-09-15T12:05:57.034423+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-15T12:05:57.034488+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Acórdão</field>
+        <field name="uses_wo" type="BooleanField">False</field>
+    </object>
+    <object model="lawsuit.typemovement" pk="30">
+        <field name="create_date" type="DateTimeField">2017-09-15T12:06:15.302435+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-15T12:06:15.302500+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Pagamento de Custas</field>
+        <field name="uses_wo" type="BooleanField">False</field>
+    </object>
+    <object model="lawsuit.typemovement" pk="31">
+        <field name="create_date" type="DateTimeField">2017-09-15T12:06:40.148689+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-15T12:06:40.148754+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Pagamento de Condenação</field>
         <field name="uses_wo" type="BooleanField">False</field>
     </object>
 </django-objects>
