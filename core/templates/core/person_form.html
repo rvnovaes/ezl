@@ -1,7 +1,6 @@
 {% extends 'inicial.html' %}
 {% load staticfiles %}
 {% load core_filters %}
-{#{% load formset_tags %}#}
 
 {% block content %}
     {% include 'core/widgets/messages.html' %}
@@ -33,21 +32,21 @@
                                     {% if field.name == 'legal_name' %}
                                         <div class="col-sm-3">
                                             <div class="form-group">
-                                                <label>{{ field | append_ast_if_req }}{{ field }}</label>
+                                                <label>{{ field | append_ast_if_req | label_capitalizer}}{{ field }}</label>
                                             </div>
                                         </div>
 
                                     {% elif field.name == 'name' %}
                                         <div class="col-sm-3">
                                             <div class="form-group">
-                                                <label>{{ field | append_ast_if_req }} {{ field }}</label>
+                                                <label>{{ field | append_ast_if_req | label_capitalizer}} {{ field }}</label>
                                             </div>
                                         </div>
 
                                     {% elif field.name == 'legal_type' %}
                                         <div class="col-sm-3">
                                             <div class="form-group">
-                                                <label id="id_legal_type_label">{{ field | append_ast_if_req }} </label>
+                                                <label id="id_legal_type_label">{{ field | append_ast_if_req | label_capitalizer}} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
@@ -57,7 +56,7 @@
                                         <div class="col-sm-3 cpf-display">
                                             <div id="cpf_container"
                                                  class="form-group {% if form.instance.legal_type == 'J' %} hidden {% endif %}">
-                                                <label>{{ field | append_ast_if_req }} {{ field }}</label>
+                                                <label>{{ field | append_ast_if_req | label_capitalizer}} {{ field }}</label>
                                             </div>
                                         </div>
 
@@ -69,13 +68,13 @@
                                             <div id="cnpj_container"
                                                  class="form-group {% if form.instance.legal_type == 'F' or not form.instance.id %}
                                                   hidden {% endif %}">
-                                                <label>{{ field | append_ast_if_req }} {{ field }}</label>
+                                                <label>{{ field | append_ast_if_req | label_capitalizer}} {{ field }}</label>
                                             </div>
                                         </div>
                                     {% else %}
                                         <div class="col-sm-2">
                                             <div class="form-group">
-                                                <label>{{ field | append_ast_if_req }} {{ field }}</label>
+                                                <label>{{ field | append_ast_if_req | label_capitalizer}} {{ field }}</label>
                                             </div>
                                         </div>
                                     {% endif %}
@@ -550,11 +549,7 @@
         </div>
         <div style="text-align: center;">
 
-            <a class="btn btn-sm btn-raised btn-default" href="{% url 'person_list' %}">
-                <i class="material-icons left">clear</i>
-                Cancelar
-                <div class="ripple-container"></div>
-            </a>
+            {% include 'core/widgets/cancel_button.html'  with link_list='person_list' %}
 
             <button type="submit" class="btn btn-sm btn-raised btn-primary"
                     onclick="document.getElementById('person_form').submit()"><i
@@ -619,7 +614,7 @@
                                         <div class="col-sm-12">
                                             <div class="form-group ">
                                                 <label
-                                                        required="">{{ field | append_ast_if_req }} </label>
+                                                        required="">{{ field | append_ast_if_req | label_capitalizer}} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
@@ -627,7 +622,7 @@
                                         <div class="col-sm-6">
                                             <div class="form-group  is-empty">
                                                 <label
-                                                        required="">{{ field | append_ast_if_req }} </label>
+                                                        required="">{{ field | append_ast_if_req | label_capitalizer}} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
@@ -635,7 +630,7 @@
                                         <div class="col-sm-3">
                                             <div class="form-group  is-empty">
                                                 <label
-                                                        required="">{{ field | append_ast_if_req }} </label>
+                                                        required="">{{ field | append_ast_if_req | label_capitalizer}} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
@@ -643,7 +638,7 @@
                                         <div class="col-sm-3">
                                             <div class="form-group  is-empty">
                                                 <label
-                                                        required="">{{ field | append_ast_if_req }} </label>
+                                                        required="">{{ field | append_ast_if_req | label_capitalizer}} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
@@ -651,7 +646,7 @@
                                         <div class="col-sm-6">
                                             <div class="form-group  is-empty">
                                                 <label
-                                                        required="">{{ field | append_ast_if_req }} </label>
+                                                        required="">{{ field | append_ast_if_req | label_capitalizer}} </label>
                                                 {{ field }}
                                             </div>
                                         </div>
@@ -660,7 +655,7 @@
                                         <div class="col-sm-6">
                                             <div class="form-group  is-empty">
                                                 <label
-                                                        required="">{{ field | append_ast_if_req }} </label>
+                                                        required="">{{ field | append_ast_if_req | label_capitalizer }} </label>
                                                 {{ field }}
                                             </div>
                                         </div>

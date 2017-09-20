@@ -1,6 +1,4 @@
 {% extends 'inicial.html' %}
-{#{% load staticfiles %}#}
-{#{% load formset_tags %}#}
 {% load core_filters %}
 {% block content %}
     <form action="" method="post">{% csrf_token %}
@@ -15,7 +13,7 @@
                             {% for field in form %}
                                 <div class="form-group">
                                     <label>
-                                        {{ field | append_ast_if_req }}{{ field }}
+                                        {{ field | append_ast_if_req  | label_capitalizer }}{{ field }}
                                     </label>
                                 </div>
                             {% endfor %}
