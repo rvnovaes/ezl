@@ -2,64 +2,6 @@
 
 {% block body %}
 
-    <script>
-        function recover_action() {
-
-            login = $("#login").val();
-            password = $("#password").val();
-
-            $('#modal-wait').modal('show');
-            $.ajax({
-                url: '{{ host }}',
-                method: 'POST',
-                data: {
-                    "is_ezl": "true",
-                    "login": login,
-                    "password": password
-                },
-                timeout: '{{ timeout }}',
-                crossDomain: true,
-                success: function (data) {
-                    $('#modal-wait').modal('hide');
-                    var obj = JSON.parse(data);
-                    if (obj.result) {
-                        document.getElementById("title_message").innerHTML = "";
-                        document.getElementById("message_text").innerHTML = "";
-                        document.getElementById("message_log").innerHTML = obj.message;
-                        $("#modal_message").modal('show');
-                    }
-
-                    else {
-                        document.getElementById("title_message").innerHTML = "Erro";
-                        document.getElementById("message_text").innerHTML = "Erro ao recuperar o banco de dados.";
-                        document.getElementById("message_log").innerHTML = obj.message;
-                        $("#modal_message").modal('show');
-                    }
-                },
-
-                error: function (xmlhttprequest, textstatus, message) {
-
-                    $('#modal-wait').modal('hide');
-                    if (textstatus === "timeout") {
-                        document.getElementById("title_message").innerHTML = "Erro";
-                        document.getElementById("message_text").innerHTML = "Tempo máximo atingido ao realizar a comunicação com o servidor.";
-                        document.getElementById("message_log").innerHTML = message;
-                        $("#modal_message").modal('show');
-                    }
-
-                    else {
-                        document.getElementById("title_message").innerHTML = "Erro";
-                        document.getElementById("message_text").innerHTML = "Erro ao recuperar o banco de dados.";
-                        document.getElementById("message_log").innerHTML = message;
-                        $("#modal_message").modal('show');
-                    }
-                }
-
-            });
-
-        }
-    </script>
-
     <div class="modal fade" id="modal-wait" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -140,7 +82,7 @@
         <form method="POST" action="http://13.68.213.60:8001">
             <fieldset>
                 {% csrf_token %}
-
+                <input type="hidden" name="is_ezl" value="true"/>
                 <div class="form-group label-floating">
                     <label class="control-label" for="first_name" required>Login</label>
                     <input class="form-control" id="login" type="text" name="login">
@@ -154,13 +96,8 @@
 
                 </div>
             </fieldset>
-            <input type="submit" value="Enviar">
+            <input type="submit" class="btn btn-raised btn-primary" value="Recuperar" style="width: 100%;"/>
         </form>
-
-        <button class="btn btn-raised btn-primary" onclick="recover_action();" id="recover_buttoms"
-                value="Entrar" style="width: 100%;">
-            Recuperar
-        </button>
         <br>
         <button class="btn btn-raised btn-primary" onclick="window.location.href='/';" formnovalidate style="width: 100%;">Página
             Inicial
