@@ -573,13 +573,13 @@
     <object model="core.person" pk="61">
         <field name="create_date" type="DateTimeField">2017-09-12T16:51:20.728938+00:00</field>
         <field name="create_user" rel="ManyToOneRel" to="auth.user">15</field>
-        <field name="alter_date" type="DateTimeField">2017-09-12T16:51:20.729007+00:00</field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user">15</field>
+        <field name="alter_date" type="DateTimeField">2017-09-20T17:27:27.870301+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">LuizaRodrigues Drumond</field>
-        <field name="name" type="CharField">LuizaRodrigues Drumond</field>
+        <field name="legal_name" type="CharField">Luiza Rodrigues Drumond</field>
+        <field name="name" type="CharField">Luiza Rodrigues Drumond</field>
         <field name="is_lawyer" type="BooleanField">False</field>
         <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
@@ -611,13 +611,13 @@
     <object model="core.person" pk="65">
         <field name="create_date" type="DateTimeField">2017-09-14T11:38:16.147778+00:00</field>
         <field name="create_user" rel="ManyToOneRel" to="auth.user">16</field>
-        <field name="alter_date" type="DateTimeField">2017-09-14T15:59:14.462822+00:00</field>
+        <field name="alter_date" type="DateTimeField">2017-09-20T17:27:04.230682+00:00</field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">TaianaFarias</field>
-        <field name="name" type="CharField">TaianaFarias</field>
+        <field name="legal_name" type="CharField">Taiana Farias</field>
+        <field name="name" type="CharField">Taiana Farias</field>
         <field name="is_lawyer" type="BooleanField">True</field>
         <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
@@ -649,13 +649,13 @@
     <object model="core.person" pk="67">
         <field name="create_date" type="DateTimeField">2017-09-14T11:43:48.126669+00:00</field>
         <field name="create_user" rel="ManyToOneRel" to="auth.user">18</field>
-        <field name="alter_date" type="DateTimeField">2017-09-14T11:43:48.126743+00:00</field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user">18</field>
+        <field name="alter_date" type="DateTimeField">2017-09-20T17:26:39.400128+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">StefanyPinheiro de Oliveira</field>
-        <field name="name" type="CharField">StefanyPinheiro de Oliveira</field>
+        <field name="legal_name" type="CharField">Stefany Pinheiro de Oliveira</field>
+        <field name="name" type="CharField">Stefany Pinheiro de Oliveira</field>
         <field name="is_lawyer" type="BooleanField">False</field>
         <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
@@ -687,13 +687,13 @@
     <object model="core.person" pk="69">
         <field name="create_date" type="DateTimeField">2017-09-14T11:46:17.807718+00:00</field>
         <field name="create_user" rel="ManyToOneRel" to="auth.user">20</field>
-        <field name="alter_date" type="DateTimeField">2017-09-14T11:57:28.381366+00:00</field>
+        <field name="alter_date" type="DateTimeField">2017-09-20T17:26:07.803046+00:00</field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">MiguelFalcão de Carvalho</field>
-        <field name="name" type="CharField">MiguelFalcão de Carvalho</field>
+        <field name="legal_name" type="CharField">Miguel Falcão de Carvalho</field>
+        <field name="name" type="CharField">Miguel Falcão de Carvalho</field>
         <field name="is_lawyer" type="BooleanField">False</field>
         <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
@@ -706,13 +706,13 @@
     <object model="core.person" pk="70">
         <field name="create_date" type="DateTimeField">2017-09-14T11:47:48.435944+00:00</field>
         <field name="create_user" rel="ManyToOneRel" to="auth.user">21</field>
-        <field name="alter_date" type="DateTimeField">2017-09-14T11:57:03.936249+00:00</field>
+        <field name="alter_date" type="DateTimeField">2017-09-20T17:25:41.710736+00:00</field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">EstevanAzevedo de Lima</field>
-        <field name="name" type="CharField">EstevanAzevedo de Lima</field>
+        <field name="legal_name" type="CharField">Estevan Azevedo de Lima</field>
+        <field name="name" type="CharField">Estevan Azevedo de Lima</field>
         <field name="is_lawyer" type="BooleanField">False</field>
         <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
@@ -725,13 +725,13 @@
     <object model="core.person" pk="71">
         <field name="create_date" type="DateTimeField">2017-09-14T11:48:57.426081+00:00</field>
         <field name="create_user" rel="ManyToOneRel" to="auth.user">22</field>
-        <field name="alter_date" type="DateTimeField">2017-09-14T11:56:45.187180+00:00</field>
+        <field name="alter_date" type="DateTimeField">2017-09-20T17:25:16.600738+00:00</field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">LuizaDias Gonçalves</field>
-        <field name="name" type="CharField">LuizaDias Gonçalves</field>
+        <field name="legal_name" type="CharField">Luiza Dias Gonçalves</field>
+        <field name="name" type="CharField">Luiza Dias Gonçalves</field>
         <field name="is_lawyer" type="BooleanField">False</field>
         <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
@@ -744,13 +744,13 @@
     <object model="core.person" pk="72">
         <field name="create_date" type="DateTimeField">2017-09-14T11:50:36.484556+00:00</field>
         <field name="create_user" rel="ManyToOneRel" to="auth.user">23</field>
-        <field name="alter_date" type="DateTimeField">2017-09-14T11:56:14.199361+00:00</field>
+        <field name="alter_date" type="DateTimeField">2017-09-20T17:24:52.257489+00:00</field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">ThaisAlmeida de Carvalho</field>
-        <field name="name" type="CharField">ThaisAlmeida de Carvalho</field>
+        <field name="legal_name" type="CharField">Thais Almeida de Carvalho</field>
+        <field name="name" type="CharField">Thais Almeida de Carvalho</field>
         <field name="is_lawyer" type="BooleanField">True</field>
         <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
@@ -763,13 +763,13 @@
     <object model="core.person" pk="73">
         <field name="create_date" type="DateTimeField">2017-09-14T11:51:45.046773+00:00</field>
         <field name="create_user" rel="ManyToOneRel" to="auth.user">24</field>
-        <field name="alter_date" type="DateTimeField">2017-09-14T11:55:47.526208+00:00</field>
+        <field name="alter_date" type="DateTimeField">2017-09-20T17:24:18.928809+00:00</field>
         <field name="alter_user" rel="ManyToOneRel" to="auth.user">2</field>
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="legal_name" type="CharField">GiovannaRodrigues Souza</field>
-        <field name="name" type="CharField">GiovannaRodrigues Souza</field>
+        <field name="legal_name" type="CharField">Giovanna Rodrigues Souza</field>
+        <field name="name" type="CharField">Giovanna Rodrigues Souza</field>
         <field name="is_lawyer" type="BooleanField">True</field>
         <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
@@ -1196,5 +1196,43 @@
         <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
         <field name="is_customer" type="BooleanField">False</field>
         <field name="is_supplier" type="BooleanField">True</field>
+    </object>
+    <object model="core.person" pk="96">
+        <field name="create_date" type="DateTimeField">2017-09-18T12:12:32.007042+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-18T12:12:32.007117+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Banco Itau Card</field>
+        <field name="name" type="CharField">Banco Itau Card</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">59.267.402/0001-08</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
+    </object>
+    <object model="core.person" pk="97">
+        <field name="create_date" type="DateTimeField">2017-09-18T12:36:09.062018+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2017-09-18T12:36:09.062090+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="legal_name" type="CharField">Rio Branco Alimentos S/A</field>
+        <field name="name" type="CharField">Rio Branco Alimentos S/A</field>
+        <field name="is_lawyer" type="BooleanField">False</field>
+        <field name="is_correspondent" type="BooleanField">False</field>
+        <field name="is_court" type="BooleanField">False</field>
+        <field name="legal_type" type="CharField">J</field>
+        <field name="cpf_cnpj" type="CharField">05.017.780/0001-04</field>
+        <field name="auth_user" rel="OneToOneRel" to="auth.user"><None></None></field>
+        <field name="is_customer" type="BooleanField">True</field>
+        <field name="is_supplier" type="BooleanField">False</field>
     </object>
 </django-objects>
