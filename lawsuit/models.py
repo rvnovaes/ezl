@@ -112,8 +112,6 @@ class LawSuit(Audit, LegacyCode):
 
 
 class Movement(Audit, LegacyCode):
-    person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
-                                      related_name='%(class)s_lawyer', verbose_name="Advogado")
     type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False,
                                       verbose_name="Tipo de Movimentação")
     law_suit = models.ForeignKey(LawSuit, on_delete=models.PROTECT, blank=False, null=False,

@@ -36,10 +36,10 @@ class MovementTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'type_movement', 'person_lawyer', 'is_active', 'legacy_code')
+        sequence = ('selection', 'type_movement', 'is_active', 'legacy_code')
         model = Movement
         attrs = {"class": "table-striped table-bordered"}
-        fields = ['selection', 'legacy_code', 'person_lawyer', 'type_movement',
+        fields = ['selection', 'legacy_code', 'type_movement',
                   'is_active']
         empty_text = "Não existem movimentações cadastradas"
         row_attrs = {

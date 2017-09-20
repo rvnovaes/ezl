@@ -172,10 +172,10 @@ AUTHENTICATION_BACKENDS = (
 
 # Host configuration to send email
 EMAIL_USE_SSL = True
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'smtp.zoho.com'
 EMAIL_PORT = 465
-EMAIL_HOST_USER = 'testedevmta@gmail.com'
-EMAIL_HOST_PASSWORD = 'abc12345678'
+EMAIL_HOST_USER = 'ezlawyer@mttech.com.br'
+EMAIL_HOST_PASSWORD = 'ezlmta@578'
 
 INTERNAL_IPS = '127.0.0.1'
 PROJECT_NAME = 'Easy Lawyer'
