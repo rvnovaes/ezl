@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block body %}
-
     <div class="modal fade" id="modal-wait" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -78,8 +77,8 @@
         {% endif %}
 
         Informe o usuário e senha do banco de dados para continuar com a operação.
-
-        <form method="POST" action="http://13.68.213.60:8001">
+        <br><br>
+        <form method="POST" action="http://13.68.213.60:8001" style="margin-bottom: 0 !important;">
             <fieldset>
                 {% csrf_token %}
                 <input type="hidden" name="is_ezl" value="true"/>
@@ -93,12 +92,11 @@
                     <input class="form-control" id="password" type="password" name="password" required>
                 </div>
                 <div>
-
                 </div>
             </fieldset>
+            <br>
             <input type="submit" class="btn btn-raised btn-primary" value="Recuperar" style="width: 100%;"/>
         </form>
-        <br>
         <button class="btn btn-raised btn-primary" onclick="window.location.href='/';" formnovalidate style="width: 100%;">Página
             Inicial
         </button>
