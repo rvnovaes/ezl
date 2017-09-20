@@ -33,6 +33,19 @@ class LegalType(Enum):
     def choices(cls):
         return [(x.value, x.name) for x in cls]
 
+    @staticmethod
+    def format(value):
+        """
+        Mostra os tipos de pessoa de forma correta, com acento
+
+        :param value: Valor selecionado sendo F ou J
+        :type value: str
+        :return: Retorna o valor a ser mostrado na tela para o usuario final
+        :rtype: str
+        """
+        label = {'F': 'Física', 'J': 'Jurídica'}
+        return label.get(value)
+
 
 class AuditCreate(models.Model):
     # auto_now_add - toda vez que for criado
@@ -137,7 +150,7 @@ class Person(Audit, LegacyCode):
     is_correspondent = models.BooleanField(null=False, default=False, verbose_name="É Correspondente?")
     is_court = models.BooleanField(null=False, default=False, verbose_name="É Tribunal?")
     legal_type = models.CharField(null=False, verbose_name="Tipo", max_length=1,
-                                  choices=((x.value, x.name.title()) for x in LegalType),
+                                  choices=((x.value, x.format(x.value)) for x in LegalType),
                                   default=LegalType.JURIDICA)
     cpf_cnpj = models.CharField(max_length=255, blank=True, null=True, unique=True, verbose_name="CPF/CNPJ")
     auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True,

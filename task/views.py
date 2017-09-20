@@ -24,6 +24,7 @@ from .forms import TaskForm, TaskDetailForm, TypeTaskForm
 from .models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
 from urllib.parse import urlparse
+from django.core.cache import cache
 
 
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -52,6 +53,7 @@ class TaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Cr
     def form_valid(self, form):
         form.instance.movement_id = self.kwargs.get('movement')
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
+        form.instance.__server = self.request.environ['HTTP_HOST']
         super(TaskCreateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
@@ -82,6 +84,7 @@ class TaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Up
 
     def form_valid(self, form):
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
+        form.instance.__server = self.request.environ['HTTP_HOST']
         super(TaskUpdateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
@@ -183,6 +186,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
                                        execution_date=execution_date, survey_result=survey_result)
 
+        form.instance.__server = self.request.environ['HTTP_HOST']
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
@@ -262,6 +266,32 @@ class TypeTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView
     form_class = TypeTaskForm
     success_url = reverse_lazy('typetask_list')
     success_message = update_success
+
+    def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data e seta a ultima url acessada no cache
+        Isso e necessario para que ao salvar uma alteracao, o metodo post consiga verificar
+        a pagina da paginacao onde o usuario fez a alteracao
+        :param kwargs:
+        :return: super
+        """
+        context = super(TypeTaskUpdateView, self).get_context_data(**kwargs)
+        cache.set('type_task_page', self.request.META.get('HTTP_REFERER'))
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Sobrescreve o metodo post e verifica se existe cache da ultima url
+        Isso e necessario pelo fato da necessidade de retornar pra mesma paginacao
+        Que o usuario se encontrava ao fazer a alteracao
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: super
+        """
+        if cache.get('type_task_page'):
+            self.success_url = cache.get('type_movement_page')
+        return super(TypeTaskUpdateView, self).post(request, *args, **kwargs)
 
 
 class TypeTaskDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
