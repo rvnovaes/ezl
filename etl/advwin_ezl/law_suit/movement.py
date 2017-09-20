@@ -1,4 +1,5 @@
 from core.models import Person
+from django.contrib.auth.models import User
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL
 from etl.advwin_ezl.factory import InvalidObjectFactory
@@ -48,32 +49,33 @@ class MovementETL(GenericETL):
             person_lawyer = Person.objects.filter(
                 legacy_code=person_lawyer_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
 
+            # Conforme descrico no caso 0000486, nao existe person_lawyer na classe Movement, pois segundo analise da
+            # regra de negocios, identificou-se que o usuario que cria a movimentacao e o advogado
+            create_user = person_lawyer.auth_user or InvalidObjectFactory.get_invalid_model(User)
+
             if not lawsuit:
                 # se não encontrou o registro, busca o registro inválido
                 lawsuit = LawSuit.objects.first()
-                # InvalidObjectFactory.get_invalid_model(LawSuit)
 
             if movement:
                 movement.law_suit = lawsuit
                 movement.type_movement = type_movement
-                movement.person_lawyer = person_lawyer
+                movement.alter_user = create_user
                 movement.is_active = True
                 movement.save(update_fields=['is_active',
                                              'law_suit',
                                              'type_movement',
-                                             'person_lawyer',
                                              'alter_user',
                                              'alter_date',
                                              ])
             else:
                 self.model.objects.create(legacy_code=legacy_code,
                                           system_prefix=LegacySystem.ADVWIN.value,
-                                          alter_user=user,
-                                          create_user=user,
+                                          alter_user=create_user,
+                                          create_user=create_user,
                                           is_active=True,
                                           law_suit=lawsuit,
                                           type_movement=type_movement,
-                                          person_lawyer=person_lawyer
                                           )
 
         super(MovementETL, self).config_import(rows, user, rows_count)

@@ -61,12 +61,7 @@ class InstanceForm(BaseForm):
 class MovementForm(BaseForm):
     class Meta:
         model = Movement
-        fields = ['type_movement', 'person_lawyer', 'is_active']
-
-    person_lawyer = forms.ModelChoiceField(
-        queryset=Person.objects.filter(is_active=True, is_lawyer=True).order_by('name'),
-        empty_label=u"Selecione...",
-    )
+        fields = ['type_movement', 'is_active']
 
     type_movement = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(TypeMovement.objects.filter(is_active=True)).order_by('name'),

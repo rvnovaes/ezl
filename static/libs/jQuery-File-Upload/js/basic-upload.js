@@ -29,9 +29,7 @@ $(function () {
         done: function (e, data) {
             if (data.result.success) {
                 document.getElementById("no-providence").innerHTML="";
-                document.getElementById("message-success-sent").innerHTML=data.result.message
-                $("#sucessSent").modal("show");
-
+                showToast('success', data.result.message, '', 3000, true);
                 $("#files tbody").prepend(
                     "<tr class='lineFile' id='row-"+ data.result.id +"'>" +
                         "<td id='cell-table'>" +
@@ -98,17 +96,14 @@ $(function () {
 
                                 "success: function (data) {" +
                                     "if (data.is_deleted) {" +
-                                        "document.getElementById('message-delete-success').innerHTML=data.message;" +
+                                        "showToast('success', data.message, '', 3000, true);" +
                                         "$('#row-"+ data.result.id +"').remove();" +
                                         "$('#row-space"+ data.result.id +"').remove();" +
                                         "$('#deleting').modal('hide');" +
-                                        "$('#deleteSuccess').modal('show')" +
-
                                     "}" +
                                     "else {" +
-                                        "document.getElementById('deleteErrorText').innerHTML= data.message;" +
+                                        "showToast('error', data.message, '', 0, false);" +
                                         "$('#deleting').modal('hide');" +
-                                        "$('#deleteError').modal('show')" +
                                     "}" +
 
                                     "if (data.num_ged == 0) {" +
@@ -125,9 +120,8 @@ $(function () {
             }
 
             else{
-                document.getElementById("error-message").innerHTML=data.result.message;
-                $("#errorSent").modal("show");
-            }
+                showToast('error', data.result.message, '', 0, false);
+                $('#deleting').modal('hide');            }
         }
 
     });

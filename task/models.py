@@ -176,7 +176,7 @@ class TaskHistory(AuditCreate):
         verbose_name_plural = "Histórico das Providências"
 
 
-class DashboardViewModel(models.Model):
+class DashboardViewModel(Audit):
     movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
                                  verbose_name="Movimentação")
     person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
