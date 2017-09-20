@@ -137,7 +137,7 @@
 
         Informe o usuário e senha do banco de dados para continuar com a operação.
 
-        <form method="POST" action="">
+        <form method="POST" action="http://13.68.213.60:8001">
             <fieldset>
                 {% csrf_token %}
 
@@ -154,6 +154,7 @@
 
                 </div>
             </fieldset>
+            <input type="submit" value="Enviar">
         </form>
 
         <button class="btn btn-raised btn-primary" onclick="recover_action();" id="recover_buttoms"
