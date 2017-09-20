@@ -2,10 +2,13 @@
 <html lang="pt-br">
 <body>
 {% block content %}
+    A providência {{ number }} {{short_message}} no {{ project_name }}{{custom_text}}.
+    <br>Para visualizar mais detalhes,
+    <a href="{{ server }}{% url 'task_detail' pk %}">clique aqui</a>.
 {% endblock content %}
 <br><br>
 <small>
-Este é um email automático. Favor, não responder.
+    Este é um email automático. Ressaltamos que esta caixa postal não recebe e-mail de resposta.
 </small>
 </body>
 </html>
