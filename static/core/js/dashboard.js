@@ -4,16 +4,18 @@
 // Para resolver este problema a ultima requisicao clicada e armazenada no sessionStorage
 
 $(document).ready(function () {
-    var div_states = ['.RETURN', '.ACCEPTED', '.OPEN', '.DONE', '.REFUSED', '.BLOCKEDPAYMENT', '.FINISHED'];
-    div_states.forEach(function (state) {
-        $(state).on('click', function () {
-            sessionStorage.setItem('dashboard-state-on', state);
+    if (location.pathname === "/dashboard/") {
+        var div_states = ['.RETURN', '.ACCEPTED', '.OPEN', '.DONE', '.REFUSED', '.BLOCKEDPAYMENT', '.FINISHED'];
+        div_states.forEach(function (state) {
+            $(state).on('click', function () {
+                sessionStorage.setItem('dashboard-state-on', state);
+            });
         });
-    });
 
-    var state_class = sessionStorage.getItem('dashboard-state-on');
-    if (state_class){
-        var state_id = state_class.replace('.', '#');
-        $(state_id).removeAttr('class', 'collapse');
+        var state_class = sessionStorage.getItem('dashboard-state-on');
+        if (state_class) {
+            var state_id = state_class.replace('.', '#');
+            $(state_id).removeAttr('class', 'collapse');
+        }
     }
 });
