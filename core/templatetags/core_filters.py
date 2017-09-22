@@ -68,3 +68,8 @@ def append_ast_if_req (field):
         return field.label + '*'
     else:
         return field.label
+
+
+@register.filter
+def label_capitalizer(text):
+    return str(text).capitalize()

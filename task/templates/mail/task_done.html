@@ -1,6 +1,0 @@
-{% extends 'mail/base.html' %}
-
-{% block content %}
-    A providência {{ number }} foi cumprida no {{ project_name }} pelo(a) correspondente {{ person_executed_by }}.<br>Para visualizar mais detalhes,
-    <a href="{{ server }}{% url 'task_detail' pk %}">clique aqui</a>.
-{% endblock %}

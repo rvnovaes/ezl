@@ -179,6 +179,11 @@ tr[data-href]:hover {
     cursor: pointer;
 }
 
+tr[data-new-href]:hover {
+    cursor: pointer;
+}
+
+
 div[data-toggle="collapse"] {
     cursor: pointer;
 }
