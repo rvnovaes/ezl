@@ -19,6 +19,7 @@ def create_person(instance, sender, **kwargs):
             is_active=True,
             is_customer=False,
             is_supplier=False,
+            legacy_code=''
         )
 
 
