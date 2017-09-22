@@ -10,7 +10,7 @@ from advwin_models.advwin import JuridAgendaTable
 from ezl import settings
 from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
-
+from django.db.models import Q
 default_justify = 'Aceita por Correspondente: %s'
 
 
@@ -28,28 +28,38 @@ def get_status_by_substatus(substatus):
 
 
 class TaskETL(GenericETL):
-    import_query = "SELECT " \
-                   "a.Data_confirmacao AS blocked_or_finished_date, " \
-                   "a.SubStatus AS status_code_advwin, " \
-                   "a.ident AS legacy_code, " \
-                   "a.Mov AS movement_legacy_code, " \
-                   "a.Advogado_sol AS person_asked_by_legacy_code, " \
-                   "a.Advogado AS person_executed_by_legacy_code, " \
-                   "a.CodMov AS type_task_legacy_code, " \
-                   "a.Advogado_or AS person_distributed_by_legacy_code," \
-                   "a.OBS AS description, " \
-                   "CASE WHEN (a.Data_delegacao IS NULL) THEN " \
-                   "a.Data ELSE a.Data_delegacao END AS delegation_date, " \
-                   "a.Data_Prazo AS reminder_deadline_date, " \
-                   "a.prazo_fatal AS final_deadline_date " \
-                   "FROM Jurid_agenda_table AS a " \
-                   "INNER JOIN Jurid_Pastas AS p ON " \
-                   "a.Pasta = p.Codigo_Comp " \
-                   "WHERE " \
-                   "(p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND " \
-                   "((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0)) " \
-                   " ORDER BY a.ident DESC "
+    import_query = """
 
+            SELECT
+                a.Data_confirmacao AS blocked_or_finished_date, 
+                a.SubStatus AS status_code_advwin, 
+                a.ident AS legacy_code, 
+                a.Mov AS movement_legacy_code, 
+                a.Advogado_sol AS person_asked_by_legacy_code,
+                a.Advogado AS person_executed_by_legacy_code,
+                a.CodMov AS type_task_legacy_code,
+                a.Advogado_or AS person_distributed_by_legacy_code,
+                a.OBS AS description, 
+
+                CASE WHEN (a.Data_delegacao IS NULL) THEN 
+                    a.Data ELSE a.Data_delegacao END AS delegation_date, 
+                    a.Data_Prazo AS reminder_deadline_date, 
+                    a.prazo_fatal AS final_deadline_date 
+
+                FROM Jurid_agenda_table AS a 
+                
+                INNER JOIN Jurid_Pastas AS p ON 
+                    a.Pasta = p.Codigo_Comp 
+                
+                INNER JOIN Jurid_CodMov as cm ON
+                     a.CodMov = cm.Codigo    
+                     
+                WHERE
+                    (cm.UsarOS = 1) AND 
+                    ((p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND 
+                    ((a.prazo_lido = 0 AND a.SubStatus = 30) OR 
+                    (a.SubStatus = 80 AND a.Status = 0)))
+    """
     model = Task
     advwin_table = 'Jurid_agenda_table'
     advwin_model = JuridAgendaTable
@@ -91,12 +101,12 @@ class TaskETL(GenericETL):
             movement = Movement.objects.filter(
                 legacy_code=movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
                 Movement)
-            person_asked_by = Person.objects.filter(
-                legacy_code=person_asked_by_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
+            person_asked_by = Person.objects.filter(Q(
+                legacy_code=person_asked_by_legacy_code), ~Q(legacy_code=None), ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
             person_executed_by = Person.objects.filter(
-                legacy_code=person_executed_by_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
-            person_distributed_by = Person.objects.filter(
-                legacy_code=person_distributed_by_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
+                Q(legacy_code=person_executed_by_legacy_code), ~Q(legacy_code=None), ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
+            person_distributed_by = Person.objects.filter(Q(
+                legacy_code=person_distributed_by_legacy_code), ~Q(legacy_code=None), ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
             type_task = TypeTask.objects.filter(
                 legacy_code=type_task_legacy_code).first() or InvalidObjectFactory.get_invalid_model(TypeTask)
 
