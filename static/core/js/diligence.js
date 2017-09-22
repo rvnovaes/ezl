@@ -61,14 +61,6 @@ window.survey = new Survey.Model(
                         ]
                     },
                     {
-                        type: "file",
-                        name: "debiteDiligencia",
-                        visible: false,
-                        visibleIf: "{cumprimento}='item1' or {cumprimento}='item2'",
-                        title: "Debite",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
-                    },
-                    {
                         isRequired: true,
                         type: "text",
                         name: "obsRelevantes",
@@ -100,14 +92,6 @@ window.survey = new Survey.Model(
                         name: "Outro(a)",
                         visible: false,
                         visibleIf: "{motivoCumprimentoParcial}='item2'"
-                    },
-                    {
-                        type: "file",
-                        name: "gedDiligencia",
-                        visible: false,
-                        visibleIf: "{cumprimento}='item1' or {cumprimento}='item2'",
-                        title: "GED",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
                     },
                     {
                         isRequired: true,

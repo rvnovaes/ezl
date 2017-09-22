@@ -44,28 +44,12 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    {
-                        type: "file",
-                        name: "debiteDiligencia",
-                        visible: false,
-                        visibleIf: "{protocoloRealizado} = 'S'",
-                        title: "Debite",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
-                    },
                     {  isRequired: true,
                         type: "text",
                         name: "obsRelevantes",
                         visible: false,
                         visibleIf: "{protocoloRealizado} = 'S'",
                         title: "Observações Relevantes: "
-                    },
-                    {
-                        type: "file",
-                        name: "gedDiligencia",
-                        visible: false,
-                        visibleIf: "{protocoloRealizado} = 'S'",
-                        title: "GED",
-                        storeDataAsText: true, showPreview: true, imageWidth: 150, imageHeight: 150
                     },
                     {   isRequired: true,
                         type: "text",

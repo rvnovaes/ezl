@@ -104,29 +104,12 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    {
-                        type: "file",
-                        name: "debiteDiligencia",
-                        visible: false,
-                        visibleIf: "{despReembolsaveis} = 'S'",
-                        title: "Debite de Diligência",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
-                    },
                     {   isRequired: true,
                         type: "text",
                         name: "obsRelevante",
                         visible: false,
                         visibleIf: "{despReembolsaveis} = 'S'",
                         title: "Observações relevantes: "
-                    }
-                    ,
-                    {
-                        type: "file",
-                        name: "gedDiligencia",
-                        visible: false,
-                        visibleIf: "{despReembolsaveis} = 'S'",
-                        title: "GED de Diligência ",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
                     }
                 ]
             }

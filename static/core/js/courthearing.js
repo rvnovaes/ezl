@@ -246,19 +246,6 @@ window.survey = new Survey.Model(
                         title: "Despesas reembolsáveis?",
                         visible: false,
                         visibleIf: "{comparecimentoAudiencia}='S'"
-                    }, {
-                        type: "file",
-                        name: "debiteDiligencia",
-                        visible: false,
-                        visibleIf: "{despReembolsaveis} = 'S'",
-                        title: "Debite de Diligência",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
-                    },
-                    {
-                        type: "file",
-                        name: "gedDiligencia",
-                        title: "GED",
-                        storeDataAsText: true, showPreview: true,imageWidth: 150, imageHeight: 150
                     },
                     {
                         isRequired: true,
