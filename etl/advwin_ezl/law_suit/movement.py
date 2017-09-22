@@ -8,20 +8,23 @@ from lawsuit.models import Movement, LawSuit, TypeMovement
 
 class MovementETL(GenericETL):
     import_query = """
-                        SELECT
-                          pm.M_Distribuicao AS law_suit_legacy_code,
-                          pm.Ident          AS legacy_code,
-                          pm.Advogado       AS person_lawyer_legacy_code,
-                          pm.CodMov         AS type_movement_legacy_code
-                        FROM Jurid_ProcMov AS pm
-                          INNER JOIN Jurid_Pastas AS p
-                            ON pm.Codigo_Comp = p.Codigo_Comp
-                          INNER JOIN Jurid_Agenda AS a
-                            ON a.Pasta = p.Codigo_Comp
-                        WHERE
-                          (p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND
-                          ((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0))
-                        ORDER BY pm.ident DESC    
+                SELECT DISTINCT 
+                  pm.M_Distribuicao AS law_suit_legacy_code,
+                  pm.Ident          AS legacy_code,
+                  pm.Advogado       AS person_lawyer_legacy_code,
+                  pm.CodMov         AS type_movement_legacy_code,
+                  a.CodMov
+                from Jurid_ProcMov AS pm
+                INNER JOIN Jurid_Pastas as p on
+                  p.Codigo_Comp = pm.Codigo_Comp
+                INNER JOIN Jurid_agenda_table as a ON
+                  pm.Ident = a.Mov
+                INNER JOIN Jurid_CodMov as cm ON
+                  a.CodMov = cm.Codigo
+                WHERE
+                  cm.UsarOS = 1 and
+                  (p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND
+                  ((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0))
                   """
 
     model = Movement

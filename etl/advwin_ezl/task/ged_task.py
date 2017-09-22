@@ -20,16 +20,23 @@ from task.models import Task
 
 
 class EcmETL(GenericETL):
-    import_query = "SELECT" \
-                   "   G.ID_doc, " \
-            "   A.Ident,   " \
-            "   G.Link      " \
-            " FROM Jurid_Ged_Main AS G" \
-            " INNER JOIN Jurid_agenda_table AS A" \
-            "   ON G.Codigo_OR = CAST(A.Ident as VARCHAR(255)) " \
-            " INNER JOIN  Jurid_Pastas AS P" \
-            "   ON A.Pasta = P.Codigo_Comp" \
-            "  WHERE G.Tabela_OR = 'Agenda' AND P.Status = 'Ativa' AND G.Link <> '' AND G.Link IS NOT NULL"
+    import_query = """
+                    SELECT
+                      G.ID_doc,
+                      A.Ident,
+                      G.Link
+                    FROM Jurid_Ged_Main AS G
+                          INNER JOIN Jurid_agenda_table AS A
+                            ON G.Codigo_OR = CAST(A.Ident AS VARCHAR(255))
+                          INNER JOIN Jurid_Pastas AS P
+                            ON A.Pasta = P.Codigo_Comp
+                          INNER JOIN Jurid_CodMov AS cm
+                            ON A.CodMov = cm.Codigo
+                    WHERE G.Tabela_OR = 'Agenda' AND P.Status = 'Ativa' AND G.Link <> '' AND G.Link IS NOT NULL
+                          AND cm.UsarOS = 1 AND
+                          (p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND
+                          ((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0))    
+                    """
 
     model = Ecm
     advwin_table = 'Jurid_Ged_Main'
