@@ -8,23 +8,25 @@ from lawsuit.models import Folder
 class FolderETL(GenericETL):
     advwin_table = 'Jurid_Pastas'
     model = Folder
-    import_query = "SELECT \n" \
-                   "    t1.Codigo_Comp, \n" \
-            "    t1.Cliente \n" \
-            "FROM " + advwin_table + " AS t1 \n" \
-            "WHERE \n" \
-            "    t1.Status = 'Ativa' AND \n" \
-            "    t1.Codigo_Comp IS NOT NULL AND t1.Codigo_Comp <> '' AND \n" \
-            "    t1.Cliente IS NOT NULL AND t1.Cliente <> '' AND \n" \
-            "    t1.Codigo_Comp = ( \n" \
-            "SELECT \n" \
-            "    min(t2.Codigo_Comp) \n" \
-            "FROM " + advwin_table + " AS t2 \n" \
-            "WHERE \n" \
-            "    t2.Status = 'Ativa' AND \n" \
-            "    t2.Codigo_Comp IS NOT NULL AND t2.Codigo_Comp <> '' AND \n" \
-            "    t2.Cliente IS NOT NULL AND t2.Cliente <> '' AND \n" \
-                                     "    t1.Codigo_Comp = t2.Codigo_Comp) order by t1.Dt_Cad DESC"
+    import_query = """
+            SELECT DISTINCT
+              p.Codigo_Comp,
+              p.Cliente,
+              a.CodMov
+            FROM Jurid_Pastas AS p
+                  INNER JOIN Jurid_ProcMov AS pm ON
+                    pm.Codigo_Comp = p.Codigo_Comp
+                  INNER JOIN Jurid_agenda_table AS a ON
+                    pm.Ident = a.Mov
+                  INNER JOIN Jurid_CodMov AS cm ON
+                    a.CodMov = cm.Codigo
+            WHERE
+              cm.UsarOS = 1 AND
+              p.Status = 'Ativa' AND
+              p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '' AND
+              p.Cliente IS NOT NULL AND p.Cliente <> '' AND
+              ((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0))
+                  """
     has_status = True
 
     def config_import(self, rows, user, rows_count):

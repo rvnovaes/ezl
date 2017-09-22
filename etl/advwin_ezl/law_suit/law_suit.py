@@ -11,34 +11,60 @@ class LawsuitETL(GenericETL):
     model = LawSuit
     advwin_table = 'Jurid_Pastas'
 
-    import_query = "SELECT" \
-                   "   p.Codigo_Comp AS folder_legacy_code, " \
-            "   case when (d.D_Atual is null) then 'False' else d.D_Atual end as is_current_instance, " \
-            "   p.Advogado AS person_legacy_code, " \
-            "   case when (rtrim(ltrim(d.D_Codigo)) LIKE '') or (d.D_Codigo is null) then " \
-            "     p.Codigo_Comp else cast(d.D_Codigo as varchar(20)) end as legacy_code, " \
-            "   case when (rtrim(ltrim(d.D_Codigo_Inst)) LIKE '') or (d.D_Codigo_Inst is null) then " \
-            "     p.Instancia else d.D_Codigo_Inst end as instance_legacy_code, " \
-            "   case when (rtrim(ltrim(d.D_Comarca)) LIKE '') or (d.D_Comarca is null) then " \
-            "     p.Comarca else d.D_Comarca end as court_district_legacy_code, " \
-            "   case when (rtrim(ltrim(d.D_Tribunal)) LIKE '') or (d.D_Tribunal is null) then " \
-            "     p.Tribunal else d.D_Tribunal end as person_court_legacy_code, " \
-            "   case when (rtrim(ltrim(d.D_Vara)) LIKE '') or (d.D_Vara is null) then " \
-            "     p.Varas else d.D_Vara end as court_division_legacy_code, " \
-            "   case when (rtrim(ltrim(d.D_NumPrc)) LIKE '') or (d.D_NumPrc is null) then " \
-            "     p.NumPrc1 else d.D_NumPrc end as law_suit_number " \
-            " FROM Jurid_Pastas AS p " \
-            " left join Jurid_Distribuicao as d on " \
-            "   p.Codigo_Comp = d.Codigo_Comp " \
-            " WHERE" \
-            "   p.Status = 'Ativa' AND " \
-            "   p.Dt_Saida IS NULL  AND" \
-            "   ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') or " \
-            "    (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND" \
-            "   ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') or " \
-            "    (d.Codigo_Comp IS NOT NULL AND d.Codigo_Comp <> '')) AND" \
-            "   ((p.Instancia IS NOT NULL AND p.Instancia <> '') or " \
-                   "    (d.D_Codigo_Inst IS NOT NULL AND d.D_Codigo_Inst <> '')) ORDER BY p.Dt_Cad DESC "
+    import_query = """
+                    SELECT DISTINCT
+                          p.Codigo_Comp                            AS folder_legacy_code,
+                          CASE WHEN (d.D_Atual IS NULL)
+                            THEN 'False'
+                          ELSE d.D_Atual END                       AS is_current_instance,
+                          p.Advogado                               AS person_legacy_code,
+                          CASE WHEN (rtrim(ltrim(d.D_Codigo)) LIKE '') OR (d.D_Codigo IS NULL)
+                            THEN
+                              p.Codigo_Comp
+                          ELSE cast(d.D_Codigo AS VARCHAR(20)) END AS legacy_code,
+                          CASE WHEN (rtrim(ltrim(d.D_Codigo_Inst)) LIKE '') OR (d.D_Codigo_Inst IS NULL)
+                            THEN
+                              p.Instancia
+                          ELSE d.D_Codigo_Inst END                 AS instance_legacy_code,
+                          CASE WHEN (rtrim(ltrim(d.D_Comarca)) LIKE '') OR (d.D_Comarca IS NULL)
+                            THEN
+                              p.Comarca
+                          ELSE d.D_Comarca END                     AS court_district_legacy_code,
+                          CASE WHEN (rtrim(ltrim(d.D_Tribunal)) LIKE '') OR (d.D_Tribunal IS NULL)
+                            THEN
+                              p.Tribunal
+                          ELSE d.D_Tribunal END                    AS person_court_legacy_code,
+                          CASE WHEN (rtrim(ltrim(d.D_Vara)) LIKE '') OR (d.D_Vara IS NULL)
+                            THEN
+                              p.Varas
+                          ELSE d.D_Vara END                        AS court_division_legacy_code,
+                          CASE WHEN (rtrim(ltrim(d.D_NumPrc)) LIKE '') OR (d.D_NumPrc IS NULL)
+                            THEN
+                              p.NumPrc1
+                          ELSE d.D_NumPrc END                      AS law_suit_number
+                    FROM Jurid_Pastas AS p
+                          LEFT JOIN Jurid_Distribuicao AS d ON
+                                                              p.Codigo_Comp = d.Codigo_Comp
+                          INNER JOIN Jurid_ProcMov AS pm ON
+                                                           pm.Codigo_Comp = p.Codigo_Comp
+                          INNER JOIN Jurid_agenda_table AS a ON
+                                                               pm.Ident = a.Mov
+                          INNER JOIN Jurid_CodMov AS cm ON
+                                                          a.CodMov = cm.Codigo
+                    WHERE
+                          p.Status = 'Ativa' AND
+                          p.Dt_Saida IS NULL AND
+                          cm.UsarOS = 1 AND
+                          p.Cliente IS NOT NULL AND p.Cliente <> '' AND
+                          ((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0)) AND
+                          ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
+                           (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
+                          ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
+                           (d.Codigo_Comp IS NOT NULL AND d.Codigo_Comp <> '')) AND
+                          ((p.Instancia IS NOT NULL AND p.Instancia <> '') OR
+                           (d.D_Codigo_Inst IS NOT NULL AND d.D_Codigo_Inst <> ''))        
+    
+    """
 
     has_status = True
 
