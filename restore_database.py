@@ -24,12 +24,12 @@ if username == current_user_db and password == current_password_db:
     path_dump_db = '/opt/demo.dump'
 
     # Para o serviço (demo) do Django e reinicia o serviço do Postgres para limpar as sessões ativas
-    subprocess.call('sudo supervisorctl stop demo_uwsgi', shell=True)
-    subprocess.call('sudo /etc/init.d/postgresql restart', shell=True)
+    subprocess.call('sudo supervisorctl stop demo_uwsgi', stdout=subprocess.PIPE, shell=True)
+    subprocess.call('sudo /etc/init.d/postgresql restart', stdout=subprocess.PIPE, shell=True)
 
     # Limpa os dados de todas as tabelas do EZL
     db_name = settings.DATABASES['default']['NAME']
-    subprocess.call('sudo python3 manage.py flush --noinput', shell=True)
+    subprocess.call('sudo python3 manage.py flush --noinput', stdout=subprocess.PIPE, shell=True)
 
     # O comando python3 manage.py flush não apaga os dados das tabelas auth_permission, django_content_type, django_migrations, django_site.
     # Assim, é necessário apagar manualmente os dados destas tabelas.
@@ -47,19 +47,18 @@ if username == current_user_db and password == current_password_db:
     pg_restore = 'pg_restore -a --disable-triggers -U ezl -d ' + current_db_name + ' ' + path_dump_db
     # pg_restore = 'psql -U ezl demo < /opt/ezl.dump'
 
-    subprocess.call(pg_restore, shell=True)
+    subprocess.call(pg_restore, stdout=subprocess.PIPE, shell=True)
     cursor.execute("SELECT * FROM task")
     quant_after_restore = len(cursor.fetchall())
 
     # Inicia o serviço (demo) do Django para disponibilizar a aplicacao novamente ao  usuário
-    subprocess.call('sudo supervisorctl start demo_uwsgi', shell=True)
+    subprocess.call('sudo supervisorctl start demo_uwsgi', stdout=subprocess.PIPE, shell=True)
 
     if quant_after_restore > quant_after_clear:
-        print('. Recuperação realizada com sucesso !')
+        print('Recuperação realizada com sucesso !')
 
     else:
-        print('. Ocorreu um erro ao recuperar o banco !')
-
+        print('Ocorreu um erro ao recuperar o banco !')
 
 
 else:
