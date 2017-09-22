@@ -46,10 +46,10 @@
                 <div class="panel-body form-group is-focused">
                     <div class="form-row">
 
-                        <label>Dados do Solicitante: </label><br>
+                        <label>Dados do solicitante: </label><br>
                         {{ form.instance.person_asked_by|capfirst|default_if_none:"" }}
                         <br><br>
-                        <label>Detalhes do Serviço: </label>
+                        <label>Detalhes do serviço: </label>
                         <br>
                         <span class="type-LineString "><b>Prazo:</b>
                             {{ form.instance.final_deadline_date|localtime|default_if_none:"" }}</span>

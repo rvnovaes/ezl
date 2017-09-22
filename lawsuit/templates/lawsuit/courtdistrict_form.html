@@ -1,6 +1,4 @@
 {% extends 'inicial.html' %}
-{#{% load staticfiles %}#}
-{#{% load formset_tags %}#}
 {% load core_filters %}
 
 {% block content %}
@@ -17,18 +15,14 @@
                         {% for field in form %}
                             <div class="form-group col-md-2">
                                 <label>
-                                    {{ field | append_ast_if_req }}{{ field }}
+                                    {{ field | append_ast_if_req  | label_capitalizer }}{{ field }}
                                 </label>
                             </div>
                         {% endfor %}
 
                     </div>
                     <div class="form-row  text-center">
-                        <a class="btn btn-sm btn-raised btn-default"
-                           href="{% url 'courtdistrict_list' %}"><i
-                                class="material-icons left">clear</i>
-                            Cancelar
-                        </a>
+                        {% include 'core/widgets/cancel_button.html' with link_list='courtdistrict_list' %}
                         <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
                                 class="material-icons left">done</i>
                             Salvar
