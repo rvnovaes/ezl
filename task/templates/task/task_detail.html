@@ -4,10 +4,22 @@
 {% load tz %}
 {% block content %}
     <div class="container">
-        <form class="container" action="" method="post">{% csrf_token %}
+        <form id="task_detail" class="container" action="" method="post">{% csrf_token %}
             {% include 'questionnaire/generic_survey.html' with generic_survey=form.instance.type_task.survey_type %}
 
             <script type="text/javascript">
+
+                //Função para tratar erro ao enviar formulário com justificativa de cumprimento em branco
+                function beforeSubmit() {
+                    var a = $("#notes_id").val;
+                    $('#task_detail').submit(function (e) {
+                        e.preventDefault();
+                        if (!a.isEmpty) {
+                            $('#confirmAction').modal('hide');
+                            $('#survey').modal('show');
+                        }
+                    });
+                }
 
                 var nextState = {
                     ACCEPTED: {text: "aceitar", icon: "assignment_ind"},
@@ -323,13 +335,15 @@
                                         data-dismiss="modal">
                                     Cancelar
                                 </button>
-
                                 {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
                                     {% if form.instance.type_task.survey_type %}
 
 
-                                        <button data-toggle="modal" data-target="#survey" value="1" id="actionButton"
-                                                data-dismiss="modal" style="width: 95px!important;"
+                                        <button id=surveyform" value="1"
+                                                value="1" id="actionButton"
+                                                id="actionButton" onclick="beforeSubmit()"
+                                                style="width: 95px!important;" type="submit"
+                                                {#                                        <input type="button" on onkeydown="" onkeypress="" onkeyup=""  onclick="showValue()"  value="Sim" id="actionButton"#}
                                                 class="btn btn-sm btn-raised btn-primary">Sim
                                         </button>
                                     {% else %}
