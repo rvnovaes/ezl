@@ -49,7 +49,8 @@ window.survey = new Survey.Model(
                         visible: false,
                         visibleIf: "{alvaraRetiradoAutos} = 'S'",
                         title: "Data da retirada do Alvará : ",
-                        inputType: "datetime"
+                        inputType: "date",
+                         isRequired: true,
                     },
                     {
                         type: "radiogroup",
