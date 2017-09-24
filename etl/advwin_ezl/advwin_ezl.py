@@ -15,14 +15,13 @@
 # movement
 # task
 import os
-
+from etl import settings
 from django.contrib.auth.models import User
 from sqlalchemy import text
 
 import connections
 from connections.db_connection import connect_db
 from core.utils import LegacySystem
-from etl.advwin_ezl import settings
 
 
 class GenericETL(object):
@@ -40,13 +39,13 @@ class GenericETL(object):
 
     # inativa todos os registros já existentes para não ter que consultar ativos e inativos do legado
     def deactivate_records(self):
-        if not settings.TRUNCATE_ALL_TABLES:
+        if not settings['truncate_all_tables']:
             records = self.model.objects.filter(system_prefix=LegacySystem.ADVWIN.value)
             for record in records:
                 record.deactivate()
 
     def deactivate_all(self):
-        if not settings.TRUNCATE_ALL_TABLES:
+        if not settings['truncate_all_tables']:
             self.model.objects.all().update(is_active=False)
 
     def config_import(self, rows, user, rows_count):
@@ -61,7 +60,7 @@ class GenericETL(object):
         cursor = self.advwin_engine.execute(text(self.import_query))
         rows = cursor.fetchall()
         rows_count = len(rows)
-        user = User.objects.get(pk=settings.USER)
+        user = User.objects.get(pk=settings['create_alter_user'])
 
         self.config_import(rows, user, rows_count)
 
