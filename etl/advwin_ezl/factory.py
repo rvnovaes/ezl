@@ -4,7 +4,22 @@ import sys
 import django
 from django.db import connection
 
-from etl.advwin_ezl import settings
+import configparser
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+parser = configparser.ConfigParser()
+
+try:
+    with open(os.path.join(BASE_DIR, 'config', 'general.ini')) as config_file:
+        parser.read_file(config_file)
+        source = dict(parser.items('etl'))
+        truncate_all_tables = source['truncate_all_tables']
+
+except FileNotFoundError:
+    print('OOOOOOOOOOOOOOOOOOOOOOOOOOOHHHHH NOOOOOOOO!!!!!')
+    print('general.ini file was not found on {config_path}'.format(config_path=os.path.join(BASE_DIR, 'config')))
+    print('Rename it to general.ini and specify the correct configuration settings!')
+    sys.exit(0)
+
 
 sys.path.append("ezl")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ezl.settings")
@@ -134,7 +149,7 @@ class InvalidObjectFactory(object):
         return model.objects.get(id=1)
 
     def restart_table_id(self):
-        if settings.TRUNCATE_ALL_TABLES:
+        if truncate_all_tables:
             with connection.cursor() as cursor:
                 for model in self.models:
                     cursor.execute("TRUNCATE TABLE " + model._meta.db_table + " RESTART IDENTITY CASCADE;")

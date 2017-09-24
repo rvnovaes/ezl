@@ -1,5 +1,5 @@
 # indica se apaga todos os registros da tabela antes de importar (*apaga as dependencias tambem)
-TRUNCATE_ALL_TABLES = True
+# TRUNCATE_ALL_TABLES = True
 # usuário usado para create e alter user
 USER = 2
 

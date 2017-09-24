@@ -17,3 +17,7 @@ email_host = 'smtp.zoho.com'
 email_port = 465
 email_host_user = 'ezlawyer@mttech.com.br'
 email_host_password = 'ezlmta@578'
+
+[etl]
+# indica se apaga todos os registros da tabela antes de importar (*apaga as dependencias tambem)
+truncate_all_tables = True
