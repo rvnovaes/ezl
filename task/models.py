@@ -207,6 +207,7 @@ class DashboardViewModel(Audit):
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
                                    default=TaskStatus.OPEN)
     client = models.CharField(null=True, verbose_name="Cliente", max_length=255)
+    law_suit_number = models.CharField(null=True, verbose_name="Processo", max_length=255)
     type_service = models.CharField(null=True, verbose_name="Serviço", max_length=255)
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
     __previous_status = None  # atributo transient

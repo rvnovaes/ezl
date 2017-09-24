@@ -1,8 +1,6 @@
 import django_tables2 as tables
-from django_tables2 import A
-
 from core.tables import CheckBoxMaterial
-from .models import Task, TypeTask, DashboardViewModel
+from .models import TypeTask, DashboardViewModel
 
 
 class TaskTable(tables.Table):
@@ -33,7 +31,6 @@ class TaskTable(tables.Table):
                   'delegation_date', 'acceptance_date', 'reminder_deadline_date', 'final_deadline_date',
                   'execution_date', 'return_date', 'refused_date', 'legacy_code', 'blocked_payment_date',
                   'finished_date', 'is_active']
-        # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem providências cadastradas"
         row_attrs = {
             'data_href': lambda record: '/providencias/providencias/' + str(record.movement.id) + '/' + str(record.pk) + '/'
@@ -42,7 +39,7 @@ class TaskTable(tables.Table):
 
 class DashboardStatusTable(tables.Table):
     def __init__(self, *args, delegation_date='Delegação', reminder_deadline_date='Prazo',
-                 client="Cliente", legacy_code="Número",type_service="Serviço",
+                 client="Cliente", law_suit_number="Processo", legacy_code="Número",type_service="Serviço",
                  title="", status="",
                  **kwargs):
         super().__init__(*args, **kwargs)
@@ -50,6 +47,7 @@ class DashboardStatusTable(tables.Table):
         self.base_columns['reminder_deadline_date'].verbose_name = reminder_deadline_date
         self.base_columns['delegation_date'].verbose_name = delegation_date
         self.base_columns['client'].verbose_name = client
+        self.base_columns['law_suit_number'].verbose_name = law_suit_number
         self.base_columns['type_service'].verbose_name = type_service
         self.title = title
         self.status = status
@@ -61,11 +59,12 @@ class DashboardStatusTable(tables.Table):
 
     class Meta:
         model = DashboardViewModel
-        fields = ['id',  'delegation_date', 'reminder_deadline_date', 'client','type_service']
+        fields = ['id', 'reminder_deadline_date', 'type_service', 'law_suit_number', 'client', 'delegation_date']
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {
             'data_new_href': lambda record: '/dashboard/' + str(record.pk) + '/'
         }
+
 
 class TypeTaskTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
