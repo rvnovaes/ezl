@@ -98,7 +98,13 @@ def new_task(sender, instance, created, **kwargs):
                                          'custom_text': custom_text,
                                          })
         mail.to_mail = mail_list
-        mail.send()
+
+        #TODO tratar corretamente a excecao
+        try:
+            mail.send()
+        except Exception as e:
+            print(e)
+            print('Você tentou mandar um e-mail')
 
 
 @receiver(pre_save, sender=Task)
