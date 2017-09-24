@@ -1,20 +1,19 @@
 import os
 import sys
-
+import configparser
 import django
 from django.db import connection
-
-from etl.advwin_ezl import settings
-
-sys.path.append("ezl")
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ezl.settings")
-django.setup()
-
 from django.contrib.auth.models import User
 from core.models import Country, State, City, Person, Address, AddressType, ContactMechanism, ContactMechanismType
 from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, Movement
 from task.models import TypeTask, Task, TaskStatus, TaskHistory
 from core import signals
+from etl import settings
+
+
+sys.path.append("ezl")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ezl.settings")
+django.setup()
 
 invalid_registry = '-INVÁLIDO'
 invalid_legacy_code = 'REGISTRO' + invalid_registry
@@ -134,7 +133,7 @@ class InvalidObjectFactory(object):
         return model.objects.get(id=1)
 
     def restart_table_id(self):
-        if settings.TRUNCATE_ALL_TABLES:
+        if settings['truncate_all_tables']:
             with connection.cursor() as cursor:
                 for model in self.models:
                     cursor.execute("TRUNCATE TABLE " + model._meta.db_table + " RESTART IDENTITY CASCADE;")
