@@ -63,18 +63,19 @@
                         <br><br>
                         <label>Detalhes do serviço: </label>
                         <br>
-                        <span class="type-LineString "><b>Prazo:</b>
-                            {{ form.instance.final_deadline_date|localtime|default_if_none:"" }}</span>
+                        <span><b>Processo:</b>
                         <br>
-                        <span>Recebida em: {{ form.instance.delegation_date|localtime|default_if_none:"" }}</span>
+                        <span><b>Prazo:</b> {{ form.instance.final_deadline_date|localtime|default_if_none:"" }}</span>
                         <br>
-                        <span>Serviço solicitado: {{ form.instance.type_task|lower|capfirst|default_if_none:"" }}</span>
+                        <span><b>Recebida em:</b> {{ form.instance.delegation_date|localtime|default_if_none:"" }}</span>
                         <br>
-                        <span>Vara: {{ form.instance.court_division|lower|capfirst|default_if_none:"" }}</span>
+                        <span><b>Serviço solicitado:</b> {{ form.instance.type_task|lower|capfirst|default_if_none:"" }}</span>
                         <br>
-                        <span>Órgão: {{ form.instance.court|lower|capfirst|default_if_none:"" }}</span>
+                        <span><b>Vara:</b> {{ form.instance.court_division|lower|capfirst|default_if_none:"" }}</span>
                         <br>
-                        <span>Endereço: {{ form.instance.address|capfirst|default_if_none:"" }}</span>
+                        <span><b>Órgão:</b> {{ form.instance.court|lower|capfirst|default_if_none:"" }}</span>
+                        <br>
+                        <span><b>Endereço:</b> {{ form.instance.address|capfirst|default_if_none:"" }}</span>
                         <div class="hidden form-control">{{ form.survey_result }}</div>
                     </div>
                     <div class="form-group text-center">
