@@ -51,7 +51,7 @@ from django.urls import reverse_lazy
 SECRET_KEY = 'f5*(8sgk)n1!i52xijv0yt@jtewp28%g%sp1rx*=y68ocgg+!2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -179,10 +179,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+#TODO Mover a pasta static/static para a app static/static
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
+# Pasta para qual os arquivos estaticos sao copiados com manage.py collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/opt/files_easy_lawyer/'
