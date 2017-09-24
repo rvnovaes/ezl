@@ -63,8 +63,8 @@
                         <br><br>
                         <label>Detalhes do serviço: </label>
                         <br>
-                        <span><b>Processo:</b>
-                        <br>
+{#                        <span><b>Processo:</b>#}
+{#                        <br>#}
                         <span><b>Prazo:</b> {{ form.instance.reminder_deadline_date|localtime|default_if_none:"" }}</span>
                         <br>
                         <span><b>Recebida em:</b> {{ form.instance.delegation_date|localtime|default_if_none:"" }}</span>
