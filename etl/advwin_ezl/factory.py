@@ -1,10 +1,14 @@
 import os
 import sys
-
+import configparser
 import django
 from django.db import connection
+from django.contrib.auth.models import User
+from core.models import Country, State, City, Person, Address, AddressType, ContactMechanism, ContactMechanismType
+from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, Movement
+from task.models import TypeTask, Task, TaskStatus, TaskHistory
+from core import signals
 
-import configparser
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 parser = configparser.ConfigParser()
 
@@ -20,16 +24,9 @@ except FileNotFoundError:
     print('Rename it to general.ini and specify the correct configuration settings!')
     sys.exit(0)
 
-
 sys.path.append("ezl")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ezl.settings")
 django.setup()
-
-from django.contrib.auth.models import User
-from core.models import Country, State, City, Person, Address, AddressType, ContactMechanism, ContactMechanismType
-from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, Movement
-from task.models import TypeTask, Task, TaskStatus, TaskHistory
-from core import signals
 
 invalid_registry = '-INVÁLIDO'
 invalid_legacy_code = 'REGISTRO' + invalid_registry
