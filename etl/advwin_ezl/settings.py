@@ -1,7 +1,7 @@
 # indica se apaga todos os registros da tabela antes de importar (*apaga as dependencias tambem)
 # TRUNCATE_ALL_TABLES = True
 # usuário usado para create e alter user
-USER = 2
+# USER = 2
 
 # informações para uso do SFTP para importar GED
 host_sftp = "172.27.155.11"
