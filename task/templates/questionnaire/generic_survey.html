@@ -29,6 +29,12 @@
         </div>
     </div>
     <script>
+    //Função para retornar o método submit default
+        function submitSurvey() {
+            $('#task_detail').unbind('submit').submit();
+
+        }
+
         Survey.Survey.cssType = "bootstrapmaterial";
         Survey.defaultBootstrapMaterialCss.navigationButton = "btn btn-sm btn-raised btn-primary";
         $.material.init();
@@ -39,11 +45,10 @@
             document.getElementById('id_survey_result').innerHTML = surveyResponse;
             document.getElementById('surveyElement').innerHTML = '<p>Formulário preenchido com sucesso.</p>'
             var v = document.createElement('p');
-            v.innerHTML = '<button name="action" value="DONE" class="btn btn-sm btn-raised btn-primary" type="submit">Enviar</button>';
+            v.innerHTML = '<button name="action" value="DONE" onclick="submitSurvey();" class="btn btn-sm btn-raised btn-primary" type="submit">Enviar</button>';
             document.getElementById('surveyElement').appendChild(v);
         });
         survey.locale = "pt";
-
         Survey.JsonObject.metaData.addProperty("dropdown", {
             name: "dateFormat",
             default: "mm/dd/yy",
