@@ -11,11 +11,38 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
-
+import sys
+import configparser
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
+parser = configparser.ConfigParser()
+try:
+    with open(os.path.join(BASE_DIR, 'config', 'general.ini')) as config_file:
+        parser.read_file(config_file)
+        source = dict(parser.items('django_application'))
+        engine = source['engine']
+        database = source['database']
+        user = source['user']
+        password = source['password']
+        host = source['host']
+        port = source['port']
+        password_validator = source['password_validator']
+        email_use_ssl = source['email_use_ssl']
+        email_host = source['email_host']
+        email_port = source['email_port']
+        email_host_user = source['email_host_user']
+        email_host_password = source['email_host_password']
+
+except FileNotFoundError:
+    print('OOOOOOOOOOOOOOOOOOOOOOOOOOOHHHHH NOOOOOOOO!!!!!')
+    print('general.ini file was not found on {config_path}'.format(config_path=os.path.join(BASE_DIR, 'config')))
+    print('Rename it to general.ini and specify the correct configuration settings!')
+    sys.exit(0)
+
+
 from django.urls import reverse_lazy
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -100,39 +127,41 @@ WSGI_APPLICATION = 'ezl.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'etl_ezl',
-        'USER': 'ezl',
-        'PASSWORD': 'ezl',
-        'HOST': '13.68.213.60',
-        'PORT': '5432'
+        'ENGINE': engine,
+        'NAME': database,
+        'USER': user,
+        'PASSWORD': password,
+        'HOST': host,
+        'PORT': port
     }
 }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-try:
-    from .local_settings import *
-except ImportError:
-    pass
-
-# Internationalization
-# https://docs.djangoproject.com/en/1.11/topics/i18n/
+if password_validator == 'development':
+    AUTH_PASSWORD_VALIDATORS = [
+        {
+            'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+            'OPTIONS': {
+                'min_length': 1,
+            }
+        },
+    ]
+else:
+    AUTH_PASSWORD_VALIDATORS = [
+        {
+            'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        },
+        {
+            'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        },
+        {
+            'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        },
+        {
+            'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        },
+    ]
 
 LANGUAGE_CODE = 'pt-br'
 
@@ -171,11 +200,12 @@ AUTHENTICATION_BACKENDS = (
 )
 
 # Host configuration to send email
-EMAIL_USE_SSL = True
-EMAIL_HOST = 'smtp.zoho.com'
-EMAIL_PORT = 465
-EMAIL_HOST_USER = 'ezlawyer@mttech.com.br'
-EMAIL_HOST_PASSWORD = 'ezlmta@578'
+EMAIL_USE_SSL = email_use_ssl
+EMAIL_HOST = email_host
+EMAIL_PORT = email_port
+EMAIL_HOST_USER = email_host_user
+EMAIL_HOST_PASSWORD = email_host_password
+
 
 INTERNAL_IPS = '127.0.0.1'
 PROJECT_NAME = 'Easy Lawyer'
