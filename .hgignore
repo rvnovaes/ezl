@@ -5,5 +5,7 @@ local_settings.py
 venv/**
 staticfiles/**
 
+etl/advwin_ezl/tmp/**
+config/general.ini
 syntax: regexp
 ^.idea/
