@@ -12,8 +12,7 @@ class MovementETL(GenericETL):
                   pm.M_Distribuicao AS law_suit_legacy_code,
                   pm.Ident          AS legacy_code,
                   pm.Advogado       AS person_lawyer_legacy_code,
-                  pm.CodMov         AS type_movement_legacy_code,
-                  a.CodMov
+                  pm.CodMov         AS type_movement_legacy_code
                 from Jurid_ProcMov AS pm
                 INNER JOIN Jurid_Pastas as p on
                   p.Codigo_Comp = pm.Codigo_Comp
@@ -58,7 +57,7 @@ class MovementETL(GenericETL):
 
             if not lawsuit:
                 # se não encontrou o registro, busca o registro inválido
-                lawsuit = LawSuit.objects.first()
+                lawsuit = InvalidObjectFactory.get_invalid_model(LawSuit)
 
             if movement:
                 movement.law_suit = lawsuit
@@ -80,7 +79,6 @@ class MovementETL(GenericETL):
                                           law_suit=lawsuit,
                                           type_movement=type_movement,
                                           )
-
         super(MovementETL, self).config_import(rows, user, rows_count)
 
 
