@@ -7,15 +7,17 @@
 # sys.path.append("ezl")
 # os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ezl.settings")
 # django.setup()
-
-from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL
+from core.utils import LegacySystem
 from lawsuit.models import Instance
 
 
 class InstanceETL(GenericETL):
-    import_query = "SELECT Codigo, Descicao FROM Jurid_Instancia AS i1 WHERE Descicao IS NOT NULL AND Codigo = " \
-                   "(SELECT min (Codigo) FROM Jurid_Instancia AS i2 WHERE i1.Descicao = i2.Descicao)"
+    import_query = """
+                   SELECT Codigo, Descicao FROM Jurid_Instancia AS i1 WHERE Descicao IS NOT NULL AND Codigo =
+                   (SELECT min (Codigo) FROM Jurid_Instancia AS i2 WHERE i1.Descicao = i2.Descicao)
+
+                   """
 
     model = Instance
     advwin_table = 'Jurid_Instancia'
@@ -23,9 +25,6 @@ class InstanceETL(GenericETL):
 
     def config_import(self, rows, user, rows_count):
         for row in rows:
-            print(rows_count)
-            rows_count -= 1
-
             code = row['Codigo']
             name = row['Descicao']
 
