@@ -1,3 +1,13 @@
+import sys
+import django
+import os
+
+dir = os.path.dirname(os.path.realpath(__file__))
+position = dir.find('easy_lawyer_django')
+sys.path.append(dir[:position] + 'easy_lawyer_django/')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ezl.settings'
+django.setup()
+
 from etl.advwin_ezl.advwin_ezl import GenericETL
 import pytz
 from itertools import chain
@@ -11,6 +21,7 @@ from ezl import settings
 from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
 from django.db.models import Q
+
 default_justify = 'Aceita por Correspondente: %s'
 
 
@@ -102,41 +113,49 @@ class TaskETL(GenericETL):
                 legacy_code=movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
                 Movement)
             person_asked_by = Person.objects.filter(Q(
-                legacy_code=person_asked_by_legacy_code), ~Q(legacy_code=None), ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
+                legacy_code=person_asked_by_legacy_code), ~Q(legacy_code=None),
+                ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
             person_executed_by = Person.objects.filter(
-                Q(legacy_code=person_executed_by_legacy_code), ~Q(legacy_code=None), ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
+                Q(legacy_code=person_executed_by_legacy_code), ~Q(legacy_code=None),
+                ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
             person_distributed_by = Person.objects.filter(Q(
-                legacy_code=person_distributed_by_legacy_code), ~Q(legacy_code=None), ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
+                legacy_code=person_distributed_by_legacy_code), ~Q(legacy_code=None),
+                ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
             type_task = TypeTask.objects.filter(
                 legacy_code=type_task_legacy_code).first() or InvalidObjectFactory.get_invalid_model(TypeTask)
 
             # 30   Open
-            # 80   returned
+            # 80   Refused
             # atualizar o status_task somente se for diferente de OPEN
+
+            # É necessário fazer com que as datas abaixo sejam nula, senão na execução da ETL
+            # será originado erro de variável sem valor
+            refused_date = execution_date = blocked_payment_date = finished_date = None
+
+            if status_code_advwin == TaskStatus.REFUSED:
+                refused_date = timezone.now()
+                execution_date = None
+            elif status_code_advwin == TaskStatus.BLOCKEDPAYMENT:
+                blocked_payment_date = blocked_or_finished_date
+            elif status_code_advwin == TaskStatus.FINISHED:
+                finished_date = blocked_or_finished_date
+
             if task:
                 task.delegation_date = delegation_date
                 task.reminder_deadline_date = reminder_deadline_date
                 task.final_deadline_date = final_deadline_date
                 task.description = description
                 task.task_status = status_code_advwin
+                task.refused_date = refused_date
+                task.execution_date = execution_date
+                task.blocked_payment_date = blocked_payment_date
+                task.finished_date = finished_date
+
                 update_fields = ['delegation_date', 'reminder_deadline_date', 'final_deadline_date', 'description',
-                                 'task_status']
-                if status_code_advwin == TaskStatus.RETURN:
-                    task.refused_date = timezone.now()
-                    task.execution_date = None
-                    update_fields.append('return_date')
-                    update_fields.append('execution_date')
-                elif status_code_advwin == TaskStatus.BLOCKEDPAYMENT:
-                    task.blocked_payment_date = blocked_or_finished_date
-                    update_fields.append('blocked_payment_date')
-                elif status_code_advwin == TaskStatus.FINISHED:
-                    task.finished_date = blocked_or_finished_date
-                    update_fields.append('finished_date')
-                elif status_code_advwin == TaskStatus.OPEN:
-                    pass
+                                 'task_status', 'refused_date', 'execution_date', 'blocked_payment_date',
+                                 'finished_date']
 
                 task.save(update_fields=update_fields)
-
 
             else:
                 self.model.objects.create(movement=movement,
@@ -152,7 +171,12 @@ class TaskETL(GenericETL):
                                           reminder_deadline_date=reminder_deadline_date,
                                           final_deadline_date=final_deadline_date,
                                           description=description,
+                                          refused_date=refused_date,
+                                          execution_date=execution_date,
+                                          blocked_payment_date=blocked_payment_date,
+                                          finished_date=finished_date,
                                           task_status=status_code_advwin)
+
         super(TaskETL, self).config_import(rows, user, rows_count)
 
     def config_export(self):
@@ -202,6 +226,7 @@ class TaskETL(GenericETL):
             print(task)
 
         self.export_query_set = tasks
+
 
 if __name__ == '__main__':
     TaskETL().import_data()
