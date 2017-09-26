@@ -78,8 +78,6 @@ class TaskETL(GenericETL):
 
     def config_import(self, rows, user, rows_count):
         for row in rows:
-            print(rows_count)
-            rows_count -= 1
             legacy_code = row['legacy_code']
             movement_legacy_code = row['movement_legacy_code']
             person_asked_by_legacy_code = row['person_asked_by_legacy_code']
