@@ -9,12 +9,16 @@ survey_dict = {'audienciaCorrespondente': 'COURTHEARING',
 
 class TypeTaskETL(GenericETL):
     model = TypeTask
-    import_query = "SELECT tm.Codigo,  tm.Descricao, tm.formulario_id FROM Jurid_CodMov AS tm  " \
-                   "WHERE right(tm.Codigo, 1) <> '.'  " \
-            "   AND (tm.UsarOS = 1 AND tm.UsarOS IS NOT NULL)  " \
-            "   AND tm.Status = 'Ativo'  " \
-            "   AND tm.Codigo= (SELECT MIN(tm2.codigo)    " \
-            "                   FROM Jurid_CodMov AS tm2 WHERE tm.Descricao = tm2.Descricao)"
+    import_query = """
+                SELECT tm.Codigo,  tm.Descricao, tm.formulario_id FROM Jurid_CodMov AS tm 
+                   WHERE right(tm.Codigo, 1) <> '.'  
+                      AND (tm.UsarOS = 1 AND tm.UsarOS IS NOT NULL)  
+                      AND tm.Status = 'Ativo'
+                      AND tm.Codigo= (SELECT MIN(tm2.codigo) 
+                   FROM Jurid_CodMov AS tm2 WHERE tm.Descricao = tm2.Descricao)
+                  
+                   """
+
     advwin_table = 'Jurid_CodMov'
     has_status = True
 
