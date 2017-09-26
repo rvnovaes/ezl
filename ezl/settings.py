@@ -27,7 +27,7 @@ try:
         password = source['password']
         host = source['host']
         port = source['port']
-        password_validator = source['password_validator']
+        environment = source['environment']
         email_use_ssl = source['email_use_ssl']
         email_host = source['email_host']
         email_port = source['email_port']
@@ -51,7 +51,10 @@ from django.urls import reverse_lazy
 SECRET_KEY = 'f5*(8sgk)n1!i52xijv0yt@jtewp28%g%sp1rx*=y68ocgg+!2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if environment == 'development':
+    DEBUG = True
+else:
+    DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -138,7 +141,7 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
-if password_validator == 'development':
+if environment == 'development':
     AUTH_PASSWORD_VALIDATORS = [
         {
             'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',

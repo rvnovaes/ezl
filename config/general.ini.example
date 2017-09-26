@@ -1,6 +1,6 @@
-# Django Web Application Configuration
+; Django Web Application Configuration
 [django_application]
-# Connection Configurations
+; Connection Configurations
 engine = django.db.backends.postgresql
 database = ezl
 user = ezl
@@ -8,10 +8,12 @@ password = ezl
 host = 127.0.0.1
 port = 5432
 
-# development (validates only min lenght = 1) or production (full validation)
-password_validator = development
+; used in password_validator and debug mode
+; password_validator: development (validates only min lenght = 1) or production (full validation)
+; debug mode = True if development, else False
+environment = development
 
-# E-mail configurations
+; E-mail configurations
 email_use_ssl = True
 email_host = 'smtp.zoho.com'
 email_port = 465
@@ -19,5 +21,5 @@ email_host_user = 'ezlawyer@mttech.com.br'
 email_host_password = 'ezlmta@578'
 
 [etl]
-# indica se apaga todos os registros da tabela antes de importar (*apaga as dependencias tambem)
-truncate_all_tables = True
+; indica se apaga todos os registros da tabela antes de importar (*apaga as dependencias tambem)
+truncate_all_tables = False
