@@ -1,7 +1,7 @@
 # esse import deve vir antes de todos porque ele executa o __init__.py
 from core.models import Person
 from core.utils import LegacySystem
-from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from lawsuit.models import Folder
 
 
@@ -10,7 +10,7 @@ class FolderETL(GenericETL):
     model = Folder
     import_query = """
             SELECT DISTINCT
-              p.Codigo_Comp,
+              p.Codigo_Comp AS legacy_code,
               p.Cliente,
               a.CodMov
             FROM Jurid_Pastas AS p
@@ -29,13 +29,13 @@ class FolderETL(GenericETL):
                   """
     has_status = True
 
+    @validate_import
     def config_import(self, rows, user, rows_count):
         log_file = open('log_file.txt', 'w')
         for row in rows:
-            print(rows_count)
             rows_count -= 1
             try:
-                legacy_code = row['Codigo_Comp']
+                legacy_code = row['legacy_code']
                 customer_code = row['Cliente']
 
                 instance = self.model.objects.filter(legacy_code=legacy_code,
