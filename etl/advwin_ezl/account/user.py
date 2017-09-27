@@ -13,24 +13,26 @@ from etl.advwin_ezl.signals import new_person, temp_disconnect_signal
 class UserETL(GenericETL):
     advwin_table = 'ADVWeb_usuario'
     model = User
-    import_query = "SELECT  u1.usuarioLogin AS username," \
-                   "u1.usuarioNome AS name_user, " \
-            "u1.usuarioEmail AS email, " \
-            "a1.Razao AS legal_name, " \
-            "a1.Nome AS name, " \
-            "a1.Codigo AS legacy_code, 'True' AS is_lawyer, 'True' AS is_correspondent, 'False' AS is_court" \
-            " FROM (" + advwin_table + " AS u1" \
-            " INNER JOIN Jurid_Advogado AS a1 ON u1.codigo_adv = a1.Codigo)" \
-            " WHERE  a1.Correspondente = 1 AND  u1.status = 'A' AND " \
-            "u1.usuarioNome IS NOT NULL AND " \
-            "u1.usuarioNome <> '' AND " \
-            "u1.usuarioLogin IS NOT NULL AND " \
-            "u1.usuarioLogin <> '' AND " \
-            "u1.usuarioId = (SELECT min(u2.usuarioId) FROM " + advwin_table + " AS u2" \
-            " WHERE u2.status = 'A' AND " \
-            "u2.usuarioNome IS NOT NULL AND u2.usuarioNome <> '' AND " \
-            "u2.usuarioLogin IS NOT NULL AND u2.usuarioLogin <> '' AND " \
-            "u1.usuarioLogin = u2.usuarioLogin)"
+    import_query = """SELECT ADVWEB_USER.usuarioLogin AS username,
+                              ADVWEB_USER.usuarioNome AS name_user,
+                              ADVWEB_USER.usuarioEmail AS email,
+                              ADVOGADO.Razao AS legal_name,
+                              ADVOGADO.Nome AS name,
+                              ADVOGADO.Codigo AS legacy_code                              
+                        FROM 
+                            (ADVWeb_usuario AS ADVWEB_USER INNER JOIN Jurid_Advogado AS ADVOGADO ON ADVWEB_USER.codigo_adv = ADVOGADO.Codigo)
+                        WHERE  ADVOGADO.Correspondente = 1 AND  ADVWEB_USER.status = 'A' AND
+                               ADVWEB_USER.usuarioNome IS NOT NULL AND
+                               ADVWEB_USER.usuarioNome <> '' AND
+                               ADVWEB_USER.usuarioLogin IS NOT NULL AND
+                               ADVWEB_USER.usuarioLogin <> '' AND
+                               ADVWEB_USER.usuarioId =                                
+                                   (SELECT min(ADVWEB_USER2.usuarioId) FROM ADVWeb_usuario AS ADVWEB_USER2
+                                    WHERE ADVWEB_USER2.status = 'A' AND
+                                    ADVWEB_USER2.usuarioNome IS NOT NULL AND ADVWEB_USER2.usuarioNome <> '' AND
+                                    ADVWEB_USER2.usuarioLogin IS NOT NULL AND ADVWEB_USER2.usuarioLogin <> '' AND
+                                    ADVWEB_USER.usuarioLogin = ADVWEB_USER2.usuarioLogin)
+            """
 
     # como não tem o nosso model de usuario não tem como herdar de LegacyCode e não tem como inativar os que são advwin
     # todo: fazer model de usuario pra ter herança com LegacyCode e Audit
