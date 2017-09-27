@@ -3,77 +3,73 @@ from django.db import IntegrityError
 
 from core.models import Person
 from core.utils import LegacySystem
-from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 
 
 class PersonETL(GenericETL):
-    advwin_table = ['Jurid_Tribunais', 'Jurid_Advogado', 'Jurid_Clifor']
     model = Person
-
-    import_query = "select" \
-                   "  t1.Descricao as legal_name, " \
-            "  t1.Descricao as name, " \
-            "  t1.Codigo as legacy_code, " \
-            "  'J' as legal_type, " \
-            "  'F' as customer_supplier, " \
-            "  'False' AS is_lawyer, " \
-            "  'False' AS is_correspondent, " \
-            "  'True' AS is_court " \
-            "from " + advwin_table[0] + " as t1 " \
-                                        "where " \
-                                        "  t1.Descricao is not null and t1.Descricao <> '' and " \
-                                        "  t1.Codigo = ( " \
-                                        "  select min(t2.Codigo) " \
-                                        "  from " + advwin_table[0] + " as t2 " \
-                                                                      "  where " \
-                                                                      "    t2.Descricao is not null and t2.Descricao <> '' and " \
-                                                                      "    t1.Codigo = t2.Codigo) " \
-                                                                      " " \
-                                                                      "UNION " \
-                                                                      " " \
-                                                                      "select " \
-                                                                      "  a1.Nome as legal_name, " \
-                                                                      "  a1.Nome as name, " \
-                                                                      "  a1.Codigo as legacy_code, " \
-                                                                      "  'N/D' as legal_type, " \
-                                                                      "  'F' as customer_supplier, " \
-                                                                      "  'True' AS is_lawyer, " \
-                                                                      "  CASE a1.Correspondente WHEN 0 THEN 'False' ELSE 'True' END as is_correspondent, " \
-                                                                      "  'False' AS is_court " \
-                                                                      "from " + advwin_table[1] + " as a1 " \
-                                                                                                  "where " \
-                                                                                                  "  a1.Status = 'Ativo' and " \
-                                                                                                  "  a1.Nome is not null and a1.Nome <> '' and " \
-                                                                                                  "  a1.Codigo not in ( " \
-                                                                                                  "  select cf.Codigo " \
-                                                                                                  "  from " + \
-                   advwin_table[2] + " as cf " \
-                                     "  where " \
-                              "      cf.Status = 'Ativo' and " \
-                              "      cf.Razao is not null and cf.Razao <> '') " \
-                              " " \
-                              "UNION " \
-                              " " \
-                              "select " \
-                              "  cf.Razao as legal_name, " \
-                              "  cf.Nome as name, " \
-                              "  cf.Codigo as legacy_code, " \
-                              "  CASE cf.pessoa_fisica WHEN 0 THEN 'J' ELSE 'F' END as legal_type, " \
-                              "  cf.TipoCF as customer_supplier, " \
-                              "  'False' AS is_lawyer, " \
-                              "  'False' AS is_correspondent, " \
-                              "  'False' AS is_court " \
-                              "from " + advwin_table[2] + " as cf " \
-                                                          "where " \
-                                                          "  cf.Status = 'Ativo' and " \
-                                                          "  cf.Razao is not null and cf.Razao <> ''"
+    import_query = """
+                    SELECT t1.descricao AS legal_name,
+                           t1.descricao AS name,
+                           t1.codigo    AS legacy_code,
+                           'J'          AS legal_type,
+                           'F'          AS customer_supplier,
+                           'False'      AS is_lawyer,
+                           'False'      AS is_correspondent,
+                           'True'       AS is_court
+                    FROM   {tribunal} AS t1
+                    WHERE  t1.descricao IS NOT NULL
+                           AND t1.descricao <> ''
+                           AND t1.codigo = (SELECT Min(t2.codigo)
+                                            FROM   {tribunal} AS t2
+                                            WHERE  t2.descricao IS NOT NULL
+                                                   AND t2.descricao <> ''
+                                                   AND t1.codigo = t2.codigo)
+                    UNION
+                    SELECT a1.nome   AS legal_name,
+                           a1.nome   AS name,
+                           a1.codigo AS legacy_code,
+                           'N/D'     AS legal_type,
+                           'F'       AS customer_supplier,
+                           'True'    AS is_lawyer,
+                           CASE a1.correspondente
+                             WHEN 0 THEN 'False'
+                             ELSE 'True'
+                           END       AS is_correspondent,
+                           'False'   AS is_court
+                    FROM   {advogado} AS a1
+                    WHERE  a1.status = 'Ativo'
+                           AND a1.nome IS NOT NULL
+                           AND a1.nome <> ''
+                           AND a1.codigo NOT IN (SELECT cf.codigo
+                                                 FROM   {clifor} AS cf
+                                                 WHERE  cf.status = 'Ativo'
+                                                        AND cf.razao IS NOT NULL
+                                                        AND cf.razao <> '')
+                    UNION
+                    SELECT cf.razao  AS legal_name,
+                           cf.nome   AS name,
+                           cf.codigo AS legacy_code,
+                           CASE cf.pessoa_fisica
+                             WHEN 0 THEN 'J'
+                             ELSE 'F'
+                           END       AS legal_type,
+                           cf.tipocf AS customer_supplier,
+                           'False'   AS is_lawyer,
+                           'False'   AS is_correspondent,
+                           'False'   AS is_court
+                    FROM   {clifor} AS cf
+                    WHERE  cf.status = 'Ativo'
+                           AND cf.razao IS NOT NULL
+                           AND cf.razao <> ''     
+                """.format(tribunal='Jurid_Tribunais', advogado='Jurid_Advogado', clifor='Jurid_Clifor')
 
     has_status = True
 
+    @validate_import
     def config_import(self, rows, user, rows_count):
         log_file = open('log_file.txt', 'w')
         for row in rows:
-            print(rows_count)
             rows_count -= 1
             try:
                 legal_name = row['legal_name'] or row['name']
