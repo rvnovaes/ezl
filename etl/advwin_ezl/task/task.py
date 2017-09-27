@@ -8,7 +8,7 @@ sys.path.append(dir[:position] + 'easy_lawyer_django/')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'ezl.settings'
 django.setup()
 
-from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 import pytz
 from itertools import chain
 from django.utils import timezone
@@ -76,6 +76,7 @@ class TaskETL(GenericETL):
     advwin_model = JuridAgendaTable
     has_status = False
 
+    @validate_import
     def config_import(self, rows, user, rows_count):
         for row in rows:
 

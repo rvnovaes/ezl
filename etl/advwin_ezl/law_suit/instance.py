@@ -14,8 +14,15 @@ from lawsuit.models import Instance
 
 class InstanceETL(GenericETL):
     import_query = """
-                   SELECT Codigo, Descicao FROM Jurid_Instancia AS i1 WHERE Descicao IS NOT NULL AND Codigo =
-                   (SELECT min (Codigo) FROM Jurid_Instancia AS i2 WHERE i1.Descicao = i2.Descicao)
+                   SELECT Codigo AS legacy_code, 
+                          Descicao 
+                   
+                   FROM Jurid_Instancia AS i1 
+                   
+                   WHERE Descicao IS NOT NULL AND Codigo =
+                   (SELECT min (Codigo) 
+                      FROM Jurid_Instancia AS i2 
+                      WHERE i1.Descicao = i2.Descicao)
 
                    """
 
@@ -27,7 +34,7 @@ class InstanceETL(GenericETL):
         for row in rows:
 
             try:
-                code = row['Codigo']
+                code = row['legacy_code']
                 name = row['Descicao']
 
                 instance = self.model.objects.filter(legacy_code=code, system_prefix=LegacySystem.ADVWIN.value).first()

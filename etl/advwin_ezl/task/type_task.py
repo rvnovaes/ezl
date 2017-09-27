@@ -1,5 +1,5 @@
 from core.utils import LegacySystem
-from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from task.models import TypeTask, SurveyType
 
 survey_dict = {'audienciaCorrespondente': 'COURTHEARING',
@@ -10,7 +10,12 @@ survey_dict = {'audienciaCorrespondente': 'COURTHEARING',
 class TypeTaskETL(GenericETL):
     model = TypeTask
     import_query = """
-                SELECT tm.Codigo,  tm.Descricao, tm.formulario_id FROM Jurid_CodMov AS tm 
+                SELECT tm.Codigo AS legacy_code,  
+                       tm.Descricao, 
+                       tm.formulario_id 
+                   
+                   FROM Jurid_CodMov AS tm 
+                   
                    WHERE right(tm.Codigo, 1) <> '.'  
                       AND (tm.UsarOS = 1 AND tm.UsarOS IS NOT NULL)  
                       AND tm.Status = 'Ativo'
@@ -22,11 +27,12 @@ class TypeTaskETL(GenericETL):
     advwin_table = 'Jurid_CodMov'
     has_status = True
 
+    @validate_import
     def config_import(self, rows, user, rows_count):
         for row in rows:
 
             try:
-                code = row['Codigo']
+                code = row['legacy_code']
                 name = row['Descricao']
                 survey_key = row['formulario_id']
                 key = survey_dict[survey_key]
