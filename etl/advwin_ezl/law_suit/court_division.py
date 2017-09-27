@@ -1,5 +1,5 @@
 from core.utils import LegacySystem
-from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from lawsuit.models import CourtDivision
 
 
@@ -8,7 +8,7 @@ class CourtDivisionETL(GenericETL):
     model = CourtDivision
     import_query = """
                     SELECT
-                      codigo,
+                      codigo AS legacy_code,
                       descricao
                     FROM Jurid_Varas AS v1
                     WHERE codigo = (SELECT min(codigo)
@@ -17,11 +17,12 @@ class CourtDivisionETL(GenericETL):
                     """
     has_status = False
 
+    @validate_import
     def config_import(self, rows, user, rows_count):
         for row in rows:
 
             try:
-                code = row['codigo']
+                code = row['legacy_code']
                 name = row['descricao']
 
                 # tem que verificar se é novo antes para não salvar o create_user ao fazer update
