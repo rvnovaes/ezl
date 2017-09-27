@@ -30,10 +30,10 @@ from etl.advwin_ezl.task.ged_task import EcmETL
 from django.core.management import call_command
 from django.core.management.commands import loaddata, migrate
 import luigi
-from luigi.interface import core
 from ezl import settings
 from etl.advwin_ezl import settings as etl_settings
 from etl.advwin_ezl.ezl_exceptions.params_exception import ParamsException
+import configparser
 
 LINUX_PASSWORD = None
 
@@ -281,19 +281,35 @@ class EcmTask(luigi.Task):
         EcmETL().import_data()
 
 
+def config():
+    """
+
+    :return:
+    """
+    parser = configparser.ConfigParser()
+    try:
+        with open(os.path.join(settings.BASE_DIR, 'config', 'general.ini')) as config_file:
+            parser.read_file(config_file)
+            source = dict(parser.items('etl'))
+            global LINUX_PASSWORD
+            LINUX_PASSWORD = source['linux_password']
+
+    except FileNotFoundError:
+        print('OOOOOOOOOOOOOOOOOOOOOOOOOOOHHHHH NOOOOOOOO!!!!!')
+        print('general.ini file was not found on {config_path}'.format(config_path=os.path.join(settings.BASE_DIR, 'config')))
+        print('Rename it to general.ini and specify the correct configuration settings!')
+        sys.exit(0)
+
+
 def main():
 
-    try:
-        #args = dict(map(lambda x: x.lstrip('-').split('='), sys.argv[1:]))
-        #if 'p' not in args.keys():
-        #    raise ParamsException
-        #sys.argv.pop(1)
+    try:        
         # E necessario remover os arquivos.ezl dentro do diretorio tmp para executar novamente
-        #LINUX_PASSWORD = args.get('p')
+        config()
         os.system('echo {0}|sudo -S rm -rf {1}/etl/advwin_ezl/tmp/*.ezl'.format(
-            'nacigi-2', settings.BASE_DIR))
+            LINUX_PASSWORD, settings.BASE_DIR))
         # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
-        #load_luigi_scheduler()
+        load_luigi_scheduler()
         luigi.run(main_task_cls=EcmTask())
     except ParamsException as e:
         print(e)
