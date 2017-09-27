@@ -78,102 +78,116 @@ class TaskETL(GenericETL):
 
     def config_import(self, rows, user, rows_count):
         for row in rows:
-            legacy_code = row['legacy_code']
-            movement_legacy_code = row['movement_legacy_code']
-            person_asked_by_legacy_code = row['person_asked_by_legacy_code']
-            person_executed_by_legacy_code = row['person_executed_by_legacy_code']
-            person_distributed_by_legacy_code = row['person_distributed_by_legacy_code']
-            type_task_legacy_code = row['type_task_legacy_code']
 
-            if row['delegation_date']:
-                delegation_date = pytz.timezone(settings.TIME_ZONE).localize(row['delegation_date'])
-            else:
-                delegation_date = None
+            try:
+                legacy_code = row['legacy_code']
+                movement_legacy_code = row['movement_legacy_code']
+                person_asked_by_legacy_code = row['person_asked_by_legacy_code']
+                person_executed_by_legacy_code = row['person_executed_by_legacy_code']
+                person_distributed_by_legacy_code = row['person_distributed_by_legacy_code']
+                type_task_legacy_code = row['type_task_legacy_code']
 
-            status_code_advwin = get_status_by_substatus(row['status_code_advwin'])
+                if row['delegation_date']:
+                    delegation_date = pytz.timezone(settings.TIME_ZONE).localize(row['delegation_date'])
+                else:
+                    delegation_date = None
 
-            if row['reminder_deadline_date']:
-                reminder_deadline_date = pytz.timezone(settings.TIME_ZONE).localize(row['reminder_deadline_date'])
-            else:
-                reminder_deadline_date = None
+                status_code_advwin = get_status_by_substatus(row['status_code_advwin'])
 
-            if row['final_deadline_date']:
-                final_deadline_date = pytz.timezone(settings.TIME_ZONE).localize(row['final_deadline_date'])
-            else:
-                final_deadline_date = None
+                if row['reminder_deadline_date']:
+                    reminder_deadline_date = pytz.timezone(settings.TIME_ZONE).localize(row['reminder_deadline_date'])
+                else:
+                    reminder_deadline_date = None
 
-            description = row['description']
-            blocked_or_finished_date = row['blocked_or_finished_date']
+                if row['final_deadline_date']:
+                    final_deadline_date = pytz.timezone(settings.TIME_ZONE).localize(row['final_deadline_date'])
+                else:
+                    final_deadline_date = None
 
-            task = Task.objects.filter(legacy_code=legacy_code, system_prefix=LegacySystem.ADVWIN.value).first()
+                description = row['description']
+                blocked_or_finished_date = row['blocked_or_finished_date']
 
-            movement = Movement.objects.filter(
-                legacy_code=movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
-                Movement)
-            person_asked_by = Person.objects.filter(Q(
-                legacy_code=person_asked_by_legacy_code), ~Q(legacy_code=None),
-                ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
-            person_executed_by = Person.objects.filter(
-                Q(legacy_code=person_executed_by_legacy_code), ~Q(legacy_code=None),
-                ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
-            person_distributed_by = Person.objects.filter(Q(
-                legacy_code=person_distributed_by_legacy_code), ~Q(legacy_code=None),
-                ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
-            type_task = TypeTask.objects.filter(
-                legacy_code=type_task_legacy_code).first() or InvalidObjectFactory.get_invalid_model(TypeTask)
+                task = Task.objects.filter(legacy_code=legacy_code, system_prefix=LegacySystem.ADVWIN.value).first()
 
-            # 30   Open
-            # 80   Refused
-            # atualizar o status_task somente se for diferente de OPEN
+                movement = Movement.objects.filter(
+                    legacy_code=movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
+                    Movement)
+                person_asked_by = Person.objects.filter(Q(
+                    legacy_code=person_asked_by_legacy_code), ~Q(legacy_code=None),
+                    ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
+                person_executed_by = Person.objects.filter(
+                    Q(legacy_code=person_executed_by_legacy_code), ~Q(legacy_code=None),
+                    ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
+                person_distributed_by = Person.objects.filter(Q(
+                    legacy_code=person_distributed_by_legacy_code), ~Q(legacy_code=None),
+                    ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
+                type_task = TypeTask.objects.filter(
+                    legacy_code=type_task_legacy_code).first() or InvalidObjectFactory.get_invalid_model(TypeTask)
 
-            # É necessário fazer com que as datas abaixo sejam nula, senão na execução da ETL
-            # será originado erro de variável sem valor
-            refused_date = execution_date = blocked_payment_date = finished_date = None
+                # 30   Open
+                # 80   Refused
+                # atualizar o status_task somente se for diferente de OPEN
 
-            if status_code_advwin == TaskStatus.REFUSED:
-                refused_date = timezone.now()
-                execution_date = None
-            elif status_code_advwin == TaskStatus.BLOCKEDPAYMENT:
-                blocked_payment_date = blocked_or_finished_date
-            elif status_code_advwin == TaskStatus.FINISHED:
-                finished_date = blocked_or_finished_date
+                # É necessário fazer com que as datas abaixo sejam nula, senão na execução da ETL
+                # será originado erro de variável sem valor
+                refused_date = execution_date = blocked_payment_date = finished_date = None
 
-            if task:
-                task.delegation_date = delegation_date
-                task.reminder_deadline_date = reminder_deadline_date
-                task.final_deadline_date = final_deadline_date
-                task.description = description
-                task.task_status = status_code_advwin
-                task.refused_date = refused_date
-                task.execution_date = execution_date
-                task.blocked_payment_date = blocked_payment_date
-                task.finished_date = finished_date
+                if status_code_advwin == TaskStatus.REFUSED:
+                    refused_date = timezone.now()
+                    execution_date = None
+                elif status_code_advwin == TaskStatus.BLOCKEDPAYMENT:
+                    blocked_payment_date = blocked_or_finished_date
+                elif status_code_advwin == TaskStatus.FINISHED:
+                    finished_date = blocked_or_finished_date
 
-                update_fields = ['delegation_date', 'reminder_deadline_date', 'final_deadline_date', 'description',
-                                 'task_status', 'refused_date', 'execution_date', 'blocked_payment_date',
-                                 'finished_date']
+                if task:
+                    task.delegation_date = delegation_date
+                    task.reminder_deadline_date = reminder_deadline_date
+                    task.final_deadline_date = final_deadline_date
+                    task.description = description
+                    task.task_status = status_code_advwin
+                    task.refused_date = refused_date
+                    task.execution_date = execution_date
+                    task.blocked_payment_date = blocked_payment_date
+                    task.finished_date = finished_date
 
-                task.save(update_fields=update_fields)
+                    update_fields = ['delegation_date', 'reminder_deadline_date', 'final_deadline_date', 'description',
+                                     'task_status', 'refused_date', 'execution_date', 'blocked_payment_date',
+                                     'finished_date']
 
-            else:
-                self.model.objects.create(movement=movement,
-                                          legacy_code=legacy_code,
-                                          system_prefix=LegacySystem.ADVWIN.value,
-                                          create_user=user,
-                                          alter_user=user,
-                                          person_asked_by=person_asked_by,
-                                          person_executed_by=person_executed_by,
-                                          person_distributed_by=person_distributed_by,
-                                          type_task=type_task,
-                                          delegation_date=delegation_date,
-                                          reminder_deadline_date=reminder_deadline_date,
-                                          final_deadline_date=final_deadline_date,
-                                          description=description,
-                                          refused_date=refused_date,
-                                          execution_date=execution_date,
-                                          blocked_payment_date=blocked_payment_date,
-                                          finished_date=finished_date,
-                                          task_status=status_code_advwin)
+                    task.save(update_fields=update_fields)
+
+                else:
+                    self.model.objects.create(movement=movement,
+                                              legacy_code=legacy_code,
+                                              system_prefix=LegacySystem.ADVWIN.value,
+                                              create_user=user,
+                                              alter_user=user,
+                                              person_asked_by=person_asked_by,
+                                              person_executed_by=person_executed_by,
+                                              person_distributed_by=person_distributed_by,
+                                              type_task=type_task,
+                                              delegation_date=delegation_date,
+                                              reminder_deadline_date=reminder_deadline_date,
+                                              final_deadline_date=final_deadline_date,
+                                              description=description,
+                                              refused_date=refused_date,
+                                              execution_date=execution_date,
+                                              blocked_payment_date=blocked_payment_date,
+                                              finished_date=finished_date,
+                                              task_status=status_code_advwin)
+                self.debug_logger.debug(
+                    "Task,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                    str(movement.id), str(legacy_code), str(LegacySystem.ADVWIN.value),
+                    str(user.id),str(user.id), str(person_asked_by.id), str(person_executed_by.id),
+                    str(person_distributed_by.id),str(type_task.id), str(delegation_date), str(reminder_deadline_date),
+                    str(final_deadline_date), str(description), str(refused_date), str(execution_date),
+                    str(blocked_payment_date), str(finished_date), str(status_code_advwin),self.timestr))
+
+            except Exception as e:
+                self.error_logger.error(
+                    "Ocorreu o seguinte erro na importacao de Task: " + str(rows_count) + "," + str(
+                        e) + "," + self.timestr)
 
         super(TaskETL, self).config_import(rows, user, rows_count)
 

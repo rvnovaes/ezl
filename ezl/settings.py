@@ -14,6 +14,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from django.urls import reverse_lazy
+import datetime
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -182,3 +183,80 @@ PROJECT_NAME = 'Easy Lawyer'
 PROJECT_LINK = 'https://ezl.mtostes.com.br'
 
 LINK_TO_RESTORE_DB_DEMO = 'http://13.68.213.60:8001'
+
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'formatters': {
+        'simple': {
+            'format': '[%(asctime)s] %(levelname)s %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'verbose': {
+            'format': '[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'development_logfile': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': '/tmp/django_dev.log',
+            'formatter': 'verbose'
+        },
+        'error_logfile': {
+            'level': 'ERROR',
+            'filters': ['require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/ezl/etl/'+datetime.datetime.now().strftime("error_%Y-%m-%d_%H:00.log"),
+            'formatter': 'simple'
+        },
+        'debug_logfile': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/ezl/etl/'+datetime.datetime.now().strftime("debug_%Y-%m-%d_%H:00.log"),
+            'formatter': 'simple'
+        },
+    },
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['console'],
+    },
+    'loggers': {
+        'coffeehouse': {
+            'handlers': ['development_logfile'],
+         },
+        'error_logger': {
+            'handlers': ['error_logfile'],
+            'level': 'ERROR'
+        },
+        'debug_logger': {
+            'handlers': ['debug_logfile'],
+            'level': 'DEBUG'
+        },
+        'django': {
+            'handlers': ['development_logfile'],
+        },
+        'py.warnings': {
+            'handlers': ['development_logfile'],
+        },
+    }
+}

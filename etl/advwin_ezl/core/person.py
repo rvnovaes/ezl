@@ -75,95 +75,103 @@ class PersonETL(GenericETL):
         for row in rows:
             print(rows_count)
             rows_count -= 1
-
-            legal_name = row['legal_name'] or row['name']
-            name = row['name'] or row['legal_name']
-            legacy_code = row['legacy_code']
-            legal_type = row['legal_type']
-            customer_supplier = row['customer_supplier']
-            is_lawyer = row['is_lawyer']
-            is_correspondent = row['is_correspondent']
-            is_court = row['is_court']
-            cpf_cnpj = None
-            if legal_type != 'F' and legal_type != 'J':
-                if str(legacy_code).isnumeric():
-                    # se for maior que 11 provavelmente é o cnpj
-                    if len(legacy_code) > 11:
-                        legal_type = 'J'
+            try:
+                legal_name = row['legal_name'] or row['name']
+                name = row['name'] or row['legal_name']
+                legacy_code = row['legacy_code']
+                legal_type = row['legal_type']
+                customer_supplier = row['customer_supplier']
+                is_lawyer = row['is_lawyer']
+                is_correspondent = row['is_correspondent']
+                is_court = row['is_court']
+                cpf_cnpj = None
+                if legal_type != 'F' and legal_type != 'J':
+                    if str(legacy_code).isnumeric():
+                        # se for maior que 11 provavelmente é o cnpj
+                        if len(legacy_code) > 11:
+                            legal_type = 'J'
+                        else:
+                            legal_type = 'F'
                     else:
-                        legal_type = 'F'
+                        # se nao der pra saber se é pessoa fisica ou juridica será considerada juridica
+                        legal_type = 'J'
+
+                if str(legacy_code).isnumeric():
+                    # no advwin nao tem campo para cpf_cnpj, é salvo no codigo
+                    cpf_cnpj = legacy_code
+
+                if customer_supplier == 'A':
+                    is_customer = True
+                    is_supplier = True
+                elif customer_supplier == 'C':
+                    is_customer = True
+                    is_supplier = False
+                elif customer_supplier == 'F':
+                    is_customer = False
+                    is_supplier = True
                 else:
-                    # se nao der pra saber se é pessoa fisica ou juridica será considerada juridica
-                    legal_type = 'J'
+                    is_customer = False
+                    is_supplier = False
 
-            if str(legacy_code).isnumeric():
-                # no advwin nao tem campo para cpf_cnpj, é salvo no codigo
-                cpf_cnpj = legacy_code
+                is_active = True
 
-            if customer_supplier == 'A':
-                is_customer = True
-                is_supplier = True
-            elif customer_supplier == 'C':
-                is_customer = True
-                is_supplier = False
-            elif customer_supplier == 'F':
-                is_customer = False
-                is_supplier = True
-            else:
-                is_customer = False
-                is_supplier = False
+                instance = self.model.objects.filter(legacy_code=legacy_code,
+                                                     system_prefix=LegacySystem.ADVWIN.value).first()
 
-            is_active = True
+                if instance:
+                    # use update_fields to specify which fields to save
+                    # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
+                    instance.legal_name = legal_name
+                    instance.name = name
+                    instance.is_lawyer = is_lawyer
+                    instance.is_correspondent = is_correspondent
+                    instance.is_court = is_court
+                    instance.legal_type = legal_type
+                    instance.cpf_cnpj = cpf_cnpj
+                    instance.alter_user = user
+                    instance.is_customer = is_customer
+                    instance.is_supplier = is_supplier
+                    instance.is_active = is_active
+                    instance.save(
+                        update_fields=['alter_date',
+                                       'legal_name',
+                                       'name',
+                                       'is_lawyer',
+                                       'is_correspondent',
+                                       'is_court',
+                                       'legal_type',
+                                       'cpf_cnpj',
+                                       'alter_user',
+                                       'is_active',
+                                       'is_customer',
+                                       'is_supplier'])
+                else:
+                    obj = self.model(legal_name=legal_name,
+                                     name=name,
+                                     is_lawyer=is_lawyer,
+                                     is_correspondent=is_correspondent,
+                                     is_court=is_court,
+                                     legal_type=legal_type,
+                                     cpf_cnpj=cpf_cnpj,
+                                     alter_user=user,
+                                     create_user=user,
+                                     is_customer=is_customer,
+                                     is_supplier=is_supplier,
+                                     is_active=is_active,
+                                     legacy_code=legacy_code,
+                                     system_prefix=LegacySystem.ADVWIN.value)
 
-            instance = self.model.objects.filter(legacy_code=legacy_code,
-                                                 system_prefix=LegacySystem.ADVWIN.value).first()
-
-            if instance:
-                # use update_fields to specify which fields to save
-                # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
-                instance.legal_name = legal_name
-                instance.name = name
-                instance.is_lawyer = is_lawyer
-                instance.is_correspondent = is_correspondent
-                instance.is_court = is_court
-                instance.legal_type = legal_type
-                instance.cpf_cnpj = cpf_cnpj
-                instance.alter_user = user
-                instance.is_customer = is_customer
-                instance.is_supplier = is_supplier
-                instance.is_active = is_active
-                instance.save(
-                    update_fields=['alter_date',
-                                   'legal_name',
-                                   'name',
-                                   'is_lawyer',
-                                   'is_correspondent',
-                                   'is_court',
-                                   'legal_type',
-                                   'cpf_cnpj',
-                                   'alter_user',
-                                   'is_active',
-                                   'is_customer',
-                                   'is_supplier'])
-            else:
-                obj = self.model(legal_name=legal_name,
-                                 name=name,
-                                 is_lawyer=is_lawyer,
-                                 is_correspondent=is_correspondent,
-                                 is_court=is_court,
-                                 legal_type=legal_type,
-                                 cpf_cnpj=cpf_cnpj,
-                                 alter_user=user,
-                                 create_user=user,
-                                 is_customer=is_customer,
-                                 is_supplier=is_supplier,
-                                 is_active=is_active,
-                                 legacy_code=legacy_code,
-                                 system_prefix=LegacySystem.ADVWIN.value)
-                try:
                     obj.save()
-                except IntegrityError:
-                    log_file.write(str(row) + '')
+                self.debug_logger.debug(
+                    "Pessoa,%s,%s,%s,%s,%s,%s,s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                        str(legal_name), str(name), str(is_lawyer), str(is_correspondent),str(is_court),str(legal_type),
+                        str(cpf_cnpj),str(user.id),str(user.id),str(is_customer),str(is_supplier),str(is_active),str(legacy_code),
+                        str(LegacySystem.ADVWIN.value), self.timestr))
+            except Exception as e:
+                self.error_logger.error(
+                    "Ocorreu o seguinte erro na importacao de Pessoa: " + str(rows_count) + "," + str(
+                        e) + "," + self.timestr)
+
 
             super(PersonETL, self).config_import(rows, user, rows_count)
 

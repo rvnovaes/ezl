@@ -281,20 +281,25 @@ class EcmTask(luigi.Task):
         EcmETL().import_data()
 
 
-if __name__ == "__main__":
+def main():
+
     try:
-        args = dict(map(lambda x: x.lstrip('-').split('='), sys.argv[1:]))
-        if 'p' not in args.keys():
-            raise ParamsException
-        sys.argv.pop(1)
+        #args = dict(map(lambda x: x.lstrip('-').split('='), sys.argv[1:]))
+        #if 'p' not in args.keys():
+        #    raise ParamsException
+        #sys.argv.pop(1)
         # E necessario remover os arquivos.ezl dentro do diretorio tmp para executar novamente
-        LINUX_PASSWORD = args.get('p')
+        #LINUX_PASSWORD = args.get('p')
         os.system('echo {0}|sudo -S rm -rf {1}/etl/advwin_ezl/tmp/*.ezl'.format(
-            LINUX_PASSWORD, settings.BASE_DIR))
+            'nacigi-2', settings.BASE_DIR))
         # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
-        load_luigi_scheduler()
+        #load_luigi_scheduler()
         luigi.run(main_task_cls=EcmTask())
     except ParamsException as e:
         print(e)
     except Exception as e:
         print(e)
+
+
+if __name__ == "__main__":
+    main()

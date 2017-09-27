@@ -154,35 +154,44 @@ class ContactMechanismETL(GenericETL):
     has_status = True
 
     def config_import(self, rows, user, rows_count):
-        log_file = open('log_file.txt', 'w')
+        #log_file = open('log_file.txt', 'w')
         for row in rows:
             print(rows_count)
             rows_count -= 1
-            legacy_code = row['legacy_code']
-            persons = Person.objects.filter(legacy_code=legacy_code)
-            for person in persons:
-                try:
-                    if row['contact_mechanism_type'] != 'muiltemail':
-                        contact_mechanism_type = ContactMechanismType.objects.filter(
-                            name__unaccent__iexact=row[
-                                'contact_mechanism_type']) or ContactMechanismType.objects.filter(
-                            name__iexact='MECANISMO-CONTATO-INVÁLIDO')
-                        if contact_mechanism_type:
-                            obj = self.model(contact_mechanism_type=contact_mechanism_type[0],
-                                             description=row['description'], notes='', person=person, create_user=user)
-                            obj.save()
-                    else:
-                        contact_mechanism_type = ContactMechanismType.objects.filter(
-                            name__unaccent__iexact='email') or ContactMechanismType.objects.filter(
-                            name__iexact='MECANISMO-CONTATO-INVÁLIDO')
-                        if contact_mechanism_type:
-                            for description in row['description'].split(';'):
-                                if description:
-                                    obj = self.model(contact_mechanism_type=contact_mechanism_type[0],
-                                                     description=description, notes='', person=person, create_user=user)
-                                    obj.save()
-                except IntegrityError:
-                    log_file.write(str(row) + '')
+            try:
+                legacy_code = row['legacy_code']
+                persons = Person.objects.filter(legacy_code=legacy_code)
+                for person in persons:
+
+                        if row['contact_mechanism_type'] != 'muiltemail':
+                            contact_mechanism_type = ContactMechanismType.objects.filter(
+                                name__unaccent__iexact=row[
+                                    'contact_mechanism_type']) or ContactMechanismType.objects.filter(
+                                name__iexact='MECANISMO-CONTATO-INVÁLIDO')
+                            if contact_mechanism_type:
+                                obj = self.model(contact_mechanism_type=contact_mechanism_type[0],
+                                                 description=row['description'], notes='', person=person, create_user=user)
+                                obj.save()
+                        else:
+                            contact_mechanism_type = ContactMechanismType.objects.filter(
+                                name__unaccent__iexact='email') or ContactMechanismType.objects.filter(
+                                name__iexact='MECANISMO-CONTATO-INVÁLIDO')
+                            if contact_mechanism_type:
+                                for description in row['description'].split(';'):
+                                    if description:
+                                        obj = self.model(contact_mechanism_type=contact_mechanism_type[0],
+                                                         description=description, notes='', person=person, create_user=user)
+                                        obj.save()
+
+                        self.debug_logger.debug(
+                            "Contact Mechanism,%s,%s,%s,%s,%s,%s" % (
+                            str(legacy_code), str(contact_mechanism_type[0]), str(description), str(person.id),
+                            str(user.id), self.timestr))
+            except Exception as e:
+                self.error_logger.error(
+                    "Ocorreu o seguinte erro na importacao de ContactMechanism: " + str(rows_count) + "," + str(
+                        e) + "," + self.timestr)
+
         super(ContactMechanismETL, self).config_import(rows, user, rows_count)
 
 

@@ -43,123 +43,136 @@ class UserETL(GenericETL):
 
             print(rows_count)
             rows_count -= 1
+            try:
+                # todas as senhas serão importadas como 1 e o usuário terá que alterar futuramente
+                password = '1'
+                is_superuser = False
+                name_user = row['name_user']
+                email = row['email']
+                if not email:
+                    email = ' '
+                is_staff = False
+                is_active = True
+                date_joined = timezone.now()
+                username = row['username']
+                legacy_code = row['legacy_code']
+                legal_name = row['legal_name']
+                name = row['name']
+                legal_type = 'J'
+                cpf_cnpj = None
+                if str(legacy_code).isnumeric():
+                    if len(legacy_code) > 11:
+                        legal_type = 'J'
+                    else:
+                        legal_type = 'F'
+                    # no advwin nao tem campo para cpf_cnpj, é salvo no codigo
+                    cpf_cnpj = legacy_code
 
-            # todas as senhas serão importadas como 1 e o usuário terá que alterar futuramente
-            password = '1'
-            is_superuser = False
-            name_user = row['name_user']
-            email = row['email']
-            if not email:
-                email = ' '
-            is_staff = False
-            is_active = True
-            date_joined = timezone.now()
-            username = row['username']
-            legacy_code = row['legacy_code']
-            legal_name = row['legal_name']
-            name = row['name']
-            legal_type = 'J'
-            cpf_cnpj = None
-            if str(legacy_code).isnumeric():
-                if len(legacy_code) > 11:
-                    legal_type = 'J'
-                else:
-                    legal_type = 'F'
-                # no advwin nao tem campo para cpf_cnpj, é salvo no codigo
-                cpf_cnpj = legacy_code
+                is_customer = False
+                is_supplier = True
+                is_lawyer = row['is_lawyer']
+                is_correspondent = row['is_correspondent']
+                is_court = row['is_court']
 
-            is_customer = False
-            is_supplier = True
-            is_lawyer = row['is_lawyer']
-            is_correspondent = row['is_correspondent']
-            is_court = row['is_court']
+                # maxlength = 30 no auth_user do django
+                first_name = (name_user.split(' ')[0])[:30]
+                last_name = (" ".join(name_user.split(' ')[1:]))[:30]
 
-            # maxlength = 30 no auth_user do django
-            first_name = (name_user.split(' ')[0])[:30]
-            last_name = (" ".join(name_user.split(' ')[1:]))[:30]
+                # tenta encontrar o usuario pelo username (unique)
+                instance = User.objects.filter(username__unaccent=username).first() or None
 
-            # tenta encontrar o usuario pelo username (unique)
-            instance = User.objects.filter(username__unaccent=username).first() or None
-
-            # todo: fazer usuario independente do usuario do django (extend, override or custom user???)
-            # todo: deve herdar de LegacyCode e Audit e já deve criar person ao criar o usuário
-            # tenta encontrar a pessoa pelo legacy_code
-            person = Person.objects.filter(legacy_code=legacy_code,
-                                           system_prefix=LegacySystem.ADVWIN.value).first()
-
-            if instance:
-                person = Person.objects.filter(legacy_code=legacy_code, auth_user=instance,
+                # todo: fazer usuario independente do usuario do django (extend, override or custom user???)
+                # todo: deve herdar de LegacyCode e Audit e já deve criar person ao criar o usuário
+                # tenta encontrar a pessoa pelo legacy_code
+                person = Person.objects.filter(legacy_code=legacy_code,
                                                system_prefix=LegacySystem.ADVWIN.value).first()
 
-            if instance and person:
-                person_id = person.id
-                if person.auth_user is None:
-                    # vincula o usuario encontrado à pessoa encontrada
-                    person.auth_user = instance
-            elif person:
-                person_id = person.id
-                # tenta encontrar o usuario vinculado a essa pessoa
-                instance = self.model.objects.get(id=person.auth_user.id)
+                if instance:
+                    person = Person.objects.filter(legacy_code=legacy_code, auth_user=instance,
+                                                   system_prefix=LegacySystem.ADVWIN.value).first()
 
-            if instance:
-                created = False
-                # use update_fields to specify which fields to save
-                # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
-                instance.is_superuser = is_superuser
-                instance.email = email
-                instance.is_staff = is_staff
-                instance.is_active = is_active
-                instance.date_joined = date_joined
-                instance.first_name = first_name
-                instance.last_name = last_name
-                instance.save(
-                    update_fields=['is_superuser',
-                                   'email',
-                                   'is_staff',
-                                   'is_active',
-                                   'date_joined',
-                                   'first_name',
-                                   'last_name'])
+                if instance and person:
+                    person_id = person.id
+                    if person.auth_user is None:
+                        # vincula o usuario encontrado à pessoa encontrada
+                        person.auth_user = instance
+                elif person:
+                    person_id = person.id
+                    # tenta encontrar o usuario vinculado a essa pessoa
+                    instance = self.model.objects.get(id=person.auth_user.id)
 
-            elif not person and not instance:
-                created = True
-                # deve ser usada a funcao create_user para gerar a senha criptografada
-                with temp_disconnect_signal(
-                        signal=models.signals.post_save,
-                        receiver=create_person,
-                        sender=User,
-                        dispatch_uid='create_person'):
+                if instance:
+                    created = False
+                    # use update_fields to specify which fields to save
+                    # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
+                    instance.is_superuser = is_superuser
+                    instance.email = email
+                    instance.is_staff = is_staff
+                    instance.is_active = is_active
+                    instance.date_joined = date_joined
+                    instance.first_name = first_name
+                    instance.last_name = last_name
+                    instance.save(
+                        update_fields=['is_superuser',
+                                       'email',
+                                       'is_staff',
+                                       'is_active',
+                                       'date_joined',
+                                       'first_name',
+                                       'last_name'])
 
-                    instance = self.model.objects.create_user(
-                        password=password,
-                        is_superuser=is_superuser,
-                        username=username,
-                        first_name=first_name,
-                        last_name=last_name,
-                        email=email,
-                        is_staff=is_staff,
-                        is_active=is_active,
-                        date_joined=date_joined)
+                elif not person and not instance:
+                    created = True
+                    # deve ser usada a funcao create_user para gerar a senha criptografada
+                    with temp_disconnect_signal(
+                            signal=models.signals.post_save,
+                            receiver=create_person,
+                            sender=User,
+                            dispatch_uid='create_person'):
 
-                new_person.send(sender=self,
-                                person=Person(
-                                    id=person_id,
-                                    legal_name=legal_name,
-                                    name=name,
-                                    is_lawyer=is_lawyer,
-                                    is_correspondent=is_correspondent,
-                                    is_court=is_court,
-                                    legal_type=legal_type,
-                                    cpf_cnpj=cpf_cnpj,
-                                    alter_user=user,
-                                    auth_user=instance,
-                                    create_user=user,
-                                    is_active=is_active,
-                                    is_customer=is_customer,
-                                    is_supplier=is_supplier,
-                                    legacy_code=legacy_code,
-                                    system_prefix=LegacySystem.ADVWIN.value),
-                                created=created)
+                        instance = self.model.objects.create_user(
+                            password=password,
+                            is_superuser=is_superuser,
+                            username=username,
+                            first_name=first_name,
+                            last_name=last_name,
+                            email=email,
+                            is_staff=is_staff,
+                            is_active=is_active,
+                            date_joined=date_joined)
+
+                    new_person.send(sender=self,
+                                    person=Person(
+                                        id=person_id,
+                                        legal_name=legal_name,
+                                        name=name,
+                                        is_lawyer=is_lawyer,
+                                        is_correspondent=is_correspondent,
+                                        is_court=is_court,
+                                        legal_type=legal_type,
+                                        cpf_cnpj=cpf_cnpj,
+                                        alter_user=user,
+                                        auth_user=instance,
+                                        create_user=user,
+                                        is_active=is_active,
+                                        is_customer=is_customer,
+                                        is_supplier=is_supplier,
+                                        legacy_code=legacy_code,
+                                        system_prefix=LegacySystem.ADVWIN.value),
+                                    created=created)
+
+                self.debug_logger.debug(
+                    "Usuario,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                        str(person_id), str(legal_name), str(name),
+                        str(is_lawyer), str(is_correspondent), str(is_court), str(legal_type),
+                        str(cpf_cnpj), str(user), str(is_active),
+                        str(is_customer), str(is_customer), str(is_supplier), str(legacy_code),
+                        str(LegacySystem.ADVWIN.value),self.timestr))
+
+            except Exception as e:
+                self.error_logger.error(
+                    "Ocorreu o seguinte erro na importacao de Usuario: " + str(rows_count) + "," + str(
+                        e) + "," + self.timestr)
 
             super(UserETL, self).config_import(rows, user, rows_count)
 

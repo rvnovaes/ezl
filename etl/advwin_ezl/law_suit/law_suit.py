@@ -73,82 +73,95 @@ class LawsuitETL(GenericETL):
             print(rows_count)
             rows_count -= 1
 
-            folder_legacy_code = row['folder_legacy_code']
-            person_legacy_code = row['person_legacy_code']
-            legacy_code = row['legacy_code']
-            instance_legacy_code = row['instance_legacy_code']
-            court_district_legacy_code = row['court_district_legacy_code']
-            person_court_legacy_code = row['person_court_legacy_code']
-            court_division_legacy_code = row['court_division_legacy_code']
-            law_suit_number = row['law_suit_number']
-            is_current_instance = row['is_current_instance']
+            try:
+                folder_legacy_code = row['folder_legacy_code']
+                person_legacy_code = row['person_legacy_code']
+                legacy_code = row['legacy_code']
+                instance_legacy_code = row['instance_legacy_code']
+                court_district_legacy_code = row['court_district_legacy_code']
+                person_court_legacy_code = row['person_court_legacy_code']
+                court_division_legacy_code = row['court_division_legacy_code']
+                law_suit_number = row['law_suit_number']
+                is_current_instance = row['is_current_instance']
 
-            folder = Folder.objects.filter(legacy_code=folder_legacy_code).first()
-            person_lawyer = Person.objects.filter(legacy_code=person_legacy_code).first()
-            instance = Instance.objects.filter(legacy_code=instance_legacy_code).first()
-            # __iexact - Case-insensitive exact match.
-            # https://docs.djangoproject.com/en/1.11/ref/models/querysets/#std:fieldlookup-iexact
-            court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_legacy_code).first()
-            person_court = Person.objects.filter(legacy_code=person_court_legacy_code).first()
-            court_division = CourtDivision.objects.filter(legacy_code=court_division_legacy_code).first()
+                folder = Folder.objects.filter(legacy_code=folder_legacy_code).first()
+                person_lawyer = Person.objects.filter(legacy_code=person_legacy_code).first()
+                instance = Instance.objects.filter(legacy_code=instance_legacy_code).first()
+                # __iexact - Case-insensitive exact match.
+                # https://docs.djangoproject.com/en/1.11/ref/models/querysets/#std:fieldlookup-iexact
+                court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_legacy_code).first()
+                person_court = Person.objects.filter(legacy_code=person_court_legacy_code).first()
+                court_division = CourtDivision.objects.filter(legacy_code=court_division_legacy_code).first()
 
-            # se não encontrou o registro, busca o registro inválido
-            if not folder:
-                folder = InvalidObjectFactory.get_invalid_model(Folder)
-            if not person_lawyer:
-                person_lawyer = InvalidObjectFactory.get_invalid_model(Person)
-            if not instance:
-                instance = InvalidObjectFactory.get_invalid_model(Instance)
-            if not court_district:
-                court_district = InvalidObjectFactory.get_invalid_model(CourtDistrict)
-            if not person_court:
-                person_court = InvalidObjectFactory.get_invalid_model(Person)
-            if not court_division:
-                court_division = InvalidObjectFactory.get_invalid_model(CourtDivision)
+                # se não encontrou o registro, busca o registro inválido
+                if not folder:
+                    folder = InvalidObjectFactory.get_invalid_model(Folder)
+                if not person_lawyer:
+                    person_lawyer = InvalidObjectFactory.get_invalid_model(Person)
+                if not instance:
+                    instance = InvalidObjectFactory.get_invalid_model(Instance)
+                if not court_district:
+                    court_district = InvalidObjectFactory.get_invalid_model(CourtDistrict)
+                if not person_court:
+                    person_court = InvalidObjectFactory.get_invalid_model(Person)
+                if not court_division:
+                    court_division = InvalidObjectFactory.get_invalid_model(CourtDivision)
 
-            lawsuit = self.model.objects.filter(instance=instance,
-                                                law_suit_number=law_suit_number).first()
+                lawsuit = self.model.objects.filter(instance=instance,
+                                                    law_suit_number=law_suit_number).first()
 
-            if lawsuit:
-                lawsuit.folder = folder
-                lawsuit.person_lawyer = person_lawyer
-                lawsuit.instance = instance
-                lawsuit.court_district = court_district
-                lawsuit.court_division = court_division
-                lawsuit.person_court = person_court
-                lawsuit.law_suit_number = law_suit_number
-                lawsuit.is_active = True
-                # use update_fields to specify which fields to save
-                # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
-                lawsuit.save(
-                    update_fields=[
-                        'is_active',
-                        'folder',
-                        'person_lawyer',
-                        'instance',
-                        'court_district',
-                        'court_division',
-                        'person_court',
-                        'law_suit_number',
-                        'alter_user',
-                        'alter_date',
-                        'is_current_instance']
-                )
-            else:
-                self.model.objects.create(
-                    folder=folder,
-                    person_lawyer=person_lawyer,
-                    instance=instance,
-                    court_district=court_district,
-                    court_division=court_division,
-                    person_court=person_court,
-                    law_suit_number=law_suit_number,
-                    alter_user=user,
-                    create_user=user,
-                    is_active=True,
-                    is_current_instance=is_current_instance,
-                    legacy_code=legacy_code,
-                    system_prefix=LegacySystem.ADVWIN.value)
+                if lawsuit:
+                    lawsuit.folder = folder
+                    lawsuit.person_lawyer = person_lawyer
+                    lawsuit.instance = instance
+                    lawsuit.court_district = court_district
+                    lawsuit.court_division = court_division
+                    lawsuit.person_court = person_court
+                    lawsuit.law_suit_number = law_suit_number
+                    lawsuit.is_active = True
+                    # use update_fields to specify which fields to save
+                    # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
+                    lawsuit.save(
+                        update_fields=[
+                            'is_active',
+                            'folder',
+                            'person_lawyer',
+                            'instance',
+                            'court_district',
+                            'court_division',
+                            'person_court',
+                            'law_suit_number',
+                            'alter_user',
+                            'alter_date',
+                            'is_current_instance']
+                    )
+                else:
+                    self.model.objects.create(
+                        folder=folder,
+                        person_lawyer=person_lawyer,
+                        instance=instance,
+                        court_district=court_district,
+                        court_division=court_division,
+                        person_court=person_court,
+                        law_suit_number=law_suit_number,
+                        alter_user=user,
+                        create_user=user,
+                        is_active=True,
+                        is_current_instance=is_current_instance,
+                        legacy_code=legacy_code,
+                        system_prefix=LegacySystem.ADVWIN.value)
+
+                self.debug_logger.debug(
+                    "LawSuit,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(folder.id), str(person_lawyer.id),
+                                                                           str(instance.id),str(court_district.id),
+                                                      str(court_division.id), str(person_court.id),law_suit_number,
+                                                      str(user.id),str(user.id),str(True),str(is_current_instance),
+                                                      legacy_code,str(LegacySystem.ADVWIN.value), self.timestr))
+
+            except Exception as e:
+                self.error_logger.error(
+                    "Ocorreu o seguinte erro na importacao de LawSuit: " + str(rows_count) + "," + str(
+                        e) + "," + self.timestr)
 
             super(LawsuitETL, self).config_import(rows, user, rows_count)
 

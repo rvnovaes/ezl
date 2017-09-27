@@ -34,39 +34,45 @@ class FolderETL(GenericETL):
         for row in rows:
             print(rows_count)
             rows_count -= 1
+            try:
+                legacy_code = row['Codigo_Comp']
+                customer_code = row['Cliente']
 
-            legacy_code = row['Codigo_Comp']
-            customer_code = row['Cliente']
+                instance = self.model.objects.filter(legacy_code=legacy_code,
+                                                     system_prefix=LegacySystem.ADVWIN.value).first()
 
-            instance = self.model.objects.filter(legacy_code=legacy_code,
-                                                 system_prefix=LegacySystem.ADVWIN.value).first()
+                person_customer = Person.objects.filter(legacy_code=customer_code,
+                                                        system_prefix=LegacySystem.ADVWIN.value).first()
+                if person_customer:
+                    if instance:
+                        # use update_fields to specify which fields to save
+                        # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
+                        instance.person_customer = person_customer
+                        instance.is_active = True
+                        instance.alter_user = user
+                        instance.save(
+                            update_fields=['person_customer',
+                                           'is_active',
+                                           'alter_date',
+                                           'alter_user'])
+                    else:
+                        obj = self.model(person_customer=person_customer,
+                                         is_active=True,
+                                         legacy_code=legacy_code,
+                                         system_prefix=LegacySystem.ADVWIN.value,
+                                         create_user=user,
+                                         alter_user=user)
+                        obj.save()
 
-            person_customer = Person.objects.filter(legacy_code=customer_code,
-                                                    system_prefix=LegacySystem.ADVWIN.value).first()
-            if person_customer:
-                if instance:
-                    # use update_fields to specify which fields to save
-                    # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
-                    instance.person_customer = person_customer
-                    instance.is_active = True
-                    instance.alter_user = user
-                    instance.save(
-                        update_fields=['person_customer',
-                                       'is_active',
-                                       'alter_date',
-                                       'alter_user'])
-                else:
-                    obj = self.model(person_customer=person_customer,
-                                     is_active=True,
-                                     legacy_code=legacy_code,
-                                     system_prefix=LegacySystem.ADVWIN.value,
-                                     create_user=user,
-                                     alter_user=user)
-                    obj.save()
+                    super(FolderETL, self).config_import(rows, user, rows_count)
 
-                super(FolderETL, self).config_import(rows, user, rows_count)
-            else:
-                log_file.write(str(row) + '\n')
+                self.debug_logger.debug("Pastas,%s,%s,%s,%s,%s,%s,%s"%(str(person_customer.id),str(True),str(legacy_code),
+                                                                str(LegacySystem.ADVWIN.value),str(user.id),str(user.id),
+                                                                self.timestr))
+            except Exception as e:
+                self.error_logger.error(
+                    "Ocorreu o seguinte erro na importacao de Pastas: " + str(rows_count) + "," + str(
+                        e) + "," + self.timestr)
 
 
 if __name__ == "__main__":

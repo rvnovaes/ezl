@@ -23,6 +23,8 @@ import connections
 from connections.db_connection import connect_db
 from core.utils import LegacySystem
 from etl.advwin_ezl import settings
+import logging
+import datetime
 
 
 class GenericETL(object):
@@ -34,6 +36,10 @@ class GenericETL(object):
     advwin_table = None
     has_status = None
     advwin_model = None
+    debug_logger=logging.getLogger('debug_logger')
+    error_logger=logging.getLogger('error_logger')
+    timestr = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
 
     class Meta:
         abstract = True

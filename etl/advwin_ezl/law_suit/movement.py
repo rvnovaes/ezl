@@ -35,50 +35,59 @@ class MovementETL(GenericETL):
             print(rows_count)
             rows_count -= 1
 
-            legacy_code = row['legacy_code']
-            law_suit_legacy_code = row['law_suit_legacy_code']
-            person_lawyer_legacy_code = row['person_lawyer_legacy_code']
-            type_movement_legacy_code = row['type_movement_legacy_code']
+            try:
+                legacy_code = row['legacy_code']
+                law_suit_legacy_code = row['law_suit_legacy_code']
+                person_lawyer_legacy_code = row['person_lawyer_legacy_code']
+                type_movement_legacy_code = row['type_movement_legacy_code']
 
-            movement = self.model.objects.filter(legacy_code=legacy_code,
-                                                 system_prefix=LegacySystem.ADVWIN.value).first()
+                movement = self.model.objects.filter(legacy_code=legacy_code,
+                                                     system_prefix=LegacySystem.ADVWIN.value).first()
 
-            lawsuit = LawSuit.objects.filter(legacy_code=law_suit_legacy_code).first()
+                lawsuit = LawSuit.objects.filter(legacy_code=law_suit_legacy_code).first()
 
-            type_movement = TypeMovement.objects.filter(
-                legacy_code=type_movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(TypeMovement)
+                type_movement = TypeMovement.objects.filter(
+                    legacy_code=type_movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(TypeMovement)
 
-            person_lawyer = Person.objects.filter(
-                legacy_code=person_lawyer_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
+                person_lawyer = Person.objects.filter(
+                    legacy_code=person_lawyer_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
 
-            # Conforme descrico no caso 0000486, nao existe person_lawyer na classe Movement, pois segundo analise da
-            # regra de negocios, identificou-se que o usuario que cria a movimentacao e o advogado
-            create_user = person_lawyer.auth_user or InvalidObjectFactory.get_invalid_model(User)
+                # Conforme descrico no caso 0000486, nao existe person_lawyer na classe Movement, pois segundo analise da
+                # regra de negocios, identificou-se que o usuario que cria a movimentacao e o advogado
+                create_user = person_lawyer.auth_user or InvalidObjectFactory.get_invalid_model(User)
 
-            if not lawsuit:
-                # se não encontrou o registro, busca o registro inválido
-                lawsuit = InvalidObjectFactory.get_invalid_model(LawSuit)
+                if not lawsuit:
+                    # se não encontrou o registro, busca o registro inválido
+                    lawsuit = InvalidObjectFactory.get_invalid_model(LawSuit)
 
-            if movement:
-                movement.law_suit = lawsuit
-                movement.type_movement = type_movement
-                movement.alter_user = create_user
-                movement.is_active = True
-                movement.save(update_fields=['is_active',
-                                             'law_suit',
-                                             'type_movement',
-                                             'alter_user',
-                                             'alter_date',
-                                             ])
-            else:
-                self.model.objects.create(legacy_code=legacy_code,
-                                          system_prefix=LegacySystem.ADVWIN.value,
-                                          alter_user=create_user,
-                                          create_user=create_user,
-                                          is_active=True,
-                                          law_suit=lawsuit,
-                                          type_movement=type_movement,
-                                          )
+                if movement:
+                    movement.law_suit = lawsuit
+                    movement.type_movement = type_movement
+                    movement.alter_user = create_user
+                    movement.is_active = True
+                    movement.save(update_fields=['is_active',
+                                                 'law_suit',
+                                                 'type_movement',
+                                                 'alter_user',
+                                                 'alter_date',
+                                                 ])
+                else:
+                    self.model.objects.create(legacy_code=legacy_code,
+                                              system_prefix=LegacySystem.ADVWIN.value,
+                                              alter_user=create_user,
+                                              create_user=create_user,
+                                              is_active=True,
+                                              law_suit=lawsuit,
+                                              type_movement=type_movement,
+                                              )
+                self.debug_logger.debug(
+                    "Movimentacao,%s,%s,%s,%s,%s,%s,%s,%s" % (str(legacy_code), str(LegacySystem.ADVWIN.value), str(create_user.id),
+                                                    str(create_user.id),str(True),str(lawsuit.id),str(type_movement.id),self.timestr))
+
+            except Exception as e:
+                self.error_logger.error(
+                    "Ocorreu o seguinte erro na importacao de Movimentacao: " + str(rows_count) + "," + str(
+                        e) + "," + self.timestr)
         super(MovementETL, self).config_import(rows, user, rows_count)
 
 

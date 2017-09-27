@@ -25,25 +25,36 @@ class InstanceETL(GenericETL):
 
     def config_import(self, rows, user, rows_count):
         for row in rows:
-            code = row['Codigo']
-            name = row['Descicao']
 
-            instance = self.model.objects.filter(legacy_code=code, system_prefix=LegacySystem.ADVWIN.value).first()
+            try:
+                code = row['Codigo']
+                name = row['Descicao']
 
-            if instance:
-                instance.name = name
-                instance.is_active = True
-                instance.alter_user = user
-                instance.save(update_fields=['is_active', 'name', 'is_active', 'alter_user', 'alter_date'])
+                instance = self.model.objects.filter(legacy_code=code, system_prefix=LegacySystem.ADVWIN.value).first()
 
-            else:
-                self.model.objects.create(
-                    name=name,
-                    is_active=True,
-                    legacy_code=code,
-                    alter_user=user,
-                    create_user=user,
-                    system_prefix=LegacySystem.ADVWIN.value)
+                if instance:
+                    instance.name = name
+                    instance.is_active = True
+                    instance.alter_user = user
+                    instance.save(update_fields=['is_active', 'name', 'is_active', 'alter_user', 'alter_date'])
+
+                else:
+                    self.model.objects.create(
+                        name=name,
+                        is_active=True,
+                        legacy_code=code,
+                        alter_user=user,
+                        create_user=user,
+                        system_prefix=LegacySystem.ADVWIN.value)
+
+                self.debug_logger.debug(
+                    "Instancias,%s,%s,%s,%s,%s,%s,%s" % (str(name), str(True), str(code),str(user.id), str(user.id),
+                                                     str(LegacySystem.ADVWIN.value), self.timestr))
+            except Exception as e:
+                self.error_logger.error(
+                    "Ocorreu o seguinte erro na importacao de Instancias: " + str(rows_count) + "," + str(
+                        e) + "," + self.timestr)
+
         super(InstanceETL, self).config_import(rows, user, rows_count)
 
 
