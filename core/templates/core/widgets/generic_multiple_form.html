@@ -41,7 +41,11 @@
                                     Cancelar
                                 </a>
                             {% else %}
-                                {% include 'core/widgets/cancel_button.html'  with link_list=previous_page %}
+                                <a class="btn btn-sm btn-raised btn-default"
+                                   href="{% url previous_page %}">
+                                    <i class="material-icons left">clear</i>
+                                    Cancelar
+                                </a>
                             {% endif %}
                             <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
                                     class="material-icons left">done</i>
