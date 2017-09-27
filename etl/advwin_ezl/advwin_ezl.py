@@ -25,6 +25,55 @@ from core.utils import LegacySystem
 from etl.advwin_ezl import settings
 import logging
 import datetime
+from functools import wraps
+
+
+def validate_import(f):
+    """
+    Funcao responvavel por validar os dados importados do ADVWin
+    Ela demonstra atraves do log a quantidade de registros lidos, quantidade de registros salvos, quantidade
+    registros nao salvos, e os registros que nao foram salvos.
+    Para utitilizar este metodo basta decorar a funcao config_import.
+    E necessario tambem a existem do atributo model, e field_check na classe.
+         - model e o modelo onde sera importado os dados no ezl
+         - field_check e o atributo do modelo onde sera checado as importacoes realizadas
+           Por padrao o field_check sera legacy_code, caso tenha a necessidade de ser um atributo diferente
+           este devera ser sobrescrito pela classe filha de GenericETL
+           Na a query atribuida ao atributo import_query devera conter pelomenos o mesmo campo que definido no
+           field_check, exemplo "SELECT pm.Ident AS legacy_code..." (--> o alias do campo a ser
+           checado deve ser o mesmo defindo em check_field)
+    :param f:
+    :type: func
+    :return f:
+    """
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        res = f(*args, **kwargs)
+        debug_logger = args[0].debug_logger
+        error_logger = args[0].error_logger
+        name_class = args[0].model._meta.verbose_name
+        try:
+            field_check = args[0].field_check
+            advwin_values = list(map(lambda i: str(i[field_check]), args[1]))
+            filter_ezl = 'args[0].model.objects.filter({0}__in={1})'.format(field_check, advwin_values)
+            ezl_imported_values = eval(filter_ezl)
+            list(map(lambda i: debug_logger.debug(name_class + ': REGISTRO SALVO - ' + str(i.__dict__)),
+                     ezl_imported_values))
+            ezl_values = list(map(lambda i: eval('i.' + field_check), ezl_imported_values))
+            read_quantity = len(advwin_values)
+            written_amount = len(ezl_values)
+            not_imported = set(advwin_values) - set(ezl_values)
+            debug_logger.debug(name_class + ' - Quantidade lida:  {0}'.format(read_quantity))
+            debug_logger.debug(name_class + ' - Quantidade salva: {0}'.format(written_amount))
+            debug_logger.debug(name_class + ' - Quantidade nao importada {0}'.format(len(not_imported)))
+            if not_imported:
+                error_logger.error(name_class + ' - Quantidade nao importada {0}'.format(len(not_imported)))
+                error_logger.error(name_class + ' -  Registros nao importadados {0}'.format(str(not_imported)))
+            return res
+        except:
+            error_logger.error(args[0].model._meta.verbose_name + ': Nao foi possivel validar ')
+            pass
+    return wrapper
 
 
 class GenericETL(object):
@@ -40,6 +89,7 @@ class GenericETL(object):
     error_logger=logging.getLogger('error_logger')
     timestr = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    field_check = 'legacy_code'
 
     class Meta:
         abstract = True
