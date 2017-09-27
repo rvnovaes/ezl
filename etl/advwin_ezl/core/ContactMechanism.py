@@ -162,12 +162,12 @@ class ContactMechanismETL(GenericETL):
                 legacy_code = row['legacy_code']
                 persons = Person.objects.filter(legacy_code=legacy_code)
                 for person in persons:
-
+                        description = ''
                         if row['contact_mechanism_type'] != 'muiltemail':
                             contact_mechanism_type = ContactMechanismType.objects.filter(
                                 name__unaccent__iexact=row[
                                     'contact_mechanism_type']) or ContactMechanismType.objects.filter(
-                                name__iexact='MECANISMO-CONTATO-INVÁLIDO')
+                                name__iexact='CONTACT MECHANISM TYPE-INVÁLIDO')
                             if contact_mechanism_type:
                                 obj = self.model(contact_mechanism_type=contact_mechanism_type[0],
                                                  description=row['description'], notes='', person=person, create_user=user)
