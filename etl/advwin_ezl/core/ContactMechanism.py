@@ -175,7 +175,7 @@ class ContactMechanismETL(GenericETL):
                         else:
                             contact_mechanism_type = ContactMechanismType.objects.filter(
                                 name__unaccent__iexact='email') or ContactMechanismType.objects.filter(
-                                name__iexact='MECANISMO-CONTATO-INVÁLIDO')
+                                name__iexact='CONTACT MECHANISM TYPE-INVÁLIDO')
                             if contact_mechanism_type:
                                 for description in row['description'].split(';'):
                                     if description:
