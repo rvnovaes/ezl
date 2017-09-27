@@ -1,7 +1,7 @@
 from core.models import Person
 from django.contrib.auth.models import User
 from core.utils import LegacySystem
-from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import Movement, LawSuit, TypeMovement
 
@@ -30,9 +30,9 @@ class MovementETL(GenericETL):
     advwin_table = "Jurid_ProcMov"
     has_status = True
 
+    @validate_import
     def config_import(self, rows, user, rows_count):
         for row in rows:
-            print(rows_count)
             rows_count -= 1
 
             try:
