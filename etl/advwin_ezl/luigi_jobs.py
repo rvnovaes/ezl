@@ -59,7 +59,7 @@ def load_luigi_scheduler():
             LINUX_PASSWORD, etl_settings.LUIGI_PORT)
         os.system(command)
         # tempo necessário para inicialização do luigi scheduler antes da primeira tarefa NAO REMOVER
-        sleep(2)
+        sleep(10)
 
 
 class MigrationTask(luigi.Task):
