@@ -72,9 +72,9 @@ class UserETL(GenericETL):
 
                 is_customer = False
                 is_supplier = True
-                is_lawyer = row['is_lawyer']
-                is_correspondent = row['is_correspondent']
-                is_court = row['is_court']
+                is_lawyer = True
+                is_correspondent = True
+                is_court = False
 
                 # maxlength = 30 no auth_user do django
                 first_name = (name_user.split(' ')[0])[:30]
