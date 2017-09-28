@@ -260,14 +260,14 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_true'],
             'class': 'logging.FileHandler',
-            'filename': '/var/log/ezl/etl/'+datetime.datetime.now().strftime("error_%Y-%m-%d_%H:00.log"),
+            'filename': '/var/log/ezl/etl/'+datetime.datetime.now().strftime("error_%Y%m%d_%H%M%S.log"),
             'formatter': 'simple'
         },
         'debug_logfile': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
             'class': 'logging.FileHandler',
-            'filename': '/var/log/ezl/etl/'+datetime.datetime.now().strftime("debug_%Y-%m-%d_%H:00.log"),
+            'filename': '/var/log/ezl/etl/'+datetime.datetime.now().strftime("debug_%Y%m%d_%H%M%S.log"),
             'formatter': 'simple'
         },
     },
