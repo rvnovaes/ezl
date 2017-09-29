@@ -1,8 +1,6 @@
-# esse import deve vir antes de todos porque ele executa o __init__.py
-
 from core.models import Person
 from core.utils import LegacySystem
-from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import LawSuit, Folder, Instance, CourtDistrict, CourtDivision
 
@@ -68,6 +66,7 @@ class LawsuitETL(GenericETL):
 
     has_status = True
 
+    @validate_import
     def config_import(self, rows, user, rows_count):
         for row in rows:
             print(rows_count)
@@ -83,7 +82,6 @@ class LawsuitETL(GenericETL):
                 court_division_legacy_code = row['court_division_legacy_code']
                 law_suit_number = row['law_suit_number']
                 is_current_instance = row['is_current_instance']
-
                 folder = Folder.objects.filter(legacy_code=folder_legacy_code).first()
                 person_lawyer = Person.objects.filter(legacy_code=person_legacy_code).first()
                 instance = Instance.objects.filter(legacy_code=instance_legacy_code).first()
