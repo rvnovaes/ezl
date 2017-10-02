@@ -1,6 +1,5 @@
 from core.models import Address, Person, AddressType, City, State, Country
-from django.db import IntegrityError
-from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 
 
 # noinspection SpellCheckingInspection
@@ -56,14 +55,17 @@ class AddressETL(GenericETL):
                     """
     has_status = True
 
+    @validate_import
     def config_import(self, rows, user, rows_count):
-        #log_file = open('log_file.txt', 'w')
+        """
+        Metodo responsavel por importar os dados lidos do advwin no EZL
+        :param rows: Dados lidos do advwin
+        :param user: Usuario do django responsavel por persistir os dados
+        :param rows_count: Quantidade de dados que foram lidos do advwin
+        """
         for row in rows:
-            print(rows_count)
             rows_count -= 1
-
             try:
-
                 legacy_code = row['legacy_code']
                 persons = Person.objects.filter(legacy_code=legacy_code)
                 address_type = AddressType.objects.filter(name__iexact=row['address_type'])
@@ -73,13 +75,16 @@ class AddressETL(GenericETL):
                 address_type = address_type[0]
                 for person in persons:
                     country = Country.objects.filter(
-                        name__unaccent__iexact=row['country'].strip() if row['country'] else '') or Country.objects.filter(
-                        name__unaccent__iexact='PAÍS-INVÁLIDO')
+                        name__unaccent__iexact=row['country'].strip() if row[
+                            'country'] else '') or Country.objects.filter(
+                        name__unaccent__iexact='Brasil')
                     state = State.objects.filter(
-                        initials__iexact=row['state'].strip() if row['state'] else '') or State.objects.filter(
+                        initials__iexact=row['state'].strip() if row[
+                            'state'] else '') or State.objects.filter(
                         name__iexact='ESTADO-INVÁLIDO')
-                    city = City.objects.filter(name__unaccent__iexact=row['city'].strip() if row['city'] else '',
-                                               state=state) or City.objects.filter(
+                    city = City.objects.filter(
+                        name__unaccent__iexact=row['city'].strip() if row['city'] else '',
+                        state=state) or City.objects.filter(
                         name__unaccent__iexact='CIDADE-INVÁLIDO')
                     obj = self.model(person=person,
                                      street=row['street'] or '',
@@ -96,13 +101,16 @@ class AddressETL(GenericETL):
                     obj.save()
                     self.debug_logger.debug(
                         "Endereco,%s,%s,%s,%s,%s,%s,s,%s,%s,%s,%s,%s,%s,%s" % (
-                        str(person.id), str(row['street'] or '',), str(row['number'] or ''), str(row['complement'] or ''),
-                        str(row['city_region'] or ''), str(row['zip_code'] or ''),str(address_type.id),str(state[0].id),str(city[0].id),
-                        str(country[0].id),str(user.id),str(user.id),self.timestr))
+                            str(person.id), str(row['street'] or '', ), str(row['number'] or ''),
+                            str(row['complement'] or ''),
+                            str(row['city_region'] or ''), str(row['zip_code'] or ''),
+                            str(address_type.id), str(state[0].id), str(city[0].id),
+                            str(country[0].id), str(user.id), str(user.id), self.timestr))
 
             except Exception as e:
                 self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Endereco: " + str(rows_count) + "," + str(
+                    "Ocorreu o seguinte erro na importacao de Endereco: " + str(
+                        rows_count) + "," + str(
                         e) + "," + self.timestr)
 
         super(AddressETL, self).config_import(rows, user, rows_count)
