@@ -12,34 +12,38 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 import sys
-import configparser
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-
-parser = configparser.ConfigParser()
+from config.config import get_parser
+parser = get_parser()
 try:
-    with open(os.path.join(BASE_DIR, 'config', 'general.ini')) as config_file:
-        parser.read_file(config_file)
-        source = dict(parser.items('django_application'))
-        engine = source['engine']
-        database = source['database']
-        user = source['user']
-        password = source['password']
-        host = source['host']
-        port = source['port']
-        environment = source['environment']
-        email_use_ssl = source['email_use_ssl']
-        email_host = source['email_host']
-        email_port = source['email_port']
-        email_host_user = source['email_host_user']
-        email_host_password = source['email_host_password']
-
-except FileNotFoundError:
-    print('OOOOOOOOOOOOOOOOOOOOOOOOOOOHHHHH NOOOOOOOO!!!!!')
-    print('general.ini file was not found on {config_path}'.format(config_path=os.path.join(BASE_DIR, 'config')))
-    print('Rename it to general.ini and specify the correct configuration settings!')
+    source = dict(parser.items('django_application'))
+    source_etl = dict(parser.items('etl'))
+    engine = source['engine']
+    database = source['database']
+    user = source['user']
+    password = source['password']
+    host = source['host']
+    port = source['port']
+    environment = source['environment']
+    email_use_ssl = source['email_use_ssl']
+    email_host = source['email_host']
+    email_port = source['email_port']
+    email_host_user = source['email_host_user']
+    email_host_password = source['email_host_password']
+    linux_password = source_etl['linux_password']
+    linux_user = source_etl['linux_user']
+    if not os.path.exists('/var/log/ezl/etl'):
+        os.system('echo {0}|sudo -S mkdir /var/log/ezl/etl/'.format(
+            linux_password))
+        os.system('echo {0}|sudo -S chmod -R +x /var/log/ezl/etl/'.format(
+            linux_password))
+        os.system('echo {0}|sudo -S chown -R {1} /var/log/ezl/etl/'.format(
+            linux_password, linux_user))
+except KeyError as e:
+    print('Invalid settings. Check the General.ini file')
+    print(e)
     sys.exit(0)
-
 
 from django.urls import reverse_lazy
 import datetime
@@ -218,26 +222,6 @@ PROJECT_NAME = 'Easy Lawyer'
 PROJECT_LINK = 'https://ezl.mtostes.com.br'
 
 LINK_TO_RESTORE_DB_DEMO = 'http://13.68.213.60:8001'
-
-try:
-    with open(os.path.join(BASE_DIR, 'config', 'general.ini')) as config_file:
-        parser.read_file(config_file)
-        source = dict(parser.items('etl'))
-        LINUX_PASSWORD=source['linux_password']
-        LINUX_USER=source['linux_user']
-
-        os.system('echo {0}|sudo -S mkdir /var/log/ezl/etl/'.format(
-            LINUX_PASSWORD))
-        os.system('echo {0}|sudo -S chmod -R +x /var/log/ezl/etl/'.format(
-            LINUX_PASSWORD))
-        os.system('echo {0}|sudo -S chown -R {1} /var/log/ezl/etl/'.format(
-            LINUX_PASSWORD,LINUX_USER))
-
-except FileNotFoundError:
-    print('OOOOOOOOOOOOOOOOOOOOOOOOOOOHHHHH NOOOOOOOO!!!!!')
-    print('general.ini file was not found on {config_path}'.format(config_path=os.path.join(BASE_DIR, 'config')))
-    print('Rename it to general.ini and specify the correct configuration settings!')
-    sys.exit(0)
 
 LOGGING = {
     'version': 1,

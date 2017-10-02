@@ -7,14 +7,15 @@ from etl.advwin_ezl import settings
 from pathlib import Path
 import paramiko
 from sqlalchemy import text
-import connections
 from connections.db_connection import connect_db
 from task.models import Ecm
+from config.config import get_parser
+parser = get_parser()
+source = dict(parser.items('etl'))
 
 
 class EcmETL:
-    advwin_cfg_file = os.path.join(os.path.abspath(os.path.dirname(connections.__file__)), 'advwin_ho.cfg')
-    advwin_engine = connect_db(advwin_cfg_file)
+    advwin_engine = connect_db(parser, source['connection_name'])
     model = Ecm
 
     def extract_data(self):

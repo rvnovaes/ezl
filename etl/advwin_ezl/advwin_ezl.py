@@ -19,29 +19,23 @@ import sys
 import logging
 import datetime
 from functools import wraps
-import configparser
 from django.contrib.auth.models import User
 from sqlalchemy import text
-
-import connections
 from connections.db_connection import connect_db
 from core.utils import LegacySystem
-
+from config.config import get_parser
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-parser = configparser.ConfigParser()
+parser = get_parser()
 
 try:
-    with open(os.path.join(BASE_DIR, 'config', 'general.ini')) as config_file:
-        parser.read_file(config_file)
-        source = dict(parser.items('etl'))
-        truncate_all_tables = source['truncate_all_tables']
-        create_alter_user = source['user']
-
-except FileNotFoundError:
-    print('OOOOOOOOOOOOOOOOOOOOOOOOOOOHHHHH NOOOOOOOO!!!!!')
-    print('general.ini file was not found on {config_path}'.format(config_path=os.path.join(BASE_DIR, 'config')))
-    print('Rename it to general.ini and specify the correct configuration settings!')
+    source = dict(parser.items('etl'))
+    truncate_all_tables = source['truncate_all_tables']
+    create_alter_user = source['user']
+    config_connection = source['connection_name']
+except KeyError as e:
+    print('Invalid settings. Check the General.ini file')
+    print(e)
     sys.exit(0)
 
 
@@ -63,6 +57,7 @@ def validate_import(f):
     :type: func
     :return f:
     """
+
     @wraps(f)
     def wrapper(*args, **kwargs):
         res = f(*args, **kwargs)
@@ -72,38 +67,43 @@ def validate_import(f):
         try:
             field_check = args[0].field_check
             advwin_values = list(map(lambda i: str(i[field_check]), args[1]))
-            filter_ezl = 'args[0].model.objects.filter({0}__in={1})'.format(field_check, advwin_values)
+            filter_ezl = 'args[0].model.objects.filter({0}__in={1})'.format(field_check,
+                                                                            advwin_values)
             ezl_imported_values = eval(filter_ezl)
-            list(map(lambda i: debug_logger.debug(name_class + ': REGISTRO SALVO - ' + str(i.__dict__)),
-                     ezl_imported_values))
+            list(map(
+                lambda i: debug_logger.debug(name_class + ': REGISTRO SALVO - ' + str(i.__dict__)),
+                ezl_imported_values))
             ezl_values = list(map(lambda i: eval('i.' + field_check), ezl_imported_values))
             read_quantity = len(advwin_values)
             written_amount = len(ezl_values)
             not_imported = set(advwin_values) - set(ezl_values)
             debug_logger.debug(name_class + ' - Quantidade lida:  {0}'.format(read_quantity))
             debug_logger.debug(name_class + ' - Quantidade salva: {0}'.format(written_amount))
-            debug_logger.debug(name_class + ' - Quantidade nao importada {0}'.format(len(not_imported)))
+            debug_logger.debug(
+                name_class + ' - Quantidade nao importada {0}'.format(len(not_imported)))
             if not_imported:
-                error_logger.error(name_class + ' - Quantidade nao importada {0}'.format(len(not_imported)))
-                error_logger.error(name_class + ' -  Registros nao importadados {0}'.format(str(not_imported)))
+                error_logger.error(
+                    name_class + ' - Quantidade nao importada {0}'.format(len(not_imported)))
+                error_logger.error(
+                    name_class + ' -  Registros nao importadados {0}'.format(str(not_imported)))
             return res
         except:
             error_logger.error(args[0].model._meta.verbose_name + ': Nao foi possivel validar ')
             pass
+
     return wrapper
 
 
 class GenericETL(object):
-    advwin_cfg_file = os.path.join(os.path.abspath(os.path.dirname(connections.__file__)), 'advwin_ho.cfg')
-    advwin_engine = connect_db(advwin_cfg_file)
+    advwin_engine = connect_db(parser, config_connection)
     model = None
     import_query = None
     export_query_set = None
     advwin_table = None
     has_status = None
     advwin_model = None
-    debug_logger=logging.getLogger('debug_logger')
-    error_logger=logging.getLogger('error_logger')
+    debug_logger = logging.getLogger('debug_logger')
+    error_logger = logging.getLogger('error_logger')
     timestr = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     field_check = 'legacy_code'

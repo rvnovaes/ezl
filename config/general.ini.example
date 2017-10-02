@@ -2,7 +2,7 @@
 [django_application]
 ; Connection Configurations
 engine = django.db.backends.postgresql
-database = ezl
+database = ezl_teste_20170929131126
 user = ezl
 password = ezl
 host = 127.0.0.1
@@ -22,9 +22,35 @@ email_host_password = 'ezlmta@578'
 
 [etl]
 ; indica se apaga todos os registros da tabela antes de importar (*apaga as dependencias tambem)
-truncate_all_tables = False
-; senha do do usuario linux responsavel por executar a etl. Este deve estar no grupo sudoers.
-linux_user = ezl
+truncate_all_tables = True
+; usuario e senha do do usuario linux responsavel por executar a etl. Este deve estar no grupo sudoers.
+linux_user = mttech
 linux_password = mttech
 ; usuario admin do django para realizar a importacao
 user=2
+; conexao com o advwin, devera ser o nome da secessao de configuracao que deseja utilizar
+connection_name = advwin_ho_connection
+
+[advwin_connection]
+server = 172.27.155.9
+user = Rvnovaes
+password = libertas
+database = Advwin
+# postgresql ou sql_server
+db_type = sql_server
+
+[advwin_ho_connection]
+server = 172.27.155.9
+user = Rvnovaes
+password = libertas
+database = Advwin_ho
+# postgresql ou sql_server
+db_type = sql_server
+
+[advwin_tunel_ho_connection]
+server = 127.0.0.1:2000
+user = Rvnovaes
+password = libertas
+database = Advwin_ho
+# postgresql ou sql_server
+db_type = sql_server

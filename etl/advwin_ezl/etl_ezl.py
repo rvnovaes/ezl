@@ -7,7 +7,10 @@ from sqlalchemy.orm import sessionmaker
 
 from connections.db_connection import connect_db
 from etl.advwin_ezl.models import Base, Person, AuthUser
+from config.config import get_parser
 
+config_parser = get_parser()
+source = dict(config_parser.items('etl'))
 
 def return_user_from_auth(key, auth_dict):
     print("Tamanho auth dict:", len(auth_dict))
@@ -193,13 +196,11 @@ def insere_person(session, linha):
     person_linha = Person(**linha)
     get_or_create(session, Person, linha)
 
-
-ezl_file_path = sys.argv[2]
-engine_ezl = connect_db(ezl_file_path)  # conexao com o banco aleteia --usar configparser
+engine_ezl = connect_db(config_parser, 'django_application')  # conexao com o banco aleteia --usar configparser
 
 # pega o caminho do arquivo de acordo com o pacote
 advwin_file_path = sys.argv[1]  # pkg_resources.resource_filename('connections', 'advwin.cfg')
-engine_advwin = connect_db(advwin_file_path)  # arquivo de conexao do advwin
+engine_advwin = connect_db(config_parser, source['connection_name'])  # arquivo de conexao do advwin
 
 Base.metadata.create_all(engine_ezl)
 session_ezl = sessionmaker(bind=engine_ezl)()

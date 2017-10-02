@@ -9,6 +9,8 @@ from connections.db_connection import connect_db
 from etl.advwin_ezl import settings
 import logging
 import datetime
+from config.config import get_parser
+config_parser = get_parser()
 
 
 def import_data():
@@ -68,12 +70,10 @@ def import_data():
             "Ocorreu o seguinte erro na importacao de Cidade: "+ str(
                 e) + "," + timestr)
 
-
-
 if __name__ == "__main__":
     # pega o diretorio do arquivo __init__.py de acordo com o pacote e junta com o 'ezl.cfg'
     cfg_file = os.path.join(os.path.abspath(os.path.dirname(connections.__file__)), 'ezl_local.cfg')
 
-    engine = connect_db(cfg_file)
+    engine = connect_db(config_parser, 'django_application')
 
     import_data()

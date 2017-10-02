@@ -6,6 +6,9 @@ from sqlalchemy.orm import sessionmaker
 
 from connections.db_connection import connect_db
 from etl.advwin_ezl.models import Base, City, State, CourtDistrict
+from config.config import get_parser
+
+config_parser = get_parser()
 
 
 def trataCidade(linha, session):
@@ -37,9 +40,7 @@ def insere_cidade(session, linha):
     session.add(cidade_linha)
     session.commit()
 
-
-ezl_file_path = sys.argv[1]
-engine_ezl = connect_db(ezl_file_path)  # conexao com o banco aleteia --usar configparser
+engine_ezl = connect_db(config_parser, 'django_application')  # conexao com o banco aleteia --usar configparser
 
 Base.metadata.create_all(engine_ezl)
 session_ezl = sessionmaker(bind=engine_ezl)()

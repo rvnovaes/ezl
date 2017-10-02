@@ -1,11 +1,43 @@
 #!/usr/bin/env bash
 
+# Update ubuntu
+echo "Atualizando o ubuntu..."
+sudo apt-get update -y
+
+# Instalando mercurial
+echo "Checando o mercurial..."
+sudo apt-get install mercurial -y
+
+
+# Checando postgres
+sudo apt-get install postgresql -y
+
+# Configurando pg_hba.conf
+
+# Configurando postgres.conf
+
+# Checando python dev
+sudo apt-get install python-setuptools -y
+sudo apt-get install python3-setuptools -y
+sudo apt-get install python-dev -y
+sudo apt-get install python3-dev -y
+sudo apt-get install python3-pip -y
+
+
+# Criando diretorio de logs
+cd /var/log
+logs_dir='etl/ezl'
+sudo mkdir -p ${logs_dir}	
+sudo chmod 755 ${logs_dir}
+sudo chown `whoami` ${logs_dir}
 # Criando diretorio padrao do projeto
 base_dir='/opt/fonts'
-sudo chmod 777 ${base_dir}
+cd '/opt/'
 if [ ! -d "$base_dir" ]; then
-    echo "Criando diretorio /opt/easy_lawyer_django..."
+    echo "Criando diretorio ${base_dir}..."
     sudo mkdir -p ${base_dir}
+    sudo chmod 777 ${base_dir}
+    sudo chown `whoami` ${base_dir}
 fi
 cd ${base_dir}
 
@@ -37,10 +69,11 @@ else
 fi
 
 # Criando virutal env
+sudo apt-get install python-virtualenv -y
 virtual_env_instalado=`dpkg -l | grep -i python3-virtualenv | awk '{print $1}'`
 if [ "$virtual_env_instalado" != "ii" ]; then
     echo "Instalando python-virtualenv..."
-    sudo apt-get install python3-virtualenv
+    sudo apt-get install python3-virtualenv -y
 fi
 virtualenv_dir='/opt/venvs'
 if [ ! -d "$virtualenv_dir" ]; then
@@ -65,8 +98,9 @@ pip3.5 install -r requirements.txt
 
 # Criando usuario postgres
 echo "criando usuario postgres..."
-psql --command="CREATE USER ezl SUPERUSER INHERIT CREATEDB CREATEROLE;" >> /dev/null 2>&1
-psql --command="ALTER USER ezl PASSWORD 'ezl';" >> /dev/null 2>&1
+sudo -H -u postgres bash -c 'psql --command="CREATE USER ezl SUPERUSER INHERIT CREATEDB CREATEROLE;"' >> /dev/null 2>&1
+sudo -H -u postgres psql --command="ALTER USER ezl PASSWORD 'ezl';" 
+
 # Criando banco de dados
 read -p "Nome do DB que sera criado: " db
 db_exist=`psql -Uezl --command="SELECT datname FROM pg_database WHERE datname='${db}';"`
@@ -121,51 +155,69 @@ email_host_password = 'ezlmta@578'
 [etl]
 ; indica se apaga todos os registros da tabela antes de importar (*apaga as dependencias tambem)
 truncate_all_tables = False
-; senha do do usuario linux responsavel por executar a etl. Este deve estar no grupo sudoers.
+; usuario e senha do do usuario linux responsavel por executar a etl. Este deve estar no grupo sudoers.
+linux_user = mttech
 linux_password = ${user_passwd}
 ; usuario admin do django para realizar a importacao
 user=2
-" > config/general.ini
+; conexao com o advwin, devera ser o nome da secessao de configuracao que deseja utilizar
+connection_name = advwin_ho_connection
 
-sudo echo "
-[connection]
+[advwin_connection]
+server = 172.27.155.9
+user = Rvnovaes
+password = libertas
+database = Advwin
+# postgresql ou sql_server
+db_type = sql_server
+
+[advwin_ho_connection]
 server = 172.27.155.9
 user = Rvnovaes
 password = libertas
 database = Advwin_ho
-
 # postgresql ou sql_server
 db_type = sql_server
-" > connections/advwin_ho.cfg
 
+[advwin_tunel_ho_connection]
+server = 127.0.0.1:2000
+user = Rvnovaes
+password = libertas
+database = Advwin_ho
+# postgresql ou sql_server
+db_type = sql_server
+
+" > config/general.ini
 
 echo "INFORME UMA DAS OPCOES DE AMBIENTE"
 valid_op=0
-#fixtures = ['country.xml', 'state.xml', 'court_district.xml', 'city.xml', 'type_movement.xml',
-#            'type_task.xml']
+cd ${base_dir}/${repositorio}
 while [ ${valid_op} -eq 0 ]
 do
     echo "1-Demo               2-ETL"
     read -p "Opcao: " op
     valid_op=1
     if [ "${op}" = "1" ]; then
-        echo "Rodando migrateions..."
+        echo "Rodando migrations..."
         python3.5 manage.py migrate
         echo "Rodando - factory"
-        python3.5 etl/advwin/factory.py
-        echo "Criando usuario admin"
-        python3.5 manage.py createsuperuser
+        echo `pwd`
         echo "Rodando fixtures..."
-        python3.5 manage.py loaddata country.xml
-        python3.5 manage.py loaddata state.xml
-        python3.5 manage.py loaddata court_district.xml
-        python3.5 manage.py loaddata city.xml
-        python3.5 manage.py loaddata type_movement.xml
-        python3.5 manage.py loaddata type_task.xml
+        python3.5 manage.py loaddata permission
+        python3.5 manage.py loaddata group
+        python3.5 manage.py loaddata auth_user
+        python3.5 manage.py loaddata country
+        python3.5 manage.py loaddata state
+        python3.5 manage.py loaddata court_district
+        python3.5 manage.py loaddata court_division
+        python3.5 manage.py loaddata city
+        python3.5 manage.py loaddata type_movement
+        python3.5 manage.py loaddata type_task
         echo "Aplicacao rodando em 127.0.0.1:8000"
         python3.5 manage.py runserver 0.0.0.0:8000
     elif [ "${op}" = "2" ]; then
         echo "Rodando ETL..."
+        sudo pip3 install
         python3.5 etl/advwin_ezl/luigi_jobs.py
     else
         valid_op=0
