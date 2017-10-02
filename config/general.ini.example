@@ -34,16 +34,14 @@ connection_name = advwin_ho_connection
 create_user = 'six'
 
 ; informa??es para uso do SFTP para importar GED
-host_sftp = "172.27.155.11"
+host_sftp = 172.27.155.11
 port_sftp = 22
-password_sftp = "mta@2017"
-username_sftp = "admin.ezl"
-local_path = '/opt/files_easy_lawyer/GEDs/'
-log_file = '/tmp/etl_ged.log'
+password_sftp = mta@2017
+username_sftp = admin.ezl
+local_path = /opt/files_easy_lawyer/GEDs/
+log_file = /tmp/etl_ged.log
 
-; PARA CONFIGURAR UMA PORTA DIFERENTE DA 8082 QUE E PADRAO DO LUIGI, E NECESSARIO CRIAR O ARQUIVO
-; luigi.cfg DENTRO DE /etc/luigi/ exemplo: http://luigi.readthedocs.io/en/stable/configuration.html
-; PARA A CONFIGURACAO DA PORTA O ARTRIBUTO NO luigi.cfg deve ser default-scheduler-port=porta
+
 luigi_port = 8082
 
 [advwin_connection]
