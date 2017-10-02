@@ -197,9 +197,6 @@ def insere_person(session, linha):
     get_or_create(session, Person, linha)
 
 engine_ezl = connect_db(config_parser, 'django_application')  # conexao com o banco aleteia --usar configparser
-
-# pega o caminho do arquivo de acordo com o pacote
-advwin_file_path = sys.argv[1]  # pkg_resources.resource_filename('connections', 'advwin.cfg')
 engine_advwin = connect_db(config_parser, source['connection_name'])  # arquivo de conexao do advwin
 
 Base.metadata.create_all(engine_ezl)

@@ -1,9 +1,12 @@
 import os
-# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ezl.settings")
-# import django
-# django.setup()
+import sys
+import django
+dir = os.path.dirname(os.path.realpath(__file__))
+position = dir.find('easy_lawyer_django')
+sys.path.append(dir[:position] + 'easy_lawyer_django/')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ezl.settings'
+django.setup()
 from datetime import datetime
-from etl.advwin_ezl import settings
 from pathlib import Path
 import paramiko
 from sqlalchemy import text
@@ -11,7 +14,18 @@ from connections.db_connection import connect_db
 from task.models import Ecm
 from config.config import get_parser
 parser = get_parser()
-source = dict(parser.items('etl'))
+try:
+    source = dict(parser.items('etl'))
+    create_user = source['user']
+    host_sftp = source['host_sftp']
+    port_sftp = source['port_sftp']
+    username_sftp = source['username_sftp']
+    password_sftp = source['password_sftp']
+    sftp_local_path = source['local_path']
+except KeyError as e:
+    print('Invalid settings. Check the General.ini file')
+    print(e)
+    sys.exit(0)
 
 
 class EcmETL:
@@ -25,8 +39,8 @@ class EcmETL:
         connection = self.advwin_engine.connect()
         ecms = self.extract_data()
 
-        transport = paramiko.Transport((settings.host_sftp, settings.port_sftp))
-        transport.connect(username=settings.username_sftp, password=settings.password_sftp)
+        transport = paramiko.Transport((host_sftp, int(port_sftp)))
+        transport.connect(username=username_sftp, password=password_sftp)
         sftp = paramiko.SFTPClient.from_transport(transport)
 
         for ecm in ecms:
@@ -40,7 +54,7 @@ class EcmETL:
             # data = '2015-09-30 09:08:18.580'
             data = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
             arq_tipo = os.path.splitext(str(ecm.path))[1][1:]
-            responsavel = settings.create_user
+            responsavel = create_user
             arq_status = 'Guardado'
             arq_versao = 1
 
@@ -69,7 +83,7 @@ class EcmETL:
                                arq_versao,
                                arq_status, nome)
 
-            local_path = os.path.join(settings.local_path, str(ecm.task_id), nome)
+            local_path = os.path.join(sftp_local_path, str(ecm.task_id), nome)
             # Verifica se o arquivo está no sistema de arquivos para ser copiado ao servidor de arquivos Advwin
 
             print('Path: ' + local_path)

@@ -198,6 +198,20 @@ user=2
 ; conexao com o advwin, devera ser o nome da secessao de configuracao que deseja utilizar
 connection_name = advwin_ho_connection
 
+# nome de usuário utilizado na exportação EZL -> Advwin
+create_user = 'six'
+
+; informações para uso do SFTP para importar GED
+host_sftp = "172.27.155.11"
+port_sftp = 22
+password_sftp = "mta@2017"
+username_sftp = "admin.ezl"
+local_path = '/opt/files_easy_lawyer/GEDs/'
+log_file = '/tmp/etl_ged.log'
+
+
+luigi_port = 8082
+
 [advwin_connection]
 server = 172.27.155.9
 user = Rvnovaes

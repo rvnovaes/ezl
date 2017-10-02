@@ -2,10 +2,17 @@
 import datetime
 import json
 import os
+import sys
 from connections.db_connection import connect_db
-from etl.advwin_ezl import settings
 from config.config import get_parser
 config_parser = get_parser()
+try:
+    source = dict(config_parser.items('etl'))
+    create_user = source['user']
+except KeyError as e:
+    print('Invalid settings. Check the General.ini file')
+    print(e)
+    sys.exit(0)
 
 
 def import_data():
@@ -28,7 +35,7 @@ def import_data():
         query = "insert into court_district(create_date, name, create_user_id, state_id, is_active) values('{0}', " \
                 "'{1}', {2}, {3}, {4})"\
             .format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    name, settings.USER,
+                    name, create_user,
                     "(select id from state where initials = '" + data['state'] + "')",
                     True)
 

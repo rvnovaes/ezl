@@ -1,22 +1,27 @@
 # esse import deve vir antes de todos porque ele executa o __init__.py
 import os
 import sys
-import django
-dir = os.path.dirname(os.path.realpath(__file__))
-position = dir.find('easy_lawyer_django')
-sys.path.append(dir[:position] + 'easy_lawyer_django/')
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ezl.settings'
-django.setup()
-
 import ntpath
-
 import paramiko
-
 from core.utils import LegacySystem
-from etl.advwin_ezl import settings
 from etl.advwin_ezl.advwin_ezl import GenericETL
 from task.models import Ecm
 from task.models import Task
+from config.config import get_parser
+config_parser = get_parser()
+
+try:
+    source = dict(config_parser.items('etl'))
+    create_user = source['user']
+    host_sftp = source['host_sftp']
+    port_sftp = source['port_sftp']
+    username_sftp = source['username_sftp']
+    password_sftp = source['password_sftp']
+    local_path = source['local_path']
+except KeyError as e:
+    print('Invalid settings. Check the General.ini file')
+    print(e)
+    sys.exit(0)
 
 
 class EcmETL(GenericETL):
@@ -99,8 +104,8 @@ class EcmETL(GenericETL):
                         # Deve verificar se o arquivo está contido no diretório de GEDs do Advwin. Pois existem caminhos
                         # de arquivos no banco mas não contém o arquivo no sistema de arquivos
                         try:
-                            transport = paramiko.Transport((settings.host_sftp, settings.port_sftp))
-                            transport.connect(username=settings.username_sftp, password=settings.password_sftp)
+                            transport = paramiko.Transport((host_sftp, int(port_sftp)))
+                            transport.connect(username=username_sftp, password=password_sftp)
                             sftp = paramiko.SFTPClient.from_transport(transport)
                             try:
                                 sftp.stat('Agenda\\' + file)
@@ -116,7 +121,7 @@ class EcmETL(GenericETL):
                                     is_file = False
                                     print('erro no arquivo')
                             if is_file:
-                                import_dir = settings.local_path + str(task.id) + '/'
+                                import_dir = local_path + str(task.id) + '/'
 
                                 # Se não houver nenhum diretório com o ID da task, cria um novo
                                 if not os.path.exists(import_dir):

@@ -31,11 +31,18 @@ from django.core.management import call_command
 from django.core.management.commands import loaddata, migrate
 import luigi
 from ezl import settings
-from etl.advwin_ezl import settings as etl_settings
 from etl.advwin_ezl.ezl_exceptions.params_exception import ParamsException
-import configparser
+from config.config import get_parser
+config_parser = get_parser()
 
-LINUX_PASSWORD = None
+try:
+    source = dict(config_parser.items('etl'))
+    linux_password = source['linux_password']
+    luigi_port = source['luigi_port']
+except KeyError as e:
+    print('Invalid settings. Check the General.ini file')
+    print(e)
+    sys.exit(0)
 
 
 # A ordem de inclusão das fixtures é importante, favor não alterar
@@ -54,9 +61,10 @@ def load_fixtures():
 
 
 def load_luigi_scheduler():
-    if subprocess.run(['pgrep', '-f', 'luigid'], stdout=subprocess.PIPE).stdout.decode("utf-8") is '':
+    if subprocess.run(['pgrep', '-f', 'luigid'], stdout=subprocess.PIPE).stdout.decode(
+            "utf-8") is '':
         command = 'echo {0}|sudo -S luigid --port {1} --background'.format(
-            LINUX_PASSWORD, etl_settings.LUIGI_PORT)
+            linux_password, luigi_port)
         os.system(command)
         # tempo necessário para inicialização do luigi scheduler antes da primeira tarefa NAO REMOVER
         sleep(10)
@@ -281,33 +289,11 @@ class EcmTask(luigi.Task):
         EcmETL().import_data()
 
 
-def config():
-    """
-
-    :return:
-    """
-    parser = configparser.ConfigParser()
-    try:
-        with open(os.path.join(settings.BASE_DIR, 'config', 'general.ini')) as config_file:
-            parser.read_file(config_file)
-            source = dict(parser.items('etl'))
-            global LINUX_PASSWORD
-            LINUX_PASSWORD = source['linux_password']
-
-    except FileNotFoundError:
-        print('OOOOOOOOOOOOOOOOOOOOOOOOOOOHHHHH NOOOOOOOO!!!!!')
-        print('general.ini file was not found on {config_path}'.format(config_path=os.path.join(settings.BASE_DIR, 'config')))
-        print('Rename it to general.ini and specify the correct configuration settings!')
-        sys.exit(0)
-
-
 def main():
-
-    try:        
+    try:
         # E necessario remover os arquivos.ezl dentro do diretorio tmp para executar novamente
-        config()
         os.system('echo {0}|sudo -S rm -rf {1}/etl/advwin_ezl/tmp/*.ezl'.format(
-            LINUX_PASSWORD, settings.BASE_DIR))
+            linux_password, settings.BASE_DIR))
         # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
         load_luigi_scheduler()
         luigi.run(main_task_cls=EcmTask())
