@@ -24,6 +24,7 @@ email_host_password = 'ezlmta@578'
 ; indica se apaga todos os registros da tabela antes de importar (*apaga as dependencias tambem)
 truncate_all_tables = False
 ; senha do do usuario linux responsavel por executar a etl. Este deve estar no grupo sudoers.
+linux_user = ezl
 linux_password = mttech
 ; usuario admin do django para realizar a importacao
 user=2

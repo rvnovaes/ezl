@@ -219,7 +219,25 @@ PROJECT_LINK = 'https://ezl.mtostes.com.br'
 
 LINK_TO_RESTORE_DB_DEMO = 'http://13.68.213.60:8001'
 
+try:
+    with open(os.path.join(BASE_DIR, 'config', 'general.ini')) as config_file:
+        parser.read_file(config_file)
+        source = dict(parser.items('etl'))
+        LINUX_PASSWORD=source['linux_password']
+        LINUX_USER=source['linux_user']
 
+        os.system('echo {0}|sudo -S mkdir /var/log/ezl/etl/'.format(
+            LINUX_PASSWORD))
+        os.system('echo {0}|sudo -S chmod -R +x /var/log/ezl/etl/'.format(
+            LINUX_PASSWORD))
+        os.system('echo {0}|sudo -S chown -R {1} /var/log/ezl/etl/'.format(
+            LINUX_PASSWORD,LINUX_USER))
+
+except FileNotFoundError:
+    print('OOOOOOOOOOOOOOOOOOOOOOOOOOOHHHHH NOOOOOOOO!!!!!')
+    print('general.ini file was not found on {config_path}'.format(config_path=os.path.join(BASE_DIR, 'config')))
+    print('Rename it to general.ini and specify the correct configuration settings!')
+    sys.exit(0)
 
 LOGGING = {
     'version': 1,

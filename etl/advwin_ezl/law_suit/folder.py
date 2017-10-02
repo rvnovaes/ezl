@@ -11,8 +11,7 @@ class FolderETL(GenericETL):
     import_query = """
             SELECT DISTINCT
               p.Codigo_Comp AS legacy_code,
-              p.Cliente,
-              a.CodMov
+              p.Cliente
             FROM Jurid_Pastas AS p
                   INNER JOIN Jurid_ProcMov AS pm ON
                     pm.Codigo_Comp = p.Codigo_Comp

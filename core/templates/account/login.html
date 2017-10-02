@@ -1,72 +1,71 @@
-{% extends 'base.html' %}
+{% include 'base.html' %}
+{% load static %}
+ {% include 'core/widgets/messages.html' %}
+<link rel="stylesheet" type="text/css"
+      href="{% static "login.css" %}">
+<script src="{% static "js/login.js" %}"></script>
+<div class="materialContainer">
+    <div class="box">
 
-{% block body %}
-    <style>
-
-
-        #faixa {
-            background: red; /* For browsers that do not support gradients */
-            background: -webkit-linear-gradient(left top, red, orange); /* For Safari 5.1 to 6.0 */
-            background: -o-linear-gradient(bottom right, red, orange); /* For Opera 11.1 to 12.0 */
-            background: -moz-linear-gradient(bottom right, red, orange); /* For Firefox 3.6 to 15 */
-            background: linear-gradient(to bottom right, red, orange); /* Standard syntax */
-            height: 43%!important;
-        }
-    </style>
-    <div class="page-header" style="text-align: center">
-        <img src="/static/img/logo_ezl.png"/>
-    </div>
-
-    <div class="well col-lg-12" id="faixa">
-        <div class="well col-md-4 col-md-offset-4" style="border: 10px solid #e3e3e3!important;">
-            {% csrf_token %}
-            <div style="overflow: hidden;">
-                {% if form.errors %}
-                    {% for error in  form.non_field_errors %}
-                        <div class="alert_danger">{{ error }}</div>
-                    {% endfor %}
-                    <br>
-                {% endif %}
-                <form method="POST" action="{% url 'account_login' %}">
-                    <fieldset>
-                        {% csrf_token %}
-
-                        <div class="form-group label-floating">
-                            <label class="control-label" for="first_name" required>Login</label>
-                            <input class="form-control" id="first_name" type="text" name="login">
-                        </div>
-
-                        <div class="form-group label-floating">
-                            <label class="control-label" for="password">Senha</label>
-                            <input class="form-control" id="password" type="password" name="password" required>
-                        </div>
-                        <div>
-                            {% if redirect_field_value %}
-                                <input type="hidden" name="{{ redirect_field_name }}"
-                                       value="{{ redirect_field_value }}"/>
-                            {% endif %}
-                            <button class="btn btn-raised btn-primary" type="submit" value="Entrar">Entrar</button>
-                            <h4>
-                                <br>
-                                <a style="text-decoration: none; font-weight: 400 !important;"
-                                   href="/accounts/password/reset/">Recuperar Senha</a>
-                                <br><br>
-                                <a style="text-decoration: none; font-weight: 400 !important;"
-                                   href="{% url 'recover_database' %}">Recuperar Banco de Dados</a>
-                            </h4>
-
-                        </div>
-                    </fieldset>
-                </form>
-
-
+        <div class="title">Easy Lawyer</div>
+        <form method="POST" action="{% url 'account_login' %}"> {% csrf_token %}
+            <div class="input">
+                <label for="first_name">Login</label>
+                <input id="first_name" type="text" name="login" required>
+                <span class="spin"></span>
             </div>
 
-            <div class="text-center"><label>Desenvolvido por:</label> <img
-                    onclick="window.open('http://www.mttech.com.br')"
-                    src="/static/img/logo.png" height="20"
-                    style="cursor: pointer; cursor: hand;"/>
+            <div class="input">
+                <label for="password">Senha</label>
+                <input id="password" type="password" name="password" required>
+                <span class="spin"></span>
             </div>
+            {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}"
+                       value="{{ redirect_field_value }}"/>
+            {% endif %}
+            <div class="button login">
+                <button type="submit" ><span>Entrar</span><i class="fa fa-check"></i></button>
+            </div>
+            <a href="/accounts/password/reset/" class="pass-forgot">Recuperar a senha</a>
+            <a href="{% url 'recover_database' %}" class="pass-forgot">Recuperar Banco de Dados</a>
+
+        </form>
+
+        <div style="padding-top: 30px" class="pass-forgot"><label>Desenvolvido por:</label> <img
+                onclick="window.open('http://www.mttech.com.br')"
+                src="/static/img/logo.png" height="20"
+                style="cursor: pointer; cursor: hand;"/>
         </div>
     </div>
-{% endblock body %}
+
+    <div class="overbox">
+        <div class="material-button alt-2"><span class="shape"></span></div>
+
+        <div class="title">Registrar</div>
+
+        <div class="input">
+            <label for="regname">Login</label>
+            <input type="text" name="regname" id="regname">
+            <span class="spin"></span>
+        </div>
+
+        <div class="input">
+            <label for="regpass">Senha</label>
+            <input type="password" name="regpass" id="regpass">
+            <span class="spin"></span>
+        </div>
+
+        <div class="input">
+            <label for="reregpass">Repetir Senha</label>
+            <input type="password" name="reregpass" id="reregpass">
+            <span class="spin"></span>
+        </div>
+        <div class="button">
+            <button><span>Próximo</span></button>
+        </div>
+
+
+    </div>
+
+</div>

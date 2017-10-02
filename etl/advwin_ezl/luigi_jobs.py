@@ -16,7 +16,7 @@ from etl.advwin_ezl import signals
 from etl.advwin_ezl.account.user import UserETL
 from etl.advwin_ezl.core.person import PersonETL
 from etl.advwin_ezl.core.address import AddressETL
-from etl.advwin_ezl.core.ContactMechanism import ContactMechanismETL
+from etl.advwin_ezl.core.contact_mechanism import ContactMechanismETL
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from etl.advwin_ezl.law_suit.court_division import CourtDivisionETL
 from etl.advwin_ezl.law_suit.folder import FolderETL
