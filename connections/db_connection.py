@@ -1,18 +1,22 @@
 from enum import Enum
 from sqlalchemy import create_engine
 
-import configparser
-
 
 class DbType(Enum):
     POSTGRESQL = 1
     SQL_SERVER = 2
 
 
-def connect_db(config_file):
-    parser = configparser.ConfigParser()
-    parser.read(config_file)
-    source = dict(parser.items('connection'))
+def connect_db(config_parser, config_session):
+    """
+    Esta funcao e responsavel por prover a conexao com os bancos postgres ou sql server.
+    Utilizado para gerar a engine do banco na ETL.
+
+    :param config_file:
+    :param config_session:
+    :return: engine do banco de dados informado nas configuracoes de config_ssesion
+    """
+    source = dict(config_parser.items(config_session))
 
     server = source['server']
     user = source['user']
