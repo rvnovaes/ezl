@@ -1,65 +1,68 @@
 from core.models import Address, Person, AddressType, City, State, Country
-from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
+from etl.advwin_ezl.advwin_ezl import GenericETL
 
 
 # noinspection SpellCheckingInspection
 class AddressETL(GenericETL):
     model = Address
     import_query = """
-                SELECT
-                  codigo      AS legacy_code,
-                  endereco    AS street,
-                  cidade      AS city,
-                  bairro      AS city_region,
-                  cep         AS zip_code,
-                  uf          AS state,
-                  numero_end  AS number,
-                  complemento AS complement,
-                  pais        AS country,
-                  'comercial'      AS address_type
-                FROM jurid_advogado AS ADV_END
-                WHERE ADV_END.Status = 'Ativo'
-                      AND ADV_END.Nome IS NOT NULL
-                      AND ADV_END.Nome <> ''
-                      AND ADV_END.Codigo NOT IN (SELECT CF.Codigo
-                                                 FROM Jurid_CliFor AS CF
-                                                 WHERE CF.Status = 'Ativo' AND CF.Razao IS NOT NULL AND CF.Razao <> '')
-                UNION
-                SELECT
-                  codigo      AS legacy_code,
-                  endereco    AS street,
-                  cidade      AS city,
-                  bairro      AS city_region,
-                  cep         AS zip_code,
-                  uf          AS state,
-                  Numero      AS number,
-                  complemento AS complement,
-                  pais        AS country,
-                  'comercial'      AS address_type
-                FROM Jurid_CliFor AS CLIFOR_END
-                WHERE CLIFOR_END.Status = 'Ativo' AND CLIFOR_END.Razao IS NOT NULL AND CLIFOR_END.Razao <> ''
-                UNION
-                SELECT
-                  codigo          AS legacy_code,
-                  Cob_endereco    AS street,
-                  Cob_Cidade      AS city,
-                  Cob_Bairro      AS city_region,
-                  Cob_CEP         AS zip_code,
-                  Cob_UF          AS state,
-                  Cob_Numero      AS number,
-                  Cob_Complemento AS complement,
-                  Cob_pais        AS country,
-                  'cobranca'      AS address_type
-                FROM Jurid_CliFor AS CLIFOR_END_COB
-                WHERE CLIFOR_END_COB.Status = 'Ativo' AND CLIFOR_END_COB.Razao IS NOT NULL AND CLIFOR_END_COB.Razao <> ''
+                    SELECT
+                      codigo      AS legacy_code,
+                      endereco    AS street,
+                      cidade      AS city,
+                      bairro      AS city_region,
+                      cep         AS zip_code,
+                      uf          AS state,
+                      numero_end  AS number,
+                      complemento AS complement,
+                      pais        AS country,
+                      'comercial' AS address_type
+                    FROM jurid_advogado AS ADV_END
+                    WHERE ADV_END.Status = 'Ativo'
+                          AND ADV_END.Nome IS NOT NULL
+                          AND ADV_END.Nome <> ''
+                          AND ADV_END.Codigo NOT IN (SELECT CF.Codigo
+                                                     FROM Jurid_CliFor AS CF
+                                                     WHERE CF.Status = 'Ativo' AND CF.Razao IS NOT NULL AND CF.Razao <> '')
+                          AND (endereco IS NOT NULL OR cidade IS NOT NULL OR bairro IS NOT NULL OR uf IS NOT NULL)
+                    UNION
+                    SELECT
+                      codigo      AS legacy_code,
+                      endereco    AS street,
+                      cidade      AS city,
+                      bairro      AS city_region,
+                      cep         AS zip_code,
+                      uf          AS state,
+                      Numero      AS number,
+                      complemento AS complement,
+                      pais        AS country,
+                      'comercial' AS address_type
+                    FROM Jurid_CliFor AS CLIFOR_END
+                    WHERE CLIFOR_END.Status = 'Ativo' AND CLIFOR_END.Razao IS NOT NULL AND CLIFOR_END.Razao <> ''
+                          AND (endereco IS NOT NULL OR cidade IS NOT NULL OR bairro IS NOT NULL OR uf IS NOT NULL)
+                    UNION
+                    SELECT
+                      codigo          AS legacy_code,
+                      Cob_endereco    AS street,
+                      Cob_Cidade      AS city,
+                      Cob_Bairro      AS city_region,
+                      Cob_CEP         AS zip_code,
+                      Cob_UF          AS state,
+                      Cob_Numero      AS number,
+                      Cob_Complemento AS complement,
+                      Cob_pais        AS country,
+                      'cobranca'      AS address_type
+                    FROM Jurid_CliFor AS CLIFOR_END_COB
+                    WHERE CLIFOR_END_COB.Status = 'Ativo' AND CLIFOR_END_COB.Razao IS NOT NULL AND CLIFOR_END_COB.Razao <> ''
+                          AND (Cob_endereco IS NOT NULL OR Cob_Cidade IS NOT NULL OR Cob_Bairro IS NOT NULL OR Cob_UF IS NOT NULL)
                     """
     has_status = True
 
-    @validate_import
     def config_import(self, rows, user, rows_count):
         """
-        Metodo responsavel por importar os dados lidos do advwin no EZL
-        :param rows: Dados lidos do advwin
+        Metodo responsavel por importar os dados referente aos enderecos das pessoas
+        cadastradas no advwin para o EZL
+        :param rows: Enderecos lidos do advwin
         :param user: Usuario do django responsavel por persistir os dados
         :param rows_count: Quantidade de dados que foram lidos do advwin
         """
@@ -68,11 +71,11 @@ class AddressETL(GenericETL):
             try:
                 legacy_code = row['legacy_code']
                 persons = Person.objects.filter(legacy_code=legacy_code)
-                address_type = AddressType.objects.filter(name__iexact=row['address_type'])
-                if not address_type:
-                    AddressType.objects.create(name=row['address_type'], create_user=user)
-                    address_type = AddressType.objects.filter(name__iexact=row['address_type'])
-                address_type = address_type[0]
+                address_type_name = 'Cobrança'
+                if row['address_type'] == 'comercial':
+                    address_type_name = 'Comercial'
+                address_type, created = AddressType.objects.get_or_create(name=address_type_name,
+                                                                          create_user=user)
                 for person in persons:
                     country = Country.objects.filter(
                         name__unaccent__iexact=row['country'].strip() if row[
@@ -83,29 +86,47 @@ class AddressETL(GenericETL):
                             'state'] else '') or State.objects.filter(
                         name__iexact='ESTADO-INVÁLIDO')
                     city = City.objects.filter(
-                        name__unaccent__iexact=row['city'].strip() if row['city'] else '',
-                        state=state) or City.objects.filter(
+                        name__unaccent__iexact=row['city'].strip() if row[
+                            'city'] else '') or City.objects.filter(
                         name__unaccent__iexact='CIDADE-INVÁLIDO')
-                    obj = self.model(person=person,
-                                     street=row['street'] or '',
-                                     number=row['number'] or '',
-                                     complement=row['complement'] or '',
-                                     city_region=row['city_region'] or '',
-                                     zip_code=row['zip_code'] or '',
-                                     address_type=address_type,
-                                     state=state[0],
-                                     city=city[0],
-                                     country=country[0],
-                                     alter_user=user,
-                                     create_user=user)
-                    obj.save()
+                    # Tratamento feito pelo fato de existir cadastros no advwin com cidade mas
+                    # sem estado. Alem disso pode ocorrer de exisitr cidade em mais de um estado
+                    # Como Sao Francisco por exemplo.
+                    if state and city.count() > 1:
+                        city = city.filter(state=state)
+                    state = state.first()
+                    if state.name == 'ESTADO-INVÁLIDO' and city:
+                        state = city.first().state
+                    address = Address.objects.filter(
+                        person=person,
+                        street=row['street'] or '',
+                        number=row['number'] or '',
+                        city=city,
+                        complement=row['complement'] or '',
+                        city_region=row['city_region'] or '',
+                        zip_code=row['zip_code'] or ''
+                    )
+                    if not address:
+                        obj = self.model(person=person,
+                                         street=row['street'] or '',
+                                         number=row['number'] or '',
+                                         complement=row['complement'] or '',
+                                         city_region=row['city_region'] or '',
+                                         zip_code=row['zip_code'] or '',
+                                         address_type=address_type,
+                                         state=state,
+                                         city=city.first(),
+                                         country=country.first(),
+                                         alter_user=user,
+                                         create_user=user)
+                        obj.save()
                     self.debug_logger.debug(
                         "Endereco,%s,%s,%s,%s,%s,%s,s,%s,%s,%s,%s,%s,%s,%s" % (
                             str(person.id), str(row['street'] or '', ), str(row['number'] or ''),
                             str(row['complement'] or ''),
                             str(row['city_region'] or ''), str(row['zip_code'] or ''),
-                            str(address_type.id), str(state[0].id), str(city[0].id),
-                            str(country[0].id), str(user.id), str(user.id), self.timestr))
+                            str(address_type.id), str(state.id), str(city.first().id),
+                            str(country.first().id), str(user.id), str(user.id), self.timestr))
 
             except Exception as e:
                 self.error_logger.error(

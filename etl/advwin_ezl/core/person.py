@@ -1,6 +1,3 @@
-# esse import deve vir antes de todos porque ele executa o __init__.py
-from django.db import IntegrityError
-
 from core.models import Person
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
@@ -62,13 +59,19 @@ class PersonETL(GenericETL):
                     WHERE  cf.status = 'Ativo'
                            AND cf.razao IS NOT NULL
                            AND cf.razao <> ''     
-                """.format(tribunal='Jurid_Tribunais', advogado='Jurid_Advogado', clifor='Jurid_Clifor')
+                """.format(tribunal='Jurid_Tribunais', advogado='Jurid_Advogado',
+                           clifor='Jurid_Clifor')
 
     has_status = True
 
     @validate_import
     def config_import(self, rows, user, rows_count):
-        log_file = open('log_file.txt', 'w')
+        """
+        Metodo responsavel por importar as pessoas cadastradas no advwin para o ezl
+        :param rows: Pessoas lidas do advwin
+        :param user: Usuario do django responsavel por persistir os dados
+        :param rows_count: Quantidade de dados que foram lidos do advwin
+        """
         for row in rows:
             rows_count -= 1
             try:
@@ -160,14 +163,16 @@ class PersonETL(GenericETL):
                     obj.save()
                 self.debug_logger.debug(
                     "Pessoa,%s,%s,%s,%s,%s,%s,s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
-                        str(legal_name), str(name), str(is_lawyer), str(is_correspondent),str(is_court),str(legal_type),
-                        str(cpf_cnpj),str(user.id),str(user.id),str(is_customer),str(is_supplier),str(is_active),str(legacy_code),
+                        str(legal_name), str(name), str(is_lawyer), str(is_correspondent),
+                        str(is_court), str(legal_type),
+                        str(cpf_cnpj), str(user.id), str(user.id), str(is_customer),
+                        str(is_supplier), str(is_active), str(legacy_code),
                         str(LegacySystem.ADVWIN.value), self.timestr))
             except Exception as e:
                 self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Pessoa: " + str(rows_count) + "," + str(
+                    "Ocorreu o seguinte erro na importacao de Pessoa: " + str(
+                        rows_count) + "," + str(
                         e) + "," + self.timestr)
-
 
             super(PersonETL, self).config_import(rows, user, rows_count)
 
