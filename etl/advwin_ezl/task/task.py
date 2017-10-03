@@ -1,13 +1,3 @@
-import sys
-import django
-import os
-
-dir = os.path.dirname(os.path.realpath(__file__))
-position = dir.find('easy_lawyer_django')
-sys.path.append(dir[:position] + 'easy_lawyer_django/')
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ezl.settings'
-django.setup()
-
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 import pytz
 from itertools import chain

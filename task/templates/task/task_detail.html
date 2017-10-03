@@ -61,10 +61,11 @@
                         <label>Dados do solicitante: </label><br>
                         {{ form.instance.person_asked_by|capfirst|default_if_none:"" }}
                         <br><br>
+                        <label>Descrição do serviço: </label><br>
+                        <p class="text-justify">{{ form.instance.description|default_if_none:"" }}</p>
+                        <br>
                         <label>Detalhes do serviço: </label>
                         <br>
-{#                        <span><b>Processo:</b>#}
-{#                        <br>#}
                         <span><b>Prazo:</b> {{ form.instance.reminder_deadline_date|localtime|default_if_none:"" }}</span>
                         <br>
                         <span><b>Recebida em:</b> {{ form.instance.delegation_date|localtime|default_if_none:"" }}</span>
@@ -77,6 +78,7 @@
                         <br>
                         <span><b>Endereço:</b> {{ form.instance.address|capfirst|default_if_none:"" }}</span>
                         <div class="hidden form-control">{{ form.survey_result }}</div>
+                        <br/>
                     </div>
                     <div class="form-group text-center">
                         {% if perms.task.view_delegated_tasks %}
