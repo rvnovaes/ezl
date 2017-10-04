@@ -1,6 +1,6 @@
 var showToast = function (type, message, title, timeout, tapToDismiss) {
     if (type === 'error'){
-        title = 'Atenção!';
+        title = title ? title: 'Atenção!';
         timeout = 0;
         tapToDismiss = false
     }
