@@ -13,28 +13,31 @@ from etl.advwin_ezl.signals import new_person, temp_disconnect_signal
 class UserETL(GenericETL):
     advwin_table = 'ADVWeb_usuario'
     model = User
-    import_query = """SELECT ADVWEB_USER.usuarioLogin AS username,
-                              ADVWEB_USER.usuarioNome AS name_user,
-                              ADVWEB_USER.usuarioEmail AS email,
-                              ADVOGADO.Razao AS legal_name,
-                              ADVOGADO.Nome AS name,
-                              ADVOGADO.Codigo AS legacy_code                              
-                        FROM 
-                            (ADVWeb_usuario AS ADVWEB_USER INNER JOIN Jurid_Advogado AS ADVOGADO ON ADVWEB_USER.codigo_adv = ADVOGADO.Codigo)
-                        WHERE  ADVOGADO.Correspondente = 1 AND  ADVWEB_USER.status = 'A' AND
-                               ADVWEB_USER.usuarioNome IS NOT NULL AND
-                               ADVWEB_USER.usuarioNome <> '' AND
-                               ADVWEB_USER.usuarioLogin IS NOT NULL AND
-                               ADVWEB_USER.usuarioLogin <> '' AND
-                               ADVWEB_USER.usuarioId =                                
-                                   (SELECT min(ADVWEB_USER2.usuarioId) FROM ADVWeb_usuario AS ADVWEB_USER2
-                                    WHERE ADVWEB_USER2.status = 'A' AND
-                                    ADVWEB_USER2.usuarioNome IS NOT NULL AND ADVWEB_USER2.usuarioNome <> '' AND
-                                    ADVWEB_USER2.usuarioLogin IS NOT NULL AND ADVWEB_USER2.usuarioLogin <> '' AND
-                                    ADVWEB_USER.usuarioLogin = ADVWEB_USER2.usuarioLogin)
+    import_query = """
+        SELECT ADVWEB_USER.usuarioLogin AS username,
+              ADVWEB_USER.usuarioNome AS name_user,
+              ADVWEB_USER.usuarioEmail AS email,
+              ADVOGADO.Razao AS legal_name,
+              ADVOGADO.Nome AS name,
+              ADVOGADO.Codigo AS legacy_code
+        FROM
+            (ADVWeb_usuario AS ADVWEB_USER INNER JOIN Jurid_Advogado AS ADVOGADO
+             ON ADVWEB_USER.codigo_adv = ADVOGADO.Codigo)
+        WHERE  ADVOGADO.Correspondente = 1 AND  ADVWEB_USER.status = 'A' AND
+               ADVWEB_USER.usuarioNome IS NOT NULL AND
+               ADVWEB_USER.usuarioNome <> '' AND
+               ADVWEB_USER.usuarioLogin IS NOT NULL AND
+               ADVWEB_USER.usuarioLogin <> '' AND
+               ADVWEB_USER.usuarioId =
+                   (SELECT min(ADVWEB_USER2.usuarioId) FROM ADVWeb_usuario AS ADVWEB_USER2
+                    WHERE ADVWEB_USER2.status = 'A' AND
+                    ADVWEB_USER2.usuarioNome IS NOT NULL AND ADVWEB_USER2.usuarioNome <> '' AND
+                    ADVWEB_USER2.usuarioLogin IS NOT NULL AND ADVWEB_USER2.usuarioLogin <> '' AND
+                    ADVWEB_USER.usuarioLogin = ADVWEB_USER2.usuarioLogin)
             """
 
-    # como não tem o nosso model de usuario não tem como herdar de LegacyCode e não tem como inativar os que são advwin
+    # como não tem o nosso model de usuario não tem como herdar de LegacyCode e não tem como
+    # inativar os que são advwin
     # todo: fazer model de usuario pra ter herança com LegacyCode e Audit
     # has_status = True
 
@@ -73,7 +76,6 @@ class UserETL(GenericETL):
                 is_customer = False
                 is_supplier = True
                 is_lawyer = True
-                is_correspondent = True
                 is_court = False
 
                 # maxlength = 30 no auth_user do django
@@ -83,7 +85,8 @@ class UserETL(GenericETL):
                 # tenta encontrar o usuario pelo username (unique)
                 instance = User.objects.filter(username__unaccent=username).first() or None
 
-                # todo: fazer usuario independente do usuario do django (extend, override or custom user???)
+                # todo: fazer usuario independente do usuario do django (extend, override or
+                # custom user???)
                 # todo: deve herdar de LegacyCode e Audit e já deve criar person ao criar o usuário
                 # tenta encontrar a pessoa pelo legacy_code
                 person = Person.objects.filter(legacy_code=legacy_code,
@@ -149,7 +152,6 @@ class UserETL(GenericETL):
                                         legal_name=legal_name,
                                         name=name,
                                         is_lawyer=is_lawyer,
-                                        is_correspondent=is_correspondent,
                                         is_court=is_court,
                                         legal_type=legal_type,
                                         cpf_cnpj=cpf_cnpj,
@@ -164,17 +166,17 @@ class UserETL(GenericETL):
                                     created=created)
 
                 self.debug_logger.debug(
-                    "Usuario,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                    "Usuario,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
                         str(person_id), str(legal_name), str(name),
-                        str(is_lawyer), str(is_correspondent), str(is_court), str(legal_type),
+                        str(is_lawyer), str(is_court), str(legal_type),
                         str(cpf_cnpj), str(user), str(is_active),
                         str(is_customer), str(is_customer), str(is_supplier), str(legacy_code),
-                        str(LegacySystem.ADVWIN.value),self.timestr))
+                        str(LegacySystem.ADVWIN.value), self.timestr))
 
             except Exception as e:
                 self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Usuario: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
+                    "Ocorreu o seguinte erro na importacao de Usuario: " + str(rows_count) + ","
+                    + str(e) + "," + self.timestr)
 
             super(UserETL, self).config_import(rows, user, rows_count)
 

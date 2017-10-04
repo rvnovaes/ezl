@@ -135,6 +135,8 @@ class City(Audit):
 
 class Person(Audit, LegacyCode):
     CORRESPONDENT_GROUP = "Correspondente"
+    REQUESTER_GROUP = 'Solicitante'
+
     objects = PersonManager()
 
     legal_name = models.CharField(max_length=255, blank=False,

@@ -11,6 +11,9 @@ class PersonManager(Manager):
     def correspondents(self, *ar, **kw):
         return self.get_queryset().correspondents(*ar, **kw)
 
+    def requesters(self, *ar, **kw):
+        return self.get_queryset().requesters(*ar, **kw)
+
 
 class PersonManagerQuerySet(QuerySet):
     def active(self):
@@ -19,3 +22,5 @@ class PersonManagerQuerySet(QuerySet):
     def correspondents(self):
         return self.filter(auth_user__groups__name=self.model.CORRESPONDENT_GROUP)
 
+    def requesters(self):
+        return self.filter(auth_user__groups__name=self.model.REQUESTER_GROUP)
