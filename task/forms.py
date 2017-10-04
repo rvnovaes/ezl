@@ -23,15 +23,15 @@ class TaskForm(BaseForm):
     person_asked_by = forms.ModelChoiceField(
         empty_label=u"Selecione...",
         queryset=filter_valid_choice_form(
-            Person.objects.filter(is_active=True, is_correspondent=False)).order_by(
-            'name'))
+          Person.objects.active().correspondents().order_by('name')))
 
     person_executed_by = forms.ModelChoiceField(
         empty_label=u"Selecione...",
-        queryset=Person.objects.filter(is_active=True, is_correspondent=True).order_by('name'))
+        queryset=Person.objects.active().correspondents().order_by('name'))
 
     type_task = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True)).order_by('name'),
+        queryset=filter_valid_choice_form(
+            TypeTask.objects.filter(is_active=True)).order_by('name'),
         empty_label=u"Selecione...",
         label=u"Tipo de Serviço")
     # TODO verificar como aplicar os formulários com dateTimeField
@@ -50,11 +50,12 @@ class TaskForm(BaseForm):
                                           )
 
     reminder_deadline_date = forms.DateField(required=True,
-                                             widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                                 format='DD/MM/YYYY',
-                                                                 min_date=datetime.utcnow().replace(
-                                                                     tzinfo=pytz.timezone(
-                                                                         settings.TIME_ZONE)))
+                                             widget=MDDatePicker(
+                                                attrs={'class': 'form-control'},
+                                                format='DD/MM/YYYY',
+                                                min_date=datetime.utcnow().replace(
+                                                    tzinfo=pytz.timezone(
+                                                        settings.TIME_ZONE)))
                                              )
 
     final_deadline_date = forms.DateTimeField(required=False,
