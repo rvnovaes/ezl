@@ -275,7 +275,7 @@ class TypeTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView
         :param kwargs:
         :return: super
         """
-        context = super(TypeTaskUpdateView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         cache.set('type_task_page', self.request.META.get('HTTP_REFERER'))
         return context
 
@@ -290,8 +290,9 @@ class TypeTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView
         :return: super
         """
         if cache.get('type_task_page'):
-            self.success_url = cache.get('type_movement_page')
-        return super(TypeTaskUpdateView, self).post(request, *args, **kwargs)
+            self.success_url = cache.get('type_task_page')
+
+        return super().post(request, *args, **kwargs)
 
 
 class TypeTaskDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
