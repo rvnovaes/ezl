@@ -7,7 +7,7 @@ from django.db import transaction
 @transaction.atomic
 def get_folder_number():
     return get_next_value('lawsuit_folder_folder_number')
-    
+
 
 class TypeMovement(Audit, LegacyCode):
     name = models.CharField(max_length=255, blank=False, null=False, default="", unique=True, verbose_name='Nome')
@@ -72,6 +72,7 @@ class CourtDistrict(Audit, LegacyCode):
     state = models.ForeignKey(State, on_delete=models.PROTECT, null=False, blank=False, verbose_name="Estado")
 
     class Meta:
+        ordering = ('name', )
         db_table = "court_district"
         verbose_name = "Comarca"
         verbose_name_plural = "Comarcas"
@@ -126,6 +127,6 @@ class Movement(Audit, LegacyCode):
 
     def __str__(self):
         return self.type_movement.name  # TODO verificar novos campos e refatorar o toString
-        
-         
+
+
 
