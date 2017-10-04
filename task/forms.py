@@ -85,7 +85,7 @@ class TaskForm(BaseForm):
                                         widget=MDDatePicker(attrs={'class': 'form-control'},
                                                             format='DD/MM/YYYY')
                                         )
-    description = forms.CharField(required=False, initial="", label="Observações",
+    description = forms.CharField(required=False, initial="", label="Descrição",
                                   widget=forms.Textarea(
                                       attrs={'class': 'form-control', 'rows': '5',
                                              'id': 'details_id'}))
