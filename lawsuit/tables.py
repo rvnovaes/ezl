@@ -16,6 +16,7 @@ class InstanceTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/processos/instancias/' + str(record.pk) + '/'
         }
+        order_by = 'name'
 
 
 class TypeMovementTable(tables.Table):
@@ -30,6 +31,7 @@ class TypeMovementTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/processos/tipo-movimentacao/' + str(record.pk) + '/'
         }
+        order_by = 'name'
 
 
 class MovementTable(tables.Table):
@@ -39,13 +41,13 @@ class MovementTable(tables.Table):
         sequence = ('selection', 'type_movement', 'is_active', 'legacy_code')
         model = Movement
         attrs = {"class": "table-striped table-bordered"}
-        fields = ['selection', 'legacy_code', 'type_movement',
-                  'is_active']
+        fields = ['selection', 'legacy_code', 'type_movement', 'is_active', 'create_date']
         empty_text = "Não existem movimentações cadastradas"
         row_attrs = {
             'data_href': lambda record: '/processos/movimentacao/' + str(record.law_suit.pk) + '/' + str(
                 record.pk) + '/'
         }
+        order_by = '-create_date'
 
 
 class FolderTable(tables.Table):
@@ -61,6 +63,7 @@ class FolderTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/processos/pastas/' + str(record.pk) + '/'
         }
+        order_by = 'folder_number'
 
 
 class LawSuitTable(tables.Table):
@@ -92,6 +95,7 @@ class CourtDivisionTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/processos/varas/' + str(record.pk) + '/'
         }
+        order_by = 'name'
 
 
 class CourtDistrictTable(tables.Table):
@@ -106,3 +110,4 @@ class CourtDistrictTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/processos/comarcas/' + str(record.pk) + '/'
         }
+        order_by = 'name'
