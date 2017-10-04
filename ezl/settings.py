@@ -258,6 +258,13 @@ LOGGING = {
             'filename': '/tmp/django_dev.log',
             'formatter': 'verbose'
         },
+        'ezl_logfile': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/ezl/ezl.log',
+            'formatter': 'simple'
+        },
         'error_logfile': {
             'level': 'ERROR',
             'filters': ['require_debug_true'],
@@ -288,6 +295,10 @@ LOGGING = {
         'debug_logger': {
             'handlers': ['debug_logfile'],
             'level': 'DEBUG'
+        },
+        'ezl': {
+            'handlers': ['ezl_logfile'],
+            'level': 'INFO'
         },
         'django': {
             'handlers': ['development_logfile'],

@@ -8,7 +8,6 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User, Group
-from django.contrib.messages import storage
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy
@@ -36,6 +35,8 @@ from task.models import Task
 from django.db.models import Q
 from functools import wraps
 from django.core.cache import cache
+from core.utils import login_log, logout_log
+from allauth.account.views import LoginView
 
 
 def login(request):
@@ -54,6 +55,7 @@ def inicial(request):
         return HttpResponseRedirect('/')
 
 
+@logout_log
 def logout_user(request):
     # Faz o logout do usuário contido na requisição, limpando todos os dados da sessão corrente;
     logout(request)
@@ -67,6 +69,7 @@ def remove_invalid_registry(f):
     :param f:
     :return f:
     """
+
     @wraps(f)
     def wrapper(*args, **kwargs):
         try:
@@ -82,7 +85,25 @@ def remove_invalid_registry(f):
             pass
         res = f(*args, **kwargs)
         return res
+
     return wrapper
+
+
+class LoginCustomView(LoginView):
+    """
+    Esta classe herda da view que e responsavel por realizar o login no django-allauth
+    """
+
+    @login_log
+    def form_valid(self, form):
+        """
+        Este metodo valida o formulario de login e faz a chamada da funcao que
+        efetuar a autenticacao
+        Esta sendo sobrescrito para gerar o log de autenticacao de usuario atraves
+        do decorator log
+        :param form:
+        """
+        return super(LoginCustomView, self).form_valid(form)
 
 
 # Implementa a alteração da data e usuários para operação de update e new
@@ -142,7 +163,8 @@ class SingleTableViewMixin(SingleTableView):
             else:
                 if kwargs.get('remove_invalid'):
                     table = self.table_class(
-                        self.model.objects.filter(~Q(pk=kwargs.get('remove_invalid'))).order_by('-pk'))
+                        self.model.objects.filter(~Q(pk=kwargs.get('remove_invalid'))).order_by(
+                            '-pk'))
                 else:
                     table = self.table_class(self.model.objects.all().order_by('-pk'))
             RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
@@ -256,7 +278,8 @@ class PersonCreateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
                 context = self.get_context_data()
                 return render(self.request, 'core/person_form.html', context)
 
-            addresses_form = AddressFormSet(self.request.POST, instance=Person.objects.get(id=person.id))
+            addresses_form = AddressFormSet(self.request.POST,
+                                            instance=Person.objects.get(id=person.id))
 
             if addresses_form.is_valid():
                 for address in addresses_form:
@@ -370,7 +393,8 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
                     a.address_type = address.instance.address_type
                     a.zip_code = address.instance.zip_code
 
-                    if address.cleaned_data['is_active'] is True or address.cleaned_data['is_active'] is 'on':
+                    if address.cleaned_data['is_active'] is True or address.cleaned_data[
+                        'is_active'] is 'on':
                         a.is_active = True
                     else:
                         a.is_active = False
@@ -422,7 +446,8 @@ class GenericAutocompleteForeignKey(autocomplete.Select2QuerySetView):
             if self.q:
                 generic_search = GenericSearchForeignKey(model)
                 ids = generic_search.get_related_values(self.q, field_name)
-                qs = list(filter(lambda i: i.id in ids, eval('model.{0}.get_queryset()'.format(field_name))))
+                qs = list(filter(lambda i: i.id in ids,
+                                 eval('model.{0}.get_queryset()'.format(field_name))))
             return qs
         except:
             return []
@@ -548,10 +573,13 @@ class GenericFormOneToMany(FormView, SingleTableView):
             context['form_name'] = self.related_model._meta.verbose_name
             context['form_name_plural'] = self.related_model._meta.verbose_name_plural
             fields_related = list(
-                filter(lambda i: i.get_internal_type() == 'ForeignKey', self.related_model._meta.fields))
+                filter(lambda i: i.get_internal_type() == 'ForeignKey',
+                       self.related_model._meta.fields))
             field_related = list(filter(lambda i: i.related_model == self.model, fields_related))[0]
-            generic_search = GenericSearchFormat(self.request, self.related_model, self.related_model._meta.fields,
-                                                 related_id=related_model_id, field_name_related=field_related.name)
+            generic_search = GenericSearchFormat(self.request, self.related_model,
+                                                 self.related_model._meta.fields,
+                                                 related_id=related_model_id,
+                                                 field_name_related=field_related.name)
             args = generic_search.despatch()
             if args:
                 table = eval(args.replace('.model.', '.related_model.'))
