@@ -3,13 +3,13 @@
     {% for field in form %}
         {% for error in field.errors %}
             <script>
-                showToast('error', '{{ error|escape }}', 'Atenção1!', 0, false)
+                showToast('error', '{{ error|escape }}', '{{ field.label|escape }}', 0, false)
             </script>
         {% endfor %}
     {% endfor %}
     {% for error in form.non_field_errors %}
         <script>
-            showToast('error', '{{ error|escape }}', 'Atenção2!', 0, false)
+            showToast('error', '{{ error|escape }}', 'Atenção!', 0, false)
         </script>
     {% endfor %}
 {% endif %}
@@ -22,4 +22,5 @@
     {% endfor %}
 {% endif %}
 {#</div>#}
+
 
