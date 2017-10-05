@@ -1,4 +1,4 @@
-USER_MANUAL_URL = '/media/manual-do-usuario.pdf'
+USER_MANUAL_URL = '/static/downloads/Manual%20correspondentes.pdf'
 
 import os
 import sys
