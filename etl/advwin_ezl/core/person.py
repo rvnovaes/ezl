@@ -58,7 +58,7 @@ class PersonETL(GenericETL):
                     FROM   {clifor} AS cf
                     WHERE  cf.status = 'Ativo'
                            AND cf.razao IS NOT NULL
-                           AND cf.razao <> ''     
+                           AND cf.razao <> ''
                 """.format(tribunal='Jurid_Tribunais', advogado='Jurid_Advogado',
                            clifor='Jurid_Clifor')
 
@@ -81,7 +81,6 @@ class PersonETL(GenericETL):
                 legal_type = row['legal_type']
                 customer_supplier = row['customer_supplier']
                 is_lawyer = row['is_lawyer']
-                is_correspondent = row['is_correspondent']
                 is_court = row['is_court']
                 cpf_cnpj = None
                 if legal_type != 'F' and legal_type != 'J':
@@ -92,7 +91,8 @@ class PersonETL(GenericETL):
                         else:
                             legal_type = 'F'
                     else:
-                        # se nao der pra saber se é pessoa fisica ou juridica será considerada juridica
+                        # se nao der pra saber se é pessoa fisica ou juridica será considerada
+                        # juridica
                         legal_type = 'J'
 
                 if str(legacy_code).isnumeric():
@@ -114,8 +114,9 @@ class PersonETL(GenericETL):
 
                 is_active = True
 
-                instance = self.model.objects.filter(legacy_code=legacy_code,
-                                                     system_prefix=LegacySystem.ADVWIN.value).first()
+                instance = self.model.objects.filter(
+                    legacy_code=legacy_code,
+                    system_prefix=LegacySystem.ADVWIN.value).first()
 
                 if instance:
                     # use update_fields to specify which fields to save
@@ -123,7 +124,6 @@ class PersonETL(GenericETL):
                     instance.legal_name = legal_name
                     instance.name = name
                     instance.is_lawyer = is_lawyer
-                    instance.is_correspondent = is_correspondent
                     instance.is_court = is_court
                     instance.legal_type = legal_type
                     instance.cpf_cnpj = cpf_cnpj
@@ -136,7 +136,6 @@ class PersonETL(GenericETL):
                                        'legal_name',
                                        'name',
                                        'is_lawyer',
-                                       'is_correspondent',
                                        'is_court',
                                        'legal_type',
                                        'cpf_cnpj',
@@ -148,7 +147,6 @@ class PersonETL(GenericETL):
                     obj = self.model(legal_name=legal_name,
                                      name=name,
                                      is_lawyer=is_lawyer,
-                                     is_correspondent=is_correspondent,
                                      is_court=is_court,
                                      legal_type=legal_type,
                                      cpf_cnpj=cpf_cnpj,
@@ -162,8 +160,8 @@ class PersonETL(GenericETL):
 
                     obj.save()
                 self.debug_logger.debug(
-                    "Pessoa,%s,%s,%s,%s,%s,%s,s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
-                        str(legal_name), str(name), str(is_lawyer), str(is_correspondent),
+                    "Pessoa,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                        str(legal_name), str(name), str(is_lawyer),
                         str(is_court), str(legal_type),
                         str(cpf_cnpj), str(user.id), str(user.id), str(is_customer),
                         str(is_supplier), str(is_active), str(legacy_code),

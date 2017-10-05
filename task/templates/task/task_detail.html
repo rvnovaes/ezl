@@ -52,7 +52,7 @@
                     <div class="panel-title"><i class="material-icons">{{ form.instance.status.get_icon }}</i>
                         <b>{{ form.instance.status|default_if_none:"" }}
                             #{{ form.instance.id|default_if_none:"" }}
-                            - {{ form.instance.type_task|lower|capfirst }}</b>
+                            - {{ form.instance.type_task }}</b>
                     </div>
                 </div>
                 <div class="panel-body form-group is-focused">
@@ -70,11 +70,11 @@
                         <br>
                         <span><b>Recebida em:</b> {{ form.instance.delegation_date|localtime|default_if_none:"" }}</span>
                         <br>
-                        <span><b>Serviço solicitado:</b> {{ form.instance.type_task|lower|capfirst|default_if_none:"" }}</span>
+                        <span><b>Serviço solicitado:</b> {{ form.instance.type_task|default_if_none:"" }}</span>
                         <br>
-                        <span><b>Vara:</b> {{ form.instance.court_division|lower|capfirst|default_if_none:"" }}</span>
+                        <span><b>Vara:</b> {{ form.instance.court_division|default_if_none:"" }}</span>
                         <br>
-                        <span><b>Órgão:</b> {{ form.instance.court|lower|capfirst|default_if_none:"" }}</span>
+                        <span><b>Órgão:</b> {{ form.instance.court|default_if_none:"" }}</span>
                         <br>
                         <span><b>Endereço:</b> {{ form.instance.address|capfirst|default_if_none:"" }}</span>
                         <div class="hidden form-control">{{ form.survey_result }}</div>

@@ -21,19 +21,19 @@ class TaskForm(BaseForm):
                   'is_active']
 
     person_asked_by = forms.ModelChoiceField(
-        empty_label=u"Selecione...",
+        empty_label='Selecione...',
         queryset=filter_valid_choice_form(
-            Person.objects.filter(is_active=True, is_correspondent=False)).order_by(
-            'name'))
+          Person.objects.active().correspondents().order_by('name')))
 
     person_executed_by = forms.ModelChoiceField(
-        empty_label=u"Selecione...",
-        queryset=Person.objects.filter(is_active=True, is_correspondent=True).order_by('name'))
+        empty_label='Selecione...',
+        queryset=Person.objects.active().requesters().order_by('name'))
 
     type_task = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True)).order_by('name'),
-        empty_label=u"Selecione...",
-        label=u"Tipo de Serviço")
+        queryset=filter_valid_choice_form(
+            TypeTask.objects.filter(is_active=True)).order_by('name'),
+        empty_label='Selecione...',
+        label='Tipo de Serviço')
     # TODO verificar como aplicar os formulários com dateTimeField
 
     delegation_date = forms.DateTimeField(show_hidden_initial=True, initial=datetime.now(),
@@ -96,15 +96,14 @@ class TaskDetailForm(ModelForm):
     execution_date = forms.DateTimeField(required=False,
                                          initial=datetime.utcnow().replace(
                                              tzinfo=pytz.timezone(settings.TIME_ZONE)),
-                                         label=u"Data de Cumprimento",
+                                         label='Data de Cumprimento',
                                          widget=MDDateTimepicker(attrs={'class': 'form-control'},
                                                                  format='DD/MM/YYYY HH:mm',
-                                                                 max_date=True
                                                                  ))
     notes = forms.CharField(
         required=True,
-        initial="",
-        label=u"Insira um comentário",
+        initial='',
+        label='Insira um comentário',
         widget=forms.Textarea(
             attrs={'class': 'form-control', 'cols': '5', 'id': 'notes_id'}
         )

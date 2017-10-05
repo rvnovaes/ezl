@@ -11,7 +11,6 @@
         <field name="legal_name" type="CharField">admin</field>
         <field name="name" type="CharField"></field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField"><None></None></field>
@@ -30,7 +29,6 @@
         <field name="legal_name" type="CharField">PESSOA-INVÁLIDO</field>
         <field name="name" type="CharField">PESSOA-INVÁLIDO</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField"><None></None></field>
@@ -49,7 +47,6 @@
         <field name="legal_name" type="CharField">Tomás Vitor Pereira</field>
         <field name="name" type="CharField">Tomás Vitor Pereira</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">868.556.446-86</field>
@@ -68,7 +65,6 @@
         <field name="legal_name" type="CharField">Guilherme e Breno Ferragens Ltda</field>
         <field name="name" type="CharField">Guilherme e Breno Ferragens Ltda</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">94.809.937/0001-56</field>
@@ -87,7 +83,6 @@
         <field name="legal_name" type="CharField">Gabriel de Araújo Lima</field>
         <field name="name" type="CharField">Gabriel de Araújo Lima</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">097.972.928-94</field>
@@ -106,7 +101,6 @@
         <field name="legal_name" type="CharField">Joaquim Lucca Cavalcanti</field>
         <field name="name" type="CharField">Joaquim Lucca Cavalcanti</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">089.789.395-62</field>
@@ -125,7 +119,6 @@
         <field name="legal_name" type="CharField">Tribunal de Justiça de Minas Gerais</field>
         <field name="name" type="CharField">TJMG</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">True</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">21.154.554/0001-13</field>
@@ -144,7 +137,6 @@
         <field name="legal_name" type="CharField">Tribunal de Justiça de São Paulo</field>
         <field name="name" type="CharField">TJSP</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">True</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">51.174.001/0001-93</field>
@@ -163,7 +155,6 @@
         <field name="legal_name" type="CharField">Bradesco Capitalização S/A</field>
         <field name="name" type="CharField">Bradesco Capitalização S/A</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">33.010.851/0001-74</field>
@@ -182,7 +173,6 @@
         <field name="legal_name" type="CharField">Rayana Lima</field>
         <field name="name" type="CharField">Rayana Lima</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">009.610.736-75</field>
@@ -201,7 +191,6 @@
         <field name="legal_name" type="CharField">Murilo Bryan Igor Nascimento</field>
         <field name="name" type="CharField">Murilo Bryan Igor Nascimento</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">521.731.296-35</field>
@@ -220,7 +209,6 @@
         <field name="legal_name" type="CharField">Hadassa e Augusto Telecomunicações Ltda</field>
         <field name="name" type="CharField">Hadassa e Augusto Telecomunicações Ltda</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">93.093.966/0001-00</field>
@@ -239,7 +227,6 @@
         <field name="legal_name" type="CharField">Alana e Gustavo Marketing Ltda</field>
         <field name="name" type="CharField">Alana e Gustavo Marketing Ltda</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">94.198.203/0001-88</field>
@@ -258,7 +245,6 @@
         <field name="legal_name" type="CharField">Éloa Costa</field>
         <field name="name" type="CharField">Éloa Costa</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">490.212.508-02</field>
@@ -277,7 +263,6 @@
         <field name="legal_name" type="CharField">Ricardo Luz</field>
         <field name="name" type="CharField">Ricardo Luz</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">198.139.878-39</field>
@@ -296,7 +281,6 @@
         <field name="legal_name" type="CharField">João Lucas Oliveira</field>
         <field name="name" type="CharField">João Lucas Oliveira</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">767.833.998-42</field>
@@ -315,7 +299,6 @@
         <field name="legal_name" type="CharField">Mayara Garbo</field>
         <field name="name" type="CharField">Mayara Garbo</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">817.138.528-10</field>
@@ -334,7 +317,6 @@
         <field name="legal_name" type="CharField">Barbara Ramos</field>
         <field name="name" type="CharField">Barbara Ramos</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">210.282.288-56</field>
@@ -353,7 +335,6 @@
         <field name="legal_name" type="CharField">Gabriel Viana</field>
         <field name="name" type="CharField">Gabriel Viana</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">420.472.648-80</field>
@@ -372,7 +353,6 @@
         <field name="legal_name" type="CharField">Trena Terraplenagem e Construções LTDA</field>
         <field name="name" type="CharField">Trena Terraplenagem e Construções LTDA</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">08.946.461/0001-63</field>
@@ -391,7 +371,6 @@
         <field name="legal_name" type="CharField">Impermeabilização Isolar</field>
         <field name="name" type="CharField">Impermeabilização Isolar</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">96.149.600/0001-95</field>
@@ -410,7 +389,6 @@
         <field name="legal_name" type="CharField">Express Lavanderia</field>
         <field name="name" type="CharField">Express Lavanderia</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">23.333.434/0001-09</field>
@@ -429,7 +407,6 @@
         <field name="legal_name" type="CharField">Minas Brasil Mineração LTDA</field>
         <field name="name" type="CharField">Minas Brasil Mineração LTDA</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">87.772.371/0001-70</field>
@@ -448,7 +425,6 @@
         <field name="legal_name" type="CharField">Qualy Comércio De Carvão LTDA</field>
         <field name="name" type="CharField">Qualy Comércio De Carvão LTDA</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">69.019.731/0001-85</field>
@@ -467,7 +443,6 @@
         <field name="legal_name" type="CharField">Cobrasa Construtora Brasileira LTDA</field>
         <field name="name" type="CharField">Cobrasa Construtora Brasileira LTDA</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">69.622.015/0001-98</field>
@@ -486,7 +461,6 @@
         <field name="legal_name" type="CharField">Pneus Brasa LTDA</field>
         <field name="name" type="CharField">Pneus Brasa LTDA</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">44.323.563/0001-96</field>
@@ -505,7 +479,6 @@
         <field name="legal_name" type="CharField">Siderúrgica São Luiz LTDA</field>
         <field name="name" type="CharField">Siderúrgica São Luiz LTDA</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">42.573.478/0001-50</field>
@@ -524,7 +497,6 @@
         <field name="legal_name" type="CharField">Lorena Manuela Brenda Fernandes</field>
         <field name="name" type="CharField">Lorena Manuela Brenda Fernandes</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">305.297.412-29</field>
@@ -543,7 +515,6 @@
         <field name="legal_name" type="CharField">Levi Otávio Paulo Fernandes</field>
         <field name="name" type="CharField">Levi Otávio Paulo Fernandes</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">935.361.379-54</field>
@@ -562,7 +533,6 @@
         <field name="legal_name" type="CharField">Flávia Agatha Milena Martins</field>
         <field name="name" type="CharField">Flávia Agatha Milena Martins</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField">263.165.543-54</field>
@@ -581,7 +551,6 @@
         <field name="legal_name" type="CharField">Luiza Rodrigues Drumond</field>
         <field name="name" type="CharField">Luiza Rodrigues Drumond</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField"><None></None></field>
@@ -600,7 +569,6 @@
         <field name="legal_name" type="CharField">Banco Rural S/A</field>
         <field name="name" type="CharField">Banco Rural</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">33.124.959/0001-98</field>
@@ -619,7 +587,6 @@
         <field name="legal_name" type="CharField">Taiana Farias</field>
         <field name="name" type="CharField">Taiana Farias</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField"><None></None></field>
@@ -638,7 +605,6 @@
         <field name="legal_name" type="CharField">José Aquino de Moraes</field>
         <field name="name" type="CharField">José Aquino de Moraes</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField"><None></None></field>
@@ -657,7 +623,6 @@
         <field name="legal_name" type="CharField">Stefany Pinheiro de Oliveira</field>
         <field name="name" type="CharField">Stefany Pinheiro de Oliveira</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField"><None></None></field>
@@ -676,7 +641,6 @@
         <field name="legal_name" type="CharField">Marcos AntônioBezerra Jr</field>
         <field name="name" type="CharField">Marcos AntônioBezerra Jr</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField"><None></None></field>
@@ -695,7 +659,6 @@
         <field name="legal_name" type="CharField">Miguel Falcão de Carvalho</field>
         <field name="name" type="CharField">Miguel Falcão de Carvalho</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField"><None></None></field>
@@ -714,7 +677,6 @@
         <field name="legal_name" type="CharField">Estevan Azevedo de Lima</field>
         <field name="name" type="CharField">Estevan Azevedo de Lima</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField"><None></None></field>
@@ -733,7 +695,6 @@
         <field name="legal_name" type="CharField">Luiza Dias Gonçalves</field>
         <field name="name" type="CharField">Luiza Dias Gonçalves</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField"><None></None></field>
@@ -752,7 +713,6 @@
         <field name="legal_name" type="CharField">Thais Almeida de Carvalho</field>
         <field name="name" type="CharField">Thais Almeida de Carvalho</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField"><None></None></field>
@@ -771,7 +731,6 @@
         <field name="legal_name" type="CharField">Giovanna Rodrigues Souza</field>
         <field name="name" type="CharField">Giovanna Rodrigues Souza</field>
         <field name="is_lawyer" type="BooleanField">True</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">F</field>
         <field name="cpf_cnpj" type="CharField"><None></None></field>
@@ -790,7 +749,6 @@
         <field name="legal_name" type="CharField">Laboratório Sabin de Análises Clínicas</field>
         <field name="name" type="CharField">Laboratório Sabin de Análises Clínicas</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">87.544.727/0001-18</field>
@@ -809,7 +767,6 @@
         <field name="legal_name" type="CharField">Consórcio Nacional Embracon</field>
         <field name="name" type="CharField">Consórcio Nacional Embracon</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">32.891.700/0001-00</field>
@@ -828,7 +785,6 @@
         <field name="legal_name" type="CharField">Plan B Comunicação</field>
         <field name="name" type="CharField">Plan B Comunicação</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">64.597.629/0001-43</field>
@@ -847,7 +803,6 @@
         <field name="legal_name" type="CharField">Kot Engenharia</field>
         <field name="name" type="CharField">Kot Engenharia</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">10.760.126/0001-18</field>
@@ -866,7 +821,6 @@
         <field name="legal_name" type="CharField">Prumo Engenharia</field>
         <field name="name" type="CharField">Prumo Engenharia</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">56.925.864/0001-79</field>
@@ -885,7 +839,6 @@
         <field name="legal_name" type="CharField">Tribunal de Justiça do Acre</field>
         <field name="name" type="CharField">Tribunal de Justiça do Acre</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">True</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">05.945.116/0001-17</field>
@@ -904,7 +857,6 @@
         <field name="legal_name" type="CharField">Tribunal de Justiça do Amazonas</field>
         <field name="name" type="CharField">Tribunal de Justiça do Amazonas</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">True</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">78.746.591/0001-38</field>
@@ -923,7 +875,6 @@
         <field name="legal_name" type="CharField">Tribunal de Justiça do Distrito Federal</field>
         <field name="name" type="CharField">Tribunal de Justiça do Distrito Federal</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">True</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">16.575.631/0001-79</field>
@@ -942,7 +893,6 @@
         <field name="legal_name" type="CharField">Tribunal de Justiça do Maranhão</field>
         <field name="name" type="CharField">Tribunal de Justiça do Maranhão</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">True</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">51.608.994/0001-64</field>
@@ -961,7 +911,6 @@
         <field name="legal_name" type="CharField">Tribunal de Justiça do Paraná</field>
         <field name="name" type="CharField">Tribunal de Justiça do Paraná</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">True</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">48.670.199/0001-91</field>
@@ -980,7 +929,6 @@
         <field name="legal_name" type="CharField">Tribunal de Justiça do Rio de Janeiro</field>
         <field name="name" type="CharField">Tribunal de Justiça do Rio de Janeiro</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">True</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">72.426.397/0001-99</field>
@@ -999,7 +947,6 @@
         <field name="legal_name" type="CharField">Junqueira Sampaio Advogados</field>
         <field name="name" type="CharField">Junqueira Sampaio Advogados</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">05.905.451/0001-91</field>
@@ -1018,7 +965,6 @@
         <field name="legal_name" type="CharField">Pio &amp; Santos Advocacia</field>
         <field name="name" type="CharField">Pio &amp; Santos Advocacia</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">74.064.832/0001-08</field>
@@ -1037,7 +983,6 @@
         <field name="legal_name" type="CharField">Abdalla Landulfo - Sociedade de Advogados</field>
         <field name="name" type="CharField">Abdalla Landulfo - Sociedade de Advogados</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">46.035.361/0001-74</field>
@@ -1056,7 +1001,6 @@
         <field name="legal_name" type="CharField">Tobias e Corgosinho Advogados Associados</field>
         <field name="name" type="CharField">Tobias e Corgosinho Advogados Associados</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">53.831.634/0001-52</field>
@@ -1075,7 +1019,6 @@
         <field name="legal_name" type="CharField">Veríssimo Carvalho Advocacia</field>
         <field name="name" type="CharField">Veríssimo Carvalho Advocacia</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">88.328.227/0001-01</field>
@@ -1094,7 +1037,6 @@
         <field name="legal_name" type="CharField">Lincoln Louzada Advocacia &amp; Consultoria Jurídica</field>
         <field name="name" type="CharField">Lincoln Louzada Advocacia &amp; Consultoria Jurídica</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">77.716.567/0001-93</field>
@@ -1113,7 +1055,6 @@
         <field name="legal_name" type="CharField">Juizado Especial Cível -  Unidade Francisco Sales</field>
         <field name="name" type="CharField">Juizado Especial Cível -  Unidade Francisco Sales</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">True</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">15.265.241/0001-30</field>
@@ -1132,7 +1073,6 @@
         <field name="legal_name" type="CharField">Juizado Especial Cível - Unidade Barreiro</field>
         <field name="name" type="CharField">Juizado Especial Cível - Unidade Barreiro</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">True</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">23.819.297/0001-17</field>
@@ -1151,7 +1091,6 @@
         <field name="legal_name" type="CharField">Juizado Especial da Fazenda Pública</field>
         <field name="name" type="CharField">Juizado Especial da Fazenda Pública</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">True</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">22.376.637/0001-10</field>
@@ -1170,7 +1109,6 @@
         <field name="legal_name" type="CharField">Tribunal Regional do Trabalho 3ª Região</field>
         <field name="name" type="CharField">Tribunal Regional do Trabalho 3ª Região</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">True</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">86.414.087/0001-69</field>
@@ -1189,7 +1127,6 @@
         <field name="legal_name" type="CharField">Farias e Farias Advogados Associados</field>
         <field name="name" type="CharField">Farias e Farias Advogados Associados</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">True</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">75.944.559/0001-79</field>
@@ -1208,7 +1145,6 @@
         <field name="legal_name" type="CharField">Banco Itau Card</field>
         <field name="name" type="CharField">Banco Itau Card</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">59.267.402/0001-08</field>
@@ -1227,7 +1163,6 @@
         <field name="legal_name" type="CharField">Rio Branco Alimentos S/A</field>
         <field name="name" type="CharField">Rio Branco Alimentos S/A</field>
         <field name="is_lawyer" type="BooleanField">False</field>
-        <field name="is_correspondent" type="BooleanField">False</field>
         <field name="is_court" type="BooleanField">False</field>
         <field name="legal_type" type="CharField">J</field>
         <field name="cpf_cnpj" type="CharField">05.017.780/0001-04</field>

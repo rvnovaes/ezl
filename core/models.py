@@ -3,23 +3,8 @@ from enum import Enum
 from django.conf import settings
 from django.db import models
 
+from .managers import PersonManager
 from .utils import LegacySystem
-
-
-class Profile(Enum):
-    # TYPE_PROFILE
-    # enum
-    # Correspondente - 0
-    # Advogado_Solicitante - 0
-    # Supervisor - 0
-    # Coordenador - 0
-    # Admin - 0
-    ADMIN = "Admin"
-    LAWYER = "Advogado Solicitante"
-    COORDINATOR = "Coordenador"
-    CORREPONDENT = "Correspondente"
-    SUPERVISOR = "Supervisor"
-    SERVICE = "Service"
 
 
 class LegalType(Enum):
@@ -51,7 +36,8 @@ class AuditCreate(models.Model):
     # auto_now_add - toda vez que for criado
     create_date = models.DateTimeField('Criado em', auto_now_add=True)
     create_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
-                                    related_name='%(class)s_create_user', verbose_name='Criado por')
+                                    related_name='%(class)s_create_user',
+                                    verbose_name='Criado por')
 
     class Meta:
         abstract = True
@@ -60,16 +46,20 @@ class AuditCreate(models.Model):
 class AuditAlter(models.Model):
     # auto_now - toda vez que for salvo
     alter_date = models.DateTimeField('Atualizado em', auto_now=True, blank=True, null=True)
-    alter_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True,
-                                   related_name='%(class)s_alter_user', verbose_name='Alterado por')
+    alter_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True,
+                                   null=True,
+                                   related_name='%(class)s_alter_user',
+                                   verbose_name='Alterado por')
 
     class Meta:
         abstract = True
 
 
 class LegacyCode(models.Model):
-    legacy_code = models.CharField(max_length=255, blank=True, null=True, verbose_name='Código legado')
-    system_prefix = models.CharField(max_length=255, blank=True, null=True, verbose_name=u'Prefixo do sistema',
+    legacy_code = models.CharField(max_length=255, blank=True, null=True,
+                                   verbose_name='Código legado')
+    system_prefix = models.CharField(max_length=255, blank=True, null=True,
+                                     verbose_name=u'Prefixo do sistema',
                                      choices=((x.value, x.name.title()) for x in LegacySystem))
 
     class Meta:
@@ -130,7 +120,8 @@ class City(Audit):
     name = models.CharField(max_length=255, null=False)
     state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False)
 
-    court_district = models.ForeignKey('lawsuit.CourtDistrict', on_delete=models.PROTECT, blank=False, null=False,
+    court_district = models.ForeignKey('lawsuit.CourtDistrict', on_delete=models.PROTECT,
+                                       blank=False, null=False,
                                        verbose_name='Comarca')
 
     class Meta:
@@ -143,17 +134,24 @@ class City(Audit):
 
 
 class Person(Audit, LegacyCode):
-    legal_name = models.CharField(max_length=255, blank=False, verbose_name="Razão social/Nome completo")
+    CORRESPONDENT_GROUP = "Correspondente"
+    REQUESTER_GROUP = 'Solicitante'
+
+    objects = PersonManager()
+
+    legal_name = models.CharField(max_length=255, blank=False,
+                                  verbose_name="Razão social/Nome completo")
     name = models.CharField(max_length=255, null=True, blank=True, default=legal_name,
                             verbose_name="Nome Fantasia/Apelido")
     is_lawyer = models.BooleanField(null=False, default=False, verbose_name="É Advogado?")
-    is_correspondent = models.BooleanField(null=False, default=False, verbose_name="É Correspondente?")
     is_court = models.BooleanField(null=False, default=False, verbose_name="É Tribunal?")
     legal_type = models.CharField(null=False, verbose_name="Tipo", max_length=1,
                                   choices=((x.value, x.format(x.value)) for x in LegalType),
                                   default=LegalType.JURIDICA)
-    cpf_cnpj = models.CharField(max_length=255, blank=True, null=True, unique=True, verbose_name="CPF/CNPJ")
-    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True,
+    cpf_cnpj = models.CharField(max_length=255, blank=True, null=True,
+                                unique=True, verbose_name="CPF/CNPJ")
+    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+                                     blank=True, null=True,
                                      verbose_name="Usuário do sistema")
     is_customer = models.BooleanField(null=False, default=False, verbose_name="É Cliente?")
     is_supplier = models.BooleanField(null=False, default=False, verbose_name="É Fornecedor?")
@@ -185,7 +183,8 @@ class Person(Audit, LegacyCode):
 
 
 class Address(Audit):
-    address_type = models.ForeignKey(AddressType, on_delete=models.PROTECT, blank=False, null=False)
+    address_type = models.ForeignKey(
+        AddressType, on_delete=models.PROTECT, blank=False, null=False)
     street = models.CharField(max_length=255)
     number = models.CharField(max_length=255)
     complement = models.CharField(max_length=255, blank=True)
@@ -203,9 +202,12 @@ class Address(Audit):
         db_table = "address"
 
     def __str__(self):
-        return '{street}, {number}{complement} - {city_region} - {city} - {state} - CEP {zip_code}'.format(
-            number=self.number, street=self.street, city_region=self.city_region, city=self.city.name,
-            state=self.state.name, zip_code=self.zip_code, complement='/' + self.complement if self.complement else ''
+        tpl = '{street}, {number}{complement} - {city_region} - {city} - {state} - CEP {zip_code}'
+        return tpl.format(
+            number=self.number, street=self.street, city_region=self.city_region,
+            city=self.city.name,
+            state=self.state.name, zip_code=self.zip_code, complement='/' +
+            self.complement if self.complement else ''
         )
 
 
@@ -220,9 +222,10 @@ class ContactMechanismType(Audit):
 
 
 class ContactMechanism(Audit):
-    contact_mechanism_type = models.ForeignKey(ContactMechanismType, on_delete=models.PROTECT, blank=False, null=False)
+    contact_mechanism_type = models.ForeignKey(
+        ContactMechanismType, on_delete=models.PROTECT, blank=False, null=False)
     description = models.CharField(max_length=255, null=False, unique=True)
-    notes = models.CharField(max_length=400)
+    notes = models.CharField(max_length=400, blank=True)
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
 
     class Meta:

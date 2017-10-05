@@ -130,11 +130,11 @@
                     </div>
                     <div class="modal-body">
                         {% if on_delete == 'CASCADE' %}
-                            <p>Ao excluir o(s) registro(s) de {{ form_name }} todos os seus vínculos também
+                            <p>Ao excluir o(s) registro(s) de {{ form_name.title }} todos os seus vínculos também
                                 serão excluídos! Essa ação é irreversível. Deseja continuar?</p>
                         {% else %}
                             <p>Tem certeza que deseja excluir o(s) registro(s)
-                                de {{ form_name }} selecionado(s)? Essa ação é irreversível. Deseja continuar?</p>
+                                de {{ form_name.title }} selecionado(s)? Essa ação é irreversível. Deseja continuar?</p>
                         {% endif %}
                     </div>
                     <div class="modal-footer">

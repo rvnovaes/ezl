@@ -64,6 +64,7 @@ class DashboardStatusTable(tables.Table):
         row_attrs = {
             'data_new_href': lambda record: '/dashboard/' + str(record.pk) + '/'
         }
+        order_by = ('-reminder_deadline_date', )
 
 
 class TypeTaskTable(tables.Table):
