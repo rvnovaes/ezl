@@ -34,12 +34,15 @@ try:
     linux_password = source_etl['linux_password']
     linux_user = source_etl['linux_user']
     if not os.path.exists('/var/log/ezl/etl'):
-        os.system('echo {0}|sudo -S mkdir /var/log/ezl/etl/'.format(
+        os.system('echo {0}|sudo -S mkdir -p /var/log/ezl/etl/'.format(
             linux_password))
-        os.system('echo {0}|sudo -S chmod -R +x /var/log/ezl/etl/'.format(
+        os.system('echo {0}|sudo -S chmod 755 /var/log/ezl/etl/ -R'.format(
             linux_password))
         os.system('echo {0}|sudo -S chown -R {1} /var/log/ezl/etl/'.format(
             linux_password, linux_user))
+        os.system('echo {0}|sudo -S chown -R {1} /var/log/ezl/'.format(
+            linux_password, linux_user))
+
 except KeyError as e:
     print('Invalid settings. Check the General.ini file')
     print(e)
