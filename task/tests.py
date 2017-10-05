@@ -80,7 +80,7 @@ class TaskTest(TestCase):
                                           is_correspondent=True).id
         type_task = mommy.make(TypeTask).id
         delegation_date = datetime.date.today()
-        reminder_deadline_date = datetime.datetime.now()
+        final_deadline_date = datetime.datetime.now()
         description = """
          Segundo o cliente ainda há três parcelas das cinco pactuadas no acordo. O processo foi 
          remetido ao arquivo geral. Pedi que o correspondente retire extrato para instruir nosso 
@@ -112,7 +112,7 @@ class TaskTest(TestCase):
                 'type_task': type_task,
                 'description': description,
                 'delegation_date': delegation_date,
-                'reminder_deadline_date': reminder_deadline_date}  # Unico requerido
+                'final_deadline_date': final_deadline_date}  # Unico requerido
         form = TaskForm(data=data)
         print(form.errors)
         self.assertTrue(form.is_valid())

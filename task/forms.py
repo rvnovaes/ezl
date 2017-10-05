@@ -15,10 +15,10 @@ from .models import Task, Ecm, TypeTask
 class TaskForm(BaseForm):
     class Meta:
         model = Task
-        fields = ['type_task', "person_executed_by", 'person_asked_by', "reminder_deadline_date",
-                  "final_deadline_date", 'delegation_date', 'acceptance_date', 'refused_date',
-                  'execution_date', 'return_date', 'blocked_payment_date', 'finished_date',
-                  'description', 'is_active']
+        fields = ['type_task', "person_executed_by", 'person_asked_by', "final_deadline_date",
+                  'delegation_date', 'acceptance_date', 'refused_date', 'execution_date',
+                  'return_date', 'blocked_payment_date', 'finished_date', 'description',
+                  'is_active']
 
     person_asked_by = forms.ModelChoiceField(
         empty_label=u"Selecione...",
@@ -49,18 +49,9 @@ class TaskForm(BaseForm):
                                                               )
                                           )
 
-    reminder_deadline_date = forms.DateField(required=True,
-                                             widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                                 format='DD/MM/YYYY',
-                                                                 min_date=datetime.utcnow().replace(
-                                                                     tzinfo=pytz.timezone(
-                                                                         settings.TIME_ZONE)))
-                                             )
-
-    final_deadline_date = forms.DateTimeField(required=False,
-                                              widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                                  format='DD/MM/YYYY')
-                                              )
+    final_deadline_date = forms.DateTimeField(required=True,
+                                              widget=MDDateTimepicker(attrs={'class': 'form-control'},
+                                                                      format='DD/MM/YYYY HH:mm'))
 
     execution_date = forms.DateTimeField(required=False,
                                          widget=MDDatePicker(attrs={'class': 'form-control'},
@@ -108,6 +99,7 @@ class TaskDetailForm(ModelForm):
                                          label=u"Data de Cumprimento",
                                          widget=MDDateTimepicker(attrs={'class': 'form-control'},
                                                                  format='DD/MM/YYYY HH:mm',
+                                                                 max_date=True
                                                                  ))
     notes = forms.CharField(
         required=True,

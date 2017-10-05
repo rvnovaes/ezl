@@ -43,8 +43,7 @@ class TaskETL(GenericETL):
                 a.OBS AS description, 
 
                 CASE WHEN (a.Data_delegacao IS NULL) THEN 
-                    a.Data ELSE a.Data_delegacao END AS delegation_date, 
-                    a.Data_Prazo AS reminder_deadline_date, 
+                    a.Data ELSE a.Data_delegacao END AS delegation_date,
                     a.prazo_fatal AS final_deadline_date 
 
                 FROM Jurid_agenda_table AS a 
@@ -79,26 +78,24 @@ class TaskETL(GenericETL):
                 type_task_legacy_code = row['type_task_legacy_code']
 
                 if row['delegation_date']:
-                    delegation_date = pytz.timezone(settings.TIME_ZONE).localize(row['delegation_date'])
+                    delegation_date = pytz.timezone(settings.TIME_ZONE).localize(
+                        row['delegation_date'])
                 else:
                     delegation_date = None
 
                 status_code_advwin = get_status_by_substatus(row['status_code_advwin'])
 
-                if row['reminder_deadline_date']:
-                    reminder_deadline_date = pytz.timezone(settings.TIME_ZONE).localize(row['reminder_deadline_date'])
-                else:
-                    reminder_deadline_date = None
-
                 if row['final_deadline_date']:
-                    final_deadline_date = pytz.timezone(settings.TIME_ZONE).localize(row['final_deadline_date'])
+                    final_deadline_date = pytz.timezone(settings.TIME_ZONE).localize(
+                        row['final_deadline_date'])
                 else:
                     final_deadline_date = None
 
                 description = row['description']
                 blocked_or_finished_date = row['blocked_or_finished_date']
 
-                task = Task.objects.filter(legacy_code=legacy_code, system_prefix=LegacySystem.ADVWIN.value).first()
+                task = Task.objects.filter(legacy_code=legacy_code,
+                                           system_prefix=LegacySystem.ADVWIN.value).first()
 
                 movement = Movement.objects.filter(
                     legacy_code=movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
@@ -113,7 +110,8 @@ class TaskETL(GenericETL):
                     legacy_code=person_distributed_by_legacy_code), ~Q(legacy_code=None),
                     ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
                 type_task = TypeTask.objects.filter(
-                    legacy_code=type_task_legacy_code).first() or InvalidObjectFactory.get_invalid_model(TypeTask)
+                    legacy_code=type_task_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
+                    TypeTask)
 
                 # 30   Open
                 # 80   Refused
@@ -133,7 +131,6 @@ class TaskETL(GenericETL):
 
                 if task:
                     task.delegation_date = delegation_date
-                    task.reminder_deadline_date = reminder_deadline_date
                     task.final_deadline_date = final_deadline_date
                     task.description = description
                     task.task_status = status_code_advwin
@@ -142,8 +139,9 @@ class TaskETL(GenericETL):
                     task.blocked_payment_date = blocked_payment_date
                     task.finished_date = finished_date
 
-                    update_fields = ['delegation_date', 'reminder_deadline_date', 'final_deadline_date', 'description',
-                                     'task_status', 'refused_date', 'execution_date', 'blocked_payment_date',
+                    update_fields = ['delegation_date', 'final_deadline_date', 'description',
+                                     'task_status', 'refused_date', 'execution_date',
+                                     'blocked_payment_date',
                                      'finished_date']
 
                     task.save(update_fields=update_fields)
@@ -159,7 +157,6 @@ class TaskETL(GenericETL):
                                               person_distributed_by=person_distributed_by,
                                               type_task=type_task,
                                               delegation_date=delegation_date,
-                                              reminder_deadline_date=reminder_deadline_date,
                                               final_deadline_date=final_deadline_date,
                                               description=description,
                                               refused_date=refused_date,
@@ -168,12 +165,14 @@ class TaskETL(GenericETL):
                                               finished_date=finished_date,
                                               task_status=status_code_advwin)
                 self.debug_logger.debug(
-                    "Task,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
-                    str(movement.id), str(legacy_code), str(LegacySystem.ADVWIN.value),
-                    str(user.id),str(user.id), str(person_asked_by.id), str(person_executed_by.id),
-                    str(person_distributed_by.id),str(type_task.id), str(delegation_date), str(reminder_deadline_date),
-                    str(final_deadline_date), str(description), str(refused_date), str(execution_date),
-                    str(blocked_payment_date), str(finished_date), str(status_code_advwin),self.timestr))
+                    "Task,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                        str(movement.id), str(legacy_code), str(LegacySystem.ADVWIN.value),
+                        str(user.id), str(user.id), str(person_asked_by.id),
+                        str(person_executed_by.id), str(person_distributed_by.id),
+                        str(type_task.id), str(delegation_date), str(final_deadline_date),
+                        str(description), str(refused_date), str(execution_date),
+                        str(blocked_payment_date), str(finished_date),
+                        str(status_code_advwin), self.timestr))
 
             except Exception as e:
                 self.error_logger.error(

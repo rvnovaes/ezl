@@ -89,8 +89,7 @@ class Task(Audit, LegacyCode):
                                   verbose_name="Tipo de Serviço")
     delegation_date = models.DateTimeField(default=timezone.now, verbose_name="Data de Delegação")
     acceptance_date = models.DateTimeField(null=True, verbose_name="Data de Aceitação")
-    reminder_deadline_date = models.DateTimeField(null=False,default=timezone.now, verbose_name="Primeiro Prazo")
-    final_deadline_date = models.DateTimeField(null=True, verbose_name="Segundo Prazo")
+    final_deadline_date = models.DateTimeField(null=True, verbose_name="Prazo")
     execution_date = models.DateTimeField(null=True, verbose_name="Data de Cumprimento")
 
     return_date = models.DateTimeField(null=True, verbose_name="Data de Retorno")
@@ -191,8 +190,7 @@ class DashboardViewModel(Audit):
                                   verbose_name="Tipo de Serviço")
     delegation_date = models.DateTimeField(default=timezone.now, verbose_name="Data de Delegação")
     acceptance_date = models.DateTimeField(null=True, verbose_name="Data de Aceitação")
-    reminder_deadline_date = models.DateTimeField(null=True, verbose_name="Primeiro Prazo")
-    final_deadline_date = models.DateTimeField(null=True, verbose_name="Segundo Prazo")
+    final_deadline_date = models.DateTimeField(null=True, verbose_name="Prazo")
     execution_date = models.DateTimeField(null=True, verbose_name="Data de Cumprimento")
 
     return_date = models.DateTimeField(null=True, verbose_name="Data de Retorno")

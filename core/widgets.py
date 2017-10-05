@@ -16,14 +16,21 @@ class MDDateTimepicker(DateTimeBaseInput):
     def get_context(self, name, value, attrs):
         context = super(Input, self).get_context(name, value, attrs)
         context['widget']['type'] = self.input_type
-        context['widget']['min_date'] = timezone.localtime(self.min_date).strftime('%d/%m/%Y %H:%M')
+        if self.min_date:
+            context['widget']['min_date'] = timezone.localtime(self.min_date).strftime(
+                '%d/%m/%Y %H:%M')
+        if self.max_date:
+            context['widget']['max_date'] = True
+        if value and not isinstance(value, six.string_types):
+            context['widget']['value'] = value.strftime('%d/%m/%Y %H:%M')
         context['widget']['format'] = self.format
         return context
 
-    def __init__(self, attrs=None, format=None, min_date=None):
+    def __init__(self, attrs=None, format=None, min_date=None, max_date=False):
         super(MDDateTimepicker, self).__init__(attrs)
         self.format = format if format else 'DD/MM/YYYY'
         self.min_date = min_date if min_date else None
+        self.max_date = max_date
 
 
 class MDDatePicker(DateTimeBaseInput):
@@ -248,7 +255,8 @@ class MDSelect(ChoiceWidget):
             return use_required_attribute
 
         first_choice = next(iter(self.choices), None)
-        return use_required_attribute and first_choice is not None and self._choice_has_empty_value(first_choice)
+        return use_required_attribute and first_choice is not None and self._choice_has_empty_value(
+            first_choice)
 
 
 class MDModelSelect2(QuerySetSelectMixin,

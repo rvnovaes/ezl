@@ -479,7 +479,6 @@ class Task(Base):
     legacy_code = Column(String(255), nullable=False, unique=True)
     delegation_date = Column(DateTime(True), nullable=False)
     acceptance_date = Column(DateTime(True))
-    reminder_deadline_date = Column(DateTime(True))
     final_deadline_date = Column(DateTime(True))
     execution_date = Column(DateTime(True))
     return_date = Column(DateTime(True))

@@ -66,7 +66,7 @@
                         <br>
                         <label>Detalhes do serviço: </label>
                         <br>
-                        <span><b>Prazo:</b> {{ form.instance.reminder_deadline_date|localtime|default_if_none:"" }}</span>
+                        <span><b>Prazo:</b> {{ form.instance.final_deadline_date|localtime|default_if_none:"" }}</span>
                         <br>
                         <span><b>Recebida em:</b> {{ form.instance.delegation_date|localtime|default_if_none:"" }}</span>
                         <br>
@@ -127,7 +127,9 @@
                         {% endif %}
                         {% if perms.task.view_delegated_tasks %}
                             {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                                <a>{{ form.execution_date }}</a>
+                                <div  class="col-sm-3">
+                                    <a>{{ form.execution_date }}</a>
+                                </div>
                                 <a onclick="getId(this)" id="DONE" type="submit" data-toggle="modal"
                                    data-target="#confirmAction"
                                    class="btn btn-sm btn-raised DONE ">

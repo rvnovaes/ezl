@@ -1,7 +1,7 @@
 <script>
     $(function () {
         $('#{{ widget.name }}').datetimepicker({
-            {#            locale: 'pt-br',#}
+            defaultDate: '',
             tooltips: {
                 selectTime: 'seleciona horas e minutos',
                 selectYear: 'seleciona o ano',
@@ -11,15 +11,17 @@
             ignoreReadonly: true,
             showClear: true,
             {% if widget.min_date %}
-                minDate: moment("{{ widget.min_date }}", "DD_MM_YYYY HH:mm").tz("America/Sao_Paulo").format(), {% endif %}
-            maxDate: moment().tz("America/Sao_Paulo").format(),
+                minDate: moment("{{ widget.min_date }}", "DD_MM_YYYY HH:mm").tz("America/Sao_Paulo").format(),
+            {% endif %}
+            {% if widget.max_date %}
+                maxDate: moment().tz("America/Sao_Paulo").format(),
+            {% endif %}
             format: "{{ widget.format }}"
-
         })
         ;
     });
 </script>
-<span class="col-sm-3">
+<span>
 {#    <span class="form-group is-empty">#}
         <span class="input-group date" id="{{ widget.name }}">
 

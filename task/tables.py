@@ -16,35 +16,34 @@ class TaskTable(tables.Table):
 
     delegation_date = tables.DateColumn(format="d/m/Y")
     acceptance_date = tables.DateColumn(format="d/m/Y")
-    reminder_deadline_date = tables.DateColumn(format="d/m/Y")
-    final_deadline_date = tables.DateColumn(format="d/m/Y")
+    final_deadline_date = tables.DateTimeColumn(short=True)
     execution_date = tables.DateColumn(format="d/m/Y")
     return_date = tables.DateColumn(format="d/m/Y")
     refused_date = tables.DateColumn(format="d/m/Y")
 
     class Meta:
         model = DashboardViewModel
-        sequence = ['selection', 'status', 'type_task', "person_executed_by", 'person_asked_by', "reminder_deadline_date",
-                    "final_deadline_date", 'delegation_date', 'acceptance_date', 'refused_date', 'execution_date',
-                    'return_date', 'blocked_payment_date', 'finished_date', 'is_active']
+        sequence = ['selection', 'status', 'type_task', "person_executed_by", 'person_asked_by',
+                    "final_deadline_date", 'delegation_date', 'acceptance_date', 'refused_date',
+                    'execution_date', 'return_date', 'blocked_payment_date', 'finished_date',
+                    'is_active']
         fields = ['selection', 'status', 'person_asked_by', 'person_executed_by', 'type_task',
-                  'delegation_date', 'acceptance_date', 'reminder_deadline_date', 'final_deadline_date',
-                  'execution_date', 'return_date', 'refused_date', 'legacy_code', 'blocked_payment_date',
+                  'delegation_date', 'acceptance_date', 'final_deadline_date', 'execution_date',
+                  'return_date', 'refused_date', 'legacy_code', 'blocked_payment_date',
                   'finished_date', 'is_active']
         empty_text = "Não existem providências cadastradas"
         row_attrs = {
-            'data_href': lambda record: '/providencias/providencias/' + str(record.movement.id) + '/' + str(record.pk) + '/'
+            'data_href': lambda record: '/providencias/providencias/' + str(
+                record.movement.id) + '/' + str(record.pk) + '/'
         }
 
 
 class DashboardStatusTable(tables.Table):
-    def __init__(self, *args, delegation_date='Delegação', reminder_deadline_date='Prazo',
-                 client="Cliente", law_suit_number="Processo", legacy_code="Número",type_service="Serviço",
-                 title="", status="",
-                 **kwargs):
+    def __init__(self, *args, delegation_date='Delegação', client="Cliente",
+                 law_suit_number="Processo", legacy_code="Número", type_service="Serviço", title="",
+                 status="", **kwargs):
         super().__init__(*args, **kwargs)
         self.base_columns['id'].verbose_name = legacy_code
-        self.base_columns['reminder_deadline_date'].verbose_name = reminder_deadline_date
         self.base_columns['delegation_date'].verbose_name = delegation_date
         self.base_columns['client'].verbose_name = client
         self.base_columns['law_suit_number'].verbose_name = law_suit_number
@@ -59,7 +58,8 @@ class DashboardStatusTable(tables.Table):
 
     class Meta:
         model = DashboardViewModel
-        fields = ['id', 'reminder_deadline_date', 'type_service', 'law_suit_number', 'client', 'delegation_date']
+        fields = ['id', 'final_deadline_date', 'type_service', 'law_suit_number', 'client',
+                  'delegation_date']
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {
             'data_new_href': lambda record: '/dashboard/' + str(record.pk) + '/'
@@ -70,7 +70,7 @@ class TypeTaskTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'name', 'survey_type', 'is_active','legacy_code')
+        sequence = ('selection', 'name', 'survey_type', 'is_active', 'legacy_code')
         model = TypeTask
         fields = ['selection', 'legacy_code', 'name', 'is_active', 'survey_type']
         empty_text = "Não existem tipos de serviço cadastrados"

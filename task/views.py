@@ -376,13 +376,6 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
                 status_dynamic_query.add(Q(task_status=TaskStatus.BLOCKEDPAYMENT.value), Q.OR)
             if data['finished']:
                 status_dynamic_query.add(Q(task_status=TaskStatus.FINISHED.value), Q.OR)
-            if data['reminder']:
-                if data['reminder'].start:
-                    reminder_dynamic_query.add(
-                        Q(reminder_deadline_date__gte=data['reminder'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['reminder'].stop:
-                    reminder_dynamic_query.add(
-                        Q(reminder_deadline_date__lte=data['reminder'].stop.replace(hour=23, minute=59)), Q.AND)
             if data['deadline']:
                 if data['deadline'].start:
                     deadline_dynamic_query.add(
