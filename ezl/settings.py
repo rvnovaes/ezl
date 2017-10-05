@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'django_filters',
     'debug_toolbar',
     'django_cleanup',
+    'raven.contrib.django.raven_compat',
     # Autocomplete
     'dal',
     # Enable plugins
@@ -215,6 +216,10 @@ PROJECT_NAME = 'Easy Lawyer'
 PROJECT_LINK = 'https://ezl.mtostes.com.br'
 
 LINK_TO_RESTORE_DB_DEMO = 'http://13.68.213.60:8001'
+
+RAVEN_CONFIG = {
+    'dsn': 'https://8117af934e9c436c8ad81a66fd875912:d00c54e22db046b19a7dcae5677126db@sentry.io/224925',
+}
 
 LOGGING = {
     'version': 1,
