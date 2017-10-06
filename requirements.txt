@@ -21,6 +21,3 @@ six==1.10.0
 SQLAlchemy==1.2.0b2
 uwsgi==2.0.15
 ## Favor inserir novas dependências em ordem alfabética.
-
-
-
