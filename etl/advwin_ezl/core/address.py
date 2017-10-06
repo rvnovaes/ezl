@@ -134,8 +134,6 @@ class AddressETL(GenericETL):
                         rows_count) + "," + str(
                         e) + "," + self.timestr)
 
-        super(AddressETL, self).config_import(rows, user, rows_count)
-
 
 if __name__ == '__main__':
     AddressETL().import_data()

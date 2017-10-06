@@ -1,4 +1,5 @@
 # esse import deve vir antes de todos porque ele executa o __init__.py
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -6,11 +7,13 @@ from django.utils import timezone
 from core.models import Person
 from core.signals import create_person
 from core.utils import LegacySystem
-from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.signals import new_person, temp_disconnect_signal
 
 
 class UserETL(GenericETL):
+    EZL_LEGACY_CODE_FIELD = 'person__legacy_code'
+
     advwin_table = 'ADVWeb_usuario'
     model = User
     import_query = """
@@ -41,7 +44,11 @@ class UserETL(GenericETL):
     # todo: fazer model de usuario pra ter herança com LegacyCode e Audit
     # has_status = True
 
+    @validate_import
     def config_import(self, rows, user, rows_count):
+
+        assert len(rows) == rows_count
+
         for row in rows:
             created = False
             person_id = None
@@ -80,7 +87,7 @@ class UserETL(GenericETL):
 
                 # maxlength = 30 no auth_user do django
                 first_name = (name_user.split(' ')[0])[:30]
-                last_name = (" ".join(name_user.split(' ')[1:]))[:30]
+                last_name = (' '.join(name_user.split(' ')[1:]))[:30]
 
                 # tenta encontrar o usuario pelo username (unique)
                 instance = User.objects.filter(username__unaccent=username).first() or None
@@ -166,7 +173,7 @@ class UserETL(GenericETL):
                                     created=created)
 
                 self.debug_logger.debug(
-                    "Usuario,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                    'Usuario,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (
                         str(person_id), str(legal_name), str(name),
                         str(is_lawyer), str(is_court), str(legal_type),
                         str(cpf_cnpj), str(user), str(is_active),
@@ -175,11 +182,9 @@ class UserETL(GenericETL):
 
             except Exception as e:
                 self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Usuario: " + str(rows_count) + ","
-                    + str(e) + "," + self.timestr)
-
-            super(UserETL, self).config_import(rows, user, rows_count)
+                    'Ocorreu o seguinte erro na importacao de Usuario: ' + str(rows_count) + ','
+                    + str(e) + ',' + self.timestr)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     UserETL().import_data()

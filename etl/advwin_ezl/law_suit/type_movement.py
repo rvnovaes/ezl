@@ -6,16 +6,16 @@ from lawsuit.models import TypeMovement
 class TypeMovementETL(GenericETL):
     import_query = """
                     SELECT  tm.Codigo AS legacy_code,
-                            tm.Descricao 
-                      
-                      FROM Jurid_CodMov AS tm 
-                      
-                      WHERE right(tm.Codigo, 1) <> '.'  
-                            AND (tm.UsarOS = 0 OR tm.UsarOS IS NULL)  
-                            AND tm.Status = 'Ativo'  
-                            AND tm.Codigo= (SELECT MIN(tm2.codigo)   
+                            tm.Descricao
+
+                      FROM Jurid_CodMov AS tm
+
+                      WHERE right(tm.Codigo, 1) <> '.'
+                            AND (tm.UsarOS = 0 OR tm.UsarOS IS NULL)
+                            AND tm.Status = 'Ativo'
+                            AND tm.Codigo= (SELECT MIN(tm2.codigo)
                       FROM Jurid_CodMov AS tm2 WHERE tm.Descricao = tm2.Descricao)
-                                               
+
                    """
     model = TypeMovement
     advwin_table = 'Jurid_CodMov'
@@ -53,8 +53,6 @@ class TypeMovementETL(GenericETL):
                 self.error_logger.error(
                     "Ocorreu o seguinte erro na importacao de Tipo Movimentacao: " + str(rows_count) + "," + str(
                         e) + "," + self.timestr)
-
-        super(TypeMovementETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == '__main__':

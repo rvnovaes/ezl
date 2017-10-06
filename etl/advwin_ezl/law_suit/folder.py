@@ -63,8 +63,6 @@ class FolderETL(GenericETL):
                                          alter_user=user)
                         obj.save()
 
-                    super(FolderETL, self).config_import(rows, user, rows_count)
-
                 self.debug_logger.debug("Pastas,%s,%s,%s,%s,%s,%s,%s"%(str(person_customer.id),str(True),str(legacy_code),
                                                                 str(LegacySystem.ADVWIN.value),str(user.id),str(user.id),
                                                                 self.timestr))

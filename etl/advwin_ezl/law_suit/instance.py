@@ -14,14 +14,14 @@ from lawsuit.models import Instance
 
 class InstanceETL(GenericETL):
     import_query = """
-                   SELECT Codigo AS legacy_code, 
-                          Descicao 
-                   
-                   FROM Jurid_Instancia AS i1 
-                   
+                   SELECT Codigo AS legacy_code,
+                          Descicao
+
+                   FROM Jurid_Instancia AS i1
+
                    WHERE Descicao IS NOT NULL AND Codigo =
-                   (SELECT min (Codigo) 
-                      FROM Jurid_Instancia AS i2 
+                   (SELECT min (Codigo)
+                      FROM Jurid_Instancia AS i2
                       WHERE i1.Descicao = i2.Descicao)
 
                    """
@@ -61,8 +61,6 @@ class InstanceETL(GenericETL):
                 self.error_logger.error(
                     "Ocorreu o seguinte erro na importacao de Instancias: " + str(rows_count) + "," + str(
                         e) + "," + self.timestr)
-
-        super(InstanceETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == "__main__":

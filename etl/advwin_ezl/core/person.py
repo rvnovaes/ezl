@@ -172,8 +172,6 @@ class PersonETL(GenericETL):
                         rows_count) + "," + str(
                         e) + "," + self.timestr)
 
-            super(PersonETL, self).config_import(rows, user, rows_count)
-
 
 if __name__ == "__main__":
     PersonETL().import_data()

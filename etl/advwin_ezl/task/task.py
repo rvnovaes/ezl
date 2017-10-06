@@ -1,9 +1,9 @@
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
+
 import pytz
 from itertools import chain
 from django.utils import timezone
 from sqlalchemy import update
-from core.models import Person
 from core.utils import LegacySystem
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from advwin_models.advwin import JuridAgendaTable
@@ -11,6 +11,7 @@ from ezl import settings
 from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
 from django.db.models import Q
+
 
 default_justify = 'Aceita por Correspondente: %s'
 
@@ -32,32 +33,32 @@ class TaskETL(GenericETL):
     import_query = """
 
             SELECT
-                a.Data_confirmacao AS blocked_or_finished_date, 
-                a.SubStatus AS status_code_advwin, 
-                a.ident AS legacy_code, 
-                a.Mov AS movement_legacy_code, 
+                a.Data_confirmacao AS blocked_or_finished_date,
+                a.SubStatus AS status_code_advwin,
+                a.ident AS legacy_code,
+                a.Mov AS movement_legacy_code,
                 a.Advogado_sol AS person_asked_by_legacy_code,
                 a.Advogado AS person_executed_by_legacy_code,
                 a.CodMov AS type_task_legacy_code,
                 a.Advogado_or AS person_distributed_by_legacy_code,
-                a.OBS AS description, 
+                a.OBS AS description,
 
-                CASE WHEN (a.Data_delegacao IS NULL) THEN 
+                CASE WHEN (a.Data_delegacao IS NULL) THEN
                     a.Data ELSE a.Data_delegacao END AS delegation_date,
-                    a.prazo_fatal AS final_deadline_date 
+                    a.prazo_fatal AS final_deadline_date
 
-                FROM Jurid_agenda_table AS a 
-                
-                INNER JOIN Jurid_Pastas AS p ON 
-                    a.Pasta = p.Codigo_Comp 
-                
+                FROM Jurid_agenda_table AS a
+
+                INNER JOIN Jurid_Pastas AS p ON
+                    a.Pasta = p.Codigo_Comp
+
                 INNER JOIN Jurid_CodMov as cm ON
-                     a.CodMov = cm.Codigo    
-                     
+                     a.CodMov = cm.Codigo
+
                 WHERE
-                    (cm.UsarOS = 1) AND 
-                    ((p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND 
-                    ((a.prazo_lido = 0 AND a.SubStatus = 30) OR 
+                    (cm.UsarOS = 1) AND
+                    ((p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND
+                    ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                     (a.SubStatus = 80 AND a.Status = 0)))
     """
     model = Task
@@ -67,6 +68,7 @@ class TaskETL(GenericETL):
 
     @validate_import
     def config_import(self, rows, user, rows_count):
+        from core.models import Person
         for row in rows:
 
             try:
@@ -179,7 +181,6 @@ class TaskETL(GenericETL):
                     "Ocorreu o seguinte erro na importacao de Task: " + str(rows_count) + "," + str(
                         e) + "," + self.timestr)
 
-        super(TaskETL, self).config_import(rows, user, rows_count)
 
     def config_export(self):
         accepted_tasks = self.model.objects.filter(legacy_code__isnull=False,

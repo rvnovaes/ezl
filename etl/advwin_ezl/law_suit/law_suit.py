@@ -60,8 +60,8 @@ class LawsuitETL(GenericETL):
                           ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
                            (d.Codigo_Comp IS NOT NULL AND d.Codigo_Comp <> '')) AND
                           ((p.Instancia IS NOT NULL AND p.Instancia <> '') OR
-                           (d.D_Codigo_Inst IS NOT NULL AND d.D_Codigo_Inst <> ''))        
-    
+                           (d.D_Codigo_Inst IS NOT NULL AND d.D_Codigo_Inst <> ''))
+
     """
 
     has_status = True
@@ -160,8 +160,6 @@ class LawsuitETL(GenericETL):
                 self.error_logger.error(
                     "Ocorreu o seguinte erro na importacao de LawSuit: " + str(rows_count) + "," + str(
                         e) + "," + self.timestr)
-
-            super(LawsuitETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == "__main__":
