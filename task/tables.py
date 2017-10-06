@@ -43,7 +43,7 @@ class DashboardStatusTable(tables.Table):
                  law_suit_number="Processo", legacy_code="Número", type_service="Serviço", title="",
                  status="", **kwargs):
         super().__init__(*args, **kwargs)
-        self.base_columns['id'].verbose_name = legacy_code
+        # self.base_columns['id'].verbose_name = legacy_code
         self.base_columns['delegation_date'].verbose_name = delegation_date
         self.base_columns['client'].verbose_name = client
         self.base_columns['law_suit_number'].verbose_name = law_suit_number
@@ -58,7 +58,7 @@ class DashboardStatusTable(tables.Table):
 
     class Meta:
         model = DashboardViewModel
-        fields = ['id', 'final_deadline_date', 'type_service', 'law_suit_number', 'client',
+        fields = ['task_number', 'final_deadline_date', 'type_service', 'law_suit_number', 'client',
                   'delegation_date']
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {

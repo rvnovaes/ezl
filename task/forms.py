@@ -13,9 +13,14 @@ from .models import Task, Ecm, TypeTask
 
 
 class TaskForm(BaseForm):
+    task_number = forms.CharField(disabled=True, required=False,
+                                  widget=forms.TextInput(attrs={
+                                    'placeholder': 'Gerado automaticamente'}))
+
     class Meta:
         model = Task
-        fields = ['type_task', "person_executed_by", 'person_asked_by', "final_deadline_date",
+        fields = ['task_number', 'type_task', 'person_executed_by', 'person_asked_by',
+                  'final_deadline_date',
                   'delegation_date', 'acceptance_date', 'refused_date', 'execution_date',
                   'return_date', 'blocked_payment_date', 'finished_date', 'description',
                   'is_active']
@@ -50,7 +55,8 @@ class TaskForm(BaseForm):
                                           )
 
     final_deadline_date = forms.DateTimeField(required=True,
-                                              widget=MDDateTimepicker(attrs={'class': 'form-control'},
+                                              widget=MDDateTimepicker(attrs={
+                                                                        'class': 'form-control'},
                                                                       format='DD/MM/YYYY HH:mm'))
 
     execution_date = forms.DateTimeField(required=False,
@@ -76,7 +82,7 @@ class TaskForm(BaseForm):
                                         widget=MDDatePicker(attrs={'class': 'form-control'},
                                                             format='DD/MM/YYYY')
                                         )
-    description = forms.CharField(required=False, initial="", label="Descrição",
+    description = forms.CharField(required=False, initial='', label='Descrição',
                                   widget=forms.Textarea(
                                       attrs={'class': 'form-control', 'rows': '5',
                                              'id': 'details_id'}))
