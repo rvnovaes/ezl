@@ -22,4 +22,4 @@ ps:
 run_prod:
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
-deploy_prod: build_prod up_prod
+deploy: build_prod run_prod
