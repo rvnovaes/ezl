@@ -1,0 +1,21 @@
+version: "2"
+services:
+  nginx:
+    ports:
+      - "80:80"
+  web:
+    build:
+      context: .
+      dockerfile: containers/web/Dockerfile
+    image: ezl:latest
+    command: uwsgi --ini /app/config/uwsgi/uwsgi.ini
+    environment:
+      ENV: production
+  cmd_collectstatic:
+    image: ezl:latest
+    environment:
+      ENV: production
+  cmd_migrate:
+    image: ezl:latest
+    environment:
+      ENV: production

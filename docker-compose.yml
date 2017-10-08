@@ -1,0 +1,62 @@
+version: "2"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: containers/web/Dockerfile_dev
+    image: ezl:dev
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      ENV: development
+    volumes:
+     - .:/app
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+    depends_on:
+      - db
+  nginx:
+    image: nginx:1.13
+    volumes:
+      - "./containers/nginx/conf.d:/etc/nginx/conf.d"
+      - "./staticfiles:/usr/share/nginx/html/static"
+      - "./media:/usr/share/nginx/html/media"
+    ports:
+      - "8000:80"
+    depends_on:
+      - web
+  db:
+    image: postgres:9.6
+    environment:
+      POSTGRES_DB: ezl
+      POSTGRES_USER: ezl
+      POSTGRES_PASSWORD: ezl
+    volumes:
+      - "db-data:/var/lib/postgresql/data"
+      - "./containers/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+  cmd_collectstatic:
+    image: ezl:dev
+    command: python manage.py collectstatic --noinput
+    environment:
+      ENV: development
+    volumes:
+     - .:/app
+    depends_on:
+      - web
+  cmd_migrate:
+    image: ezl:dev
+    command: python manage.py migrate --noinput
+    environment:
+      ENV: development
+    volumes:
+     - .:/app
+    depends_on:
+      - web
+volumes:
+  db-data:

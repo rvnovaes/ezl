@@ -1,0 +1,7 @@
+version: "2"
+services:
+  sqlserver:
+    image: microsoft/mssql-server-linux:2017-latest
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: "%SuperEZL%1"

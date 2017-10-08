@@ -1,21 +1,27 @@
-#!/usr/bin/python
 # -*- encoding: utf-8 -*-
-
+import configparser
 import os
 import sys
-import configparser
+import logging
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+ENV = os.environ.get('ENV')
+logger = logging.getLogger(__name__)
+
+
+if ENV is None:
+    logger.fatal('Environment variable ENV is missing')
+    sys.exit(1)
 
 
 def get_parser():
+    filepath = os.path.join(BASE_DIR, 'config/{}.general.ini'.format(ENV))
     parser = configparser.ConfigParser()
     try:
-        with open(os.path.join(BASE_DIR, 'config', 'general.ini')) as config_file:
+        with open(filepath) as config_file:
             parser.read_file(config_file)
     except FileNotFoundError:
-        print('OOOOOOOOOOOOOOOOOOOOOOOOOOOHHHHH NOOOOOOOO!!!!!')
-        print('general.ini file was not found on {config_path}'.format(config_path=os.path.join(BASE_DIR, 'config')))
-        print('Rename it to general.ini and specify the correct configuration settings!')
-        sys.exit(0)
+        logger.fatal('{} file was not found'.format(filepath))
+        sys.exit(1)
     return parser
