@@ -1,42 +1,41 @@
 import importlib
 import json
-from datetime import datetime
+from functools import wraps
 
-from dal import autocomplete
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User, Group
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy
-from django.db.models import ProtectedError
+from django.db.models import ProtectedError, Q
 from django.db.utils import IntegrityError
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
+
+from allauth.account.views import LoginView
+from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 
 from core.forms import PersonForm, AddressForm, AddressFormSet, UserUpdateForm, UserCreateForm
-from core.generic_search import GenericSearchForeignKey
-from core.generic_search import GenericSearchFormat
-from core.generic_search import set_search_model_attrs
-from core.messages import new_success, update_success, delete_error_protected, delete_success, \
+from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
+    set_search_model_attrs
+from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
+    delete_success, \
     address_error_update, \
     address_success_update, duplicate_cpf, duplicate_cnpj
 from core.models import Person, Address, City, State, Country, AddressType
 from core.signals import create_person
 from core.tables import PersonTable, UserTable
-from ezl import settings
+from core.utils import login_log, logout_log
 from lawsuit.models import Folder, Movement, LawSuit
 from task.models import Task
-from django.db.models import Q
-from functools import wraps
-from django.core.cache import cache
-from core.utils import login_log, logout_log
-from allauth.account.views import LoginView
 
 
 def login(request):
@@ -65,7 +64,8 @@ def logout_user(request):
 
 def remove_invalid_registry(f):
     """
-    Embrulha o metodo get_context_data onde deseja remover da listagem  o registro invalido gerado pela ETL.
+    Embrulha o metodo get_context_data onde deseja remover da listagem  o registro invalido gerado
+    pela ETL.
     :param f:
     :return f:
     """
@@ -132,7 +132,8 @@ class BaseCustomView(FormView):
         user = User.objects.get(id=self.request.user.id)
 
         if form.instance.id is None:
-            # todo: nao precisa salvar o create_date e o alter_date pq o model já faz isso. tirar de todos os lugares
+            # TODO: nao precisa salvar o create_date e o alter_date pq o model já faz isso. tirar
+            # de todos os lugares
             form.instance.create_date = timezone.now()
             form.instance.create_user = user
         else:
@@ -179,8 +180,8 @@ class MultiDeleteViewMixin(DeleteView):
     success_message = None
 
     def delete(self, request, *args, **kwargs):
-        if request.method == "POST":
-            pks = request.POST.getlist("selection")
+        if request.method == 'POST':
+            pks = request.POST.getlist('selection')
 
             try:
                 self.model.objects.filter(pk__in=pks).delete()
@@ -189,8 +190,8 @@ class MultiDeleteViewMixin(DeleteView):
                 qs = e.protected_objects.first()
                 # type = type('Task')
                 messages.error(self.request,
-                               delete_error_protected(str(self.model._meta.verbose_name)
-                                                      , qs.__str__()))
+                               delete_error_protected(str(self.model._meta.verbose_name),
+                                                      qs.__str__()))
 
         # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
         return HttpResponseRedirect(self.success_url)
@@ -236,95 +237,30 @@ class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
         return super(PersonListView, self).get_context_data(**kwargs)
 
 
-class PersonCreateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, CreateView):
+class BaseCreateView(LoginRequiredMixin, CreateView):
+    def form_valid(self, form):
+        instance = form.instance
+        if instance.id is None:
+            instance.create_date = timezone.now()
+            instance.create_user = self.request.user
+        else:
+            instance.alter_date = timezone.now()
+            instance.alter_user = self.request.user
+        return super().form_valid(form)
+
+
+class PersonCreateView(BaseCreateView):
     model = Person
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
-    success_message = new_success
-    addresses_form = AddressForm()
-
-    def form_valid(self, form):
-
-        user = User.objects.get(id=self.request.user.id)
-
-        if form.instance.id is None:
-            form.instance.create_user = user
-        else:
-            form.instance.alter_user = user
-
-        person_form = PersonForm(self.request.POST)
-        legal_type = self.request.POST['legal_type']
-        cnpj = self.request.POST['cnpj']
-        cpf = self.request.POST['cpf']
-
-        message = 'CPF/CNPJ já existente'
-
-        if legal_type is 'F' and cpf:
-            person_form.instance.cpf_cnpj = cpf
-            message = duplicate_cpf(None)
-        elif legal_type is 'J' and cnpj:
-            person_form.instance.cpf_cnpj = cnpj
-            message = duplicate_cnpj(cnpj)
-
-        if person_form.is_valid():
-            person_form.instance.create_date = datetime.now()
-            person_form.instance.create_user = User.objects.get(id=self.request.user.id)
-
-            try:
-                person = person_form.save()
-
-            except IntegrityError:
-                messages.error(self.request, message)
-                context = self.get_context_data()
-                return render(self.request, 'core/person_form.html', context)
-
-            addresses_form = AddressFormSet(self.request.POST,
-                                            instance=Person.objects.get(id=person.id))
-
-            if addresses_form.is_valid():
-                for address in addresses_form:
-
-                    if address.cleaned_data['id']:
-                        id_form = address.cleaned_data['id'].id
-                        pass
-
-                    else:
-                        address.instance.create_date = datetime.now()
-                        address.instance.create_user = User.objects.get(id=self.request.user.id)
-                        address.save()
-                messages.success(self.request, self.success_message)
-
-            else:
-                for error in addresses_form.errors:
-                    messages.error(self.request, error)
-
-                return HttpResponseRedirect(self.success_url)
-
-            messages.success(self.request, self.success_message)
-
-        # super(PersonCreateView, self).form_valid(form)
-        return HttpResponseRedirect(self.success_url)
-
-    def get_context_data(self, **kwargs):
-        context = super(PersonCreateView, self).get_context_data(**kwargs)
-        context['form_address'] = AddressForm()
-        context['has_person'] = False
-        # context['address_formset'] = AddressFormSet()
-
-        if self.request.POST:
-            address_formset = AddressFormSet(self.request.POST)
-            context['addresses'] = address_formset.cleaned_data
-
-        else:
-            context['formset'] = AddressFormSet()
-        return context
+    success_message = CREATE_SUCCESS_MESSAGE
 
 
 class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, UpdateView):
     model = Person
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
-    success_message = update_success
+    success_message = UPDATE_SUCCESS_MESSAGE
 
     def form_invalid(self, form):
 
@@ -351,7 +287,7 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
 
         except IntegrityError:
             messages.error(self.request, message)
-            context = self.get_context_data()
+            self.get_context_data()
             return HttpResponseRedirect(self.request.environ.get('PATH_INFO'))
 
         return super(PersonUpdateView, self).form_valid(form)
@@ -377,7 +313,7 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
                 # Form foi marcado para deleção
                 if address.cleaned_data['DELETE'] and self.request.POST['is_delete'] == '3':
                     Address.objects.get(id=address.cleaned_data['id'].id).delete()
-                    messages.success(request, "Registro(s) excluído(s) com sucesso")
+                    messages.success(request, 'Registro(s) excluído(s) com sucesso')
 
                 # Endereço já existe no banco
                 elif address.cleaned_data['id']:
@@ -393,8 +329,8 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
                     a.address_type = address.instance.address_type
                     a.zip_code = address.instance.zip_code
 
-                    if address.cleaned_data['is_active'] is True or address.cleaned_data[
-                        'is_active'] is 'on':
+                    if (address.cleaned_data['is_active'] is True or
+                            address.cleaned_data['is_active'] is 'on'):
                         a.is_active = True
                     else:
                         a.is_active = False
@@ -408,7 +344,7 @@ class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, 
 
                 # Endereço não existe no banco (novo endereço) e será salvo
                 else:
-                    address.instance.create_date = datetime.now()
+                    address.instance.create_date = timezone.now()
                     address.instance.create_user = User.objects.get(id=self.request.user.id)
                     address.save()
         else:
@@ -464,14 +400,16 @@ def person_address_search_country(request):
 @login_required
 def person_address_search_state(request, pk):
     states = State.objects.filter(country_id=pk).values('name', 'id').order_by('name')
-    states_json = json.dumps({'number': len(states), 'states': list(states)}, cls=DjangoJSONEncoder)
+    states_json = json.dumps({'number': len(states), 'states': list(states)},
+                             cls=DjangoJSONEncoder)
     return JsonResponse(states_json, safe=False)
 
 
 @login_required
 def person_address_search_city(request, pk):
     cities = City.objects.filter(state_id=pk).values('name', 'id').order_by('name')
-    cities_json = json.dumps({'number': len(cities), 'cities': list(cities)}, cls=DjangoJSONEncoder)
+    cities_json = json.dumps({'number': len(cities), 'cities': list(cities)},
+                             cls=DjangoJSONEncoder)
     return JsonResponse(cities_json, safe=False)
 
 
@@ -551,7 +489,8 @@ class GenericFormOneToMany(FormView, SingleTableView):
                     form.instance.task = Task.objects.get(id=pk)
 
         if form.instance.id is None:
-            # todo: nao precisa salvar o create_date e o alter_date pq o model já faz isso. tirar de todos os lugares
+            # TODO: nao precisa salvar o create_date e o alter_date pq o model já faz isso. tirar
+            # de todos os lugares
             form.instance.create_date = timezone.now()
             form.instance.create_user = user
         else:
@@ -575,7 +514,8 @@ class GenericFormOneToMany(FormView, SingleTableView):
             fields_related = list(
                 filter(lambda i: i.get_internal_type() == 'ForeignKey',
                        self.related_model._meta.fields))
-            field_related = list(filter(lambda i: i.related_model == self.model, fields_related))[0]
+            field_related = list(filter(lambda i: i.related_model == self.model,
+                                        fields_related))[0]
             generic_search = GenericSearchFormat(self.request, self.related_model,
                                                  self.related_model._meta.fields,
                                                  related_id=related_model_id,
@@ -586,8 +526,9 @@ class GenericFormOneToMany(FormView, SingleTableView):
             else:
                 table = self.table_class(self.related_model.objects.none())
                 if related_model_id:
-                    table_class = 'self.table_class(self.related_model.objects.filter({0}__id=related_model_id).order_by("-pk"))'.format(
-                        field_related.name)
+                    src = ('self.table_class(self.related_model.objects.filter('
+                           '{0}__id=related_model_id).order_by("-pk"))')
+                    table_class = src.format(field_related.name)
                     table = eval(table_class)
             RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
             context['table'] = table
@@ -618,7 +559,7 @@ class UserCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Cr
     model = User
     form_class = UserCreateForm
     success_url = reverse_lazy('user_list')
-    success_message = new_success
+    success_message = CREATE_SUCCESS_MESSAGE
 
     def get_success_url(self):
         create_person
@@ -642,7 +583,7 @@ class UserUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Up
 
     form_class = UserUpdateForm
     success_url = reverse_lazy('user_list')
-    success_message = update_success
+    success_message = UPDATE_SUCCESS_MESSAGE
 
     def get_initial(self):
         self.form_class.declared_fields['password'].disabled = True
