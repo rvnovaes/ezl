@@ -8,6 +8,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN mkdir -p /app /var/log/ezl/etl/
 WORKDIR /app
-COPY ["requirements.txt", "requirements-dev.txt", "./"]
+COPY ["requirements/development.txt", "requirements/production.txt", "./"]
 
-RUN pip install -r requirements/development.txt
+RUN pip install -r development.txt

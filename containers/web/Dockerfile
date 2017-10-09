@@ -8,6 +8,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN mkdir -p /app /var/log/ezl/etl/
 WORKDIR /app
-ADD requirements.txt /app/
+ADD requirements/production.txt /app/requirements.txt
 
-RUN pip install -r requirements/production.txt
+RUN pip install -r requirements.txt
