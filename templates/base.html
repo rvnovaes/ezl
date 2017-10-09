@@ -6,9 +6,15 @@
 
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="{% static "libs/bootstrap-3.3.7/css/bootstrap.min.css" %}">
+
     <link rel="stylesheet" href="{% static "libs/toastr/build/toastr.min.css" %}">
+
     <link rel="stylesheet"
           href="{% static "libs/bootstrap-material-design-0.5.10/css/bootstrap-material-design.css" %}">
+    
+    {% comment %}
+    {% endcomment %}
+    
     <link rel="stylesheet" href="{% static "libs/bootstrap-material-design-0.5.10/css/ripples.css" %}">
 
     <!-- Material Design fonts -->
@@ -37,13 +43,14 @@
     <script src="{% static "js/dashboard.js" %}"></script>
     <script src="{% static "js/widget_toast.js" %}"></script>
     <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
-{% block body %}
-{% endblock body %}
-<script>
-    $(function () {
-        $.material.init();
-    });
-</script>
+    {% block body %}{% endblock body %}
+    <script>
+        $(function () {
+            $.material.init();
+        });
+    </script>
+    {% block javascript %}{% endblock %}
 </body>

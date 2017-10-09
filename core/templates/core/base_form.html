@@ -1,0 +1,157 @@
+{% extends 'inicial.html' %}
+{% load core_filters %}
+{% load material_form %}
+{% load staticfiles %}
+
+{% block extra_head %}
+
+  {% include 'material/includes/material_css.html' %}
+
+{% endblock extra_head %}
+
+{% block javascript %}
+
+  {% include 'material/includes/material_js.html' %}
+  <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
+  <script type="text/javascript">
+        $(function () {
+
+            $('#id_cnpj').mask('00.000.000/0000-00', {reverse: true});
+            $('#id_cpf').mask('000.000.000-00', {reverse: true});
+
+        });
+
+        var legal_type = document.getElementById('id_legal_type');
+
+        var div_cnpj = document.getElementById("cnpj_container");
+        var div_cpf = document.getElementById("cpf_container");
+
+        var cnpj = document.getElementById('id_cnpj');
+        var cpf = document.getElementById('id_cpf');
+
+        if (legal_type.getAttribute('value') === 'J')
+            cnpj.required = true;
+        else if (legal_type.getAttribute('value') === 'F')
+            cpf.required = true;
+
+
+        cnpj.addEventListener('change', function () {
+            spaces = cnpj.value;
+            if (!spaces.replace(/\s/g, '').length) {
+                // string only contained whitespace (ie. spaces, tabs or line breaks)
+                console.log('Entrou');
+                spaces.trim();
+                cnpj.required = true;
+                console.log(spaces.length);
+                cnpj.value = spaces.replace(/\s/g, '');
+                cnpj.removeAttribute('value');
+            }
+        });
+
+        cpf.addEventListener('change', function () {
+            spaces = cpf.value;
+            if (!spaces.replace(/\s/g, '').length) {
+                // string only contained whitespace (ie. spaces, tabs or line breaks)
+                console.log('Entrou');
+                spaces.trim();
+                cpf.required = true;
+                console.log(spaces.length);
+                cpf.value = spaces.replace(/\s/g, '');
+                cpf.removeAttribute('value');
+
+            }
+        });
+
+        legal_type.addEventListener("change", function () {
+
+            if ($(this).prop('value') === 'J') {
+                cnpj.required = true;
+                div_cnpj.setAttribute('class', 'form-group');
+
+                cpf.required = false;
+                cpf.value = '';
+                cpf.removeAttribute('value');
+                div_cpf.setAttribute('class', 'form-group hidden');
+                $('#cnpj_container').closest('.cnpj-display').css('display', 'block');
+                $('#cpf_container').closest('.cpf-display').css('display', 'none');
+            } else {
+                cpf.required = true;
+                div_cpf.setAttribute('class', 'form-group');
+                cnpj.required = false;
+                cnpj.value = '';
+                cnpj.removeAttribute('value');
+                div_cnpj.setAttribute('class', 'form-group hidden');
+                $('#cnpj_container').closest('.cnpj-display').css('display', 'none');
+                $('#cpf_container').closest('.cpf-display').css('display', 'block')
+            }
+        }, false);
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            if ($("#id_legal_type").val() == 'J') {
+                $('div[class*="cnpj-display"]').css('display', 'block');
+                $('div[id*="cnpj_container"]').removeClass('hidden');
+            }
+
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            alert("Enviado");
+
+            if ($("#id_legal_type").val() === 'F')
+                document.getElementById("id_cpf").value = "{{ cpf_cnpj_invalid }}";
+
+
+            else
+                document.getElementById("id_cnpj").value = "{{ cpf_cnpj_invalid }}";
+
+        })
+    </script>
+
+{% endblock %}
+
+{% block content %}
+
+    {% include 'core/widgets/messages.html' %}
+
+    {# Este form, deve ter o índice 0, favor não alterar a ordem dos forms deste arquivo #}
+
+    <form id="object_form" action="" method="post">
+        {{ form.management_form }}
+
+        {% csrf_token %}
+
+        <di1v>
+            <div>
+                <div class="row">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h1 class="panel-title">
+                                {{ form.title }}
+                            </h1>
+                        </div>
+                        <div class="panel-body">
+                            {% form %}{% endform %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: center;">
+
+            {% include 'core/widgets/cancel_button.html'  with link_list='person_list' %}
+
+            <button type="submit" class="btn btn-sm btn-raised btn-primary"
+                    onclick="document.getElementById('person_form').submit()"><i
+                    class="material-icons left">done</i>
+                Salvar
+            </button>
+
+        </div>
+
+    </form>
+
+{% endblock content %}

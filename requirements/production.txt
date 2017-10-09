@@ -8,6 +8,7 @@ django-cleanup==0.4.2
 django-debug-toolbar==1.8
 django-filter==1.0.4
 django-localflavor== 1.5.2
+django-material==1.0.0
 django-querysetsequence==0.7.2
 django-tables2==1.10.0
 django-sequences==2.2

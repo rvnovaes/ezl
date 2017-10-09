@@ -1,17 +1,19 @@
 {#<div class="container text-center">#}
 {% if form.errors %}
-    {% for field in form %}
-        {% for error in field.errors %}
+    {% comment %}
+        {% for field in form %}
+            {% for error in field.errors %}
+                <script>
+                    showToast('error', '{{ error|escape }}', '{{ field.label|escape }}', 0, false)
+                </script>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
             <script>
-                showToast('error', '{{ error|escape }}', '{{ field.label|escape }}', 0, false)
+                showToast('error', '{{ error|escape }}', 'Atenção!', 0, false)
             </script>
         {% endfor %}
-    {% endfor %}
-    {% for error in form.non_field_errors %}
-        <script>
-            showToast('error', '{{ error|escape }}', 'Atenção!', 0, false)
-        </script>
-    {% endfor %}
+    {% endcomment %}
 {% endif %}
 
 {% if messages %}
