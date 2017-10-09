@@ -2,12 +2,7 @@ import os
 import sys
 import django
 from django.db import connection
-from django.contrib.auth.models import User
-from core.models import Country, State, City, Person, Address, AddressType, ContactMechanism, ContactMechanismType
-from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, Movement
-from task.models import TypeTask, Task, TaskStatus, TaskHistory
-from core import signals
-from etl import settings
+from django.conf import settings
 
 
 sys.path.append("ezl")
@@ -25,7 +20,13 @@ class InvalidObjectFactory(object):
     @staticmethod
     def create():
         # cria usuário padrão
-        signals
+        from django.contrib.auth.models import User
+        from core.models import Country, State, City, Person, Address, AddressType, ContactMechanism, ContactMechanismType
+        from core import signals
+        from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, Movement
+        from task.models import TypeTask, Task, TaskStatus, TaskHistory
+
+        print(signals)
         user = User.objects.filter(username='invalid_user').first()
         admin = User.objects.filter(username='admin').first()
         if not user:

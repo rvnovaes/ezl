@@ -2,14 +2,14 @@ from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User, Group
-from django.core.exceptions import FieldDoesNotExist
-from django.forms import ModelForm, TextInput
+from django.forms import ModelForm
 from django.forms.models import inlineformset_factory
 from django.utils.translation import ugettext_lazy as _
 from localflavor.br.forms import BRCPFField, BRCNPJField
 
 from core.fields import CustomBooleanField
-from core.models import ContactUs, Person, Address, Country, City, State, ContactMechanism, AddressType
+from core.models import ContactUs, Person, Address, Country, City, State, ContactMechanism, \
+    AddressType
 from lawsuit.forms import BaseForm
 
 
@@ -85,8 +85,8 @@ class PersonForm(BaseForm, forms.Form):
 
     class Meta:
         model = Person
-        fields = ['legal_name', 'name', 'legal_type', 'cpf', 'cnpj', 'is_lawyer', "is_correspondent", 'is_court',
-                  'is_customer', 'is_supplier', 'is_active']
+        fields = ['legal_name', 'name', 'legal_type', 'cpf', 'cnpj', 'is_lawyer',
+                  'is_court', 'is_customer', 'is_supplier', 'is_active']
 
     legal_name = forms.CharField(
         required=True,
@@ -99,10 +99,6 @@ class PersonForm(BaseForm, forms.Form):
     )
 
     is_lawyer = CustomBooleanField(
-        required=False,
-    )
-
-    is_correspondent = CustomBooleanField(
         required=False,
     )
 
@@ -132,7 +128,8 @@ class PersonForm(BaseForm, forms.Form):
 class AddressForm(ModelForm, forms.Form):
     class Meta:
         model = Address
-        fields = ['address_type', 'street', 'number', 'complement', 'city_region', 'zip_code', 'country',
+        fields = ['address_type', 'street', 'number', 'complement', 'city_region', 'zip_code',
+                  'country',
                   'state', 'city', 'notes', 'is_active']
 
     address_type = forms.ModelChoiceField(

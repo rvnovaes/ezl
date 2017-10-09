@@ -1,10 +1,16 @@
 from django.conf.urls import url
+from django.conf import settings
 # http://stackoverflow.com/questions/6069070/how-to-use-permission-required-decorators-on-django-class-based-views
 from django.contrib.auth.decorators import login_required
+from django.views.generic import RedirectView
 
 from . import views
 
 urlpatterns = [
+
+    url(r'^ajuda/manual-do-usuario/$',
+        RedirectView.as_view(url=settings.USER_MANUAL_URL, permanent=False),
+        name='user_manual'),
 
     url(r'^$', views.login, name='login'),
     url(r'^logout/', views.logout_user, name='logout'),

@@ -22,7 +22,7 @@ class ContactMechanismETL(GenericETL):
                                                                FROM Jurid_CliFor AS CF
                                                                WHERE CF.Status = 'Ativo' AND CF.Razao IS NOT NULL AND CF.Razao <> '')
                            UNION
-                    
+
                            --          ADV_PHONE2
                            SELECT
                              ADV_PHONE2.Codigo AS legacy_code,
@@ -35,9 +35,9 @@ class ContactMechanismETL(GenericETL):
                                  AND ADV_PHONE2.Codigo NOT IN (SELECT CF.Codigo
                                                                FROM Jurid_CliFor AS CF
                                                                WHERE CF.Status = 'Ativo' AND CF.Razao IS NOT NULL AND CF.Razao <> '')
-                    
+
                            UNION
-                    
+
                            --   ADV_PHONE3
                            SELECT
                              ADV_PHONE3.Codigo AS legacy_code,
@@ -51,7 +51,7 @@ class ContactMechanismETL(GenericETL):
                                                                FROM Jurid_CliFor AS CF
                                                                WHERE CF.Status = 'Ativo' AND CF.Razao IS NOT NULL AND CF.Razao <> '')
                            UNION
-                    
+
                            --   ADV_FAX
                            SELECT
                              ADV_FAX.Codigo AS legacy_code,
@@ -64,7 +64,7 @@ class ContactMechanismETL(GenericETL):
                                  AND ADV_FAX.Codigo NOT IN (SELECT CF.Codigo
                                                             FROM Jurid_CliFor AS CF
                                                             WHERE CF.Status = 'Ativo' AND CF.Razao IS NOT NULL AND CF.Razao <> '')
-                    
+
                            --        ADV_EMAIL
                            UNION
                            SELECT
@@ -86,7 +86,7 @@ class ContactMechanismETL(GenericETL):
                              CLIFOR_PHONE1.Fone1  AS description
                            FROM Jurid_CliFor AS CLIFOR_PHONE1
                            WHERE CLIFOR_PHONE1.Status = 'Ativo' AND CLIFOR_PHONE1.Razao IS NOT NULL AND CLIFOR_PHONE1.Razao <> ''
-                    
+
                            UNION
                            --          CLIFOR_PHONE2
                            SELECT
@@ -95,7 +95,7 @@ class ContactMechanismETL(GenericETL):
                              CLIFOR_PHONE2.Fone2  AS description
                            FROM Jurid_CliFor AS CLIFOR_PHONE2
                            WHERE CLIFOR_PHONE2.Status = 'Ativo' AND CLIFOR_PHONE2.Razao IS NOT NULL AND CLIFOR_PHONE2.Razao <> ''
-                    
+
                            UNION
                            --          CLIFOR_FAX
                            SELECT
@@ -104,7 +104,7 @@ class ContactMechanismETL(GenericETL):
                              CLIFOR_FAX.Fax    AS description
                            FROM Jurid_CliFor AS CLIFOR_FAX
                            WHERE CLIFOR_FAX.Status = 'Ativo' AND CLIFOR_FAX.Razao IS NOT NULL AND CLIFOR_FAX.Razao <> ''
-                    
+
                            UNION
                            --          CLIFOR_EMAIL
                            SELECT
@@ -113,7 +113,7 @@ class ContactMechanismETL(GenericETL):
                              CLIFOR_EMAIL.E_mail AS description
                            FROM Jurid_CliFor AS CLIFOR_EMAIL
                            WHERE CLIFOR_EMAIL.Status = 'Ativo' AND CLIFOR_EMAIL.Razao IS NOT NULL AND CLIFOR_EMAIL.Razao <> ''
-                    
+
                            UNION
                            --          CLIFOR_EMAILNFE
                            SELECT
@@ -122,7 +122,7 @@ class ContactMechanismETL(GenericETL):
                              CLIFOR_EMAILNFE.email_nfse AS description
                            FROM Jurid_CliFor AS CLIFOR_EMAILNFE
                            WHERE CLIFOR_EMAILNFE.Status = 'Ativo' AND CLIFOR_EMAILNFE.Razao IS NOT NULL AND CLIFOR_EMAILNFE.Razao <> ''
-                    
+
                            UNION
                            --          CLIFOR_SITE
                            SELECT
@@ -131,7 +131,7 @@ class ContactMechanismETL(GenericETL):
                              CLIFOR_SITE.site   AS description
                            FROM Jurid_CliFor AS CLIFOR_SITE
                            WHERE CLIFOR_SITE.Status = 'Ativo' AND CLIFOR_SITE.Razao IS NOT NULL AND CLIFOR_SITE.Razao <> ''
-                    
+
                            UNION
                            --          CORSER_EMAIL
                            SELECT
@@ -139,7 +139,7 @@ class ContactMechanismETL(GenericETL):
                              'email'                  AS contact_mechanism_type,
                              CORSER_EMAIL.CS_Email    AS description
                            FROM Jurid_Corresp_Servico CORSER_EMAIL
-                    
+
                            UNION
                            --          CORSER_MULTEMAIL
                            SELECT
@@ -147,7 +147,7 @@ class ContactMechanismETL(GenericETL):
                              'muiltemail'                      AS contact_mechanism_type,
                              CORSER_MULTEMAIL.CS_Outros_Emails AS description
                            FROM Jurid_Corresp_Servico CORSER_MULTEMAIL
-                    
+
                          ) AS TMP
                     WHERE description IS NOT NULL AND description <> ''
                     """
@@ -191,8 +191,6 @@ class ContactMechanismETL(GenericETL):
                 self.error_logger.error(
                     "Ocorreu o seguinte erro na importacao de ContactMechanism: " + str(rows_count) + "," + str(
                         e) + "," + self.timestr)
-
-        super(ContactMechanismETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == '__main__':

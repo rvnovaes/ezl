@@ -74,7 +74,6 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
     legal_name = ''
     name = ''
     is_lawyer = False
-    is_correspondent = False
     is_court = False
     legal_type = 'F'
     cpf_cnpj = ''
@@ -104,7 +103,6 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
 
         if linha['Correspondente'] is True:
 
-            is_correspondent = True
             authuser_query = session.query(AuthUser).filter(
                 AuthUser.username == return_user_from_auth(linha['Codigo'], auth_dict)).first()
 
@@ -159,7 +157,6 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
         'legal_name': legal_name,
         'name': name,
         'is_lawyer': is_lawyer,
-        'is_correspondent': is_correspondent,
         'is_court': is_court,
         'legal_type': legal_type,
         'cpf_cnpj': cpf_cnpj,

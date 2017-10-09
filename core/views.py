@@ -139,7 +139,7 @@ class BaseCustomView(FormView):
             form.instance.alter_date = timezone.now()
             form.instance.alter_user = user
             form.save()
-        super(BaseCustomView, self).form_valid(form)
+        super().form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
 

@@ -18,8 +18,8 @@ import os
 import sys
 import logging
 import datetime
-from functools import wraps
-from django.contrib.auth.models import User
+from functools import wraps, reduce
+
 from sqlalchemy import text
 from connections.db_connection import connect_db
 from core.utils import LegacySystem
@@ -42,16 +42,19 @@ except KeyError as e:
 def validate_import(f):
     """
     Funcao responvavel por validar os dados importados do ADVWin
-    Ela demonstra atraves do log a quantidade de registros lidos, quantidade de registros salvos, quantidade
+    Ela demonstra atraves do log a quantidade de registros lidos, quantidade de registros salvos,
+    quantidade
     registros nao salvos, e os registros que nao foram salvos.
     Para utitilizar este metodo basta decorar a funcao config_import.
     E necessario tambem a existem do atributo model, e field_check na classe.
          - model e o modelo onde sera importado os dados no ezl
          - field_check e o atributo do modelo onde sera checado as importacoes realizadas
-           Por padrao o field_check sera legacy_code, caso tenha a necessidade de ser um atributo diferente
+           Por padrao o field_check sera legacy_code, caso tenha a necessidade de ser um atributo
+           diferente
            este devera ser sobrescrito pela classe filha de GenericETL
-           Na a query atribuida ao atributo import_query devera conter pelomenos o mesmo campo que definido no
-           field_check, exemplo "SELECT pm.Ident AS legacy_code..." (--> o alias do campo a ser
+           Na a query atribuida ao atributo import_query devera conter pelomenos o mesmo campo que
+           definido no
+           field_check, exemplo 'SELECT pm.Ident AS legacy_code...' (--> o alias do campo a ser
            checado deve ser o mesmo defindo em check_field)
     :param f:
     :type: func
@@ -59,24 +62,34 @@ def validate_import(f):
     """
 
     @wraps(f)
-    def wrapper(*args, **kwargs):
-        res = f(*args, **kwargs)
-        debug_logger = args[0].debug_logger
-        error_logger = args[0].error_logger
-        name_class = args[0].model._meta.verbose_name
+    def wrapper(etl, rows, user, rows_count):
+        res = f(etl, rows, user, rows_count)
+        debug_logger = etl.debug_logger
+        error_logger = etl.error_logger
+        name_class = etl.model._meta.verbose_name
         try:
-            field_check = args[0].field_check
-            advwin_values = list(map(lambda i: str(i[field_check]), args[1]))
-            filter_ezl = 'args[0].model.objects.filter({0}__in={1})'.format(field_check,
-                                                                            advwin_values)
-            ezl_imported_values = eval(filter_ezl)
-            list(map(
-                lambda i: debug_logger.debug(name_class + ': REGISTRO SALVO - ' + str(i.__dict__)),
-                ezl_imported_values))
-            ezl_values = list(map(lambda i: eval('i.' + field_check), ezl_imported_values))
+            field_check = etl.field_check
+            advwin_values = [str(i[field_check]) for i in rows]
+
+            params = {'{}__in'.format(etl.EZL_LEGACY_CODE_FIELD): advwin_values}
+            qset = etl.model.objects.filter(**params)
+
+            parts = etl.EZL_LEGACY_CODE_FIELD.split('__')
+            chain = parts[:-1]
+            related = '__'.join(chain)
+            if related:
+                qset = qset.select_related(related)
+
+            for entry in qset:
+                debug_logger.debug('{}: REGISTROSALVO - {}'.format(name_class, entry))
+
+            ezl_values = [reduce(getattr, parts, entry) for entry in qset]
+
             read_quantity = len(advwin_values)
             written_amount = len(ezl_values)
+
             not_imported = set(advwin_values) - set(ezl_values)
+
             debug_logger.debug(name_class + ' - Quantidade lida:  {0}'.format(read_quantity))
             debug_logger.debug(name_class + ' - Quantidade salva: {0}'.format(written_amount))
             debug_logger.debug(
@@ -87,14 +100,16 @@ def validate_import(f):
                 error_logger.error(
                     name_class + ' -  Registros nao importadados {0}'.format(str(not_imported)))
             return res
-        except:
-            error_logger.error(args[0].model._meta.verbose_name + ': Nao foi possivel validar ')
-            pass
+        except Exception as exc:
+            error_logger.error(etl.model._meta.verbose_name + ': Nao foi possivel validar ')
+            error_logger.error(exc)
 
     return wrapper
 
 
 class GenericETL(object):
+    EZL_LEGACY_CODE_FIELD = 'legacy_code'
+
     advwin_engine = connect_db(parser, config_connection)
     model = None
     import_query = None
@@ -104,14 +119,15 @@ class GenericETL(object):
     advwin_model = None
     debug_logger = logging.getLogger('debug_logger')
     error_logger = logging.getLogger('error_logger')
-    timestr = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestr = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     field_check = 'legacy_code'
 
     class Meta:
         abstract = True
 
-    # inativa todos os registros já existentes para não ter que consultar ativos e inativos do legado
+    # inativa todos os registros já existentes para não ter que consultar ativos e inativos do
+    # legado
     def deactivate_records(self):
         if not truncate_all_tables:
             records = self.model.objects.filter(system_prefix=LegacySystem.ADVWIN.value)
@@ -123,9 +139,12 @@ class GenericETL(object):
             self.model.objects.all().update(is_active=False)
 
     def config_import(self, rows, user, rows_count):
-        pass
+        raise NotImplementedError()
 
     def import_data(self):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+
         if self.has_status:
             self.deactivate_all()
 

@@ -8,7 +8,7 @@ from lawsuit.models import Movement, LawSuit, TypeMovement
 
 class MovementETL(GenericETL):
     import_query = """
-                SELECT DISTINCT 
+                SELECT DISTINCT
                   pm.M_Distribuicao AS law_suit_legacy_code,
                   pm.Ident          AS legacy_code,
                   pm.Advogado       AS person_lawyer_legacy_code,
@@ -88,7 +88,6 @@ class MovementETL(GenericETL):
                 self.error_logger.error(
                     "Ocorreu o seguinte erro na importacao de Movimentacao: " + str(rows_count) + "," + str(
                         e) + "," + self.timestr)
-        super(MovementETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == "__main__":

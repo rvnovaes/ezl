@@ -13,7 +13,7 @@ class CourtDivisionETL(GenericETL):
                     FROM Jurid_Varas AS v1
                     WHERE codigo = (SELECT min(codigo)
                                     FROM Jurid_Varas AS v2
-                                    WHERE v1.descricao = v2.descricao)    
+                                    WHERE v1.descricao = v2.descricao)
                     """
     has_status = False
 
@@ -50,7 +50,6 @@ class CourtDivisionETL(GenericETL):
                 self.error_logger.error(
                     "Ocorreu o seguinte erro na importacao de Varas: " + str(rows_count) + "," + str(
                         e) + "," + self.timestr)
-        super(CourtDivisionETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == "__main__":

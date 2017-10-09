@@ -10,18 +10,18 @@ survey_dict = {'audienciaCorrespondente': 'COURTHEARING',
 class TypeTaskETL(GenericETL):
     model = TypeTask
     import_query = """
-                SELECT tm.Codigo AS legacy_code,  
-                       tm.Descricao, 
-                       tm.formulario_id 
-                   
-                   FROM Jurid_CodMov AS tm 
-                   
-                   WHERE right(tm.Codigo, 1) <> '.'  
-                      AND (tm.UsarOS = 1 AND tm.UsarOS IS NOT NULL)  
+                SELECT tm.Codigo AS legacy_code,
+                       tm.Descricao,
+                       tm.formulario_id
+
+                   FROM Jurid_CodMov AS tm
+
+                   WHERE right(tm.Codigo, 1) <> '.'
+                      AND (tm.UsarOS = 1 AND tm.UsarOS IS NOT NULL)
                       AND tm.Status = 'Ativo'
-                      AND tm.Codigo= (SELECT MIN(tm2.codigo) 
+                      AND tm.Codigo= (SELECT MIN(tm2.codigo)
                    FROM Jurid_CodMov AS tm2 WHERE tm.Descricao = tm2.Descricao)
-                  
+
                    """
 
     advwin_table = 'Jurid_CodMov'
@@ -64,8 +64,6 @@ class TypeTaskETL(GenericETL):
                 self.error_logger.error(
                     "Ocorreu o seguinte erro na importacao de Type Task: " + str(rows_count) + "," + str(
                         e) + "," + self.timestr)
-
-        super(TypeTaskETL, self).config_import(rows, user, rows_count)
 
 
 if __name__ == "__main__":

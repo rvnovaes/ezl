@@ -1,6 +1,7 @@
-from config.config import get_parser
+
 import os
 import sys
+from config.config import get_parser
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
