@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
 
-from core.messages import new_success, update_success, delete_success, delete_error_protected
+from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_success, delete_error_protected
 from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin, GenericFormOneToMany
 from task.models import Task
 from task.tables import TaskTable
@@ -86,14 +86,14 @@ class TypeMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustom
     model = TypeMovement
     form_class = TypeMovementForm
     success_url = reverse_lazy('type_movement_list')
-    success_message = new_success
+    success_message = CREATE_SUCCESS_MESSAGE
 
 
 class TypeMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
     model = TypeMovement
     form_class = TypeMovementForm
     success_url = reverse_lazy('type_movement_list')
-    success_message = update_success
+    success_message = UPDATE_SUCCESS_MESSAGE
 
     def get_context_data(self, **kwargs):
         """
@@ -146,17 +146,17 @@ class FolderListView(LoginRequiredMixin, SingleTableViewMixin):
 
 class FolderCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
     model = Folder
-    
+
     form_class = FolderForm
     success_url = reverse_lazy('folder_list')
-    success_message = new_success
-    
+    success_message = CREATE_SUCCESS_MESSAGE
+
 
 class FolderUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
     model = Folder
     form_class = FolderForm
     success_url = reverse_lazy('folder_list')
-    success_message = update_success
+    success_message = UPDATE_SUCCESS_MESSAGE
 
 
 class FolderDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
@@ -185,14 +185,14 @@ class CourtDistrictCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCusto
     model = CourtDistrict
     form_class = CourtDistrictForm
     success_url = reverse_lazy('courtdistrict_list')
-    success_message = new_success
+    success_message = CREATE_SUCCESS_MESSAGE
 
 
 class CourtDistrictUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
     model = CourtDistrict
     form_class = CourtDistrictForm
     success_url = reverse_lazy('courtdistrict_list')
-    success_message = update_success
+    success_message = UPDATE_SUCCESS_MESSAGE
 
     def get_context_data(self, **kwargs):
         """
@@ -247,14 +247,14 @@ class CourtDivisionCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCusto
     model = CourtDivision
     form_class = CourtDivisionForm
     success_url = reverse_lazy('courtdivision_list')
-    success_message = new_success
+    success_message = CREATE_SUCCESS_MESSAGE
 
 
 class CourtDivisionUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
     model = CourtDivision
     form_class = CourtDivisionForm
     success_url = reverse_lazy('courtdivision_list')
-    success_message = update_success
+    success_message = UPDATE_SUCCESS_MESSAGE
 
 
 class CourtDivisionDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
@@ -270,7 +270,7 @@ class FolderLawsuitCreateView(SuccessMessageMixin, GenericFormOneToMany, CreateV
     table_class = LawSuitTable
     template_name = 'lawsuit/folder_lawsuit_form.html'
     success_url = reverse_lazy('folder_list')
-    success_message = new_success
+    success_message = CREATE_SUCCESS_MESSAGE
 
     def get_context_data(self, **kwargs):
         context = super(FolderLawsuitCreateView, self).get_context_data(**kwargs)
@@ -285,7 +285,7 @@ class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateV
     table_class = LawSuitTable
     template_name = 'lawsuit/folder_lawsuit_form.html'
     success_url = reverse_lazy('folder_list')
-    success_message = update_success
+    success_message = UPDATE_SUCCESS_MESSAGE
     delete_message = delete_success(related_model._meta.verbose_name_plural)
 
     def get_context_data(self, **kwargs):
@@ -323,7 +323,7 @@ class LawSuitListView(LoginRequiredMixin, SingleTableViewMixin):
 class LawSuitCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
     model = LawSuit
     form_class = LawSuitForm
-    success_message = new_success
+    success_message = CREATE_SUCCESS_MESSAGE
 
     def get_success_url(self):
         self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
@@ -333,7 +333,7 @@ class LawSuitCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView,
 class LawSuitUpdateView(LoginRequiredMixin, BaseCustomView, UpdateView):
     model = LawSuit
     form_class = LawSuitForm
-    success_message = update_success
+    success_message = UPDATE_SUCCESS_MESSAGE
 
     def get_success_url(self):
         self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
@@ -367,7 +367,7 @@ class LawsuitMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, Generic
     table_class = MovementTable
     template_name = 'lawsuit/lawsuit_movement_form.html'
     # success_url = reverse_lazy('lawsuit_list')
-    success_message = new_success
+    success_message = CREATE_SUCCESS_MESSAGE
     object_list = []
 
     def get_context_data(self, **kwargs):
@@ -391,7 +391,7 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
     form_class = LawSuitForm
     table_class = MovementTable
     template_name = 'lawsuit/lawsuit_movement_form.html'
-    success_message = update_success
+    success_message = UPDATE_SUCCESS_MESSAGE
     delete_message = delete_success(related_model._meta.verbose_name_plural)
     object_list = []
 
@@ -423,7 +423,7 @@ class MovementListView(LoginRequiredMixin, SingleTableViewMixin):
 class MovementCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
     model = Movement
     form_class = MovementForm
-    success_message = new_success
+    success_message = CREATE_SUCCESS_MESSAGE
 
     def form_valid(self, form):
         self.kwargs.update({'folder': form.instance.law_suit.folder_id})
@@ -439,7 +439,7 @@ class MovementCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView
 class MovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
     model = Movement
     form_class = MovementForm
-    success_message = update_success
+    success_message = UPDATE_SUCCESS_MESSAGE
 
     def form_valid(self, form):
         self.kwargs.update({'folder': form.instance.law_suit.folder_id})
@@ -486,7 +486,7 @@ class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
     form_class = MovementForm
     table_class = TaskTable
     template_name = 'lawsuit/movement_task_form.html'
-    success_message = new_success
+    success_message = CREATE_SUCCESS_MESSAGE
 
     def get_context_data(self, **kwargs):
         context = super(MovementTaskCreateView, self).get_context_data(**kwargs)
@@ -509,7 +509,7 @@ class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
     form_class = MovementForm
     table_class = TaskTable
     template_name = 'lawsuit/movement_task_form.html'
-    success_message = new_success
+    success_message = CREATE_SUCCESS_MESSAGE
 
     def get_context_data(self, **kwargs):
         context = super(MovementTaskUpdateView, self).get_context_data(**kwargs)
@@ -518,5 +518,5 @@ class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
     def get_success_url(self):
         self.success_url = reverse('lawsuit_update',
                                    kwargs={'folder': self.kwargs['folder'], 'pk': self.kwargs['lawsuit']})
-                                   
+
 

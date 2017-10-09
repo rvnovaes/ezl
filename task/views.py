@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.views.generic import CreateView, UpdateView, TemplateView
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
-from core.messages import new_success, update_success, delete_success
+from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_success
 from core.messages import operational_error_create, ioerror_create, exception_create, integrity_error_delete, \
     file_exists_error_delete, exception_delete, success_sent, success_delete
 from core.models import Person
@@ -36,7 +36,7 @@ class TaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Cr
     model = Task
     form_class = TaskForm
     success_url = reverse_lazy('task_list')
-    success_message = new_success
+    success_message = CREATE_SUCCESS_MESSAGE
 
     def get_initial(self):
         if self.kwargs.get('movement'):
@@ -68,7 +68,7 @@ class TaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Up
     model = Task
     form_class = TaskForm
     success_url = reverse_lazy('task_list')
-    success_message = update_success
+    success_message = UPDATE_SUCCESS_MESSAGE
 
     def get_initial(self):
         if self.kwargs.get('movement'):
@@ -171,7 +171,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Task
     form_class = TaskDetailForm
     success_url = reverse_lazy('dashboard')
-    success_message = update_success
+    success_message = UPDATE_SUCCESS_MESSAGE
     template_name = "task/task_detail.html"
 
     def form_valid(self, form):
@@ -258,14 +258,14 @@ class TypeTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView
     model = TypeTask
     form_class = TypeTaskForm
     success_url = reverse_lazy('typetask_list')
-    success_message = new_success
+    success_message = CREATE_SUCCESS_MESSAGE
 
 
 class TypeTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
     model = TypeTask
     form_class = TypeTaskForm
     success_url = reverse_lazy('typetask_list')
-    success_message = update_success
+    success_message = UPDATE_SUCCESS_MESSAGE
 
     def get_context_data(self, **kwargs):
         """
