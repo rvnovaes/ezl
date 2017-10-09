@@ -10,4 +10,4 @@ RUN mkdir -p /app /var/log/ezl/etl/
 WORKDIR /app
 COPY ["requirements.txt", "requirements-dev.txt", "./"]
 
-RUN pip install -r requirements-dev.txt
+RUN pip install -r requirements/development.txt

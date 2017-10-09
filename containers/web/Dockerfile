@@ -10,4 +10,4 @@ RUN mkdir -p /app /var/log/ezl/etl/
 WORKDIR /app
 ADD requirements.txt /app/
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements/production.txt
