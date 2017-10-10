@@ -31,7 +31,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     ADDRESS_UPDATE_SUCCESS_MESSAGE
 from core.models import Person, Address, City, State, Country, AddressType
 from core.signals import create_person
-from core.tables import PersonTable, UserTable
+from core.tables import PersonTable, UserTable, AddressTable
 from core.utils import login_log, logout_log
 from lawsuit.models import Folder, Movement, LawSuit
 from task.models import Task
@@ -246,6 +246,13 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
     success_message = UPDATE_SUCCESS_MESSAGE
+    template_name_suffix = '_update_form'
+
+    def get_context_data(self, **kwargs):
+        kwargs.update({
+            'address_table': AddressTable(self.object.address_set.all()),
+        })
+        return super().get_context_data(**kwargs)
 
 
 class PersonDeleteView(AuditFormMixin, MultiDeleteViewMixin):

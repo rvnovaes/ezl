@@ -184,13 +184,14 @@ class Person(Audit, LegacyCode):
 
 class Address(Audit):
     address_type = models.ForeignKey(
-        AddressType, on_delete=models.PROTECT, blank=False, null=False)
-    street = models.CharField(max_length=255)
-    number = models.CharField(max_length=255)
-    complement = models.CharField(max_length=255, blank=True)
-    city_region = models.CharField(max_length=255)
-    zip_code = models.CharField(max_length=255)
-    notes = models.TextField(blank=True)
+        AddressType, on_delete=models.PROTECT, blank=False, null=False,
+        verbose_name='Tipo')
+    street = models.CharField(max_length=255, verbose_name='Rua')
+    number = models.CharField(max_length=255, verbose_name='Número')
+    complement = models.CharField(max_length=255, blank=True, verbose_name='Complemento')
+    city_region = models.CharField(max_length=255, verbose_name='Bairro')
+    zip_code = models.CharField(max_length=255, verbose_name='CEP')
+    notes = models.TextField(blank=True, verbose_name='Observação')
     home_address = models.BooleanField(default=False, blank=True)
     business_address = models.BooleanField(default=False, blank=True)
     city = models.ForeignKey(City, on_delete=models.PROTECT, blank=False, null=False)

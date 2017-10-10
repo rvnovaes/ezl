@@ -3,7 +3,18 @@ from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django_tables2.utils import AttributeDict  # alias for Accessor
 
-from .models import Person
+from .models import Person, Address
+
+
+class AddressTable(tables.Table):
+    class Meta:
+        model = Address
+        fields = ['street', 'number', 'complement', 'city_region', 'zip_code',
+                  'country',
+                  'state', 'city', 'notes', 'address_type', 'is_active']
+        attrs = {'class': 'table table-hover'}
+
+# Logradouro, N, COmplemento, Bairro, Cidade, Estado, Cep, Pais, Observacao, Tipo, Ativo
 
 
 class CheckBoxMaterial(tables.CheckBoxColumn):
@@ -24,7 +35,9 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         attrs = AttributeDict(default, **(specific or general or {}))
         attrs['selectable'] = True
         return mark_safe(
-            '<div class="checkbox"><label><input %s id="selection_header"  onclick="toggle(this)"/></label></div>'
+            ('<div class="checkbox"><label>'
+             '<input %s id="selection_header"  onclick="toggle(this)"/>'
+             '</label></div>')
             % attrs.as_html())
 
     def render(self, value, bound_column, record):
@@ -57,7 +70,8 @@ class PersonTable(tables.Table):
             'cpf_cnpj', 'is_active', 'is_customer', 'is_supplier', 'auth_user', 'legacy_code')
         model = Person
         fields = ['selection', 'legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_lawyer',
-                  'is_court', 'is_customer', 'is_supplier', 'auth_user', 'is_active', 'legacy_code']
+                  'is_court', 'is_customer', 'is_supplier', 'auth_user', 'is_active',
+                  'legacy_code']
         attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem pessoas cadastradas"
         row_attrs = {
@@ -72,8 +86,7 @@ class UserTable(tables.Table):
 
     def __init__(self, *args, first_name='Nome', last_name='Sobrenome', is_active="Ativo",
                  username="Nome de usuário (login)", email="e-mail", last_login="Último acesso",
-                 date_joined="Data de registro"
-                 ,
+                 date_joined="Data de registro",
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.base_columns['first_name'].verbose_name = first_name
@@ -83,7 +96,8 @@ class UserTable(tables.Table):
         self.base_columns['is_active'].verbose_name = is_active
         self.base_columns['last_login'].verbose_name = last_login
         self.base_columns['date_joined'].verbose_name = date_joined
-        self.exclude = ('is_staff','is_superuser')
+        self.exclude = ('is_staff', 'is_superuser')
+
     class Meta:
 
         model = User

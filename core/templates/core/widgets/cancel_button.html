@@ -1,7 +1,7 @@
 {# Botao de cancelar utilizada nos formularios #}
 {# Ao clicar ele retorna a listagem respeitando a pagina se encontrava#}
 
-<button type="button" onclick="goToBackUrl('{% url link_list %}');" class="btn btn-sm btn-raised btn-default"><i
+<a href="{% url link_list %}" class="btn btn-sm btn-raised btn-default"><i
         class="material-icons left">clear</i>
     Cancelar
-</button>
+</a>

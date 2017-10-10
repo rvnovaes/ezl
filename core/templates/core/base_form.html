@@ -32,22 +32,19 @@
 
         {% csrf_token %}
 
-        <di1v>
-            <div>
-                <div class="row">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h1 class="panel-title">
-                                {{ form.get_title }}
-                            </h1>
-                        </div>
-                        <div class="panel-body">
-                            {% form %}{% endform %}
-                        </div>
-                    </div>
+        <div class="row">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h1 class="panel-title">
+                        {{ form.get_title }}
+                    </h1>
+                </div>
+                <div class="panel-body">
+                    {% form %}{% endform %}
                 </div>
             </div>
         </div>
+
         <div style="text-align: center;">
 
             {% include 'core/widgets/cancel_button.html' with link_list='person_list' %}

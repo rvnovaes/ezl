@@ -1,0 +1,22 @@
+{% extends "core/person_form.html" %}
+
+{% load render_table from django_tables2 %}
+
+{% block content %}
+    {{ block.super }}
+
+    <div class="row">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h1 class="panel-title">Endereços</h1>
+            </div>
+
+            <div class="panel-body">
+                <div class="table-responsive">
+                    {% render_table address_table %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
