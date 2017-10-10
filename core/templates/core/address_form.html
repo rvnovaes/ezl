@@ -1,0 +1,21 @@
+{% extends "core/base_form.html" %}
+
+{% block extrajs %}
+
+    {{ block.super }}
+
+    <script type="text/javascript">
+        $(function () {
+            $('#id_city').show();
+            $('#id_city').chosen({
+                // width: '90%',
+                include_group_label_in_selected: true,
+                search_contains: true});
+            window.setTimeout(function () {
+                $('#id_city').material_select('destroy');
+            }, 0);
+        })
+    </script>
+
+{% endblock %}
+

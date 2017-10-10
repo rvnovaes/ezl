@@ -11,7 +11,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import ProtectedError, Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
@@ -139,6 +139,34 @@ class AuditFormMixin(LoginRequiredMixin, SuccessMessageMixin):
     def form_invalid(self, form):
         messages.error(self.request, form.errors)
         return super().form_invalid(form)
+
+
+class AddressUpdateView(AuditFormMixin, UpdateView):
+    model = Address
+    form_class = AddressForm
+    success_message = UPDATE_SUCCESS_MESSAGE
+    # template_name_suffix = '_update_form'
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['city'].choices = (
+            ('Brasil - Minas Gerais - MG',
+             ((31, 'Belo Horizonte - MG - Brasil'),
+              (55, 'Salvador - BA - Brasil'), ), ),
+
+            ('Alemanha - Minas Gerais - MG',
+             ((31, 'Belo Horizonte - MG - Brasil'),
+              (55, 'Berlin - BLN - Alemanha'), ),), )
+        return form
+
+    def get_success_url(self):
+        return reverse('address_list', args=(self.request.user.person.pk, ))
+
+    # def get_context_data(self, **kwargs):
+    #     kwargs.update({
+    #         'address_table': AddressTable(self.object.address_set.all()),
+    #     })
+    #     return super().get_context_data(**kwargs)
 
 
 class SingleTableViewMixin(SingleTableView):

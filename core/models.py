@@ -194,7 +194,8 @@ class Address(Audit):
     notes = models.TextField(blank=True, verbose_name='Observação')
     home_address = models.BooleanField(default=False, blank=True)
     business_address = models.BooleanField(default=False, blank=True)
-    city = models.ForeignKey(City, on_delete=models.PROTECT, blank=False, null=False)
+    city = models.ForeignKey(City, on_delete=models.PROTECT, blank=False, null=False,
+                             verbose_name="Cidade")
     state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False)
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False)
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)

@@ -4,24 +4,23 @@
 {% load material_form %}
 {% load staticfiles %}
 
+{% block head %}
+
+    {{ block.super }}
+
+    <link rel="stylesheet" href="{% static "chosen/chosen.min.css" %}">
+
+    <link rel="stylesheet" href="{% static "chosen/chosen-material-theme.min.css" %}">
+
+{% endblock %}
+
 {% block extrajs %}
 
     {{ block.super }}
 
-    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
+    <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>
 
-    <script type="text/javascript">
-        $(function () {
-            $('#id_legal_type').change(function () {
-                if (this.value == 'F') {
-                    $("#id_cpf_cnpj").mask('000.000.000-00', {reverse: true});
-                }
-                else {
-                    $('#id_cpf_cnpj').mask('00.000.000/0000-00', {reverse: true});
-                }
-            }).change();
-        })
-    </script>
+    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
 
 {% endblock %}
 

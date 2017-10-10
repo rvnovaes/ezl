@@ -1,17 +1,23 @@
-import django_tables2 as tables
 from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
-from django_tables2.utils import AttributeDict  # alias for Accessor
+
+import django_tables2 as tables
+from django_tables2.utils import AttributeDict, A
 
 from .models import Person, Address
 
 
 class AddressTable(tables.Table):
+    edit_link = tables.LinkColumn('address_update',
+                                  verbose_name="",
+                                  text="Editar",
+                                  args=[A('person_id'), A('pk')])
+
     class Meta:
         model = Address
         fields = ['street', 'number', 'complement', 'city_region', 'zip_code',
                   'country',
-                  'state', 'city', 'notes', 'address_type', 'is_active']
+                  'state', 'city', 'notes', 'address_type', 'is_active', 'edit_link']
         attrs = {'class': 'table table-hover'}
 
 # Logradouro, N, COmplemento, Bairro, Cidade, Estado, Cep, Pais, Observacao, Tipo, Ativo

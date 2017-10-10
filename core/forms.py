@@ -115,95 +115,100 @@ class PersonForm(forms.ModelForm):
         return cleaned_data
 
 
-class AddressForm(ModelForm, forms.Form):
+class AddressForm(ModelForm):
+    # address_type = forms.ModelChoiceField(
+    #     label=u'Tipo de Endereço',
+    #     queryset=AddressType.objects.filter(id__gte=1),
+    #     widget=forms.Select(attrs={'class': 'form-control'})
+    # )
+
+    # street = forms.CharField(
+    #     label=u'Logradouro',
+    #     required=True,
+    #     max_length=255,
+    #     widget=forms.TextInput(attrs={'class': 'form-control'})
+    # )
+    # number = forms.CharField(
+    #     label=u'Número',
+    #     required=True,
+    #     max_length=255,
+    #     widget=forms.TextInput(attrs={'class': 'form-control'})
+    # )
+
+    # complement = forms.CharField(
+    #     label=u'Complemento',
+    #     required=False,
+    #     max_length=255,
+    #     widget=forms.TextInput(attrs={'class': 'form-control'})
+    # )
+
+    # city_region = forms.CharField(
+    #     label=u'Bairro',
+    #     required=True,
+    #     max_length=255,
+    #     widget=forms.TextInput(attrs={'class': 'form-control'})
+    # )
+
+    # zip_code = forms.CharField(
+    #     label=u'CEP',
+    #     required=True,
+    #     max_length=255,
+    #     widget=forms.TextInput(attrs={'class': 'form-control'})
+    # )
+
+    # country = forms.ModelChoiceField(
+    #     label=u'País',
+    #     queryset=Country.objects.all(),
+    #     required=True,
+    #     widget=forms.Select(attrs={'class': 'form-control'})
+    # )
+
+    # # todo: alterar o id de acordo com o país
+    # state = forms.ModelChoiceField(
+    #     label=u'Estado',
+    #     # queryset=State.objects.none(),
+    #     # queryset=State.objects.filter(country_id=-1).order_by('name'),
+    #     queryset=State.objects.filter(id__gt=1).order_by('name'),
+    #     required=True,
+    #     widget=forms.Select(attrs={'class': 'form-control'})
+
+    # )
+
+    # is_active = CustomBooleanField(
+    #     required=False,
+    #     widget=(forms.HiddenInput())
+    # )
+
+    # # todo: alterar o id de acordo com o estato
+    # city = forms.ModelChoiceField(
+    #     label=u'Município',
+    #     # queryset=City.objects.none(),
+    #     # queryset=City.objects.filter(state_id=-1).order_by('name'),
+    #     queryset=City.objects.filter(id__gt=1).order_by('name'),
+    #     required=True,
+    #     widget=forms.Select(attrs={
+    #         'onchange': '',
+    #         'class': 'form-control'
+    #     },
+    #     )
+    # )
+
+    # notes = forms.CharField(
+    #     label=u'Observação',
+    #     required=False,
+    #     widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '2'})
+    # )
+
     class Meta:
         model = Address
-        fields = ['address_type', 'street', 'number', 'complement', 'city_region', 'zip_code',
-                  'country',
-                  'state', 'city', 'notes', 'is_active']
+        fields = ['address_type', 'street', 'number', 'complement',
+                  'zip_code',
+                  'city_region',
+                  'city',
+                  # 'state',
+                  # 'country',
+                  'notes', 'is_active']
 
-    address_type = forms.ModelChoiceField(
-        label=u'Tipo de Endereço',
-        queryset=AddressType.objects.filter(id__gte=1),
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-
-    street = forms.CharField(
-        label=u'Logradouro',
-        required=True,
-        max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-    number = forms.CharField(
-        label=u'Número',
-        required=True,
-        max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-
-    complement = forms.CharField(
-        label=u'Complemento',
-        required=False,
-        max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-
-    city_region = forms.CharField(
-        label=u'Bairro',
-        required=True,
-        max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-
-    zip_code = forms.CharField(
-        label=u'CEP',
-        required=True,
-        max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-
-    country = forms.ModelChoiceField(
-        label=u'País',
-        queryset=Country.objects.all(),
-        required=True,
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-
-    # todo: alterar o id de acordo com o país
-    state = forms.ModelChoiceField(
-        label=u'Estado',
-        # queryset=State.objects.none(),
-        # queryset=State.objects.filter(country_id=-1).order_by('name'),
-        queryset=State.objects.filter(id__gt=1).order_by('name'),
-        required=True,
-        widget=forms.Select(attrs={'class': 'form-control'})
-
-    )
-
-    is_active = CustomBooleanField(
-        required=False,
-        widget=(forms.HiddenInput())
-    )
-
-    # todo: alterar o id de acordo com o estato
-    city = forms.ModelChoiceField(
-        label=u'Município',
-        # queryset=City.objects.none(),
-        # queryset=City.objects.filter(state_id=-1).order_by('name'),
-        queryset=City.objects.filter(id__gt=1).order_by('name'),
-        required=True,
-        widget=forms.Select(attrs={
-            'onchange': '',
-            'class': 'form-control'
-        },
-        )
-    )
-
-    notes = forms.CharField(
-        label=u'Observação',
-        required=False,
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '2'})
-    )
 
 
 AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=3)
