@@ -1,6 +1,16 @@
+# TODO: Mover odas as constantes para as classes ou módulos onde elas pertencem.
+
 CREATE_SUCCESS_MESSAGE = 'Registro criado com sucesso'
 
 UPDATE_SUCCESS_MESSAGE = 'Registro atualizado com sucesso'
+
+ADDRESS_UPDATE_SUCCESS_MESSAGE = 'Endereço atualizado com sucesso.'
+
+ADDRESS_UPDATE_ERROR_MESSAGE = 'Erro ao atualizar o endereço.'
+
+ERROR_FILE_EXITS_MESSAGE = 'Erro: impossível encontrar o arquivo.'
+
+DELETE_EXCEPTION_MESSAGE = 'Erro: impossível excluir o arquivo.'
 
 
 def delete_success(model_name):
@@ -14,8 +24,6 @@ def delete_error_protected(model_name, related_model):
             'associados em outra parte do sistema!'
             ' A exclusão será cancelada.')
 
-
-# GED
 
 def success_delete():
     return 'Arquivo excluído com sucesso !'
@@ -39,65 +47,3 @@ def exception_create():
 
 def integrity_error_delete():
     return 'Erro: impossível excluir o arquivo.'
-
-
-def file_exists_error_delete():
-    return 'Erro: impossível encontrar o arquivo.'
-
-
-def exception_delete():
-    return 'Erro: impossível excluir o arquivo.'
-
-
-def address_sucess_deleted():
-    return 'Endereço excluído com sucesso.'
-
-
-def address_error_deleted():
-    return 'Erro ao excluir o endereço.'
-
-
-def address_success_create():
-    return 'Endereço cadastrado com sucesso.'
-
-
-def address_error_create():
-    return 'Erro ao cadastrar endereço.'
-
-
-def address_success_update():
-    return 'Endereço atualizado com sucesso.'
-
-
-def address_error_update():
-    return 'Erro ao atualizar o endereço.'
-
-
-def address_and_person_created():
-    return 'Dados cadastrados com sucesso.'
-
-
-def address_and_person_not_created():
-    return 'Erro ao cadastrar os dados.'
-
-
-def recover_database_not_permitted():
-    return 'Usuário sem permissão de continuar com a operação'
-
-
-def recover_database_login_incorrect():
-    return 'O nome de usuário e/ou senha especificados não estão corretos.'
-
-
-def duplicate_cpf(cpf):
-    if cpf is not None:
-        return 'O número de CPF ' + cpf + ' já existe.'
-    else:
-        return 'O número de CPF já existe.'
-
-
-def duplicate_cnpj(cnpj):
-    if cnpj is not None:
-        return 'O número de CNPJ ' + cnpj + ' já existe.'
-    else:
-        return 'O número de CNPJ já existe.'

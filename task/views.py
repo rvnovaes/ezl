@@ -1,5 +1,7 @@
 import os
+from urllib.parse import urlparse
 
+from django.core.cache import cache
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
@@ -12,20 +14,19 @@ from django.utils import timezone
 from django.views.generic import CreateView, UpdateView, TemplateView
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
-from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_success
-from core.messages import operational_error_create, ioerror_create, exception_create, \
+from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_success, \
+    operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
-    file_exists_error_delete, exception_delete, success_sent, success_delete
+    ERROR_FILE_EXITS_MESSAGE, DELETE_EXCEPTION_MESSAGE, success_sent, success_delete
 from core.models import Person
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
 from task.signals import send_notes_execution_date
+
 from .filters import TaskFilter
 from .forms import TaskForm, TaskDetailForm, TypeTaskForm
 from .models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
-from urllib.parse import urlparse
-from django.core.cache import cache
 
 
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -326,12 +327,12 @@ def delete_ecm(request, pk):
 
     except FileExistsError:
         data = {'is_deleted': False,
-                'message': file_exists_error_delete()
+                'message': ERROR_FILE_EXITS_MESSAGE
                 }
 
     except Exception:
         data = {'is_deleted': False,
-                'message': exception_delete()
+                'message': DELETE_EXCEPTION_MESSAGE,
                 }
 
     return JsonResponse(data)

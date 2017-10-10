@@ -27,8 +27,8 @@ from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
     delete_success, \
-    address_error_update, \
-    address_success_update
+    ADDRESS_UPDATE_ERROR_MESSAGE, \
+    ADDRESS_UPDATE_SUCCESS_MESSAGE
 from core.models import Person, Address, City, State, Country, AddressType
 from core.signals import create_person
 from core.tables import PersonTable, UserTable
@@ -202,7 +202,7 @@ def address_update(request, pk):
 
     data = {
         'result': False,
-        'message': address_error_update(),
+        'message': ADDRESS_UPDATE_ERROR_MESSAGE,
         'city': str(form.instance.city),
         'state': str(form.instance.state),
         'country': str(form.instance.country),
@@ -214,7 +214,7 @@ def address_update(request, pk):
         form.save()
         data = {
             'result': True,
-            'message': address_success_update()
+            'message': ADDRESS_UPDATE_SUCCESS_MESSAGE
         }
 
     return JsonResponse(data)
