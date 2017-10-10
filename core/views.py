@@ -105,35 +105,29 @@ class LoginCustomView(LoginView):
         return super(LoginCustomView, self).form_valid(form)
 
 
-# Implementa a alteração da data e usuários para operação de update e new
 class AuditFormMixin(LoginRequiredMixin, SuccessMessageMixin):
+    """
+    Implementa a alteração da data e usuários para operação de update e new
+    Lógica que verifica se a requisição é para Create ou Update.
+    Se Create, o botão 'ativar' é desabilitar e valor padrão True
+    Se Update, o botão 'ativar é habilitado para edição e o valor, carregado do banco
+    """
 
-    def form_invalid(self, form):
-        messages.error(self.request, form.errors)
-        return super().form_invalid(form)
-
-    # Lógica que verifica se a requisição é para Create ou Update.
-    # Se Create, o botão 'ativar' é desabilitar e valor padrão True
-    # Se Update, o botão 'ativar é habilitado para edição e o valor, carregado do banco
-    def get_initial(self):
-
-        # try:
-        #     if isinstance(self, CreateView):
-        #         self.form_class.declared_fields['is_active'].initial = True
-        #         self.form_class.declared_fields['is_active'].disabled = True
-
-        #     elif isinstance(self, UpdateView):
-        #         self.form_class.declared_fields['is_active'].disabled = False
-
-        # except:
-        #     pass
-
-        return self.initial.copy()
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        if 'is_active' in form.fields and not form.instance.pk:
+            form.fields['is_active'].initial = True
+            form.fields['is_active'].required = False
+            form.fields['is_active'].widget.attrs['disabled'] = 'disabled'
+        return form
 
     def form_valid(self, form):
+        instance = form.save(commit=False)
+
+        if 'is_active' in form.fields and not instance.pk:
+            instance.is_active = True
+
         if form.instance.id is None:
-            # TODO: nao precisa salvar o create_date e o alter_date pq o model já faz isso. tirar
-            # de todos os lugares
             form.instance.create_date = timezone.now()
             form.instance.create_user = self.request.user
         else:
@@ -141,6 +135,10 @@ class AuditFormMixin(LoginRequiredMixin, SuccessMessageMixin):
             form.instance.alter_user = self.request.user
             form.save()
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, form.errors)
+        return super().form_invalid(form)
 
 
 class SingleTableViewMixin(SingleTableView):

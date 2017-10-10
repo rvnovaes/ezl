@@ -4,6 +4,14 @@
 
 {% block container_class %}content-block{% endblock %}
 
+{% block extrajs %}
+
+    {{ block.super }}
+
+    <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
+
+{% endblock %}
+
 {% block head %}
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="{% static "libs/bootstrap-3.3.7/css/bootstrap.css" %}">
@@ -89,7 +97,6 @@
 {% endblock %}
 
 {% block container %}
-    {% include 'core/widgets/messages.html' %}
     {% block content %}{% endblock content %}
     <!-- Janela modal de logout -->
     <div class="modal" id="logout_modal">
