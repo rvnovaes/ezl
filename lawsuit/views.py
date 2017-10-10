@@ -10,11 +10,14 @@ from django.http import HttpResponseRedirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
 
-from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_success, delete_error_protected
-from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin, GenericFormOneToMany
+from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_success, \
+    delete_error_protected
+from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin, \
+    GenericFormOneToMany
 from task.models import Task
 from task.tables import TaskTable
-from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm, \
+from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, \
+    CourtDistrictForm, \
     CourtDivisionForm
 from .models import Instance, Movement, LawSuit, Folder, CourtDistrict, CourtDivision, TypeMovement
 from .tables import MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, InstanceTable, \
@@ -33,13 +36,13 @@ class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
         return ret
 
 
-class InstanceCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+class InstanceCreateView(AuditFormMixin, CreateView):
     model = Instance
     form_class = InstanceForm
     success_url = reverse_lazy('instance_list')
 
 
-class InstanceUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
+class InstanceUpdateView(AuditFormMixin, UpdateView):
     model = Instance
     form_class = InstanceForm
     success_url = reverse_lazy('instance_list')
@@ -82,14 +85,14 @@ class TypeMovementListView(LoginRequiredMixin, SingleTableViewMixin):
     table_class = TypeMovementTable
 
 
-class TypeMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+class TypeMovementCreateView(AuditFormMixin, CreateView):
     model = TypeMovement
     form_class = TypeMovementForm
     success_url = reverse_lazy('type_movement_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
 
-class TypeMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
+class TypeMovementUpdateView(AuditFormMixin, UpdateView):
     model = TypeMovement
     form_class = TypeMovementForm
     success_url = reverse_lazy('type_movement_list')
@@ -144,7 +147,7 @@ class FolderListView(LoginRequiredMixin, SingleTableViewMixin):
         return super(FolderListView, self).get_context_data(**kwargs)
 
 
-class FolderCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+class FolderCreateView(AuditFormMixin, CreateView):
     model = Folder
 
     form_class = FolderForm
@@ -152,14 +155,14 @@ class FolderCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, 
     success_message = CREATE_SUCCESS_MESSAGE
 
 
-class FolderUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
+class FolderUpdateView(AuditFormMixin, UpdateView):
     model = Folder
     form_class = FolderForm
     success_url = reverse_lazy('folder_list')
     success_message = UPDATE_SUCCESS_MESSAGE
 
 
-class FolderDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
+class FolderDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = Folder
     success_url = reverse_lazy('folder_list')
     success_message = delete_success(model._meta.verbose_name_plural)
@@ -181,14 +184,14 @@ class CourtDistrictListView(LoginRequiredMixin, SingleTableViewMixin):
         return super(CourtDistrictListView, self).get_context_data(**kwargs)
 
 
-class CourtDistrictCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+class CourtDistrictCreateView(AuditFormMixin, CreateView):
     model = CourtDistrict
     form_class = CourtDistrictForm
     success_url = reverse_lazy('courtdistrict_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
 
-class CourtDistrictUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
+class CourtDistrictUpdateView(AuditFormMixin, UpdateView):
     model = CourtDistrict
     form_class = CourtDistrictForm
     success_url = reverse_lazy('courtdistrict_list')
@@ -221,7 +224,7 @@ class CourtDistrictUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCusto
         return super(CourtDistrictUpdateView, self).post(request, *args, **kwargs)
 
 
-class CourtDistrictDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
+class CourtDistrictDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = CourtDistrict
     success_url = reverse_lazy('courtdistrict_list')
     success_message = delete_success(model._meta.verbose_name_plural)
@@ -243,21 +246,21 @@ class CourtDivisionListView(LoginRequiredMixin, SingleTableViewMixin):
         return super(CourtDivisionListView, self).get_context_data(**kwargs)
 
 
-class CourtDivisionCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+class CourtDivisionCreateView(AuditFormMixin, CreateView):
     model = CourtDivision
     form_class = CourtDivisionForm
     success_url = reverse_lazy('courtdivision_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
 
-class CourtDivisionUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
+class CourtDivisionUpdateView(AuditFormMixin, UpdateView):
     model = CourtDivision
     form_class = CourtDivisionForm
     success_url = reverse_lazy('courtdivision_list')
     success_message = UPDATE_SUCCESS_MESSAGE
 
 
-class CourtDivisionDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
+class CourtDivisionDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = CourtDivision
     success_url = reverse_lazy('courtdivision_list')
     success_message = delete_success(model._meta.verbose_name_plural)
@@ -320,7 +323,7 @@ class LawSuitListView(LoginRequiredMixin, SingleTableViewMixin):
     table_class = LawSuitTable
 
 
-class LawSuitCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+class LawSuitCreateView(AuditFormMixin, CreateView):
     model = LawSuit
     form_class = LawSuitForm
     success_message = CREATE_SUCCESS_MESSAGE
@@ -330,7 +333,7 @@ class LawSuitCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView,
         super(LawSuitCreateView, self).get_success_url()
 
 
-class LawSuitUpdateView(LoginRequiredMixin, BaseCustomView, UpdateView):
+class LawSuitUpdateView(AuditFormMixin, UpdateView):
     model = LawSuit
     form_class = LawSuitForm
     success_message = UPDATE_SUCCESS_MESSAGE
@@ -340,12 +343,12 @@ class LawSuitUpdateView(LoginRequiredMixin, BaseCustomView, UpdateView):
         super(LawSuitUpdateView, self).get_success_url()
 
 
-class LawSuitDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
+class LawSuitDeleteView(AuditFormMixin, DeleteView):
     model = LawSuit
     success_message = delete_success(model._meta.verbose_name_plural)
 
     def delete(self, request, *args, **kwargs):
-        pks = self.request.POST.getlist("selection")
+        pks = self.request.POST.getlist('selection')
         parent_class = self.request.POST['parent_class']
         try:
             self.model.objects.filter(pk__in=pks).delete()
@@ -353,14 +356,14 @@ class LawSuitDeleteView(LoginRequiredMixin, BaseCustomView, DeleteView):
         except ProtectedError as e:
             qs = e.protected_objects.first()
             messages.error(self.request,
-                           delete_error_protected(self.model._meta.verbose_name
-                                                  , qs.__str__()))
+                           delete_error_protected(self.model._meta.verbose_name, qs.__str__()))
         return HttpResponseRedirect(
             reverse('folder_update',
                     kwargs={'pk': parent_class}))
 
 
-class LawsuitMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany, CreateView):
+class LawsuitMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
+                                CreateView):
     model = LawSuit
     related_model = Movement
     form_class = LawSuitForm
@@ -385,7 +388,8 @@ class LawsuitMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, Generic
         super(LawsuitMovementCreateView, self).get_success_url()
 
 
-class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany, UpdateView):
+class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
+                                UpdateView):
     model = LawSuit
     related_model = Movement
     form_class = LawSuitForm
@@ -420,7 +424,7 @@ class MovementListView(LoginRequiredMixin, SingleTableViewMixin):
     table_class = MovementTable
 
 
-class MovementCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+class MovementCreateView(AuditFormMixin, CreateView):
     model = Movement
     form_class = MovementForm
     success_message = CREATE_SUCCESS_MESSAGE
@@ -432,11 +436,12 @@ class MovementCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView
 
     def get_success_url(self):
         self.success_url = reverse('lawsuit_update',
-                                   kwargs={'folder': self.kwargs['folder'], 'pk': self.kwargs['lawsuit']})
+                                   kwargs={'folder': self.kwargs['folder'],
+                                           'pk': self.kwargs['lawsuit']})
         super(MovementCreateView, self).get_success_url()
 
 
-class MovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
+class MovementUpdateView(AuditFormMixin, UpdateView):
     model = Movement
     form_class = MovementForm
     success_message = UPDATE_SUCCESS_MESSAGE
@@ -448,7 +453,8 @@ class MovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView
 
     def get_success_url(self):
         self.success_url = reverse('lawsuit_update',
-                                   kwargs={'folder': self.kwargs['folder'], 'pk': self.kwargs['lawsuit']})
+                                   kwargs={'folder': self.kwargs['folder'],
+                                           'pk': self.kwargs['lawsuit']})
         super(MovementUpdateView, self).get_success_url()
 
     def get_context_data(self, **kwargs):
@@ -471,7 +477,7 @@ class MovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView
         return super(MovementUpdateView, self).post(request, *args, **kwargs)
 
 
-class MovementDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
+class MovementDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = Movement
     success_message = delete_success(model._meta.verbose_name_plural)
 
@@ -480,7 +486,8 @@ class MovementDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixi
         return super(MovementDeleteView, self).post(request, *args, **kwargs)
 
 
-class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany, CreateView):
+class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
+                             CreateView):
     model = Movement
     related_model = Task
     form_class = MovementForm
@@ -500,10 +507,12 @@ class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
 
     def get_success_url(self):
         self.success_url = reverse('lawsuit_update',
-                                   kwargs={'folder': self.kwargs['folder'], 'pk': self.kwargs['lawsuit']})
+                                   kwargs={'folder': self.kwargs['folder'],
+                                           'pk': self.kwargs['lawsuit']})
 
 
-class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany, UpdateView):
+class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
+                             UpdateView):
     model = Movement
     related_model = Task
     form_class = MovementForm
@@ -517,6 +526,5 @@ class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
 
     def get_success_url(self):
         self.success_url = reverse('lawsuit_update',
-                                   kwargs={'folder': self.kwargs['folder'], 'pk': self.kwargs['lawsuit']})
-
-
+                                   kwargs={'folder': self.kwargs['folder'],
+                                           'pk': self.kwargs['lawsuit']})

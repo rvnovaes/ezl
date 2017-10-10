@@ -13,7 +13,6 @@ from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import ProtectedError, Q
-from django.db.utils import IntegrityError
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -23,13 +22,13 @@ from allauth.account.views import LoginView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 
-from core.forms import PersonForm, AddressForm, AddressFormSet, UserUpdateForm, UserCreateForm
+from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
     delete_success, \
     address_error_update, \
-    address_success_update, duplicate_cpf, duplicate_cnpj
+    address_success_update
 from core.models import Person, Address, City, State, Country, AddressType
 from core.signals import create_person
 from core.tables import PersonTable, UserTable
@@ -107,41 +106,41 @@ class LoginCustomView(LoginView):
 
 
 # Implementa a alteração da data e usuários para operação de update e new
-class BaseCustomView(FormView):
-    success_url = None
+class AuditFormMixin(LoginRequiredMixin, SuccessMessageMixin):
+
+    def form_invalid(self, form):
+        messages.error(self.request, form.errors)
+        return super().form_invalid(form)
 
     # Lógica que verifica se a requisição é para Create ou Update.
     # Se Create, o botão 'ativar' é desabilitar e valor padrão True
     # Se Update, o botão 'ativar é habilitado para edição e o valor, carregado do banco
     def get_initial(self):
 
-        try:
-            if isinstance(self, CreateView):
-                self.form_class.declared_fields['is_active'].initial = True
-                self.form_class.declared_fields['is_active'].disabled = True
+        # try:
+        #     if isinstance(self, CreateView):
+        #         self.form_class.declared_fields['is_active'].initial = True
+        #         self.form_class.declared_fields['is_active'].disabled = True
 
-            elif isinstance(self, UpdateView):
-                self.form_class.declared_fields['is_active'].disabled = False
+        #     elif isinstance(self, UpdateView):
+        #         self.form_class.declared_fields['is_active'].disabled = False
 
-        except:
-            pass
+        # except:
+        #     pass
 
         return self.initial.copy()
 
     def form_valid(self, form):
-        user = User.objects.get(id=self.request.user.id)
-
         if form.instance.id is None:
             # TODO: nao precisa salvar o create_date e o alter_date pq o model já faz isso. tirar
             # de todos os lugares
             form.instance.create_date = timezone.now()
-            form.instance.create_user = user
+            form.instance.create_user = self.request.user
         else:
             form.instance.alter_date = timezone.now()
-            form.instance.alter_user = user
+            form.instance.alter_user = self.request.user
             form.save()
-        super().form_valid(form)
-        return HttpResponseRedirect(self.success_url)
+        return super().form_valid(form)
 
 
 class SingleTableViewMixin(SingleTableView):
@@ -237,123 +236,21 @@ class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
         return super(PersonListView, self).get_context_data(**kwargs)
 
 
-class BaseCreateView(LoginRequiredMixin, CreateView):
-    def form_valid(self, form):
-        instance = form.instance
-        if instance.id is None:
-            instance.create_date = timezone.now()
-            instance.create_user = self.request.user
-        else:
-            instance.alter_date = timezone.now()
-            instance.alter_user = self.request.user
-        return super().form_valid(form)
-
-
-class PersonCreateView(BaseCreateView):
+class PersonCreateView(AuditFormMixin, CreateView):
     model = Person
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
 
-class PersonUpdateView(LoginRequiredMixin, SuccessMessageMixin, BaseCustomView, UpdateView):
+class PersonUpdateView(AuditFormMixin, UpdateView):
     model = Person
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
     success_message = UPDATE_SUCCESS_MESSAGE
 
-    def form_invalid(self, form):
 
-        messages.error(self.request, form.errors)
-        return super(PersonUpdateView, self).form_invalid(form)
-
-    def form_valid(self, form):
-
-        legal_type = self.request.POST['legal_type']
-        cnpj = self.request.POST['cnpj']
-        cpf = self.request.POST['cpf']
-
-        message = 'CPF/CNPJ já existente'
-        if legal_type is 'F' and cpf:
-            form.instance.cpf_cnpj = cpf
-            message = duplicate_cpf(cpf)
-
-        elif legal_type is 'J' and cnpj:
-            form.instance.cpf_cnpj = cnpj
-            message = duplicate_cnpj(cnpj)
-
-        try:
-            form.save()
-
-        except IntegrityError:
-            messages.error(self.request, message)
-            self.get_context_data()
-            return HttpResponseRedirect(self.request.environ.get('PATH_INFO'))
-
-        return super(PersonUpdateView, self).form_valid(form)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(PersonUpdateView, self).get_context_data(**kwargs)
-        context['addresses'] = Address.objects.filter(person=self.object.id)
-        context['form_address'] = AddressForm()
-        context['address_formset'] = AddressFormSet()
-        cache.set('person_page', self.request.META.get('HTTP_REFERER'))
-        return context
-
-    def post(self, request, *args, **kwargs):
-        if cache.get('person_page'):
-            self.success_url = cache.get('person_page')
-        res = super(PersonUpdateView, self).post(request, *args, **kwargs)
-        addresses_form = AddressFormSet(self.request.POST,
-                                        instance=Person.objects.get(id=kwargs['pk']))
-
-        if addresses_form.is_valid():
-            for address in addresses_form:
-                # Form foi marcado para deleção
-                if address.cleaned_data['DELETE'] and self.request.POST['is_delete'] == '3':
-                    Address.objects.get(id=address.cleaned_data['id'].id).delete()
-                    messages.success(request, 'Registro(s) excluído(s) com sucesso')
-
-                # Endereço já existe no banco
-                elif address.cleaned_data['id']:
-                    a = Address.objects.get(id=address.cleaned_data['id'].id)
-                    a.street = address.instance.street
-                    a.number = address.instance.number
-                    a.complement = address.instance.complement
-                    a.city_region = address.instance.city_region
-                    a.country = address.instance.country
-                    a.state = address.instance.state
-                    a.city = address.instance.city
-                    a.notes = address.instance.notes
-                    a.address_type = address.instance.address_type
-                    a.zip_code = address.instance.zip_code
-
-                    if (address.cleaned_data['is_active'] is True or
-                            address.cleaned_data['is_active'] is 'on'):
-                        a.is_active = True
-                    else:
-                        a.is_active = False
-
-                    # a.is_active = address.instance.is_active
-
-                    a.save(
-                        update_fields=['street', 'number', 'complement', 'city_region', 'country',
-                                       'state', 'city',
-                                       'notes', 'address_type', 'zip_code', 'is_active'])
-
-                # Endereço não existe no banco (novo endereço) e será salvo
-                else:
-                    address.instance.create_date = timezone.now()
-                    address.instance.create_user = User.objects.get(id=self.request.user.id)
-                    address.save()
-        else:
-            for error in addresses_form.errors:
-                messages.error(self.request, error)
-        return res
-
-
-class PersonDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
+class PersonDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = Person
     success_url = reverse_lazy('person_list')
     success_message = delete_success(model._meta.verbose_name_plural)
@@ -555,7 +452,7 @@ class UserListView(LoginRequiredMixin, SingleTableViewMixin):
     template_name = 'auth/user_list.html'
 
 
-class UserCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+class UserCreateView(AuditFormMixin, CreateView):
     model = User
     form_class = UserCreateForm
     success_url = reverse_lazy('user_list')
@@ -578,7 +475,7 @@ class UserCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Cr
         return HttpResponseRedirect(self.success_url)
 
 
-class UserUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
+class UserUpdateView(AuditFormMixin, UpdateView):
     model = User
 
     form_class = UserUpdateForm
@@ -632,7 +529,7 @@ class UserUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Up
         return super(UserUpdateView, self).post(request, *args, **kwargs)
 
 
-class UserDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
+class UserDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
     model = User
     success_url = reverse_lazy('user_list')
     success_message = delete_success('usuários')

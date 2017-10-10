@@ -13,10 +13,11 @@ from django.views.generic import CreateView, UpdateView, TemplateView
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_success
-from core.messages import operational_error_create, ioerror_create, exception_create, integrity_error_delete, \
+from core.messages import operational_error_create, ioerror_create, exception_create, \
+    integrity_error_delete, \
     file_exists_error_delete, exception_delete, success_sent, success_delete
 from core.models import Person
-from core.views import BaseCustomView, MultiDeleteViewMixin, SingleTableViewMixin
+from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
 from task.signals import send_notes_execution_date
 from .filters import TaskFilter
@@ -32,7 +33,7 @@ class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
     table_class = TaskTable
 
 
-class TaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+class TaskCreateView(AuditFormMixin, CreateView):
     model = Task
     form_class = TaskForm
     success_url = reverse_lazy('task_list')
@@ -57,14 +58,14 @@ class TaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Cr
         super(TaskCreateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
-
     def get_success_url(self):
         self.success_url = reverse('movement_update',
-                                   kwargs={'lawsuit': self.kwargs['lawsuit'], 'pk': self.kwargs['movement']})
+                                   kwargs={'lawsuit': self.kwargs['lawsuit'],
+                                           'pk': self.kwargs['movement']})
         super(TaskCreateView, self).get_success_url()
 
 
-class TaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
+class TaskUpdateView(AuditFormMixin, UpdateView):
     model = Task
     form_class = TaskForm
     success_url = reverse_lazy('task_list')
@@ -90,7 +91,8 @@ class TaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, Up
 
     def get_success_url(self):
         self.success_url = reverse('movement_update',
-                                   kwargs={'lawsuit': self.kwargs['lawsuit'], 'pk': self.kwargs['movement']})
+                                   kwargs={'lawsuit': self.kwargs['lawsuit'],
+                                           'pk': self.kwargs['movement']})
         super(TaskUpdateView, self).get_success_url()
 
 
@@ -104,7 +106,7 @@ class TaskDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMix
 
 
 class DashboardView(MultiTableMixin, TemplateView):
-    template_name = "task/task_dashboard.html"
+    template_name = 'task/task_dashboard.html'
     table_pagination = {
         'per_page': 5
     }
@@ -135,32 +137,32 @@ class DashboardView(MultiTableMixin, TemplateView):
         finished = grouped.get(TaskStatus.FINISHED) or {}
 
         if person:
-            return_table = DashboardStatusTable(returned, title="Retornadas",
+            return_table = DashboardStatusTable(returned, title='Retornadas',
                                                 status=TaskStatus.RETURN)
 
             accepted_table = DashboardStatusTable(accepted,
-                                                  title="A Cumprir", status=TaskStatus.ACCEPTED
+                                                  title='A Cumprir', status=TaskStatus.ACCEPTED
                                                   )
 
-            open_table = DashboardStatusTable(opened, title="Em Aberto",
+            open_table = DashboardStatusTable(opened, title='Em Aberto',
                                               status=TaskStatus.OPEN)
 
-            done_table = DashboardStatusTable(done, title="Cumpridas",
+            done_table = DashboardStatusTable(done, title='Cumpridas',
                                               status=TaskStatus.DONE)
 
             refused_table = DashboardStatusTable(refused,
-                                                 title="Recusadas", status=TaskStatus.REFUSED
-                                                 )
+                                                 title='Recusadas', status=TaskStatus.REFUSED)
+
             blocked_payment_table = DashboardStatusTable(blocked_payment,
-                                                         title="Glosadas", status=TaskStatus.BLOCKEDPAYMENT
+                                                         title='Glosadas',
+                                                         status=TaskStatus.BLOCKEDPAYMENT)
 
-                                                         )
             finished_table = DashboardStatusTable(finished,
-                                                  title="Finalizadas", status=TaskStatus.FINISHED
+                                                  title='Finalizadas',
+                                                  status=TaskStatus.FINISHED)
 
-                                                  )
-
-            tables = [return_table, accepted_table, open_table, done_table, refused_table, blocked_payment_table,
+            tables = [return_table, accepted_table, open_table, done_table, refused_table,
+                      blocked_payment_table,
                       finished_table]
         else:
             tables = {}
@@ -172,7 +174,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     form_class = TaskDetailForm
     success_url = reverse_lazy('dashboard')
     success_message = UPDATE_SUCCESS_MESSAGE
-    template_name = "task/task_detail.html"
+    template_name = 'task/task_detail.html'
 
     def form_valid(self, form):
         execution_date = None
@@ -181,7 +183,8 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None
         if form.cleaned_data['execution_date'] and not form.instance.execution_date:
             execution_date = form.cleaned_data['execution_date']
-        survey_result = form.cleaned_data['survey_result'] if form.cleaned_data['survey_result'] else None
+        survey_result = (form.cleaned_data['survey_result']
+                         if form.cleaned_data['survey_result'] else None)
 
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
                                        execution_date=execution_date, survey_result=survey_result)
@@ -193,7 +196,8 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(TaskDetailView, self).get_context_data(**kwargs)
         context['geds'] = Ecm.objects.filter(task_id=self.object.id)
-        context['task_history'] = TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
+        context['task_history'] = \
+            TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
 
         return context
 
@@ -224,7 +228,8 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
                         'id': ecm.id,
                         'name': str(file),
                         'user': str(self.request.user),
-                        'username': str(self.request.user.first_name + ' ' + self.request.user.last_name),
+                        'username': str(self.request.user.first_name + ' ' +
+                                        self.request.user.last_name),
                         'filename': str(os.path.basename(ecm.path.path)),
                         'task_id': str(task),
                         'message': success_sent()
@@ -254,14 +259,14 @@ class TypeTaskListView(LoginRequiredMixin, SingleTableViewMixin):
     table_class = TypeTaskTable
 
 
-class TypeTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, CreateView):
+class TypeTaskCreateView(AuditFormMixin, CreateView):
     model = TypeTask
     form_class = TypeTaskForm
     success_url = reverse_lazy('typetask_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
 
-class TypeTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView, UpdateView):
+class TypeTaskUpdateView(AuditFormMixin, UpdateView):
     model = TypeTask
     form_class = TypeTaskForm
     success_url = reverse_lazy('typetask_list')
@@ -295,7 +300,7 @@ class TypeTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, BaseCustomView
         return super().post(request, *args, **kwargs)
 
 
-class TypeTaskDeleteView(LoginRequiredMixin, BaseCustomView, MultiDeleteViewMixin):
+class TypeTaskDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = TypeTask
     success_url = reverse_lazy('typetask_list')
     success_message = delete_success(model._meta.verbose_name_plural)
@@ -380,13 +385,18 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             if data['deadline']:
                 if data['deadline'].start:
                     deadline_dynamic_query.add(
-                        Q(final_deadline_date__gte=data['deadline'].start.replace(hour=0, minute=0)), Q.AND)
+                        Q(final_deadline_date__gte=data['deadline'].start.replace(hour=0,
+                                                                                  minute=0)),
+                        Q.AND)
                 if data['deadline'].stop:
                     deadline_dynamic_query.add(
-                        Q(final_deadline_date__lte=data['deadline'].stop.replace(hour=23, minute=59)), Q.AND)
+                        Q(final_deadline_date__lte=data['deadline'].stop.replace(hour=23,
+                                                                                 minute=59)),
+                        Q.AND)
             if data['client']:
                 client_query.add(Q(client=data['client']), Q.AND)
-            person_dynamic_query.add(status_dynamic_query, Q.AND).add(Q(reminder_dynamic_query), Q.AND).add(
+            person_dynamic_query.add(status_dynamic_query, Q.AND).add(Q(reminder_dynamic_query),
+                                                                      Q.AND).add(
                 Q(deadline_dynamic_query), Q.AND).add(Q(client_query), Q.AND)
 
             query_set = DashboardViewModel.objects.filter(person_dynamic_query)
