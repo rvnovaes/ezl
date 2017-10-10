@@ -76,7 +76,7 @@ class ContactMechanismForm(ModelForm, forms.Form):
     )
 
 
-class PersonForm(BaseForm, forms.Form):
+class PersonForm(forms.ModelForm):
 
     layout = Layout(
         Row('legal_name', 'name'),
@@ -89,6 +89,9 @@ class PersonForm(BaseForm, forms.Form):
         fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj',
                   'is_lawyer',
                   'is_court', 'is_customer', 'is_supplier', 'is_active']
+
+    def get_title(self):
+        return self._meta.model._meta.verbose_name
 
     def clean(self):
         cleaned_data = super().clean()
