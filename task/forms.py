@@ -28,11 +28,11 @@ class TaskForm(BaseForm):
     person_asked_by = forms.ModelChoiceField(
         empty_label='Selecione...',
         queryset=filter_valid_choice_form(
-          Person.objects.active().correspondents().order_by('name')))
+          Person.objects.active().requesters().order_by('name')))
 
     person_executed_by = forms.ModelChoiceField(
         empty_label='Selecione...',
-        queryset=Person.objects.active().requesters().order_by('name'))
+        queryset=Person.objects.active().correspondents().order_by('name'))
 
     type_task = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(

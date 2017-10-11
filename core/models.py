@@ -8,8 +8,8 @@ from .utils import LegacySystem
 
 
 class LegalType(Enum):
-    FISICA = u"F"
-    JURIDICA = u"J"
+    FISICA = 'F'
+    JURIDICA = 'J'
 
     def __str__(self):
         return str(self.value)
@@ -59,7 +59,7 @@ class LegacyCode(models.Model):
     legacy_code = models.CharField(max_length=255, blank=True, null=True,
                                    verbose_name='Código legado')
     system_prefix = models.CharField(max_length=255, blank=True, null=True,
-                                     verbose_name=u'Prefixo do sistema',
+                                     verbose_name='Prefixo do sistema',
                                      choices=((x.value, x.name.title()) for x in LegacySystem))
 
     class Meta:
@@ -86,7 +86,7 @@ class AddressType(Audit):
     name = models.CharField(max_length=255, null=False, unique=True)
 
     class Meta:
-        db_table = "address_type"
+        db_table = 'address_type'
 
     def __str__(self):
         return self.name
@@ -96,7 +96,7 @@ class Country(Audit):
     name = models.CharField(max_length=255, null=False, unique=True)
 
     class Meta:
-        db_table = "country"
+        db_table = 'country'
         verbose_name = 'País'
 
     def __str__(self):
@@ -109,8 +109,8 @@ class State(Audit):
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False)
 
     class Meta:
-        db_table = "state"
-        verbose_name = "Estado"
+        db_table = 'state'
+        verbose_name = 'Estado'
 
     def __str__(self):
         return self.name
@@ -125,8 +125,8 @@ class City(Audit):
                                        verbose_name='Comarca')
 
     class Meta:
-        db_table = "city"
-        verbose_name = "Cidade"
+        db_table = 'city'
+        verbose_name = 'Cidade'
         unique_together = (('name', 'state'),)
 
     def __str__(self):
@@ -134,27 +134,27 @@ class City(Audit):
 
 
 class Person(Audit, LegacyCode):
-    CORRESPONDENT_GROUP = "Correspondente"
+    CORRESPONDENT_GROUP = 'Correspondente'
     REQUESTER_GROUP = 'Solicitante'
 
     objects = PersonManager()
 
     legal_name = models.CharField(max_length=255, blank=False,
-                                  verbose_name="Razão social/Nome completo")
+                                  verbose_name='Razão social/Nome completo')
     name = models.CharField(max_length=255, null=True, blank=True,
-                            verbose_name="Nome Fantasia/Apelido")
-    is_lawyer = models.BooleanField(null=False, default=False, verbose_name="É Advogado?")
-    is_court = models.BooleanField(null=False, default=False, verbose_name="É Tribunal?")
-    legal_type = models.CharField(null=False, verbose_name="Tipo", max_length=1,
+                            verbose_name='Nome Fantasia/Apelido')
+    is_lawyer = models.BooleanField(null=False, default=False, verbose_name='É Advogado?')
+    is_court = models.BooleanField(null=False, default=False, verbose_name='É Tribunal?')
+    legal_type = models.CharField(null=False, verbose_name='Tipo', max_length=1,
                                   choices=((x.value, x.format(x.value)) for x in LegalType),
                                   default=LegalType.JURIDICA)
     cpf_cnpj = models.CharField(max_length=255, blank=True, null=True,
-                                unique=True, verbose_name="CPF/CNPJ")
+                                unique=True, verbose_name='CPF/CNPJ')
     auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
                                      blank=True, null=True,
-                                     verbose_name="Usuário do sistema")
-    is_customer = models.BooleanField(null=False, default=False, verbose_name="É Cliente?")
-    is_supplier = models.BooleanField(null=False, default=False, verbose_name="É Fornecedor?")
+                                     verbose_name='Usuário do sistema')
+    is_customer = models.BooleanField(null=False, default=False, verbose_name='É Cliente?')
+    is_supplier = models.BooleanField(null=False, default=False, verbose_name='É Fornecedor?')
 
     @property
     def cpf(self):
@@ -173,10 +173,10 @@ class Person(Audit, LegacyCode):
         self.cnpj = value
 
     class Meta:
-        db_table = "person"
+        db_table = 'person'
         ordering = ['-id']
-        verbose_name = "Pessoa"
-        verbose_name_plural = "Pessoas"
+        verbose_name = 'Pessoa'
+        verbose_name_plural = 'Pessoas'
 
     def __str__(self):
         return self.legal_name
@@ -195,15 +195,15 @@ class Address(Audit):
     home_address = models.BooleanField(default=False, blank=True)
     business_address = models.BooleanField(default=False, blank=True)
     city = models.ForeignKey(City, on_delete=models.PROTECT, blank=False, null=False,
-                             verbose_name="Cidade")
+                             verbose_name='Cidade')
     state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False)
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False)
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
 
     class Meta:
-        db_table = "address"
-        verbose_name = "Endereço"
-        verbose_name_plural = "Endereços"
+        db_table = 'address'
+        verbose_name = 'Endereço'
+        verbose_name_plural = 'Endereços'
 
     def __str__(self):
         tpl = '{street}, {number}{complement} - {city_region} - {city} - {state} - CEP {zip_code}'
@@ -219,7 +219,7 @@ class ContactMechanismType(Audit):
     name = models.CharField(max_length=255, null=False, unique=True)
 
     class Meta:
-        db_table = "contact_mechanism_type"
+        db_table = 'contact_mechanism_type'
 
     def __str__(self):
         return self.name
@@ -233,7 +233,7 @@ class ContactMechanism(Audit):
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
 
     class Meta:
-        db_table = "contact_mechanism"
+        db_table = 'contact_mechanism'
 
     def __str__(self):
         return self.description
@@ -246,7 +246,7 @@ class ContactUs(Audit):
     message = models.TextField()
 
     class Meta:
-        db_table = "contact_us"
+        db_table = 'contact_us'
 
     def __str__(self):
         return self.name
