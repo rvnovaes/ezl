@@ -113,9 +113,20 @@ class AuditFormMixin(LoginRequiredMixin, SuccessMessageMixin):
     Se Update, o botão 'ativar é habilitado para edição e o valor, carregado do banco
     """
 
+    object_list_url = None
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(object_list_url=self.get_object_list_url(), **kwargs)
+
+    def get_object_list_url(self):
+        if self.object_list_url:
+            return reverse(self.object_list_url)
+
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         if 'is_active' in form.fields and not form.instance.pk:
+            form.data = form.data.copy()
+            form.data['is_active'] = True
             form.fields['is_active'].initial = True
             form.fields['is_active'].required = False
             form.fields['is_active'].widget.attrs['disabled'] = 'disabled'
@@ -141,32 +152,40 @@ class AuditFormMixin(LoginRequiredMixin, SuccessMessageMixin):
         return super().form_invalid(form)
 
 
-class AddressUpdateView(AuditFormMixin, UpdateView):
+class AddressMixin(AuditFormMixin):
+
+    def dispatch(self, *args, **kwargs):
+        self.person = Person.objects.get(pk=self.kwargs['person_pk'])
+        return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(person=self.person, **kwargs)
+
+    def form_valid(self, form):
+        form.save(commit=False)
+        form.instance.person = self.person
+        return super().form_valid(form)
+
+    def get_object_list_url(self):
+        return reverse('person_update', args=(self.person.pk, ))
+
+
+class AddressCreateView(AddressMixin, CreateView):
+    model = Address
+    form_class = AddressForm
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def get_success_url(self):
+        return reverse('person_update', args=(self.object.person.pk, ))
+
+
+class AddressUpdateView(AddressMixin, UpdateView):
     model = Address
     form_class = AddressForm
     success_message = UPDATE_SUCCESS_MESSAGE
-    # template_name_suffix = '_update_form'
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        form.fields['city'].choices = (
-            ('Brasil - Minas Gerais - MG',
-             ((31, 'Belo Horizonte - MG - Brasil'),
-              (55, 'Salvador - BA - Brasil'), ), ),
-
-            ('Alemanha - Minas Gerais - MG',
-             ((31, 'Belo Horizonte - MG - Brasil'),
-              (55, 'Berlin - BLN - Alemanha'), ),), )
-        return form
 
     def get_success_url(self):
-        return reverse('address_list', args=(self.request.user.person.pk, ))
-
-    # def get_context_data(self, **kwargs):
-    #     kwargs.update({
-    #         'address_table': AddressTable(self.object.address_set.all()),
-    #     })
-    #     return super().get_context_data(**kwargs)
+        return reverse('person_update', args=(self.object.person.pk, ))
 
 
 class SingleTableViewMixin(SingleTableView):

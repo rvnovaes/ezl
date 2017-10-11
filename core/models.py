@@ -202,6 +202,8 @@ class Address(Audit):
 
     class Meta:
         db_table = "address"
+        verbose_name = "Endereço"
+        verbose_name_plural = "Endereços"
 
     def __str__(self):
         tpl = '{street}, {number}{complement} - {city_region} - {city} - {state} - CEP {zip_code}'

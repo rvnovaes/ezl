@@ -16,6 +16,10 @@ urlpatterns = [
     url(r'^inicial/', login_required(views.inicial), name='inicial'),
 
     # Address views
+    url(r'^pessoas/(?P<person_pk>[0-9]+)/enderecoes/criar/$',
+        views.AddressCreateView.as_view(),
+        name='address_create'),
+
     url(r'^pessoas/(?P<person_pk>[0-9]+)/enderecoes/(?P<pk>[0-9]+)/$',
         views.AddressUpdateView.as_view(),
         name='address_update'),

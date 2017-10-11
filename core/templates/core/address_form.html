@@ -6,16 +6,27 @@
 
     <script type="text/javascript">
         $(function () {
+
             $('#id_city').show();
+
             $('#id_city').chosen({
                 // width: '90%',
                 include_group_label_in_selected: true,
                 search_contains: true});
+
             window.setTimeout(function () {
                 $('#id_city').material_select('destroy');
             }, 0);
+
         })
     </script>
 
 {% endblock %}
 
+{% block form_title %}
+    {% if object %}
+        {{ block.super }}
+    {% else %}
+        Novo endereço para {{ person }}
+    {% endif %}
+{% endblock %}

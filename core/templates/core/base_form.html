@@ -35,7 +35,19 @@
             <div class="panel panel-primary">
                 <div class="panel-heading">
                     <h1 class="panel-title">
-                        {{ form.get_title }}
+                        {% block form_title %}
+                            {% with form.get_title as form_title %}
+                                {% if form_title %}
+                                    {{ form_title }}
+                                {% else %}
+                                    {% if object %}
+                                        Editando {{ object }}
+                                    {% else %}
+                                        Novo {{ form.get_model_verbose_name }}
+                                    {% endif %}
+                                {% endif %}
+                            {% endwith %}
+                        {% endblock %}
                     </h1>
                 </div>
                 <div class="panel-body">
@@ -46,7 +58,9 @@
 
         <div style="text-align: center;">
 
-            {% include 'core/widgets/cancel_button.html' with link_list='person_list' %}
+            {% if object_list_url %}
+                {% include 'core/widgets/cancel_button.html' %}
+            {% endif %}
 
             <button type="submit" class="btn btn-sm btn-raised btn-primary">
                 <i class="material-icons left">done</i>

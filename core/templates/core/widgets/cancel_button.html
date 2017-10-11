@@ -1,7 +1,14 @@
 {# Botao de cancelar utilizada nos formularios #}
 {# Ao clicar ele retorna a listagem respeitando a pagina se encontrava#}
 
-<a href="{% url link_list %}" class="btn btn-sm btn-raised btn-default"><i
-        class="material-icons left">clear</i>
-    Cancelar
-</a>
+{% if link_list %}
+    <a href="{% url link_list %}" class="btn btn-sm btn-raised btn-default"><i class="material-icons left">clear</i>
+        Cancelar
+    </a>
+{% else %}
+    {% if object_list_url %}
+        <a href="{{ object_list_url }}" class="btn btn-sm btn-raised btn-default"><i class="material-icons left">clear</i>
+            Cancelar
+        </a>
+    {% endif %}
+{% endif %}
