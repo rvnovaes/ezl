@@ -167,6 +167,7 @@ class AddressMixin(AuditFormMixin):
         return super().form_valid(form)
 
     def get_object_list_url(self):
+        # TODO: Este método parece ser inútil, success_url pode ser usado.
         return reverse('person_update', args=(self.person.pk, ))
 
 
@@ -295,6 +296,7 @@ class PersonCreateView(AuditFormMixin, CreateView):
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
     success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'person_list'
 
 
 class PersonUpdateView(AuditFormMixin, UpdateView):
@@ -303,6 +305,7 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
     success_url = reverse_lazy('person_list')
     success_message = UPDATE_SUCCESS_MESSAGE
     template_name_suffix = '_update_form'
+    object_list_url = 'person_list'
 
     def get_context_data(self, **kwargs):
         kwargs.update({
@@ -315,6 +318,7 @@ class PersonDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = Person
     success_url = reverse_lazy('person_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+    object_list_url = 'person_list'
 
 
 class ClientAutocomplete(autocomplete.Select2QuerySetView):

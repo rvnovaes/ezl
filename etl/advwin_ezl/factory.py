@@ -1,13 +1,14 @@
-import os
-import sys
-import django
-from django.db import connection
 from django.conf import settings
+from django.db import connection
+from django.contrib.auth.models import User
 
+from core.models import Country, State, City, Person, Address, AddressType, ContactMechanism, \
+    ContactMechanismType
+from core import signals
+from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, \
+    Movement
+from task.models import TypeTask, Task, TaskStatus, TaskHistory
 
-sys.path.append("ezl")
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ezl.settings")
-django.setup()
 
 invalid_registry = '-INVÁLIDO'
 invalid_legacy_code = 'REGISTRO' + invalid_registry
@@ -20,17 +21,13 @@ class InvalidObjectFactory(object):
     @staticmethod
     def create():
         # cria usuário padrão
-        from django.contrib.auth.models import User
-        from core.models import Country, State, City, Person, Address, AddressType, ContactMechanism, ContactMechanismType
-        from core import signals
-        from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, Movement
-        from task.models import TypeTask, Task, TaskStatus, TaskHistory
 
         print(signals)
         user = User.objects.filter(username='invalid_user').first()
         admin = User.objects.filter(username='admin').first()
         if not user:
-            user = User.objects.create_superuser('invalid_user', 'invalid_user@mttech.com.br', 'admin')
+            user = User.objects.create_superuser('invalid_user', 'invalid_user@mttech.com.br',
+                                                 'admin')
         if not admin:
             admin = User.objects.create_superuser('admin', 'admin@mttech.com.br', 'admin')
 
@@ -41,38 +38,38 @@ class InvalidObjectFactory(object):
         invalid_state, created = State.objects.get_or_create(
             name=State._meta.verbose_name.upper() + invalid_registry,
             create_user=user, country=invalid_country)
-        invalid_court_district, created = CourtDistrict.objects.get_or_create(create_user=user,
-                                                                              name=CourtDistrict._meta.verbose_name.upper()
-                                                                                   + invalid_registry,
-                                                                              state=invalid_state)
+        invalid_court_district, created = CourtDistrict.objects.get_or_create(
+            create_user=user,
+            name=CourtDistrict._meta.verbose_name.upper() + invalid_registry,
+            state=invalid_state)
         invalid_city, created = City.objects.get_or_create(
             name=City._meta.verbose_name.upper() + invalid_registry,
             state=invalid_state, create_user=user,
             court_district=invalid_court_district)
 
-        #Atualiza os dados de invalid_person para o padrao
+        # Atualiza os dados de invalid_person para o padrao
         invalid_user = User.objects.filter(username='invalid_user').first().id
         invalid_person = Person.objects.filter(auth_user_id=invalid_user).first()
-        Person.objects.filter(auth_user_id=invalid_user).update(legacy_code=invalid_legacy_code,
-                                legal_name=Person._meta.verbose_name.upper() + invalid_registry,
-                                name=Person._meta.verbose_name.upper() + invalid_registry)
+        Person.objects.filter(auth_user_id=invalid_user).update(
+                              legacy_code=invalid_legacy_code,
+                              legal_name=Person._meta.verbose_name.upper() + invalid_registry,
+                              name=Person._meta.verbose_name.upper() + invalid_registry)
+
         # Registros inválidos para o app lawsuit
         invalid_type_movement, created = TypeMovement.objects.get_or_create(
             legacy_code=invalid_legacy_code,
-            name=TypeMovement._meta.verbose_name.upper() +
-                 invalid_registry, create_user=user)
+            name=TypeMovement._meta.verbose_name.upper() + invalid_registry, create_user=user)
 
         invalid_instance, created = Instance.objects.get_or_create(
             legacy_code=invalid_legacy_code,
-            name=Instance._meta.verbose_name.upper() +
-                 invalid_registry, create_user=user)
+            name=Instance._meta.verbose_name.upper() + invalid_registry, create_user=user)
         invalid_folder, created = Folder.objects.get_or_create(legacy_code=invalid_legacy_code,
-                                                               person_customer=invalid_person, create_user=user)
+                                                               person_customer=invalid_person,
+                                                               create_user=user)
 
         invalid_court_division, created = CourtDivision.objects.get_or_create(
             legacy_code=invalid_legacy_code,
-            name=CourtDivision._meta.verbose_name.upper()
-                 + invalid_registry, create_user=user)
+            name=CourtDivision._meta.verbose_name.upper() + invalid_registry, create_user=user)
 
         invalid_law_suit, created = LawSuit.objects.get_or_create(
             legacy_code=invalid_legacy_code,
@@ -109,7 +106,8 @@ class InvalidObjectFactory(object):
         )
 
         invalid_contact_mechanism_type, created = ContactMechanismType.objects.get_or_create(
-            name=ContactMechanismType._meta.verbose_name.upper() + invalid_registry, create_user=user
+            name=ContactMechanismType._meta.verbose_name.upper() + invalid_registry,
+            create_user=user
         )
 
         invalid_contact_mechanism, created = ContactMechanism.objects.get_or_create(
@@ -120,13 +118,18 @@ class InvalidObjectFactory(object):
         )
 
         # Registros inválidos para o app Task
-        invalid_type_task, created = TypeTask.objects.get_or_create(create_user=user, legacy_code=invalid_legacy_code,
-                                                                    name=TypeTask._meta.verbose_name.upper() + invalid_registry)
-        invalid_task, created = Task.objects.get_or_create(create_user=user, movement=invalid_movement,
+        invalid_type_task, created = TypeTask.objects.get_or_create(
+            create_user=user,
+            legacy_code=invalid_legacy_code,
+            name=TypeTask._meta.verbose_name.upper() + invalid_registry)
+
+        invalid_task, created = Task.objects.get_or_create(create_user=user,
+                                                           movement=invalid_movement,
                                                            person_asked_by=invalid_person,
                                                            person_executed_by=invalid_person,
                                                            legacy_code=invalid_legacy_code,
-                                                           task_status=TaskStatus.INVALID, type_task=invalid_type_task)
+                                                           task_status=TaskStatus.INVALID,
+                                                           type_task=invalid_type_task)
 
     @staticmethod
     def get_invalid_model(model):
@@ -136,7 +139,9 @@ class InvalidObjectFactory(object):
         if settings['truncate_all_tables']:
             with connection.cursor() as cursor:
                 for model in self.models:
-                    cursor.execute("TRUNCATE TABLE " + model._meta.db_table + " RESTART IDENTITY CASCADE;")
+                    cursor.execute('TRUNCATE TABLE ' +
+                                   model._meta.db_table +
+                                   ' RESTART IDENTITY CASCADE;')
 
 
 if __name__ == '__main__':
