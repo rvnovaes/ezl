@@ -83,7 +83,6 @@ class UserETL(GenericETL):
                 is_customer = False
                 is_supplier = True
                 is_lawyer = True
-                is_court = False
 
                 # maxlength = 30 no auth_user do django
                 first_name = (name_user.split(' ')[0])[:30]
@@ -159,7 +158,6 @@ class UserETL(GenericETL):
                                         legal_name=legal_name,
                                         name=name,
                                         is_lawyer=is_lawyer,
-                                        is_court=is_court,
                                         legal_type=legal_type,
                                         cpf_cnpj=cpf_cnpj,
                                         alter_user=user,
@@ -173,9 +171,9 @@ class UserETL(GenericETL):
                                     created=created)
 
                 self.debug_logger.debug(
-                    'Usuario,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (
+                    'Usuario,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (
                         str(person_id), str(legal_name), str(name),
-                        str(is_lawyer), str(is_court), str(legal_type),
+                        str(is_lawyer), str(legal_type),
                         str(cpf_cnpj), str(user), str(is_active),
                         str(is_customer), str(is_customer), str(is_supplier), str(legacy_code),
                         str(LegacySystem.ADVWIN.value), self.timestr))

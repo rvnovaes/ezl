@@ -10,7 +10,6 @@ def create_person(instance, sender, **kwargs):
             legal_name=instance.first_name + ' ' + instance.last_name,
             name=instance.first_name + ' ' + instance.last_name,
             is_lawyer=False,
-            is_court=False,
             legal_type='F',
             alter_user=instance,
             auth_user=instance,

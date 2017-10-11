@@ -436,7 +436,6 @@ class Person(Base):
     legal_name = Column(String(255), nullable=False, unique=True)
     name = Column(String(255), nullable=False, unique=True)
     is_lawyer = Column(Boolean, nullable=False)
-    is_court = Column(Boolean, nullable=False)
     legal_type = Column(String(1), nullable=False)
     cpf_cnpj = Column(String(255), nullable=False)
     alter_user_id = Column(ForeignKey('auth_user.id', deferrable=True, initially='DEFERRED'), index=True)

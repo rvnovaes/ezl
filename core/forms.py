@@ -87,14 +87,13 @@ class PersonForm(BaseModelForm):
     layout = Layout(
         Row('legal_name', 'name'),
         Row('legal_type', 'cpf_cnpj'),
-        Row('is_lawyer', 'is_court', 'is_customer', 'is_supplier', 'is_active'),
+        Row('is_lawyer', 'is_customer', 'is_supplier', 'is_active'),
     )
 
     class Meta:
         model = Person
         fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj',
-                  'is_lawyer',
-                  'is_court', 'is_customer', 'is_supplier', 'is_active']
+                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active']
 
     def clean(self):
         cleaned_data = super().clean()

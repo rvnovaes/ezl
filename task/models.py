@@ -147,12 +147,12 @@ class Task(Audit, LegacyCode):
 
     @property
     def court(self):
-        return self.movement.law_suit.person_court
+        return self.movement.law_suit.organ
 
     # TODO fazer composição para buscar no endereço completo
     @property
     def address(self):
-        address = self.movement.law_suit.person_court.address_set.first()
+        address = self.movement.law_suit.organ.address_set.first()
         return address if address else ''
 
     def save(self, *args, **kwargs):
@@ -253,10 +253,10 @@ class DashboardViewModel(Audit):
 
     @property
     def court(self):
-        return self.movement.law_suit.person_court
+        return self.movement.law_suit.organ
 
     # TODO fazer composição para buscar no endereço completo
     @property
     def address(self):
-        address = self.movement.law_suit.person_court.address_set.first()
+        address = self.movement.law_suit.organ.address_set.first()
         return address if address else ''

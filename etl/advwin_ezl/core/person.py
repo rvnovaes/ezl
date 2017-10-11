@@ -6,23 +6,6 @@ from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 class PersonETL(GenericETL):
     model = Person
     import_query = """
-                    SELECT t1.descricao AS legal_name,
-                           t1.descricao AS name,
-                           t1.codigo    AS legacy_code,
-                           'J'          AS legal_type,
-                           'F'          AS customer_supplier,
-                           'False'      AS is_lawyer,
-                           'False'      AS is_correspondent,
-                           'True'       AS is_court
-                    FROM   {tribunal} AS t1
-                    WHERE  t1.descricao IS NOT NULL
-                           AND t1.descricao <> ''
-                           AND t1.codigo = (SELECT Min(t2.codigo)
-                                            FROM   {tribunal} AS t2
-                                            WHERE  t2.descricao IS NOT NULL
-                                                   AND t2.descricao <> ''
-                                                   AND t1.codigo = t2.codigo)
-                    UNION
                     SELECT a1.nome   AS legal_name,
                            a1.nome   AS name,
                            a1.codigo AS legacy_code,
@@ -32,8 +15,7 @@ class PersonETL(GenericETL):
                            CASE a1.correspondente
                              WHEN 0 THEN 'False'
                              ELSE 'True'
-                           END       AS is_correspondent,
-                           'False'   AS is_court
+                           END       AS is_correspondent
                     FROM   {advogado} AS a1
                     WHERE  a1.status = 'Ativo'
                            AND a1.nome IS NOT NULL
@@ -53,8 +35,7 @@ class PersonETL(GenericETL):
                            END       AS legal_type,
                            cf.tipocf AS customer_supplier,
                            'False'   AS is_lawyer,
-                           'False'   AS is_correspondent,
-                           'False'   AS is_court
+                           'False'   AS is_correspondent
                     FROM   {clifor} AS cf
                     WHERE  cf.status = 'Ativo'
                            AND cf.razao IS NOT NULL
@@ -81,7 +62,6 @@ class PersonETL(GenericETL):
                 legal_type = row['legal_type']
                 customer_supplier = row['customer_supplier']
                 is_lawyer = row['is_lawyer']
-                is_court = row['is_court']
                 cpf_cnpj = None
                 if legal_type != 'F' and legal_type != 'J':
                     if str(legacy_code).isnumeric():
@@ -124,7 +104,6 @@ class PersonETL(GenericETL):
                     instance.legal_name = legal_name
                     instance.name = name
                     instance.is_lawyer = is_lawyer
-                    instance.is_court = is_court
                     instance.legal_type = legal_type
                     instance.cpf_cnpj = cpf_cnpj
                     instance.alter_user = user
@@ -136,7 +115,6 @@ class PersonETL(GenericETL):
                                        'legal_name',
                                        'name',
                                        'is_lawyer',
-                                       'is_court',
                                        'legal_type',
                                        'cpf_cnpj',
                                        'alter_user',
@@ -147,7 +125,6 @@ class PersonETL(GenericETL):
                     obj = self.model(legal_name=legal_name,
                                      name=name,
                                      is_lawyer=is_lawyer,
-                                     is_court=is_court,
                                      legal_type=legal_type,
                                      cpf_cnpj=cpf_cnpj,
                                      alter_user=user,
@@ -160,9 +137,8 @@ class PersonETL(GenericETL):
 
                     obj.save()
                 self.debug_logger.debug(
-                    "Pessoa,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
-                        str(legal_name), str(name), str(is_lawyer),
-                        str(is_court), str(legal_type),
+                    "Pessoa,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                        str(legal_name), str(name), str(is_lawyer), str(legal_type),
                         str(cpf_cnpj), str(user.id), str(user.id), str(is_customer),
                         str(is_supplier), str(is_active), str(legacy_code),
                         str(LegacySystem.ADVWIN.value), self.timestr))

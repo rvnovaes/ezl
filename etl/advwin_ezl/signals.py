@@ -12,7 +12,6 @@ def create_person(person, created, **kwargs):
                                    'legal_name',
                                    'name',
                                    'is_lawyer',
-                                   'is_court',
                                    'legal_type',
                                    'cpf_cnpj',
                                    'alter_user',

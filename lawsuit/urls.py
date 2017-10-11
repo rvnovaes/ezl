@@ -62,4 +62,25 @@ urlpatterns = [
         name='folder_update'),
     url(r'^pastas/excluir$', login_required(login_required(views.FolderDeleteView.as_view())),
         name='folder_delete'),
+
+    # Orgao
+    url(r'^orgaos/listar/$', login_required(views.OrganListView.as_view()), name='organ_list'),
+    url(r'^orgaos/$', login_required(views.OrganCreateView.as_view()), name='organ_add'),
+    url(r'^orgaos/(?P<pk>[0-9]+)/$', login_required(views.OrganUpdateView.as_view()),
+        name='organ_update'),
+    url(r'orgaos/excluir$', login_required(views.OrganDeleteView.as_view()), name='organ_delete'),
+    url(r'organ_autocomplete$', login_required(views.OrganAutocomplete.as_view()),
+        name='organ_autocomplete'),
+
+    # Address views
+    url(r'^orgaos/(?P<person_pk>[0-9]+)/enderecoes/criar/$', views.AddressOrganCreateView.as_view(),
+        name='address_organ_create'),
+
+    url(r'^orgaos/(?P<person_pk>[0-9]+)/enderecoes/(?P<pk>[0-9]+)/$',
+        views.AddressOrganUpdateView.as_view(),
+        name='address_organ_update'),
+
+    url(r'^orgaos/(?P<person_pk>[0-9]+)/enderecoes/(?P<pk>[0-9]+)/excluir/$',
+        views.AddressOrganDeleteView.as_view(),
+        name='address_organ_delete'),
 ]

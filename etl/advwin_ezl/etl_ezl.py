@@ -74,7 +74,6 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
     legal_name = ''
     name = ''
     is_lawyer = False
-    is_court = False
     legal_type = 'F'
     cpf_cnpj = ''
     auth_user_id = None
@@ -147,7 +146,6 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
         date_creation = datetime.datetime.now()
         name = linha['Descricao']
         legal_name = linha['Descricao']
-        is_court = True
         legal_type = 'J'
 
     linha = {
@@ -157,7 +155,6 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
         'legal_name': legal_name,
         'name': name,
         'is_lawyer': is_lawyer,
-        'is_court': is_court,
         'legal_type': legal_type,
         'cpf_cnpj': cpf_cnpj,
         'alter_user_id': None,

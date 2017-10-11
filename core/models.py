@@ -144,7 +144,6 @@ class Person(Audit, LegacyCode):
     name = models.CharField(max_length=255, null=True, blank=True,
                             verbose_name='Nome Fantasia/Apelido')
     is_lawyer = models.BooleanField(null=False, default=False, verbose_name='É Advogado?')
-    is_court = models.BooleanField(null=False, default=False, verbose_name='É Tribunal?')
     legal_type = models.CharField(null=False, verbose_name='Tipo', max_length=1,
                                   choices=((x.value, x.format(x.value)) for x in LegalType),
                                   default=LegalType.JURIDICA)

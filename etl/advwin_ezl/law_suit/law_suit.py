@@ -1,5 +1,6 @@
 from core.models import Person
 from core.utils import LegacySystem
+from lawsuit.models import Organ
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import LawSuit, Folder, Instance, CourtDistrict, CourtDivision
@@ -88,7 +89,7 @@ class LawsuitETL(GenericETL):
                 # __iexact - Case-insensitive exact match.
                 # https://docs.djangoproject.com/en/1.11/ref/models/querysets/#std:fieldlookup-iexact
                 court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_legacy_code).first()
-                person_court = Person.objects.filter(legacy_code=person_court_legacy_code).first()
+                organ = Organ.objects.filter(legacy_code=person_court_legacy_code).first()
                 court_division = CourtDivision.objects.filter(legacy_code=court_division_legacy_code).first()
 
                 # se não encontrou o registro, busca o registro inválido
@@ -100,8 +101,8 @@ class LawsuitETL(GenericETL):
                     instance = InvalidObjectFactory.get_invalid_model(Instance)
                 if not court_district:
                     court_district = InvalidObjectFactory.get_invalid_model(CourtDistrict)
-                if not person_court:
-                    person_court = InvalidObjectFactory.get_invalid_model(Person)
+                if not organ:
+                    organ = InvalidObjectFactory.get_invalid_model(Person)
                 if not court_division:
                     court_division = InvalidObjectFactory.get_invalid_model(CourtDivision)
 
@@ -114,7 +115,7 @@ class LawsuitETL(GenericETL):
                     lawsuit.instance = instance
                     lawsuit.court_district = court_district
                     lawsuit.court_division = court_division
-                    lawsuit.person_court = person_court
+                    lawsuit.organ = organ
                     lawsuit.law_suit_number = law_suit_number
                     lawsuit.is_active = True
                     # use update_fields to specify which fields to save
@@ -127,7 +128,7 @@ class LawsuitETL(GenericETL):
                             'instance',
                             'court_district',
                             'court_division',
-                            'person_court',
+                            'organ',
                             'law_suit_number',
                             'alter_user',
                             'alter_date',
@@ -140,7 +141,7 @@ class LawsuitETL(GenericETL):
                         instance=instance,
                         court_district=court_district,
                         court_division=court_division,
-                        person_court=person_court,
+                        organ=organ,
                         law_suit_number=law_suit_number,
                         alter_user=user,
                         create_user=user,
@@ -152,7 +153,7 @@ class LawsuitETL(GenericETL):
                 self.debug_logger.debug(
                     "LawSuit,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(folder.id), str(person_lawyer.id),
                                                                            str(instance.id),str(court_district.id),
-                                                      str(court_division.id), str(person_court.id),law_suit_number,
+                                                      str(court_division.id), str(organ.id),law_suit_number,
                                                       str(user.id),str(user.id),str(True),str(is_current_instance),
                                                       legacy_code,str(LegacySystem.ADVWIN.value), self.timestr))
 

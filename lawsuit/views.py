@@ -9,21 +9,21 @@ from django.db.models import ProtectedError
 from django.http import HttpResponseRedirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
-
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     delete_error_protected
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin, \
-    GenericFormOneToMany
+    GenericFormOneToMany, AddressCreateView, AddressUpdateView, AddressDeleteView
 from task.models import Task
 from task.tables import TaskTable
 from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, \
-    CourtDistrictForm, \
-    CourtDivisionForm
-from .models import Instance, Movement, LawSuit, Folder, CourtDistrict, CourtDivision, TypeMovement
+    CourtDistrictForm, OrganForm, CourtDivisionForm
+from .models import Instance, Movement, LawSuit, Folder, CourtDistrict, CourtDivision, TypeMovement, Organ
 from .tables import MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, InstanceTable, \
-    CourtDivisionTable, TypeMovementTable
+    CourtDivisionTable, TypeMovementTable, OrganTable, AddressOrganTable
 from core.views import remove_invalid_registry
 from django.core.cache import cache
+from dal import autocomplete
+from django.db.models import Q
 
 
 class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -528,3 +528,86 @@ class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
         self.success_url = reverse('lawsuit_update',
                                    kwargs={'folder': self.kwargs['folder'],
                                            'pk': self.kwargs['lawsuit']})
+
+
+class OrganCreateView(AuditFormMixin, CreateView):
+    """
+    Classe responsavel por fornecer a regra de criacao dos Orgaos
+    """
+    model = Organ
+    form_class = OrganForm
+    success_url = reverse_lazy('organ_list')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'organ_list'
+
+
+class OrganUpdateView(AuditFormMixin, UpdateView):
+    """
+    Classe responsavel por fornecer a regra de alteracao dos Orgaos
+    """
+    model = Organ
+    form_class = OrganForm
+    success_url = reverse_lazy('organ_list')
+    success_message = UPDATE_SUCCESS_MESSAGE
+    object_list_url = 'organ_list'
+    template_name_suffix = '_update_form'
+
+    def get_context_data(self, **kwargs):
+        kwargs.update({
+            'address_table': AddressOrganTable(self.object.address_set.all()),
+        })
+        return super().get_context_data(**kwargs)
+
+
+class OrganDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
+    """
+    Classe responsavel por forncer a regra de exclusao dos Orgaos
+    """
+    model = Organ
+    success_url = reverse_lazy('organ_list')
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+
+
+class OrganListView(SuccessMessageMixin, SingleTableViewMixin):
+    """
+    Classe responsavel por fornecer a regra de listagem dos Orgaos
+    """
+    model = Organ
+    table_class = OrganTable
+
+
+class OrganAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated():
+            return Organ.objects.all()
+        qs = Organ.objects.all()
+        continent = self.forwarded.get('continent', None)
+        if continent:
+            qs = qs.filter(continent=continent)
+        if self.q:
+            q_objects = Q()
+            args_filter = self.q.split(' ')
+            for arg in args_filter:
+                q_objects &= Q(legal_name__unaccent__icontains=arg) | Q(
+                    court_district__name__icontains=arg)
+            qs = qs.filter(q_objects)
+        return qs
+
+    def get_result_label(self, result):
+        res = result.court_district.name + ' / ' + result.legal_name
+        return res
+
+
+class AddressOrganCreateView(AddressCreateView):
+    def get_success_url(self):
+        return reverse('organ_update', args=(self.object.person.pk, ))
+
+
+class AddressOrganUpdateView(AddressUpdateView):
+    def get_success_url(self):
+        return reverse('organ_update', args=(self.object.person.pk, ))
+
+
+class AddressOrganDeleteView(AddressDeleteView):
+    def get_success_url(self):
+        return reverse('organ_update', args=(self.object.person.pk, ))

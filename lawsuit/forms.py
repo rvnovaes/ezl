@@ -1,15 +1,21 @@
 from django import forms
 from django.core.exceptions import FieldDoesNotExist
 from django.forms import ModelForm
-
 from core.fields import CustomBooleanField
-from core.models import Person, State
-from core.widgets import MDModelSelect2, MDDatePicker
-from .models import TypeMovement, Instance, Movement, Folder, CourtDistrict, LawSuit, CourtDivision
-
-# TODO Verificar se será utilizado datepicker
-# from django.contrib.admin.widgets import AdminDateWidget
+from core.models import Person, State, Address
+from core.widgets import MDModelSelect2
+from .models import TypeMovement, Instance, Movement, Folder, CourtDistrict, LawSuit, CourtDivision, \
+    Organ
 from core.utils import filter_valid_choice_form
+from dal import autocomplete
+from localflavor.br.forms import BRCNPJField
+from material import Layout, Row
+from django.forms.models import inlineformset_factory
+
+
+class BaseModelForm(forms.ModelForm):
+    def get_model_verbose_name(self):
+        return self._meta.model._meta.verbose_name
 
 
 # TODO: Por ser uma implementacao base que esta sendo utilizada por outros apps, talvez compensa levar esta implementacao para o app core.
@@ -98,11 +104,19 @@ class FolderForm(BaseForm):
 
 
 class LawSuitForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        super(LawSuitForm, self).__init__(*args, **kwargs)
+
+        def get_option(o):
+            return '{}/{}'.format(o.court_district.name, o.legal_name)
+        choices = [(organ.pk, get_option(organ)) for organ in Organ.objects.all()]
+        self.fields['organ'].choices = choices
+
     class Meta:
         model = LawSuit
-        fields = ['law_suit_number', 'court_district', 'instance', 'person_court', 'court_division',
+        fields = ['law_suit_number', 'organ', 'instance', 'court_division',
                   'person_lawyer',
-                  'is_current_instance', 'is_active']
+                  'is_current_instance', 'is_active', 'court_district']
 
     person_lawyer = forms.ModelChoiceField(
         empty_label=u"Selecione",
@@ -110,19 +124,17 @@ class LawSuitForm(BaseForm):
             Person.objects.filter(is_active=True, is_lawyer=True)).only('legal_name').order_by(
             'name'), required=True
     )
+    organ = forms.ModelChoiceField(
+        queryset=filter_valid_choice_form(
+            filter_valid_choice_form(Organ.objects.filter(is_active=True))).order_by('name'),
+        empty_label=u"Selecione", required=True, initial=None,
+        widget=autocomplete.ListSelect2(url='organ_autocomplete', forward=['person_lawyer'], attrs={
+            'class': 'select-with-search', 'data-placeholder': 'Comarca/Tribunal'}))
+
     instance = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(Instance.objects.filter(is_active=True)).order_by('name'),
         empty_label=u"Selecione", required=True
     )
-    court_district = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True)).order_by(
-            'name'),
-        empty_label=u"Selecione", required=True
-    )
-    person_court = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(filter_valid_choice_form(
-            Person.objects.filter(is_active=True, is_court=True))).order_by('name'),
-        empty_label=u"Selecione", required=True)
     court_division = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(CourtDivision.objects.filter(is_active=True)).order_by(
             'name'),
@@ -130,6 +142,14 @@ class LawSuitForm(BaseForm):
     )
     law_suit_number = forms.CharField(max_length=255, required=True)
     is_current_instance = CustomBooleanField(initial=False, required=False)
+    court_district = forms.CharField(required=False, widget=forms.HiddenInput(), initial=None)
+
+    def clean(self):
+        res = super(LawSuitForm, self).clean()
+        res['court_district'] = None
+        if res.get('organ'):
+            res['court_district'] = res.get('organ').court_district
+        return res
 
 
 class CourtDivisionForm(BaseForm):
@@ -149,3 +169,31 @@ class CourtDistrictForm(BaseForm):
         queryset=filter_valid_choice_form(State.objects.filter(is_active=True)),
         empty_label=u"Selecione"
     )
+
+
+class OrganForm(BaseModelForm):
+    def __init__(self, *args, **kwargs):
+        super(OrganForm, self).__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            if field_name is 'cnpj':
+                field.initial = self.instance.cpf_cnpj
+    layout = Layout(
+        Row('legal_name', 'cpf_cnpj'),
+        Row('court_district', 'is_active')
+    )
+
+    class Meta:
+        model = Organ
+        fields = ['legal_name', 'cpf_cnpj', 'court_district', 'is_active']
+
+    def clean(self):
+        cleaned_data = super(OrganForm, self).clean()
+        document = cleaned_data.get('cpf_cnpj')
+        if document:
+            try:
+                BRCNPJField().clean(document)
+            except forms.ValidationError as exc:
+                self._errors['cpf_cnpj'] = \
+                    self.error_class(exc.messages)
+                del cleaned_data['cpf_cnpj']
+        return cleaned_data

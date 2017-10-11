@@ -33,7 +33,7 @@ from core.models import Person, Address, City, State, Country, AddressType
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable
 from core.utils import login_log, logout_log
-from lawsuit.models import Folder, Movement, LawSuit
+from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task
 
 
@@ -265,6 +265,7 @@ def address_update(request, pk):
     instance = get_object_or_404(Address, id=pk)
     form = AddressForm(request.POST or None, instance=instance)
 
+    # Todo: Trocar o codigo de data por serialize()
     data = {
         'result': False,
         'message': ADDRESS_UPDATE_ERROR_MESSAGE,
@@ -298,7 +299,12 @@ class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
         :return: Retorna o contexto contendo a listatem
         :rtype: dict
         """
-        return super(PersonListView, self).get_context_data(**kwargs)
+        context = super(PersonListView, self).get_context_data(**kwargs)
+        table = self.table_class(
+            context['table'].data.data.exclude(pk__in=Organ.objects.all()).order_by('-pk'))
+        context['table'] = table
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        return context
 
 
 class PersonCreateView(AuditFormMixin, CreateView):

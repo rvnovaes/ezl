@@ -1,7 +1,6 @@
 import sys
 import django
 import os
-
 dir = os.path.dirname(os.path.realpath(__file__))
 position = dir.find('easy_lawyer_django')
 sys.path.append(dir[:position] + 'easy_lawyer_django/')
@@ -17,6 +16,7 @@ from etl.advwin_ezl.account.user import UserETL
 from etl.advwin_ezl.core.person import PersonETL
 from etl.advwin_ezl.core.address import AddressETL
 from etl.advwin_ezl.core.contact_mechanism import ContactMechanismETL
+from etl.advwin_ezl.law_suit.organ import OrganETL
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from etl.advwin_ezl.law_suit.court_division import CourtDivisionETL
 from etl.advwin_ezl.law_suit.folder import FolderETL
@@ -163,13 +163,27 @@ class PersonTask(luigi.Task):
         PersonETL().import_data()
 
 
+class OrganTask(luigi.Task):
+    def output(self):
+        return luigi.LocalTarget(
+            path=get_folder_ipc(self)
+        )
+
+    def requires(self):
+        yield PersonTask()
+
+    def run(self):
+        f = open(get_folder_ipc(self), 'w')
+        f.close()
+        OrganETL().import_data()
+
 class ContactMechanismTask(luigi.Task):
     def output(self):
         return luigi.LocalTarget(
             path=get_folder_ipc(self))
 
     def requires(self):
-        yield PersonTask()
+        yield OrganTask()
 
     def run(self):
         f = open(get_folder_ipc(self), 'w')

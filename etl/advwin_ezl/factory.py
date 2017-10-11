@@ -1,4 +1,4 @@
-from django.conf import settings
+from config.config import get_parser
 from django.db import connection
 from django.contrib.auth.models import User
 
@@ -6,9 +6,11 @@ from core.models import Country, State, City, Person, Address, AddressType, Cont
     ContactMechanismType
 from core import signals
 from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, \
-    Movement
+    Movement, Organ
 from task.models import TypeTask, Task, TaskStatus, TaskHistory
 
+config_parser = get_parser()
+settings = config_parser['etl']
 
 invalid_registry = '-INVÁLIDO'
 invalid_legacy_code = 'REGISTRO' + invalid_registry
@@ -56,6 +58,12 @@ class InvalidObjectFactory(object):
                               name=Person._meta.verbose_name.upper() + invalid_registry)
 
         # Registros inválidos para o app lawsuit
+        invalid_organ, created = Organ.objects.get_or_create(
+            legacy_code=invalid_legacy_code,
+            legal_name=Organ._meta.verbose_name.upper() + invalid_registry,
+            court_district=invalid_court_district,
+            create_user=user
+        )
         invalid_type_movement, created = TypeMovement.objects.get_or_create(
             legacy_code=invalid_legacy_code,
             name=TypeMovement._meta.verbose_name.upper() + invalid_registry, create_user=user)
@@ -73,7 +81,7 @@ class InvalidObjectFactory(object):
 
         invalid_law_suit, created = LawSuit.objects.get_or_create(
             legacy_code=invalid_legacy_code,
-            create_user=user, person_court=invalid_person,
+            create_user=user, organ=invalid_organ,
             folder=invalid_folder,
             person_lawyer=invalid_person,
             court_district=invalid_court_district,

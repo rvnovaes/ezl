@@ -1,6 +1,11 @@
 {% extends 'inicial.html' %}
 {% load core_filters %}
 {% block content %}
+    <script>
+        $(function() {
+            $(".chzn-select").chosen();
+        });
+    </script>
     {% include 'core/widgets/messages.html' %}
     <div>
         {#            {% if form.title == 'Pasta' %}#}
@@ -13,17 +18,18 @@
                         <b>{{ form.title }}</b>
                     </div>
                 </div>
+                <br/>
                 <div class="panel-body form-group">
                     <div class="row">
                         {% for field in form %}
                             <div class="form-group col-sm-4">
-
-                                <label>
-                                    {{ field | append_ast_if_req | label_capitalizer}}{{ field }}
-                                </label>
+                                {% if  field.field.widget.input_type != 'hidden'%}
+                                    <label>
+                                        {{ field | append_ast_if_req | label_capitalizer}}{{ field }}
+                                    </label>
+                                {% endif %}
                             </div>
                         {% endfor %}
-
                     </div>
                     <div class="">
                         <br>

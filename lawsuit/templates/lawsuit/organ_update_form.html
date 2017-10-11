@@ -1,0 +1,38 @@
+{% extends "lawsuit/organ_form.html" %}
+
+{% load render_table from django_tables2 %}
+
+{% block content %}
+
+    {{ block.super }}
+
+    <div class="row">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h1 class="panel-title">Endereços</h1>
+            </div>
+
+            <div class="panel-body">
+                <div class="table-responsive">
+                    {% render_table address_table %}
+                </div>
+
+
+                <div class="text-right" style="">
+
+                    <!--                         <input type="button" data-toggle="modal" data-target="#confirmDelete"
+                                               id="delete_button"
+                                               class="btn btn-fab btn-warning material-icons" value="remove"
+                                               style="height: 30px !important; width: 30px !important; min-width: 30px !important;"
+                                               onclick="can_delete_addresses()" disabled>
+                    -->
+                    <a class="btn btn-fab btn-primary" href="{% url 'address_organ_create' object.pk %}">
+                        <!-- style="height: 30px !important; width: 30px !important; min-width: 30px !important;"> -->
+                        <i class="material-icons">add</i></a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

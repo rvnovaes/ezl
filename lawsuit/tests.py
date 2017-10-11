@@ -31,7 +31,7 @@ class LawSuitTest(TestCase):
         folder = mommy.make(Folder).id
         instance = mommy.make(Instance).id
         court_district = mommy.make(CourtDistrict).id
-        person_court = mommy.make(Person, name='Court', is_active=True, is_court=True).id
+        organ = mommy.make(Person, name='Court', is_active=True).id
         court_division = mommy.make(CourtDivision, is_active=True).id
         law_suit_number = '12345'
 
@@ -39,7 +39,7 @@ class LawSuitTest(TestCase):
                 'folder': folder,
                 'instance': instance,
                 'court_district': court_district,
-                'person_court': person_court,
+                'organ': organ,
                 'court_division': court_division,
                 'law_suit_number': law_suit_number}
 
