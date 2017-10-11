@@ -199,6 +199,15 @@ class AddressDeleteView(AddressMixin, DeleteView):
 
 
 class SingleTableViewMixin(SingleTableView):
+    ordering = None
+
+    @classmethod
+    def filter_queryset(cls, queryset):
+        if cls.ordering:
+            return queryset.order_by(*cls.ordering)
+        else:
+            return queryset
+
     @set_search_model_attrs
     def get_context_data(self, **kwargs):
         context = super(SingleTableViewMixin, self).get_context_data(**kwargs)
@@ -217,11 +226,12 @@ class SingleTableViewMixin(SingleTableView):
                 table = eval(args)
             else:
                 if kwargs.get('remove_invalid'):
-                    table = self.table_class(
-                        self.model.objects.filter(~Q(pk=kwargs.get('remove_invalid'))).order_by(
-                            '-pk'))
+                    qs = self.filter_queryset(
+                        self.model.objects.filter(~Q(pk=kwargs.get('remove_invalid'))))
+                    table = self.table_class(qs)
                 else:
-                    table = self.table_class(self.model.objects.all().order_by('-pk'))
+                    qs = self.filter_queryset(self.model.objects.all())
+                    table = self.table_class(qs)
             RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
             context['table'] = table
         except:
@@ -515,6 +525,7 @@ class UserListView(LoginRequiredMixin, SingleTableViewMixin):
     model = User
     table_class = UserTable
     template_name = 'auth/user_list.html'
+    ordering = ('first_name', 'last_name', 'username', 'email', )
 
 
 class UserCreateView(AuditFormMixin, CreateView):

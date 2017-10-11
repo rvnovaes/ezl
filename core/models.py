@@ -174,7 +174,7 @@ class Person(Audit, LegacyCode):
 
     class Meta:
         db_table = 'person'
-        ordering = ['-id']
+        ordering = ['legal_name', 'name']
         verbose_name = 'Pessoa'
         verbose_name_plural = 'Pessoas'
 

@@ -73,6 +73,7 @@ class TypeTask(Audit, LegacyCode):
 
     class Meta:
         db_table = 'type_task'
+        ordering = ('name', )
         verbose_name = 'Tipo de Serviço'
         verbose_name_plural = 'Tipos de Serviço'
 
