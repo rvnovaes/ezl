@@ -51,21 +51,26 @@
                     </h1>
                 </div>
                 <div class="panel-body">
-                    {% form %}{% endform %}
+                    {% block form_container %}
+                        {% form %}{% endform %}
+                    {% endblock %}
                 </div>
             </div>
         </div>
 
         <div style="text-align: center;">
+            {% block form_butons %}
 
-            {% if object_list_url %}
-                {% include 'core/widgets/cancel_button.html' %}
-            {% endif %}
+                {% if object_list_url %}
+                    {% include 'core/widgets/cancel_button.html' %}
+                {% endif %}
 
-            <button type="submit" class="btn btn-sm btn-raised btn-primary">
-                <i class="material-icons left">done</i>
-                Salvar
-            </button>
+                <button type="submit" class="btn btn-sm btn-raised btn-primary">
+                    <i class="material-icons left">done</i>
+                    Salvar
+                </button>
+
+            {% endblock %}
 
         </div>
 

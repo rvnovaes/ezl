@@ -24,6 +24,10 @@ urlpatterns = [
         views.AddressUpdateView.as_view(),
         name='address_update'),
 
+    url(r'^pessoas/(?P<person_pk>[0-9]+)/enderecoes/(?P<pk>[0-9]+)/excluir/$',
+        views.AddressDeleteView.as_view(),
+        name='address_delete'),
+
     # Person views
     url(r'^pessoas/$', views.PersonListView.as_view(), name='person_list'),
     url(r'^pessoas/criar/$', views.PersonCreateView.as_view(), name='person_add'),

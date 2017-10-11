@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
 
-from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_success, \
+from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     delete_error_protected
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin, \
     GenericFormOneToMany
@@ -77,7 +77,7 @@ class InstanceUpdateView(AuditFormMixin, UpdateView):
 class InstanceDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
     model = Instance
     success_url = reverse_lazy('instance_list')
-    success_message = delete_success('instâncias')
+    success_message = DELETE_SUCCESS_MESSAGE.format('instâncias')
 
 
 class TypeMovementListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -128,7 +128,7 @@ class TypeMovementUpdateView(AuditFormMixin, UpdateView):
 class TypeMovementDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
     model = TypeMovement
     success_url = reverse_lazy('type_movement_list')
-    success_message = delete_success(model._meta.verbose_name_plural)
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
 class FolderListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -165,7 +165,7 @@ class FolderUpdateView(AuditFormMixin, UpdateView):
 class FolderDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = Folder
     success_url = reverse_lazy('folder_list')
-    success_message = delete_success(model._meta.verbose_name_plural)
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
 class CourtDistrictListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -227,7 +227,7 @@ class CourtDistrictUpdateView(AuditFormMixin, UpdateView):
 class CourtDistrictDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = CourtDistrict
     success_url = reverse_lazy('courtdistrict_list')
-    success_message = delete_success(model._meta.verbose_name_plural)
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
 class CourtDivisionListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -263,7 +263,7 @@ class CourtDivisionUpdateView(AuditFormMixin, UpdateView):
 class CourtDivisionDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = CourtDivision
     success_url = reverse_lazy('courtdivision_list')
-    success_message = delete_success(model._meta.verbose_name_plural)
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
 class FolderLawsuitCreateView(SuccessMessageMixin, GenericFormOneToMany, CreateView):
@@ -289,7 +289,7 @@ class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateV
     template_name = 'lawsuit/folder_lawsuit_form.html'
     success_url = reverse_lazy('folder_list')
     success_message = UPDATE_SUCCESS_MESSAGE
-    delete_message = delete_success(related_model._meta.verbose_name_plural)
+    delete_message = DELETE_SUCCESS_MESSAGE.format(related_model._meta.verbose_name_plural)
 
     def get_context_data(self, **kwargs):
         """
@@ -345,14 +345,14 @@ class LawSuitUpdateView(AuditFormMixin, UpdateView):
 
 class LawSuitDeleteView(AuditFormMixin, DeleteView):
     model = LawSuit
-    success_message = delete_success(model._meta.verbose_name_plural)
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
     def delete(self, request, *args, **kwargs):
         pks = self.request.POST.getlist('selection')
         parent_class = self.request.POST['parent_class']
         try:
             self.model.objects.filter(pk__in=pks).delete()
-            messages.success(self.request, delete_success(self.model._meta.verbose_name_plural))
+            messages.success(self.request, DELETE_SUCCESS_MESSAGE.format(self.model._meta.verbose_name_plural))
         except ProtectedError as e:
             qs = e.protected_objects.first()
             messages.error(self.request,
@@ -396,7 +396,7 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
     table_class = MovementTable
     template_name = 'lawsuit/lawsuit_movement_form.html'
     success_message = UPDATE_SUCCESS_MESSAGE
-    delete_message = delete_success(related_model._meta.verbose_name_plural)
+    delete_message = DELETE_SUCCESS_MESSAGE.format(related_model._meta.verbose_name_plural)
     object_list = []
 
     def get_context_data(self, **kwargs):
@@ -479,7 +479,7 @@ class MovementUpdateView(AuditFormMixin, UpdateView):
 
 class MovementDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = Movement
-    success_message = delete_success(model._meta.verbose_name_plural)
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
     def post(self, request, *args, **kwargs):
         self.success_url = urlparse(request.environ.get('HTTP_REFERER')).path

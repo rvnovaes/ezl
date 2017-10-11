@@ -12,9 +12,7 @@ ERROR_FILE_EXITS_MESSAGE = 'Erro: impossível encontrar o arquivo.'
 
 DELETE_EXCEPTION_MESSAGE = 'Erro: impossível excluir o arquivo.'
 
-
-def delete_success(model_name):
-    return 'Registros selecionados de ' + model_name + ' excluídos com sucesso'
+DELETE_SUCCESS_MESSAGE = 'Registros selecionados de {} excluídos com sucesso'
 
 
 def delete_error_protected(model_name, related_model):

@@ -26,7 +26,7 @@ from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
-    delete_success, \
+    DELETE_SUCCESS_MESSAGE, \
     ADDRESS_UPDATE_ERROR_MESSAGE, \
     ADDRESS_UPDATE_SUCCESS_MESSAGE
 from core.models import Person, Address, City, State, Country, AddressType
@@ -188,6 +188,15 @@ class AddressUpdateView(AddressMixin, UpdateView):
         return reverse('person_update', args=(self.object.person.pk, ))
 
 
+class AddressDeleteView(AddressMixin, DeleteView):
+    model = Address
+    form_class = AddressForm
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+
+    def get_success_url(self):
+        return reverse('person_update', args=(self.object.person.pk, ))
+
+
 class SingleTableViewMixin(SingleTableView):
     @set_search_model_attrs
     def get_context_data(self, **kwargs):
@@ -305,7 +314,7 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
 class PersonDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = Person
     success_url = reverse_lazy('person_list')
-    success_message = delete_success(model._meta.verbose_name_plural)
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
 class ClientAutocomplete(autocomplete.Select2QuerySetView):
@@ -584,7 +593,7 @@ class UserUpdateView(AuditFormMixin, UpdateView):
 class UserDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
     model = User
     success_url = reverse_lazy('user_list')
-    success_message = delete_success('usuários')
+    success_message = DELETE_SUCCESS_MESSAGE.format('usuários')
 
     def get_success_url(self):
         return reverse_lazy('user_list')

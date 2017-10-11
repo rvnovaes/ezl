@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.views.generic import CreateView, UpdateView, TemplateView
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
-from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_success, \
+from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
     ERROR_FILE_EXITS_MESSAGE, DELETE_EXCEPTION_MESSAGE, success_sent, success_delete
@@ -99,7 +99,7 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
 
 class TaskDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
     model = Task
-    success_message = delete_success(model._meta.verbose_name_plural)
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
     def post(self, request, *args, **kwargs):
         self.success_url = urlparse(request.environ.get('HTTP_REFERER')).path
@@ -304,7 +304,7 @@ class TypeTaskUpdateView(AuditFormMixin, UpdateView):
 class TypeTaskDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = TypeTask
     success_url = reverse_lazy('typetask_list')
-    success_message = delete_success(model._meta.verbose_name_plural)
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
 @login_required
