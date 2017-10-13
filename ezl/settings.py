@@ -86,7 +86,6 @@ INSTALLED_APPS = [
     'django_filters',
     'debug_toolbar',
     'django_cleanup',
-    'raven.contrib.django.raven_compat',
     # Autocomplete
     'dal',
     # Enable plugins
@@ -173,6 +172,7 @@ else:
             'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
         },
     ]
+    INSTALLED_APPS.append('raven.contrib.django.raven_compat')
 
 LANGUAGE_CODE = 'pt-br'
 
