@@ -10,6 +10,12 @@ build_prod:
 run:
 	docker-compose up -d
 
+logs:
+	docker-compose logs --follow
+
+build:
+	docker-compose build web cmd_migrate cmd_collectstatic
+
 shell:
 	docker-compose run web bash
 
