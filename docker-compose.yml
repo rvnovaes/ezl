@@ -11,6 +11,8 @@ services:
       ENV: development
     volumes:
      - .:/app
+    ports:
+      - "8000:8000"
     logging:
       driver: "json-file"
       options:
@@ -24,7 +26,7 @@ services:
       - "./staticfiles:/usr/share/nginx/html/static"
       - "./media:/usr/share/nginx/html/media"
     ports:
-      - "8000:80"
+      - "8080:80"
     depends_on:
       - web
   db:
