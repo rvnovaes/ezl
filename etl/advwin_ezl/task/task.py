@@ -30,7 +30,7 @@ def to_dict(model_instance, query_instance=None):
         return {cols[i]['name']: model_instance[i] for i in range(len(cols))}
 
 
-def parseSurveyResult(survey, agenda_id):
+def parse_survey_result(survey, agenda_id):
     json = loads(survey)
     json['agenda_id'] = agenda_id
     json['versao'] = 1
@@ -221,7 +221,7 @@ class TaskETL(GenericETL):
 
         survey_result = map(lambda x: (
             insert(survey_tables.get(x.type_task.survey_type).__table__).values(to_dict(
-                survey_tables.get(x.type_task.survey_type)(**parseSurveyResult(x.survey_result, x.legacy_code))))
+                survey_tables.get(x.type_task.survey_type)(**parse_survey_result(x.survey_result, x.legacy_code))))
         ), survey_result)
 
         accepeted_history = TaskHistory.objects.filter(task_id__in=accepted_tasks.values('id'),
@@ -240,11 +240,12 @@ class TaskETL(GenericETL):
                      JuridAgendaTable.Ag_StatusExecucao: 'Em execucao',
                      JuridAgendaTable.Data_correspondente: x.acceptance_date,
                      JuridAgendaTable.Obs: cast(JuridAgendaTable.Obs,
-                                                String()) + linesep + ' *** Ordem de serviço aceita por ' + str(
-                         x.person_executed_by) + ': ' + x.taskhistory_set.filter(
-                         status=TaskStatus.ACCEPTED.value).last().notes + (' em ' + x.acceptance_date.strftime(
-                         '%d/%m/%Y') if x.acceptance_date else '')}).where(
-                    JuridAgendaTable.Ident == x.legacy_code)), accepted_tasks)
+                                                String()) + linesep + ' *** Ordem de serviço aceita por ' +
+                                           str(x.person_executed_by) + ': ' + x.taskhistory_set.filter(
+                         status=TaskStatus.ACCEPTED.value).last().notes + (
+                                               ' em ' + x.acceptance_date.strftime(
+                                                   '%d/%m/%Y') if x.acceptance_date else '')
+                     }).where(JuridAgendaTable.Ident == x.legacy_code)), accepted_tasks)
 
         done_tasks_query = map(
             lambda x: (
@@ -255,13 +256,11 @@ class TaskETL(GenericETL):
                      JuridAgendaTable.Ag_StatusExecucao: '',
                      JuridAgendaTable.Data_cumprimento: x.execution_date,
                      JuridAgendaTable.Obs: cast(JuridAgendaTable.Obs,
-                                                String()) + linesep + ' *** Ordem de serviço cumprida por ' + str(
-                         x.person_executed_by) + ': ' + x.taskhistory_set.filter(
-                         status=TaskStatus.DONE.value).last().notes + (
-                                           'em ' + x.execution_date.strftime('%d/%m/%Y') if x.execution_date else '')
-                     }).where(
-                    JuridAgendaTable.Ident == x.legacy_code)),
-            done_tasks)
+                                                String()) + linesep + ' *** Ordem de serviço cumprida por ' +
+                                           str(x.person_executed_by) + ': ' + x.taskhistory_set.filter(
+                         status=TaskStatus.DONE.value).last().notes +
+                                           (' em ' + x.execution_date.strftime('%d/%m/%Y') if x.execution_date else '')
+                     }).where(JuridAgendaTable.Ident == x.legacy_code)), done_tasks)
 
         refused_tasks_query = map(
             lambda x: (
@@ -270,13 +269,11 @@ class TaskETL(GenericETL):
                      JuridAgendaTable.prazo_lido: 1, JuridAgendaTable.Prazo_Interm: 1,
                      JuridAgendaTable.Data_correspondente: x.refused_date,
                      JuridAgendaTable.Obs: cast(JuridAgendaTable.Obs,
-                                                String()) + linesep + ' *** Ordem de serviço recusada por ' + str(
-                         x.person_executed_by) + ': ' + x.taskhistory_set.filter(
+                                                String()) + linesep + ' *** Ordem de serviço recusada por ' +
+                                           str(x.person_executed_by) + ': ' + x.taskhistory_set.filter(
                          status=TaskStatus.REFUSED.value).last().notes + (
                                                ' em ' + x.refused_date.strftime('%d/%m/%Y') if x.refused_date else'')
-                     }).where(
-                    JuridAgendaTable.Ident == x.legacy_code)),
-            refused_tasks)
+                     }).where(JuridAgendaTable.Ident == x.legacy_code)), refused_tasks)
 
         accepeted_history_query = map(lambda x: (
             insert(JuridCorrespondenteHist.__table__).values(
@@ -287,8 +284,8 @@ class TaskETL(GenericETL):
                  JuridCorrespondenteHist.data_operacao: x.create_date,
                  JuridCorrespondenteHist.justificativa: x.notes,
                  JuridCorrespondenteHist.usuario: x.task.person_executed_by.auth_user.username,
-                 JuridCorrespondenteHist.descricao: 'Aceita por correspondente: ' + x.task.person_executed_by.legal_name})
-        ), accepeted_history)
+                 JuridCorrespondenteHist.descricao: 'Aceita por correspondente: ' +
+                                                    x.task.person_executed_by.legal_name})), accepeted_history)
 
         done_history_query = map(lambda x: (
             insert(JuridCorrespondenteHist.__table__).values(
@@ -299,8 +296,8 @@ class TaskETL(GenericETL):
                  JuridCorrespondenteHist.data_operacao: x.create_date,
                  JuridCorrespondenteHist.justificativa: x.notes,
                  JuridCorrespondenteHist.usuario: x.task.person_executed_by.auth_user.username,
-                 JuridCorrespondenteHist.descricao: 'Cumprida por correspondente: ' + x.task.person_executed_by.legal_name})
-        ), done_history)
+                 JuridCorrespondenteHist.descricao: 'Cumprida por correspondente: ' +
+                                                    x.task.person_executed_by.legal_name})), done_history)
 
         refused_history_query = map(lambda x: (
             insert(JuridCorrespondenteHist.__table__).values(
@@ -311,8 +308,8 @@ class TaskETL(GenericETL):
                  JuridCorrespondenteHist.data_operacao: x.create_date,
                  JuridCorrespondenteHist.justificativa: x.notes,
                  JuridCorrespondenteHist.usuario: x.task.person_executed_by.auth_user.username,
-                 JuridCorrespondenteHist.descricao: 'Recusada por correspondente: ' + x.task.person_executed_by.legal_name})
-        ), refused_history)
+                 JuridCorrespondenteHist.descricao: 'Recusada por correspondente: ' +
+                                                    x.task.person_executed_by.legal_name})), refused_history)
 
         self.export_query_set = chain(accepted_tasks_query, done_tasks_query, refused_tasks_query,
                                       accepeted_history_query,
