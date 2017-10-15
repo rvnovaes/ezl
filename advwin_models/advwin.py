@@ -351,10 +351,10 @@ class JuridAgendaTable(Base):
 
 class JuridCorrespondenteHist(Base):
     __tablename__ = 'Jurid_Correspondente_Hist'
-
-    codigo = Column(Integer)
+    __table_args__ = {'implicit_returning': False} # Não remover cancela o OUTPUT devido a trigger para envio de email do advwin
+    codigo = Column(Integer,primary_key=True,autoincrement=True)
     codigo_adv_correspondente = Column(String(70, 'Latin1_General_CI_AS'))
-    ident_agenda = Column(Integer, nullable=False, primary_key=True)
+    ident_agenda = Column(Integer)
     status = Column(Integer, nullable=False)
     data_operacao = Column(DateTime)
     justificativa = Column(String(1000, 'Latin1_General_CI_AS'))
@@ -369,7 +369,7 @@ class JuridCorrespondenteHist(Base):
 class JuridFMAlvaraCorrespondente(Base):
     __tablename__ = 'Jurid_FM_alvaraCorrespondente'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,autoincrement=True)
     versao = Column(String(10, 'Latin1_General_CI_AS'), nullable=False)
     agenda_id = Column(Integer, nullable=False)
     alvaraRetiradoAutos = Column(String(255, 'Latin1_General_CI_AS'))
@@ -389,7 +389,7 @@ class JuridFMAlvaraCorrespondente(Base):
 class JuridFMAudienciaCorrespondente(Base):
     __tablename__ = 'Jurid_FM_audienciaCorrespondente'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,autoincrement=True)
     versao = Column(String(10, 'Latin1_General_CI_AS'), nullable=False)
     agenda_id = Column(Integer, nullable=False)
     comparecimentoAudiencia = Column(String(255, 'Latin1_General_CI_AS'))
@@ -416,7 +416,7 @@ class JuridFMAudienciaCorrespondente(Base):
 class JuridFMDiligenciaCorrespondente(Base):
     __tablename__ = 'Jurid_FM_diligenciaCorrespondente'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,autoincrement=True)
     versao = Column(String(10, 'Latin1_General_CI_AS'))
     agenda_id = Column(Integer, nullable=False)
     cumprimento = Column(String(255, 'Latin1_General_CI_AS'))
@@ -432,7 +432,7 @@ class JuridFMDiligenciaCorrespondente(Base):
 class JuridFMProtocoloCorrespondente(Base):
     __tablename__ = 'Jurid_FM_protocoloCorrespondente'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,autoincrement=True)
     versao = Column(String(10, 'Latin1_General_CI_AS'))
     agenda_id = Column(Integer, nullable=False)
     protocoloRealizado = Column(String(255, 'Latin1_General_CI_AS'))
