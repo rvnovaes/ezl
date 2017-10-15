@@ -1,8 +1,12 @@
-version: "2"
+version: "3"
 services:
   nginx:
     ports:
       - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+      - certbot
   web:
     build:
       context: .
@@ -11,11 +15,9 @@ services:
     command: uwsgi --ini /app/config/uwsgi/uwsgi.ini
     environment:
       ENV: production
-  cmd_collectstatic:
-    image: ezl:latest
-    environment:
-      ENV: production
-  cmd_migrate:
-    image: ezl:latest
-    environment:
-      ENV: production
+  certbot:
+    image: certbot/certbot
+    command: certonly --webroot -w /tmp/www -d mtostes.ezlawyer.com.br -m contato@ezlawyer.com.br --agree-tos
+    volumes:
+      - letsencrypt-www:/tmp/www
+      - letsencrypt-etc:/etc/letsencrypt
