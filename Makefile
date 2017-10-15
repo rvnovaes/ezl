@@ -11,13 +11,16 @@ logs:
 	docker-compose logs --follow
 
 build:
-	docker-compose build web cmd_migrate cmd_collectstatic
+	docker-compose build web
 
 shell:
 	docker-compose run web bash
 
 stop:
 	docker-compose stop
+
+restart:
+	docker-compose restart web nginx
 
 ps:
 	docker-compose ps
@@ -30,4 +33,4 @@ set_env_development:
 
 set_env_production:
 	rm docker-compose.override.yml || true
-	ln -s docker-compose.prod.yml docker-compose.override.yml
+	ln -s docker-compose.production.yml docker-compose.override.yml
