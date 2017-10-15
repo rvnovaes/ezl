@@ -303,6 +303,17 @@ class EcmTask(luigi.Task):
         EcmETL().import_data()
 
 
+class TaskExport(luigi.Task):
+    def output(self):
+        return luigi.LocalTarget(
+            path=get_folder_ipc(self))
+
+    def run(self):
+        f = open(get_folder_ipc(self), 'w')
+        f.close()
+        TaskETL().export_data()
+
+
 def main():
     try:
         # E necessario remover os arquivos.ezl dentro do diretorio tmp para executar novamente
@@ -310,7 +321,7 @@ def main():
             linux_password, settings.BASE_DIR))
         # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
         load_luigi_scheduler()
-        luigi.run(main_task_cls=EcmTask())
+        luigi.run(main_task_cls=TaskExport())
     except ParamsException as e:
         print(e)
     except Exception as e:

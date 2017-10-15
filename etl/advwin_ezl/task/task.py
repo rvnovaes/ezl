@@ -181,7 +181,6 @@ class TaskETL(GenericETL):
                     "Ocorreu o seguinte erro na importacao de Task: " + str(rows_count) + "," + str(
                         e) + "," + self.timestr)
 
-
     def config_export(self):
         accepted_tasks = self.model.objects.filter(legacy_code__isnull=False,
                                                    task_status=TaskStatus.ACCEPTED)
@@ -192,17 +191,23 @@ class TaskETL(GenericETL):
         refused_tasks = self.model.objects.filter(legacy_code__isnull=False,
                                                   task_status=TaskStatus.REFUSED)
 
+        task_ids = chain(accepted_tasks.values_list('id', flat=True),
+                         refused_tasks.values_list('id', flat=True), done_tasks.values_list('id', flat=True))
+
+        task_history = TaskHistory.objects.filter(task_id__in=task_ids)
+
         accepted_tasks = map(
             lambda x: (
                 update(JuridAgendaTable.__table__).values(
                     {JuridAgendaTable.SubStatus: 50, JuridAgendaTable.status_correspondente: 0,
                      JuridAgendaTable.prazo_lido: 0, JuridAgendaTable.envio_alerta: 0,
                      JuridAgendaTable.Ag_StatusExecucao: 'Em execucao',
-                     JuridAgendaTable.Data_correspondente: x.acceptance_date}).where(
+                     JuridAgendaTable.Data_correspondente: x.acceptance_date,
+                     JuridAgendaTable.Obs: cast(JuridAgendaTable.Obs,
+                                                String()) + linesep + ' *** ' + task_history.filter(
+                         task_id=x.id).last().notes}).where(
                     JuridAgendaTable.Ident == x.legacy_code)),
             accepted_tasks)
-
-        task_history = TaskHistory.objects.filter()
 
         done_tasks = map(
             lambda x: (
@@ -211,7 +216,11 @@ class TaskETL(GenericETL):
                      JuridAgendaTable.Data_Fech: x.execution_date,
                      JuridAgendaTable.prazo_lido: 1, JuridAgendaTable.Prazo_Interm: 1,
                      JuridAgendaTable.Ag_StatusExecucao: '',
-                     JuridAgendaTable.Data_cumprimento: x.execution_date}).where(
+                     JuridAgendaTable.Data_cumprimento: x.execution_date,
+                     JuridAgendaTable.Obs: cast(JuridAgendaTable.Obs,
+                                                String()) + linesep + ' *** ' + task_history.filter(
+                         task_id=x.id).last().notes
+                     }).where(
                     JuridAgendaTable.Ident == x.legacy_code)),
             done_tasks)
 
@@ -220,15 +229,15 @@ class TaskETL(GenericETL):
                 update(JuridAgendaTable.__table__).values(
                     {JuridAgendaTable.SubStatus: 20, JuridAgendaTable.Status: 1,
                      JuridAgendaTable.prazo_lido: 1, JuridAgendaTable.Prazo_Interm: 1,
-                     JuridAgendaTable.Data_cumprimento: x.execution_date}).where(
+                     JuridAgendaTable.Data_cumprimento: x.execution_date,
+                     JuridAgendaTable.Obs: cast(JuridAgendaTable.Obs,
+                                                String()) + linesep + ' *** ' + task_history.filter(
+                         task_id=x.id).last().notes
+                     }).where(
                     JuridAgendaTable.Ident == x.legacy_code)),
             refused_tasks)
 
-        tasks = chain(done_tasks, accepted_tasks, refused_tasks)
-        for task in tasks:
-            print(task)
-
-        self.export_query_set = tasks
+        self.export_query_set = chain(done_tasks, accepted_tasks, refused_tasks)
 
 
 if __name__ == '__main__':
