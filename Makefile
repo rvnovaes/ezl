@@ -1,5 +1,6 @@
 build:
-	docker-compose build web certbot
+	docker-compose build web
+	docker-compose build certbot || true
 
 collectstatic:
 	docker-compose run web python manage.py collectstatic --noinput
@@ -22,7 +23,8 @@ ps:
 	docker-compose ps
 
 remove:
-	docker-compose rm -f certbot web
+	docker-compose rm -f web
+	docker-compose rm -f certbot web || true
 
 run:
 	docker-compose up -d
