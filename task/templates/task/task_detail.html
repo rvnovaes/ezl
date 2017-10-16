@@ -142,7 +142,7 @@
                 </div>
             </div>
 
-            <!-- Arquivos GED -->
+            <!-- Arquivos ECM -->
             <div class="panel panel-primary">
                 <div class="panel-heading " data-toggle="collapse" data-target="#attachment" id="header-attachment"
                      onclick="toggleArrow()">
@@ -170,7 +170,7 @@
                             <br>
                         {% endif %}
                         <p class="text-center" id="no-providence">
-                            {% if geds|length == 0 %}
+                            {% if ecms|length == 0 %}
                                 Esta providência não possui nenhum arquivo em
                                 anexo.
                             {% endif %}
@@ -178,8 +178,8 @@
                         <div class="table-responsive">
                             <table id="files" class="table table-bordered table-responsive">
                                 <tbody>
-                                {% for ged in geds %}
-                                    <tr class="lineFile" id="row-{{ ged.id }}">
+                                {% for ecm in ecms %}
+                                    <tr class="lineFile" id="row-{{ ecm.id }}">
                                         <td id="cell-table">
                                             <div class="row" id="row-file">
                                                 <div class="col-sm-2"
@@ -187,37 +187,37 @@
                                                     <i class="material-icons">person_pin</i>
                                                 </div>
                                                 <div class="col-sm-8" style="text-align: left; padding-left: 0;">
-                                                    <h6 style="margin-bottom: 3px !important;">{{ ged.user.first_name }} {{ ged.user.last_name }}
-                                                        ({{ ged.create_user }})
+                                                    <h6 style="margin-bottom: 3px !important;">{{ ecm.user.first_name }} {{ ecm.user.last_name }}
+                                                        ({{ ecm.create_user }})
                                                     </h6>
 
                                                     <div style="font-size: x-small">
-                                                        {{ ged.create_date|localtime }}
+                                                        {{ ecm.create_date|localtime }}
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td id="cell-table" style="font-size: small; width: 70% !important;">
-                                            <a href="/media/{{ ged.path }}" download
-                                               style="text-decoration: none;">{{ ged.filename }}</a>
+                                            <a href="/media/{{ ecm.path }}" download
+                                               style="text-decoration: none;">{{ ecm.filename }}</a>
                                         </td>
                                         {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
                                             <td id="cell-table" style="font-size: small">
                                                 <i class="material-icons" id=""
                                                    style="cursor: pointer; font-size: medium;"
                                                    data-toggle="modal"
-                                                   data-target="#confirmDelete-{{ ged.id }}">delete</i>
+                                                   data-target="#confirmDelete-{{ ecm.id }}">delete</i>
                                             </td>
                                         {% endif %}
                                     </tr>
-                                    <tr class="spaceFile" id="row-space{{ ged.id }}"></tr>
+                                    <tr class="spaceFile" id="row-space{{ ecm.id }}"></tr>
 
                                     <!-- Janela modal para confirmação de deleção de arquivo -->
-                                    <div id="confirmDelete-{{ ged.id }}" class="modal">
+                                    <div id="confirmDelete-{{ ecm.id }}" class="modal">
                                         <div class="modal-dialog">
                                             <div class="modal-content ">
                                                 <div class="modal-body" style="text-align: center !important;">
-                                                    Tem certeza que deseja excluir o arquivo <b>{{ ged.filename }}</b> ?
+                                                    Tem certeza que deseja excluir o arquivo <b>{{ ecm.filename }}</b> ?
                                                 </div>
                                                 <div class="modal-footer">
                                                     <div class="form-group text-center">
@@ -226,7 +226,7 @@
                                                                 data-dismiss="modal">
                                                             Não
                                                         </button>
-                                                        <button value="1" id="delete-ecm-{{ ged.id }}"
+                                                        <button value="1" id="delete-ecm-{{ ecm.id }}"
                                                                 style="width: 95px!important;"
                                                                 class="btn btn-sm btn-raised btn-primary"
                                                                 data-dismiss="modal">Sim
@@ -436,19 +436,19 @@
         <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
         <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>
 
-        {% for ged in geds %}
+        {% for ecm in ecms %}
             <script>
-                $("#delete-ecm-{{ ged.id }}").click(function () {
+                $("#delete-ecm-{{ ecm.id }}").click(function () {
                         $('#deleting').modal('show');
                         $.ajax({
-                            url: '{% url 'delete_ecm' ged.id %}',
+                            url: '{% url 'delete_ecm' ecm.id %}',
                             dataType: 'json',
 
                             success: function (data) {
                                 if (data.is_deleted) {
                                     showToast('success', data.message, '', 3000, true);
-                                    $('#row-{{ ged.id }}').remove();
-                                    $('#row-space{{ ged.id }}').remove();
+                                    $('#row-{{ ecm.id }}').remove();
+                                    $('#row-space{{ ecm.id }}').remove();
                                     $('#deleting').modal('hide');
                                 }
                                 else {

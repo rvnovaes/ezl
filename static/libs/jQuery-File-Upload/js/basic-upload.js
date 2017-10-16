@@ -47,7 +47,7 @@ $(function () {
                             "</div>" +
                         "</td>" +
                         "<td id='cell-table' style='font-size: small; width: 70% !important;'>" +
-                            "<a href='/media/GEDs/"+ data.result.task_id + '/' +data.result.filename +"' download " +
+                            "<a href='/media/ECM/"+ data.result.task_id + '/' +data.result.filename +"' download " +
                             "style='text-decoration: none;'>"+ data.result.filename +"</a>" +
                         "</td>" +
                         "<td id='cell-table' style='font-size: small'>" +

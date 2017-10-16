@@ -1,7 +1,8 @@
-
+from config.config import get_parser
+import datetime
+from django.urls import reverse_lazy
 import os
 import sys
-from config.config import get_parser
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -41,9 +42,6 @@ except KeyError as e:
     print(e)
     sys.exit(0)
 
-from django.urls import reverse_lazy
-import datetime
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -56,8 +54,6 @@ if environment == 'development':
     DEBUG = True
 else:
     DEBUG = False
-
-DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -86,7 +82,6 @@ INSTALLED_APPS = [
     'django_filters',
     'debug_toolbar',
     'django_cleanup',
-    'raven.contrib.django.raven_compat',
     # Autocomplete
     'dal',
     # Enable plugins
@@ -173,6 +168,7 @@ else:
             'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
         },
     ]
+    INSTALLED_APPS.append('raven.contrib.django.raven_compat')
 
 LANGUAGE_CODE = 'pt-br'
 
@@ -198,8 +194,8 @@ STATICFILES_DIRS = (
 # Pasta para qual os arquivos estaticos sao copiados com manage.py collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = '/opt/files_easy_lawyer/'
 
 LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
 
