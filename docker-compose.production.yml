@@ -16,8 +16,10 @@ services:
     environment:
       ENV: production
   certbot:
-    image: certbot/certbot
-    command: certonly --webroot -w /tmp/www -d mtostes.ezlawyer.com.br -m contato@ezlawyer.com.br --agree-tos
+    build:
+      context: .
+      dockerfile: containers/certbot/Dockerfile
+    image: local_certbot:latest
     volumes:
       - letsencrypt-www:/tmp/www
       - letsencrypt-etc:/etc/letsencrypt
