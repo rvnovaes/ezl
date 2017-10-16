@@ -128,17 +128,17 @@ class EcmETL:
                     cursor = self.advwin_engine.execute(text(insert_ged_hist))
 
                     if cursor:
-                        print('GED Exportado com sucesso')
+                        print('ECM Exportado com sucesso')
 
                     else:
-                        print('Erro na exportação do GED')
+                        print('Erro na exportação do ECM')
                 else:
                     print('Erro no Insert no banco Advwin')
             else:
                 print('Arquivo local não encontrado')
 
         if not ecms:
-            print('Nenhum GED a ser exportados')
+            print('Nenhum ECM a ser exportados')
 
         connection.close()
         sftp.close()

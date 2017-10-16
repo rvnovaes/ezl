@@ -198,8 +198,8 @@ STATICFILES_DIRS = (
 # Pasta para qual os arquivos estaticos sao copiados com manage.py collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = '/opt/files_easy_lawyer/'
 
 LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
 

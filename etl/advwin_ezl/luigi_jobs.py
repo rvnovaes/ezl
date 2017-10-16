@@ -26,7 +26,7 @@ from etl.advwin_ezl.law_suit.movement import MovementETL
 from etl.advwin_ezl.law_suit.type_movement import TypeMovementETL
 from etl.advwin_ezl.task.task import TaskETL
 from etl.advwin_ezl.task.type_task import TypeTaskETL
-from etl.advwin_ezl.task.ged_task import EcmETL
+from etl.advwin_ezl.task.ecm_task import EcmEtl
 from django.core.management import call_command
 from django.core.management.commands import loaddata, migrate
 import luigi
@@ -300,7 +300,7 @@ class EcmTask(luigi.Task):
     def run(self):
         f = open(get_folder_ipc(self), 'w')
         f.close()
-        EcmETL().import_data()
+        EcmEtl().import_data()
 
 
 def main():
