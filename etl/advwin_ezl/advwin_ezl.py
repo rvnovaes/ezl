@@ -173,7 +173,7 @@ class GenericETL(object):
         for query in self.export_query_set:
             trans = connection.begin()
             try:
-                result = self.advwin_engine.execute(text(query))
+                result = connection.execute(query)
                 self.post_export_handler(result)
                 trans.commit()
             except:

@@ -4,12 +4,10 @@ from enum import Enum
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
-
 from sequences import get_next_value
 
 from core.models import Person, Audit, AuditCreate, LegacyCode
 from lawsuit.models import Movement, Folder
-
 
 # Dicionário para retornar o icone referente ao status da providencia
 icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assignment_return',
@@ -73,7 +71,7 @@ class TypeTask(Audit, LegacyCode):
 
     class Meta:
         db_table = 'type_task'
-        ordering = ('name', )
+        ordering = ('name',)
         verbose_name = 'Tipo de Serviço'
         verbose_name_plural = 'Tipos de Serviço'
 
@@ -150,10 +148,14 @@ class Task(Audit, LegacyCode):
         return self.movement.law_suit.organ
 
     # TODO fazer composição para buscar no endereço completo
+    # TODO Modifiquei pois quando não há orgão cadastrado em lawsuit lança erro de variável nula / Martins
     @property
     def address(self):
-        address = self.movement.law_suit.organ.address_set.first()
-        return address if address else ''
+        address = ''
+        organ = self.movement.law_suit.organ
+        if organ:
+            address = organ.address_set.first()
+        return address
 
     def save(self, *args, **kwargs):
         if not self.task_number:
@@ -256,7 +258,11 @@ class DashboardViewModel(Audit):
         return self.movement.law_suit.organ
 
     # TODO fazer composição para buscar no endereço completo
+    # TODO Modifiquei pois quando não há orgão cadastrado em lawsuit lança erro de variável nula / Martins
     @property
     def address(self):
-        address = self.movement.law_suit.organ.address_set.first()
-        return address if address else ''
+        address = ''
+        organ = self.movement.law_suit.organ
+        if organ:
+            address = organ.address_set.first()
+        return address

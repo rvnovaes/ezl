@@ -1,19 +1,45 @@
-from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
+from itertools import chain
+from json import loads
+from os import linesep
 
 import pytz
-from itertools import chain
+from django.db.models import Q
 from django.utils import timezone
-from sqlalchemy import update
+from sqlalchemy import update, cast, String, insert
+
+from advwin_models.advwin import JuridAgendaTable, JuridCorrespondenteHist, JuridFMAudienciaCorrespondente, \
+    JuridFMAlvaraCorrespondente, JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente
 from core.utils import LegacySystem
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
-from advwin_models.advwin import JuridAgendaTable
 from ezl import settings
 from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
-from django.db.models import Q
-
 
 default_justify = 'Aceita por Correspondente: %s'
+
+"'Função para converter uma instância de um objeto sqlachemy para dicionário, utilizada na inserção do survey result'"
+
+
+def to_dict(model_instance, query_instance=None):
+    if hasattr(model_instance, '__table__'):
+        return {c.name: str(getattr(model_instance, c.name) if getattr(model_instance, c.name) else '') for c in
+                model_instance.__table__.columns if c.name is not 'id'}
+    else:
+        cols = query_instance.column_descriptions
+        return {cols[i]['name']: model_instance[i] for i in range(len(cols))}
+
+
+def parse_survey_result(survey, agenda_id):
+    json = loads(survey)
+    json['agenda_id'] = agenda_id
+    json['versao'] = 1
+    return json
+
+
+survey_tables = {'Courthearing': JuridFMAudienciaCorrespondente, 'Diligence'
+: JuridFMDiligenciaCorrespondente, 'Protocol': JuridFMProtocoloCorrespondente,
+                 'Operationlicense': JuridFMAlvaraCorrespondente}
 
 
 def get_status_by_substatus(substatus):
@@ -52,7 +78,7 @@ class TaskETL(GenericETL):
                 INNER JOIN Jurid_Pastas AS p ON
                     a.Pasta = p.Codigo_Comp
 
-                INNER JOIN Jurid_CodMov as cm ON
+                INNER JOIN Jurid_CodMov AS cm ON
                      a.CodMov = cm.Codigo
 
                 WHERE
@@ -181,7 +207,6 @@ class TaskETL(GenericETL):
                     "Ocorreu o seguinte erro na importacao de Task: " + str(rows_count) + "," + str(
                         e) + "," + self.timestr)
 
-
     def config_export(self):
         accepted_tasks = self.model.objects.filter(legacy_code__isnull=False,
                                                    task_status=TaskStatus.ACCEPTED)
@@ -192,43 +217,103 @@ class TaskETL(GenericETL):
         refused_tasks = self.model.objects.filter(legacy_code__isnull=False,
                                                   task_status=TaskStatus.REFUSED)
 
-        accepted_tasks = map(
+        survey_result = done_tasks.filter(Q(survey_result__isnull=False) & ~Q(survey_result=''))
+
+        survey_result = map(lambda x: (
+            insert(survey_tables.get(x.type_task.survey_type).__table__).values(to_dict(
+                survey_tables.get(x.type_task.survey_type)(**parse_survey_result(x.survey_result, x.legacy_code))))
+        ), survey_result)
+
+        accepeted_history = TaskHistory.objects.filter(task_id__in=accepted_tasks.values('id'),
+                                                       status=TaskStatus.ACCEPTED.value)
+
+        done_history = TaskHistory.objects.filter(task_id__in=done_tasks.values('id'), status=TaskStatus.DONE.value)
+
+        refused_history = TaskHistory.objects.filter(task_id__in=refused_tasks.values('id'),
+                                                     status=TaskStatus.REFUSED.value)
+
+        accepted_tasks_query = map(
             lambda x: (
                 update(JuridAgendaTable.__table__).values(
                     {JuridAgendaTable.SubStatus: 50, JuridAgendaTable.status_correspondente: 0,
                      JuridAgendaTable.prazo_lido: 0, JuridAgendaTable.envio_alerta: 0,
                      JuridAgendaTable.Ag_StatusExecucao: 'Em execucao',
-                     JuridAgendaTable.Data_correspondente: x.acceptance_date}).where(
-                    JuridAgendaTable.Ident == x.legacy_code)),
-            accepted_tasks)
+                     JuridAgendaTable.Data_correspondente: x.acceptance_date,
+                     JuridAgendaTable.Obs: cast(JuridAgendaTable.Obs,
+                                                String()) + linesep + ' *** Ordem de serviço aceita por ' +
+                                           str(x.person_executed_by) + ': ' + x.taskhistory_set.filter(
+                         status=TaskStatus.ACCEPTED.value).last().notes + (
+                                               ' em ' + x.acceptance_date.strftime(
+                                                   '%d/%m/%Y') if x.acceptance_date else '')
+                     }).where(JuridAgendaTable.Ident == x.legacy_code)), accepted_tasks)
 
-        task_history = TaskHistory.objects.filter()
-
-        done_tasks = map(
+        done_tasks_query = map(
             lambda x: (
                 update(JuridAgendaTable.__table__).values(
                     {JuridAgendaTable.SubStatus: 70, JuridAgendaTable.Status: 2,
                      JuridAgendaTable.Data_Fech: x.execution_date,
                      JuridAgendaTable.prazo_lido: 1, JuridAgendaTable.Prazo_Interm: 1,
                      JuridAgendaTable.Ag_StatusExecucao: '',
-                     JuridAgendaTable.Data_cumprimento: x.execution_date}).where(
-                    JuridAgendaTable.Ident == x.legacy_code)),
-            done_tasks)
+                     JuridAgendaTable.Data_cumprimento: x.execution_date,
+                     JuridAgendaTable.Obs: cast(JuridAgendaTable.Obs,
+                                                String()) + linesep + ' *** Ordem de serviço cumprida por ' +
+                                           str(x.person_executed_by) + ': ' + x.taskhistory_set.filter(
+                         status=TaskStatus.DONE.value).last().notes +
+                                           (' em ' + x.execution_date.strftime('%d/%m/%Y') if x.execution_date else '')
+                     }).where(JuridAgendaTable.Ident == x.legacy_code)), done_tasks)
 
-        refused_tasks = map(
+        refused_tasks_query = map(
             lambda x: (
                 update(JuridAgendaTable.__table__).values(
                     {JuridAgendaTable.SubStatus: 20, JuridAgendaTable.Status: 1,
                      JuridAgendaTable.prazo_lido: 1, JuridAgendaTable.Prazo_Interm: 1,
-                     JuridAgendaTable.Data_cumprimento: x.execution_date}).where(
-                    JuridAgendaTable.Ident == x.legacy_code)),
-            refused_tasks)
+                     JuridAgendaTable.Data_correspondente: x.refused_date,
+                     JuridAgendaTable.Obs: cast(JuridAgendaTable.Obs,
+                                                String()) + linesep + ' *** Ordem de serviço recusada por ' +
+                                           str(x.person_executed_by) + ': ' + x.taskhistory_set.filter(
+                         status=TaskStatus.REFUSED.value).last().notes + (
+                                               ' em ' + x.refused_date.strftime('%d/%m/%Y') if x.refused_date else'')
+                     }).where(JuridAgendaTable.Ident == x.legacy_code)), refused_tasks)
 
-        tasks = chain(done_tasks, accepted_tasks, refused_tasks)
-        for task in tasks:
-            print(task)
+        accepeted_history_query = map(lambda x: (
+            insert(JuridCorrespondenteHist.__table__).values(
+                {JuridCorrespondenteHist.codigo_adv_correspondente: str(x.create_user),
+                 JuridCorrespondenteHist.ident_agenda: x.task.legacy_code,
+                 JuridCorrespondenteHist.status: 0,
+                 JuridCorrespondenteHist.SubStatus: 50,
+                 JuridCorrespondenteHist.data_operacao: x.create_date,
+                 JuridCorrespondenteHist.justificativa: x.notes,
+                 JuridCorrespondenteHist.usuario: x.task.person_executed_by.auth_user.username,
+                 JuridCorrespondenteHist.descricao: 'Aceita por correspondente: ' +
+                                                    x.task.person_executed_by.legal_name})), accepeted_history)
 
-        self.export_query_set = tasks
+        done_history_query = map(lambda x: (
+            insert(JuridCorrespondenteHist.__table__).values(
+                {JuridCorrespondenteHist.codigo_adv_correspondente: str(x.create_user),
+                 JuridCorrespondenteHist.ident_agenda: x.task.legacy_code,
+                 JuridCorrespondenteHist.status: 0,
+                 JuridCorrespondenteHist.SubStatus: 70,
+                 JuridCorrespondenteHist.data_operacao: x.create_date,
+                 JuridCorrespondenteHist.justificativa: x.notes,
+                 JuridCorrespondenteHist.usuario: x.task.person_executed_by.auth_user.username,
+                 JuridCorrespondenteHist.descricao: 'Cumprida por correspondente: ' +
+                                                    x.task.person_executed_by.legal_name})), done_history)
+
+        refused_history_query = map(lambda x: (
+            insert(JuridCorrespondenteHist.__table__).values(
+                {JuridCorrespondenteHist.codigo_adv_correspondente: str(x.create_user),
+                 JuridCorrespondenteHist.ident_agenda: x.task.legacy_code,
+                 JuridCorrespondenteHist.status: 1,
+                 JuridCorrespondenteHist.SubStatus: 20,
+                 JuridCorrespondenteHist.data_operacao: x.create_date,
+                 JuridCorrespondenteHist.justificativa: x.notes,
+                 JuridCorrespondenteHist.usuario: x.task.person_executed_by.auth_user.username,
+                 JuridCorrespondenteHist.descricao: 'Recusada por correspondente: ' +
+                                                    x.task.person_executed_by.legal_name})), refused_history)
+
+        self.export_query_set = chain(accepted_tasks_query, done_tasks_query, refused_tasks_query,
+                                      accepeted_history_query,
+                                      done_history_query, refused_history_query, survey_result)
 
 
 if __name__ == '__main__':
