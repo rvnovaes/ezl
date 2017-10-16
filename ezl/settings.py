@@ -1,7 +1,8 @@
-
+from config.config import get_parser
+import datetime
+from django.urls import reverse_lazy
 import os
 import sys
-from config.config import get_parser
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -41,9 +42,6 @@ except KeyError as e:
     print(e)
     sys.exit(0)
 
-from django.urls import reverse_lazy
-import datetime
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -56,8 +54,6 @@ if environment == 'development':
     DEBUG = True
 else:
     DEBUG = False
-
-DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
