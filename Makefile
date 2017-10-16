@@ -8,6 +8,9 @@ collectstatic:
 create_certificate:
 	docker-compose run certbot certbot certonly --webroot -w /tmp/www -d mtostes.ezlawyer.com.br -m contato@ezlawyer.com.br --agree-tos
 
+create_certificate_teste:
+	docker-compose run certbot certbot certonly --webroot -w /tmp/www -d teste.ezlawyer.com.br -m contato@ezlawyer.com.br --agree-tos
+
 deploy: build stop remove run migrate collectstatic
 
 local_sqlserver:
@@ -39,6 +42,10 @@ set_env_development:
 set_env_production:
 	rm docker-compose.override.yml || true
 	ln -s docker-compose.production.yml docker-compose.override.yml
+
+set_env_teste:
+	rm docker-compose.override.yml || true
+	ln -s docker-compose.teste.yml docker-compose.override.yml
 
 shell:
 	docker-compose run web bash

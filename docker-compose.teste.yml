@@ -1,0 +1,31 @@
+version: "3"
+services:
+  nginx:
+    ports:
+      - "801:80"
+      - "4431:443"
+    volumes:
+      - ./containers/nginx/conf.d/ezl_teste.conf:/etc/nginx/conf.d/default.conf
+      - web-static:/usr/share/nginx/html/static
+      - web-media:/usr/share/nginx/html/media
+      - letsencrypt-www:/usr/share/nginx/html/certbot
+      - letsencrypt-etc:/etc/letsencrypt
+    depends_on:
+      - web
+      - certbot
+  web:
+    build:
+      context: .
+      dockerfile: containers/web/Dockerfile
+    image: ezl:latest
+    command: uwsgi --ini /app/config/uwsgi/uwsgi.ini
+    environment:
+      ENV: development
+  certbot:
+    build:
+      context: .
+      dockerfile: containers/certbot/Dockerfile
+    image: local_certbot:latest
+    volumes:
+      - letsencrypt-www:/tmp/www
+      - letsencrypt-etc:/etc/letsencrypt
