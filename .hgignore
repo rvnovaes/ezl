@@ -9,3 +9,4 @@ config/general.ini
 etl/advwin_ezl/tmp/**
 syntax: regexp
 ^.idea/
+docker-compose.override.yml

@@ -11,6 +11,14 @@ O projeto está configurado para dodar com Docker e Docker composer.
 make run
 ```
 
+#### Atualizando imagem docker
+
+Sempre que uma nova dependência for adicionada no requirements.txt o comando abaixo deve ser executado para gerar novamente a imagem docker.
+
+```bash
+make build
+```
+
 ### Executando em ambiente de produção
 
 ```bash
@@ -23,8 +31,8 @@ A aplicação está distribuida nos seguintes serviços Docker:
 
 ### Desenvolvimento
 
-- web - Projeto Django rodando `internamente` com runserver na porta `8000`
-- nginx - Nginx rodando na porta `8000` do computador `localmente`
+- web - Projeto Django rodando com runserver na porta `8000` do computador `localmente`
+- nginx - Nginx rodando na porta `8080` do computador `localmente`
 - db - Postgres rodando `internamente` na porta `5432`
 - cmd_collectstatic - Comando `collectstatic` do Django que é executado toda vez que um `up` ou `restart` é executado
 - cmd_migrate - Comando `migrate` do Django que é executado toda vez que um `up` ou `restart` é executado
