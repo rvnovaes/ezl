@@ -61,3 +61,39 @@ Ao executar o comando acima será criado um link simbólico com o nome `docker-c
 - Password: `%SuperEZL%1`
 
 
+## Deploy
+
+Para fazer deploy você deve executar os comandos abaixo:
+
+### Produção
+```
+cd deploy
+fab production deploy:dev
+```
+
+### Teste
+```
+cd deploy
+fab teste deploy:dev
+```
+
+#### Testando o deploy sem fazer push
+
+Você pode testar o deploy sem fazer push da seguinte maneira:
+
+```
+cd deploy
+fab teste deploy:rsync=true
+```
+
+Ao executar o comando acima ao invés de atualizar o repositório no servidor atavés do Mercurial ele será atualizado utilizando o `rsync` copiando os arquivos de sua maquina para o servidor
+
+
+#### Fazendo deploy de uma revisão específica
+
+Você pode fazer deploy de uma revisão específica da seguinte maneira:
+
+```
+cd deploy
+fab teste deploy:$REVISION
+```
