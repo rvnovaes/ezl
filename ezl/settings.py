@@ -1,8 +1,13 @@
-from config.config import get_parser
 import datetime
-from django.urls import reverse_lazy
 import os
 import sys
+
+from django.urls import reverse_lazy
+
+from config.config import get_parser
+
+
+CELERY_BROKER_URL = 'amqp://guest:guest@rabbit:5672//'
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -71,12 +76,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
 
+    'advwin_models',
     'core.apps.CoreConfig',
     'lawsuit.apps.LawsuitConfig',
     'task.apps.TaskConfig',
+
     'django.contrib.sites',
+
     'allauth',
     'allauth.account',
+    'celery',
     'django_tables2',
     'bootstrap3',
     'django_filters',
@@ -89,7 +98,7 @@ INSTALLED_APPS = [
     'dal_queryset_sequence',
     # Test
     'localflavor',
-    #Sequences
+    # Sequences
     'sequences.apps.SequencesConfig'
 ]
 
@@ -186,7 +195,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-#TODO Mover a pasta static/static para a app static/static
+# TODO Mover a pasta static/static para a app static/static
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
@@ -222,9 +231,10 @@ PROJECT_LINK = 'https://ezl.mtostes.com.br'
 
 LINK_TO_RESTORE_DB_DEMO = 'http://13.68.213.60:8001'
 
-RAVEN_CONFIG = {
-    'dsn': 'https://8117af934e9c436c8ad81a66fd875912:d00c54e22db046b19a7dcae5677126db@sentry.io/224925',
-}
+# RAVEN_CONFIG = {
+#     'dsn': ('https://8117af934e9c436c8ad81a66fd875912'
+#             ':d00c54e22db046b19a7dcae5677126db@sentry.io/224925'),
+# }
 
 LOGGING = {
     'version': 1,
@@ -272,14 +282,16 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_true'],
             'class': 'logging.FileHandler',
-            'filename': '/var/log/ezl/etl/'+datetime.datetime.now().strftime("error_%Y%m%d_%H%M%S.log"),
+            'filename': '/var/log/ezl/etl/' +
+                        datetime.datetime.now().strftime('error_%Y%m%d_%H%M%S.log'),
             'formatter': 'simple'
         },
         'debug_logfile': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
             'class': 'logging.FileHandler',
-            'filename': '/var/log/ezl/etl/'+datetime.datetime.now().strftime("debug_%Y%m%d_%H%M%S.log"),
+            'filename': '/var/log/ezl/etl/' +
+                        datetime.datetime.now().strftime('debug_%Y%m%d_%H%M%S.log'),
             'formatter': 'simple'
         },
     },

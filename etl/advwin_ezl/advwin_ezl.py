@@ -113,7 +113,7 @@ class GenericETL(object):
     advwin_engine = connect_db(parser, config_connection)
     model = None
     import_query = None
-    export_query_set = None
+    export_statements = None
     advwin_table = None
     has_status = None
     advwin_model = None
@@ -170,10 +170,10 @@ class GenericETL(object):
         self.config_export()
         connection = self.advwin_engine.connect()
 
-        for query in self.export_query_set:
+        for stmt in self.export_statements:
             trans = connection.begin()
             try:
-                result = connection.execute(query)
+                result = connection.execute(stmt)
                 self.post_export_handler(result)
                 trans.commit()
             except:
