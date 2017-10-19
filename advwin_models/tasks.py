@@ -3,12 +3,13 @@ from os import linesep
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
-from raven.contrib.django.raven_compat.models import client
+# from raven.contrib.django.raven_compat.models import client
 from sqlalchemy import cast, String
 
 from advwin_models.advwin import JuridFMAudienciaCorrespondente, JuridFMAlvaraCorrespondente, \
     JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente, JuridAgendaTable, \
     JuridCorrespondenteHist
+from connections.db_connection import advwin_engine
 from task.models import Task, TaskStatus, TaskHistory
 
 
@@ -35,7 +36,8 @@ def get_task_survey_values(task):
 
 def get_task_observation(task, message, date_field):
     casting = cast(JuridAgendaTable.Obs, String())
-    last_taskhistory_notes = task.taskhistory_set.filter(status=task.task_status).last().notes
+    last_taskhistory = task.taskhistory_set.filter(status=task.task_status).last()
+    last_taskhistory_notes = last_taskhistory.notes if last_taskhistory else ''
     dt = getattr(task, date_field)
     date = dt.strftime('%d/%m/%Y') if dt else ''
     s = '{}{} *** {} {}: {} em {}'.format(
@@ -49,7 +51,7 @@ def get_task_observation(task, message, date_field):
 
 
 @shared_task()
-def export_task_history(task_history_id, task_history=None):
+def export_task_history(task_history_id, task_history=None, execute=True):
     if task_history is None:
         task_history = TaskHistory.objects.get(pk=task_history_id)
 
@@ -106,8 +108,33 @@ def export_task_history(task_history_id, task_history=None):
         return stmt
 
 
+def update_advwin_task(task, values, execute=True):
+    stmt = JuridAgendaTable.__table__.update()\
+        .where(JuridAgendaTable.__table__.c.Ident == task.legacy_code)\
+        .values(**values)
+
+    if execute:
+        LOGGER.debug('Exportando OS %d-%s ', task.id, task)
+        try:
+            result = advwin_engine.execute(stmt)
+        except Exception as exc:
+            result = None
+            LOGGER.warning('Não foi possíve exportar OS: %d-%s com status %s\n%s',
+                           task.id,
+                           task,
+                           task.task_status,
+                           exc,
+                           exc_info=(type(exc), exc, exc.__traceback__))
+        else:
+            LOGGER.info('OS %s: exportada com  status %s', task, task.task_status)
+        finally:
+            return result
+    else:
+        return stmt
+
+
 @shared_task()
-def export_task(task_id, task=None):
+def export_task(task_id, task=None, execute=True):
     if task is None:
         task = Task.objects.get(pk=task_id)
 
@@ -125,8 +152,7 @@ def export_task(task_id, task=None):
             'Obs': get_task_observation(task, 'Ordem de serviço aceita por', 'acceptance_date'),
         }
 
-        stmt = table.update().where(table.c.Ident == task.legacy_code).values(**values)
-        return stmt
+        return update_advwin_task(task, values, execute)
 
     elif task.task_status == TaskStatus.DONE:
 
@@ -141,13 +167,40 @@ def export_task(task_id, task=None):
             'Obs': get_task_observation(task, 'Ordem de serviço cumprida por', 'execution_date'),
         }
 
-        update = table.update().where(table.c.Ident == task.legacy_code).values(**values)
-        stmts = [update]
+        result = update_advwin_task(task, values, execute)
+
+        stmts = result
 
         if task.survey_result:
-            table = SURVEY_TABLES_MAPPING.get(task.type_task.survey_type)
-            insert = table.insert().values(**get_task_survey_values(task))
-            stmts.append(insert)
+            table = SURVEY_TABLES_MAPPING.get(task.type_task.survey_type).__table__
+            stmt = table.insert().values(**get_task_survey_values(task))
+
+            if execute:
+                LOGGER.debug('Exportando formulário da OS %d-%s', task.id, task)
+                try:
+                    result = advwin_engine.execute(stmt)
+                except Exception as exc:
+                    result = None
+                    LOGGER.warning(
+                        'Não foi possíve exportar formulário da OS: %d-%s com status %s\n%s',
+                        task.id,
+                        task,
+                        task.task_status,
+                        exc,
+                        exc_info=(type(exc), exc, exc.__traceback__))
+                else:
+                    LOGGER.info('Formulário da OS %d-%s: exportada com  status %s',
+                                task.id,
+                                task,
+                                task.task_status)
+                finally:
+                    return result
+
+            stmts.append(stmt)
+
+        if execute:
+            return result
+
         return stmts
 
     elif task.task_status == TaskStatus.REFUSED:
@@ -163,12 +216,11 @@ def export_task(task_id, task=None):
             'Obs': get_task_observation(task, 'Ordem de serviço recusada por', 'refused_date'),
         }
 
-        stmt = table.update().where(table.c.Ident == task.legacy_code).values(**values)
-        return stmt
+        return update_advwin_task(task, values, execute)
 
-    try:
-        print('something')
-        LOGGER.info(DO_SOMETHING_SUCCESS_MESSAGE)
-    except Exception as exc:
-        LOGGER.error(DO_SOMETHING_ERROR_MESSAGE, exc)
-        client.captureException()
+    # try:
+    #     print('something')
+    #     LOGGER.info(DO_SOMETHING_SUCCESS_MESSAGE)
+    # except Exception as exc:
+    #     LOGGER.error(DO_SOMETHING_ERROR_MESSAGE, exc)
+    #     client.captureException()

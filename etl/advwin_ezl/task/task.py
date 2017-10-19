@@ -215,7 +215,7 @@ class TaskETL(GenericETL):
 
         stmts = []
         for task in legacy_tasks:
-            stmts.append(export_task(task.id, task))
+            stmts.append(export_task(task.id, task, execute=False))
 
         legacy_tasks_history = TaskHistory.objects\
             .filter(task__legacy_code__isnull=False,
@@ -223,7 +223,7 @@ class TaskETL(GenericETL):
             .select_related('task', 'task__person_executed_by__auth_user')
 
         for task_history in legacy_tasks_history:
-            stmts.append(export_task_history(task_history.id, task_history))
+            stmts.append(export_task_history(task_history.id, task_history, execute=False))
 
         self.export_statements = chain(*stmts)
 

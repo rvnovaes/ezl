@@ -300,6 +300,11 @@ LOGGING = {
         'handlers': ['console'],
     },
     'loggers': {
+        'advwin_models.tasks': {
+            'handlers': [
+                'console', 'error_logfile', 'ezl_logfile', 'debug_logfile', 'development_logfile',
+            ],
+        },
         'coffeehouse': {
             'handlers': ['development_logfile'],
          },

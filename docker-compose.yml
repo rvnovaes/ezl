@@ -1,5 +1,13 @@
 version: "3"
 
+volumes:
+  db-data:
+  db-advwin-data:
+  web-media:
+  web-static:
+  letsencrypt-www:
+  letsencrypt-etc:
+
 services:
   web:
     volumes:
@@ -12,6 +20,7 @@ services:
         max-size: "100m"
     depends_on:
       - db
+
   nginx:
     image: nginx:1.13
     volumes:
@@ -22,6 +31,7 @@ services:
       - letsencrypt-etc:/etc/letsencrypt
     depends_on:
       - web
+
   db:
     image: postgres:9.6
     environment:
@@ -35,9 +45,17 @@ services:
       driver: "json-file"
       options:
         max-size: "100m"
-volumes:
-  db-data:
-  web-media:
-  web-static:
-  letsencrypt-www:
-  letsencrypt-etc:
+
+  rabbit:
+    restart: unless-stopped
+    image: rabbitmq:latest
+    ports:
+      - 5672:5672
+
+#  db_advwin:
+#    image: microsoft/mssql-server-linux:2017-latest
+#    environment:
+#      ACCEPT_EULA: Y
+#      MSSQL_SA_PASSWORD: DB@advwinOn1Tw2Thre3
+#    volumes:
+#      - "db-advwin-data:/var/opt/mssql"
