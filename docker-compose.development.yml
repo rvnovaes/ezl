@@ -4,7 +4,9 @@ services:
   web:
     build:
       context: .
-      dockerfile: containers/web/Dockerfile_dev
+      dockerfile: containers/web/Dockerfile
+      args:
+        requirements_file: development.txt
     image: ezl:dev
     command: python manage.py runserver 0.0.0.0:8000
     environment:
