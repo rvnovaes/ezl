@@ -49,6 +49,10 @@ set_env_production:
 	rm docker-compose.override.yml || true
 	ln -s docker-compose.production.yml docker-compose.override.yml
 
+set_env_teste:
+	rm docker-compose.override.yml || true
+	ln -s docker-compose.teste.yml docker-compose.override.yml
+
 shell:
 	docker-compose run web bash
 

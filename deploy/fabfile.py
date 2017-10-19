@@ -47,7 +47,6 @@ def deploy(revision=None, rsync=False):
         update_repo(revision)
 
     with cd(get_repo_path()):
-        run("make set_env_{}".format(env["NAME"]))
         run("make deploy")
 
 
@@ -75,9 +74,13 @@ def install():
     sudo('echo "{} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/no-password'
          .format(USER))
     install_docker()
-    #deploy()
-    #with cd(get_repo_path()):
-    #    run("make create_certificate")
+    with cd(get_repo_path()):
+        run("make set_env_{}".format(env["NAME"]))
+        run("make deploy")
+
+    deploy()
+    with cd(get_repo_path()):
+        run("make create_certificate")
 
 
 @task
