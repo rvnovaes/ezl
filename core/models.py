@@ -174,11 +174,11 @@ class Person(Audit, LegacyCode):
     def contact_mechanism_by_type(self, type):
         type = ContactMechanismType.objects.filter(name__iexact=type).first()
         contacts = self.contactmechanism_set.filter(contact_mechanism_type=type)
-        return '|'.join([contact.description for contact in contacts]) if contacts else ''
+        return ' | '.join([contact.description for contact in contacts]) if contacts else ''
 
     @property
     def emails(self):
-        return self.contact_mechanism_by_type('email').__add__('|').__add__(self.auth_user.email if self.auth_user.email else '')
+        return self.contact_mechanism_by_type('email').__add__(' | ').__add__(self.auth_user.email if self.auth_user.email else '')
 
     @property
     def phones(self):

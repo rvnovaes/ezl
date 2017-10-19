@@ -88,7 +88,7 @@ def new_task(sender, instance, created, **kwargs):
             project_link = settings.PROJECT_LINK
 
         mail = SendMail()
-        mail.subject = str(number) + ': ' + str(
+        mail.subject = 'Easy Lawyer - OS '+str(number) + ' - ' + str(
             instance.type_task).title() + ' - ' + instance.final_deadline_date.strftime('%d/%m/%Y')
         mail.message = render_to_string('mail/base.html',
                                         {'server': 'http://' + project_link, 'pk': instance.pk,

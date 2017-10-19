@@ -6,10 +6,6 @@
     {% if task.task_status.name != 'OPEN' %}
         A providência {{ number }} {{ short_message }} no {{ project_name }}{{ custom_text }}.
     {% endif %}
-    Nº da OS
-    Tipo de serviço
-    Prazo
-    Descrição
     {% if task.task_status.name == 'OPEN' %}
         <div>
             <br> <span>Dados do serviço:</span>
