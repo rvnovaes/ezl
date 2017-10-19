@@ -12,7 +12,11 @@ class Command(BaseCommand):
         from etl.advwin_ezl.task.ecm_task import EcmEtl
         EcmEtl().import_data()
 
+    def run_etl(self):
+        from etl.advwin_ezl.luigi_jobs import main
+        main()
+
     def handle(self, *args, **options):
-        self.run_ecm_etl()
+        self.run_etl()
 
 

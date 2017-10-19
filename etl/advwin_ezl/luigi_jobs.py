@@ -1,14 +1,5 @@
-import sys
-import django
-import os
-dir = os.path.dirname(os.path.realpath(__file__))
-position = dir.find('easy_lawyer_django')
-sys.path.append(dir[:position] + 'easy_lawyer_django/')
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ezl.settings'
-django.setup()
-
 import subprocess
-
+import os
 from time import sleep
 
 from etl.advwin_ezl import signals
@@ -58,16 +49,6 @@ def get_folder_ipc(task):
 def load_fixtures():
     for fixture in fixtures:
         call_command(loaddata.Command(), fixture, verbosity=0)
-
-
-def load_luigi_scheduler():
-    if subprocess.run(['pgrep', '-f', 'luigid'], stdout=subprocess.PIPE).stdout.decode(
-            "utf-8") is '':
-        command = 'echo {0}|sudo -S luigid --port {1} --background'.format(
-            linux_password, luigi_port)
-        os.system(command)
-        # tempo necessário para inicialização do luigi scheduler antes da primeira tarefa NAO REMOVER
-        sleep(10)
 
 
 class MigrationTask(luigi.Task):
@@ -305,11 +286,7 @@ class EcmTask(luigi.Task):
 
 def main():
     try:
-        # E necessario remover os arquivos.ezl dentro do diretorio tmp para executar novamente
-        os.system('echo {0}|sudo -S rm -rf {1}/etl/advwin_ezl/tmp/*.ezl'.format(
-            linux_password, settings.BASE_DIR))
         # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
-        load_luigi_scheduler()
         luigi.run(main_task_cls=EcmTask())
     except ParamsException as e:
         print(e)
