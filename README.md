@@ -117,5 +117,5 @@ Você pode fazer deploy de uma revisão específica da seguinte maneira:
 
 ```
 cd deploy
-fab teste deploy:$REVISION
+fab teste deploy:100000000
 ```

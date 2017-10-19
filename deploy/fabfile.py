@@ -51,18 +51,13 @@ def deploy(revision=None, rsync=False):
         run("make deploy")
 
 
-def update_repo(revision):
+def update_repo(revision="default"):
     if not exists(get_repo_path()):
         run("hg clone {} {}".format(REPO_URL, get_repo_path()))
 
-    if revision:
-        revision_arg = "--rev {}".format(revision)
-    else:
-        revision_arg = "default"
-
     with cd(get_repo_path()):
         run("hg pull -u")
-        run("hg update {}".format(revision_arg))
+        run("hg update {}".format(revision))
 
 
 def rsync_repo(revision=None):
