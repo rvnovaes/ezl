@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db.models.signals import post_init, pre_save, post_save
 from django.dispatch import receiver, Signal
 from django.template.loader import render_to_string
@@ -7,7 +8,6 @@ from core.models import ContactMechanism, ContactMechanismType, Person
 from ezl import settings
 from task.mail import SendMail
 from task.models import Task, TaskStatus, TaskHistory
-from django.contrib.auth.models import User
 
 send_notes_execution_date = Signal(providing_args=["notes", "instance", "execution_date"])
 
@@ -88,18 +88,19 @@ def new_task(sender, instance, created, **kwargs):
             project_link = settings.PROJECT_LINK
 
         mail = SendMail()
-        mail.subject = 'Providência ' + str(
-            number) + ': ' + instance.task_status.value + ' - ' + settings.PROJECT_NAME
+        mail.subject = str(number) + ': ' + str(
+            instance.type_task).title() + ' - ' + instance.final_deadline_date.strftime('%d/%m/%Y')
         mail.message = render_to_string('mail/base.html',
                                         {'server': 'http://' + project_link, 'pk': instance.pk,
                                          'project_name': settings.PROJECT_NAME,
                                          'number': str(number),
                                          'short_message': short_message[instance.task_status],
                                          'custom_text': custom_text,
+                                         'task': instance
                                          })
         mail.to_mail = mail_list
 
-        #TODO tratar corretamente a excecao
+        # TODO tratar corretamente a excecao
         try:
             mail.send()
         except Exception as e:
