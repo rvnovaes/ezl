@@ -11,6 +11,18 @@ services:
       ENV: development
     ports:
       - "8000:8000"
+    depends_on:
+      - db
+      - tunnel
+
+  tunnel:
+    image: ezl:dev
+    command: python sshtunnel.py -U dev -P dev@2016 -L 0.0.0.0:2000 -R 172.27.155.9:1433 -p 22 201.86.113.86
+    ports:
+      - "2000:2000"
+    volumes:
+      - .:/app
+
   nginx:
     ports:
       - "8080:80"
