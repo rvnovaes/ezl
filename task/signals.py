@@ -22,7 +22,7 @@ def load_previous_status(sender, instance, **kwargs):
 
 @receiver(send_notes_execution_date)
 def receive_notes_execution_date(notes, instance, execution_date, survey_result, **kwargs):
-    instance.__notes = notes if notes else ''
+    setattr(instance, '__notes', notes if notes else '')
     if execution_date and not instance.execution_date:
         instance.execution_date = execution_date
     instance.survey_result = survey_result if survey_result else None
@@ -140,7 +140,8 @@ def change_status(sender, instance, **kwargs):
 
             TaskHistory.objects.create(task=instance, create_user=instance.alter_user,
                                        status=instance.task_status,
-                                       create_date=now_date, notes=instance.__notes)
+                                       create_date=now_date,
+                                       notes=getattr(instance, '__notes', ''))
             instance.__previous_status = instance.task_status
 
     except Exception as e:
