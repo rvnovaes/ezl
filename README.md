@@ -4,10 +4,23 @@ O projeto está configurado para dodar com Docker e Docker composer.
 
 ## Rodando o projeto em ambiente de desenvolvimento
 
-
 ### Executando em ambiente de desenvolvimento
 
+Para executar o projeto em ambiente de desenvolvimento você precisa executar o comando abaixo para definir o ambiente:
+
 ```bash
+make set_env_development
+```
+
+Em seguida você deverá rodar o comando `make deploy` para que todos os containers sejam criados juntamente com o banco de dados e os arquivos estáticos:
+
+```
+make deploy
+```
+
+Após a primeira execução do projeto você pode roda-lo com o comando abaixo:
+
+```
 make run
 ```
 
@@ -19,11 +32,20 @@ Sempre que uma nova dependência for adicionada no requirements.txt o comando ab
 make build
 ```
 
-### Executando em ambiente de produção
+### Comandos disponíveis
 
-```bash
-make run_prod
-```
+Para facilitar o desenvolvimento os seguintes comandos estão disponíveis através do `make`:
+
+- `run` - Executa todos os serviços em backgroud
+- `stop` - Para de executar a aplicação. Para voltar é só rodar o `run`
+- `restart` - Reinicia todos os containers
+- `deploy` - Atualiza as dependências, executa as migrations, gera os arquivos estáticos e executa a aplicação (make run)
+- `logs` - Exibe todos os logs de todos os containers
+- `shell` - Abre um shell dentro do container da aplicação
+- `psql` - Abre a linha de comando do banco de dados Postgres
+- `migrate` - Executa as migrações do projeto
+- `collectstatic` - Executa o comando `collectstatic` do Django
+- `test` - Executa os testes unitários
 
 ## Componentes
 
@@ -44,8 +66,7 @@ A aplicação está distribuida nos seguintes serviços Docker:
 - web - Projeto Django rodando `internamente` com uWsgi na porta `8000`
 - nginx - Nginx rodando na porta `80` do computador `localmente`
 - db - Idem ao ambiente de desenvolvimento
-- cmd_collectstatic - Idem ao ambiente de desenvolvimento
-- cmd_migrate - Idem ao ambiente de desenvolvimento
+- certbot - Cronjob que renova o certificado SSL automaticamente
 
 Para rodar o SQLServer em ambiente de desenvolvimento você deve rodar o seguinte comando:
 
@@ -59,6 +80,7 @@ Ao executar o comando acima será criado um link simbólico com o nome `docker-c
 - Port:  `1433`
 - User: `sa`
 - Password: `%SuperEZL%1`
+
 
 
 ## Deploy

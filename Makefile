@@ -2,6 +2,9 @@ build:
 	docker-compose build web
 	docker-compose build certbot || true
 
+check_compose_override:
+	@test -s docker-compose.override.yml || { echo "docker-compose.override.yml não foi encontrado. Você precisa rodar o comando 'make set_env_development' para começar."; exit 1;}
+
 collectstatic:
 	docker-compose run web python manage.py collectstatic --noinput
 
@@ -11,7 +14,7 @@ create_certificate:
 create_certificate_teste:
 	docker-compose run certbot certbot certonly --webroot -w /tmp/www -d teste.ezlawyer.com.br -m contato@ezlawyer.com.br --agree-tos
 
-deploy: build stop remove run migrate collectstatic
+deploy: check_compose_override build stop remove run migrate collectstatic
 
 local_sqlserver:
 	ln -s docker-compose.sqlserver.yml docker-compose.override.yml
@@ -25,33 +28,32 @@ migrate:
 ps:
 	docker-compose ps
 
+psql:
+	docker-compose run web bash -c "PGPASSWORD=ezl psql -h db -U ezl"
+
 remove:
 	docker-compose rm -f web
-	docker-compose rm -f certbot web || true
+	docker-compose rm -f certbot || true
 
-run:
+run: check_compose_override
 	docker-compose up -d
 
 restart:
 	docker-compose restart web nginx
 
 set_env_development:
-	rm docker-compose.override.yml || true
-	ln -s docker-compose.development.yml docker-compose.override.yml
+	@rm docker-compose.override.yml || true
+	@ln -s docker-compose.development.yml docker-compose.override.yml
 
 set_env_production:
 	rm docker-compose.override.yml || true
 	ln -s docker-compose.production.yml docker-compose.override.yml
 
-set_env_teste:
-	rm docker-compose.override.yml || true
-	ln -s docker-compose.teste.yml docker-compose.override.yml
-
 shell:
 	docker-compose run web bash
 
 stop:
-	docker-compose stop
+	docker-compose stop web nginx
 
 test:
 	docker-compose run web python manage.py test
