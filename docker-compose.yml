@@ -46,11 +46,26 @@ services:
       options:
         max-size: "100m"
 
-  rabbit:
+  queues:
     restart: unless-stopped
     image: rabbitmq:latest
-    ports:
-      - 5672:5672
+
+  tasks:
+    image: ezl:dev
+    command: celery -A ezl worker -l debug --concurrency 10 -P eventlet
+
+    environment:
+      ENV: development
+      PYTHONPATH: /app
+
+    depends_on:
+      - db
+      - tunnel
+      - queues
+
+    volumes:
+      - .:/app
+
 
 #  db_advwin:
 #    image: microsoft/mssql-server-linux:2017-latest

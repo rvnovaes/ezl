@@ -1,5 +1,6 @@
 # Celery
 celery[redis]==4.1.0
+eventlet==0.21.0
 
 # Dependências do Projeto
 django==1.11.1
