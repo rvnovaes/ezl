@@ -39,6 +39,12 @@ def teste():
 
 
 @task
+def psql(revision=None, rsync=False):
+    with cd(get_repo_path()):
+        run("make psql")
+
+
+@task
 def deploy(revision=None, rsync=False):
     setup_ssh()
     if rsync:
