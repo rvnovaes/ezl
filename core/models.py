@@ -171,6 +171,19 @@ class Person(Audit, LegacyCode):
     def cnpj(self, value):
         self.cnpj = value
 
+    def contact_mechanism_by_type(self, type):
+        type = ContactMechanismType.objects.filter(name__iexact=type).first()
+        contacts = self.contactmechanism_set.filter(contact_mechanism_type=type)
+        return '|'.join([contact.description for contact in contacts]) if contacts else ''
+
+    @property
+    def emails(self):
+        return self.contact_mechanism_by_type('email').__add__('|').__add__(self.auth_user.email if self.auth_user.email else '')
+
+    @property
+    def phones(self):
+        return self.contact_mechanism_by_type('telefone')
+
     class Meta:
         db_table = 'person'
         ordering = ['legal_name', 'name']
@@ -210,7 +223,7 @@ class Address(Audit):
             number=self.number, street=self.street, city_region=self.city_region,
             city=self.city.name,
             state=self.state.name, zip_code=self.zip_code, complement='/' +
-            self.complement if self.complement else ''
+                                                                      self.complement if self.complement else ''
         )
 
 

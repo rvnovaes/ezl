@@ -6,38 +6,42 @@
     {% if task.task_status.name != 'OPEN' %}
         A providência {{ number }} {{ short_message }} no {{ project_name }}{{ custom_text }}.
     {% endif %}
-
+    Nº da OS
+    Tipo de serviço
+    Prazo
+    Descrição
     {% if task.task_status.name == 'OPEN' %}
         <div>
             <br> <span>Dados do serviço:</span>
             <br> ---------------------------------------------------------------
+            <br> Nº da OS: {{ task.task_number|default_if_none:'' }}
             <br><span>Tipo de serviço: {{ task.type_task|lower|title }}</span>
-            <br> Descrição:
-            <br>{{ task.description }}
-            <br> Nº da OS: {{ task.task_number }}
             <br> Prazo: {{ task.final_deadline_date|date:"d/m/Y" }}
+            <br> Descrição:
+            <br>{{ task.description|default_if_none:'' }}
+            <br>
             <br> Número do processo: {{ task.movement.law_suit.law_suit_number }}
             <br> Cliente: {{ task.movement.law_suit.folder.person_customer|lower|title }}
-            <br> UF: {{ task.movement.law_suit.court_district.state }}
-            <br> Comarca: {{ task.movement.law_suit.court_district }}
-            <br> Vara: {{ task.court_division }}
-            <br> Endereço do órgão: {{ task.address }}
+            <br> UF: {{ task.movement.law_suit.court_district.state|default_if_none:'' }}
+            <br> Comarca: {{ task.movement.law_suit.court_district|default_if_none:'' }}
+            <br> Vara: {{ task.court_division|default_if_none:'' }}
+            <br> Endereço do órgão: {{ task.address|default_if_none:'' }}
             <br> Data/hora da delegação: {{ task.delegation_date|date:"d/m/Y" }}
-            <br> Nº da pasta: {{ task.movement.law_suit.folder.folder_number }}
+            <br> Nº da pasta: {{ task.movement.law_suit.folder.folder_number|default_if_none:'' }}
             <br> Nº da OS no sistema de origem: {{ task.legacy_code|default_if_none:'' }}
             <br>
             <br> Dados do solicitante
             <br> ---------------------------------------------------------------
-            <br> Nome : {{ task.person_asked_by }}
-            <br> Telefone: {{ task.person_asked_by.phone_number }}
-            <br> E-mail: {{ task.person_asked_by.email }}
+            <br> Nome : {{ task.person_asked_by|default_if_none:'' }}
+            <br> Telefone: {{ task.person_asked_by.phones|default_if_none:'' }}
+            <br> E-mail: {{ task.person_asked_by.emails|default_if_none:'' }}
             <br> Endereço: {{ task.person_asked_by.address_set.first|default_if_none:'' }}
             <br>
             <br> Dados do correspondente
             <br> ---------------------------------------------------------------
-            <br>Nome: {{ task.person_executed_by }}
-            <br>Telefone: {{ task.person_executed_by.phone_number }}
-            <br>E-mail: {{ task.person_executed_by.email }}
+            <br>Nome: {{ task.person_executed_by|default_if_none:'' }}
+            <br>Telefone: {{ task.person_executed_by.phones|default_if_none:'' }}
+            <br>E-mail: {{ task.person_executed_by.emails|default_if_none:'' }}
             <br>Endereço: {{ task.person_executed_by.address_set.first|default_if_none:'' }}
         </div>
     {% endif %}
