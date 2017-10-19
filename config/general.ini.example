@@ -60,7 +60,7 @@ database = Advwin_ho
 # postgresql ou sql_server
 db_type = sql_server
 
-[advwin_tunel_ho_connection]
+[advwin_tunnel_ho_connection]
 server = 127.0.0.1:2000
 user = Rvnovaes
 password = libertas
