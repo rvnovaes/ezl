@@ -56,7 +56,7 @@ def update_repo(revision="default"):
 
     with cd(get_repo_path()):
         run("hg pull -u")
-        run("hg update {}".format(revision))
+        run("hg update {} -C".format(revision))
 
 
 def rsync_repo(revision=None):
