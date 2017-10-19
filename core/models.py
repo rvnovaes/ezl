@@ -178,7 +178,8 @@ class Person(Audit, LegacyCode):
 
     @property
     def emails(self):
-        return self.contact_mechanism_by_type('email').__add__(' | ').__add__(self.auth_user.email if self.auth_user.email else '')
+        return self.contact_mechanism_by_type('email').__add__(' | ').__add__(
+            self.auth_user.email if self.auth_user.email else '')
 
     @property
     def phones(self):
