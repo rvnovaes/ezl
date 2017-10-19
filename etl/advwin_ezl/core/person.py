@@ -1,5 +1,8 @@
+from django.contrib.auth.models import Group
+
 from core.models import Person
 from core.utils import LegacySystem
+
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 
 
@@ -53,6 +56,8 @@ class PersonETL(GenericETL):
         :param user: Usuario do django responsavel por persistir os dados
         :param rows_count: Quantidade de dados que foram lidos do advwin
         """
+        correspondent_group, nil = Group.objects.get_or_create(name=Person.CORRESPONDENT_GROUP)
+
         for row in rows:
             rows_count -= 1
             try:
@@ -121,6 +126,12 @@ class PersonETL(GenericETL):
                                        'is_active',
                                        'is_customer',
                                        'is_supplier'])
+
+                    if instance.auth_user and row['is_correspondent']:
+                        instance.auth_user.groups.add(correspondent_group)
+                    else:
+                        instance.auth_user.groups.remove(correspondent_group)
+
                 else:
                     obj = self.model(legal_name=legal_name,
                                      name=name,
@@ -136,18 +147,24 @@ class PersonETL(GenericETL):
                                      system_prefix=LegacySystem.ADVWIN.value)
 
                     obj.save()
+
+                    if obj.auth_user and row['is_correspondent']:
+                        obj.auth_user.groups.add(correspondent_group)
+                    else:
+                        obj.auth_user.groups.remove(correspondent_group)
+
                 self.debug_logger.debug(
-                    "Pessoa,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                    'Pessoa,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (
                         str(legal_name), str(name), str(is_lawyer), str(legal_type),
                         str(cpf_cnpj), str(user.id), str(user.id), str(is_customer),
                         str(is_supplier), str(is_active), str(legacy_code),
                         str(LegacySystem.ADVWIN.value), self.timestr))
             except Exception as e:
                 self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Pessoa: " + str(
-                        rows_count) + "," + str(
-                        e) + "," + self.timestr)
+                    'Ocorreu o seguinte erro na importacao de Pessoa: ' + str(
+                        rows_count) + ',' + str(
+                        e) + ',' + self.timestr)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     PersonETL().import_data()
