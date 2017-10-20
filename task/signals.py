@@ -151,9 +151,9 @@ def change_status(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Task)
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
-    export_task.delay(instance.pk)
+    export_task(instance.pk, instance)
 
 
 @receiver(post_save, sender=TaskHistory)
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
-    export_task_history.delay(instance.pk)
+    export_task_history(instance.pk, instance)
