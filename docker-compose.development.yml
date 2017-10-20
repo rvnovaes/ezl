@@ -4,13 +4,16 @@ services:
   web:
     build:
       context: .
-      dockerfile: containers/web/Dockerfile_dev
+      dockerfile: containers/web/Dockerfile
+      args:
+        requirements_file: development.txt
     image: ezl:dev
     command: python manage.py runserver 0.0.0.0:8000
     environment:
       ENV: development
     ports:
       - "8000:8000"
+
     depends_on:
       - db
       - tunnel
@@ -23,6 +26,18 @@ services:
       - "2000:2000"
     volumes:
       - .:/app
+
+  luigi:
+    image: ezl:dev
+    command: luigid
+    environment:
+      ENV: development
+    volumes:
+      - .:/app
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
 
   nginx:
     ports:
