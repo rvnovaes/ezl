@@ -4,6 +4,9 @@ from django.core.management.base import BaseCommand
 class Command(BaseCommand):
     help = 'Execute ETL suit'
 
+    def add_arguments(self, parser):
+        parser.add_argument('etls', choices=['user'])
+
     def run_user_etl(self):
         from etl.advwin_ezl.account.user import UserETL
         UserETL().import_data()
@@ -17,5 +20,5 @@ class Command(BaseCommand):
         main()
 
     def handle(self, *args, **options):
-        if 'user' in args:
+        if 'user' in options['etls']:
             self.run_user_etl()
