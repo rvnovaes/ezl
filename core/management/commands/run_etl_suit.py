@@ -17,6 +17,5 @@ class Command(BaseCommand):
         main()
 
     def handle(self, *args, **options):
-        self.run_etl()
-
-
+        if 'user' in args:
+            self.run_user_etl()
