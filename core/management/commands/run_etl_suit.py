@@ -5,7 +5,7 @@ class Command(BaseCommand):
     help = 'Execute ETL suit'
 
     def add_arguments(self, parser):
-        parser.add_argument('etls', choices=['user'])
+        parser.add_argument('etl', choices=['user', 'ecm', 'luigi'])
 
     def run_user_etl(self):
         from etl.advwin_ezl.account.user import UserETL
@@ -15,10 +15,17 @@ class Command(BaseCommand):
         from etl.advwin_ezl.task.ecm_task import EcmEtl
         EcmEtl().import_data()
 
-    def run_etl(self):
+    def run_luigi(self):
         from etl.advwin_ezl.luigi_jobs import main
         main()
 
     def handle(self, *args, **options):
-        if 'user' in options['etls']:
+        etl = options['etl']
+        if etl == 'user':
             self.run_user_etl()
+
+        elif etl == 'ecm':
+            self.run_ecm_etl()
+
+        elif etl == 'luigi':
+            self.run_luigi()
