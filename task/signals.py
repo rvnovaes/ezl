@@ -4,14 +4,20 @@ from django.dispatch import receiver, Signal
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-from advwin_models.tasks import export_task, export_task_history
+from advwin_models.tasks import export_ecm, export_task, export_task_history
 from core.models import ContactMechanism, ContactMechanismType, Person
 from ezl import settings
 from task.mail import SendMail
-from task.models import Task, TaskStatus, TaskHistory
+from task.models import Task, TaskStatus, TaskHistory, Ecm
 
 
 send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'execution_date'])
+
+
+@receiver(post_save, sender=Ecm)
+def export_ecm_path(sender, instance, created, raw, using, update_fields, **kwargs):
+    if 'path' in update_fields:
+        export_ecm(instance.id, instance)
 
 
 @receiver(post_init, sender=Task)

@@ -217,11 +217,9 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
         for file in files:
 
             ecm = Ecm(path=file,
-
                       task=Task.objects.get(id=task),
                       create_user_id=str(request.user.id),
-                      create_date=timezone.now()
-                      )
+                      create_date=timezone.now())
 
             try:
                 ecm.save()
@@ -238,19 +236,16 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
 
             except OperationalError:
                 data = {'success': False,
-                        'message': operational_error_create()
-                        }
+                        'message': operational_error_create()}
 
             except IOError:
 
                 data = {'is_deleted': False,
-                        'message': ioerror_create()
-                        }
+                        'message': ioerror_create()}
 
             except Exception:
                 data = {'success': False,
-                        'message': exception_create()
-                        }
+                        'message': exception_create()}
 
         return JsonResponse(data)
 

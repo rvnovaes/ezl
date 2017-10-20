@@ -3,14 +3,14 @@ from os import linesep
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
-# from raven.contrib.django.raven_compat.models import client
 from sqlalchemy import cast, String
 
 from advwin_models.advwin import JuridFMAudienciaCorrespondente, JuridFMAlvaraCorrespondente, \
     JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente, JuridAgendaTable, \
-    JuridCorrespondenteHist
+    JuridGedMain, JuridCorrespondenteHist
 from connections.db_connection import advwin_engine
-from task.models import Task, TaskStatus, TaskHistory
+from etl.utils import ecm_path_ezl2advwin
+from task.models import Task, TaskStatus, TaskHistory, Ecm
 
 
 LOGGER = get_task_logger(__name__)
@@ -25,6 +25,35 @@ SURVEY_TABLES_MAPPING = {
     'Protocol': JuridFMProtocoloCorrespondente,
     'Operationlicense': JuridFMAlvaraCorrespondente,
 }
+
+
+def export_ecm(ecm_id, ecm=None, execute=True):
+    if ecm is None:
+        ecm = Ecm.objects.get(pk=ecm_id)
+
+    new_path = ecm_path_ezl2advwin(ecm.path.name)
+
+    stmt = JuridGedMain.__table__.update()\
+        .where(JuridGedMain.__table__.c.ID_doc == ecm.legacy_code)\
+        .values(Link=new_path)
+
+    if execute:
+        LOGGER.debug('Exportando ECM %d-%s ', ecm.id, ecm)
+        try:
+            result = advwin_engine.execute(stmt)
+        except Exception as exc:
+            result = None
+            LOGGER.warning('Não foi possíve exportar ECM: %d-%s\n%s',
+                           ecm.id,
+                           ecm,
+                           exc,
+                           exc_info=(type(exc), exc, exc.__traceback__))
+        else:
+            LOGGER.info('ECM %s: exportado', ecm)
+        finally:
+            return result
+    else:
+        return stmt
 
 
 def get_task_survey_values(task):
@@ -217,10 +246,3 @@ def export_task(task_id, task=None, execute=True):
         }
 
         return update_advwin_task(task, values, execute)
-
-    # try:
-    #     print('something')
-    #     LOGGER.info(DO_SOMETHING_SUCCESS_MESSAGE)
-    # except Exception as exc:
-    #     LOGGER.error(DO_SOMETHING_ERROR_MESSAGE, exc)
-    #     client.captureException()
