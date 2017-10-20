@@ -1,7 +1,4 @@
-import subprocess
-import os
-from time import sleep
-
+import sys
 from etl.advwin_ezl import signals
 from etl.advwin_ezl.account.user import UserETL
 from etl.advwin_ezl.core.person import PersonETL
@@ -287,6 +284,7 @@ class EcmTask(luigi.Task):
 def main():
     try:
         # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
+        sys.argv.remove('run_etl_suit')
         luigi.run(main_task_cls=EcmTask())
     except ParamsException as e:
         print(e)
