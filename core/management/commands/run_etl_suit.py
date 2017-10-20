@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand
 
+import luigi
+
 
 class Command(BaseCommand):
     help = 'Execute ETL suit'
@@ -16,8 +18,8 @@ class Command(BaseCommand):
         EcmEtl().import_data()
 
     def run_luigi(self):
-        from etl.advwin_ezl.luigi_jobs import main
-        main()
+        from etl.advwin_ezl.luigi_jobs import EcmTask
+        luigi.build([EcmTask()])
 
     def handle(self, *args, **options):
         etl = options['etl']

@@ -283,9 +283,6 @@ class EcmTask(luigi.Task):
 
 def main():
     try:
-        # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
-        if 'run_etl_suit' in sys.argv:
-            sys.argv.remove('run_etl_suit')
         luigi.run(main_task_cls=EcmTask())
     except ParamsException as e:
         print(e)
