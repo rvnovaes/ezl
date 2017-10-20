@@ -1,6 +1,12 @@
 # EasyLawyer
 
-O projeto está configurado para dodar com Docker e Docker composer.
+O projeto está configurado para rodar com Docker e Docker compose. Ambos devem estar instalados:
+
+Link para instalação do Docker compose:
+https://docs.docker.com/compose/install/#install-compose
+
+Link para instalação do Docker no Ubuntu:
+https://docs.docker.com/engine/installation/linux/ubuntu/
 
 ## Rodando o projeto em ambiente de desenvolvimento
 
