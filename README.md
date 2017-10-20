@@ -15,19 +15,19 @@ https://docs.docker.com/engine/installation/linux/ubuntu/
 Para executar o projeto em ambiente de desenvolvimento você precisa executar o comando abaixo para definir o ambiente:
 
 ```bash
-make set_env_development
+sudo make set_env_development
 ```
 
 Em seguida você deverá rodar o comando `make deploy` para que todos os containers sejam criados juntamente com o banco de dados e os arquivos estáticos:
 
 ```
-make deploy
+sudo make deploy
 ```
 
 Após a primeira execução do projeto você pode roda-lo com o comando abaixo:
 
 ```
-make run
+sudo make run
 ```
 
 #### Atualizando imagem docker
@@ -35,7 +35,7 @@ make run
 Sempre que uma nova dependência for adicionada no requirements.txt o comando abaixo deve ser executado para gerar novamente a imagem docker.
 
 ```bash
-make build
+sudo make build
 ```
 
 ### Comandos disponíveis
@@ -77,7 +77,7 @@ A aplicação está distribuida nos seguintes serviços Docker:
 Para rodar o SQLServer em ambiente de desenvolvimento você deve rodar o seguinte comando:
 
 ```
-make local_sqlserver
+sudo make local_sqlserver
 ```
 
 Ao executar o comando acima será criado um link simbólico com o nome `docker-compose.override.yml` apontando para `docker-compose.sqlserver.yml` e na próxima vez que você rodar a aplicação você poderá acessar o SQLServer da seguinte maneira:
