@@ -1,6 +1,7 @@
 import datetime
 import os
 import sys
+import tempfile
 
 from django.urls import reverse_lazy
 
@@ -148,6 +149,13 @@ DATABASES = {
         'PASSWORD': password,
         'HOST': host,
         'PORT': port
+    }
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(tempfile.gettempdir(), 'django_cache'),
     }
 }
 

@@ -401,6 +401,7 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
 
     def get_context_data(self, **kwargs):
         context = super(LawsuitMovementUpdateView, self).get_context_data(**kwargs)
+        cache.set('lawsuit_movement_page', self.request.META.get('HTTP_REFERER'))
         return context
 
     def post(self, request, *args, **kwargs):
@@ -413,13 +414,9 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
         :param kwargs:
         :return: super
         """
+        if cache.get('lawsuit_movement_page'):
+            self.success_url = cache.get('lawsuit_movement_page')
         return super(LawsuitMovementUpdateView, self).post(request, *args, **kwargs)
-
-    def get_success_url(self):
-        instance = self.get_object()
-        self.success_url = reverse('lawsuit_update',
-                                   kwargs={'folder': instance.folder_id,
-                                           'pk': instance.id})
 
 
 class MovementListView(LoginRequiredMixin, SingleTableViewMixin):
