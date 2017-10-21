@@ -28,7 +28,7 @@ migrate:
 load_fixtures:
 	docker-compose run web python manage.py loaddata permission
 	docker-compose run web python manage.py loaddata group
-	docker-compose run web python manage.py loaddata group_permissions
+	#docker-compose run web python manage.py loaddata group_permissions
 	docker-compose run web python manage.py loaddata auth_user
 	docker-compose run web python manage.py loaddata country
 	docker-compose run web python manage.py loaddata state
