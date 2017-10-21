@@ -1,6 +1,6 @@
 build:
 	docker-compose build web
-	docker-compose build certbot || true
+	@docker-compose build certbot || true
 
 check_compose_override:
 	@test -s docker-compose.override.yml || { echo "docker-compose.override.yml não foi encontrado. Você precisa rodar o comando 'make set_env_development' para começar."; exit 1;}
@@ -26,17 +26,8 @@ migrate:
 	docker-compose run web python manage.py migrate --noinput
 
 load_fixtures:
-	docker-compose run web python manage.py loaddata permission
-	docker-compose run web python manage.py loaddata group
+	docker-compose run web python manage.py loaddata permission group auth_user country state court_district court_division city type_movement type_task
 	#docker-compose run web python manage.py loaddata group_permissions
-	docker-compose run web python manage.py loaddata auth_user
-	docker-compose run web python manage.py loaddata country
-	docker-compose run web python manage.py loaddata state
-	docker-compose run web python manage.py loaddata court_district
-	docker-compose run web python manage.py loaddata court_division
-	docker-compose run web python manage.py loaddata city
-	docker-compose run web python manage.py loaddata type_movement
-	docker-compose run web python manage.py loaddata type_task
 
 ps:
 	docker-compose ps
