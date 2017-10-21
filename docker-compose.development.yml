@@ -14,18 +14,6 @@ services:
     ports:
       - "8000:8000"
 
-  luigi:
-    image: ezl:dev
-    command: luigid
-    environment:
-      ENV: development
-    volumes:
-      - .:/app
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-
   nginx:
     ports:
       - "8080:80"

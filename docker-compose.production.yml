@@ -7,6 +7,7 @@ services:
     depends_on:
       - web
       - certbot
+
   web:
     build:
       context: .
@@ -17,6 +18,7 @@ services:
     command: uwsgi --ini /app/config/uwsgi/uwsgi.ini
     environment:
       ENV: production
+
   certbot:
     build:
       context: .
@@ -25,3 +27,6 @@ services:
     volumes:
       - letsencrypt-www:/tmp/www
       - letsencrypt-etc:/etc/letsencrypt
+
+  luigi:
+    image: ezl:latest

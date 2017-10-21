@@ -13,6 +13,23 @@ services:
     depends_on:
       - db
 
+  luigi:
+    image: ezl:dev
+    command: luigid
+    environment:
+      ENV: development
+    volumes:
+      - .:/app
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+    ports:
+      - "8082:8082"
+    depends_on:
+      - db
+      - web
+
   nginx:
     image: nginx:1.13
     volumes:
