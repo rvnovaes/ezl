@@ -32,7 +32,7 @@ services:
       - queues
 
   tunnel:
-    image: ezl:dev
+    image: ezl:latest
     command: python -m sshtunnel -U dev -P dev@2016 -L 0.0.0.0:2000 -R 172.27.155.9:1433 -p 22 201.86.113.86
     ports:
       - "2000:2000"
