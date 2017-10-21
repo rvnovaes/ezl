@@ -30,12 +30,7 @@ $(document).ready(function () {
 
         $(this).find('td').each(function () {
 
-
-            $(this).wrapInner('<a href="' + url + '"></a>');
-
             $(this).each(function () {
-
-                // console.log('this', this);
 
                 if ($(this).attr('class') !== 'selection') {
                     if (url.length > 0) {
