@@ -8,7 +8,7 @@ from sqlalchemy import cast, String
 from advwin_models.advwin import JuridFMAudienciaCorrespondente, JuridFMAlvaraCorrespondente, \
     JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente, JuridAgendaTable, \
     JuridGedMain, JuridCorrespondenteHist
-from connections.db_connection import advwin_engine
+from connections.db_connection import get_advwin_engine
 from etl.utils import ecm_path_ezl2advwin
 from task.models import Task, TaskStatus, TaskHistory, Ecm
 
@@ -40,7 +40,7 @@ def export_ecm(ecm_id, ecm=None, execute=True):
     if execute:
         LOGGER.debug('Exportando ECM %d-%s ', ecm.id, ecm)
         try:
-            result = advwin_engine.execute(stmt)
+            result = get_advwin_engine().execute(stmt)
         except Exception as exc:
             result = None
             LOGGER.warning('Não foi possíve exportar ECM: %d-%s\n%s',
@@ -145,7 +145,7 @@ def update_advwin_task(task, values, execute=True):
     if execute:
         LOGGER.debug('Exportando OS %d-%s ', task.id, task)
         try:
-            result = advwin_engine.execute(stmt)
+            result = get_advwin_engine().execute(stmt)
         except Exception as exc:
             result = None
             LOGGER.warning('Não foi possíve exportar OS: %d-%s com status %s\n%s',
@@ -207,7 +207,7 @@ def export_task(task_id, task=None, execute=True):
             if execute:
                 LOGGER.debug('Exportando formulário da OS %d-%s', task.id, task)
                 try:
-                    result = advwin_engine.execute(stmt)
+                    result = get_advwin_engine().execute(stmt)
                 except Exception as exc:
                     result = None
                     LOGGER.warning(

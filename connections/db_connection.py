@@ -63,6 +63,7 @@ def connect_db(config_parser, config_session):
     return engine
 
 
-parser = get_parser()
-source = dict(parser.items('etl'))
-advwin_engine = connect_db(parser, source['connection_name'])
+def get_advwin_engine():
+    parser = get_parser()
+    source = dict(parser.items('etl'))
+    return connect_db(parser, source['connection_name'])
