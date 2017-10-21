@@ -1,6 +1,6 @@
 # esse import deve vir antes de todos porque ele executa o __init__.py
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.db import models
 from django.utils import timezone
 
@@ -46,6 +46,7 @@ class UserETL(GenericETL):
 
     @validate_import
     def config_import(self, rows, user, rows_count):
+        correspondent_group, nil = Group.objects.get_or_create(name=Person.CORRESPONDENT_GROUP)
 
         assert len(rows) == rows_count
 
@@ -99,7 +100,8 @@ class UserETL(GenericETL):
                                                system_prefix=LegacySystem.ADVWIN.value).first()
 
                 if instance:
-                    person = Person.objects.filter(legacy_code=legacy_code, auth_user=instance,
+                    person = Person.objects.filter(legacy_code=legacy_code,
+                                                   auth_user=instance,
                                                    system_prefix=LegacySystem.ADVWIN.value).first()
 
                 if instance and person:
@@ -132,6 +134,8 @@ class UserETL(GenericETL):
                                        'first_name',
                                        'last_name'])
 
+                    instance.groups.add(correspondent_group)
+
                 elif not person and not instance:
                     created = True
                     # deve ser usada a funcao create_user para gerar a senha criptografada
@@ -151,6 +155,8 @@ class UserETL(GenericETL):
                             is_staff=is_staff,
                             is_active=is_active,
                             date_joined=date_joined)
+
+                        instance.groups.add(correspondent_group)
 
                     new_person.send(sender=self,
                                     person=Person(

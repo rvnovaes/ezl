@@ -17,8 +17,8 @@ try:
     database = source['database']
     user = source['user']
     password = source['password']
-    host = source['host']
-    port = source['port']
+    host = os.environ.get('DB_HOST', source['host'])
+    port = os.environ.get('DB_PORT', source['port'])
     environment = source['environment']
     email_use_ssl = source['email_use_ssl']
     email_host = source['email_host']

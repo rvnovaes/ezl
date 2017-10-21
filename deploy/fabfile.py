@@ -39,6 +39,12 @@ def teste():
 
 
 @task
+def psql(revision=None, rsync=False):
+    with cd(get_repo_path()):
+        run("make psql")
+
+
+@task
 def deploy(revision=None, rsync=False):
     setup_ssh()
     if rsync:
@@ -47,22 +53,16 @@ def deploy(revision=None, rsync=False):
         update_repo(revision)
 
     with cd(get_repo_path()):
-        run("make set_env_{}".format(env["NAME"]))
         run("make deploy")
 
 
-def update_repo(revision):
+def update_repo(revision="default"):
     if not exists(get_repo_path()):
         run("hg clone {} {}".format(REPO_URL, get_repo_path()))
 
-    if revision:
-        revision_arg = "--rev {}".format(revision)
-    else:
-        revision_arg = "default"
-
     with cd(get_repo_path()):
         run("hg pull -u")
-        run("hg update {}".format(revision_arg))
+        run("hg update {} -C".format(revision))
 
 
 def rsync_repo(revision=None):
@@ -80,9 +80,13 @@ def install():
     sudo('echo "{} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/no-password'
          .format(USER))
     install_docker()
-    #deploy()
-    #with cd(get_repo_path()):
-    #    run("make create_certificate")
+    with cd(get_repo_path()):
+        run("make set_env_{}".format(env["NAME"]))
+        run("make deploy")
+
+    deploy()
+    with cd(get_repo_path()):
+        run("make create_certificate")
 
 
 @task
