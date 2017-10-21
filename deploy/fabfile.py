@@ -2,6 +2,7 @@
 from fabric.api import env, task, local, run, sudo, roles, put, cd
 from fabric.contrib.project import rsync_project
 from fabric.contrib.files import exists
+from fabric.operations import prompt
 import tempfile
 
 
@@ -54,6 +55,24 @@ def deploy(revision=None, rsync=False):
 
     with cd(get_repo_path()):
         run("make deploy")
+
+
+@task
+def etl_run():
+    confirm = prompt("Tem certeza que deseja executar o ETL no servidor '{}'? [s/n]".format(
+        env["NAME"]))
+    if confirm.lower() != "s":
+        return
+
+    with cd(get_repo_path()):
+        run("rm -f etl/advwin_ezl/tmp/*")
+        run("docker-compose run web python manage.py run_etl_suit luigi")
+
+
+@task
+def etl_logs():
+    with cd(get_repo_path()):
+        run("docker-compose ps | grep web_run_ | tail -1 | awk '{print $1}' | xargs docker logs --follow ")
 
 
 def update_repo(revision="default"):
