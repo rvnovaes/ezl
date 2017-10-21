@@ -79,7 +79,6 @@ services:
 
     depends_on:
       - db
-      - tunnel
       - queues
 
     volumes:
