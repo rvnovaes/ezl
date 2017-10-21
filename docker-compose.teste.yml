@@ -1,5 +1,16 @@
 version: "3"
 services:
+  builder:
+    build:
+      context: .
+      dockerfile: containers/web/Dockerfile
+      args:
+        requirements_file: production.txt
+    image: ezl:latest
+    command: date
+    environment:
+      ENV: development
+
   nginx:
     ports:
       - "801:80"
@@ -15,18 +26,13 @@ services:
       - certbot
 
   web:
-    build:
-      context: .
-      dockerfile: containers/web/Dockerfile
-      args:
-        requirements_file: production.txt
-    image: ezl:latest
     command: uwsgi --ini /app/config/uwsgi/uwsgi.ini
     environment:
       ENV: development
 
   tasks:
     depends_on:
+      - builder
       - db
       - tunnel
       - queues
