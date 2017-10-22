@@ -125,6 +125,16 @@ class Task(Audit, LegacyCode):
         verbose_name = 'Providência'
         verbose_name_plural = 'Providências'
 
+        permissions = (
+            ("view_delegated_tasks","Can view tasks delegated to the user"),
+            ("view_all_tasks","Can view all tasks"),
+            ("return_all_tasks","Can return tasks"),
+            ("validate_all_tasks","Can validade tasks"),
+            ("view_requested_tasks","Can view tasks requested by the user"),
+            ("block_payment_tasks","Can block tasks payment"),
+            ("can_access_general_data","Can access general data screens")
+        )
+
     @property
     def status(self):
         return TaskStatus(self.task_status)
