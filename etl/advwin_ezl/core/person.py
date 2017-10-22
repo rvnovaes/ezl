@@ -129,7 +129,7 @@ class PersonETL(GenericETL):
 
                     if instance.auth_user and row['is_correspondent']:
                         instance.auth_user.groups.add(correspondent_group)
-                    else:
+                    elif instance.auth_user:
                         instance.auth_user.groups.remove(correspondent_group)
 
                 else:
@@ -150,7 +150,7 @@ class PersonETL(GenericETL):
 
                     if obj.auth_user and row['is_correspondent']:
                         obj.auth_user.groups.add(correspondent_group)
-                    else:
+                    elif obj.auth_user:
                         obj.auth_user.groups.remove(correspondent_group)
 
                 self.debug_logger.debug(
