@@ -4,22 +4,31 @@ from django.dispatch import receiver, Signal
 from django.template.loader import render_to_string
 from django.utils import timezone
 
+from advwin_models.tasks import export_ecm, export_task, export_task_history
 from core.models import ContactMechanism, ContactMechanismType, Person
 from ezl import settings
 from task.mail import SendMail
-from task.models import Task, TaskStatus, TaskHistory
+from task.models import Task, TaskStatus, TaskHistory, Ecm
 
-send_notes_execution_date = Signal(providing_args=["notes", "instance", "execution_date"])
+
+send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'execution_date'])
+
+
+@receiver(post_save, sender=Ecm)
+def export_ecm_path(sender, instance, created, raw, using, update_fields, **kwargs):
+    if 'path' in update_fields:
+        export_ecm(instance.id, instance)
 
 
 @receiver(post_init, sender=Task)
 def load_previous_status(sender, instance, **kwargs):
-    instance.__previous_status = TaskStatus(instance.task_status) if instance.task_status else TaskStatus.INVALID
+    instance.__previous_status = \
+        TaskStatus(instance.task_status) if instance.task_status else TaskStatus.INVALID
 
 
 @receiver(send_notes_execution_date)
 def receive_notes_execution_date(notes, instance, execution_date, survey_result, **kwargs):
-    instance.__notes = notes if notes else ''
+    setattr(instance, '__notes', notes if notes else '')
     if execution_date and not instance.execution_date:
         instance.execution_date = execution_date
     instance.survey_result = survey_result if survey_result else None
@@ -28,8 +37,10 @@ def receive_notes_execution_date(notes, instance, execution_date, survey_result,
 @receiver(post_save, sender=Task)
 def new_task(sender, instance, created, **kwargs):
     if created:
-        TaskHistory.objects.create(task=instance, create_user=instance.create_user, status=instance.task_status,
-                                   create_date=instance.create_date, notes="Nova providência")
+        TaskHistory.objects.create(task=instance,
+                                   create_user=instance.create_user,
+                                   status=instance.task_status,
+                                   create_date=instance.create_date, notes='Nova providência')
 
     contact_mechanism_type = ContactMechanismType.objects.filter(name__iexact='email')
     if not contact_mechanism_type:
@@ -100,7 +111,8 @@ def new_task(sender, instance, created, **kwargs):
                                          })
         mail.to_mail = mail_list
 
-        # TODO tratar corretamente a excecao
+        # TODO: tratar corretamente a excecao
+
         try:
             mail.send()
         except Exception as e:
@@ -133,10 +145,22 @@ def change_status(sender, instance, **kwargs):
 
             instance.alter_date = now_date
 
-            TaskHistory.objects.create(task=instance, create_user=instance.alter_user, status=instance.task_status,
-                                       create_date=now_date, notes=instance.__notes)
+            TaskHistory.objects.create(task=instance, create_user=instance.alter_user,
+                                       status=instance.task_status,
+                                       create_date=now_date,
+                                       notes=getattr(instance, '__notes', ''))
             instance.__previous_status = instance.task_status
 
     except Exception as e:
         print(e)
         pass  # TODO melhorar este tratamento
+
+
+@receiver(post_save, sender=Task)
+def ezl_export_task_to_advwin(sender, instance, **kwargs):
+    export_task(instance.pk, instance)
+
+
+@receiver(post_save, sender=TaskHistory)
+def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
+    export_task_history(instance.pk, instance)

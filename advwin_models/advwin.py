@@ -351,10 +351,10 @@ class JuridAgendaTable(Base):
 
 class JuridCorrespondenteHist(Base):
     __tablename__ = 'Jurid_Correspondente_Hist'
-
-    codigo = Column(Integer)
+    __table_args__ = {'implicit_returning': False} # Não remover cancela o OUTPUT devido a trigger para envio de email do advwin
+    codigo = Column(Integer,primary_key=True,autoincrement=True)
     codigo_adv_correspondente = Column(String(70, 'Latin1_General_CI_AS'))
-    ident_agenda = Column(Integer, nullable=False, primary_key=True)
+    ident_agenda = Column(Integer)
     status = Column(Integer, nullable=False)
     data_operacao = Column(DateTime)
     justificativa = Column(String(1000, 'Latin1_General_CI_AS'))
@@ -364,3 +364,81 @@ class JuridCorrespondenteHist(Base):
     ident_agenda_anterior = Column(Integer)
     SubStatus = Column(Integer)
     descricao = Column(String(200, 'Latin1_General_CI_AS'))
+
+
+class JuridFMAlvaraCorrespondente(Base):
+    __tablename__ = 'Jurid_FM_alvaraCorrespondente'
+
+    id = Column(Integer, primary_key=True,autoincrement=True)
+    versao = Column(String(10, 'Latin1_General_CI_AS'), nullable=False)
+    agenda_id = Column(Integer, nullable=False)
+    alvaraRetiradoAutos = Column(String(255, 'Latin1_General_CI_AS'))
+    viaOriginalEnviada = Column(String(255, 'Latin1_General_CI_AS'))
+    dataRetiradoAutos = Column(DateTime)
+    justAlvaraNRetirado = Column(Text(2147483647, 'Latin1_General_CI_AS'))
+    alvaraLevadoBanco = Column(String(255, 'Latin1_General_CI_AS'))
+    vlrLevantadoBanco = Column(MONEY)
+    contaLevantamento = Column(String(255, 'Latin1_General_CI_AS'))
+    justAlvaraNLevantado = Column(Text(2147483647, 'Latin1_General_CI_AS'))
+    despReembolsaveis = Column(String(255, 'Latin1_General_CI_AS'))
+    obsRelevantes = Column(Text(2147483647, 'Latin1_General_CI_AS'))
+    status = Column(Integer)
+    paginas = Column(String(255, 'Latin1_General_CI_AS'))
+
+
+class JuridFMAudienciaCorrespondente(Base):
+    __tablename__ = 'Jurid_FM_audienciaCorrespondente'
+
+    id = Column(Integer, primary_key=True,autoincrement=True)
+    versao = Column(String(10, 'Latin1_General_CI_AS'), nullable=False)
+    agenda_id = Column(Integer, nullable=False)
+    comparecimentoAudiencia = Column(String(255, 'Latin1_General_CI_AS'))
+    audienciaRealizada = Column(String(255, 'Latin1_General_CI_AS'))
+    tipoComparecimento = Column(String(255, 'Latin1_General_CI_AS'))
+    orientacaoAcordo = Column(String(255, 'Latin1_General_CI_AS'))
+    acordoRealizado = Column(String(255, 'Latin1_General_CI_AS'))
+    valorDanoMoral = Column(MONEY)
+    valorDanoMaterial = Column(MONEY)
+    devolucaoProduto = Column(String(255, 'Latin1_General_CI_AS'))
+    reparo = Column(String(255, 'Latin1_General_CI_AS'))
+    trocaProduto = Column(String(255, 'Latin1_General_CI_AS'))
+    justificativaNAcordo = Column(Text(2147483647, 'Latin1_General_CI_AS'))
+    tipoProcesso = Column(String(255, 'Latin1_General_CI_AS'))
+    temAdvHabilitado = Column(String(255, 'Latin1_General_CI_AS'))
+    advHabilitado = Column(String(255, 'Latin1_General_CI_AS'))
+    obsRelevantes = Column(Text(2147483647, 'Latin1_General_CI_AS'))
+    despReembolsaveis = Column(String(255, 'Latin1_General_CI_AS'))
+    justNCompAudiencia = Column(Text(2147483647, 'Latin1_General_CI_AS'))
+    status = Column(Integer)
+    paginas = Column(String(255, 'Latin1_General_CI_AS'))
+
+
+class JuridFMDiligenciaCorrespondente(Base):
+    __tablename__ = 'Jurid_FM_diligenciaCorrespondente'
+
+    id = Column(Integer, primary_key=True,autoincrement=True)
+    versao = Column(String(10, 'Latin1_General_CI_AS'))
+    agenda_id = Column(Integer, nullable=False)
+    cumprimento = Column(String(255, 'Latin1_General_CI_AS'))
+    docLegivel = Column(String(255, 'Latin1_General_CI_AS'))
+    despReembolsaveis = Column(String(255, 'Latin1_General_CI_AS'))
+    obsRelevantes = Column(Text(2147483647, 'Latin1_General_CI_AS'))
+    motivoCumprimentoParcial = Column(String(255, 'Latin1_General_CI_AS'))
+    justificativaNCumprimento = Column(Text(2147483647, 'Latin1_General_CI_AS'))
+    status = Column(Integer)
+    paginas = Column(String(255, 'Latin1_General_CI_AS'))
+
+
+class JuridFMProtocoloCorrespondente(Base):
+    __tablename__ = 'Jurid_FM_protocoloCorrespondente'
+
+    id = Column(Integer, primary_key=True,autoincrement=True)
+    versao = Column(String(10, 'Latin1_General_CI_AS'))
+    agenda_id = Column(Integer, nullable=False)
+    protocoloRealizado = Column(String(255, 'Latin1_General_CI_AS'))
+    dataProtocolo = Column(DateTime)
+    despReembolsaveis = Column(String(255, 'Latin1_General_CI_AS'))
+    obsRelevantes = Column(Text(2147483647, 'Latin1_General_CI_AS'))
+    justificativaNProtocolo = Column(Text(2147483647, 'Latin1_General_CI_AS'))
+    status = Column(Integer)
+    paginas = Column(String(255, 'Latin1_General_CI_AS'))

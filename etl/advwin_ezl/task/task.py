@@ -1,19 +1,46 @@
-from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
+from itertools import chain
+from json import loads
 
 import pytz
-from itertools import chain
+from django.db.models import Q
 from django.utils import timezone
-from sqlalchemy import update
+
+from advwin_models.advwin import JuridAgendaTable, JuridFMAudienciaCorrespondente, \
+    JuridFMAlvaraCorrespondente, JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente
+from advwin_models.tasks import export_task, export_task_history
 from core.utils import LegacySystem
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
-from advwin_models.advwin import JuridAgendaTable
 from ezl import settings
 from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
-from django.db.models import Q
 
 
-default_justify = 'Aceita por Correspondente: %s'
+def to_dict(model_instance, query_instance=None):
+    """Função para converter uma instância de um objeto sqlachemy para dicionário, utilizada na
+    inserção do survey result"""
+    if hasattr(model_instance, '__table__'):
+        return {c.name: str(getattr(model_instance, c.name)
+                            if getattr(model_instance, c.name) else '') for c in
+                model_instance.__table__.columns if c.name is not 'id'}
+    else:
+        cols = query_instance.column_descriptions
+        return {cols[i]['name']: model_instance[i] for i in range(len(cols))}
+
+
+def parse_survey_result(survey, agenda_id):
+    json = loads(survey)
+    json['agenda_id'] = agenda_id
+    json['versao'] = 1
+    return json
+
+
+survey_tables = {
+    'Courthearing': JuridFMAudienciaCorrespondente,
+    'Diligence': JuridFMDiligenciaCorrespondente,
+    'Protocol': JuridFMProtocoloCorrespondente,
+    'Operationlicense': JuridFMAlvaraCorrespondente,
+}
 
 
 def get_status_by_substatus(substatus):
@@ -52,7 +79,7 @@ class TaskETL(GenericETL):
                 INNER JOIN Jurid_Pastas AS p ON
                     a.Pasta = p.Codigo_Comp
 
-                INNER JOIN Jurid_CodMov as cm ON
+                INNER JOIN Jurid_CodMov AS cm ON
                      a.CodMov = cm.Codigo
 
                 WHERE
@@ -99,9 +126,9 @@ class TaskETL(GenericETL):
                 task = Task.objects.filter(legacy_code=legacy_code,
                                            system_prefix=LegacySystem.ADVWIN.value).first()
 
-                movement = Movement.objects.filter(
-                    legacy_code=movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
-                    Movement)
+                movement = Movement.objects.filter(legacy_code=movement_legacy_code).first() or \
+                    InvalidObjectFactory.get_invalid_model(Movement)
+
                 person_asked_by = Person.objects.filter(Q(
                     legacy_code=person_asked_by_legacy_code), ~Q(legacy_code=None),
                     ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
@@ -111,9 +138,8 @@ class TaskETL(GenericETL):
                 person_distributed_by = Person.objects.filter(Q(
                     legacy_code=person_distributed_by_legacy_code), ~Q(legacy_code=None),
                     ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
-                type_task = TypeTask.objects.filter(
-                    legacy_code=type_task_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
-                    TypeTask)
+                type_task = TypeTask.objects.filter(legacy_code=type_task_legacy_code).first() or \
+                    InvalidObjectFactory.get_invalid_model(TypeTask)
 
                 # 30   Open
                 # 80   Refused
@@ -167,7 +193,7 @@ class TaskETL(GenericETL):
                                               finished_date=finished_date,
                                               task_status=status_code_advwin)
                 self.debug_logger.debug(
-                    "Task,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                    'Task,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (
                         str(movement.id), str(legacy_code), str(LegacySystem.ADVWIN.value),
                         str(user.id), str(user.id), str(person_asked_by.id),
                         str(person_executed_by.id), str(person_distributed_by.id),
@@ -178,57 +204,28 @@ class TaskETL(GenericETL):
 
             except Exception as e:
                 self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Task: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
-
+                    'Ocorreu o seguinte erro na importacao de Task: ' + str(rows_count) + ',' +
+                    str(e) + ',' + self.timestr)
 
     def config_export(self):
-        accepted_tasks = self.model.objects.filter(legacy_code__isnull=False,
-                                                   task_status=TaskStatus.ACCEPTED)
+        valid_task_status = [TaskStatus.ACCEPTED, TaskStatus.DONE,  TaskStatus.REFUSED]
+        legacy_tasks = Task.objects\
+            .filter(legacy_code__isnull=False, task_status__in=valid_task_status)\
+            .select_related('type_task')
 
-        done_tasks = self.model.objects.filter(legacy_code__isnull=False,
-                                               task_status=TaskStatus.DONE)
+        stmts = []
+        for task in legacy_tasks:
+            stmts.append(export_task(task.id, task, execute=False))
 
-        refused_tasks = self.model.objects.filter(legacy_code__isnull=False,
-                                                  task_status=TaskStatus.REFUSED)
+        legacy_tasks_history = TaskHistory.objects\
+            .filter(task__legacy_code__isnull=False,
+                    task__task_status__in=valid_task_status)\
+            .select_related('task', 'task__person_executed_by__auth_user')
 
-        accepted_tasks = map(
-            lambda x: (
-                update(JuridAgendaTable.__table__).values(
-                    {JuridAgendaTable.SubStatus: 50, JuridAgendaTable.status_correspondente: 0,
-                     JuridAgendaTable.prazo_lido: 0, JuridAgendaTable.envio_alerta: 0,
-                     JuridAgendaTable.Ag_StatusExecucao: 'Em execucao',
-                     JuridAgendaTable.Data_correspondente: x.acceptance_date}).where(
-                    JuridAgendaTable.Ident == x.legacy_code)),
-            accepted_tasks)
+        for task_history in legacy_tasks_history:
+            stmts.append(export_task_history(task_history.id, task_history, execute=False))
 
-        task_history = TaskHistory.objects.filter()
-
-        done_tasks = map(
-            lambda x: (
-                update(JuridAgendaTable.__table__).values(
-                    {JuridAgendaTable.SubStatus: 70, JuridAgendaTable.Status: 2,
-                     JuridAgendaTable.Data_Fech: x.execution_date,
-                     JuridAgendaTable.prazo_lido: 1, JuridAgendaTable.Prazo_Interm: 1,
-                     JuridAgendaTable.Ag_StatusExecucao: '',
-                     JuridAgendaTable.Data_cumprimento: x.execution_date}).where(
-                    JuridAgendaTable.Ident == x.legacy_code)),
-            done_tasks)
-
-        refused_tasks = map(
-            lambda x: (
-                update(JuridAgendaTable.__table__).values(
-                    {JuridAgendaTable.SubStatus: 20, JuridAgendaTable.Status: 1,
-                     JuridAgendaTable.prazo_lido: 1, JuridAgendaTable.Prazo_Interm: 1,
-                     JuridAgendaTable.Data_cumprimento: x.execution_date}).where(
-                    JuridAgendaTable.Ident == x.legacy_code)),
-            refused_tasks)
-
-        tasks = chain(done_tasks, accepted_tasks, refused_tasks)
-        for task in tasks:
-            print(task)
-
-        self.export_query_set = tasks
+        self.export_statements = chain(*stmts)
 
 
 if __name__ == '__main__':

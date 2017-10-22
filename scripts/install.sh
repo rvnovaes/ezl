@@ -29,7 +29,7 @@
 #
 # Observações:
 #    - Este script funciona na rede interna da empresa
-#    - Para rodar em redes externas, é necessário configurar o tunelamento
+#    - Para rodar em redes externas, é necessário configurar o tunnelamento
 #      da conexao com o servidor do advwin e alterar neste script
 #   -  na sessão 'Configurando ETL' o valor server = 172.27.155.9 para server = 127.0.0.1:2000
 
@@ -61,7 +61,7 @@ sudo apt-get install python3-pip -y
 # Criando diretorio de logs
 cd /var/log
 logs_dir='etl/ezl'
-sudo mkdir -p ${logs_dir}	
+sudo mkdir -p ${logs_dir}
 sudo chmod 755 ${logs_dir}
 sudo chown `whoami` ${logs_dir}
 # Criando diretorio padrao do projeto
@@ -133,7 +133,7 @@ pip3.5 install -r requirements.txt
 # Criando usuario postgres
 echo "criando usuario postgres..."
 sudo -H -u postgres bash -c 'psql --command="CREATE USER ezl SUPERUSER INHERIT CREATEDB CREATEROLE;"' >> /dev/null 2>&1
-sudo -H -u postgres psql --command="ALTER USER ezl PASSWORD 'ezl';" 
+sudo -H -u postgres psql --command="ALTER USER ezl PASSWORD 'ezl';"
 
 # Criando banco de dados
 read -p "Nome do DB que sera criado: " db
@@ -176,7 +176,7 @@ host = 127.0.0.1
 port = 5432
 
 ; used in password_validator and debug mode
-; password_validator: development (validates only min lenght = 1) or production (full validation)
+; password_validator: development (validates only min length = 1) or production (full validation)
 ; debug mode = True if development, else False
 environment = development
 
@@ -228,7 +228,7 @@ database = Advwin_ho
 # postgresql ou sql_server
 db_type = sql_server
 
-[advwin_tunel_ho_connection]
+[advwin_tunnel_ho_connection]
 server = 127.0.0.1:2000
 user = Rvnovaes
 password = libertas
@@ -254,6 +254,7 @@ do
         echo "Rodando fixtures..."
         python3.5 manage.py loaddata permission
         python3.5 manage.py loaddata group
+        python3.5 manage.py loaddata group_permissions
         python3.5 manage.py loaddata auth_user
         python3.5 manage.py loaddata country
         python3.5 manage.py loaddata state

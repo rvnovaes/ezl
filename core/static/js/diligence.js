@@ -96,7 +96,7 @@ window.survey = new Survey.Model(
                     {
                         isRequired: true,
                         type: "text",
-                        name: "justificativaNCumprir",
+                        name: "justificativaNCumprimento",
                         visible: false,
                         visibleIf: "{cumprimento} ='item3'",
                         title: "Justificativa de não Cumprimento"
