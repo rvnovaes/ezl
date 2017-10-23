@@ -482,37 +482,35 @@ class GenericFormOneToMany(FormView, SingleTableView):
     @set_search_model_attrs
     def get_context_data(self, **kwargs):
         context = super(GenericFormOneToMany, self).get_context_data(**kwargs)
-        try:
-            related_model_id = self.kwargs.get('pk')
-            context['module'] = self.related_model.__module__
-            context['model'] = self.related_model.__name__
-            context['nav_' + self.related_model._meta.verbose_name] = True
-            context['form_name'] = self.related_model._meta.verbose_name
-            context['form_name_plural'] = self.related_model._meta.verbose_name_plural
-            fields_related = list(
-                filter(lambda i: i.get_internal_type() == 'ForeignKey',
-                       self.related_model._meta.fields))
-            field_related = list(filter(lambda i: i.related_model == self.model,
-                                        fields_related))[0]
-            generic_search = GenericSearchFormat(self.request, self.related_model,
-                                                 self.related_model._meta.fields,
-                                                 related_id=related_model_id,
-                                                 field_name_related=field_related.name)
-            args = generic_search.despatch()
-            if args:
-                table = eval(args.replace('.model.', '.related_model.'))
-            else:
-                table = self.table_class(self.related_model.objects.none())
-                if related_model_id:
-                    src = ('self.table_class(self.related_model.objects.filter('
-                           '{0}__id=related_model_id).order_by("-pk"))')
-                    table_class = src.format(field_related.name)
-                    table = eval(table_class)
-            RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-            context['table'] = table
-        except:
+        related_model_id = self.kwargs.get('pk')
+        context['module'] = self.related_model.__module__
+        context['model'] = self.related_model.__name__
+        context['nav_' + self.related_model._meta.verbose_name] = True
+        context['form_name'] = self.related_model._meta.verbose_name
+        context['form_name_plural'] = self.related_model._meta.verbose_name_plural
+        fields_related = list(
+            filter(lambda i: i.get_internal_type() == 'ForeignKey',
+                   self.related_model._meta.fields))
+        field_related = list(filter(lambda i: i.related_model == self.model,
+                                    fields_related))[0]
+        generic_search = GenericSearchFormat(self.request, self.related_model,
+                                             self.related_model._meta.fields,
+                                             related_id=related_model_id,
+                                             field_name_related=field_related.name)
+        args = generic_search.despatch()
+        if args:
+            table = eval(args.replace('.model.', '.related_model.'))
+        else:
             table = self.table_class(self.related_model.objects.none())
+            if related_model_id:
+                src = ('self.table_class(self.related_model.objects.filter('
+                       '{0}__id=related_model_id).order_by("-pk"))')
+                table_class = src.format(field_related.name)
+                table = eval(table_class)
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
+        # table = self.table_class(self.related_model.objects.none())
+        # context['table'] = table
         return context
 
     success_message = None

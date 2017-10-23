@@ -40,7 +40,8 @@ def set_search_model_attrs(f):
             map(lambda i: {'name': i.name, 'verbose_name': i.verbose_name,
                            'type': field_to_html_input(i.get_internal_type()),
                            'choices': i.choices,
-                           'default': i._get_default() if i.get_internal_type() == 'BooleanField' else False},
+                           'default': i._get_default() if i.get_internal_type() == 'BooleanField'
+                           else False},
                 res.get('table')._meta.model._meta.fields))
         res['search_model_fields'] = group_by(res['search_model_fields'])
         return res
@@ -74,26 +75,34 @@ class GenericSearchFormat(object):
 
     def despatch(self):
         params = []
-        if self.related_id:
-            params.append('{0}__id={1}'.format(self.field_name_related, self.related_id))
+
         if not any([self.params, params]):
             return False
+
         if self.params.get('is_active') == 'T':
             self.params.pop('is_active')
             self.model_type_fields.remove({'type': 'BooleanField', 'name': 'is_active'})
+
         search = "self.table_class(self.model.objects.filter({params}))"
         for field in self.model_type_fields:
             if field.get('type') in ['DateField', 'DateTimeField']:
                 value = self.params.get(field.get('name') + '_ini'), self.params.get(field.get('name') + '_fim')
                 params.append(
-                    self.search.get(field.get('type'), GenericSearch()).dict_to_filter(field.get('name'), value))
+                    self.search.get(field.get('type'),
+                                    GenericSearch()).dict_to_filter(field.get('name'), value))
             else:
                 params.append(
-                    self.search.get(field.get('type'), GenericSearch()).dict_to_filter(field.get('name'),
-                                                                                       self.params.get(
-                                                                                           field.get('name'))))
+                    self.search.get(
+                        field.get('type'),
+                        GenericSearch()).dict_to_filter(field.get('name'),
+                                                        self.params.get(field.get('name'))))
+
+        if self.related_id:
+            params.append('{0}__id={1}'.format(self.field_name_related, self.related_id))
+
         if not params:
             return False
+
         return search.format(params=','.join(list(set(params))))
 
     def format_params(self):
@@ -138,10 +147,12 @@ class GenericSearchDate(GenericSearch):
     def dict_to_filter(self, param, value):
         filter_date = []
         if value[0]:
-            data = datetime.strptime(value[0] + ' 00:00:00', "%d/%m/%Y %H:%M:%S").strftime('%Y-%m-%d %H:%M:%S')
+            data = datetime.strptime(value[0] + ' 00:00:00',
+                                     "%d/%m/%Y %H:%M:%S").strftime('%Y-%m-%d %H:%M:%S')
             filter_date.append("{0}__gte='{1}'".format(param, data))
         if value[1]:
-            data = datetime.strptime(value[1] + ' 23:59:59', "%d/%m/%Y %H:%M:%S").strftime('%Y-%m-%d %H:%M:%S')
+            data = datetime.strptime(value[1] + ' 23:59:59',
+                                     "%d/%m/%Y %H:%M:%S").strftime('%Y-%m-%d %H:%M:%S')
             filter_date.append("{0}__lte='{1}'".format(param, data))
         return ",".join(filter_date)
 
@@ -159,5 +170,6 @@ class GenericSearchForeignKey(GenericSearch):
         if value:
             model_query_set = 'self.model.{0}.get_queryset()'.format(param)
             return list(map(lambda x: x.id,
-                            list(filter(lambda i: value.lower() in i.__str__().lower(), eval(model_query_set)))))
+                            list(filter(lambda i: value.lower() in i.__str__().lower(),
+                                        eval(model_query_set)))))
         return []
