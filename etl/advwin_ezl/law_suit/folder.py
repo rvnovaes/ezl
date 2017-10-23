@@ -30,7 +30,6 @@ class FolderETL(GenericETL):
 
     @validate_import
     def config_import(self, rows, user, rows_count):
-        log_file = open('log_file.txt', 'w')
         for row in rows:
             rows_count -= 1
             try:
