@@ -11,7 +11,7 @@ from advwin_models.tasks import export_task, export_task_history
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
-from ezl import settings
+from django.conf import settings
 from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
 

@@ -50,7 +50,6 @@ def export_ecm(ecm_id, ecm=None, execute=True):
                            exc_info=(type(exc), exc, exc.__traceback__))
         else:
             LOGGER.info('ECM %s: exportado', ecm)
-        finally:
             return result
     else:
         return stmt

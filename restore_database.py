@@ -11,7 +11,7 @@ sys.path.append(os.getcwd())
 os.environ['DJANGO_SETTINGS_MODULE'] = 'ezl.settings'
 django.setup()
 
-from ezl import settings
+from django.conf import settings
 
 current_db_name = settings.DATABASES['default']['NAME']
 current_user_db = settings.DATABASES['default']['USER']

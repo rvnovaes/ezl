@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from advwin_models.tasks import export_ecm, export_task, export_task_history
 from core.models import ContactMechanism, ContactMechanismType, Person
-from ezl import settings
+from django.conf import settings
 from task.mail import SendMail
 from task.models import Task, TaskStatus, TaskHistory, Ecm
 

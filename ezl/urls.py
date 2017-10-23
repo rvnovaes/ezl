@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 
 from core.views import ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView
-from ezl import settings
+from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView
 
 urlpatterns = [

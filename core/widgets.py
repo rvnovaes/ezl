@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.utils.encoding import force_text
 from django_filters import RangeFilter
 
-from ezl import settings
+from django.conf import settings
 
 
 class MDDateTimepicker(DateTimeBaseInput):
