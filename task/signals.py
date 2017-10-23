@@ -16,7 +16,7 @@ send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'executi
 
 @receiver(post_save, sender=Ecm)
 def export_ecm_path(sender, instance, created, raw, using, update_fields, **kwargs):
-    if 'path' in update_fields:
+    if update_fields and 'path' in update_fields:
         export_ecm(instance.id, instance)
 
 
@@ -100,7 +100,8 @@ def new_task(sender, instance, created, **kwargs):
 
         mail = SendMail()
         mail.subject = 'Easy Lawyer - OS '+str(number) + ' - ' + str(
-            instance.type_task).title() + ' - Prazo: ' + instance.final_deadline_date.strftime('%d/%m/%Y')
+            instance.type_task).title() + ' - Prazo: ' + \
+            instance.final_deadline_date.strftime('%d/%m/%Y')
         mail.message = render_to_string('mail/base.html',
                                         {'server': 'http://' + project_link, 'pk': instance.pk,
                                          'project_name': settings.PROJECT_NAME,
