@@ -15,9 +15,9 @@ send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'executi
 
 
 @receiver(post_save, sender=Ecm)
-def export_ecm_path(sender, instance, created, raw, using, update_fields, **kwargs):
-    if created and not instance.legacy_code:
-        export_ecm(instance.id, instance)
+def export_ecm_path(sender, instance, created, **kwargs):
+    if created and instance.legacy_code is None:
+        export_ecm.delay(instance.id)
 
 
 @receiver(post_init, sender=Task)

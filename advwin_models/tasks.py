@@ -27,6 +27,7 @@ SURVEY_TABLES_MAPPING = {
 }
 
 
+@shared_task()
 def export_ecm(ecm_id, ecm=None, execute=True):
     if ecm is None:
         ecm = Ecm.objects.get(pk=ecm_id)
