@@ -1,16 +1,17 @@
+from enum import Enum
 from json import loads
 from os import linesep
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
-from sqlalchemy import cast, String
+# from sqlalchemy import cast, String
 
 from advwin_models.advwin import JuridFMAudienciaCorrespondente, JuridFMAlvaraCorrespondente, \
     JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente, JuridAgendaTable, \
     JuridGedMain, JuridCorrespondenteHist
 from connections.db_connection import get_advwin_engine
 from etl.utils import ecm_path_ezl2advwin
-from task.models import Task, TaskStatus, TaskHistory, Ecm
+from task.models import Task, TaskStatus, TaskHistory, Ecm, SurveyType
 
 
 LOGGER = get_task_logger(__name__)
@@ -20,11 +21,15 @@ DO_SOMETHING_SUCCESS_MESSAGE = 'Do Something successful!'
 DO_SOMETHING_ERROR_MESSAGE = 'ERROR during do something: {}'
 
 SURVEY_TABLES_MAPPING = {
-    'Courthearing': JuridFMAudienciaCorrespondente,
-    'Diligence': JuridFMDiligenciaCorrespondente,
-    'Protocol': JuridFMProtocoloCorrespondente,
-    'Operationlicense': JuridFMAlvaraCorrespondente,
+    SurveyType.COURTHEARING.name.title(): JuridFMAudienciaCorrespondente,
+    SurveyType.DILIGENCE.name.title(): JuridFMDiligenciaCorrespondente,
+    SurveyType.PROTOCOL.name.title(): JuridFMProtocoloCorrespondente,
+    SurveyType.OPERATIONLICENSE.name.title(): JuridFMAlvaraCorrespondente,
 }
+
+
+class TaskObservation(Enum):
+    DONE = 'Ordem de serviço cumprida por'
 
 
 @shared_task()
@@ -60,6 +65,9 @@ def get_task_survey_values(task):
     values = loads(task.survey_result)
     values['agenda_id'] = task.legacy_code
     values['versao'] = 1
+    if 'question1' in values:
+        del values['question1']
+
     return values
 
 
@@ -191,7 +199,7 @@ def export_task(task_id, task=None, execute=True):
             'Prazo_Interm': 1,
             'Ag_StatusExecucao': '',
             'Data_cumprimento': task.execution_date,
-            'Obs': get_task_observation(task, 'Ordem de serviço cumprida por', 'execution_date'),
+            'Obs': get_task_observation(task, TaskObservation.DONE.value, 'execution_date'),
         }
 
         result = update_advwin_task(task, values, execute)
@@ -199,7 +207,7 @@ def export_task(task_id, task=None, execute=True):
         stmts = result
 
         if task.survey_result:
-            table = SURVEY_TABLES_MAPPING.get(task.type_task.survey_type).__table__
+            table = SURVEY_TABLES_MAPPING[task.type_task.survey_type].__table__
             stmt = table.insert().values(**get_task_survey_values(task))
 
             if execute:
