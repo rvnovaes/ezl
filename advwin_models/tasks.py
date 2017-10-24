@@ -112,8 +112,7 @@ def insert_advwin_history(task_history, values, execute=True):
             LOGGER.info('Histórico de OS %d-%d: exportado com sucesso.',
                         task_history.task.id,
                         task_history.id)
-        finally:
-            return result
+        return result
     else:
         return stmt
 
