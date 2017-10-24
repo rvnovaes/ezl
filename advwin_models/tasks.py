@@ -66,6 +66,7 @@ def export_ecm(ecm_id, ecm=None, execute=True):
 
 def get_task_survey_values(task):
     values = loads(task.survey_result)
+    values['paginas'] = ',1,2,'
     values['agenda_id'] = task.legacy_code
     values['versao'] = 1
 
