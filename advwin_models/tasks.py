@@ -64,13 +64,11 @@ def get_task_survey_values(task):
 
 
 def get_task_observation(task, message, date_field):
-    casting = cast(JuridAgendaTable.Obs, String())
     last_taskhistory = task.taskhistory_set.filter(status=task.task_status).last()
     last_taskhistory_notes = last_taskhistory.notes if last_taskhistory else ''
     dt = getattr(task, date_field)
     date = dt.strftime('%d/%m/%Y') if dt else ''
-    s = '{}{} *** {} {}: {} em {}'.format(
-        casting,
+    s = '{} *** {} {}: {} em {}'.format(
         linesep,
         message,
         task.person_executed_by,
