@@ -10,7 +10,7 @@ from config.config import get_parser
 
 CELERY_BROKER_URL = 'amqp://guest:guest@queues:5672/'
 
-CELERY_ALWAYS_EAGER = True
+CELERY_TASK_ALWAYS_EAGER = True
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

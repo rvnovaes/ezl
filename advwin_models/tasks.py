@@ -4,7 +4,10 @@ from os import linesep
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
-# from sqlalchemy import cast, String
+# from sqlalchemy.sql.expression import cast
+from sqlalchemy import String, cast
+import dateutil.parser
+
 
 from advwin_models.advwin import JuridFMAudienciaCorrespondente, JuridFMAlvaraCorrespondente, \
     JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente, JuridAgendaTable, \
@@ -65,8 +68,14 @@ def get_task_survey_values(task):
     values = loads(task.survey_result)
     values['agenda_id'] = task.legacy_code
     values['versao'] = 1
+
     if 'question1' in values:
         del values['question1']
+
+    for key in values:
+        if key.startswith('data'):
+            if values[key]:
+                values[key] = dateutil.parser.parse(values[key])
 
     return values
 
@@ -82,7 +91,7 @@ def get_task_observation(task, message, date_field):
         task.person_executed_by,
         last_taskhistory_notes,
         date)
-    return s
+    return cast(JuridAgendaTable.Obs, String()) + s
 
 
 @shared_task()
@@ -94,7 +103,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
 
     task = task_history.task
 
-    if task_history.status == TaskStatus.ACCEPTED:
+    if task_history.status == TaskStatus.ACCEPTED.value:
         values = {
             'codigo_adv_correspondente': str(task_history.create_user),
             'ident_agenda': task.legacy_code,
@@ -110,7 +119,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
         stmt = table.insert().values(**values)
         return stmt
 
-    elif task_history.status == TaskStatus.DONE:
+    elif task_history.status == TaskStatus.DONE.value:
         values = {
             'codigo_adv_correspondente': str(task_history.create_user),
             'ident_agenda': task.legacy_code,
@@ -126,7 +135,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
         stmt = table.insert().values(**values)
         return stmt
 
-    elif task_history.status == TaskStatus.REFUSED:
+    elif task_history.status == TaskStatus.REFUSED.value:
         values = {
             'codigo_adv_correspondente': str(task_history.create_user),
             'ident_agenda': task.legacy_code,
@@ -175,7 +184,7 @@ def export_task(task_id, task=None, execute=True):
 
     table = JuridAgendaTable.__table__
 
-    if task.task_status == TaskStatus.ACCEPTED:
+    if task.task_status == TaskStatus.ACCEPTED.value:
 
         values = {
             'SubStatus': 50,
@@ -189,7 +198,7 @@ def export_task(task_id, task=None, execute=True):
 
         return update_advwin_task(task, values, execute)
 
-    elif task.task_status == TaskStatus.DONE:
+    elif task.task_status == TaskStatus.DONE.value:
 
         values = {
             'SubStatus': 70,
@@ -238,7 +247,7 @@ def export_task(task_id, task=None, execute=True):
 
         return stmts
 
-    elif task.task_status == TaskStatus.REFUSED:
+    elif task.task_status == TaskStatus.REFUSED.value:
 
         values = {
             'SubStatus': 20,
