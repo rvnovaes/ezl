@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from model_mommy import mommy
 
-from advwin_models.tasks import export_task, get_task_observation, TaskObservation
+from advwin_models.tasks import export_task, TaskObservation
 from task.models import Task, TaskStatus, SurveyType, TypeTask
 
 
@@ -14,10 +14,13 @@ User = get_user_model()
 
 
 class TasksTest(TestCase):
+    TASK_OBSERVATION = 'TASK_OBSERVATION'
 
+    @patch('advwin_models.tasks.get_task_observation', return_value=TASK_OBSERVATION)
     @patch('advwin_models.advwin.JuridFMAudienciaCorrespondente.__table__.insert')
     @patch('advwin_models.tasks.update_advwin_task')
-    def test_export_task(self, update_advwin_task_mock, table_insert_mock):
+    def test_export_task(self, update_advwin_task_mock, table_insert_mock,
+                         get_task_observation_mock):
         # User.objects.create(username='username')
 
         type_task = mommy.make(TypeTask,
@@ -31,6 +34,9 @@ class TasksTest(TestCase):
 
         export_task(task.id, task)
 
+        get_task_observation_mock.assert_called_with(task, TaskObservation.DONE.value,
+                                                     'execution_date')
+
         update_advwin_task_mock.assert_called_with(
             task,
             {
@@ -41,7 +47,7 @@ class TasksTest(TestCase):
                 'Prazo_Interm': 1,
                 'Ag_StatusExecucao': '',
                 'Data_cumprimento': task.execution_date,
-                'Obs': get_task_observation(task, TaskObservation.DONE.value, 'execution_date'),
+                'Obs': self.TASK_OBSERVATION,
             },
             True)
 

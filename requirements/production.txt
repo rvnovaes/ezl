@@ -2,6 +2,9 @@
 celery[redis]==4.1.0
 eventlet==0.21.0
 
+# Utils
+python-dateutil==2.6.1
+
 # Dependências do Projeto
 django==1.11.1
 django-allauth==0.32
