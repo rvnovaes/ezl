@@ -20,7 +20,7 @@ from etl.advwin_ezl.task.ecm_task import EcmEtl
 from django.core.management import call_command
 from django.core.management.commands import loaddata, migrate
 import luigi
-from ezl import settings
+from django.conf import settings
 from etl.advwin_ezl.ezl_exceptions.params_exception import ParamsException
 from config.config import get_parser
 config_parser = get_parser()

@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from advwin_models.tasks import export_ecm, export_task, export_task_history
 from core.models import ContactMechanism, ContactMechanismType, Person
-from ezl import settings
+from django.conf import settings
 from task.mail import SendMail
 from task.models import Task, TaskStatus, TaskHistory, Ecm
 
@@ -15,9 +15,9 @@ send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'executi
 
 
 @receiver(post_save, sender=Ecm)
-def export_ecm_path(sender, instance, created, raw, using, update_fields, **kwargs):
-    if update_fields and 'path' in update_fields:
-        export_ecm(instance.id, instance)
+def export_ecm_path(sender, instance, created, **kwargs):
+    if created and instance.legacy_code is None:
+        export_ecm.delay(instance.id)
 
 
 @receiver(post_init, sender=Task)
@@ -127,41 +127,36 @@ def change_status(sender, instance, **kwargs):
     new_status = TaskStatus(instance.task_status) or TaskStatus.INVALID
     previous_status = TaskStatus(instance.__previous_status) or TaskStatus.INVALID
 
-    try:
+    if new_status is not previous_status:
+        if new_status is TaskStatus.ACCEPTED:
+            instance.acceptance_date = now_date
+        elif new_status is TaskStatus.REFUSED:
+            instance.refused_date = now_date
+        elif new_status is TaskStatus.DONE:
+            instance.return_date = None
+        elif new_status is TaskStatus.RETURN:
+            instance.execution = None
+            instance.return_date = now_date
+        elif new_status is TaskStatus.BLOCKEDPAYMENT:
+            instance.blocked_payment_date = now_date
+        elif new_status is TaskStatus.FINISHED:
+            instance.finished_date = now_date
 
-        if new_status is not previous_status:
-            if new_status is TaskStatus.ACCEPTED:
-                instance.acceptance_date = now_date
-            elif new_status is TaskStatus.REFUSED:
-                instance.refused_date = now_date
-            elif new_status is TaskStatus.DONE:
-                instance.return_date = None
-            elif new_status is TaskStatus.RETURN:
-                instance.execution = None
-                instance.return_date = now_date
-            elif new_status is TaskStatus.BLOCKEDPAYMENT:
-                instance.blocked_payment_date = now_date
-            elif new_status is TaskStatus.FINISHED:
-                instance.finished_date = now_date
+        instance.alter_date = now_date
 
-            instance.alter_date = now_date
+        TaskHistory.objects.create(task=instance, create_user=instance.alter_user,
+                                   status=instance.task_status,
+                                   create_date=now_date,
+                                   notes=getattr(instance, '__notes', ''))
+        instance.__previous_status = instance.task_status
 
-            TaskHistory.objects.create(task=instance, create_user=instance.alter_user,
-                                       status=instance.task_status,
-                                       create_date=now_date,
-                                       notes=getattr(instance, '__notes', ''))
-            instance.__previous_status = instance.task_status
-
-    except Exception as e:
-        print(e)
-        pass  # TODO melhorar este tratamento
 
 
 @receiver(post_save, sender=Task)
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
-    export_task(instance.pk, instance)
+    export_task.delay(instance.pk)
 
 
 @receiver(post_save, sender=TaskHistory)
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
-    export_task_history(instance.pk, instance)
+    export_task_history.delay(instance.pk)

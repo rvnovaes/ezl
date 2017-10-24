@@ -1,16 +1,20 @@
+from enum import Enum
 from json import loads
 from os import linesep
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
-from sqlalchemy import cast, String
+# from sqlalchemy.sql.expression import cast
+from sqlalchemy import String, cast
+import dateutil.parser
+
 
 from advwin_models.advwin import JuridFMAudienciaCorrespondente, JuridFMAlvaraCorrespondente, \
     JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente, JuridAgendaTable, \
     JuridGedMain, JuridCorrespondenteHist
 from connections.db_connection import get_advwin_engine
 from etl.utils import ecm_path_ezl2advwin
-from task.models import Task, TaskStatus, TaskHistory, Ecm
+from task.models import Task, TaskStatus, TaskHistory, Ecm, SurveyType
 
 
 LOGGER = get_task_logger(__name__)
@@ -20,13 +24,18 @@ DO_SOMETHING_SUCCESS_MESSAGE = 'Do Something successful!'
 DO_SOMETHING_ERROR_MESSAGE = 'ERROR during do something: {}'
 
 SURVEY_TABLES_MAPPING = {
-    'Courthearing': JuridFMAudienciaCorrespondente,
-    'Diligence': JuridFMDiligenciaCorrespondente,
-    'Protocol': JuridFMProtocoloCorrespondente,
-    'Operationlicense': JuridFMAlvaraCorrespondente,
+    SurveyType.COURTHEARING.name.title(): JuridFMAudienciaCorrespondente,
+    SurveyType.DILIGENCE.name.title(): JuridFMDiligenciaCorrespondente,
+    SurveyType.PROTOCOL.name.title(): JuridFMProtocoloCorrespondente,
+    SurveyType.OPERATIONLICENSE.name.title(): JuridFMAlvaraCorrespondente,
 }
 
 
+class TaskObservation(Enum):
+    DONE = 'Ordem de serviço cumprida por'
+
+
+@shared_task()
 def export_ecm(ecm_id, ecm=None, execute=True):
     if ecm is None:
         ecm = Ecm.objects.get(pk=ecm_id)
@@ -50,7 +59,6 @@ def export_ecm(ecm_id, ecm=None, execute=True):
                            exc_info=(type(exc), exc, exc.__traceback__))
         else:
             LOGGER.info('ECM %s: exportado', ecm)
-        finally:
             return result
     else:
         return stmt
@@ -58,25 +66,56 @@ def export_ecm(ecm_id, ecm=None, execute=True):
 
 def get_task_survey_values(task):
     values = loads(task.survey_result)
+    values['paginas'] = ',1,2,'
     values['agenda_id'] = task.legacy_code
     values['versao'] = 1
+
+    if 'question1' in values:
+        del values['question1']
+
+    for key in values:
+        if key.startswith('data'):
+            if values[key]:
+                values[key] = dateutil.parser.parse(values[key])
+
     return values
 
 
 def get_task_observation(task, message, date_field):
-    casting = cast(JuridAgendaTable.Obs, String())
     last_taskhistory = task.taskhistory_set.filter(status=task.task_status).last()
     last_taskhistory_notes = last_taskhistory.notes if last_taskhistory else ''
     dt = getattr(task, date_field)
     date = dt.strftime('%d/%m/%Y') if dt else ''
-    s = '{}{} *** {} {}: {} em {}'.format(
-        casting,
+    s = '{} *** {} {}: {} em {}'.format(
         linesep,
         message,
         task.person_executed_by,
         last_taskhistory_notes,
         date)
-    return s
+    return cast(JuridAgendaTable.Obs, String()) + s
+
+
+def insert_advwin_history(task_history, values, execute=True):
+    stmt = JuridCorrespondenteHist.__table__.insert().values(**values)
+
+    if execute:
+        LOGGER.debug('Exportando Histórico de OS %d-%d ', task_history.task.id, task_history.id)
+        try:
+            result = get_advwin_engine().execute(stmt)
+        except Exception as exc:
+            result = None
+            LOGGER.warning('Não foi possíve exportar Histórico de OS: %d-%d\n%s',
+                           task_history.task.id,
+                           task_history.id,
+                           exc,
+                           exc_info=(type(exc), exc, exc.__traceback__))
+        else:
+            LOGGER.info('Histórico de OS %d-%d: exportado com sucesso.',
+                        task_history.task.id,
+                        task_history.id)
+        return result
+    else:
+        return stmt
 
 
 @shared_task()
@@ -84,11 +123,9 @@ def export_task_history(task_history_id, task_history=None, execute=True):
     if task_history is None:
         task_history = TaskHistory.objects.get(pk=task_history_id)
 
-    table = JuridCorrespondenteHist.__table__
-
     task = task_history.task
 
-    if task_history.status == TaskStatus.ACCEPTED:
+    if task_history.status == TaskStatus.ACCEPTED.value:
         values = {
             'codigo_adv_correspondente': str(task_history.create_user),
             'ident_agenda': task.legacy_code,
@@ -100,11 +137,9 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'descricao': 'Aceita por correspondente: {}'.format(
                 task.person_executed_by.legal_name),
         }
+        return insert_advwin_history(task_history, values, execute)
 
-        stmt = table.insert().values(**values)
-        return stmt
-
-    elif task_history.status == TaskStatus.DONE:
+    elif task_history.status == TaskStatus.DONE.value:
         values = {
             'codigo_adv_correspondente': str(task_history.create_user),
             'ident_agenda': task.legacy_code,
@@ -116,11 +151,9 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'descricao': 'Cumprida por correspondente: {}'.format(
                 task.person_executed_by.legal_name),
         }
+        return insert_advwin_history(task_history, values, execute)
 
-        stmt = table.insert().values(**values)
-        return stmt
-
-    elif task_history.status == TaskStatus.REFUSED:
+    elif task_history.status == TaskStatus.REFUSED.value:
         values = {
             'codigo_adv_correspondente': str(task_history.create_user),
             'ident_agenda': task.legacy_code,
@@ -132,9 +165,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'descricao': 'Recusada por correspondente: {}'.format(
                 task.person_executed_by.legal_name),
         }
-
-        stmt = table.insert().values(**values)
-        return stmt
+        return insert_advwin_history(task_history, values, execute)
 
 
 def update_advwin_task(task, values, execute=True):
@@ -169,7 +200,7 @@ def export_task(task_id, task=None, execute=True):
 
     table = JuridAgendaTable.__table__
 
-    if task.task_status == TaskStatus.ACCEPTED:
+    if task.task_status == TaskStatus.ACCEPTED.value:
 
         values = {
             'SubStatus': 50,
@@ -183,7 +214,7 @@ def export_task(task_id, task=None, execute=True):
 
         return update_advwin_task(task, values, execute)
 
-    elif task.task_status == TaskStatus.DONE:
+    elif task.task_status == TaskStatus.DONE.value:
 
         values = {
             'SubStatus': 70,
@@ -193,7 +224,7 @@ def export_task(task_id, task=None, execute=True):
             'Prazo_Interm': 1,
             'Ag_StatusExecucao': '',
             'Data_cumprimento': task.execution_date,
-            'Obs': get_task_observation(task, 'Ordem de serviço cumprida por', 'execution_date'),
+            'Obs': get_task_observation(task, TaskObservation.DONE.value, 'execution_date'),
         }
 
         result = update_advwin_task(task, values, execute)
@@ -201,7 +232,7 @@ def export_task(task_id, task=None, execute=True):
         stmts = result
 
         if task.survey_result:
-            table = SURVEY_TABLES_MAPPING.get(task.type_task.survey_type).__table__
+            table = SURVEY_TABLES_MAPPING[task.type_task.survey_type].__table__
             stmt = table.insert().values(**get_task_survey_values(task))
 
             if execute:
@@ -232,7 +263,7 @@ def export_task(task_id, task=None, execute=True):
 
         return stmts
 
-    elif task.task_status == TaskStatus.REFUSED:
+    elif task.task_status == TaskStatus.REFUSED.value:
 
         values = {
             'SubStatus': 20,

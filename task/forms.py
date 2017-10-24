@@ -7,7 +7,7 @@ from django.forms import ModelForm
 from core.models import Person
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimepicker, MDDatePicker
-from ezl import settings
+from django.conf import settings
 from lawsuit.forms import BaseForm
 from .models import Task, Ecm, TypeTask
 
