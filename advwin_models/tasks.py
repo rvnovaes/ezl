@@ -94,12 +94,34 @@ def get_task_observation(task, message, date_field):
     return cast(JuridAgendaTable.Obs, String()) + s
 
 
+def insert_advwin_history(task_history, values, execute=True):
+    stmt = JuridCorrespondenteHist.__table__.insert().values(**values)
+
+    if execute:
+        LOGGER.debug('Exportando Histórico de OS %d-%d ', task_history.task.id, task_history.id)
+        try:
+            result = get_advwin_engine().execute(stmt)
+        except Exception as exc:
+            result = None
+            LOGGER.warning('Não foi possíve exportar Histórico de OS: %d-%d\n%s',
+                           task_history.task.id,
+                           task_history.id,
+                           exc,
+                           exc_info=(type(exc), exc, exc.__traceback__))
+        else:
+            LOGGER.info('Histórico de OS %d-%d: exportado com sucesso.',
+                        task_history.task.id,
+                        task_history.id)
+        finally:
+            return result
+    else:
+        return stmt
+
+
 @shared_task()
 def export_task_history(task_history_id, task_history=None, execute=True):
     if task_history is None:
         task_history = TaskHistory.objects.get(pk=task_history_id)
-
-    table = JuridCorrespondenteHist.__table__
 
     task = task_history.task
 
@@ -115,9 +137,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'descricao': 'Aceita por correspondente: {}'.format(
                 task.person_executed_by.legal_name),
         }
-
-        stmt = table.insert().values(**values)
-        return stmt
+        return insert_advwin_history(task_history, values, execute)
 
     elif task_history.status == TaskStatus.DONE.value:
         values = {
@@ -131,9 +151,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'descricao': 'Cumprida por correspondente: {}'.format(
                 task.person_executed_by.legal_name),
         }
-
-        stmt = table.insert().values(**values)
-        return stmt
+        return insert_advwin_history(task_history, values, execute)
 
     elif task_history.status == TaskStatus.REFUSED.value:
         values = {
@@ -147,9 +165,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'descricao': 'Recusada por correspondente: {}'.format(
                 task.person_executed_by.legal_name),
         }
-
-        stmt = table.insert().values(**values)
-        return stmt
+        return insert_advwin_history(task_history, values, execute)
 
 
 def update_advwin_task(task, values, execute=True):

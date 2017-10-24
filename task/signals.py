@@ -127,34 +127,29 @@ def change_status(sender, instance, **kwargs):
     new_status = TaskStatus(instance.task_status) or TaskStatus.INVALID
     previous_status = TaskStatus(instance.__previous_status) or TaskStatus.INVALID
 
-    try:
+    if new_status is not previous_status:
+        if new_status is TaskStatus.ACCEPTED:
+            instance.acceptance_date = now_date
+        elif new_status is TaskStatus.REFUSED:
+            instance.refused_date = now_date
+        elif new_status is TaskStatus.DONE:
+            instance.return_date = None
+        elif new_status is TaskStatus.RETURN:
+            instance.execution = None
+            instance.return_date = now_date
+        elif new_status is TaskStatus.BLOCKEDPAYMENT:
+            instance.blocked_payment_date = now_date
+        elif new_status is TaskStatus.FINISHED:
+            instance.finished_date = now_date
 
-        if new_status is not previous_status:
-            if new_status is TaskStatus.ACCEPTED:
-                instance.acceptance_date = now_date
-            elif new_status is TaskStatus.REFUSED:
-                instance.refused_date = now_date
-            elif new_status is TaskStatus.DONE:
-                instance.return_date = None
-            elif new_status is TaskStatus.RETURN:
-                instance.execution = None
-                instance.return_date = now_date
-            elif new_status is TaskStatus.BLOCKEDPAYMENT:
-                instance.blocked_payment_date = now_date
-            elif new_status is TaskStatus.FINISHED:
-                instance.finished_date = now_date
+        instance.alter_date = now_date
 
-            instance.alter_date = now_date
+        TaskHistory.objects.create(task=instance, create_user=instance.alter_user,
+                                   status=instance.task_status,
+                                   create_date=now_date,
+                                   notes=getattr(instance, '__notes', ''))
+        instance.__previous_status = instance.task_status
 
-            TaskHistory.objects.create(task=instance, create_user=instance.alter_user,
-                                       status=instance.task_status,
-                                       create_date=now_date,
-                                       notes=getattr(instance, '__notes', ''))
-            instance.__previous_status = instance.task_status
-
-    except Exception as e:
-        print(e)
-        pass  # TODO melhorar este tratamento
 
 
 @receiver(post_save, sender=Task)
