@@ -15,6 +15,7 @@ services:
       - .:/app
       - web-static:/app/staticfiles
       - web-media:/app/media
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
     logging:
       driver: "json-file"
       options:
@@ -22,11 +23,10 @@ services:
 
   luigi:
     image: ezl:latest
-    command: luigid
-    environment:
-      ENV: development
+    command: bash -c "cron && crontab /etc/cron.d/luigi && luigid"
     volumes:
       - .:/app
+      - ./containers/luigi/cron:/etc/cron.d/luigi
     logging:
       driver: "json-file"
       options:

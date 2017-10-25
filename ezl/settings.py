@@ -246,6 +246,8 @@ LINK_TO_RESTORE_DB_DEMO = 'http://13.68.213.60:8001'
 #             ':d00c54e22db046b19a7dcae5677126db@sentry.io/224925'),
 # }
 
+LUIGI_TARGET_PATH = os.path.join(BASE_DIR, 'luigi_targets')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,

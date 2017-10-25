@@ -30,6 +30,10 @@ services:
     environment:
       ENV: development
 
+  luigi:
+    environment:
+      ENV: development
+
   tasks:
     depends_on:
       - builder

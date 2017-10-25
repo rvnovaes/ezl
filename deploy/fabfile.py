@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from getpass import getpass
 from fabric.api import env, task, local, run, sudo, roles, put, cd
 from fabric.contrib.project import rsync_project
 from fabric.contrib.files import exists
@@ -21,10 +22,6 @@ env.roledefs = {
         'hosts': ['{}@13.68.213.60'.format(USER)],
     }
 }
-
-
-def get_repo_path():
-    return REPO_PATH.format(user=USER, env=env["NAME"])
 
 
 @task
@@ -52,27 +49,25 @@ def deploy(revision=None, rsync=False):
         rsync_repo()
     else:
         update_repo(revision)
-
     with cd(get_repo_path()):
         run("make deploy")
 
 
 @task
-def etl_run():
-    confirm = prompt("Tem certeza que deseja executar o ETL no servidor '{}'? [s/n]".format(
-        env["NAME"]))
-    if confirm.lower() != "s":
-        return
-
+def luigi_logs():
     with cd(get_repo_path()):
-        run("rm -f etl/advwin_ezl/tmp/*")
-        run("docker-compose run web python manage.py run_etl_suit luigi")
+        run("docker-compose logs --follow --tail=10 luigi")
 
 
 @task
-def etl_logs():
-    with cd(get_repo_path()):
-        run("docker-compose ps | grep web_run_ | tail -1 | awk '{print $1}' | xargs docker logs --follow ")
+def mount_ecm_dir():
+    """Monta a pasta do ECM/GED dentro do servidor"""
+    username = prompt("Informe o nome do usuário do servidor Windows: ")
+    password = getpass("Informe a senha do usuário: ")
+    host = "172.27.155.11"
+    local_path = "/mnt/windows_ecm/"
+    sudo("mount -t cifs -o username={},domain=mtostes,password={} "
+         "//{}/ged_advwin$ {}".format(username, password, host, local_path))
 
 
 def update_repo(revision="default"):
@@ -124,3 +119,7 @@ def setup_ssh():
     put('authorized_keys', '/home/{}/.ssh/authorized_keys'.format(USER))
     put('deploy_key', '/home/{}/.ssh/id_rsa'.format(USER))
     run('chmod 600 /home/{}/.ssh/id_rsa'.format(USER))
+
+
+def get_repo_path():
+    return REPO_PATH.format(user=USER, env=env["NAME"])

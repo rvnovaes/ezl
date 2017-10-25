@@ -24,6 +24,11 @@ services:
       - tunnel
       - queues
 
+  luigi:
+    command: luigid
+    environment:
+      ENV: development
+
   tasks:
     depends_on:
       - builder
