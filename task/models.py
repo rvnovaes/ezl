@@ -174,12 +174,8 @@ class Task(Audit, LegacyCode):
         return super().save(*args, **kwargs)
 
 
-def get_dir_name(self, filename):
-    upload_dir = os.path.join('media', 'ECM', str(self.task_id))
-    if not os.path.exists(upload_dir):
-        os.makedirs(upload_dir)
-    path = os.path.join('ECM', str(self.task_id), filename)
-    return path
+def get_dir_name(instance, filename):
+    return 'ECM/{0}/{1}'.format(instance.task.pk, filename)
 
 
 class Ecm(Audit, LegacyCode):
