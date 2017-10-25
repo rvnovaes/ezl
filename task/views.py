@@ -24,7 +24,7 @@ from lawsuit.models import Movement
 from task.signals import send_notes_execution_date
 
 from .filters import TaskFilter
-from .forms import TaskForm, TaskDetailForm, TypeTaskForm
+from .forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
 from .models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
 
@@ -36,7 +36,7 @@ class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
 
 class TaskCreateView(AuditFormMixin, CreateView):
     model = Task
-    form_class = TaskForm
+    form_class = TaskCreateForm
     success_url = reverse_lazy('task_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
@@ -57,6 +57,10 @@ class TaskCreateView(AuditFormMixin, CreateView):
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
         form.instance.__server = self.request.environ['HTTP_HOST']
         super(TaskCreateView, self).form_valid(form)
+        if form.cleaned_data['document']:
+            form.instance.ecm_set.create(path=form.cleaned_data['document'],
+                                         create_user=self.request.user)
+
         return HttpResponseRedirect(self.success_url)
 
     def get_success_url(self):

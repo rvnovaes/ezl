@@ -87,6 +87,11 @@ class TaskForm(BaseForm):
                                              'id': 'details_id'}))
 
 
+class TaskCreateForm(TaskForm):
+    document = forms.FileField(required=False,
+                               label='Anexar Documento')
+
+
 class TaskDetailForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
