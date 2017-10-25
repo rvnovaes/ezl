@@ -124,7 +124,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
         task_history = TaskHistory.objects.get(pk=task_history_id)
 
     task = task_history.task
-
+    username = task.person_executed_by.auth_user.username[:20]
     if task_history.status == TaskStatus.ACCEPTED.value:
         values = {
             'codigo_adv_correspondente': str(task_history.create_user),
@@ -133,7 +133,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'SubStatus': 50,
             'data_operacao': task_history.create_date,
             'justificativa': task_history.notes,
-            'usuario': task.person_executed_by.auth_user.username,
+            'usuario': username,
             'descricao': 'Aceita por correspondente: {}'.format(
                 task.person_executed_by.legal_name),
         }
@@ -147,7 +147,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'SubStatus': 70,
             'data_operacao': task_history.create_date,
             'justificativa': task_history.notes,
-            'usuario': task.person_executed_by.auth_user.username,
+            'usuario': username,
             'descricao': 'Cumprida por correspondente: {}'.format(
                 task.person_executed_by.legal_name),
         }
@@ -161,9 +161,46 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'SubStatus': 20,
             'data_operacao': task_history.create_date,
             'justificativa': task_history.notes,
-            'usuario': task.person_executed_by.auth_user.username,
+            'usuario': username,
             'descricao': 'Recusada por correspondente: {}'.format(
                 task.person_executed_by.legal_name),
+        }
+        return insert_advwin_history(task_history, values, execute)
+    elif task_history.status == TaskStatus.FINISHED.value:
+        values = {
+            'codigo_adv_correspondente': str(task_history.create_user),
+            'ident_agenda': task.legacy_code,
+            'status': 0,
+            'SubStatus': 100,
+            'data_operacao': task_history.create_date,
+            'justificativa': task_history.notes,
+            'usuario': username,
+            'descricao': 'Diligência devidamente cumprida por: {}'.format(
+                task.person_executed_by.legal_name),
+        }
+        return insert_advwin_history(task_history, values, execute)
+    elif task_history.status == TaskStatus.RETURN.value:
+        values = {
+            'codigo_adv_correspondente': str(task_history.create_user),
+            'ident_agenda': task.legacy_code,
+            'status': 0,
+            'SubStatus': 80,
+            'data_operacao': task_history.create_date,
+            'justificativa': task_history.notes,
+            'usuario': username,
+            'descricao': 'Diligência delegada ao correspondente para complementação:'
+        }
+        return insert_advwin_history(task_history, values, execute)
+    elif task_history.status == TaskStatus.BLOCKEDPAYMENT.value:
+        values = {
+            'codigo_adv_correspondente': str(task_history.create_user),
+            'ident_agenda': task.legacy_code,
+            'status': 0,
+            'SubStatus': 90,
+            'data_operacao': task_history.create_date,
+            'justificativa': task_history.notes,
+            'usuario': username,
+            'descricao': 'Diligência não cumprida - pagamento glosado'
         }
         return insert_advwin_history(task_history, values, execute)
 
@@ -275,5 +312,45 @@ def export_task(task_id, task=None, execute=True):
             'Data_cumprimento': task.execution_date,
             'Obs': get_task_observation(task, 'Ordem de serviço recusada por', 'refused_date'),
         }
-
+        return update_advwin_task(task, values, execute)
+    elif task.task_status == TaskStatus.FINISHED.value:
+        values = {
+            'SubStatus': 100,
+            'Status': 1,
+            'prazo_lido': 1,
+            'Prazo_Interm': 1,
+            'Data_correspondente': task.refused_date,
+            'Ag_StatusExecucao': '',
+            'Data_cumprimento': task.execution_date,
+            'Obs': get_task_observation(task, 'Diligência devidamente cumprida por',
+                                        'finished_date')
+        }
+        return update_advwin_task(task, values, execute)
+    elif task.task_status == TaskStatus.RETURN.value:
+        values = {
+            'SubStatus': 80,
+            'Status': 0,
+            'prazo_lido': 1,
+            'Prazo_Interm': 1,
+            'Data_correspondente': task.refused_date,
+            'Ag_StatusExecucao': '',
+            'Data_cumprimento': task.execution_date,
+            'Obs': get_task_observation(
+                task, 'Diligência delegada ao correspondente para complementação por',
+                'return_date')
+        }
+        return update_advwin_task(task, values, execute)
+    elif task.task_status == TaskStatus.BLOCKEDPAYMENT.value:
+        values = {
+            'SubStatus': 90,
+            'Status': 1,
+            'prazo_lido': 1,
+            'Prazo_Interm': 1,
+            'Data_correspondente': task.refused_date,
+            'Ag_StatusExecucao': 'Glosado',
+            'Data_cumprimento': task.execution_date,
+            'Obs': get_task_observation(task,
+                                        'Diligência não cumprida - pagamento glosado por',
+                                        'blocked_payment_date')
+        }
         return update_advwin_task(task, values, execute)
