@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group
-from django.core.files.uploadedfile import SimpleUploadedFile
+# from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.utils import timezone
@@ -9,7 +9,7 @@ from model_mommy import mommy
 from core.models import Person
 from lawsuit.models import Movement
 from task.models import TypeTask, Task, Ecm, TaskHistory
-from task.forms import TypeTaskForm, TaskForm, EcmForm, TaskDetailForm
+from task.forms import TypeTaskForm, TaskForm, TaskDetailForm
 
 
 class TypeTaskTest(TestCase):
@@ -175,18 +175,6 @@ class EcmTest(TestCase):
         # mommy deixa as coisas bem mais faaceis
         c_inst = mommy.make(Ecm, path='ECM/something.pdf')
         self.assertTrue(isinstance(c_inst, Ecm))
-
-    def test_valid_EcmForm(self):
-        task = mommy.make(Task).id
-        file_path = 'arquivo_exemplo.txt'  # tem que ta na pasta raiz
-        path = SimpleUploadedFile(name=file_path, content=open(file_path, 'rb').read())
-        data = {'task': task}
-        file_dict = {'path': path}
-        form = EcmForm(data=data,
-                       files=file_dict)
-        # ATENCAO!!!!!!!!! ARQUIVO SE PASSA PELO PARAMETRO 'files' (oh god D:)
-        print(form.errors)
-        self.assertTrue(form.is_valid())
 
     def test_create_view(self):
         task = mommy.make(Task, movement=mommy.make(Movement, legacy_code='999'),

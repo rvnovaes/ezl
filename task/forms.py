@@ -1,14 +1,23 @@
 from datetime import datetime
 
 from django import forms
-from django.forms import ModelForm
+from django.forms import ModelForm, formset_factory
 from django.utils import timezone
 
 from core.models import Person
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimepicker, MDDatePicker
 from lawsuit.forms import BaseForm
-from task.models import Task, Ecm, TypeTask
+from task.models import Task, TypeTask
+
+
+class DocumentForm(forms.Form):
+    document = forms.FileField(widget=forms.FileInput(attrs={'multiple': True}),
+                               required=False,
+                               label='Documento')
+
+
+DocumentFormSet = formset_factory(DocumentForm, can_delete=True)
 
 
 class TaskForm(BaseForm):
@@ -114,14 +123,6 @@ class TaskDetailForm(ModelForm):
             attrs={'class': 'form-control', 'cols': '5', 'id': 'notes_id'}
         )
     )
-
-
-class EcmForm(BaseForm):
-    class Meta:
-        model = Ecm
-        fields = ['path', 'task']
-
-    path = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
 
 
 class TypeTaskForm(BaseForm):
