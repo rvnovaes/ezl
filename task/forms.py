@@ -1,15 +1,14 @@
 from datetime import datetime
 
-import pytz
 from django import forms
 from django.forms import ModelForm
+from django.utils import timezone
 
 from core.models import Person
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimepicker, MDDatePicker
-from django.conf import settings
 from lawsuit.forms import BaseForm
-from .models import Task, Ecm, TypeTask
+from task.models import Task, Ecm, TypeTask
 
 
 class TaskForm(BaseForm):
@@ -92,6 +91,7 @@ class TaskDetailForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
         self.fields['execution_date'].widget.min_date = self.instance.acceptance_date
+        self.fields['execution_date'].widget.max_date = timezone.now()
 
     class Meta:
         model = Task
@@ -99,13 +99,13 @@ class TaskDetailForm(ModelForm):
 
     survey_result = forms.CharField(required=False, initial=None)
 
-    execution_date = forms.DateTimeField(required=False,
-                                         initial=datetime.utcnow().replace(
-                                             tzinfo=pytz.timezone(settings.TIME_ZONE)),
+    execution_date = forms.DateTimeField(required=True,
+                                         initial=timezone.now(),
                                          label='Data de Cumprimento',
-                                         widget=MDDateTimepicker(attrs={'class': 'form-control'},
-                                                                 format='DD/MM/YYYY HH:mm',
-                                                                 ))
+                                         widget=MDDateTimepicker(attrs={
+                                                                    'class': 'form-control',
+                                                                 },
+                                                                 format='DD/MM/YYYY HH:mm'))
     notes = forms.CharField(
         required=True,
         initial='',
