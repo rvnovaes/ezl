@@ -175,7 +175,7 @@ class Task(Audit, LegacyCode):
 
 
 def get_dir_name(self, filename):
-    upload_dir = os.path.join('opt', 'media', 'ECM', str(self.task_id))
+    upload_dir = os.path.join('media', 'ECM', str(self.task_id))
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
     path = os.path.join('ECM', str(self.task_id), filename)
