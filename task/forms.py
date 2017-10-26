@@ -1,23 +1,16 @@
 from datetime import datetime
 
 from django import forms
-from django.forms import ModelForm, formset_factory
+from django.forms import ModelForm
 from django.utils import timezone
+
+from django_file_form.forms import FileFormMixin, MultipleUploadedFileField
 
 from core.models import Person
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimepicker, MDDatePicker
 from lawsuit.forms import BaseForm
 from task.models import Task, TypeTask
-
-
-class DocumentForm(forms.Form):
-    document = forms.FileField(widget=forms.FileInput(attrs={'multiple': True}),
-                               required=False,
-                               label='Documento')
-
-
-DocumentFormSet = formset_factory(DocumentForm, can_delete=True)
 
 
 class TaskForm(BaseForm):
@@ -94,6 +87,13 @@ class TaskForm(BaseForm):
                                   widget=forms.Textarea(
                                       attrs={'class': 'form-control', 'rows': '5',
                                              'id': 'details_id'}))
+
+
+class TaskCreateForm(FileFormMixin, TaskForm):
+    documents = MultipleUploadedFileField()
+
+    class Meta(TaskForm.Meta):
+        fields = TaskForm.Meta.fields + ['documents']
 
 
 class TaskDetailForm(ModelForm):

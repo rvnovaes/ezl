@@ -22,7 +22,7 @@ from core.models import Person
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
 from task.filters import TaskFilter
-from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, DocumentFormSet
+from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable
@@ -35,14 +35,10 @@ class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
 
 class TaskCreateView(AuditFormMixin, CreateView):
     model = Task
-    form_class = TaskForm
+    form_class = TaskCreateForm
     success_url = reverse_lazy('task_list')
     success_message = CREATE_SUCCESS_MESSAGE
     template_name_suffix = '_create_form'
-
-    def get_context_data(self, **kwargs):
-        formset = DocumentFormSet(self.request.POST or None)
-        return super().get_context_data(formset=formset, **kwargs)
 
     def get_initial(self):
         if self.kwargs.get('movement'):
@@ -59,17 +55,17 @@ class TaskCreateView(AuditFormMixin, CreateView):
         return self.initial.copy()
 
     def form_valid(self, form):
+        task = form.instance
         form.instance.movement_id = self.kwargs.get('movement')
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
         form.instance.__server = self.request.environ['HTTP_HOST']
-
         response = super(TaskCreateView, self).form_valid(form)
 
-        formset = DocumentFormSet(self.request.POST or None)
-        for iform in formset:
-            if iform.is_valid():
-                for file in self.request.FILES.getlist(iform['document'].html_name):
-                    self.object.ecm_set.create(path=file, create_user=self.request.user)
+        for document in form.cleaned_data['documents']:
+            task.ecm_set.create(path=document,
+                                create_user=task.create_user)
+
+        form.delete_temporary_files()
 
         return response
 

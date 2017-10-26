@@ -5,18 +5,18 @@
 
 {% block javascript %}
     {{ block.super }}
-    <script type="text/javascript" src="{% static "js/django-formset.js" %}"></script>
-{% endblock %}
+    <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
+    <script src="{% static "file_form/file_form.js" %}"></script>
+    <script>
+       $(function() {
+           initUploadFields($('#task_form'));
+       });
+    </script>
+    {% endblock %}
 
 {% block extra_head %}
     {{ block.super }}
-    <style type="text/css">
-
-        [for$=-DELETE], [name$=-DELETE] {
-            display: none;
-        }
-
-    </style>
+    <link rel="stylesheet" href="{% static "fileuploader.css" %}">
 {% endblock %}
 
 {% block content %}
@@ -33,11 +33,13 @@
                         </div>
                         <div class="panel-body">
                             {% for field in form %}
-                                <div class="form-group col-sm-3">
-                                    <label>
-                                        {{ field | append_ast_if_req | label_capitalizer}}{{ field }}
-                                    </label>
-                                </div>
+                                {% if field.name != 'documents' %}
+                                    <div class="form-group col-sm-3">
+                                        <label>
+                                            {{ field | append_ast_if_req | label_capitalizer}}{{ field }}
+                                        </label>
+                                    </div>
+                                {% endif %}
                             {% endfor %}
                         </div>
                     </div>
@@ -53,45 +55,13 @@
                             <h1 class="panel-title">Anexos</h1>
                         </div>
                         <div class="panel-body">
+                            <fieldset>
 
-                            <fieldset disabled class="empty-form" style="display: none">
-                                <fieldset>
+                                {{ form.documents }}
 
-                                    <div class="row">
-                                        <div class="col-md-10">
-                                            {{ formset.empty_form }}
-                                        </div>
-                                        <div class="col-md-2">
-                                            <div class="text-right" style="">
-                                                <button type="button" class="btn btn-fab btn-primary" style="vertical-align: top" data-formset-remove-form>
-                                                    <i class="material-icons">remove</i></button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <hr />
-                                </fieldset>
+                                {% include 'django_file_form/upload_template.html' %}
+
                             </fieldset>
-
-
-                            <div class="forms">
-                                {% for form in formset %}
-                                <fieldset>
-                                    <div class="row">
-                                        <div class="col-md-10">
-                                            {{ form }}
-                                        </div>
-                                    </div>
-                                    <hr />
-                                </fieldset>
-                                {% endfor %}
-                            </div>
-
-                            <div class="text-right" style="">
-                                <button type="button" class="btn btn-fab btn-primary" data-formset-add-form>
-                                    <i class="material-icons">add</i></button>
-                            </div>
-
-
                         </div>
                     </div>
                 </div>

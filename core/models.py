@@ -3,8 +3,8 @@ from enum import Enum
 from django.conf import settings
 from django.db import models
 
-from .managers import PersonManager
-from .utils import LegacySystem
+from core.managers import PersonManager
+from core.utils import LegacySystem
 
 
 class LegalType(Enum):
@@ -134,8 +134,11 @@ class City(Audit):
 
 
 class Person(Audit, LegacyCode):
+    ADMINISTRATOR_GROUP = 'Administrador'
     CORRESPONDENT_GROUP = 'Correspondente'
     REQUESTER_GROUP = 'Solicitante'
+    SERVICE_GROUP = 'Service'
+    SUPERVISOR_GROUP = 'Supervisor'
 
     objects = PersonManager()
 
@@ -223,8 +226,8 @@ class Address(Audit):
         return tpl.format(
             number=self.number, street=self.street, city_region=self.city_region,
             city=self.city.name,
-            state=self.state.name, zip_code=self.zip_code, complement='/' +
-                                                                      self.complement if self.complement else ''
+            state=self.state.name, zip_code=self.zip_code,
+            complement='/' + self.complement if self.complement else ''
         )
 
 
