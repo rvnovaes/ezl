@@ -9,6 +9,17 @@ from sequences import get_next_value
 from core.models import Person, Audit, AuditCreate, LegacyCode
 from lawsuit.models import Movement, Folder
 
+
+class Permissions(Enum):
+    view_delegated_tasks = 'Can view tasks delegated to the user'
+    view_all_tasks = 'Can view all tasks'
+    return_all_tasks = 'Can return tasks'
+    validate_all_tasks = 'Can validade tasks'
+    view_requested_tasks = 'Can view tasks requested by the user'
+    block_payment_tasks = 'Can block tasks payment'
+    can_access_general_data = 'Can access general data screens'
+
+
 # Dicionário para retornar o icone referente ao status da providencia
 icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assignment_return',
              'DONE': 'assignment_turned_in',
@@ -124,16 +135,7 @@ class Task(Audit, LegacyCode):
         ordering = ['-alter_date']
         verbose_name = 'Providência'
         verbose_name_plural = 'Providências'
-
-        permissions = (
-            ("view_delegated_tasks","Can view tasks delegated to the user"),
-            ("view_all_tasks","Can view all tasks"),
-            ("return_all_tasks","Can return tasks"),
-            ("validate_all_tasks","Can validade tasks"),
-            ("view_requested_tasks","Can view tasks requested by the user"),
-            ("block_payment_tasks","Can block tasks payment"),
-            ("can_access_general_data","Can access general data screens")
-        )
+        permissions = [(i.name, i.value) for i in Permissions]
 
     @property
     def status(self):
@@ -158,7 +160,8 @@ class Task(Audit, LegacyCode):
         return self.movement.law_suit.organ
 
     # TODO fazer composição para buscar no endereço completo
-    # TODO Modifiquei pois quando não há orgão cadastrado em lawsuit lança erro de variável nula / Martins
+    # TODO Modifiquei pois quando não há orgão cadastrado em lawsuit lança erro de
+    # variável nula / Martins
     @property
     def address(self):
         address = ''
@@ -264,7 +267,8 @@ class DashboardViewModel(Audit):
         return self.movement.law_suit.organ
 
     # TODO fazer composição para buscar no endereço completo
-    # TODO Modifiquei pois quando não há orgão cadastrado em lawsuit lança erro de variável nula / Martins
+    # TODO Modifiquei pois quando não há orgão cadastrado em lawsuit lança erro de
+    # variável nula / Martins
     @property
     def address(self):
         address = ''

@@ -26,8 +26,8 @@ migrate:
 	docker-compose run web python manage.py migrate --noinput
 
 load_fixtures:
-	docker-compose run web python manage.py loaddata permission group auth_user country state court_district court_division city type_movement type_task
-	#docker-compose run web python manage.py loaddata group_permissions
+	docker-compose run web python manage.py loaddata auth_user country state court_district court_division city type_movement type_task
+	docker-compose run web python manage.py ezl_create_groups_and_permissions
 
 ps:
 	docker-compose ps
