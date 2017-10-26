@@ -62,6 +62,7 @@ services:
       - web-media:/usr/share/nginx/html/media
       - letsencrypt-www:/usr/share/nginx/html/certbot
       - letsencrypt-etc:/etc/letsencrypt
+      - /mnt/windows_ecm/Agenda:/usr/share/nginx/html/media/ECM
     depends_on:
       - web
 
