@@ -27,7 +27,6 @@ migrate:
 
 load_fixtures:
 	docker-compose run web python manage.py loaddata permission group auth_user country state court_district court_division city type_movement type_task
-	#docker-compose run web python manage.py loaddata group_permissions
 
 ps:
 	docker-compose ps
