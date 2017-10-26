@@ -16,10 +16,10 @@
 
                 //Função para tratar erro ao enviar formulário com justificativa de cumprimento em branco
                 function beforeSubmit() {
-                    var a = $("#notes_id").val;
+                    var a = $("#notes_id").val();
                     $('#task_detail').submit(function (e) {
                         e.preventDefault();
-                        if (!a.isEmpty) {
+                        if (! a.isEmpty) {
                             $('#confirmAction').modal('hide');
                             $('#survey').modal('show');
                         }
@@ -35,30 +35,39 @@
                     BLOCKEDPAYMENT: {text: "Glosar", icon: "money_off"},
                     RETURN: {text: "Retornar", icon: "assignment_late"}
                 };
+
                 function getId(value) {
-                    var input = $("input[name=execution_date]").get(0);
-                    if (! input.checkValidity()) {
-                        input.reportValidity();
-                        return false
+                    var task_status = value.id;
+
+                    var $input = $("input[name=execution_date]");
+                    if ($input.length > 0) {
+                        var input = $input.get(0);
+                        if (! input.checkValidity()) {
+                            input.reportValidity();
+                            return false
+                        }
                     }
 
-                    $("#confirmAction").on('shown.bs.modal', function () {
+                    $('#confirmAction').modal('show');
+
+                    // $("#confirmAction").on('shown.bs.modal', function () {
                         var actionButton = document.getElementById("actionButton");
                         var nextText = document.getElementById("actionText");
-                        var id = value.id;
                         var icon = document.getElementById("icon");
                         var modalHeader = document.getElementById("modalHeader");
 
-                        nextText.innerHTML = nextState[id]['text'];
-                        icon.innerHTML = nextState[id]['icon'];
+                        nextText.innerHTML = nextState[task_status]['text'];
+                        icon.innerHTML = nextState[task_status]['icon'];
 
-                        modalHeader.setAttribute("class", "panel-header panel-heading" + " " + id);
+                        modalHeader.setAttribute("class", "panel-header panel-heading" + " " + task_status);
 
                         actionButton.setAttribute("name", "action");
-                        actionButton.setAttribute("value", id);
-                    });
+                        actionButton.setAttribute("value", task_status);
 
-                    $('#confirmAction').modal('show');
+                        // alert(task_status);
+
+                    // });
+
 
                     return true;
                 }
@@ -303,7 +312,7 @@
                                                                 data-dismiss="modal">
                                                             Não
                                                         </button>
-                                                        <button value="1" id="delete-ecm-{{ ecm.id }}"
+                                                        <button id="delete-ecm-{{ ecm.id }}"
                                                                 style="width: 95px!important;"
                                                                 class="btn btn-sm btn-raised btn-primary"
                                                                 data-dismiss="modal">Sim
@@ -419,23 +428,23 @@
                                 </button>
                                 {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
                                     {% if form.instance.type_task.survey_type %}
-
-
-                                        <button id=surveyform" value="1"
-                                                value="1" id="actionButton"
-                                                id="actionButton" onclick="beforeSubmit()"
-                                                style="width: 95px!important;" type="submit"
+                                        <button id="actionButton"
+                                                type="submit"
+                                                onclick="beforeSubmit()"
+                                                style="width: 95px!important;"
                                                 class="btn btn-sm btn-raised btn-primary">Sim
                                         </button>
                                     {% else %}
-                                        <button value="1" id="actionButton"
-                                                type="submit" style="width: 95px!important;"
+                                        <button id="actionButton"
+                                                type="submit"
+                                                style="width: 95px!important;"
                                                 class="btn btn-sm btn-raised btn-primary">Sim
                                         </button>
                                     {% endif %}
 
                                 {% else %}
-                                    <button value="1" id="actionButton" style="width: 95px!important;"
+                                    <button id="actionButton"
+                                            style="width: 95px!important;"
                                             type="submit" class="btn btn-sm btn-raised btn-primary">Sim
                                     </button>
                                 {% endif %}
