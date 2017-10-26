@@ -108,7 +108,7 @@ class TaskDetailForm(ModelForm):
 
     survey_result = forms.CharField(required=False, initial=None)
 
-    execution_date = forms.DateTimeField(required=True,
+    execution_date = forms.DateTimeField(required=False,
                                          initial=timezone.now(),
                                          label='Data de Cumprimento',
                                          widget=MDDateTimepicker(attrs={
