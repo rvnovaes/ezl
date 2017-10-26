@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 
 from config.config import get_parser
 
+MUST_LOGIN = True
 
 CELERY_BROKER_URL = 'amqp://guest:guest@queues:5672/'
 
@@ -68,6 +69,8 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+
+
     'material.theme.teal',
     'material',
 
@@ -88,10 +91,17 @@ INSTALLED_APPS = [
 
     'allauth',
     'allauth.account',
+
     'celery',
+
     'django_tables2',
-    'bootstrap3',
     'django_filters',
+
+    'bootstrap3',
+
+    'django_file_form',
+    'django_file_form.ajaxuploader',
+
     'debug_toolbar',
     'django_cleanup',
     # Autocomplete
