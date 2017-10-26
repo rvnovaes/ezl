@@ -168,11 +168,11 @@
                     </div>
                     <div class="form-group text-center">
                         {% if perms.task.view_delegated_tasks %}
-                            <a id="ACCEPTED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                            <button type="button" id="ACCEPTED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised ACCEPTED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
                                 <i class="material-icons left" style="color: white;">assignment_ind</i>
                                 Aceitar
-                            </a>
+                            </button>
                             <a id="REFUSED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised REFUSED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}"><i
                                     class="material-icons left" style="color: white;">assignment_late</i>
@@ -180,48 +180,48 @@
                             </a>
                         {% endif %}
                         {% if perms.task.delegate_tasks %}
-                            <a id="DELEGATE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                            <button type="button" id="DELEGATE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised DELEGATE {% if not form.instance.status.name == 'DELEGATE' %}hidden{% endif %}"
                                href=""><i
                                     class="material-icons left" style="color: white">assignment_return</i>
                                 Delegar
-                            </a>
+                            </button>
                         {% endif %}
                         {% if perms.task.block_payment_tasks %}
-                            <a id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle=""
+                            <button type="button" id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle=""
                                data-target="#confirmAction"
                                class="btn btn-sm btn-raised BLOCKEDPAYMENT {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}"><i
                                     class="material-icons left" style="color: white;">money_off</i>
                                 Glosar
-                            </a>
+                            </button>
                         {% endif %}
                         {% if perms.task.validate_all_tasks %}
-                            <a id="FINISHED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                            <button type="button" id="FINISHED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised FINISHED {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}"
                                href=""><i
                                     class="material-icons left" style="color: white">gavel</i>
                                 Finalizar
-                            </a>
+                            </button>
                         {% endif %}
                         {% if perms.task.return_all_tasks %}
-                            <a id="RETURN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                            <button type="button" id="RETURN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised RETURN {% if not  form.instance.status.name == 'DONE' %}hidden{% endif %}"
                                href=""><i
                                     class="material-icons left" style="color: white">assignment_return</i>
                                 Retornar
-                            </a>
+                            </button>
                         {% endif %}
                         {% if perms.task.view_delegated_tasks %}
                             {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
                                 <div  class="col-sm-3">
                                     <a>{{ form.execution_date }}</a>
                                 </div>
-                                <a onclick="getId(this)" id="DONE" type="submit" data-toggle=""
+                                <button type="button" onclick="getId(this)" id="DONE" type="submit" data-toggle=""
                                    data-target="#confirmAction"
                                    class="btn btn-sm btn-raised DONE ">
                                     <i class="material-icons left" style="color: white">assignment_turned_in</i>
                                     Cumprir
-                                </a>
+                                </button>
                             {% endif %}
                         {% endif %}
                     </div>
