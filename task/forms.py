@@ -90,7 +90,7 @@ class TaskForm(BaseForm):
 
 
 class TaskCreateForm(FileFormMixin, TaskForm):
-    documents = MultipleUploadedFileField()
+    documents = MultipleUploadedFileField(required=False)
 
     class Meta(TaskForm.Meta):
         fields = TaskForm.Meta.fields + ['documents']
