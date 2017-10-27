@@ -9,7 +9,7 @@ def ecm_path_advwin2ezl(advwin_path):
 
 def ecm_path_ezl2advwin(ezl_path):
     """
-    O Link deve ser armazenado no seguinte estrutura inicial no advwin:
+    O Link deve ser armazenado na seguinte estrutura inicial no advwin:
     \\host\ged_advwin$\Agenda\...
     """
     storage_server = get_parser()['etl']['host_sftp']
