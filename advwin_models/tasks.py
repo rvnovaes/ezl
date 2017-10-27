@@ -4,7 +4,6 @@ from os import linesep
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
-# from sqlalchemy.sql.expression import cast
 from sqlalchemy import String, cast
 import dateutil.parser
 
@@ -13,7 +12,7 @@ from advwin_models.advwin import JuridFMAudienciaCorrespondente, JuridFMAlvaraCo
     JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente, JuridAgendaTable, \
     JuridGedMain, JuridCorrespondenteHist
 from connections.db_connection import get_advwin_engine
-from etl.utils import ecm_path_ezl2advwin
+from etl.utils import ecm_path_ezl2advwin, get_ecm_file_name
 from task.models import Task, TaskStatus, TaskHistory, Ecm, SurveyType
 
 
@@ -41,23 +40,31 @@ def export_ecm(ecm_id, ecm=None, execute=True):
         ecm = Ecm.objects.get(pk=ecm_id)
 
     new_path = ecm_path_ezl2advwin(ecm.path.name)
-
-    stmt = JuridGedMain.__table__.update()\
-        .where(JuridGedMain.__table__.c.ID_doc == ecm.legacy_code)\
-        .values(Link=new_path)
-
+    file_name = get_ecm_file_name(ecm.path.name)
+    values = {
+        'Tabela_OR': 'Agenda',
+        'Codigo_OR': ecm.task.legacy_code,
+        'Link': new_path,
+        'Data': ecm.create_date,
+        'Nome': file_name,
+        'Responsavel': ecm.create_user.username,
+        'Arq_Status': 'Guardado',
+        'Arq_nick': file_name,
+        'Descricao': file_name
+    }
+    stmt = JuridGedMain.__table__.insert().values(**values)
     if execute:
         LOGGER.debug('Exportando ECM %d-%s ', ecm.id, ecm)
+        result = None
         try:
             result = get_advwin_engine().execute(stmt)
         except Exception as exc:
-            result = None
             LOGGER.warning('Não foi possíve exportar ECM: %d-%s\n%s',
                            ecm.id,
                            ecm,
                            exc,
                            exc_info=(type(exc), exc, exc.__traceback__))
-        else:
+        finally:
             LOGGER.info('ECM %s: exportado', ecm)
             return result
     else:

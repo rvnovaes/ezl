@@ -57,8 +57,8 @@ class JuridGedMain(Base):
     __tablename__ = 'Jurid_Ged_Main'
     __table_args__ = (
         Index('IX_Jurid_Ged_Main_Responsavel', 'Responsavel', 'Link', 'ID_doc', 'Arq_Versao'),
+        {'implicit_returning': False}
     )
-
     Tabela_OR = Column(String(60, 'Latin1_General_CI_AS'))
     Codigo_OR = Column(String(50, 'Latin1_General_CI_AS'), index=True)
     Id_OR = Column(Integer)
