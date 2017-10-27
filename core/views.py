@@ -211,31 +211,27 @@ class SingleTableViewMixin(SingleTableView):
     @set_search_model_attrs
     def get_context_data(self, **kwargs):
         context = super(SingleTableViewMixin, self).get_context_data(**kwargs)
+        context['module'] = self.model.__module__
+        context['model'] = self.model.__name__
         try:
-            context['module'] = self.model.__module__
-            context['model'] = self.model.__name__
-            try:
-                context['nav_' + str(self.model._meta.verbose_name)] = True
-            except:
-                pass
-            context['form_name'] = self.model._meta.verbose_name
-            context['form_name_plural'] = self.model._meta.verbose_name_plural
-            generic_search = GenericSearchFormat(self.request, self.model, self.model._meta.fields)
-            args = generic_search.despatch()
-            if args:
-                table = eval(args)
-            else:
-                if kwargs.get('remove_invalid'):
-                    qs = self.filter_queryset(
-                        self.model.objects.filter(~Q(pk=kwargs.get('remove_invalid'))))
-                    table = self.table_class(qs)
-                else:
-                    qs = self.filter_queryset(self.model.objects.all())
-                    table = self.table_class(qs)
-            RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-            context['table'] = table
+            context['nav_' + str(self.model._meta.verbose_name)] = True
         except:
-            table = self.table_class(self.model.objects.none())
+            pass
+        context['form_name'] = self.model._meta.verbose_name
+        context['form_name_plural'] = self.model._meta.verbose_name_plural
+        generic_search = GenericSearchFormat(self.request, self.model, self.model._meta.fields)
+        args = generic_search.despatch()
+        if args:
+            table = eval(args)
+        else:
+            if kwargs.get('remove_invalid'):
+                qs = self.filter_queryset(
+                    self.model.objects.filter(~Q(pk=kwargs.get('remove_invalid'))))
+                table = self.table_class(qs)
+            else:
+                qs = self.filter_queryset(self.model.objects.all())
+                table = self.table_class(qs)
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         return context
 
@@ -289,6 +285,7 @@ def address_update(request, pk):
 class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Person
     table_class = PersonTable
+    ordering = ('legal_name', 'name', )
 
     @remove_invalid_registry
     def get_context_data(self, **kwargs):

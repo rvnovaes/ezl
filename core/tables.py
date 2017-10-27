@@ -22,7 +22,8 @@ class AddressTable(tables.Table):
         model = Address
         fields = ['street', 'number', 'complement', 'city_region', 'zip_code',
                   'country',
-                  'state', 'city', 'notes', 'address_type', 'is_active', 'edit_link', 'delete_link']
+                  'state', 'city', 'notes', 'address_type', 'is_active', 'edit_link',
+                  'delete_link']
         attrs = {'class': 'table table-hover'}
 
 # Logradouro, N, COmplemento, Bairro, Cidade, Estado, Cep, Pais, Observacao, Tipo, Ativo
@@ -87,6 +88,7 @@ class PersonTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/pessoas/' + str(record.pk) + '/'
         }
+        order_by = 'legal_name'
 
 
 class UserTable(tables.Table):

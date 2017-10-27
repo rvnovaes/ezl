@@ -4,6 +4,7 @@ from .models import TypeTask, DashboardViewModel
 
 
 class TaskTable(tables.Table):
+
     def __init__(self, *args, _overriden_value="Estado", **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -22,6 +23,7 @@ class TaskTable(tables.Table):
     refused_date = tables.DateColumn(format="d/m/Y")
 
     class Meta:
+        order_by = 'legal_name'
         model = DashboardViewModel
         sequence = ['selection', 'status', 'task_number', 'type_task', "person_executed_by", 'person_asked_by',
                     "final_deadline_date", 'delegation_date', 'acceptance_date', 'refused_date',
