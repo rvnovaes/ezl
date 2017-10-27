@@ -517,6 +517,7 @@ class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
     related_model = Task
     form_class = MovementForm
     table_class = TaskTable
+    related_ordering = ('-final_deadline_date', )
     template_name = 'lawsuit/movement_task_form.html'
     success_message = CREATE_SUCCESS_MESSAGE
 

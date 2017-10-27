@@ -431,6 +431,8 @@ def person_address_search_address_type(request):
 
 
 class GenericFormOneToMany(FormView, SingleTableView):
+    related_ordering = None
+
     def get_initial(self):
         if self.kwargs.get('lawsuit'):
             folder_id = LawSuit.objects.get(id=self.kwargs.get('lawsuit')).folder.id
@@ -500,10 +502,14 @@ class GenericFormOneToMany(FormView, SingleTableView):
         else:
             table = self.table_class(self.related_model.objects.none())
             if related_model_id:
-                src = ('self.table_class(self.related_model.objects.filter('
-                       '{0}__id=related_model_id).order_by("-pk"))')
-                table_class = src.format(field_related.name)
-                table = eval(table_class)
+                lookups = {'{}__id'.format(field_related.name): related_model_id}
+                qs = self.related_model.objects.filter(**lookups)
+
+                if self.related_ordering:
+                    qs = qs.order_by(*self.related_ordering)
+
+                table = self.table_class(qs)
+
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         # table = self.table_class(self.related_model.objects.none())
