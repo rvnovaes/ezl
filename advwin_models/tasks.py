@@ -36,7 +36,6 @@ class TaskObservation(Enum):
 
 @shared_task()
 def export_ecm(ecm_id, ecm=None, execute=True):
-    LOGGER.info('Exportando ECM %d-%s ', ecm.id, ecm)
     if ecm is None:
         ecm = Ecm.objects.get(pk=ecm_id)
 
@@ -55,6 +54,7 @@ def export_ecm(ecm_id, ecm=None, execute=True):
     }
     stmt = JuridGedMain.__table__.insert().values(**values)
     if execute:
+        LOGGER.debug('Exportando ECM %d-%s ', ecm.id, ecm)
         result = None
         try:
             result = get_advwin_engine().execute(stmt)
