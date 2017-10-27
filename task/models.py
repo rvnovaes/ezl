@@ -178,6 +178,9 @@ class Task(Audit, LegacyCode):
 
 
 def get_dir_name(instance, filename):
+    path = os.path.join('media', 'ECM', str(instance.task_id))
+    if not os.path.exists(path):
+        os.makedirs(path)
     return 'ECM/{0}/{1}'.format(instance.task.pk, filename)
 
 
