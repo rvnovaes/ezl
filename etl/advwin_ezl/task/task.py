@@ -48,7 +48,7 @@ def get_status_by_substatus(substatus):
     elif substatus == 90:
         return TaskStatus.BLOCKEDPAYMENT
     elif substatus == 80:
-        return TaskStatus.REFUSED
+        return TaskStatus.RETURN
     elif substatus == 30:
         return TaskStatus.OPEN
     else:
@@ -60,6 +60,7 @@ class TaskETL(GenericETL):
 
             SELECT
                 a.Data_confirmacao AS blocked_or_finished_date,
+                a.Status,
                 a.SubStatus AS status_code_advwin,
                 a.ident AS legacy_code,
                 a.Mov AS movement_legacy_code,
@@ -85,7 +86,7 @@ class TaskETL(GenericETL):
                     (cm.UsarOS = 1) AND
                     ((p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND
                     ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                    (a.SubStatus = 80 AND a.Status = 0)))
+                    (a.SubStatus = 80))) AND a.Status = '0' -- STATUS ATIVO
     """
     model = Task
     advwin_table = 'Jurid_agenda_table'
