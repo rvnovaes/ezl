@@ -3,6 +3,23 @@
 {% load material_form %}
 {% load staticfiles %}
 
+{% block extrahead %}
+    {{ block.super }}
+    <style type="text/css">
+
+        #id_city_container > label.active {
+            color: #0097a7;
+        }
+
+        .select2-container--focus .select2-selection {
+            border-color: #0097a7 !important;
+            /*border-bottom: 1px solid #0097a7;*/
+            /*box-shadow: 0 1px 00 solid #0097a7;*/
+        }
+
+    </style>
+{% endblock %}
+
 {% block form_title %}
 
     {% if object %}
@@ -15,4 +32,5 @@
 
 {% block extrajs %}
     {{ form.media }}
+    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
 {% endblock %}

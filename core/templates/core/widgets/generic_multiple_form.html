@@ -1,5 +1,6 @@
 {% extends 'inicial.html' %}
 {% load core_filters %}
+{% load staticfiles %}
 {% block content %}
     {% include 'core/widgets/messages.html' %}
     <div>
@@ -57,6 +58,8 @@
                 </div>
             </div>
             {{ form.media }}
+            <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
+
         </form>
         {% include 'core/widgets/generic_search_view.html' %}
         {% include 'core/widgets/generic_form.html' with link_ex=delete link_add=create %}

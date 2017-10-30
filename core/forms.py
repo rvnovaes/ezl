@@ -126,6 +126,8 @@ class AddressForm(BaseModelForm):
         required=True,
         widget=autocomplete.ListSelect2(url='city_autocomplete',
                                         attrs={
+                                            # 'data-dropdown-parent': '#id_city_container',
+                                            # 'data-container-css': '#id_city_container',
                                             'class': 'select-with-search material-ignore',
                                             'data-placeholder': 'Clique para selecionar a cidade',
                                             'data-minimum-input-length': 3}))
