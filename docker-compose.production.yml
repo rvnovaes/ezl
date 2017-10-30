@@ -1,5 +1,16 @@
 version: "3"
 services:
+  builder:
+    build:
+      context: .
+      dockerfile: containers/web/Dockerfile
+      args:
+        requirements_file: production.txt
+    image: ezl:latest
+    command: date
+    environment:
+      ENV: production
+
   nginx:
     ports:
       - "80:80"
@@ -7,14 +18,27 @@ services:
     depends_on:
       - web
       - certbot
+
   web:
     build:
       context: .
       dockerfile: containers/web/Dockerfile
+      args:
+        requirements_file: production.txt
     image: ezl:latest
     command: uwsgi --ini /app/config/uwsgi/uwsgi.ini
+    volumes:
+      - .:/app
+      - web-static:/app/staticfiles
+      - web-media:/app/media
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
     environment:
       ENV: production
+
+  luigi:
+    environment:
+      ENV: production
+
   certbot:
     build:
       context: .
@@ -23,3 +47,9 @@ services:
     volumes:
       - letsencrypt-www:/tmp/www
       - letsencrypt-etc:/etc/letsencrypt
+
+  tasks:
+    depends_on:
+      - builder
+      - db
+      - queues

@@ -1,4 +1,7 @@
 syntax: glob
+
+.coverage
+.cache
 *.pyc
 *.orig
 local_settings.py

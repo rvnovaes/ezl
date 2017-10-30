@@ -9,12 +9,17 @@
 
             <script type="text/javascript">
 
+                $(function () {
+                    $("input[name=execution_date]").attr({'required': true,
+                                                          'placeholder': 'Data de Cumprimento'});
+                });
+
                 //Função para tratar erro ao enviar formulário com justificativa de cumprimento em branco
                 function beforeSubmit() {
-                    var a = $("#notes_id").val;
+                    var a = $("#notes_id").val();
                     $('#task_detail').submit(function (e) {
                         e.preventDefault();
-                        if (!a.isEmpty) {
+                        if (! a.isEmpty) {
                             $('#confirmAction').modal('hide');
                             $('#survey').modal('show');
                         }
@@ -30,112 +35,193 @@
                     BLOCKEDPAYMENT: {text: "Glosar", icon: "money_off"},
                     RETURN: {text: "Retornar", icon: "assignment_late"}
                 };
+
                 function getId(value) {
-                    var actionButton = document.getElementById("actionButton");
-                    var nextText = document.getElementById("actionText");
-                    var id = value.id;
-                    var icon = document.getElementById("icon");
-                    var modalHeader = document.getElementById("modalHeader");
+                    var task_status = value.id;
 
-                    nextText.innerHTML = nextState[id]['text'];
-                    icon.innerHTML = nextState[id]['icon'];
+                    var $input = $("input[name=execution_date]");
+                    if ($input.length > 0) {
+                        var input = $input.get(0);
+                        if (! input.checkValidity()) {
+                            input.reportValidity();
+                            return false
+                        }
+                    }
 
-                    modalHeader.setAttribute("class", "panel-header panel-heading" + " " + id);
+                    $('#confirmAction').modal('show');
 
-                    actionButton.setAttribute("name", "action");
-                    actionButton.setAttribute("value", id);
+                    // $("#confirmAction").on('shown.bs.modal', function () {
+                        var actionButton = document.getElementById("actionButton");
+                        var nextText = document.getElementById("actionText");
+                        var icon = document.getElementById("icon");
+                        var modalHeader = document.getElementById("modalHeader");
+
+                        nextText.innerHTML = nextState[task_status]['text'];
+                        icon.innerHTML = nextState[task_status]['icon'];
+
+                        modalHeader.setAttribute("class", "panel-header panel-heading" + " " + task_status);
+
+                        actionButton.setAttribute("name", "action");
+                        actionButton.setAttribute("value", task_status);
+
+                        // alert(task_status);
+
+                    // });
+
+
+                    return true;
                 }
             </script>
             {% include 'core/widgets/messages.html' %}
             <div class="panel">
                 <div class="panel-heading {{ form.instance.status.name }}">
                     <div class="panel-title"><i class="material-icons">{{ form.instance.status.get_icon }}</i>
-                        <b>{{ form.instance.status|default_if_none:"" }}
-                            #{{ form.instance.id|default_if_none:"" }}
+                        <b>{{ form.instance.status }}
+                            #{{ form.instance.task_number }}
                             - {{ form.instance.type_task }}</b>
                     </div>
                 </div>
                 <div class="panel-body form-group is-focused">
                     <div class="form-row">
 
-                        <label>Dados do solicitante: </label><br>
-                        {{ form.instance.person_asked_by|capfirst|default_if_none:"" }}
-                        <br><br>
-                        <label>Descrição do serviço: </label><br>
-                        <p class="text-justify">{{ form.instance.description|default_if_none:"" }}</p>
-                        <br>
-                        <label>Detalhes do serviço: </label>
-                        <br>
-                        <span><b>Prazo:</b> {{ form.instance.final_deadline_date|localtime|default_if_none:"" }}</span>
-                        <br>
-                        <span><b>Recebida em:</b> {{ form.instance.delegation_date|localtime|default_if_none:"" }}</span>
-                        <br>
-                        <span><b>Serviço solicitado:</b> {{ form.instance.type_task|default_if_none:"" }}</span>
-                        <br>
-                        <span><b>Vara:</b> {{ form.instance.court_division|default_if_none:"" }}</span>
-                        <br>
-                        <span><b>Órgão:</b> {{ form.instance.court|default_if_none:"" }}</span>
-                        <br>
-                        <span><b>Endereço:</b> {{ form.instance.address|capfirst|default_if_none:"" }}</span>
+                        <table class="table table-striped">
+                            {% if form.instance.legacy_code %}
+                                <thead>
+                                    <tr>
+                                        <th>Número no Sistema Legado</th>
+                                        <th>
+                                            {{ form.instance.legacy_code }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                            {% endif %}
+                            <tbody>
+                                <tr>
+                                    <th>
+                                        Dados do solicitante
+                                    </th>
+                                    <td>
+                                        {{ form.instance.person_asked_by|capfirst|default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Descrição do serviço
+                                    </th>
+                                    <td>
+                                        <p class="text-justify">{{ form.instance.description.strip|default:"---" }}</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Prazo
+                                    </th>
+                                    <td>
+                                        {{ form.instance.final_deadline_date|localtime|default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Recebida em
+                                    </th>
+                                    <td>
+                                        {{ form.instance.delegation_date|localtime|default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Serviço solicitado
+                                    </th>
+                                    <td>
+                                        {{ form.instance.type_task|default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Vara
+                                    </th>
+                                    <td>
+                                        {{ form.instance.court_division|default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Orgão
+                                    </th>
+                                    <td>
+                                        {{ form.instance.court|default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Endereço
+                                    </th>
+                                    <td>
+                                        {{ form.instance.address|default:"---"|capfirst }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
                         <div class="hidden form-control">{{ form.survey_result }}</div>
-                        <br/>
+
                     </div>
                     <div class="form-group text-center">
                         {% if perms.task.view_delegated_tasks %}
-                            <a id="ACCEPTED" onclick="getId(this)" data-toggle="modal" data-target="#confirmAction"
+                            <button type="button" id="ACCEPTED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised ACCEPTED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
                                 <i class="material-icons left" style="color: white;">assignment_ind</i>
                                 Aceitar
-                            </a>
-                            <a id="REFUSED" onclick="getId(this)" data-toggle="modal" data-target="#confirmAction"
+                            </button>
+                            <a id="REFUSED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised REFUSED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}"><i
                                     class="material-icons left" style="color: white;">assignment_late</i>
                                 Recusar
                             </a>
                         {% endif %}
                         {% if perms.task.delegate_tasks %}
-                            <a id="DELEGATE" onclick="getId(this)" data-toggle="modal" data-target="#confirmAction"
+                            <button type="button" id="DELEGATE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised DELEGATE {% if not form.instance.status.name == 'DELEGATE' %}hidden{% endif %}"
                                href=""><i
                                     class="material-icons left" style="color: white">assignment_return</i>
                                 Delegar
-                            </a>
+                            </button>
                         {% endif %}
                         {% if perms.task.block_payment_tasks %}
-                            <a id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle="modal"
+                            <button type="button" id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle=""
                                data-target="#confirmAction"
                                class="btn btn-sm btn-raised BLOCKEDPAYMENT {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}"><i
                                     class="material-icons left" style="color: white;">money_off</i>
                                 Glosar
-                            </a>
+                            </button>
                         {% endif %}
                         {% if perms.task.validate_all_tasks %}
-                            <a id="FINISHED" onclick="getId(this)" data-toggle="modal" data-target="#confirmAction"
+                            <button type="button" id="FINISHED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised FINISHED {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}"
                                href=""><i
                                     class="material-icons left" style="color: white">gavel</i>
                                 Finalizar
-                            </a>
+                            </button>
                         {% endif %}
                         {% if perms.task.return_all_tasks %}
-                            <a id="RETURN" onclick="getId(this)" data-toggle="modal" data-target="#confirmAction"
+                            <button type="button" id="RETURN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised RETURN {% if not  form.instance.status.name == 'DONE' %}hidden{% endif %}"
                                href=""><i
                                     class="material-icons left" style="color: white">assignment_return</i>
                                 Retornar
-                            </a>
+                            </button>
                         {% endif %}
                         {% if perms.task.view_delegated_tasks %}
                             {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
                                 <div  class="col-sm-3">
                                     <a>{{ form.execution_date }}</a>
                                 </div>
-                                <a onclick="getId(this)" id="DONE" type="submit" data-toggle="modal"
+                                <button type="button" onclick="getId(this)" id="DONE" type="submit" data-toggle=""
                                    data-target="#confirmAction"
                                    class="btn btn-sm btn-raised DONE ">
                                     <i class="material-icons left" style="color: white">assignment_turned_in</i>
                                     Cumprir
-                                </a>
+                                </button>
                             {% endif %}
                         {% endif %}
                     </div>
@@ -205,7 +291,7 @@
                                             <td id="cell-table" style="font-size: small">
                                                 <i class="material-icons" id=""
                                                    style="cursor: pointer; font-size: medium;"
-                                                   data-toggle="modal"
+                                                   data-toggle=""
                                                    data-target="#confirmDelete-{{ ecm.id }}">delete</i>
                                             </td>
                                         {% endif %}
@@ -226,7 +312,7 @@
                                                                 data-dismiss="modal">
                                                             Não
                                                         </button>
-                                                        <button value="1" id="delete-ecm-{{ ecm.id }}"
+                                                        <button id="delete-ecm-{{ ecm.id }}"
                                                                 style="width: 95px!important;"
                                                                 class="btn btn-sm btn-raised btn-primary"
                                                                 data-dismiss="modal">Sim
@@ -266,7 +352,7 @@
             </div>
 
             <div class="panel panel-primary">
-                <div class="panel-heading " data-toggle="collapse" data-target="#history" id="header-attachment"
+                <div class="panel-heading " data-toggle="collapse" data-target="#history" id="header-history"
                      onclick="toggleArrowHist()">
                     <div class="panel-title"><i class="material-icons">history</i>
                         <b>Histórico</b>
@@ -342,24 +428,23 @@
                                 </button>
                                 {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
                                     {% if form.instance.type_task.survey_type %}
-
-
-                                        <button id=surveyform" value="1"
-                                                value="1" id="actionButton"
-                                                id="actionButton" onclick="beforeSubmit()"
-                                                style="width: 95px!important;" type="submit"
-                                                {#                                        <input type="button" on onkeydown="" onkeypress="" onkeyup=""  onclick="showValue()"  value="Sim" id="actionButton"#}
+                                        <button id="actionButton"
+                                                type="submit"
+                                                onclick="beforeSubmit()"
+                                                style="width: 95px!important;"
                                                 class="btn btn-sm btn-raised btn-primary">Sim
                                         </button>
                                     {% else %}
-                                        <button value="1" id="actionButton"
-                                                type="submit" style="width: 95px!important;"
+                                        <button id="actionButton"
+                                                type="submit"
+                                                style="width: 95px!important;"
                                                 class="btn btn-sm btn-raised btn-primary">Sim
                                         </button>
                                     {% endif %}
 
                                 {% else %}
-                                    <button value="1" id="actionButton" style="width: 95px!important;"
+                                    <button id="actionButton"
+                                            style="width: 95px!important;"
                                             type="submit" class="btn btn-sm btn-raised btn-primary">Sim
                                     </button>
                                 {% endif %}

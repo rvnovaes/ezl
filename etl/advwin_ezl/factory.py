@@ -144,7 +144,9 @@ class InvalidObjectFactory(object):
         return model.objects.get(id=1)
 
     def restart_table_id(self):
+        print('=============ANTES DO TRUNCATE')
         if settings['truncate_all_tables']:
+            print('=============PASSEI DENTRO DO TRUNCATE')
             with connection.cursor() as cursor:
                 for model in self.models:
                     cursor.execute('TRUNCATE TABLE ' +

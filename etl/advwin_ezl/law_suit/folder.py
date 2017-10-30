@@ -24,13 +24,15 @@ class FolderETL(GenericETL):
               p.Status = 'Ativa' AND
               p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '' AND
               p.Cliente IS NOT NULL AND p.Cliente <> '' AND
-              ((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0))
+              ((a.prazo_lido = 0 AND a.SubStatus = 30) OR 
+              (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
+              AND a.Advogado='12157458697' -- marcio.batista (Em teste)
+              
                   """
     has_status = True
 
     @validate_import
     def config_import(self, rows, user, rows_count):
-        log_file = open('log_file.txt', 'w')
         for row in rows:
             rows_count -= 1
             try:

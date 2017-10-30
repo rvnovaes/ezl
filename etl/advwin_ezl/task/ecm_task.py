@@ -1,8 +1,8 @@
-#!/usr/bin/python
-# -*- encoding: utf-8 -*-
+from django.db.utils import IntegrityError
+
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL
-from django.db.utils import IntegrityError
+from etl.utils import ecm_path_advwin2ezl
 from task.models import Ecm, Task
 
 
@@ -25,7 +25,9 @@ class EcmEtl(GenericETL):
                       AND G.Link IS NOT NULL
                       AND cm.UsarOS = 1
                       AND (p.Status = 'Ativa' OR p.Dt_Saida IS NULL)
-                      AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR (a.SubStatus = 80 AND a.Status = 0))
+                      AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
+                      (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
+                      AND a.Advogado='12157458697' -- marcio.batista (Em teste)
     """
     model = Ecm
 
@@ -43,7 +45,7 @@ class EcmEtl(GenericETL):
         for row in rows:
             try:
                 if 'Agenda' in row['path']:
-                    path = 'ECM/' + row['path'].split('Agenda\\')[1].replace('\\', '/')
+                    path = ecm_path_advwin2ezl(row['path'])
                     tasks = Task.objects.filter(legacy_code=row['task_legacy_code'])
                     for task in tasks:
                         try:
@@ -54,12 +56,12 @@ class EcmEtl(GenericETL):
                                              alter_user=user, updated=False)
                             ecm.save()
                             self.debug_logger.debug(
-                                "ECM,%s,%s,%s,%s" % (
+                                'ECM,%s,%s,%s,%s' % (
                                     str(row['ecm_legacy_code']), str(row['task_legacy_code']),
                                     str(row['path']), self.timestr))
                         except IntegrityError as e:
                             print(e)
             except Exception as e:
                 self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de ECM: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
+                    'Ocorreu o seguinte erro na importacao de ECM: ' + str(rows_count) + ',' + str(
+                        e) + ',' + self.timestr)

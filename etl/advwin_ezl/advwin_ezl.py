@@ -21,9 +21,11 @@ import datetime
 from functools import wraps, reduce
 
 from sqlalchemy import text
-from connections.db_connection import connect_db
+from connections.db_connection import connect_db, get_advwin_engine
 from core.utils import LegacySystem
 from config.config import get_parser
+from django.utils.lru_cache import lru_cache
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 parser = get_parser()
@@ -110,7 +112,11 @@ def validate_import(f):
 class GenericETL(object):
     EZL_LEGACY_CODE_FIELD = 'legacy_code'
 
-    advwin_engine = connect_db(parser, config_connection)
+    @property
+    @lru_cache(maxsize=None)
+    def advwin_engine(self):
+        return connect_db(parser, config_connection)
+
     model = None
     import_query = None
     export_statements = None

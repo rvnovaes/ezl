@@ -1,0 +1,85 @@
+{% extends 'inicial.html' %}
+
+{% load core_filters %}
+{% load staticfiles %}
+
+{% block javascript %}
+    {{ block.super }}
+    <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
+    <script src="{% static "file_form/file_form.js" %}"></script>
+    <script>
+       $(function() {
+           initUploadFields($('#task_form'));
+       });
+    </script>
+    {% endblock %}
+
+{% block extra_head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static "fileuploader.css" %}">
+{% endblock %}
+
+{% block content %}
+    {% include 'core/widgets/messages.html' %}
+    <form id="task_form" action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        <div class="col-lg-12">
+            <fieldset>
+                <div class="form-row">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h1 class="panel-title">{{ form.title }}</h1>
+                        </div>
+                        <div class="panel-body">
+                            {% for field in form %}
+                                {% if field.name != 'documents' %}
+                                    <div class="form-group col-sm-3">
+                                        <label>
+                                            {{ field | append_ast_if_req | label_capitalizer}}{{ field }}
+                                        </label>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="col-lg-12">
+            <fieldset>
+                <div class="form-row">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h1 class="panel-title">Anexos</h1>
+                        </div>
+                        <div class="panel-body">
+                            <fieldset>
+
+                                {{ form.documents }}
+
+                                {% include 'django_file_form/upload_template.html' %}
+
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="form-row  text-center">
+            <a class="btn btn-sm btn-raised btn-default"
+               href="{% url 'movement_update' view.kwargs.lawsuit view.kwargs.movement %}"><i
+                    class="material-icons left">clear</i>
+                Cancelar
+            </a>
+            <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
+                    class="material-icons left">done</i>
+                Salvar
+            </button>
+        </div>
+
+    </form>
+
+{% endblock content %}

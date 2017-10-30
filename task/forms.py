@@ -1,15 +1,16 @@
 from datetime import datetime
 
-import pytz
 from django import forms
 from django.forms import ModelForm
+from django.utils import timezone
+
+from django_file_form.forms import FileFormMixin, MultipleUploadedFileField
 
 from core.models import Person
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimepicker, MDDatePicker
-from ezl import settings
 from lawsuit.forms import BaseForm
-from .models import Task, Ecm, TypeTask
+from task.models import Task, TypeTask
 
 
 class TaskForm(BaseForm):
@@ -88,10 +89,18 @@ class TaskForm(BaseForm):
                                              'id': 'details_id'}))
 
 
+class TaskCreateForm(FileFormMixin, TaskForm):
+    documents = MultipleUploadedFileField(required=False)
+
+    class Meta(TaskForm.Meta):
+        fields = TaskForm.Meta.fields + ['documents']
+
+
 class TaskDetailForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
         self.fields['execution_date'].widget.min_date = self.instance.acceptance_date
+        self.fields['execution_date'].widget.max_date = timezone.now()
 
     class Meta:
         model = Task
@@ -100,12 +109,12 @@ class TaskDetailForm(ModelForm):
     survey_result = forms.CharField(required=False, initial=None)
 
     execution_date = forms.DateTimeField(required=False,
-                                         initial=datetime.utcnow().replace(
-                                             tzinfo=pytz.timezone(settings.TIME_ZONE)),
+                                         initial=timezone.now(),
                                          label='Data de Cumprimento',
-                                         widget=MDDateTimepicker(attrs={'class': 'form-control'},
-                                                                 format='DD/MM/YYYY HH:mm',
-                                                                 ))
+                                         widget=MDDateTimepicker(attrs={
+                                                                    'class': 'form-control',
+                                                                 },
+                                                                 format='DD/MM/YYYY HH:mm'))
     notes = forms.CharField(
         required=True,
         initial='',
@@ -114,14 +123,6 @@ class TaskDetailForm(ModelForm):
             attrs={'class': 'form-control', 'cols': '5', 'id': 'notes_id'}
         )
     )
-
-
-class EcmForm(BaseForm):
-    class Meta:
-        model = Ecm
-        fields = ['path', 'task']
-
-    path = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
 
 
 class TypeTaskForm(BaseForm):

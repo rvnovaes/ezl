@@ -1,16 +1,6 @@
 import sys
-import django
 import os
-dir = os.path.dirname(os.path.realpath(__file__))
-position = dir.find('easy_lawyer_django')
-sys.path.append(dir[:position] + 'easy_lawyer_django/')
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ezl.settings'
-django.setup()
-
-import subprocess
-
-from time import sleep
-
+from datetime import datetime
 from etl.advwin_ezl import signals
 from etl.advwin_ezl.account.user import UserETL
 from etl.advwin_ezl.core.person import PersonETL
@@ -30,7 +20,7 @@ from etl.advwin_ezl.task.ecm_task import EcmEtl
 from django.core.management import call_command
 from django.core.management.commands import loaddata, migrate
 import luigi
-from ezl import settings
+from django.conf import settings
 from etl.advwin_ezl.ezl_exceptions.params_exception import ParamsException
 from config.config import get_parser
 config_parser = get_parser()
@@ -45,54 +35,43 @@ except KeyError as e:
     sys.exit(0)
 
 
-# A ordem de inclusão das fixtures é importante, favor não alterar
-fixtures = ['country.xml', 'state.xml', 'court_district.xml', 'city.xml', 'type_movement.xml',
-            'type_task.xml']
-
-
-# ipc da funcao get_folder_ipc significa inter process communication
-def get_folder_ipc(task):
-    return settings.BASE_DIR + '/etl/advwin_ezl/tmp/%s.ezl' % task.task_id
+def get_target_path(task):
+    return os.path.join(settings.LUIGI_TARGET_PATH,
+                        "{}.lock".format(task.task_id))
 
 
 def load_fixtures():
+    # A ordem de inclusão das fixtures é importante, favor não alterar
+    fixtures = ['country.xml', 'state.xml', 'court_district.xml', 'city.xml',
+                'type_movement.xml', 'type_task.xml']
+
     for fixture in fixtures:
         call_command(loaddata.Command(), fixture, verbosity=0)
 
 
-def load_luigi_scheduler():
-    if subprocess.run(['pgrep', '-f', 'luigid'], stdout=subprocess.PIPE).stdout.decode(
-            "utf-8") is '':
-        command = 'echo {0}|sudo -S luigid --port {1} --background'.format(
-            linux_password, luigi_port)
-        os.system(command)
-        # tempo necessário para inicialização do luigi scheduler antes da primeira tarefa NAO REMOVER
-        sleep(10)
-
-
 class MigrationTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def run(self):
         # Injeção de contexto (Carrega modulo do signals)
         signals
         call_command(migrate.Command(), verbosity=0)
         print('Migration finalizada...')
-        f = open(get_folder_ipc(self),
-                 'w')
-        f.close()
+        self.output().open("w").close()
 
 
 # task inicial
 class ConfigTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield MigrationTask()
+        yield MigrationTask(self.date_interval)
 
     def run(self):
         signals
@@ -101,226 +80,216 @@ class ConfigTask(luigi.Task):
         InvalidObjectFactory().restart_table_id()
         InvalidObjectFactory.create()
         load_fixtures()
-        print('Configuração inicial finalizada...')
-        f = open(get_folder_ipc(self),
-                 'w')
-        f.close()
+        self.output().open("w").close()
 
 
 class UserTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield ConfigTask()
+        yield ConfigTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         UserETL().import_data()
 
 
 class CourtDivisionTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield UserTask()
+        yield UserTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         CourtDivisionETL().import_data()
 
 
 class InstanceTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield CourtDivisionTask()
+        yield CourtDivisionTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         InstanceETL().import_data()
 
 
 class PersonTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield InstanceTask()
+        yield InstanceTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         PersonETL().import_data()
 
 
 class OrganTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self)
-        )
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield PersonTask()
+        yield PersonTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         OrganETL().import_data()
 
+
 class ContactMechanismTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield OrganTask()
+        yield OrganTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         ContactMechanismETL().import_data()
 
 
 class AddressTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield ContactMechanismTask()
+        yield ContactMechanismTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         AddressETL().import_data()
 
 
 class FolderTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield AddressTask()
+        yield AddressTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         FolderETL().import_data()
 
 
 class LawsuitTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield FolderTask()
+        yield FolderTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         LawsuitETL().import_data()
 
 
 class TypeMovementTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield LawsuitTask()
+        yield LawsuitTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         TypeMovementETL().import_data()
 
 
 class TypeTaskTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield TypeMovementTask()
+        yield TypeMovementTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         TypeTaskETL().import_data()
 
 
 class MovementTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield TypeTaskTask()
+        yield TypeTaskTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         MovementETL().import_data()
 
 
 class TaskTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield MovementTask()
+        yield MovementTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         TaskETL().import_data()
 
 
 class EcmTask(luigi.Task):
+    date_interval = luigi.DateHourParameter(default=datetime.now())
+
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield TaskTask()
+        yield TaskTask(self.date_interval)
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         EcmEtl().import_data()
 
 
 class TaskExport(luigi.Task):
     def output(self):
-        return luigi.LocalTarget(
-            path=get_folder_ipc(self))
+        return luigi.LocalTarget(path=get_target_path(self))
 
     def run(self):
-        f = open(get_folder_ipc(self), 'w')
-        f.close()
+        self.output().open("w").close()
         TaskETL().export_data()
 
 
 def main():
     try:
-        # E necessario remover os arquivos.ezl dentro do diretorio tmp para executar novamente
-        os.system('echo {0}|sudo -S rm -rf {1}/etl/advwin_ezl/tmp/*.ezl'.format(
-            linux_password, settings.BASE_DIR))
-        # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
-        load_luigi_scheduler()
         luigi.run(main_task_cls=EcmTask())
     except ParamsException as e:
         print(e)

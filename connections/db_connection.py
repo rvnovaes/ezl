@@ -1,5 +1,9 @@
 from enum import Enum
+
 from sqlalchemy import create_engine
+import pymssql
+
+from config.config import get_parser
 
 
 class DbType(Enum):
@@ -28,11 +32,38 @@ def connect_db(config_parser, config_session):
     # indica o driver de acordo com o banco configurado
     if db_type == DbType.SQL_SERVER.name.lower():
         driver = 'mssql+pymssql'
+
+        def connect():
+            if ':' in server:
+                host, port = server.split(':')
+            else:
+                host = server
+                port = 1433
+
+            return pymssql.connect(host=host,
+                                   user=user,
+                                   password=password,
+                                   database=database,
+                                   port=port)
+
+        engine = create_engine(
+            'mssql+pymssql://', creator=connect)
+
+        assert engine.connect()
+
+        return engine
+
     elif db_type == DbType.POSTGRESQL.name.lower():
         driver = 'postgresql'
 
-    # monta string de conexao
     url = driver + '://{0}:{1}@{2}/{3}'.format(user, password, server, database)
+
     engine = create_engine(url, echo=True)
 
     return engine
+
+
+def get_advwin_engine():
+    parser = get_parser()
+    source = dict(parser.items('etl'))
+    return connect_db(parser, source['connection_name'])

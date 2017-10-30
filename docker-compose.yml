@@ -1,17 +1,59 @@
 version: "3"
 
+volumes:
+  db-data:
+  db-advwin-data:
+  web-media:
+  web-static:
+  letsencrypt-www:
+  letsencrypt-etc:
+
 services:
   web:
+    image: ezl:latest
     volumes:
       - .:/app
       - web-static:/app/staticfiles
       - web-media:/app/media
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
     logging:
       driver: "json-file"
       options:
         max-size: "100m"
+
+  luigi:
+    image: ezl:latest
+    command: bash -c "cron && crontab /etc/cron.d/luigi && luigid"
+    volumes:
+      - .:/app
+      - ./containers/luigi/cron:/etc/cron.d/luigi
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+    ports:
+      - "8082:8082"
     depends_on:
+      - builder
       - db
+
+  tasks:
+    image: ezl:latest
+    command: celery -A ezl worker -l debug --concurrency 10 -P eventlet
+    environment:
+      ENV: development
+      PYTHONPATH: /app
+    volumes:
+      - .:/app
+    depends_on:
+      - builder
+      - db
+      - queues
+
+  queues:
+    restart: unless-stopped
+    image: rabbitmq:latest
+
   nginx:
     image: nginx:1.13
     volumes:
@@ -20,14 +62,18 @@ services:
       - web-media:/usr/share/nginx/html/media
       - letsencrypt-www:/usr/share/nginx/html/certbot
       - letsencrypt-etc:/etc/letsencrypt
+      - /mnt/windows_ecm/Agenda:/usr/share/nginx/html/media/ECM
     depends_on:
       - web
+
   db:
     image: postgres:9.6
     environment:
       POSTGRES_DB: ezl
       POSTGRES_USER: ezl
       POSTGRES_PASSWORD: ezl
+    ports:
+      - "127.0.0.1:57002:5432"
     volumes:
       - "db-data:/var/lib/postgresql/data"
       - "./containers/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
@@ -35,9 +81,11 @@ services:
       driver: "json-file"
       options:
         max-size: "100m"
-volumes:
-  db-data:
-  web-media:
-  web-static:
-  letsencrypt-www:
-  letsencrypt-etc:
+
+#  db_advwin:
+#    image: microsoft/mssql-server-linux:2017-latest
+#    environment:
+#      ACCEPT_EULA: Y
+#      MSSQL_SA_PASSWORD: DB@advwinOn1Tw2Thre3
+#    volumes:
+#      - "db-advwin-data:/var/opt/mssql"

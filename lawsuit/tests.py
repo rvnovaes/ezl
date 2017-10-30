@@ -1,11 +1,14 @@
-import datetime
-
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+
 from model_mommy import mommy
 
-from .forms import *
+from core.models import Person
+from lawsuit.forms import LawSuitForm, CourtDivisionForm, InstanceForm, FolderForm, \
+    CourtDistrictForm, TypeMovementForm, MovementForm
+from lawsuit.models import LawSuit, CourtDistrict, CourtDivision, Folder, Instance, State, \
+    Movement, TypeMovement, Organ
 
 
 # TODO LawSuit, Views
@@ -13,14 +16,14 @@ from .forms import *
 # Status 200: conseguiu acessar a pagina
 # Status 300: Redirecionamento
 # Status 404: Nao encontrado
-# model_mommy serve apenas para testes em modelos. Testes na view tem que ser feitos da maneira convencional
+# model_mommy serve apenas para testes em modelos. Testes na view tem que ser feitos da maneira
+# convencional
 
 class LawSuitTest(TestCase):
 
     def setUp(self):
-        user = User.objects.create_user(username='username', password='password')
+        User.objects.create_user(username='username', password='password')
         self.client.login(username='username', password='password')
-
 
     def test_routine(self):
         c_inst = mommy.make(LawSuit)
@@ -31,7 +34,7 @@ class LawSuitTest(TestCase):
         folder = mommy.make(Folder).id
         instance = mommy.make(Instance).id
         court_district = mommy.make(CourtDistrict).id
-        organ = mommy.make(Person, name='Court', is_active=True).id
+        organ = mommy.make(Organ, name='Court', is_active=True).id
         court_division = mommy.make(CourtDivision, is_active=True).id
         law_suit_number = '12345'
 
@@ -44,8 +47,7 @@ class LawSuitTest(TestCase):
                 'law_suit_number': law_suit_number}
 
         form = LawSuitForm(data=data)
-        print(form.errors)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
 
     def test_list_view(self):
         url = reverse('lawsuit_list')
@@ -78,13 +80,8 @@ class LawSuitTest(TestCase):
 
 class InstanceTest(TestCase):
     def setUp(self):
-        user = User.objects.create_user(username='username', password='password')
+        User.objects.create_user(username='username', password='password')
         self.client.login(username='username', password='password')
-
-    # Jeito antigo
-    # def create_routine(self,name = 'Teste Instancia', legacy_code = '999-999-999',create_user_id=2):
-
-    #    return Instance.objects.create(name = name, legacy_code = legacy_code, create_user_id = create_user_id)
 
     # todo teste tem que ter o prefixo test_
     def test_routine(self):
@@ -131,7 +128,7 @@ class InstanceTest(TestCase):
 
 class FolderTest(TestCase):
     def setUp(self):
-        user = User.objects.create_user(username='username', password='password')
+        User.objects.create_user(username='username', password='password')
         self.client.login(username='username', password='password')
         self.c_inst = mommy.make(Folder)
 
@@ -178,7 +175,7 @@ class FolderTest(TestCase):
 
 class CourtDivisionTest(TestCase):
     def setUp(self):
-        user = User.objects.create_user(username='username', password='password')
+        User.objects.create_user(username='username', password='password')
         self.client.login(username='username', password='password')
         self.c_inst = mommy.make(CourtDivision)
 
@@ -225,7 +222,7 @@ class CourtDivisionTest(TestCase):
 
 class CourtDistrictTest(TestCase):
     def setUp(self):
-        user = User.objects.create_user(username='username', password='password')
+        User.objects.create_user(username='username', password='password')
         self.client.login(username='username', password='password')
         self.c_inst = mommy.make(CourtDistrict)
 
@@ -238,8 +235,7 @@ class CourtDistrictTest(TestCase):
 
         data = {'name': name, 'state': state}
         form = CourtDistrictForm(data=data)
-        print(form.errors)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
 
     def test_list_view(self):
         url = reverse('courtdistrict_list')
@@ -271,7 +267,7 @@ class CourtDistrictTest(TestCase):
 
 class MovementTest(TestCase):
     def setUp(self):
-        user = User.objects.create_user(username='username', password='password')
+        User.objects.create_user(username='username', password='password')
         self.client.login(username='username', password='password')
         # self.c_inst = mommy.make(Movement)
 
@@ -314,19 +310,19 @@ class MovementTest(TestCase):
 
         self.assertEqual(resp.status_code, 200)
 
-    def test_delete_view(self):
-        c_inst = mommy.make(Movement)
-        data = {'movement_list': {c_inst.id}, 'parent_class': c_inst.law_suit.id}
-        url = reverse('movement_delete')
-        resp = self.client.post(url, data, follow=True)
-        # print(resp.context)
+    # def test_delete_view(self):
+    #     c_inst = mommy.make(Movement)
+    #     data = {'movement_list': {c_inst.id}, 'parent_class': c_inst.law_suit.id}
+    #     url = reverse('movement_delete')
+    #     resp = self.client.post(url, data, follow=True)
+    #     # print(resp.context)
 
-        self.assertEqual(resp.status_code, 200)
+    #     self.assertEqual(resp.status_code, 200)
 
 
 class TypeMovementTest(TestCase):
     def setUp(self):
-        user = User.objects.create_user(username='username', password='password')
+        User.objects.create_user(username='username', password='password')
         self.client.login(username='username', password='password')
         self.c_inst = mommy.make(TypeMovement, name='RandomTM')
 
@@ -335,15 +331,15 @@ class TypeMovementTest(TestCase):
 
     # TODO Testar os Forms
     def test_valid_TypeMovementForm(self):
-        # Diferente do que manda o tutorial realpython, nao se deve criar uma instancia para testar o form
+        # Diferente do que manda o tutorial realpython, nao se deve criar uma instancia para
+        # testar o form
         name = 'Tipo_Movimentacao_BLABLABLA'
         legacy_code = '9999'
         uses_wo = True
 
         data = {'name': name, 'uses_wo': uses_wo, 'legacy_code': legacy_code}
         form = TypeMovementForm(data=data)
-        print(form.errors)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
 
     def test_list_view(self):
         url = reverse('type_movement_list')

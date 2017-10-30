@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 if ENV is None:
-    logger.fatal('Environment variable ENV is missing')
-    sys.exit(1)
+    logger.warning('Environment variable ENV is missing. Using development environment.')
+    ENV = 'development'
 
 
 def get_parser():

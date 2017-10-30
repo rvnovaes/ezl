@@ -1,13 +1,17 @@
 import datetime
 import os
 import sys
+import tempfile
 
 from django.urls import reverse_lazy
 
 from config.config import get_parser
 
+MUST_LOGIN = True
 
-CELERY_BROKER_URL = 'amqp://guest:guest@rabbit:5672//'
+CELERY_BROKER_URL = 'amqp://guest:guest@queues:5672/'
+
+CELERY_TASK_ALWAYS_EAGER = True
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,8 +26,8 @@ try:
     database = source['database']
     user = source['user']
     password = source['password']
-    host = source['host']
-    port = source['port']
+    host = os.environ.get('DB_HOST', source['host'])
+    port = os.environ.get('DB_PORT', source['port'])
     environment = source['environment']
     email_use_ssl = source['email_use_ssl']
     email_host = source['email_host']
@@ -65,6 +69,8 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+
+
     'material.theme.teal',
     'material',
 
@@ -85,10 +91,17 @@ INSTALLED_APPS = [
 
     'allauth',
     'allauth.account',
+
     'celery',
+
     'django_tables2',
-    'bootstrap3',
     'django_filters',
+
+    'bootstrap3',
+
+    'django_file_form',
+    'django_file_form.ajaxuploader',
+
     'debug_toolbar',
     'django_cleanup',
     # Autocomplete
@@ -151,6 +164,13 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(tempfile.gettempdir(), 'django_cache'),
+    }
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 if environment == 'development':
@@ -203,8 +223,7 @@ STATICFILES_DIRS = (
 # Pasta para qual os arquivos estaticos sao copiados com manage.py collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_ROOT = '/opt/files_easy_lawyer/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
 
@@ -235,6 +254,8 @@ LINK_TO_RESTORE_DB_DEMO = 'http://13.68.213.60:8001'
 #     'dsn': ('https://8117af934e9c436c8ad81a66fd875912'
 #             ':d00c54e22db046b19a7dcae5677126db@sentry.io/224925'),
 # }
+
+LUIGI_TARGET_PATH = os.path.join(BASE_DIR, 'luigi_targets')
 
 LOGGING = {
     'version': 1,
@@ -300,6 +321,11 @@ LOGGING = {
         'handlers': ['console'],
     },
     'loggers': {
+        'advwin_models.tasks': {
+            'handlers': [
+                'console', 'error_logfile', 'ezl_logfile', 'debug_logfile', 'development_logfile',
+            ],
+        },
         'coffeehouse': {
             'handlers': ['development_logfile'],
          },

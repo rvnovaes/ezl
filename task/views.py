@@ -17,16 +17,15 @@ from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
-    ERROR_FILE_EXITS_MESSAGE, DELETE_EXCEPTION_MESSAGE, success_sent, success_delete
+    DELETE_EXCEPTION_MESSAGE, success_sent, success_delete
 from core.models import Person
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
+from task.filters import TaskFilter
+from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
+from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from task.signals import send_notes_execution_date
-
-from .filters import TaskFilter
-from .forms import TaskForm, TaskDetailForm, TypeTaskForm
-from .models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
-from .tables import TaskTable, DashboardStatusTable, TypeTaskTable
+from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable
 
 
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -36,34 +35,44 @@ class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
 
 class TaskCreateView(AuditFormMixin, CreateView):
     model = Task
-    form_class = TaskForm
+    form_class = TaskCreateForm
     success_url = reverse_lazy('task_list')
     success_message = CREATE_SUCCESS_MESSAGE
+    template_name_suffix = '_create_form'
 
     def get_initial(self):
         if self.kwargs.get('movement'):
             lawsuit_id = Movement.objects.get(id=self.kwargs.get('movement')).law_suit_id
             self.kwargs['lawsuit'] = lawsuit_id
+
         if isinstance(self, CreateView):
             self.form_class.declared_fields['is_active'].initial = True
             self.form_class.declared_fields['is_active'].disabled = True
 
         elif isinstance(self, UpdateView):
             self.form_class.declared_fields['is_active'].disabled = False
+
         return self.initial.copy()
 
     def form_valid(self, form):
+        task = form.instance
         form.instance.movement_id = self.kwargs.get('movement')
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
         form.instance.__server = self.request.environ['HTTP_HOST']
-        super(TaskCreateView, self).form_valid(form)
-        return HttpResponseRedirect(self.success_url)
+        response = super(TaskCreateView, self).form_valid(form)
+
+        for document in form.cleaned_data['documents']:
+            task.ecm_set.create(path=document,
+                                create_user=task.create_user)
+
+        form.delete_temporary_files()
+
+        return response
 
     def get_success_url(self):
-        self.success_url = reverse('movement_update',
-                                   kwargs={'lawsuit': self.kwargs['lawsuit'],
-                                           'pk': self.kwargs['movement']})
-        super(TaskCreateView, self).get_success_url()
+        return reverse('movement_update',
+                       kwargs={'lawsuit': self.kwargs['lawsuit'],
+                               'pk': self.kwargs['movement']})
 
 
 class TaskUpdateView(AuditFormMixin, UpdateView):
@@ -217,11 +226,9 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
         for file in files:
 
             ecm = Ecm(path=file,
-
                       task=Task.objects.get(id=task),
                       create_user_id=str(request.user.id),
-                      create_date=timezone.now()
-                      )
+                      create_date=timezone.now())
 
             try:
                 ecm.save()
@@ -238,19 +245,16 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
 
             except OperationalError:
                 data = {'success': False,
-                        'message': operational_error_create()
-                        }
+                        'message': operational_error_create()}
 
             except IOError:
 
                 data = {'is_deleted': False,
-                        'message': ioerror_create()
-                        }
+                        'message': ioerror_create()}
 
             except Exception:
                 data = {'success': False,
-                        'message': exception_create()
-                        }
+                        'message': exception_create()}
 
         return JsonResponse(data)
 
@@ -324,12 +328,6 @@ def delete_ecm(request, pk):
         data = {'is_deleted': False,
                 'message': integrity_error_delete()
                 }
-
-    except FileExistsError:
-        data = {'is_deleted': False,
-                'message': ERROR_FILE_EXITS_MESSAGE
-                }
-
     except Exception:
         data = {'is_deleted': False,
                 'message': DELETE_EXCEPTION_MESSAGE,

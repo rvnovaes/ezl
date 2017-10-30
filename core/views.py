@@ -211,31 +211,27 @@ class SingleTableViewMixin(SingleTableView):
     @set_search_model_attrs
     def get_context_data(self, **kwargs):
         context = super(SingleTableViewMixin, self).get_context_data(**kwargs)
+        context['module'] = self.model.__module__
+        context['model'] = self.model.__name__
         try:
-            context['module'] = self.model.__module__
-            context['model'] = self.model.__name__
-            try:
-                context['nav_' + str(self.model._meta.verbose_name)] = True
-            except:
-                pass
-            context['form_name'] = self.model._meta.verbose_name
-            context['form_name_plural'] = self.model._meta.verbose_name_plural
-            generic_search = GenericSearchFormat(self.request, self.model, self.model._meta.fields)
-            args = generic_search.despatch()
-            if args:
-                table = eval(args)
-            else:
-                if kwargs.get('remove_invalid'):
-                    qs = self.filter_queryset(
-                        self.model.objects.filter(~Q(pk=kwargs.get('remove_invalid'))))
-                    table = self.table_class(qs)
-                else:
-                    qs = self.filter_queryset(self.model.objects.all())
-                    table = self.table_class(qs)
-            RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-            context['table'] = table
+            context['nav_' + str(self.model._meta.verbose_name)] = True
         except:
-            table = self.table_class(self.model.objects.none())
+            pass
+        context['form_name'] = self.model._meta.verbose_name
+        context['form_name_plural'] = self.model._meta.verbose_name_plural
+        generic_search = GenericSearchFormat(self.request, self.model, self.model._meta.fields)
+        args = generic_search.despatch()
+        if args:
+            table = eval(args)
+        else:
+            if kwargs.get('remove_invalid'):
+                qs = self.filter_queryset(
+                    self.model.objects.filter(~Q(pk=kwargs.get('remove_invalid'))))
+                table = self.table_class(qs)
+            else:
+                qs = self.filter_queryset(self.model.objects.all())
+                table = self.table_class(qs)
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         return context
 
@@ -289,6 +285,7 @@ def address_update(request, pk):
 class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Person
     table_class = PersonTable
+    ordering = ('legal_name', 'name', )
 
     @remove_invalid_registry
     def get_context_data(self, **kwargs):
@@ -434,6 +431,8 @@ def person_address_search_address_type(request):
 
 
 class GenericFormOneToMany(FormView, SingleTableView):
+    related_ordering = None
+
     def get_initial(self):
         if self.kwargs.get('lawsuit'):
             folder_id = LawSuit.objects.get(id=self.kwargs.get('lawsuit')).folder.id
@@ -482,37 +481,39 @@ class GenericFormOneToMany(FormView, SingleTableView):
     @set_search_model_attrs
     def get_context_data(self, **kwargs):
         context = super(GenericFormOneToMany, self).get_context_data(**kwargs)
-        try:
-            related_model_id = self.kwargs.get('pk')
-            context['module'] = self.related_model.__module__
-            context['model'] = self.related_model.__name__
-            context['nav_' + self.related_model._meta.verbose_name] = True
-            context['form_name'] = self.related_model._meta.verbose_name
-            context['form_name_plural'] = self.related_model._meta.verbose_name_plural
-            fields_related = list(
-                filter(lambda i: i.get_internal_type() == 'ForeignKey',
-                       self.related_model._meta.fields))
-            field_related = list(filter(lambda i: i.related_model == self.model,
-                                        fields_related))[0]
-            generic_search = GenericSearchFormat(self.request, self.related_model,
-                                                 self.related_model._meta.fields,
-                                                 related_id=related_model_id,
-                                                 field_name_related=field_related.name)
-            args = generic_search.despatch()
-            if args:
-                table = eval(args.replace('.model.', '.related_model.'))
-            else:
-                table = self.table_class(self.related_model.objects.none())
-                if related_model_id:
-                    src = ('self.table_class(self.related_model.objects.filter('
-                           '{0}__id=related_model_id).order_by("-pk"))')
-                    table_class = src.format(field_related.name)
-                    table = eval(table_class)
-            RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-            context['table'] = table
-        except:
+        related_model_id = self.kwargs.get('pk')
+        context['module'] = self.related_model.__module__
+        context['model'] = self.related_model.__name__
+        context['nav_' + self.related_model._meta.verbose_name] = True
+        context['form_name'] = self.related_model._meta.verbose_name
+        context['form_name_plural'] = self.related_model._meta.verbose_name_plural
+        fields_related = list(
+            filter(lambda i: i.get_internal_type() == 'ForeignKey',
+                   self.related_model._meta.fields))
+        field_related = list(filter(lambda i: i.related_model == self.model,
+                                    fields_related))[0]
+        generic_search = GenericSearchFormat(self.request, self.related_model,
+                                             self.related_model._meta.fields,
+                                             related_id=related_model_id,
+                                             field_name_related=field_related.name)
+        args = generic_search.despatch()
+        if args:
+            table = eval(args.replace('.model.', '.related_model.'))
+        else:
             table = self.table_class(self.related_model.objects.none())
+            if related_model_id:
+                lookups = {'{}__id'.format(field_related.name): related_model_id}
+                qs = self.related_model.objects.filter(**lookups)
+
+                if self.related_ordering:
+                    qs = qs.order_by(*self.related_ordering)
+
+                table = self.table_class(qs)
+
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
+        # table = self.table_class(self.related_model.objects.none())
+        # context['table'] = table
         return context
 
     success_message = None

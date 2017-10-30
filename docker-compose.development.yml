@@ -1,16 +1,51 @@
 version: "3"
 
 services:
-  web:
+  builder:
     build:
       context: .
-      dockerfile: containers/web/Dockerfile_dev
-    image: ezl:dev
+      dockerfile: containers/web/Dockerfile
+      args:
+        requirements_file: development.txt
+    image: ezl:latest
+    command: date
+    environment:
+      ENV: development
+
+  web:
     command: python manage.py runserver 0.0.0.0:8000
     environment:
       ENV: development
     ports:
       - "8000:8000"
+    depends_on:
+      - builder
+      - db
+      - tunnel
+      - queues
+
+  luigi:
+    command: luigid
+    environment:
+      ENV: development
+
+  tasks:
+    depends_on:
+      - builder
+      - db
+      - tunnel
+      - queues
+
+  tunnel:
+    image: ezl:latest
+    command: python -m sshtunnel -U dev -P dev@2016 -L 0.0.0.0:2000 -R 172.27.155.9:1433 -p 22 201.86.113.86
+    ports:
+      - "2000:2000"
+    volumes:
+      - .:/app
+    depends_on:
+      - builder
+
   nginx:
     ports:
       - "8080:80"
