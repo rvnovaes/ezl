@@ -1,5 +1,5 @@
 build:
-	docker-compose build web
+	docker-compose build builder
 	@docker-compose build certbot || true
 
 check_compose_override:
