@@ -17,7 +17,8 @@ from task.models import Task
 from task.tables import TaskTable
 from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, \
     CourtDistrictForm, OrganForm, CourtDivisionForm
-from .models import Instance, Movement, LawSuit, Folder, CourtDistrict, CourtDivision, TypeMovement, Organ
+from .models import Instance, Movement, LawSuit, Folder, CourtDistrict, CourtDivision, \
+    TypeMovement, Organ
 from .tables import MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, InstanceTable, \
     CourtDivisionTable, TypeMovementTable, OrganTable, AddressOrganTable
 from core.views import remove_invalid_registry
@@ -352,7 +353,8 @@ class LawSuitDeleteView(AuditFormMixin, DeleteView):
         parent_class = self.request.POST['parent_class']
         try:
             self.model.objects.filter(pk__in=pks).delete()
-            messages.success(self.request, DELETE_SUCCESS_MESSAGE.format(self.model._meta.verbose_name_plural))
+            messages.success(self.request,
+                             DELETE_SUCCESS_MESSAGE.format(self.model._meta.verbose_name_plural))
         except ProtectedError as e:
             qs = e.protected_objects.first()
             messages.error(self.request,
@@ -577,14 +579,19 @@ class OrganListView(SuccessMessageMixin, SingleTableViewMixin):
     table_class = OrganTable
 
 
-class OrganAutocomplete(autocomplete.Select2QuerySetView):
+class OrganAutocompleteView(autocomplete.Select2QuerySetView):
+
     def get_queryset(self):
+
         if not self.request.user.is_authenticated():
-            return Organ.objects.all()
+            return Organ.objects.none()
+
         qs = Organ.objects.all()
         continent = self.forwarded.get('continent', None)
+
         if continent:
             qs = qs.filter(continent=continent)
+
         if self.q:
             q_objects = Q()
             args_filter = self.q.split(' ')
@@ -592,6 +599,7 @@ class OrganAutocomplete(autocomplete.Select2QuerySetView):
                 q_objects &= Q(legal_name__unaccent__icontains=arg) | Q(
                     court_district__name__icontains=arg)
             qs = qs.filter(q_objects)
+
         return qs
 
     def get_result_label(self, result):

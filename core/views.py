@@ -1,5 +1,6 @@
 import importlib
 import json
+from abc import abstractproperty
 from functools import wraps
 
 from django.conf import settings
@@ -35,6 +36,56 @@ from core.tables import PersonTable, UserTable, AddressTable
 from core.utils import login_log, logout_log
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task
+
+
+class AutoCompleteView(autocomplete.Select2QuerySetView):
+    model = abstractproperty()
+    lookups = abstractproperty()
+    select_related = None
+
+    @classmethod
+    def get_part_queryset(cls, part, queryset):
+        q = Q()
+        for lookup in cls.lookups:
+            q |= Q(**{lookup: part})
+
+        return queryset.filter(q)
+
+    def get_queryset(self):
+        if self.select_related:
+            qs = self.model.objects.select_related(*self.select_related)
+
+        if self.q:
+            parts = self.q.split(' ')
+
+            for part in parts:
+                qs = self.get_part_queryset(part, qs)
+                if not qs.exists():
+                    return self.model.objects.none()
+
+            return qs
+
+        else:
+            qs = qs[:10]
+
+        return qs
+
+
+class CityAutoCompleteView(AutoCompleteView):
+    model = City
+    lookups = (
+        'name__unaccent__icontains',
+        'state__initials__exact',
+        'state__name__unaccent__contains',
+        'state__country__name__unaccent__contains',
+    )
+    select_related = ('state__country', 'state', )
+
+    def get_result_label(self, result):
+        return '{} - {}/{} - {}'.format(result.state.country.name,
+                                        result.state.initials,
+                                        result.state.name,
+                                        result.name)
 
 
 def login(request):

@@ -7,6 +7,10 @@ from . import views
 
 urlpatterns = [
 
+    url(r'city/autocomplete/$',
+        login_required(views.CityAutoCompleteView.as_view()),
+        name='city_autocomplete'),
+
     url(r'^ajuda/manual-do-usuario/$',
         RedirectView.as_view(url=settings.USER_MANUAL_URL, permanent=False),
         name='user_manual'),
