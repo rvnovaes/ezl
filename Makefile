@@ -14,7 +14,7 @@ create_certificate:
 create_certificate_teste:
 	docker-compose run certbot certbot certonly --webroot -w /tmp/www -d teste.ezlawyer.com.br -m contato@ezlawyer.com.br --agree-tos
 
-deploy: check_compose_override build run migrate load_fixtures collectstatic
+deploy: check_compose_override build run migrate collectstatic
 
 local_sqlserver:
 	ln -s docker-compose.sqlserver.yml docker-compose.override.yml
