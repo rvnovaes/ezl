@@ -43,9 +43,9 @@
             var surveyResult = document.getElementsByName('survey_result').item(0);
             surveyResult.value = surveyResponse;
             document.getElementById('id_survey_result').innerHTML = surveyResponse;
-            document.getElementById('surveyElement').innerHTML = '<p>Formulário preenchido com sucesso.</p>'
+            document.getElementById('surveyElement').innerHTML = '<p>Formulário preenchido com sucesso.</p><div class="alert alert-info" role="alert"> <strong>Atenção!</strong><br> Lembre-se de anexar o arquivo, caso necessário. </div>'
             var v = document.createElement('p');
-            v.innerHTML = '<button name="action" value="DONE" onclick="submitSurvey();" class="btn btn-sm btn-raised btn-primary" type="submit">Enviar</button>';
+            v.innerHTML = '<button name="action" value="DONE" onclick="submitSurvey();" class="btn btn-sm btn-raised btn-primary pull-right" type="submit">Enviar</button>';
             document.getElementById('surveyElement').appendChild(v);
         });
         survey.locale = "pt";
