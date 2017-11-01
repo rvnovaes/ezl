@@ -16,7 +16,7 @@ class FolderETL(GenericETL):
                   INNER JOIN Jurid_ProcMov AS pm ON
                     pm.Codigo_Comp = p.Codigo_Comp
                   INNER JOIN Jurid_agenda_table AS a ON
-                    pm.Ident = a.Mov
+                    a.Pasta = p.Codigo_Comp
                   INNER JOIN Jurid_CodMov AS cm ON
                     a.CodMov = cm.Codigo
             WHERE
