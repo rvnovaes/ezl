@@ -245,6 +245,8 @@ class DashboardViewModel(Audit):
     client = models.CharField(null=True, verbose_name='Cliente', max_length=255)
     type_service = models.CharField(null=True, verbose_name='Serviço', max_length=255)
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    lawsuit_number = models.CharField(max_length=255, blank=True, null=True,
+                                      verbose_name='Número do Processo')
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
 
@@ -279,3 +281,7 @@ class DashboardViewModel(Audit):
         if organ:
             address = organ.address_set.first()
         return address
+
+    @property
+    def lawsuit_number(self):
+        return self.movement.law_suit.law_suit_number
