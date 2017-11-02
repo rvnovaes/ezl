@@ -2,13 +2,8 @@
 
 {% block content %}
     {% load bootstrap3 %}
-    <script src="https://surveyjs.azureedge.net/0.12.23/survey.jquery.js"></script>
     <script src="{% static  "js" %}/{{ generic_survey|lower }}.js"></script>
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-
-
-    <div id="survey" class="modal">
+        <div id="survey" class="modal">
         <div class="modal-dialog">
             <div class="modal-content ">
                 <div id=" modal modalHeader">
@@ -43,7 +38,7 @@
             var surveyResult = document.getElementsByName('survey_result').item(0);
             surveyResult.value = surveyResponse;
             document.getElementById('id_survey_result').innerHTML = surveyResponse;
-            document.getElementById('surveyElement').innerHTML = '<p>Formulário preenchido com sucesso.</p><div class="alert alert-info" role="alert"> <strong>Atenção!</strong><br> Lembre-se de anexar o arquivo, caso necessário. </div>'
+            document.getElementById('surveyElement').innerHTML = '<p>Formulário preenchido com sucesso.</p><div class="alert alert-info" role="alert"> <strong>Atenção!</strong><br> <strong>Lembre-se de anexar o arquivo, caso necessário.</strong> </div>'
             var v = document.createElement('p');
             v.innerHTML = '<button name="action" value="DONE" onclick="submitSurvey();" class="btn btn-sm btn-raised btn-primary pull-right" type="submit">Enviar</button>';
             document.getElementById('surveyElement').appendChild(v);
