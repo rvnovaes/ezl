@@ -3,11 +3,12 @@ from django.contrib.auth.models import User
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
+from etl.utils import get_users_to_import
 from lawsuit.models import Movement, LawSuit, TypeMovement
 
 
 class MovementETL(GenericETL):
-    import_query = """
+    _import_query = """
                 SELECT DISTINCT
                   pm.M_Distribuicao AS law_suit_legacy_code,
                   pm.Ident          AS legacy_code,
@@ -23,14 +24,18 @@ class MovementETL(GenericETL):
                 WHERE
                   cm.UsarOS = 1 and
                   (p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND
-                  ((a.prazo_lido = 0 AND a.SubStatus = 30) OR                
+                  ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                   (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                  AND a.Advogado='12157458697' -- marcio.batista (Em teste)
+                  AND a.Advogado IN ('{}')
                   """
 
     model = Movement
     advwin_table = "Jurid_ProcMov"
     has_status = True
+
+    @property
+    def import_query(self):
+        return self._import_query.format("','".join(get_users_to_import()))
 
     @validate_import
     def config_import(self, rows, user, rows_count):

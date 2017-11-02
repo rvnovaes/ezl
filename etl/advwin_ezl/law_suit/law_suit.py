@@ -3,6 +3,7 @@ from core.utils import LegacySystem
 from lawsuit.models import Organ
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
+from etl.utils import get_users_to_import
 from lawsuit.models import LawSuit, Folder, Instance, CourtDistrict, CourtDivision
 
 
@@ -10,7 +11,7 @@ class LawsuitETL(GenericETL):
     model = LawSuit
     advwin_table = 'Jurid_Pastas'
 
-    import_query = """
+    _import_query = """
                     SELECT DISTINCT
                           p.Codigo_Comp                            AS folder_legacy_code,
                           CASE WHEN (d.D_Atual IS NULL)
@@ -55,9 +56,9 @@ class LawsuitETL(GenericETL):
                           p.Dt_Saida IS NULL AND
                           cm.UsarOS = 1 AND
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
-                          ((a.prazo_lido = 0 AND a.SubStatus = 30) OR        
+                          ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                           (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          AND a.Advogado='12157458697' AND -- marcio.batista (Em teste) 
+                          AND a.Advogado IN ('{}')
                           ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
                            (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
                           ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
@@ -68,6 +69,10 @@ class LawsuitETL(GenericETL):
     """
 
     has_status = True
+
+    @property
+    def import_query(self):
+        return self._import_query.format("','".join(get_users_to_import()))
 
     @validate_import
     def config_import(self, rows, user, rows_count):
