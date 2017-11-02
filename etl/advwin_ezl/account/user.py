@@ -134,7 +134,8 @@ class UserETL(GenericETL):
                                        'first_name',
                                        'last_name'])
 
-                    instance.groups.add(correspondent_group)
+                    # issue/620 - Por enquanto vamos definir os correspondentes manualmente
+                    # instance.groups.add(correspondent_group)
 
                 elif not person and not instance:
                     created = True
