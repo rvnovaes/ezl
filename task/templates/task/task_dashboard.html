@@ -44,7 +44,6 @@
                                             {# support pagination #}
                                             {% block table.tbody.row %}
                                                 <tr class="{% cycle "odd" "even" %}" data-new-href="{{ row.attrs.data_new_href }}" data-task data-task-id="{{ row.record.id}}" data-task-status="{{ row.record.status}}">
-                                                    <td>{{ row.record.status }}</td>
                                                     {% for column, cell in row.items %}
                                                         <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                                                     {% endfor %}
