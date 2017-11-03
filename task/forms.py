@@ -116,7 +116,7 @@ class TaskDetailForm(ModelForm):
                                                                  },
                                                                  format='DD/MM/YYYY HH:mm'))
     notes = forms.CharField(
-        required=True,
+        required=False,
         initial='',
         label='Insira um comentário',
         widget=forms.Textarea(
