@@ -291,7 +291,7 @@
                                             <td id="cell-table" style="font-size: small">
                                                 <i class="material-icons" id=""
                                                    style="cursor: pointer; font-size: medium;"
-                                                   data-toggle=""
+                                                   data-toggle="modal"
                                                    data-target="#confirmDelete-{{ ecm.id }}">delete</i>
                                             </td>
                                         {% endif %}
@@ -515,80 +515,82 @@
         </div>
     </div>
 
-    {% block javascript %}
-        <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
-        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
-        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
-        <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>
-
-        {% for ecm in ecms %}
-            <script>
-                $("#delete-ecm-{{ ecm.id }}").click(function () {
-                        $('#deleting').modal('show');
-                        $.ajax({
-                            url: '{% url 'delete_ecm' ecm.id %}',
-                            dataType: 'json',
-
-                            success: function (data) {
-                                if (data.is_deleted) {
-                                    showToast('success', data.message, '', 3000, true);
-                                    $('#row-{{ ecm.id }}').remove();
-                                    $('#row-space{{ ecm.id }}').remove();
-                                    $('#deleting').modal('hide');
-                                }
-                                else {
-                                    showToast('error', data.message, '', 0, false);
-                                    $('#deleting').modal('hide');
-                                }
-
-                                if (data.num_ged == 0) {
-                                    document.getElementById("no-providence").innerHTML = "Esta providência não possui nenhum arquivo em anexo.";
-                                }
-                            }
-                        })
-                    }
-                );
-            </script>
-        {% endfor %}
-        <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
-             a medida que for adicionando novos arquivos -->
-        <div id="scripts">
-        </div>
-
-        <script>
-            var expanded = false;
-
-            function toggleArrowHist() {
-
-                if (expanded) {
-                    expanded = false;
-                    document.getElementById("up_hist").style.display = "none";
-                    document.getElementById("down_hist").style.display = "block";
-                }
-                else {
-                    expanded = true;
-                    document.getElementById("up_hist").style.display = "block";
-                    document.getElementById("down_hist").style.display = "none";
-                }
-            }
-        </script>
-
-        <script>
-            var expanded = false;
-
-            function toggleArrow() {
-
-                if (expanded) {
-                    expanded = false;
-                    document.getElementById("up").style.display = "none";
-                    document.getElementById("down").style.display = "block";
-                }
-                else {
-                    expanded = true;
-                    document.getElementById("up").style.display = "block";
-                    document.getElementById("down").style.display = "none";
-                }
-            }
-        </script>
-    {% endblock %}
 {% endblock content %}
+
+{% block javascript %}
+    <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>
+
+    {% for ecm in ecms %}
+        <script>
+            console.log("Adicionando evento delete-ecm-{{ ecm.id }}");
+            $("#delete-ecm-{{ ecm.id }}").click(function () {
+                    $('#deleting').modal('show');
+                    $.ajax({
+                        url: '{% url 'delete_ecm' ecm.id %}',
+                        dataType: 'json',
+
+                        success: function (data) {
+                            if (data.is_deleted) {
+                                showToast('success', data.message, '', 3000, true);
+                                $('#row-{{ ecm.id }}').remove();
+                                $('#row-space{{ ecm.id }}').remove();
+                                $('#deleting').modal('hide');
+                            }
+                            else {
+                                showToast('error', data.message, '', 0, false);
+                                $('#deleting').modal('hide');
+                            }
+
+                            if (data.num_ged == 0) {
+                                document.getElementById("no-providence").innerHTML = "Esta providência não possui nenhum arquivo em anexo.";
+                            }
+                        }
+                    })
+                }
+            );
+        </script>
+    {% endfor %}
+    <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
+         a medida que for adicionando novos arquivos -->
+    <div id="scripts">
+    </div>
+
+    <script>
+        var expanded = false;
+
+        function toggleArrowHist() {
+
+            if (expanded) {
+                expanded = false;
+                document.getElementById("up_hist").style.display = "none";
+                document.getElementById("down_hist").style.display = "block";
+            }
+            else {
+                expanded = true;
+                document.getElementById("up_hist").style.display = "block";
+                document.getElementById("down_hist").style.display = "none";
+            }
+        }
+    </script>
+
+    <script>
+        var expanded = false;
+
+        function toggleArrow() {
+
+            if (expanded) {
+                expanded = false;
+                document.getElementById("up").style.display = "none";
+                document.getElementById("down").style.display = "block";
+            }
+            else {
+                expanded = true;
+                document.getElementById("up").style.display = "block";
+                document.getElementById("down").style.display = "none";
+            }
+        }
+    </script>
+{% endblock %}
