@@ -90,7 +90,7 @@
                             {% if form.instance.legacy_code %}
                                 <thead>
                                     <tr>
-                                        <th>Número no Sistema Legado</th>
+                                        <th>Código Legado</th>
                                         <th>
                                             {{ form.instance.legacy_code }}
                                         </th>
@@ -100,7 +100,7 @@
                             <tbody>
                                 <tr>
                                     <th>
-                                        Dados do solicitante
+                                        Solicitante
                                     </th>
                                     <td>
                                         {{ form.instance.person_asked_by|capfirst|default_if_none:"---" }}
@@ -148,7 +148,7 @@
                                 </tr>
                                 <tr>
                                     <th>
-                                        Orgão
+                                        Órgão
                                     </th>
                                     <td>
                                         {{ form.instance.court|default_if_none:"---" }}
