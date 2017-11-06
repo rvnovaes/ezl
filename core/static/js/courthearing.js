@@ -222,7 +222,7 @@ window.survey = new Survey.Model(
                         visibleIf: "{temAdvHabilitado}='S'"
                     },
                     {
-                        isRequired: true,
+                        isRequired: false,
                         type: "text",
                         name: "obsRelevantes",
                         title: "Observações Relevantes",

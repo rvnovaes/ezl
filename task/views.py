@@ -1,5 +1,6 @@
 import os
 from urllib.parse import urlparse
+import json
 
 from django.core.cache import cache
 from django.contrib.auth.decorators import login_required
@@ -11,7 +12,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
-from django.views.generic import CreateView, UpdateView, TemplateView
+from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
@@ -416,3 +417,24 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         return context
+
+
+class DashboardStatusCheckView(LoginRequiredMixin, View):
+
+    def post(self, request, *args, **kwargs):
+        tasks_payload = request.POST.get('tasks')
+        if not tasks_payload:
+            return JsonResponse({"error": "tasks is required"}, status=400)
+
+        # Ordena as tasks para que possamos comparar o que está no banco com o que foi recebido
+        tasks = sorted(json.loads(tasks_payload), key=lambda x: x[0])
+
+        # Convertemos a lista para uma tupla de tuplas que é o formato que é retornado pelo banco
+        tasks = tuple(map(lambda x: (x[0], x[1]), tasks))
+        ids = map(lambda x: x[0], tasks)
+
+        db_tasks = Task.objects.filter(id__in=ids).order_by('id').values_list('id', 'task_status')
+
+        # Comparamos as tasks que foram enviadas com as que estão no banco para saber se houve mudanças
+        has_changed = tuple(db_tasks) != tasks
+        return JsonResponse({"has_changed": has_changed})
