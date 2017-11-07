@@ -63,9 +63,11 @@
 
                     {# Apenas estes status devem possuir notes como required, alem de nao poder #}
                     {# espacos em branco #}
+
+                    var notes = $('textarea[id=notes_id]');
+                    notes.removeAttr('required');
                     ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN'].forEach(function (status) {
                         if (task_status === status) {
-                            var notes = $('textarea[id=notes_id]');
                             notes.attr('required', true).change(function () {
                                 notes.val(notes.val().trim())
                             });
