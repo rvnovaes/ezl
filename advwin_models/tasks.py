@@ -130,8 +130,11 @@ def export_task_history(task_history_id, task_history=None, execute=True):
     if task_history is None:
         task_history = TaskHistory.objects.get(pk=task_history_id)
 
+    username = ''
+    if task_history.create_user:
+        username = task_history.create_user.username[:20]
+
     task = task_history.task
-    username = task.person_executed_by.auth_user.username[:20]
     if task_history.status == TaskStatus.ACCEPTED.value:
         values = {
             'codigo_adv_correspondente': str(task_history.create_user),
