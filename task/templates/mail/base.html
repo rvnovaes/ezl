@@ -3,10 +3,10 @@
 <body>
 {% block content %}
 
-    {% if task.task_status.name != 'OPEN' %}
+    {% if task.status.name != 'OPEN' %}
         A providência {{ number }} {{ short_message }} no {{ project_name }}{{ custom_text }}.
     {% endif %}
-    {% if task.task_status.name == 'OPEN' %}
+    {% if task.status.name == 'OPEN' %}
         <div>
             <br> <span>Dados do serviço:</span>
             <br> ---------------------------------------------------------------
@@ -18,6 +18,7 @@
             <br>
             <br> Número do processo: {{ task.movement.law_suit.law_suit_number }}
             <br> Cliente: {{ task.movement.law_suit.folder.person_customer|lower|title }}
+            <br> Parte adversa: {{ task.movement.law_suit.opposing_party|default_if_none:'' }}
             <br> UF: {{ task.movement.law_suit.court_district.state|default_if_none:'' }}
             <br> Comarca: {{ task.movement.law_suit.court_district|default_if_none:'' }}
             <br> Vara: {{ task.court_division|default_if_none:'' }}

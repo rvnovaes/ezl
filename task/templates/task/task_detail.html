@@ -110,6 +110,14 @@
                                 </tr>
                                 <tr>
                                     <th>
+                                        Parte adversa
+                                    </th>
+                                    <td>
+                                        {{ form.instance.movement.law_suit.opposing_party|default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
                                         Descrição do serviço
                                     </th>
                                     <td>

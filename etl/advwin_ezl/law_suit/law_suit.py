@@ -11,7 +11,8 @@ class LawsuitETL(GenericETL):
     advwin_table = 'Jurid_Pastas'
 
     import_query = """
-                    SELECT DISTINCT
+                    SELECT 
+                          p.OutraParte                             AS opposing_party, 
                           p.Codigo_Comp                            AS folder_legacy_code,
                           CASE WHEN (d.D_Atual IS NULL)
                             THEN 'False'
@@ -85,6 +86,7 @@ class LawsuitETL(GenericETL):
                 court_division_legacy_code = row['court_division_legacy_code']
                 law_suit_number = row['law_suit_number']
                 is_current_instance = row['is_current_instance']
+                opposing_party = row['opposing_party']
                 folder = Folder.objects.filter(legacy_code=folder_legacy_code).first()
                 person_lawyer = Person.objects.filter(legacy_code=person_legacy_code).first()
                 instance = Instance.objects.filter(legacy_code=instance_legacy_code).first()
@@ -120,6 +122,7 @@ class LawsuitETL(GenericETL):
                     lawsuit.organ = organ
                     lawsuit.law_suit_number = law_suit_number
                     lawsuit.is_active = True
+                    lawsuit.opposing_party = opposing_party
                     # use update_fields to specify which fields to save
                     # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
                     lawsuit.save(
@@ -134,7 +137,8 @@ class LawsuitETL(GenericETL):
                             'law_suit_number',
                             'alter_user',
                             'alter_date',
-                            'is_current_instance']
+                            'is_current_instance',
+                            'opposing_party']
                     )
                 else:
                     self.model.objects.create(
@@ -150,14 +154,15 @@ class LawsuitETL(GenericETL):
                         is_active=True,
                         is_current_instance=is_current_instance,
                         legacy_code=legacy_code,
-                        system_prefix=LegacySystem.ADVWIN.value)
-
+                        system_prefix=LegacySystem.ADVWIN.value,
+                        opposing_party=opposing_party)
                 self.debug_logger.debug(
-                    "LawSuit,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(folder.id), str(person_lawyer.id),
-                                                                           str(instance.id),str(court_district.id),
-                                                      str(court_division.id), str(organ.id),law_suit_number,
-                                                      str(user.id),str(user.id),str(True),str(is_current_instance),
-                                                      legacy_code,str(LegacySystem.ADVWIN.value), self.timestr))
+                    "LawSuit,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                    str(folder.id), str(person_lawyer.id),
+                    str(instance.id), str(court_district.id),
+                    str(court_division.id), str(organ.id), law_suit_number,
+                    str(user.id), str(user.id), str(True), str(is_current_instance),
+                    legacy_code, str(LegacySystem.ADVWIN.value), str(opposing_party), self.timestr))
 
             except Exception as e:
                 self.error_logger.error(
