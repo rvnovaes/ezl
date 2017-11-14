@@ -62,7 +62,7 @@ $(function() {
          }, 600)
 
          var windowWidth = $(window).width();
-         if(windowWidth <= 576) {
+         if(windowWidth <= 451) {
             sizeButton = 50
          }else if (windowWidth <= 768) {
             sizeButton = 70

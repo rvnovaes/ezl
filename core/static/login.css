@@ -350,8 +350,26 @@
             -ms-transform: translate(0%, 0%);
         }
     }
+    @media (max-width: 540px){
+        .material-button,
+        .alt-2 {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #ed651f;
+            position: absolute;
+            top: 48px;
+            right: 0px;
+            cursor: pointer;
+            z-index: 100;
+            transform: translate(0%, 0%);
+            -webkit-transform: translate(0%, 0%);
+            -ms-transform: translate(0%, 0%);
+        }
 
-    @media (max-width: 576px){
+    }
+
+    @media (max-width: 451px){
         .material-button,
         .alt-2 {
             width: 50px;
@@ -360,7 +378,7 @@
             background: #ed651f;
             position: absolute;
             top: 58px;
-            right: -24px;
+            right: 0px;
             cursor: pointer;
             z-index: 100;
             transform: translate(0%, 0%);
