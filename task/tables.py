@@ -42,13 +42,13 @@ class TaskTable(tables.Table):
 
 class DashboardStatusTable(tables.Table):
     def __init__(self, *args, delegation_date='Delegação', client="Cliente",
-                 law_suit_number="Processo", legacy_code="Número", type_service="Serviço", title="",
+                 lawsuit_number="Processo", legacy_code="Número", type_service="Serviço", title="",
                  status="", **kwargs):
         super().__init__(*args, **kwargs)
         # self.base_columns['id'].verbose_name = legacy_code
         self.base_columns['delegation_date'].verbose_name = delegation_date
         self.base_columns['client'].verbose_name = client
-        self.base_columns['law_suit_number'].verbose_name = law_suit_number
+        self.base_columns['lawsuit_number'].verbose_name = lawsuit_number
         self.base_columns['type_service'].verbose_name = type_service
         self.title = title
         self.status = status
@@ -60,8 +60,8 @@ class DashboardStatusTable(tables.Table):
 
     class Meta:
         model = DashboardViewModel
-        fields = ['task_number', 'final_deadline_date', 'type_service', 'law_suit_number', 'client',
-                  'delegation_date']
+        fields = ['task_number', 'final_deadline_date', 'type_service', 'lawsuit_number', 'client',
+                  'delegation_date', 'legacy_code']
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {
             'data_new_href': lambda record: '/dashboard/' + str(record.pk) + '/'

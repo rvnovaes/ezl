@@ -43,7 +43,7 @@
                                         {% for row in table.page.object_list|default:table.rows %}
                                             {# support pagination #}
                                             {% block table.tbody.row %}
-                                                <tr class="{% cycle "odd" "even" %}" data-new-href="{{ row.attrs.data_new_href }}">
+                                                <tr class="{% cycle "odd" "even" %}" data-new-href="{{ row.attrs.data_new_href }}" data-task data-task-id="{{ row.record.id}}" data-task-status="{{ row.record.status}}">
                                                     {% for column, cell in row.items %}
                                                         <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                                                     {% endfor %}
@@ -78,3 +78,34 @@
         </div>
     {% endblock table %}
 {% endblock content %}
+
+{% block javascript %}{{ block.super }}
+<script>
+    $(document).ready(function(){
+        var tasks = [];
+        $('[data-task]').each(function(){
+            var task = $(this),
+                status = task.attr('data-task-status'),
+                id = parseInt(task.attr('data-task-id'));
+            tasks.push([id, status]);
+        });
+
+        setInterval(function(){
+            $.ajax({
+                type: "POST",
+                url: "/dashboard/verificar_status/",
+                data: {"tasks": JSON.stringify(tasks)},
+                success: function(response){
+                    if (response.has_changed) {
+                        location.reload();
+                    }
+                },
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                dataType: "json"
+            });
+        }, 500);
+    });
+</script>
+{% endblock %}

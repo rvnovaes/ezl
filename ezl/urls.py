@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 
 from core.views import ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView
 from django.conf import settings
-from task.views import DashboardView, TaskDetailView, DashboardSearchView
+from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView
 
 urlpatterns = [
 
@@ -29,6 +29,11 @@ urlpatterns = [
     url(r'^dashboard/filtrar/$',
         login_required(DashboardSearchView.as_view()),
         name='task_search'),
+
+    url(r'^dashboard/verificar_status/$',
+        login_required(DashboardStatusCheckView.as_view()),
+        name='task_status_check'),
+
 
     url(r'^client_form',
         login_required(ClientAutocomplete.as_view()),

@@ -105,7 +105,7 @@ window.survey = new Survey.Model(
                             }
                         ]
                     },
-                    {   isRequired: true,
+                    {   isRequired: false,
                         type: "text",
                         name: "obsRelevante",
                         visible: false,
