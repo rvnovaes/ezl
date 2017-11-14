@@ -73,10 +73,12 @@
 </div>
 {% endblock %}
 {% block javascript %}
-<script type="text/javascript">
+    <script type="text/javascript">
         $(document).ready(function() {
+            // Função timeout utilizada para dar um tempo para o navegador carregar os valores de autofill.
+            // Caso exista um usuário preenchido (casos de senha salva), o navegador passa o foco pelos campos de usuário e senha
             setTimeout(function() {
-                if($("#first_name").val()){
+                if($("#first_name").val() && $("#first_name").val() !== $("#first_name").attr("value")){
                     $("#first_name").focus();
                     $("#password").focus();
                 };
