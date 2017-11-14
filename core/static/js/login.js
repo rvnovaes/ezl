@@ -61,9 +61,18 @@ $(function() {
             })
          }, 600)
 
+         var windowWidth = $(window).width();
+         if(windowWidth <= 576) {
+            sizeButton = 50
+         }else if (windowWidth <= 768) {
+            sizeButton = 70
+         }else{
+            sizeButton = 100
+         }
+
          $(this).animate({
-            "width": "140px",
-            "height": "140px"
+            "width": sizeButton+"px",
+            "height": sizeButton+"px"
          }, 500, function() {
             $(".box").removeClass("back");
 

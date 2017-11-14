@@ -9,6 +9,7 @@
 
         <div class="title"><img width="325px" class="img-responsive" src="{% static "img/logo_ezl.png" %}"></div>
         <form method="POST" action="{% url 'account_login' %}"> {% csrf_token %}
+
             <div class="input">
                 <label for="first_name">Login</label>
                 <input id="first_name" type="text" name="login" required>
@@ -32,7 +33,7 @@
 
         </form>
 
-        <div style="padding-top: 30px" class="pass-forgot"><label>Desenvolvido por:</label> <img
+        <div style="padding-top: 30px" class="pass-forgot"><label >Desenvolvido por:</label> <img
                 onclick="window.open('http://www.mttech.com.br')"
                 src="/static/img/logo.png" height="20"
                 style="cursor: pointer; cursor: hand;"/>
