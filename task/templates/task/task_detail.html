@@ -291,14 +291,18 @@
                                             <a href="/media/{{ ecm.path }}" download
                                                style="text-decoration: none;">{{ ecm.filename }}</a>
                                         </td>
-                                        {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
-                                            <td id="cell-table" style="font-size: small">
-                                                <i class="material-icons" id=""
-                                                   style="cursor: pointer; font-size: medium;"
-                                                   data-toggle="modal"
-                                                   data-target="#confirmDelete-{{ ecm.id }}">delete</i>
-                                            </td>
-                                        {% endif %}
+                                            {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
+                                                <td id="cell-table" style="font-size: small">
+                                                    <i class="material-icons {% if ecm.legacy_code %}text-danger{% endif %}" id=""
+                                                       style="cursor: pointer; font-size: medium;"
+                                                       {% if ecm.legacy_code %}
+                                                           data-target="#confirmDeleteNotAllowed"
+                                                       {% else %}
+                                                           data-target="#confirmDelete-{{ ecm.id }}"
+                                                       {% endif %}
+                                                       data-toggle="modal">delete</i>
+                                                </td>
+                                            {% endif %}
                                     </tr>
                                     <tr class="spaceFile" id="row-space{{ ecm.id }}"></tr>
 
@@ -327,6 +331,25 @@
                                         </div>
                                     </div>
                                 {% endfor %}
+                                <!-- Janela modal para arquivos que não podem ser apagados -->
+                                <div id="confirmDeleteNotAllowed" class="modal">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content ">
+                                            <div class="modal-body" style="text-align: center !important;">
+                                                Arquivos de sistemas legados não podem ser apagados.
+                                            </div>
+                                            <div class="modal-footer">
+                                                <div class="form-group text-center">
+                                                    <button type="button" style="width: 95px!important;"
+                                                            class="btn btn-sm btn-raised btn-default"
+                                                            data-dismiss="modal">
+                                                        Ok
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído o conteúdo das novas janelas modais
                                 a medida que for adicionando novos arquivos -->
                                 <div id="modals">
