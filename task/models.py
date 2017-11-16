@@ -2,6 +2,7 @@ import os
 from enum import Enum
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from sequences import get_next_value
@@ -184,10 +185,25 @@ def get_dir_name(instance, filename):
     return 'ECM/{0}/{1}'.format(instance.task.pk, filename)
 
 
+class EcmQuerySet(models.QuerySet):
+    def delete(self):
+        # Não podemos apagar os ECMs que possuam legacy_code
+        queryset = self.exclude(legacy_code__isnull=False)
+        return super(EcmQuerySet, queryset).delete()
+
+
+class EcmManager(models.Manager):
+
+    def get_queryset(self):
+        return EcmQuerySet(self.model, using=self._db)
+
+
 class Ecm(Audit, LegacyCode):
     path = models.FileField(upload_to=get_dir_name, max_length=255, unique=True, null=False)
     task = models.ForeignKey(Task, blank=False, null=False, on_delete=models.PROTECT)
     updated = models.BooleanField(default=True, null=False)
+
+    objects = EcmManager()
 
     # Retorna o nome do arquivo no Path, para renderizar no tamplate
     @property
@@ -197,6 +213,11 @@ class Ecm(Audit, LegacyCode):
     @property
     def user(self):
         return User.objects.get(username=self.path.instance.create_user)
+
+    def delete(self, *args, **kwargs):
+        if self.legacy_code:
+            raise ValidationError("Você não pode apagar um GED cadastrado em um sistema legado")
+        return super().delete(*args, **kwargs)
 
 
 class TaskHistory(AuditCreate):

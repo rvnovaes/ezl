@@ -27,7 +27,7 @@ class EcmEtl(GenericETL):
                       AND (p.Status = 'Ativa' OR p.Dt_Saida IS NULL)
                       AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                       (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                      AND a.Advogado='12157458697' -- marcio.batista (Em teste)
+                      AND a.Advogado IN ('12157458697', '12197627686') -- marcio.batista e claudia pires(Em teste)
     """
     model = Ecm
 
