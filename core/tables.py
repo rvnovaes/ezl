@@ -7,28 +7,6 @@ from django_tables2.utils import AttributeDict, A
 from .models import Person, Address
 
 
-class AddressTable(tables.Table):
-    edit_link = tables.LinkColumn('address_update',
-                                  verbose_name="",
-                                  text="Editar",
-                                  args=[A('person_id'), A('pk')])
-
-    delete_link = tables.LinkColumn('address_delete',
-                                    verbose_name="",
-                                    text="Excluir",
-                                    args=[A('person_id'), A('pk')])
-
-    class Meta:
-        model = Address
-        fields = ['street', 'number', 'complement', 'city_region', 'zip_code',
-                  'country',
-                  'state', 'city', 'notes', 'address_type', 'is_active', 'edit_link',
-                  'delete_link']
-        attrs = {'class': 'table table-hover'}
-
-# Logradouro, N, COmplemento, Bairro, Cidade, Estado, Cep, Pais, Observacao, Tipo, Ativo
-
-
 class CheckBoxMaterial(tables.CheckBoxColumn):
     def __init__(self, attrs=None, checked=None, **extra):
         self.checked = checked
@@ -71,6 +49,30 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
                          ' type="checkbox" %s onclick="showDeleteButton(this)"/>'
                          '</label></div>' % attrs.as_html())
 
+class AddressTable(tables.Table):
+
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
+
+    delete_link = tables.LinkColumn('address_delete',
+                                    verbose_name="",
+                                    text="Excluir",
+                                    args=[A('person_id'), A('pk')])
+
+    class Meta:
+        sequecence = (
+            'selection', 'street', 'number', 'complement', 'city_region', 'zip_code',
+              'country',
+              'state', 'city', 'notes', 'address_type', 'is_active', 'delete_link')
+        model = Address
+        fields = ['selection', 'street', 'number', 'complement', 'city_region', 'zip_code',
+                  'country',
+                  'state', 'city', 'notes', 'address_type', 'is_active', 'delete_link']
+        attrs = {"class": "table-striped table-bordered"}
+        row_attrs = {
+            'data-href': lambda record: '/pessoas/' + str(record.person.pk) + '/enderecos/' + str(record.pk) + '/'
+        }
+
+# Logradouro, N, COmplemento, Bairro, Cidade, Estado, Cep, Pais, Observacao, Tipo, Ativo
 
 class PersonTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
