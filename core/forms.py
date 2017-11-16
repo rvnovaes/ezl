@@ -11,7 +11,7 @@ from localflavor.br.forms import BRCPFField, BRCNPJField
 from material import Layout, Row
 
 from core.fields import CustomBooleanField
-from core.models import ContactUs, Person, Address, City, ContactMechanism
+from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType
 from core.utils import filter_valid_choice_form
 from lawsuit.forms import BaseForm
 
@@ -122,15 +122,25 @@ class PersonForm(BaseModelForm):
 class AddressForm(BaseModelForm):
     city = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(City.objects.filter(is_active=True)).order_by('name'),
-        empty_label='Selecione',
+        empty_label='Cidade',
         required=True,
-        widget=autocomplete.ListSelect2(url='city_autocomplete',
+        label='Cidade',
+        widget=autocomplete.ModelSelect2(url='city_autocomplete',
                                         attrs={
-                                            # 'data-dropdown-parent': '#id_city_container',
-                                            # 'data-container-css': '#id_city_container',
+                                            #'data-dropdown-parent': 'id_city',
+                                            'data-container-css': '#id_city_container',
                                             'class': 'select-with-search material-ignore',
-                                            'data-placeholder': 'Clique para selecionar a cidade',
-                                            'data-minimum-input-length': 3}))
+                                            'data-placeholder': 'Cidade',
+                                            'data-minimum-input-length': 3,
+                                            'data-minimum-input-message': 'favor'}
+                                        ))
+
+    address_type = forms.ModelChoiceField(
+        queryset=filter_valid_choice_form(AddressType.objects.exclude(name__startswith='ADDRESS TYPE').order_by('name')),
+        empty_label='Tipo',
+        required=True,
+        label='Tipo',
+    )
 
     layout = Layout(
         Row('address_type'),
