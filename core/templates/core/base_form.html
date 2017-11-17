@@ -4,6 +4,27 @@
 {% load material_form %}
 {% load staticfiles %}
 
+{% block head %}
+
+    {{ block.super }}
+
+    <link rel="stylesheet" href="{% static "chosen/chosen.min.css" %}">
+
+    <link rel="stylesheet" href="{% static "chosen/chosen-material-theme.min.css" %}">
+
+{% endblock %}
+
+{% block extrajs %}
+
+    {{ block.super }}
+    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
+
+    <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+
+    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
+
+{% endblock %}
+
 {% block content %}
 
     <form id="object_form" action="" method="post">

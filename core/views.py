@@ -129,7 +129,10 @@ class MultiDeleteViewMixin(DeleteView):
                                                       qs.__str__()))
 
         # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
-        return HttpResponseRedirect(self.success_url)
+        if self.success_url:
+            return HttpResponseRedirect(self.success_url)
+        else:
+            return HttpResponseRedirect(self.get_success_url())
 
 def remove_invalid_registry(f):
     """
@@ -263,10 +266,9 @@ class AddressDeleteView(AddressMixin, MultiDeleteViewMixin):
     model = Address
     form_class = AddressForm
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
-    success_url = reverse_lazy('person_update', kwargs={'pk': '582'})
 
-    #def get_success_url(self):
-        #return reverse('person_update', args=(self.object.person.pk, ))
+    def get_success_url(self):
+        return reverse('person_update', kwargs={'pk': self.kwargs['person_pk']})
 
 
 class SingleTableViewMixin(SingleTableView):

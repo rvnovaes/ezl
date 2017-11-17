@@ -53,20 +53,15 @@ class AddressTable(tables.Table):
 
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
-    delete_link = tables.LinkColumn('address_delete',
-                                    verbose_name="",
-                                    text="Excluir",
-                                    args=[A('person_id')])
-
     class Meta:
         sequecence = (
             'selection', 'street', 'number', 'complement', 'city_region', 'zip_code',
               'country',
-              'state', 'city', 'notes', 'address_type', 'is_active', 'delete_link')
+              'state', 'city', 'notes', 'address_type', 'is_active')
         model = Address
         fields = ['selection', 'street', 'number', 'complement', 'city_region', 'zip_code',
                   'country',
-                  'state', 'city', 'notes', 'address_type', 'is_active', 'delete_link']
+                  'state', 'city', 'notes', 'address_type', 'is_active']
         attrs = {"class": "table-striped table-bordered"}
         row_attrs = {
             'data-href': lambda record: '/pessoas/' + str(record.person.pk) + '/enderecos/' + str(record.pk) + '/'
