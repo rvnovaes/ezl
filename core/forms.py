@@ -131,16 +131,21 @@ class AddressForm(BaseModelForm):
                                             'data-container-css': '#id_city_container',
                                             'class': 'select-with-search material-ignore',
                                             'data-placeholder': 'Cidade',
-                                            'data-minimum-input-length': 3,
-                                            'data-minimum-input-message': 'favor'}
+                                            'data-minimum-input-length': 3,}
                                         ))
 
     address_type = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(AddressType.objects.exclude(name__startswith='ADDRESS TYPE').order_by('name')),
-        empty_label='Tipo',
+        queryset=filter_valid_choice_form(AddressType.objects.all().order_by('name')),
+        empty_label='Tipo de Endereço',
         required=True,
-        label='Tipo',
-    )
+        label='Tipo de Endereço',
+        widget=autocomplete.ModelSelect2(attrs={
+                                            #'data-dropdown-parent': 'id_city',
+                                            'data-container-css': '#id_address_type',
+                                            'class': 'select-with-search material-ignore',
+                                            'data-placeholder': 'Tipo de Endereço',
+                                            'data-minimum-input-length': 0,})
+        )
 
     layout = Layout(
         Row('address_type'),

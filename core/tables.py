@@ -56,7 +56,7 @@ class AddressTable(tables.Table):
     delete_link = tables.LinkColumn('address_delete',
                                     verbose_name="",
                                     text="Excluir",
-                                    args=[A('person_id'), A('pk')])
+                                    args=[A('person_id')])
 
     class Meta:
         sequecence = (

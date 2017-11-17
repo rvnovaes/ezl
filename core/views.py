@@ -111,6 +111,25 @@ def logout_user(request):
     # Redireciona para a página de login
     return HttpResponseRedirect('/')
 
+class MultiDeleteViewMixin(DeleteView):
+    success_message = None
+
+    def delete(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            pks = request.POST.getlist('selection')
+
+            try:
+                self.model.objects.filter(pk__in=pks).delete()
+                messages.success(self.request, self.success_message)
+            except ProtectedError as e:
+                qs = e.protected_objects.first()
+                # type = type('Task')
+                messages.error(self.request,
+                               delete_error_protected(str(self.model._meta.verbose_name),
+                                                      qs.__str__()))
+
+        # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
+        return HttpResponseRedirect(self.success_url)
 
 def remove_invalid_registry(f):
     """
@@ -240,13 +259,14 @@ class AddressUpdateView(AddressMixin, UpdateView):
         return reverse('person_update', args=(self.object.person.pk, ))
 
 
-class AddressDeleteView(AddressMixin, DeleteView):
+class AddressDeleteView(AddressMixin, MultiDeleteViewMixin):
     model = Address
     form_class = AddressForm
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+    success_url = reverse_lazy('person_update', kwargs={'pk': '582'})
 
-    def get_success_url(self):
-        return reverse('person_update', args=(self.object.person.pk, ))
+    #def get_success_url(self):
+        #return reverse('person_update', args=(self.object.person.pk, ))
 
 
 class SingleTableViewMixin(SingleTableView):
@@ -285,27 +305,6 @@ class SingleTableViewMixin(SingleTableView):
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         return context
-
-
-class MultiDeleteViewMixin(DeleteView):
-    success_message = None
-
-    def delete(self, request, *args, **kwargs):
-        if request.method == 'POST':
-            pks = request.POST.getlist('selection')
-
-            try:
-                self.model.objects.filter(pk__in=pks).delete()
-                messages.success(self.request, self.success_message)
-            except ProtectedError as e:
-                qs = e.protected_objects.first()
-                # type = type('Task')
-                messages.error(self.request,
-                               delete_error_protected(str(self.model._meta.verbose_name),
-                                                      qs.__str__()))
-
-        # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
-        return HttpResponseRedirect(self.success_url)
 
 
 def address_update(request, pk):
@@ -373,7 +372,7 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         kwargs.update({
-            'address_table': AddressTable(self.object.address_set.all()),
+            'table': AddressTable(self.object.address_set.all()),
         })
         return super().get_context_data(**kwargs)
 

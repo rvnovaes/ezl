@@ -28,7 +28,7 @@ urlpatterns = [
         views.AddressUpdateView.as_view(),
         name='address_update'),
 
-    url(r'^pessoas/(?P<person_pk>[0-9]+)/enderecos/(?P<pk>[0-9]+)/excluir/$',
+    url(r'^pessoas/(?P<person_pk>[0-9]+)/enderecos/excluir/$',
         views.AddressDeleteView.as_view(),
         name='address_delete'),
 
