@@ -96,7 +96,7 @@ def get_task_observation(task, message, date_field):
     s = '{} *** {} {}: {} em {}'.format(
         linesep,
         message,
-        task.person_executed_by,
+        task.alter_user.username,
         last_taskhistory_notes,
         date)
     return cast(JuridAgendaTable.Obs, String()) + s
