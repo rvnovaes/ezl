@@ -133,11 +133,12 @@ class AddressForm(BaseModelForm):
                                             'data-placeholder': 'Cidade',
                                             'data-minimum-input-length': 3,}
                                         ))
-    choices = filter_valid_choice_form(AddressType.objects.all().order_by('name'))
-    address_type = forms.ChoiceField(
-        choices=((x.id, x.name) for x in choices ),
-        label='Tipo'
-    )
+    address_type = forms.ModelChoiceField(
+        queryset=filter_valid_choice_form(AddressType.objects.all().order_by('name')),
+        empty_label='Tipo',
+        required=True,
+        label='Tipo',
+        )
 
     layout = Layout(
         Row('address_type'),

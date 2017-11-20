@@ -1,5 +1,16 @@
 {% extends "core/base_form.html" %}
 
+{% block extrahead %}
+    {{ block.super }}
+    <style type="text/css">
+
+        .select-field label {
+            font-size: 1rem;
+        }
+
+    </style>
+{% endblock %}
+
 {% block extrajs %}
 
     {{ block.super }}
