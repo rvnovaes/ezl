@@ -24,9 +24,9 @@ class FolderETL(GenericETL):
               p.Status = 'Ativa' AND
               p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '' AND
               p.Cliente IS NOT NULL AND p.Cliente <> '' AND
-              ((a.prazo_lido = 0 AND a.SubStatus = 30) OR 
+              ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-              AND a.Advogado IN ('12157458697', '12197627686') -- marcio.batista e claudia pires(Em teste)              
+              AND a.Advogado IN ('12157458697', '12197627686', '13281750656') -- marcio.batista, claudia pires e nagila(Em teste)
                   """
     has_status = True
 
