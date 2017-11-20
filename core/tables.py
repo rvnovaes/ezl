@@ -64,7 +64,7 @@ class AddressTable(tables.Table):
                   'state', 'city', 'notes', 'address_type', 'is_active']
         attrs = {"class": "table-striped table-bordered"}
         row_attrs = {
-            'data-href': lambda record: '/pessoas/' + str(record.person.pk) + '/enderecos/' + str(record.pk) + '/'
+            'data_href': lambda record: '/pessoas/' + str(record.person.pk) + '/enderecos/' + str(record.pk) + '/'
         }
 
 # Logradouro, N, COmplemento, Bairro, Cidade, Estado, Cep, Pais, Observacao, Tipo, Ativo

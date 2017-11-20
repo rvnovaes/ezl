@@ -232,7 +232,7 @@ span, .pagination > .active > span:focus, .pagination > .active > span:hover {
 }
 
 .fixed-btn .btn[disabled] {
-    display: none;
+    display: none !important;
 }
 
 .fixed-btn .btn.btn-fab.btn-primary:hover{
@@ -280,4 +280,9 @@ span, .pagination > .active > span:focus, .pagination > .active > span:hover {
     top: -20px;
     left:-5px;
     width: 100%;
+}
+
+#confirmDelete{
+    background-color: transparent ;
+    box-shadow: none;
 }

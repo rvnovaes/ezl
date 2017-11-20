@@ -359,15 +359,17 @@ class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
 class PersonCreateView(AuditFormMixin, CreateView):
     model = Person
     form_class = PersonForm
-    success_url = reverse_lazy('person_list')
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'person_list'
+
+    def get_success_url(self):
+        return reverse('person_update', args=(self.object.id,))
 
 
 class PersonUpdateView(AuditFormMixin, UpdateView):
     model = Person
     form_class = PersonForm
-    success_url = reverse_lazy('person_list')
+    # success_url = reverse_lazy('person_list')
     success_message = UPDATE_SUCCESS_MESSAGE
     template_name_suffix = '_update_form'
     object_list_url = 'person_list'
@@ -377,6 +379,9 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
             'table': AddressTable(self.object.address_set.all()),
         })
         return super().get_context_data(**kwargs)
+
+    def get_success_url(self):
+        return reverse('person_update', args=(self.object.id,))
 
 
 class PersonDeleteView(AuditFormMixin, MultiDeleteViewMixin):

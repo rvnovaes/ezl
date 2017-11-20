@@ -46,7 +46,6 @@
                 document.getElementById('delete_button').disabled = false;
             else
                 document.getElementById('delete_button').disabled = true;
-
         }
     </script>
     <form action="{% url 'address_delete' person_pk=object.pk %}" method="post">
@@ -109,13 +108,14 @@
 
 
                 <div class="text-right" style="">
-
-                    <input type="button" data-toggle="modal" data-target="#confirmDelete" disabled id="delete_button"
-                           class="btn btn-fab btn-warning material-icons"
-                           value="remove">
-                    <a class="btn btn-fab btn-primary" href="{% url 'address_create' object.pk %}">
-                       <!-- style="height: 30px !important; width: 30px !important; min-width: 30px !important;"> -->
-                        <i class="material-icons">add</i></a>
+                    <div class="fixed-btn">
+                        <input type="button" data-toggle="modal" data-target="#confirmDelete" id="delete_button"
+                               class="btn btn-fab btn-warning material-icons"
+                               value="remove" disabled>
+                        <a class="btn btn-fab btn-primary" href="{% url 'address_create' object.pk %}">
+                           <!-- style="height: 30px !important; width: 30px !important; min-width: 30px !important;"> -->
+                            <i class="material-icons">add</i></a>
+                    </div>
                 </div>
 
             </div>

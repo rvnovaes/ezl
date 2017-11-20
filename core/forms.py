@@ -128,24 +128,16 @@ class AddressForm(BaseModelForm):
         widget=autocomplete.ModelSelect2(url='city_autocomplete',
                                         attrs={
                                             #'data-dropdown-parent': 'id_city',
-                                            'data-container-css': '#id_city_container',
+                                            'data-container-css': 'id_city_container',
                                             'class': 'select-with-search material-ignore',
                                             'data-placeholder': 'Cidade',
                                             'data-minimum-input-length': 3,}
                                         ))
-
-    address_type = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(AddressType.objects.all().order_by('name')),
-        empty_label='Tipo de Endereço',
-        required=True,
-        label='Tipo de Endereço',
-        widget=autocomplete.ModelSelect2(attrs={
-                                            #'data-dropdown-parent': 'id_city',
-                                            'data-container-css': '#id_address_type',
-                                            'class': 'select-with-search material-ignore',
-                                            'data-placeholder': 'Tipo de Endereço',
-                                            'data-minimum-input-length': 0,})
-        )
+    choices = filter_valid_choice_form(AddressType.objects.all().order_by('name'))
+    address_type = forms.ChoiceField(
+        choices=((x.id, x.name) for x in choices ),
+        label='Tipo'
+    )
 
     layout = Layout(
         Row('address_type'),

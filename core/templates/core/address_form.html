@@ -7,7 +7,7 @@
     {{ block.super }}
     <style type="text/css">
 
-        #id_city_container > label.active {
+        label.active {
             color: #0097a7;
         }
 
@@ -32,5 +32,6 @@
 
 {% block extrajs %}
     {{ form.media }}
+    {{ block.super }}
     <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
 {% endblock %}
