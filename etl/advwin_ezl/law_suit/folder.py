@@ -27,7 +27,7 @@ class FolderETL(GenericETL):
               p.Cliente IS NOT NULL AND p.Cliente <> '' AND
               ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-
+              AND a.Advogado='12157458697' -- marcio.batista (Em teste)
                   """
     has_status = True
 
