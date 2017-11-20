@@ -112,7 +112,8 @@ class FolderForm(BaseForm):
     cost_center = forms.ModelChoiceField(
         queryset=CostCenter.objects.filter(is_active=True),
         empty_label=u"Selecione...",
-        widget=MDModelSelect2(url='costcenter_autocomplete', attrs={'class': 'form-control'})
+        widget=MDModelSelect2(url='costcenter_autocomplete', attrs={'class': 'form-control'}),
+        required=False,
     )
 
     def __init__(self, *args, **kwargs):

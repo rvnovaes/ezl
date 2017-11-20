@@ -2,7 +2,7 @@
 from core.models import Person
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
-from lawsuit.models import Folder
+from lawsuit.models import Folder, CostCenter
 
 
 class FolderETL(GenericETL):
@@ -11,7 +11,8 @@ class FolderETL(GenericETL):
     import_query = """
             SELECT DISTINCT
               p.Codigo_Comp AS legacy_code,
-              p.Cliente
+              p.Cliente,
+              p.Setor
             FROM Jurid_Pastas AS p
                   INNER JOIN Jurid_ProcMov AS pm ON
                     pm.Codigo_Comp = p.Codigo_Comp
@@ -24,10 +25,9 @@ class FolderETL(GenericETL):
               p.Status = 'Ativa' AND
               p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '' AND
               p.Cliente IS NOT NULL AND p.Cliente <> '' AND
-              ((a.prazo_lido = 0 AND a.SubStatus = 30) OR 
+              ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-              AND a.Advogado='12157458697' -- marcio.batista (Em teste)
-              
+
                   """
     has_status = True
 
@@ -38,6 +38,14 @@ class FolderETL(GenericETL):
             try:
                 legacy_code = row['legacy_code']
                 customer_code = row['Cliente']
+                cost_center = row['Setor'].strip()
+                cost_center_instance = None
+
+                if cost_center:
+                    cost_center_instance, _ = CostCenter.objects.get_or_create(
+                        legacy_code=cost_center,
+                        defaults={"name": cost_center,
+                                  "create_user": user})
 
                 instance = self.model.objects.filter(legacy_code=legacy_code,
                                                      system_prefix=LegacySystem.ADVWIN.value).first()
@@ -51,17 +59,20 @@ class FolderETL(GenericETL):
                         instance.person_customer = person_customer
                         instance.is_active = True
                         instance.alter_user = user
+                        instance.cost_center = cost_center_instance
                         instance.save(
                             update_fields=['person_customer',
                                            'is_active',
                                            'alter_date',
-                                           'alter_user'])
+                                           'alter_user',
+                                           'cost_center'])
                     else:
                         obj = self.model(person_customer=person_customer,
                                          is_active=True,
                                          legacy_code=legacy_code,
                                          system_prefix=LegacySystem.ADVWIN.value,
                                          create_user=user,
+                                         cost_center=cost_center_instance,
                                          alter_user=user)
                         obj.save()
 
