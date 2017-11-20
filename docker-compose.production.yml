@@ -31,6 +31,7 @@ services:
       - .:/app
       - web-static:/app/staticfiles
       - web-media:/app/media
+      - ezl-logs:/var/log/ezl
       - /mnt/windows_ecm/Agenda:/app/media/ECM
     environment:
       ENV: production
