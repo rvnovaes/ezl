@@ -62,9 +62,10 @@ class TaskCreateView(AuditFormMixin, CreateView):
         form.instance.__server = self.request.environ['HTTP_HOST']
         response = super(TaskCreateView, self).form_valid(form)
 
-        for document in form.cleaned_data['documents']:
-            task.ecm_set.create(path=document,
-                                create_user=task.create_user)
+        if form.cleaned_data['documents']:
+            for document in form.cleaned_data['documents']:
+                task.ecm_set.create(path=document,
+                                    create_user=task.create_user)
 
         form.delete_temporary_files()
 
