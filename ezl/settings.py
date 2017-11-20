@@ -29,7 +29,7 @@ try:
     host = os.environ.get('DB_HOST', source['host'])
     port = os.environ.get('DB_PORT', source['port'])
     environment = source['environment']
-    email_use_ssl = source['email_use_ssl']
+    email_use_ssl = True if source['email_use_ssl'].lower() == "true" else False
     email_host = source['email_host']
     email_port = source['email_port']
     email_host_user = source['email_host_user']

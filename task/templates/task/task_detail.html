@@ -88,87 +88,95 @@
                 <div class="panel-body form-group is-focused">
                     <div class="form-row">
 
-                        <table class="table table-striped">
-                            {% if form.instance.legacy_code %}
-                                <thead>
-                                    <tr>
-                                        <th>Código Legado</th>
-                                        <th>
-                                            {{ form.instance.legacy_code }}
-                                        </th>
-                                    </tr>
-                                </thead>
-                            {% endif %}
-                            <tbody>
-                                <tr>
-                                    <th>
-                                        Solicitante
-                                    </th>
-                                    <td>
-                                        {{ form.instance.person_asked_by|capfirst|default_if_none:"---" }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        Descrição do serviço
-                                    </th>
-                                    <td>
-                                        <p class="text-justify">{{ form.instance.description.strip|default:"---" }}</p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        Prazo
-                                    </th>
-                                    <td>
-                                        {{ form.instance.final_deadline_date|localtime|default_if_none:"---" }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        Recebida em
-                                    </th>
-                                    <td>
-                                        {{ form.instance.delegation_date|localtime|default_if_none:"---" }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        Serviço solicitado
-                                    </th>
-                                    <td>
-                                        {{ form.instance.type_task|default_if_none:"---" }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        Vara
-                                    </th>
-                                    <td>
-                                        {{ form.instance.court_division|default_if_none:"---" }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        Órgão
-                                    </th>
-                                    <td>
-                                        {{ form.instance.court|default_if_none:"---" }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        Endereço
-                                    </th>
-                                    <td>
-                                        {{ form.instance.address|default:"---"|capfirst }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <div class="hidden form-control">{{ form.survey_result }}</div>
-
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <div class="panel-title">
+                                    <i class="material-icons">assignment</i>
+                                    Dados da providência
+                                </div>
+                            </div>
+                            <div class="panel-body form-group is-focused">
+                                <div class="form-row">
+                                    <table class="table table-striped">
+                                        <tbody>
+                                            <tr>
+                                                <th>
+                                                    Serviço solicitado
+                                                </th>
+                                                <td>
+                                                    {{ form.instance.type_task|default_if_none:"---" }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    Descrição do serviço
+                                                </th>
+                                                <td>
+                                                    <p class="text-justify">{{ form.instance.description.strip|default:"---" }}</p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    Prazo
+                                                </th>
+                                                <td>
+                                                    {{ form.instance.final_deadline_date|localtime|default_if_none:"---" }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    Recebida em
+                                                </th>
+                                                <td>
+                                                    {{ form.instance.delegation_date|localtime|default_if_none:"---" }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    Vara
+                                                </th>
+                                                <td>
+                                                    {{ form.instance.court_division|default_if_none:"---" }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    Órgão
+                                                </th>
+                                                <td>
+                                                    {{ form.instance.court|default_if_none:"---" }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    Endereço
+                                                </th>
+                                                <td>
+                                                    {{ form.instance.address|default:"---"|capfirst }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    Número do processo
+                                                </th>
+                                                <td>
+                                                    {{ form.instance.movement.law_suit.law_suit_number }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    Centro de Custo
+                                                </th>
+                                                <td>
+                                                    {{ form.instance.movement.law_suit.folder.cost_center|default:"---" }}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="hidden form-control">{{ form.survey_result }}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group text-center">
                         {% if perms.task.view_delegated_tasks %}
@@ -228,6 +236,67 @@
                                 </button>
                             {% endif %}
                         {% endif %}
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <div class="panel-title">
+                                <i class="material-icons">assignment</i>
+                                Dados do correspondente
+                            </div>
+                        </div>
+                        <div class="panel-body form-group is-focused">
+                            <div class="form-row">
+                                {% include 'task/person_info.html' with person=form.instance.person_executed_by %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <div class="panel-title">
+                                <i class="material-icons">assignment</i>
+                                Dados do solicitante
+                            </div>
+                        </div>
+                        <div class="panel-body form-group is-focused">
+                            <div class="form-row">
+                                {% include 'task/person_info.html' with person=form.instance.person_asked_by %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <div class="panel-title">
+                                <i class="material-icons">assignment</i>
+                                Dados do sistema legado
+                            </div>
+                        </div>
+                        <div class="panel-body form-group is-focused">
+                            <div class="form-row">
+                                <table class="table table-striped">
+                                    <tbody>
+                                        <tr>
+                                            <th>
+                                                N° da pasta
+                                            </th>
+                                            <td>
+                                                {{ form.instance.movement.law_suit.folder.folder_number|default_if_none:'' }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                N° da OS
+                                            </th>
+                                            <td>
+                                                {{ form.instance.legacy_code|default_if_none:'' }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -291,14 +360,18 @@
                                             <a href="/media/{{ ecm.path }}" download
                                                style="text-decoration: none;">{{ ecm.filename }}</a>
                                         </td>
-                                        {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
-                                            <td id="cell-table" style="font-size: small">
-                                                <i class="material-icons" id=""
-                                                   style="cursor: pointer; font-size: medium;"
-                                                   data-toggle="modal"
-                                                   data-target="#confirmDelete-{{ ecm.id }}">delete</i>
-                                            </td>
-                                        {% endif %}
+                                            {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
+                                                <td id="cell-table" style="font-size: small">
+                                                    <i class="material-icons {% if ecm.legacy_code %}text-danger{% endif %}" id=""
+                                                       style="cursor: pointer; font-size: medium;"
+                                                       {% if ecm.legacy_code %}
+                                                           data-target="#confirmDeleteNotAllowed"
+                                                       {% else %}
+                                                           data-target="#confirmDelete-{{ ecm.id }}"
+                                                       {% endif %}
+                                                       data-toggle="modal">delete</i>
+                                                </td>
+                                            {% endif %}
                                     </tr>
                                     <tr class="spaceFile" id="row-space{{ ecm.id }}"></tr>
 
@@ -327,6 +400,25 @@
                                         </div>
                                     </div>
                                 {% endfor %}
+                                <!-- Janela modal para arquivos que não podem ser apagados -->
+                                <div id="confirmDeleteNotAllowed" class="modal">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content ">
+                                            <div class="modal-body" style="text-align: center !important;">
+                                                Arquivos de sistemas legados não podem ser apagados.
+                                            </div>
+                                            <div class="modal-footer">
+                                                <div class="form-group text-center">
+                                                    <button type="button" style="width: 95px!important;"
+                                                            class="btn btn-sm btn-raised btn-default"
+                                                            data-dismiss="modal">
+                                                        Ok
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído o conteúdo das novas janelas modais
                                 a medida que for adicionando novos arquivos -->
                                 <div id="modals">
