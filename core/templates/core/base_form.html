@@ -1,23 +1,23 @@
-{% extends "ezl_base.html" %}
+{% extends "inicial.html" %}
 
 {% load core_filters %}
 {% load material_form %}
 {% load staticfiles %}
 
-{% block head %}
-
+{% block css_head %}
+    {% include 'material/includes/material_css.html' %}
     {{ block.super }}
+{% endblock css_head %}
+{% block js_head %}
+{#    {% include 'material/includes/material_js.html' %}#}
+    {{ block.super }}
+    <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
     <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
 
 {% endblock %}
 
-{% block extrajs %}
-
-    {{ block.super }}
-
-{% endblock %}
-
 {% block content %}
+    {{ block.super }}
     <script language="JavaScript">
         $('#myModal').modal('show')
         var pk_list = [];

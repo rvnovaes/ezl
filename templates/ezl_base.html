@@ -1,4 +1,4 @@
-{% extends "material_base.html" %}
+{% extends "inicial.html" %}
 
 {% load staticfiles %}
 
@@ -6,32 +6,36 @@
 
 {% block container_class %}content-block{% endblock %}
 
-{% block extrajs %}
-
+{% block css_head %}
+    {% include 'material/includes/material_css.html' %}
     {{ block.super }}
+{% endblock css_head %}
 
-    <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
+{% block js_head %}
+    {% include 'material/includes/material_js.html' %}
+    {{ block.super }}
+{#    <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>#}
 
 {% endblock %}
 
-{% block head %}
-    {{ block.super }}
-    <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="{% static "libs/bootstrap-3.3.7/css/bootstrap.css" %}">
-
-    <link rel="stylesheet" href="{% static "libs/toastr/build/toastr.min.css" %}">
-
-    <link rel="stylesheet"
-          href="{% static "libs/bootstrap-material-design-0.5.10/css/bootstrap-material-design.css" %}">
-
-    <link rel="stylesheet" href="{% static "libs/bootstrap-material-design-0.5.10/css/ripples.css" %}">
-
-    <!-- Material Design fonts -->
-    <link rel="stylesheet" type="text/css" href="{% static "fonts/google.css" %}">
-    <link rel="stylesheet" type="text/css" href="{% static "fonts/material.css" %}">
-    <!-- Our custom style goes here -->
-    <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">
-{% endblock %}
+{#{% block head %}#}
+{#    {{ block.super }}#}
+{#    <!-- Compiled and minified CSS -->#}
+{#    <link rel="stylesheet" href="{% static "libs/bootstrap-3.3.7/css/bootstrap.css" %}">#}
+{##}
+{#    <link rel="stylesheet" href="{% static "libs/toastr/build/toastr.min.css" %}">#}
+{##}
+{#    <link rel="stylesheet"#}
+{#          href="{% static "libs/bootstrap-material-design-0.5.10/css/bootstrap-material-design.css" %}">#}
+{##}
+{#    <link rel="stylesheet" href="{% static "libs/bootstrap-material-design-0.5.10/css/ripples.css" %}">#}
+{##}
+{#    <!-- Material Design fonts -->#}
+{#    <link rel="stylesheet" type="text/css" href="{% static "fonts/google.css" %}">#}
+{#    <link rel="stylesheet" type="text/css" href="{% static "fonts/material.css" %}">#}
+{#    <!-- Our custom style goes here -->#}
+{#    <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">#}
+{#{% endblock %}#}
 
 {% block navbar %}
     {% if user.is_authenticated %}
