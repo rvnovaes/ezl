@@ -1,5 +1,6 @@
 {% extends 'inicial.html' %}
 {% load core_filters %}
+{% load tz %}
 {% block content %}
     {% include 'core/widgets/messages.html' %}
     <form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
@@ -33,7 +34,155 @@
                     </div>
                 </div>
             </fieldset>
+
+            <div class="panel panel-primary">
+                <div class="panel-heading " data-toggle="collapse" data-target="#attachment" id="header-attachment"
+                     onclick="toggleArrow()">
+                    <div class="panel-title"><i class="material-icons">attach_file</i>
+                        <b>Anexos</b>
+                        <i class="material-icons" style="float: right;" id="down">arrow_drop_down</i>
+                        <i class="material-icons" style="float: right; display: none;" id="up">arrow_drop_up</i>
+                    </div>
+                </div>
+                <div id="attachment" class="panel-collapse collapse">
+                    <div class="panel-body form-group is-focused">
+                        {{ form.instance.status.name }}
+                        {% if form.instance.status.name == 'OPEN' or form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
+                            <button type="button" class="btn btn-sm btn-primary btn-raised js-upload-files"
+                                    style="color: #fff !important;">
+                                <i class="material-icons">cloud_upload</i> &nbsp; Enviar Arquivo(s)
+                            </button>
+
+                            <input id="fileupload" type="file" name="path" multiple
+                                   style="display: none;"
+                                   data-method="POST"
+                                   enctype="multipart/form-data"
+                                   data-url="{% url 'ecm_add' object.id %}"
+                                   data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+                            <br>
+                            <br>
+                        {% endif %}
+                        <p class="text-center" id="no-providence">
+                            {% if ecms|length == 0 %}
+                                Esta providência não possui nenhum arquivo em
+                                anexo.
+                            {% endif %}
+                        </p>
+                        <div class="table-responsive">
+                            <table id="files" class="table table-bordered table-responsive">
+                                <tbody>
+                                {% for ecm in ecms %}
+                                    <tr class="lineFile" id="row-{{ ecm.id }}">
+                                        <td id="cell-table">
+                                            <div class="row" id="row-file">
+                                                <div class="col-sm-2"
+                                                     style="text-align: center !important; vertical-align: middle !important;">
+                                                    <i class="material-icons">person_pin</i>
+                                                </div>
+                                                <div class="col-sm-8" style="text-align: left; padding-left: 0;">
+                                                    <h6 style="margin-bottom: 3px !important;">{{ ecm.user.first_name }} {{ ecm.user.last_name }}
+                                                        ({{ ecm.create_user }})
+                                                    </h6>
+
+                                                    <div style="font-size: x-small">
+                                                        {{ ecm.create_date|localtime }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td id="cell-table" style="font-size: small; width: 70% !important;">
+                                            <a href="/media/{{ ecm.path }}" download
+                                               style="text-decoration: none;">{{ ecm.filename }}</a>
+                                        </td>
+                                            {% if form.instance.status.name == 'OPEN' or  form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
+                                                <td id="cell-table" style="font-size: small">
+                                                    <i class="material-icons {% if ecm.legacy_code %}text-danger{% endif %}" id=""
+                                                       style="cursor: pointer; font-size: medium;"
+                                                       {% if ecm.legacy_code %}
+                                                           data-target="#confirmDeleteNotAllowed"
+                                                       {% else %}
+                                                           data-target="#confirmDelete-{{ ecm.id }}"
+                                                       {% endif %}
+                                                       data-toggle="modal">delete</i>
+                                                </td>
+                                            {% endif %}
+                                    </tr>
+                                    <tr class="spaceFile" id="row-space{{ ecm.id }}"></tr>
+
+                                    <!-- Janela modal para confirmação de deleção de arquivo -->
+                                    <div id="confirmDelete-{{ ecm.id }}" class="modal">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content ">
+                                                <div class="modal-body" style="text-align: center !important;">
+                                                    Tem certeza que deseja excluir o arquivo <b>{{ ecm.filename }}</b> ?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <div class="form-group text-center">
+                                                        <button type="button" style="width: 95px!important;"
+                                                                class="btn btn-sm btn-raised btn-default"
+                                                                data-dismiss="modal">
+                                                            Não
+                                                        </button>
+                                                        <button id="delete-ecm-{{ ecm.id }}"
+                                                                style="width: 95px!important;"
+                                                                class="btn btn-sm btn-raised btn-primary"
+                                                                data-dismiss="modal">Sim
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                                <!-- Janela modal para arquivos que não podem ser apagados -->
+                                <div id="confirmDeleteNotAllowed" class="modal">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content ">
+                                            <div class="modal-body" style="text-align: center !important;">
+                                                Arquivos de sistemas legados não podem ser apagados.
+                                            </div>
+                                            <div class="modal-footer">
+                                                <div class="form-group text-center">
+                                                    <button type="button" style="width: 95px!important;"
+                                                            class="btn btn-sm btn-raised btn-default"
+                                                            data-dismiss="modal">
+                                                        Ok
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído o conteúdo das novas janelas modais
+                                a medida que for adicionando novos arquivos -->
+                                <div id="modals">
+                                </div>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Janela modal para mostrar progresso do envio de arquivos -->
+
+                        <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" style="text-align: center">Enviando ...</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: 0%;">0%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+{#    {{ ecms }}#}
+
 
     </form>
 

@@ -107,6 +107,12 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
                                            'pk': self.kwargs['movement']})
         super(TaskUpdateView, self).get_success_url()
 
+    def get_context_data(self, **kwargs):
+        context = super(TaskUpdateView, self).get_context_data(**kwargs)
+        context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
+
+        return context
+
 
 class TaskDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
     model = Task
