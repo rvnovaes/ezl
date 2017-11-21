@@ -7,6 +7,7 @@
 {% block head %}
 
     {{ block.super }}
+    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
 
 {% endblock %}
 
@@ -14,11 +15,49 @@
 
     {{ block.super }}
 
-    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
-
 {% endblock %}
 
 {% block content %}
+    <script language="JavaScript">
+        $('#myModal').modal('show')
+        var pk_list = [];
+
+        function toggle(source) {
+
+
+            checkboxes = document.getElementsByName('selection');
+            for (var i in checkboxes) {
+
+                if (checkboxes.hasOwnProperty(i)) {
+                    checkboxes[i].checked = source.checked;
+                    if (source.checked)
+                        pk_list.push(checkboxes[i].id);
+                    else
+                        pk_list = []
+                }
+            }
+            if (pk_list.length > 0) {
+                document.getElementById('delete_button').disabled = false;
+            } else {
+                document.getElementById('delete_button').disabled = true;
+            }
+        }
+
+        function showDeleteButton(source) {
+            if (source.checked) {
+                pk_list.push(source.id);
+            } else {
+                pk_list.pop();
+                document.getElementById("selection_header").checked = false;
+            }
+
+            if (pk_list.length > 0)
+                document.getElementById('delete_button').disabled = false;
+            else
+                document.getElementById('delete_button').disabled = true;
+
+        }
+    </script>
 
     <form id="object_form" action="" method="post">
         {{ form.management_form }}

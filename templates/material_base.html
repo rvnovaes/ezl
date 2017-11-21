@@ -6,6 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Material Design for Django Forms and Admin{% endblock %}</title>
 
+    <script src="{% static "libs/jquery-3.2.17/jquery.min.js" %}"></script>
+    {% include 'material/includes/material_js.html' %}
+    <script src="{% static "js/utils.js" %}"></script>
+    <script src="{% static "js/table-tr-link.js" %}"></script>
+    <script src="{% static "js/pagination-fixed.js" %}"></script>
+    <script src="{% static "js/masks.js" %}"></script>
+    <script src="{% static "libs/bootstrap-3.3.7/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
+    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/ripples.min.js" %}"></script>
+
     {% block head %}
         {% include 'material/includes/material_css.html' %}
 
@@ -18,10 +28,6 @@
           {% block container %}{% endblock %}
       </div>
       {% block js %}
-      <script src="{% static "libs/jquery-3.2.17/jquery.min.js" %}"></script>
-      <script src="{% static "libs/bootstrap-3.3.7/js/bootstrap.min.js" %}"></script>
-      {% include 'material/includes/material_js.html' %}
-      <script src="{% static "js/masks.js" %}"></script>c
       {% block extrajs %}{% endblock %}
       {% endblock %}
   </body>

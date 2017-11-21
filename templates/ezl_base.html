@@ -15,6 +15,7 @@
 {% endblock %}
 
 {% block head %}
+    {{ block.super }}
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="{% static "libs/bootstrap-3.3.7/css/bootstrap.css" %}">
 
@@ -30,7 +31,6 @@
     <link rel="stylesheet" type="text/css" href="{% static "fonts/material.css" %}">
     <!-- Our custom style goes here -->
     <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">
-    {{ block.super }}
 {% endblock %}
 
 {% block navbar %}
