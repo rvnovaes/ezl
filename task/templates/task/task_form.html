@@ -46,7 +46,6 @@
                 </div>
                 <div id="attachment" class="panel-collapse collapse">
                     <div class="panel-body form-group is-focused">
-                        {{ form.instance.status.name }}
                         {% if form.instance.status.name == 'OPEN' or form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
                             <button type="button" class="btn btn-sm btn-primary btn-raised js-upload-files"
                                     style="color: #fff !important;">
