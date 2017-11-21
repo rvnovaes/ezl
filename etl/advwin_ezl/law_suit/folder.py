@@ -2,6 +2,7 @@
 from core.models import Person
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
+from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import Folder, CostCenter
 
 
@@ -33,19 +34,22 @@ class FolderETL(GenericETL):
 
     @validate_import
     def config_import(self, rows, user, rows_count):
+        invalid_cost_center = InvalidObjectFactory.get_invalid_model(CostCenter)
         for row in rows:
             rows_count -= 1
             try:
                 legacy_code = row['legacy_code']
                 customer_code = row['Cliente']
                 cost_center = row['Setor'].strip()
-                cost_center_instance = None
+                cost_center_instance = invalid_cost_center
 
                 if cost_center:
-                    cost_center_instance, _ = CostCenter.objects.get_or_create(
-                        legacy_code=cost_center,
-                        defaults={"name": cost_center,
-                                  "create_user": user})
+                    try:
+                        cost_center_instance = CostCenter.objects.get(
+                            system_prefix=LegacySystem.ADVWIN.value,
+                            legacy_code=cost_center)
+                    except CostCenter.DoesNotExist:
+                        pass
 
                 instance = self.model.objects.filter(legacy_code=legacy_code,
                                                      system_prefix=LegacySystem.ADVWIN.value).first()

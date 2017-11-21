@@ -10,6 +10,7 @@ from etl.advwin_ezl.law_suit.organ import OrganETL
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from etl.advwin_ezl.law_suit.court_division import CourtDivisionETL
 from etl.advwin_ezl.law_suit.folder import FolderETL
+from etl.advwin_ezl.law_suit.cost_center import CostCenterETL
 from etl.advwin_ezl.law_suit.instance import InstanceETL
 from etl.advwin_ezl.law_suit.law_suit import LawsuitETL
 from etl.advwin_ezl.law_suit.movement import MovementETL
@@ -181,7 +182,7 @@ class AddressTask(luigi.Task):
         AddressETL().import_data()
 
 
-class FolderTask(luigi.Task):
+class CostCenterTask(luigi.Task):
     date_interval = luigi.DateHourParameter()
 
     def output(self):
@@ -189,6 +190,20 @@ class FolderTask(luigi.Task):
 
     def requires(self):
         yield AddressTask(self.date_interval)
+
+    def run(self):
+        self.output().open("w").close()
+        CostCenterETL().import_data()
+
+
+class FolderTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
+    def output(self):
+        return luigi.LocalTarget(path=get_target_path(self))
+
+    def requires(self):
+        yield CostCenterTask(self.date_interval)
 
     def run(self):
         self.output().open("w").close()
