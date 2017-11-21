@@ -99,7 +99,7 @@ class FolderForm(BaseForm):
         self.order_fields(['folder_number', 'person_customer', 'is_active'])
 
         if not self.instance.pk:
-            # Since the pk is set this is not a new instance            
+            # Since the pk is set this is not a new instance
             self.fields.pop('folder_number')
 
 
@@ -109,6 +109,7 @@ class LawSuitForm(BaseForm):
 
         def get_option(o):
             return '{}/{}'.format(o.court_district.name, o.legal_name)
+
         choices = [(organ.pk, get_option(organ)) for organ in Organ.objects.all()]
         self.fields['organ'].choices = choices
 
@@ -125,11 +126,15 @@ class LawSuitForm(BaseForm):
             'name'), required=True
     )
     organ = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(
-            filter_valid_choice_form(Organ.objects.filter(is_active=True))).order_by('name'),
-        empty_label=u"Selecione", required=True, initial=None,
-        widget=autocomplete.ListSelect2(url='organ_autocomplete', forward=['person_lawyer'], attrs={
-            'class': 'select-with-search', 'data-placeholder': 'Comarca/Tribunal'}))
+        queryset=filter_valid_choice_form(Organ.objects.filter(is_active=True)).order_by('name'),
+        empty_label=u"Selecione",
+        required=True,
+        initial=None,
+        widget=autocomplete.ListSelect2(url='organ_autocomplete',
+                                        attrs={
+                                            'class': 'select-with-search',
+                                            'data-placeholder': 'Comarca/Tribunal'
+                                        }))
 
     instance = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(Instance.objects.filter(is_active=True)).order_by('name'),

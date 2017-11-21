@@ -342,7 +342,7 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
     template_name = 'task/task_filter.html'
     context_object_name = 'task_filter'
     context_filter_name = 'filter'
-    ordering = ['-id']
+    ordering = ['-final_deadline_date']
     table_class = DashboardStatusTable
 
     def query_builder(self):

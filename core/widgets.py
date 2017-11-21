@@ -99,10 +99,10 @@ class MDCheckboxInput(Input):
 
 class MDRangeWidget(forms.MultiWidget):
     template_name = 'core/widgets/md_range_datetimepicker.html'
-    format = "DD/MM/YYYY"
+    format = 'DD/MM/YYYY'
 
     def __init__(self, format=None, attrs=None):
-        self.format = format if format else "DD/MM/YYYY"
+        self.format = format if format else 'DD/MM/YYYY'
         widgets = (MDDateTimepicker(), MDDateTimepicker())
         super(MDRangeWidget, self).__init__(widgets, attrs)
 
@@ -138,7 +138,9 @@ class MDRangeWidget(forms.MultiWidget):
                 widget_attrs['id'] = '%s_%s' % (id_, i)
             else:
                 widget_attrs = final_attrs
-            subwidgets.append(widget.get_context(widget_name, widget_value, widget_attrs)['widget'])
+            subwidgets.append(widget.get_context(widget_name,
+                                                 widget_value,
+                                                 widget_attrs)['widget'])
         context['widget']['subwidgets'] = subwidgets
         context['widget']['format'] = self.format
         return context
@@ -177,7 +179,7 @@ class MDSelect2WidgetMixin(object):
     """Mixin for Select2 widgets."""
 
     def build_attrs(self, *args, **kwargs):
-        attrs = super(MDSelect2WidgetMixin, self).build_attrs(*args, **kwargs)
+        attrs = super().build_attrs(*args, **kwargs)
         lang_code = self._get_language_code()
         if lang_code:
             attrs.setdefault('data-autocomplete-light-language', lang_code)
@@ -255,8 +257,9 @@ class MDSelect(ChoiceWidget):
             return use_required_attribute
 
         first_choice = next(iter(self.choices), None)
-        return use_required_attribute and first_choice is not None and self._choice_has_empty_value(
-            first_choice)
+        return (use_required_attribute and
+                first_choice is not None and
+                self._choice_has_empty_value(first_choice))
 
 
 class MDModelSelect2(QuerySetSelectMixin,

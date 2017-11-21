@@ -233,7 +233,7 @@ span, .pagination > .active > span:focus, .pagination > .active > span:hover {
 }
 
 .fixed-btn .btn[disabled] {
-    display: none;
+    display: none !important;
 }
 
 .fixed-btn .btn.btn-fab.btn-primary:hover{
@@ -266,4 +266,24 @@ span, .pagination > .active > span:focus, .pagination > .active > span:hover {
 .profile-selector{
     width: 200px;
     height: 90px;
+}
+
+#id_city_container label, #id_address_type_container label {
+    font-size: 0.8rem;
+    top: -7px;
+    position: relative;
+}
+
+#id_city_container span.select2-selection--single {
+    border-width: 0px 0px 1px 0px;
+    border-radius: 0;
+    position: absolute;
+    top: -20px;
+    left:-5px;
+    width: 100%;
+}
+
+#confirmDelete{
+    background-color: transparent ;
+    box-shadow: none;
 }

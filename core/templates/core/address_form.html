@@ -1,32 +1,37 @@
 {% extends "core/base_form.html" %}
 
-{% block extrajs %}
+{% load material_form %}
+{% load staticfiles %}
 
+{% block extrahead %}
     {{ block.super }}
+    <style type="text/css">
 
-    <script type="text/javascript">
-        $(function () {
+        label.active {
+            color: #0097a7;
+        }
 
-            $('#id_city').show();
+        .select2-container--focus .select2-selection {
+            border-color: #0097a7 !important;
+            /*border-bottom: 1px solid #0097a7;*/
+            /*box-shadow: 0 1px 00 solid #0097a7;*/
+        }
 
-            $('#id_city').chosen({
-                // width: '90%',
-                include_group_label_in_selected: true,
-                search_contains: true});
-
-            window.setTimeout(function () {
-                $('#id_city').material_select('destroy');
-            }, 0);
-
-        })
-    </script>
-
+    </style>
 {% endblock %}
 
 {% block form_title %}
+
     {% if object %}
         {{ block.super }}
     {% else %}
         Novo endereço para {{ person }}
     {% endif %}
+
+{% endblock %}
+
+{% block extrajs %}
+    {{ form.media }}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
 {% endblock %}
