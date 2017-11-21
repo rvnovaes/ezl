@@ -112,8 +112,6 @@ def validate_import(f):
 class GenericETL(object):
     EZL_LEGACY_CODE_FIELD = 'legacy_code'
 
-    @property
-    @lru_cache(maxsize=None)
     def advwin_engine(self):
         return connect_db(parser, config_connection)
 
@@ -154,9 +152,9 @@ class GenericETL(object):
         if self.has_status:
             self.deactivate_all()
 
-        connection = self.advwin_engine.connect()
+        connection = self.advwin_engine().connect()
 
-        cursor = self.advwin_engine.execute(text(self.import_query))
+        cursor = self.advwin_engine().execute(text(self.import_query))
         rows = cursor.fetchall()
         rows_count = len(rows)
         user = User.objects.get(pk=create_alter_user)
@@ -174,7 +172,7 @@ class GenericETL(object):
 
     def export_data(self):
         self.config_export()
-        connection = self.advwin_engine.connect()
+        connection = self.advwin_engine().connect()
 
         for stmt in self.export_statements:
             trans = connection.begin()
