@@ -87,7 +87,7 @@ class TaskETL(GenericETL):
                     ((p.Status = 'Ativa' OR p.Dt_Saida IS NULL) AND
                     ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                     (a.SubStatus = 80))) AND a.Status = '0' -- STATUS ATIVO
-                    AND a.Advogado IN ('12157458697', '12197627686', '13281750656') -- marcio.batista, nagila e claudia (Em teste)
+                    AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171') -- marcio.batista, nagila e claudia (Em teste)
     """
     model = Task
     advwin_table = 'Jurid_agenda_table'
