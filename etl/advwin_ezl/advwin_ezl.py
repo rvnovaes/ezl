@@ -25,6 +25,8 @@ from connections.db_connection import connect_db, get_advwin_engine
 from core.utils import LegacySystem
 from config.config import get_parser
 from django.utils.lru_cache import lru_cache
+from etl.models import DashboardETL
+from django.utils import timezone
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -160,9 +162,13 @@ class GenericETL(object):
         rows = cursor.fetchall()
         rows_count = len(rows)
         user = User.objects.get(pk=create_alter_user)
-
+        dashboard_log = DashboardETL.objects.create(
+            execution_date_start=timezone.now(),
+            name=self.model._meta.verbose_name.upper(),
+            create_user=user)
         self.config_import(rows, user, rows_count)
-
+        dashboard_log.execution_date_finish = timezone.now()
+        dashboard_log.save()
         connection.close()
 
     def config_export(self):
