@@ -17,15 +17,14 @@
 {% endblock css_head %}
 {% block js_head %}
     {{ block.super }}
-
 {% endblock js_head %}
 {% block extrajs%}
-    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="{% static "js/jquery-2.1.1.min.js" %}"></script>
+{#    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>#}
     {% include 'material/includes/material_js.html' %}
     <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
 {#    Apesar de repetidos, os scripts a seguir são necessário para renderização do form #}
     <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
-{#    <script src="{% static 'material/js/jquery.js' %}"></script>#}
     <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
 {% endblock extrajs %}

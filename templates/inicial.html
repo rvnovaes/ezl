@@ -55,7 +55,7 @@
                             <ul class="dropdown-menu">
                                 <li><a href="/accounts/password/change/">Alterar Senha</a></li>
                                 <li role="separator" class="divider"></li>
-                                <li><a href="#modal1" onclick="$('#logout_modal').modal('show');">Sair do Sistema</a>
+                                <li><a href="#modal1" onclick="logout('{% static "js/jquery-2.1.1.min.js" %}')">Sair do Sistema</a>
                                 </li>
                             </ul>
                         </li>
@@ -84,7 +84,7 @@
                     <div class="modal-footer">
                         <form action="{% url 'logout' %}">
                             <input type="submit" class="btn btn-raised btn-danger" data-dismiss="modal"
-                                   value="Cancelar"/>
+                                   value="Cancelar" style="float: unset;margin: 10px 1px;"/>
                             <input type="submit" class="btn btn-raised btn-primary" value="Sair"
                                    style="margin: 10px 1px !important;"/>
                         </form>
