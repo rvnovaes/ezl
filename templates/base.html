@@ -50,11 +50,14 @@
 </head>
 <body>
     {% block body %}{% endblock body %}
+
+    {% block javascript %}
+        {% block extrajs %}{% endblock %}
+    {% endblock %}
     <script>
         $(function () {
             $.material.init();
         });
     </script>
-    {% block javascript %}{% endblock %}
 </body>
 </html>

@@ -277,10 +277,11 @@ span, .pagination > .active > span:focus, .pagination > .active > span:hover {
 #id_city_container span.select2-selection--single {
     border-width: 0px 0px 1px 0px;
     border-radius: 0;
-    position: absolute;
-    top: -20px;
-    left:-5px;
+    /*position: absolute;*/
+    /*top: -20px;*/
+    /*left:-5px;*/
     width: 100%;
+    font-size: 1rem;
 }
 
 #confirmDelete{
