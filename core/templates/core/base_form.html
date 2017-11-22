@@ -6,23 +6,27 @@
 
 {% block css_head %}
     {% include 'material/includes/material_css.html' %}
-    <link rel="stylesheet" href="{% static "chosen/chosen.min.css" %}">
-    <link rel="stylesheet" href="{% static "chosen/chosen-material-theme.min.css" %}">
-
+{#    <link rel="stylesheet" href="{% static "chosen/chosen.min.css" %}">#}
+{#    <link rel="stylesheet" href="{% static "chosen/chosen-material-theme.min.css" %}">#}
     {{ block.super }}
+    <style type="text/css">
+        .select-field label {font-size: 1rem;}
+    </style>
 {% endblock css_head %}
 {% block js_head %}
-    <!-- Compiled and minified JavaScript -->
-    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-{#    {{ block.super }}#}
-    <script src="{% static 'material/js/jquery.js' %}"></script>
-    {% include 'material/includes/material_js.html' %}
-    <script src="{% static "js/masks.js" %}"></script>
-    <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
-    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
-    <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+    {{ block.super }}
+{#    <script src="{% static 'material/js/jquery.js' %}"></script>#}
+{#    <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>#}
 
 {% endblock js_head %}
+{% block extrajs%}
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    {% include 'material/includes/material_js.html' %}
+    <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
+{#    Apesar de repetidos, os scripts a seguir são necessário para renderização do form #}
+    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
+    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
+{% endblock extrajs %}
 
 {% block content %}
     {{ block.super }}
