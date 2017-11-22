@@ -28,7 +28,7 @@
 {% endblock %}
 
 {% block extrajs %}
-    {{ form.media }}
     {{ block.super }}
+    {{ form.media }}
     <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
 {% endblock %}

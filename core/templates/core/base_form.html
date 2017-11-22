@@ -6,17 +6,17 @@
 
 {% block css_head %}
     {% include 'material/includes/material_css.html' %}
-{#    <link rel="stylesheet" href="{% static "chosen/chosen.min.css" %}">#}
-{#    <link rel="stylesheet" href="{% static "chosen/chosen-material-theme.min.css" %}">#}
     {{ block.super }}
     <style type="text/css">
         .select-field label {font-size: 1rem;}
+        label.active {color: #0097a7;}
+		.select2-container--focus .select2-selection {border-color: #0097a7 !important;}
     </style>
+    <link rel="stylesheet" href="{% static "chosen/chosen.min.css" %}">
+    <link rel="stylesheet" href="{% static "chosen/chosen-material-theme.min.css" %}">
 {% endblock css_head %}
 {% block js_head %}
     {{ block.super }}
-{#    <script src="{% static 'material/js/jquery.js' %}"></script>#}
-{#    <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>#}
 
 {% endblock js_head %}
 {% block extrajs%}
@@ -25,6 +25,8 @@
     <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
 {#    Apesar de repetidos, os scripts a seguir são necessário para renderização do form #}
     <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
+{#    <script src="{% static 'material/js/jquery.js' %}"></script>#}
+    <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
 {% endblock extrajs %}
 
