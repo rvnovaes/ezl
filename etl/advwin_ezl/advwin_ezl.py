@@ -66,8 +66,8 @@ def validate_import(f):
     """
 
     @wraps(f)
-    def wrapper(etl, rows, user, rows_count):
-        res = f(etl, rows, user, rows_count)
+    def wrapper(etl, rows, user, rows_count, *args, **kwargs):
+        res = f(etl, rows, user, rows_count, *args, **kwargs)
         debug_logger = etl.debug_logger
         error_logger = etl.error_logger
         name_class = etl.model._meta.verbose_name
@@ -146,28 +146,28 @@ class GenericETL(object):
         if not truncate_all_tables:
             self.model.objects.all().update(is_active=False)
 
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         raise NotImplementedError()
 
     def import_data(self):
         from django.contrib.auth import get_user_model
         User = get_user_model()
-
+        user = User.objects.get(pk=create_alter_user)
+        dashboard_log = DashboardETL.objects.create(
+            name=self.model._meta.verbose_name.upper(),
+            executed_query=self.import_query, status=False,
+            create_user=user)
         if self.has_status:
             self.deactivate_all()
 
         connection = self.advwin_engine.connect()
-
         cursor = self.advwin_engine.execute(text(self.import_query))
         rows = cursor.fetchall()
         rows_count = len(rows)
-        user = User.objects.get(pk=create_alter_user)
-        dashboard_log = DashboardETL.objects.create(
-            execution_date_start=timezone.now(),
-            name=self.model._meta.verbose_name.upper(),
-            create_user=user)
-        self.config_import(rows, user, rows_count)
+        self.config_import(rows, user, rows_count, log=dashboard_log)
         dashboard_log.execution_date_finish = timezone.now()
+        dashboard_log.read_quantity = rows_count
+        dashboard_log.status = True
         dashboard_log.save()
         connection.close()
 

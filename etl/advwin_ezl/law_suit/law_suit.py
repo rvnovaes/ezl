@@ -4,6 +4,7 @@ from lawsuit.models import Organ
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import LawSuit, Folder, Instance, CourtDistrict, CourtDivision
+from etl.utils import get_message_log_default, save_error_log
 
 
 class LawsuitETL(GenericETL):
@@ -57,7 +58,7 @@ class LawsuitETL(GenericETL):
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
                           ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                           (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          AND a.Advogado IN ('12157458697', '12197627686', '13281750656') AND -- marcio.batista, nagila e claudia (Em teste) 
+                          AND a.Advogado IN ('12157458697', '12197627686', '13281750656') AND -- marcio.batista, nagila e claudia (Em teste)
                           ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
                            (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
                           ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
@@ -70,7 +71,7 @@ class LawsuitETL(GenericETL):
     has_status = True
 
     @validate_import
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         for row in rows:
             print(rows_count)
             rows_count -= 1
@@ -160,10 +161,10 @@ class LawsuitETL(GenericETL):
                                                       legacy_code,str(LegacySystem.ADVWIN.value), self.timestr))
 
             except Exception as e:
-                self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de LawSuit: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
-
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
+                self.error_logger.error(msg)
+                save_error_log(log, user, msg)
 
 if __name__ == "__main__":
     LawsuitETL().import_data()

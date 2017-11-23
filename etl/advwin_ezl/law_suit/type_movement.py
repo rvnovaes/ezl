@@ -1,6 +1,7 @@
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from lawsuit.models import TypeMovement
+from etl.utils import get_message_log_default, save_error_log
 
 
 class TypeMovementETL(GenericETL):
@@ -22,7 +23,7 @@ class TypeMovementETL(GenericETL):
     has_status = True
 
     @validate_import
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         for row in rows:
 
             try:
@@ -50,10 +51,11 @@ class TypeMovementETL(GenericETL):
                     str(user.id), str(user.id), self.timestr))
 
             except Exception as e:
-                self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Tipo Movimentacao: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
-
+                msg = get_message_log_default(self.model._met.verbose_name,
+                                              rows_count, e, self.timestr)
+                self.error_logger.error(msg)
+                save_error_log(log, user, msg)
+                
 
 if __name__ == '__main__':
     TypeMovementETL().import_data()
