@@ -23,7 +23,7 @@ def get_ecm_file_name(ezl_path):
 
 def get_message_log_default(model_name, rows_count, error, time):
     msg = """Ocorreu o seguinte erro na importacao de {0}: {1}, {2}, {3}
-            """.format(model, rows_count, str(error), str(time))
+            """.format(model_name, rows_count, str(error), str(time))
     return msg
 
 def save_error_log(log, create_user, message_error):
