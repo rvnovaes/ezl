@@ -134,9 +134,6 @@ class UserETL(GenericETL):
                                        'first_name',
                                        'last_name'])
 
-                    # issue/620 - Por enquanto vamos definir os correspondentes manualmente
-                    # instance.groups.add(correspondent_group)
-
                 elif not person and not instance:
                     created = True
                     # deve ser usada a funcao create_user para gerar a senha criptografada
@@ -156,8 +153,6 @@ class UserETL(GenericETL):
                             is_staff=is_staff,
                             is_active=is_active,
                             date_joined=date_joined)
-
-                        instance.groups.add(correspondent_group)
 
                     new_person.send(sender=self,
                                     person=Person(
