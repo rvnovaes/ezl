@@ -6,6 +6,8 @@
 {% block content %}
     {#    <div class="container form-group"><label class="is-focused"><h2>{{ title_page }}</h2></label></div>#}
     {% include 'core/widgets/messages.html' %}
+    {% for message in messages %}      
+    {%endfor%}
     {% block table %}
         <div class="container">
             {% if table.page %}

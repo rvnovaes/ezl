@@ -19,6 +19,7 @@ class Permissions(Enum):
     view_requested_tasks = 'Can view tasks requested by the user'
     block_payment_tasks = 'Can block tasks payment'
     can_access_general_data = 'Can access general data screens'
+    view_distributed_tasks = 'Can view tasks distributed by the user'
 
 
 # Dicionário para retornar o icone referente ao status da providencia
