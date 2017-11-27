@@ -1,7 +1,7 @@
 from core.models import ContactMechanism, Person, ContactMechanismType
 from django.db import IntegrityError
 from etl.advwin_ezl.advwin_ezl import GenericETL
-
+from etl.utils import get_message_log_default, save_error_log
 
 # noinspection SpellCheckingInspection
 class ContactMechanismETL(GenericETL):
@@ -153,7 +153,7 @@ class ContactMechanismETL(GenericETL):
                     """
     has_status = True
 
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         #log_file = open('log_file.txt', 'w')
         for row in rows:
             print(rows_count)
@@ -171,7 +171,7 @@ class ContactMechanismETL(GenericETL):
                             if contact_mechanism_type:
                                 obj = self.model(contact_mechanism_type=contact_mechanism_type[0],
                                                  description=row['description'], notes='', person=person, create_user=user)
-                                obj.save()
+                                obj.get_or_create()
                         else:
                             contact_mechanism_type = ContactMechanismType.objects.filter(
                                 name__unaccent__iexact='email') or ContactMechanismType.objects.filter(
@@ -181,16 +181,16 @@ class ContactMechanismETL(GenericETL):
                                     if description:
                                         obj = self.model(contact_mechanism_type=contact_mechanism_type[0],
                                                          description=description, notes='', person=person, create_user=user)
-                                        obj.save()
+                                        obj.get_or_create()
 
                         self.debug_logger.debug(
                             "Contact Mechanism,%s,%s,%s,%s,%s,%s" % (
                             str(legacy_code), str(contact_mechanism_type[0]), str(description), str(person.id),
                             str(user.id), self.timestr))
             except Exception as e:
-                self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de ContactMechanism: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
+                save_error_log(log, user, msg)
 
 
 if __name__ == '__main__':

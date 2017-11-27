@@ -9,6 +9,8 @@ from core.signals import create_person
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.signals import new_person, temp_disconnect_signal
+from etl.models import ErrorETL
+from etl.utils import get_message_log_default, save_error_log
 
 
 class UserETL(GenericETL):
@@ -45,7 +47,7 @@ class UserETL(GenericETL):
     # has_status = True
 
     @validate_import
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         correspondent_group, nil = Group.objects.get_or_create(name=Person.CORRESPONDENT_GROUP)
 
         assert len(rows) == rows_count
@@ -185,9 +187,10 @@ class UserETL(GenericETL):
                         str(LegacySystem.ADVWIN.value), self.timestr))
 
             except Exception as e:
-                self.error_logger.error(
-                    'Ocorreu o seguinte erro na importacao de Usuario: ' + str(rows_count) + ','
-                    + str(e) + ',' + self.timestr)
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
+                self.error_logger.error(msg)
+                save_error_log(log, user, msg)
 
 
 if __name__ == '__main__':

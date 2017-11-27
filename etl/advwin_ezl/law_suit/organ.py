@@ -5,6 +5,7 @@ from lawsuit.models import CourtDistrict, Organ
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
+from etl.utils import get_message_log_default, save_error_log
 
 
 class OrganETL(GenericETL):
@@ -12,8 +13,8 @@ class OrganETL(GenericETL):
     import_query = """
                     SELECT t1.descricao AS legal_name,
                            t1.descricao AS name,
-                           t1.codigo    AS legacy_code, 
-                           t1.Comarca   AS court_district                                                                                 
+                           t1.codigo    AS legacy_code,
+                           t1.Comarca   AS court_district
                     FROM   {tribunal} AS t1
                     WHERE  t1.descricao IS NOT NULL
                            AND t1.descricao <> ''
@@ -21,13 +22,13 @@ class OrganETL(GenericETL):
                                             FROM   {tribunal} AS t2
                                             WHERE  t2.descricao IS NOT NULL
                                                    AND t2.descricao <> ''
-                                                   AND t1.codigo = t2.codigo)                    
+                                                   AND t1.codigo = t2.codigo)
                 """.format(tribunal='Jurid_Tribunais')
 
     has_status = True
 
     @validate_import
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         """
         Metodo responsavel por importar as pessoas cadastradas no advwin para o ezl
         :param rows: Pessoas lidas do advwin
@@ -102,10 +103,10 @@ class OrganETL(GenericETL):
                         str(is_active), str(legacy_code), str(court_district),
                         str(LegacySystem.ADVWIN.value), self.timestr))
             except Exception as e:
-                self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Pessoa: " + str(
-                        rows_count) + "," + str(
-                        e) + "," + self.timestr)
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
+                self.error_logger.error(msg)
+                save_error_log(log, user, msg)
 
 
 if __name__ == "__main__":
