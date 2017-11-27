@@ -49,9 +49,9 @@ class CourtDivisionETL(GenericETL):
 
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,
-                                              rows_count, e, msg)
+                                              rows_count, e, self.timestr)
                 self.error_logger.error(msg)
-                save_error_log(msg)
+                save_error_log(log, user, msg)
 
 if __name__ == "__main__":
     CourtDivisionETL().import_data()

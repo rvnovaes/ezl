@@ -187,8 +187,8 @@ class UserETL(GenericETL):
                         str(LegacySystem.ADVWIN.value), self.timestr))
 
             except Exception as e:
-                msg = get_message_log_default(self.model._meta.verbose_name, e,
-                                              self.timestr)
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
                 self.error_logger.error(msg)
                 save_error_log(log, user, msg)
 

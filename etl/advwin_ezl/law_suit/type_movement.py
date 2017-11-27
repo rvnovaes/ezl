@@ -51,11 +51,11 @@ class TypeMovementETL(GenericETL):
                     str(user.id), str(user.id), self.timestr))
 
             except Exception as e:
-                msg = get_message_log_default(self.model._met.verbose_name,
+                msg = get_message_log_default(self.model._meta.verbose_name,
                                               rows_count, e, self.timestr)
                 self.error_logger.error(msg)
                 save_error_log(log, user, msg)
-                
+
 
 if __name__ == '__main__':
     TypeMovementETL().import_data()

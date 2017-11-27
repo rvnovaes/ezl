@@ -18,7 +18,7 @@ class DashboardETL(Audit):
 
     class Meta:
         db_table = 'dashboard_etl'
-        ordering = ('-execution_date_finish', )
+        ordering = ('-execution_date_start', )
         verbose_name = 'Dashboard ETL'
         verbose_name_plural = 'Dashboard ETL'
 
