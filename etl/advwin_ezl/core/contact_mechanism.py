@@ -171,7 +171,7 @@ class ContactMechanismETL(GenericETL):
                             if contact_mechanism_type:
                                 obj = self.model(contact_mechanism_type=contact_mechanism_type[0],
                                                  description=row['description'], notes='', person=person, create_user=user)
-                                obj.save()
+                                obj.get_or_create()
                         else:
                             contact_mechanism_type = ContactMechanismType.objects.filter(
                                 name__unaccent__iexact='email') or ContactMechanismType.objects.filter(
@@ -181,7 +181,7 @@ class ContactMechanismETL(GenericETL):
                                     if description:
                                         obj = self.model(contact_mechanism_type=contact_mechanism_type[0],
                                                          description=description, notes='', person=person, create_user=user)
-                                        obj.save()
+                                        obj.get_or_create()
 
                         self.debug_logger.debug(
                             "Contact Mechanism,%s,%s,%s,%s,%s,%s" % (

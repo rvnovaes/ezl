@@ -37,6 +37,9 @@ try:
     truncate_all_tables = source['truncate_all_tables']
     create_alter_user = source['user']
     config_connection = source['connection_name']
+    source_etl_connection = dict(parser.items(source['connection_name']))
+    db_name_source = source_etl_connection['database']
+    db_host_source = source_etl_connection['server']
 except KeyError as e:
     print('Invalid settings. Check the General.ini file')
     print(e)
@@ -66,7 +69,7 @@ def validate_import(f):
     """
 
     @wraps(f)
-    def wrapper(etl, rows, user, rows_count, *args, **kwargs):
+    def wrapper(etl, rows, user, rows_count, log, *args, **kwargs):
         res = f(etl, rows, user, rows_count, *args, **kwargs)
         debug_logger = etl.debug_logger
         error_logger = etl.error_logger
@@ -103,6 +106,8 @@ def validate_import(f):
                     name_class + ' - Quantidade nao importada {0}'.format(len(not_imported)))
                 error_logger.error(
                     name_class + ' -  Registros nao importadados {0}'.format(str(not_imported)))
+            log.imported_quantity = written_amount
+            log.save()
             return res
         except Exception as exc:
             error_logger.error(etl.model._meta.verbose_name + ': Nao foi possivel validar ')
@@ -154,9 +159,9 @@ class GenericETL(object):
         User = get_user_model()
         user = User.objects.get(pk=create_alter_user)
         dashboard_log = DashboardETL.objects.create(
-            name=self.model._meta.verbose_name.upper(),
-            executed_query=self.import_query, status=False,
-            create_user=user)
+            name=self.model._meta.verbose_name.upper(), status=False,
+            executed_query=self.import_query, create_user=user,
+            db_name_source=db_name_source, db_host_source=db_host_source)
         if self.has_status:
             self.deactivate_all()
 

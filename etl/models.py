@@ -3,7 +3,7 @@ from core.models import Audit
 
 class DashboardETL(Audit):
     execution_date_start = models.DateTimeField(
-        verbose_name='Inicio', auto_now=True, null=True, blank=True)
+        verbose_name='Inicio', auto_now_add=True, null=True, blank=True)
     execution_date_finish  = models.DateTimeField(
         verbose_name='Fim', null=True, blank=True, editable=False)
     name = models.CharField(verbose_name='ETL', max_length=100, editable=False)
@@ -15,6 +15,10 @@ class DashboardETL(Audit):
                                             default=0, editable=False)
     executed_query = models.TextField(verbose_name='Query executada', null=True,
                                       blank=True, editable=False)
+    db_name_source = models.CharField(verbose_name='DB de origem',
+                                     max_length=50, blank=True, null=True)
+    db_host_source = models.CharField(verbose_name='Host do db de origem',
+                                      blank=True, null=True, max_length=16)
 
     class Meta:
         db_table = 'dashboard_etl'

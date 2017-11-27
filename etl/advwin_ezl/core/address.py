@@ -1,5 +1,5 @@
 from core.models import Address, Person, AddressType, City, State, Country
-from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.utils import get_message_log_default, save_error_log
 
 
@@ -59,6 +59,7 @@ class AddressETL(GenericETL):
                     """
     has_status = True
 
+    @validate_import
     def config_import(self, rows, user, rows_count, log=False):
         """
         Metodo responsavel por importar os dados referente aos enderecos das pessoas

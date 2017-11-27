@@ -1,13 +1,4 @@
-# esse import deve vir antes de todos porque ele executa o __init__.py
-# import os
-# import sys
-#
-# import django
-#
-# sys.path.append("ezl")
-# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ezl.settings")
-# django.setup()
-from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from core.utils import LegacySystem
 from lawsuit.models import Instance
 from etl.utils import get_message_log_default, save_error_log
@@ -31,6 +22,7 @@ class InstanceETL(GenericETL):
     advwin_table = 'Jurid_Instancia'
     has_status = False
 
+    @validate_import
     def config_import(self, rows, user, rows_count, log=False):
         for row in rows:
 
