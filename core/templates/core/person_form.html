@@ -1,14 +1,10 @@
 {% extends "core/base_form.html" %}
 
+{% load material_form %}
+{% load staticfiles %}
+
 {% block extrahead %}
     {{ block.super }}
-    <style type="text/css">
-
-        .select-field label {
-            font-size: 1rem;
-        }
-
-    </style>
 {% endblock %}
 
 {% block extrajs %}
@@ -27,5 +23,7 @@
             }).change();
         })
     </script>
+    {{ form.media }}
+    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
 
 {% endblock %}

@@ -7,13 +7,9 @@
 {% block css_head %}
     {% include 'material/includes/material_css.html' %}
     {{ block.super }}
-    <style type="text/css">
-        .select-field label {font-size: 1rem;}
-        label.active {color: #0097a7;}
-		.select2-container--focus .select2-selection {border-color: #0097a7 !important;}
-    </style>
     <link rel="stylesheet" href="{% static "chosen/chosen.min.css" %}">
     <link rel="stylesheet" href="{% static "chosen/chosen-material-theme.min.css" %}">
+    <link rel="stylesheet" href="{% static "libs/toastr/build/toastr.min.css" %}">
 {% endblock css_head %}
 {% block js_head %}
     {{ block.super }}

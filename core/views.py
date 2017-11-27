@@ -82,10 +82,10 @@ class CityAutoCompleteView(AutoCompleteView):
     select_related = ('state__country', 'state', )
 
     def get_result_label(self, result):
-        return '{} - {}/{} - {}'.format(result.state.country.name,
+        return '{} - {}/{} - {}'.format(result.name,
                                         result.state.initials,
                                         result.state.name,
-                                        result.name)
+                                        result.state.country.name)
 
 
 def login(request):

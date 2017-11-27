@@ -11,8 +11,9 @@ from localflavor.br.forms import BRCPFField, BRCNPJField
 from material import Layout, Row
 
 from core.fields import CustomBooleanField
-from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType
+from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType
 from core.utils import filter_valid_choice_form
+from core.widgets import MDModelSelect2
 from lawsuit.forms import BaseForm
 
 
@@ -86,6 +87,12 @@ class ContactMechanismForm(ModelForm):
 
 class PersonForm(BaseModelForm):
 
+    legal_type = forms.ChoiceField(
+        label='Tipo',
+        choices=((x.value, x.format(x.value)) for x in LegalType),
+        required=True,
+    )
+
     layout = Layout(
         Row('legal_name', 'name'),
         Row('legal_type', 'cpf_cnpj'),
@@ -122,20 +129,22 @@ class PersonForm(BaseModelForm):
 class AddressForm(BaseModelForm):
     city = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(City.objects.filter(is_active=True)).order_by('name'),
-        empty_label='Cidade',
         required=True,
         label='Cidade',
-        widget=autocomplete.ModelSelect2(url='city_autocomplete',
+        widget=MDModelSelect2(url='city_autocomplete',
                                         attrs={
-                                            #'data-dropdown-parent': 'id_city',
+                                            #'data-dropdown-parent': '#id_city_container',
                                             'data-container-css': 'id_city_container',
                                             'class': 'select-with-search material-ignore',
+                                            'data-minimum-input-length': 3,
                                             'data-placeholder': 'Cidade',
-                                            'data-minimum-input-length': 3,}
+                                            'data-label': 'Cidade',
+                                            'data-autocomplete-light-language': 'pt-BR',
+                                            'data-html': True}
                                         ))
     address_type = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(AddressType.objects.all().order_by('name')),
-        empty_label='Tipo',
+        empty_label='',
         required=True,
         label='Tipo',
         )
