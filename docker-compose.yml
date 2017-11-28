@@ -86,6 +86,14 @@ services:
       options:
         max-size: "100m"
 
+  pgweb:
+    build:
+      context: .
+      dockerfile: containers/pgweb/Dockerfile
+    command: pgweb --url postgres://ezl:ezl@db:5432/ezl?sslmode=disable --bind 0.0.0.0 --auth-user=admin --auth-pass=dev@2016
+    ports:
+    - "8081:8081"
+
 #  db_advwin:
 #    image: microsoft/mssql-server-linux:2017-latest
 #    environment:
