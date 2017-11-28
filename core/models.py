@@ -212,8 +212,10 @@ class Address(Audit):
     business_address = models.BooleanField(default=False, blank=True)
     city = models.ForeignKey(City, on_delete=models.PROTECT, blank=False, null=False,
                              verbose_name='Cidade')
-    state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False)
+    state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False,
+                             verbose_name='Estado')
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False,
+                             verbose_name='País')
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
 
     class Meta:

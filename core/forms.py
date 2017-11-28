@@ -3,7 +3,7 @@ from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User, Group
 from django.forms import ModelForm
-from django.forms import formset_factory
+from django.forms import CheckboxInput, formset_factory
 from django.forms.models import inlineformset_factory
 from django.utils.translation import ugettext_lazy as _
 
@@ -86,100 +86,6 @@ class ContactMechanismForm(ModelForm):
     )
 
 
-# class AddressForm(BaseModelForm):
-#     city = forms.ModelChoiceField(
-#         queryset=filter_valid_choice_form(City.objects.filter(is_active=True)).order_by('name'),
-#         required=True,
-#         label='Cidade',
-#         widget=MDModelSelect2(url='city_autocomplete',
-#                                         attrs={
-#                                             'data-container-css': 'id_city_container',
-#                                             'class': 'select-with-search material-ignore',
-#                                             'data-minimum-input-length': 3,
-#                                             'data-placeholder': 'Cidade',
-#                                             'data-label': 'Cidade',
-#                                             'data-autocomplete-light-language': 'pt-BR',}
-#                                         ))
-#     address_type = forms.ModelChoiceField(
-#         queryset=filter_valid_choice_form(AddressType.objects.all().order_by('name')),
-#         empty_label='',
-#         required=True,
-#         label='Tipo',
-#         )
-#
-#     layout = Layout(
-#         Row('address_type'),
-#         Row('street', 'number', 'complement'),
-#         Row('city_region', 'city', 'zip_code'),
-#         Row('notes'),
-#         Row('is_active'),
-#     )
-#
-#     class Meta:
-#         model = Address
-#         fields = [
-#             'city',
-#             'address_type', 'street', 'number', 'complement',
-#             'zip_code',
-#             'city_region',
-#             'notes',
-#             'is_active',
-#         ]
-#
-#     def save(self, commit=True):
-#         saved = super().save(commit=False)
-#         saved.country = saved.city.state.country
-#         saved.state = saved.city.state
-#         if commit:
-#             saved.save()
-#         print('salvando...', saved)
-#         return saved
-
-
-# AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=1)
-# AddressFormSet = formset_factory(AddressForm, extra=1, can_delete=True)
-
-
-# class PersonForm(BaseModelForm):
-#
-#     legal_type = forms.ChoiceField(
-#         label='Tipo',
-#         choices=((x.value, x.format(x.value)) for x in LegalType),
-#         required=True,
-#     )
-#
-#     layout = Layout(
-#         Row('legal_name', 'name'),
-#         Row('legal_type', 'cpf_cnpj'),
-#         Row('is_lawyer', 'is_customer', 'is_supplier', 'is_active'),
-#     )
-#
-#     class Meta:
-#         model = Person
-#         fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj',
-#                   'is_lawyer', 'is_customer', 'is_supplier', 'is_active']
-#
-#     def clean(self):
-#         cleaned_data = super().clean()
-#         document_type = cleaned_data.get('legal_type')
-#         document = cleaned_data.get('cpf_cnpj')
-#         if document_type == 'F' and document:
-#             try:
-#                 BRCPFField().clean(document)
-#             except forms.ValidationError as exc:
-#                 self._errors['cpf_cnpj'] = \
-#                     self.error_class(exc.messages)
-#                 del cleaned_data['cpf_cnpj']
-#         elif document_type == 'J' and document:
-#             try:
-#                 BRCNPJField().clean(document)
-#             except forms.ValidationError as exc:
-#                 self._errors['cpf_cnpj'] = \
-#                     self.error_class(exc.messages)
-#                 del cleaned_data['cpf_cnpj']
-#
-#         return cleaned_data
-
 class AddressForm(BaseModelForm):
     city = forms.ModelChoiceField(
             queryset=filter_valid_choice_form(City.objects.filter(is_active=True)).order_by('name'),
@@ -200,6 +106,12 @@ class AddressForm(BaseModelForm):
         required=True,
         label='Tipo',
         )
+
+    is_active = CustomBooleanField(
+        required=True,
+        label='Ativo',
+        widget=CheckboxInput(attrs={'class': 'filled-in',})
+    )
 
     layout = Layout(
         Row('address_type'),
