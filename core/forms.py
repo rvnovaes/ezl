@@ -190,7 +190,7 @@ class AddressForm(BaseModelForm):
                                                 'data-container-css': 'id_city_container',
                                                 'class': 'select-with-search material-ignore',
                                                 'data-minimum-input-length': 3,
-                                                'data-placeholder': 'Cidade',
+                                                'data-placeholder': '',
                                                 'data-label': 'Cidade',
                                                 'data-autocomplete-light-language': 'pt-BR',}
                                             ))

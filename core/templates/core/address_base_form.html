@@ -1,0 +1,87 @@
+{% load material_form %}
+{% load staticfiles %}
+
+<div class="layout-row row"><div class="col s12 m12">
+<div class="row">
+    <div class="select-field col s12 required" id="{{ form.address_type.id_for_label }}_container">
+        <label for="{{ form.address_type.id_for_label }}">{{ form.address_type.label }}</label>
+        {{ form.address_type }}
+    </div>
+</div>
+</div></div>
+<div class="layout-row row">
+    <div class="col s12 m4">
+        <div class="row">
+            <div class="input-field col s12 required" id="{{ form.street.id_for_label }}_container">
+                {{ form.street }}
+                <label class="active" for="{{ form.street.id_for_label }}">{{ form.street.label }}</label>
+            </div>
+        </div>
+    </div>
+    <div class="col s12 m4">
+        <div class="row">
+            <div class="input-field col s12 required" id="{{ form.number.id_for_label }}_container">
+                {{ form.number }}
+                <label class="active" for="{{ form.number.id_for_label }}">{{ form.number.label }}</label>
+            </div>
+        </div>
+    </div>
+    <div class="col s12 m4">
+        <div class="row">
+        <div class="input-field col s12" id="{{ form.complement.id_for_label }}_container">
+            {{ form.complement }}
+            <label class="active" for="{{ form.complement.id_for_label }}">{{ form.complement.label }}</label>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layout-row row">
+    <div class="col s12 m4">
+        <div class="row">
+            <div class="input-field col s12 required" id="{{ form.city_region.id_for_label }}_container">
+                {{ form.city_region }}
+                <label for="{{ form.city_region.id_for_label }}">{{ form.city_region.label }}</label>
+
+            </div>
+        </div>
+    </div>
+    <div class="col s12 m4">
+        <label for="{{ form.city.id_for_label }}" style="position: relative;top: -14px;" id="city_label">{{ form.city.label }}</label>
+        {{ form.city }}
+    </div>
+    <div class="col s12 m4">
+        <div class="row">
+            <div class="input-field col s12 required" id="{{ form.zip_code.id_for_label }}_container">
+                {{ form.zip_code }}
+                <label class="active" for="{{ form.zip_code.id_for_label }}">{{ form.zip_code.label }}</label>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layout-row row">
+    <div class="col s12 m12">
+        <div class="row">
+            <div class="input-field col s12" id="{{ form.notes.id_for_label }}_container">
+                {{ form.notes }}
+                <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layout-row row">
+    <div class="col s12 m12">
+        <div class="row">
+            <div class="checkbox-field col s12" id="{{ form.is_active.id_for_label }}_container">
+                {{ form.is_active }}<label for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extrajs %}
+    {{ form.media }}
+    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
+{% endblock %}

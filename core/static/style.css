@@ -79,7 +79,8 @@ textarea {
     outline: none;
     height: 3rem;
     width: 100%;
-    font-size: 1rem;
+    font-size: 16px;
+    font-weight: 400;
     margin: 0 0 20px 0;
     padding: 0;
     box-shadow: none;
@@ -296,10 +297,10 @@ span, .pagination > .active > span:focus, .pagination > .active > span:hover {
 
 .select2 {
     position: relative;
-    top: 14px;
+    top: -14px;
 }
 
-.select-field label.active {color: #0097a7;}
+.select-field label.active, label#city_label.active{color: #0097a7;}
 .select2-container--focus .select2-selection {border-color: #0097a7 !important;}
 
 #confirmDelete{
@@ -356,4 +357,9 @@ i.material-icons {
     word-break: unset;
     font-size: 14px;
     display: block;
+}
+
+.select-wrapper input.select-dropdown {
+    font-size: 16px!important;
+    font-weight: 400;
 }

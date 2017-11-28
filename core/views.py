@@ -375,7 +375,6 @@ class PersonCreateView(AuditFormMixin, CreateView):
         if AuditFormMixin.form_valid(self, form):
             context = self.get_context_data()
             personaddress = context['personaddress']
-            import pdb; pdb.set_trace()
             with transaction.atomic():
                 self.object = form.save()
 
@@ -390,7 +389,6 @@ class PersonCreateView(AuditFormMixin, CreateView):
 class PersonUpdateView(AuditFormMixin, UpdateView):
     model = Person
     form_class = PersonForm
-    # success_url = reverse_lazy('person_list')
     success_message = UPDATE_SUCCESS_MESSAGE
     template_name_suffix = '_update_form'
     object_list_url = 'person_list'

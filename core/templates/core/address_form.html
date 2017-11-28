@@ -17,6 +17,10 @@
 
 {% endblock %}
 
+{% block form_container %}
+    {% include 'core/address_base_form.html' %}
+{% endblock %}
+
 {% block extrajs %}
     {{ block.super }}
     {{ form.media }}

@@ -93,17 +93,23 @@
                 <div class="panel-body">
                     {% block form_container %}
                         {% form %}{% endform %}
-                        </div>
+                </div>
+            </div>
+        </div>
                         {% if personaddress.forms %}
                             {{ personaddress.management_form }}
                             {% for form in personaddress.forms %}
                                 {% if forloop.first %}
-                                        <h1 class="panel-title">
-                                            Novo Endereço
-                                        </h1>
+        <div class="row">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h1 class="panel-title">
+                        Endereço
+                    </h1>
+                </div>
                                 {% endif %}
-                                {{ form }}
-                                {{ form.media }}
+                <div class="panel-body">
+                                {% include 'core/address_base_form.html' %}
                             {% endfor %}
                         {% endif %}
                     {% endblock %}
