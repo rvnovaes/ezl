@@ -24,7 +24,9 @@ services:
         max-size: "100m"
 
   luigi:
-    image: ezl:latest
+    build:
+      context: .
+      dockerfile: containers/luigi/Dockerfile
     command: bash -c "cron && crontab /etc/cron.d/luigi && luigid"
     volumes:
       - .:/app
