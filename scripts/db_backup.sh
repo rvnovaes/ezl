@@ -12,9 +12,9 @@ TIME=`date +%Y-%m-%d-%H%M`
 TAR_FILENAME=$DB_NAME-$TIME.tar.gz
 BACKUP_WORKDIR=/tmp/_db_backup/
 
-echo "Iniciando backup para $BUCKET às $TIME";
+echo "Iniciando backup para $BUCKET às $(date)";
 
-sudo pip install aws-cli
+sudo pip install awscli
 
 cd $PROJECT_WORKDIR
 rm -rf $BACKUP_WORKDIR || true

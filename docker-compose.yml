@@ -7,6 +7,7 @@ volumes:
   web-static:
   letsencrypt-www:
   letsencrypt-etc:
+  ezl-logs:
 
 services:
   web:
@@ -15,6 +16,7 @@ services:
       - .:/app
       - web-static:/app/staticfiles
       - web-media:/app/media
+      - ezl-logs:/var/log/ezl
       - /mnt/windows_ecm/Agenda:/app/media/ECM
     logging:
       driver: "json-file"
@@ -27,6 +29,7 @@ services:
     volumes:
       - .:/app
       - ./containers/luigi/cron:/etc/cron.d/luigi
+      - ezl-logs:/var/log/ezl
     logging:
       driver: "json-file"
       options:
@@ -45,6 +48,7 @@ services:
       PYTHONPATH: /app
     volumes:
       - .:/app
+      - ezl-logs:/var/log/ezl
     depends_on:
       - builder
       - db
@@ -81,6 +85,14 @@ services:
       driver: "json-file"
       options:
         max-size: "100m"
+
+  pgweb:
+    build:
+      context: .
+      dockerfile: containers/pgweb/Dockerfile
+    command: pgweb --url postgres://ezl:ezl@db:5432/ezl?sslmode=disable --bind 0.0.0.0 --auth-user=admin --auth-pass=dev@2016
+    ports:
+    - "9002:8081"
 
 #  db_advwin:
 #    image: microsoft/mssql-server-linux:2017-latest

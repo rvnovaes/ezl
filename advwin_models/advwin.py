@@ -85,6 +85,23 @@ class JuridGedMain(Base):
     id_pasta = Column(Integer)
 
 
+class JuridGEDLig(Base):
+    __tablename__ = 'Jurid_GEDLig'
+    __table_args__ = (
+        {'implicit_returning': False},
+    )
+    ID_lig = Column(Integer, nullable=False, unique=True, primary_key=True)
+    Id_tabela_or = Column(String(60, 'Latin1_General_CI_AS'))
+    Id_codigo_or = Column(String(60, 'Latin1_General_CI_AS'))
+    Id_id_doc = Column(Integer)
+    id_ID_or = Column(Integer)
+    dt_inserido = Column(DateTime)
+    usuario_insercao = Column(String(60, 'Latin1_General_CI_AS'))
+
+
+
+
+
 class JuridPastas(Base):
     # SEM PK - USEI Codigo_Comp por ser unique
 

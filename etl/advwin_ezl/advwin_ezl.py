@@ -112,6 +112,9 @@ def validate_import(f):
 class GenericETL(object):
     EZL_LEGACY_CODE_FIELD = 'legacy_code'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
     @property
     @lru_cache(maxsize=None)
     def advwin_engine(self):
@@ -154,8 +157,7 @@ class GenericETL(object):
         if self.has_status:
             self.deactivate_all()
 
-        connection = self.advwin_engine.connect()
-
+        connection = self.advwin_engine.connect()        
         cursor = self.advwin_engine.execute(text(self.import_query))
         rows = cursor.fetchall()
         rows_count = len(rows)
