@@ -68,7 +68,6 @@
     </script>
 
     <form id="object_form" action="" method="post">
-        {{ form.management_form }}
 
         {% csrf_token %}
 
@@ -94,6 +93,19 @@
                 <div class="panel-body">
                     {% block form_container %}
                         {% form %}{% endform %}
+                        </div>
+                        {% if personaddress.forms %}
+                            {{ personaddress.management_form }}
+                            {% for form in personaddress.forms %}
+                                {% if forloop.first %}
+                                        <h1 class="panel-title">
+                                            Novo Endereço
+                                        </h1>
+                                {% endif %}
+                                {{ form }}
+                                {{ form.media }}
+                            {% endfor %}
+                        {% endif %}
                     {% endblock %}
                 </div>
             </div>
