@@ -52,7 +52,6 @@ class LawsuitETL(GenericETL):
                                                           a.CodMov = cm.Codigo
                     WHERE
                           p.Status = 'Ativa' AND
-                          p.Dt_Saida IS NULL AND
                           cm.UsarOS = 1 AND
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
                           ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
