@@ -157,10 +157,10 @@
                                             </tr>
                                             <tr>
                                                 <th>
-                                                    Número do processo
+                                                    N° da pasta
                                                 </th>
                                                 <td>
-                                                    {{ form.instance.movement.law_suit.law_suit_number }}
+                                                    {{ form.instance.movement.law_suit.folder.folder_number|default_if_none:'' }}
                                                 </td>
                                             </tr>
                                             <tr>
@@ -270,6 +270,20 @@
                         <div class="panel-heading">
                             <div class="panel-title">
                                 <i class="material-icons">assignment</i>
+                                Dados de quem delegou
+                            </div>
+                        </div>
+                        <div class="panel-body form-group is-focused">
+                            <div class="form-row">
+                                {% include 'task/person_info.html' with person=form.instance.person_distributed_by %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <div class="panel-title">
+                                <i class="material-icons">assignment</i>
                                 Dados do sistema legado
                             </div>
                         </div>
@@ -282,7 +296,7 @@
                                                 N° da pasta
                                             </th>
                                             <td>
-                                                {{ form.instance.movement.law_suit.folder.folder_number|default_if_none:'' }}
+                                                {{ form.instance.movement.law_suit.folder.legacy_code|default_if_none:'' }}
                                             </td>
                                         </tr>
                                         <tr>
