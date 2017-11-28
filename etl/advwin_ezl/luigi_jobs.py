@@ -8,9 +8,9 @@ from etl.advwin_ezl.core.address import AddressETL
 from etl.advwin_ezl.core.contact_mechanism import ContactMechanismETL
 from etl.advwin_ezl.law_suit.organ import OrganETL
 from etl.advwin_ezl.factory import InvalidObjectFactory
+from etl.advwin_ezl.financial.cost_center import CostCenterETL
 from etl.advwin_ezl.law_suit.court_division import CourtDivisionETL
 from etl.advwin_ezl.law_suit.folder import FolderETL
-from etl.advwin_ezl.law_suit.cost_center import CostCenterETL
 from etl.advwin_ezl.law_suit.instance import InstanceETL
 from etl.advwin_ezl.law_suit.law_suit import LawsuitETL
 from etl.advwin_ezl.law_suit.movement import MovementETL

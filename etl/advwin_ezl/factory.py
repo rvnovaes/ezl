@@ -6,8 +6,10 @@ from core.models import Country, State, City, Person, Address, AddressType, Cont
     ContactMechanismType
 from core import signals
 from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, \
-    Movement, Organ, CostCenter
+    Movement, Organ
 from task.models import TypeTask, Task, TaskStatus, TaskHistory
+from financial.models import CostCenter
+
 
 config_parser = get_parser()
 settings = config_parser['etl']

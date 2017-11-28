@@ -12,19 +12,6 @@ def get_folder_number():
     return get_next_value('lawsuit_folder_folder_number')
 
 
-class CostCenter(Audit, LegacyCode):
-    name = models.CharField(verbose_name="Nome", max_length=255, null=False, blank=False, default="", unique=True)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        db_table = 'cost_center'
-        ordering = ['name']
-        verbose_name = 'Centro de custo'
-        verbose_name_plural = 'Centros de custos'
-
-
 class TypeMovement(Audit, LegacyCode):
     name = models.CharField(max_length=255, blank=False, null=False, default="", unique=True, verbose_name='Nome')
     uses_wo = models.BooleanField(default=False, verbose_name='Utiliza ordem de serviço?')
@@ -56,7 +43,7 @@ class Folder(Audit, LegacyCode):
     folder_number = models.IntegerField(verbose_name='Número da Pasta', null=False, default=0)
     person_customer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                         verbose_name='Cliente')
-    cost_center = models.ForeignKey('CostCenter',
+    cost_center = models.ForeignKey('financial.CostCenter',
                                     on_delete=models.PROTECT,
                                     blank=True,
                                     null=True,

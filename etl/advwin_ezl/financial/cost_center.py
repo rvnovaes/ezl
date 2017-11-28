@@ -1,7 +1,7 @@
 # esse import deve vir antes de todos porque ele executa o __init__.py
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
-from lawsuit.models import CostCenter
+from financial.models import CostCenter
 
 
 class CostCenterETL(GenericETL):

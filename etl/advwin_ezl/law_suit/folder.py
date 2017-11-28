@@ -3,7 +3,8 @@ from core.models import Person
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
-from lawsuit.models import Folder, CostCenter
+from lawsuit.models import Folder
+from financial.models import CostCenter
 
 
 class FolderETL(GenericETL):

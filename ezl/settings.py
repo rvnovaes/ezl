@@ -86,6 +86,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'lawsuit.apps.LawsuitConfig',
     'task.apps.TaskConfig',
+    'financial.apps.FinancialConfig',
 
     'django.contrib.sites',
 

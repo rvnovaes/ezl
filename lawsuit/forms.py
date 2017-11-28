@@ -3,9 +3,10 @@ from django.core.exceptions import FieldDoesNotExist
 from django.forms import ModelForm
 from core.fields import CustomBooleanField
 from core.models import Person, State, Address
+from financial.models import CostCenter
 from core.widgets import MDModelSelect2
 from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict,
-                     LawSuit, CourtDivision, Organ, CostCenter)
+                     LawSuit, CourtDivision, Organ)
 from core.utils import filter_valid_choice_form
 from dal import autocomplete
 from localflavor.br.forms import BRCNPJField
@@ -43,21 +44,6 @@ class BaseForm(ModelForm):
                     pass
             except AttributeError:
                 pass
-
-
-class CostCenterForm(BaseModelForm):
-
-    layout = Layout(
-        Row('name', 'is_active'),
-    )
-
-    legacy_code = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={'readonly': 'readonly'}))
-
-    class Meta:
-        model = CostCenter
-        fields = ['name', 'legacy_code', 'is_active']
 
 
 class TypeMovementForm(BaseForm):

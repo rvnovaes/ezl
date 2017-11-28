@@ -17,69 +17,16 @@ from task.models import Task
 from task.tables import TaskTable
 from .forms import (TypeMovementForm, InstanceForm, MovementForm, FolderForm,
                     LawSuitForm, CourtDistrictForm, OrganForm,
-                    CourtDivisionForm, CostCenterForm)
+                    CourtDivisionForm)
 from .models import (Instance, Movement, LawSuit, Folder, CourtDistrict,
-                     CourtDivision, TypeMovement, Organ, CostCenter)
+                     CourtDivision, TypeMovement, Organ)
 from .tables import (MovementTable, FolderTable, LawSuitTable,
                      CourtDistrictTable, InstanceTable, CourtDivisionTable,
-                     TypeMovementTable, OrganTable, AddressOrganTable,
-                     CostCenterTable)
+                     TypeMovementTable, OrganTable, AddressOrganTable)
 from core.views import remove_invalid_registry
 from django.core.cache import cache
 from dal import autocomplete
 from django.db.models import Q
-
-
-class CostCenterListView(LoginRequiredMixin, SingleTableViewMixin):
-    model = CostCenter
-    table_class = CostCenterTable
-    ordering = ('name', )
-
-    @remove_invalid_registry
-    def get_context_data(self, **kwargs):
-        """
-        Sobrescreve o metodo get_context_data utilizando o decorator remove_invalid_registry
-        para remover o registro invalido da listagem
-        :param kwargs:
-        :return: Retorna o contexto contendo a listagem
-        :rtype: dict
-        """
-        context = super().get_context_data(**kwargs)
-        return context
-
-
-class CostCenterCreateView(AuditFormMixin, CreateView):
-    model = CostCenter
-    form_class = CostCenterForm
-    success_url = reverse_lazy('costcenter_list')
-    success_message = CREATE_SUCCESS_MESSAGE
-    object_list_url = 'costcenter_list'
-
-
-class CostCenterUpdateView(AuditFormMixin, UpdateView):
-    model = CostCenter
-    form_class = CostCenterForm
-    success_url = reverse_lazy('costcenter_list')
-    success_message = UPDATE_SUCCESS_MESSAGE
-    template_name_suffix = '_update_form'
-    object_list_url = 'costcenter_list'
-
-
-class CostCenterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
-    model = CostCenter
-    success_url = reverse_lazy('costcenter_list')
-    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
-    object_list_url = 'costcenter_list'
-
-
-class CostCenterAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = CostCenter.objects.none()
-
-        if self.q:
-            qs = CostCenter.objects.filter(name__unaccent__istartswith=self.q,
-                                           is_active=True)
-        return qs
 
 
 class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
