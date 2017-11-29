@@ -24,7 +24,6 @@ from sqlalchemy import text
 from connections.db_connection import connect_db, get_advwin_engine
 from core.utils import LegacySystem
 from config.config import get_parser
-from django.utils.lru_cache import lru_cache
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -112,11 +111,6 @@ def validate_import(f):
 class GenericETL(object):
     EZL_LEGACY_CODE_FIELD = 'legacy_code'
 
-    @property
-    @lru_cache(maxsize=None)
-    def advwin_engine(self):
-        return connect_db(parser, config_connection)
-
     model = None
     import_query = None
     export_statements = None
@@ -153,16 +147,12 @@ class GenericETL(object):
 
         if self.has_status:
             self.deactivate_all()
-
-        connection = self.advwin_engine.connect()
-
-        cursor = self.advwin_engine.execute(text(self.import_query))
+        connection = get_advwin_engine().connect()
+        cursor = connection.execute(text(self.import_query))
         rows = cursor.fetchall()
         rows_count = len(rows)
         user = User.objects.get(pk=create_alter_user)
-
         self.config_import(rows, user, rows_count)
-
         connection.close()
 
     def config_export(self):
