@@ -181,7 +181,7 @@ class PersonForm(BaseModelForm):
         return cleaned_data
 
 
-AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=1)
+AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=1, max_num=1)
 
 
 class UserCreateForm(BaseForm, UserCreationForm):

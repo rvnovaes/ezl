@@ -369,6 +369,8 @@ class PersonCreateView(AuditFormMixin, CreateView):
             data['personaddress'] = AddressFormSet(self.request.POST)
         else:
             data['personaddress'] = AddressFormSet()
+            data['personaddress'].forms[0].fields['is_active'].initial = True
+            data['personaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
         return data
 
     def form_valid(self, form):
