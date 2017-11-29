@@ -134,6 +134,14 @@
                                 </tr>
                                 <tr>
                                     <th>
+                                        Cliente
+                                    </th>
+                                    <td>
+                                        {{ form.instance.client|default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
                                         Serviço solicitado
                                     </th>
                                     <td>
@@ -146,6 +154,22 @@
                                     </th>
                                     <td>
                                         {{ form.instance.movement.law_suit.law_suit_number |default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Comarca
+                                    </th>
+                                    <td>
+                                        {{ form.instance.court_district|default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        UF
+                                    </th>
+                                    <td>
+                                        {{ form.instance.court_district.state|default_if_none:"---" }}
                                     </td>
                                 </tr>
                                 <tr>
