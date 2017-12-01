@@ -2,7 +2,7 @@ from core.models import Person
 from core.utils import LegacySystem
 from lawsuit.models import Organ
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
-from etl.advwin_ezl.factory import InvalidObjectFactory
+from etl.advwin_ezl.factory import InvalidObjectFactory, INVALID_ORGAN
 from lawsuit.models import LawSuit, Folder, Instance, CourtDistrict, CourtDivision
 
 
@@ -103,7 +103,7 @@ class LawsuitETL(GenericETL):
                 if not court_district:
                     court_district = InvalidObjectFactory.get_invalid_model(CourtDistrict)
                 if not organ:
-                    organ = InvalidObjectFactory.get_invalid_model(Person)
+                    organ = Organ.objects.filter(legal_name=INVALID_ORGAN).first()
                 if not court_division:
                     court_division = InvalidObjectFactory.get_invalid_model(CourtDivision)
 
