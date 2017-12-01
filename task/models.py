@@ -25,6 +25,7 @@ class Permissions(Enum):
 # Dicionário para retornar o icone referente ao status da providencia
 icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assignment_return',
              'DONE': 'assignment_turned_in',
+             'REQUESTED': 'description',
              'REFUSED': 'assignment_late', 'INVALID': 'error', 'FINISHED': 'gavel',
              'BLOCKEDPAYMENT': 'money_off'}
 
@@ -42,6 +43,7 @@ class TaskStatus(Enum):
     BLOCKEDPAYMENT = 'Glosada'
     FINISHED = 'Finalizada'
     INVALID = 'Inválida'
+    REQUESTED = 'Solicitada'
 
     def get_icon(self):
         return icon_dict[self.name]
