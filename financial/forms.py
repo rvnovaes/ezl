@@ -1,6 +1,9 @@
 from django import forms
-from .models import CostCenter
+from task.models import TypeTask
 from material import Layout, Row
+from core.widgets import MDModelSelect2
+from core.models import Person
+from .models import CostCenter, ServicePriceTable
 
 
 class BaseModelForm(forms.ModelForm):
@@ -21,3 +24,15 @@ class CostCenterForm(BaseModelForm):
     class Meta:
         model = CostCenter
         fields = ['name', 'legacy_code', 'is_active']
+
+
+class ServicePriceTableForm(BaseModelForm):
+
+    correspondent = forms.ModelChoiceField(
+        label='Correspondente',
+        queryset=Person.objects.filter(auth_user__groups__name=Person.CORRESPONDENT_GROUP),
+    )
+
+    class Meta:
+        model = ServicePriceTable
+        fields = ('type_task', 'court_district', 'state', 'client', 'correspondent', 'value')

@@ -6,9 +6,9 @@ from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
                            DELETE_SUCCESS_MESSAGE)
 from core.views import (AuditFormMixin, MultiDeleteViewMixin,
                         SingleTableViewMixin)
-from .forms import CostCenterForm
-from .models import CostCenter
-from .tables import CostCenterTable
+from .forms import CostCenterForm, ServicePriceTableForm
+from .models import CostCenter, ServicePriceTable
+from .tables import CostCenterTable, ServicePriceTableTable
 from core.views import remove_invalid_registry
 from dal import autocomplete
 
@@ -65,3 +65,34 @@ class CostCenterAutocomplete(LoginRequiredMixin,
             qs = CostCenter.objects.filter(name__unaccent__istartswith=self.q,
                                            is_active=True)
         return qs
+
+
+class ServicePriceTableListView(LoginRequiredMixin, SingleTableViewMixin):
+    model = ServicePriceTable
+    table_class = ServicePriceTableTable
+    ordering = ('correspondent', )
+
+
+class ServicePriceTableCreateView(CreateView):
+    model = ServicePriceTable
+    form_class = ServicePriceTableForm
+    success_url = reverse_lazy('servicepricetable_list')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'servicepricetable_list'
+
+
+class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
+    model = ServicePriceTable
+    form_class = ServicePriceTableForm
+    success_url = reverse_lazy('servicepricetable_list')
+    success_message = UPDATE_SUCCESS_MESSAGE
+    template_name_suffix = '_update_form'
+    object_list_url = 'servicepricetable_list'
+
+
+class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):
+    model = ServicePriceTable
+    success_url = reverse_lazy('servicepricetable_list')
+    success_message = DELETE_SUCCESS_MESSAGE.format(
+        model._meta.verbose_name_plural)
+    object_list_url = 'servicepricetable_list'
