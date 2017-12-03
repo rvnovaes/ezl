@@ -2,7 +2,8 @@ import django_tables2 as tables
 
 from core.tables import CheckBoxMaterial
 from core.models import Address
-from .models import TypeMovement, Movement, Folder, CourtDistrict, Instance, LawSuit, Organ
+from .models import (TypeMovement, Movement, Folder, CourtDistrict, Instance,
+                     LawSuit, Organ)
 from django_tables2.utils import A
 
 
@@ -56,9 +57,9 @@ class FolderTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'folder_number', 'person_customer', 'is_active', 'legacy_code')
+        sequence = ('selection', 'folder_number', 'person_customer', 'cost_center', 'is_active', 'legacy_code')
         model = Folder
-        fields = ['folder_number', 'selection', 'legacy_code', 'person_customer', 'is_active']
+        fields = ['folder_number', 'selection', 'legacy_code', 'person_customer', 'cost_center', 'is_active']
         readonly_fields = ['folder_number']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem pastas cadastradas"
