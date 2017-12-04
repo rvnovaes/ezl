@@ -15,11 +15,14 @@ from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixi
     GenericFormOneToMany, AddressCreateView, AddressUpdateView, AddressDeleteView
 from task.models import Task
 from task.tables import TaskTable
-from .forms import TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, \
-    CourtDistrictForm, OrganForm, CourtDivisionForm
-from .models import Instance, Movement, LawSuit, Folder, CourtDistrict, CourtDivision, TypeMovement, Organ
-from .tables import MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, InstanceTable, \
-    CourtDivisionTable, TypeMovementTable, OrganTable, AddressOrganTable
+from .forms import (TypeMovementForm, InstanceForm, MovementForm, FolderForm,
+                    LawSuitForm, CourtDistrictForm, OrganForm,
+                    CourtDivisionForm)
+from .models import (Instance, Movement, LawSuit, Folder, CourtDistrict,
+                     CourtDivision, TypeMovement, Organ)
+from .tables import (MovementTable, FolderTable, LawSuitTable,
+                     CourtDistrictTable, InstanceTable, CourtDivisionTable,
+                     TypeMovementTable, OrganTable, AddressOrganTable)
 from core.views import remove_invalid_registry
 from django.core.cache import cache
 from dal import autocomplete

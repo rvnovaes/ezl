@@ -158,6 +158,10 @@ class Task(Audit, LegacyCode):
         return self.movement.law_suit.court_division
 
     @property
+    def court_district(self):
+        return self.movement.law_suit.court_district
+
+    @property
     def court(self):
         return self.movement.law_suit.organ
 

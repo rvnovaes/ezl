@@ -64,4 +64,4 @@ stop:
 	docker-compose stop web nginx
 
 test:
-	docker-compose run web pytest
+	docker-compose run web python manage.py test --parallel --keepdb

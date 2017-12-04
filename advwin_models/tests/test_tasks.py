@@ -54,4 +54,5 @@ class TasksTest(TestCase):
         table_insert_mock.assert_called_with()
 
         table_insert_mock.return_value.values.assert_called_with(agenda_id=task.legacy_code,
-                                                                 versao=1)
+                                                                 versao=1,
+                                                                 paginas=',1,2,')

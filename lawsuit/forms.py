@@ -3,9 +3,10 @@ from django.core.exceptions import FieldDoesNotExist
 from django.forms import ModelForm
 from core.fields import CustomBooleanField
 from core.models import Person, State, Address
+from financial.models import CostCenter
 from core.widgets import MDModelSelect2
-from .models import TypeMovement, Instance, Movement, Folder, CourtDistrict, LawSuit, CourtDivision, \
-    Organ
+from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict,
+                     LawSuit, CourtDivision, Organ)
 from core.utils import filter_valid_choice_form
 from dal import autocomplete
 from localflavor.br.forms import BRCNPJField
@@ -84,7 +85,7 @@ class MovementForm(BaseForm):
 class FolderForm(BaseForm):
     class Meta:
         model = Folder
-        fields = ['folder_number', 'person_customer', 'is_active']
+        fields = ['folder_number', 'person_customer', 'cost_center', 'is_active']
 
     folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
 
@@ -94,12 +95,19 @@ class FolderForm(BaseForm):
         widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'})
     )
 
+    cost_center = forms.ModelChoiceField(
+        queryset=CostCenter.objects.filter(is_active=True),
+        empty_label=u"Selecione...",
+        widget=MDModelSelect2(url='costcenter_autocomplete', attrs={'class': 'form-control'}),
+        required=False,
+    )
+
     def __init__(self, *args, **kwargs):
         super(FolderForm, self).__init__(*args, **kwargs)
         self.order_fields(['folder_number', 'person_customer', 'is_active'])
 
         if not self.instance.pk:
-            # Since the pk is set this is not a new instance            
+            # Since the pk is set this is not a new instance
             self.fields.pop('folder_number')
 
 
