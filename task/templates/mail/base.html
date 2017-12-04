@@ -463,10 +463,10 @@
                                             <td valign="top" class="bodyContent" mc:edit="body_content">
                                             {% block content %}
 
-                                                {% if task.task_status.name != 'OPEN' %}
+                                                {% if task.status.name != 'OPEN' %}
                                                     A providência <strong>{{ number }}</strong> {{ short_message }} no <strong>{{ project_name }}</strong>{{ custom_text }}.
                                                 {% endif %}
-                                                {% if task.task_status.name == 'OPEN' %}
+                                                {% if task.status.name == 'OPEN' %}
                                                     <div>
                                                         <br><h2>Dados da providência:</h2>
                                                             <strong>Nº da providência:</strong>
@@ -480,6 +480,7 @@
                                                         <br>
                                                             <strong>Prazo:</strong>
                                                             {{ task.final_deadline_date|date:"d/m/Y" }}
+            <br> Parte adversa: {{ task.movement.law_suit.opposing_party|default_if_none:'' }}
                                                         <br>
                                                             <strong>Recebida em:</strong>
                                                             {{ task.delegation_date|date:"d/m/Y" }}

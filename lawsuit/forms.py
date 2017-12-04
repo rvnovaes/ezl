@@ -123,7 +123,7 @@ class LawSuitForm(BaseForm):
     class Meta:
         model = LawSuit
         fields = ['law_suit_number', 'organ', 'instance', 'court_division',
-                  'person_lawyer',
+                  'person_lawyer', 'opposing_party',
                   'is_current_instance', 'is_active', 'court_district']
 
     person_lawyer = forms.ModelChoiceField(
@@ -148,6 +148,7 @@ class LawSuitForm(BaseForm):
             'name'),
         empty_label=u"Selecione", required=True
     )
+    opposing_party = forms.CharField(required=False)
     law_suit_number = forms.CharField(max_length=255, required=True)
     is_current_instance = CustomBooleanField(initial=False, required=False)
     court_district = forms.CharField(required=False, widget=forms.HiddenInput(), initial=None)

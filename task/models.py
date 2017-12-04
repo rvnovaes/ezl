@@ -275,6 +275,7 @@ class DashboardViewModel(Audit):
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
     lawsuit_number = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='Número do Processo')
+    opposing_party = models.CharField(null=True, verbose_name=u'Parte adversa', max_length=255)
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
 
@@ -313,3 +314,7 @@ class DashboardViewModel(Audit):
     @property
     def lawsuit_number(self):
         return self.movement.law_suit.law_suit_number
+
+    @property
+    def opposing_party(self):
+        return self.movement.law_suit.opposing_party
