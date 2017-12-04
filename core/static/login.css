@@ -256,7 +256,7 @@
         width: 100%;
         float: left;
         text-align: center;
-        color: #006D3A;
+        color: #006D3A!important;
         font-size: 18px;
     }
 
