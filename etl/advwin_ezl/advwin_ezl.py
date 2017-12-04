@@ -18,13 +18,13 @@ import os
 import sys
 import logging
 import datetime
+import time
 from functools import wraps, reduce
 
 from sqlalchemy import text
 from connections.db_connection import connect_db, get_advwin_engine
 from core.utils import LegacySystem
 from config.config import get_parser
-from django.utils.lru_cache import lru_cache
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -112,11 +112,6 @@ def validate_import(f):
 class GenericETL(object):
     EZL_LEGACY_CODE_FIELD = 'legacy_code'
 
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-
-    def advwin_engine(self):
-        return connect_db(parser, config_connection)
 
     model = None
     import_query = None
@@ -155,15 +150,23 @@ class GenericETL(object):
         if self.has_status:
             self.deactivate_all()
 
-        connection = self.advwin_engine().connect()
-        cursor = self.advwin_engine().execute(text(self.import_query))
-        rows = cursor.fetchall()
-        rows_count = len(rows)
-        user = User.objects.get(pk=create_alter_user)
-
-        self.config_import(rows, user, rows_count)
-
-        connection.close()
+        for attempt in range(5):
+            try:
+                connection = get_advwin_engine().connect()
+                cursor = connection.execute(text(self.import_query))
+                rows = cursor.fetchall()
+                rows_count = len(rows)
+                user = User.objects.get(pk=create_alter_user)
+                self.config_import(rows, user, rows_count)
+                connection.close()
+            except:
+                self.error_logger.error("Erro de conexão. Nova tentativa de conexão em 5s. Tentativa: " + str(attempt + 1))
+                time.sleep(5)
+            else:
+                break
+        else:
+            self.error_logger.error("Não foi possível conectar com o banco.")
+            raise
 
     def config_export(self):
         pass
