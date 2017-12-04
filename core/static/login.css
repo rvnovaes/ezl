@@ -469,3 +469,10 @@
         list-style-type: none;
         outline: none;
     }
+
+    input:-webkit-autofill + .floating-label {
+        top: 0px;
+        line-height: 18px;
+        font-size: 18px;
+        font-weight: 100;
+    }
