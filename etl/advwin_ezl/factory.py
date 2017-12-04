@@ -8,17 +8,20 @@ from core import signals
 from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, \
     Movement, Organ
 from task.models import TypeTask, Task, TaskStatus, TaskHistory
+from financial.models import CostCenter
+
 
 config_parser = get_parser()
 settings = config_parser['etl']
 
 invalid_registry = '-INVÁLIDO'
 invalid_legacy_code = 'REGISTRO' + invalid_registry
+INVALID_ORGAN = Organ._meta.verbose_name.upper() + invalid_registry
 
 
 class InvalidObjectFactory(object):
     models = [Person, TypeMovement, Instance, Folder, CourtDivision, LawSuit, Movement, TypeTask,
-              Task, CourtDistrict, Country, State, City, User, TaskHistory]
+              Task, CourtDistrict, Country, State, City, User, TaskHistory, CostCenter]
 
     @staticmethod
     def create():
@@ -60,7 +63,7 @@ class InvalidObjectFactory(object):
         # Registros inválidos para o app lawsuit
         invalid_organ, created = Organ.objects.get_or_create(
             legacy_code=invalid_legacy_code,
-            legal_name=Organ._meta.verbose_name.upper() + invalid_registry,
+            legal_name=INVALID_ORGAN,
             court_district=invalid_court_district,
             create_user=user
         )
@@ -138,6 +141,13 @@ class InvalidObjectFactory(object):
                                                            legacy_code=invalid_legacy_code,
                                                            task_status=TaskStatus.INVALID,
                                                            type_task=invalid_type_task)
+
+        # Registro inválido de centro de custo
+        CostCenter.objects.get_or_create(
+            create_user=user,
+            name=CostCenter._meta.verbose_name.upper() + invalid_registry,
+            legacy_code=invalid_legacy_code
+        )
 
     @staticmethod
     def get_invalid_model(model):

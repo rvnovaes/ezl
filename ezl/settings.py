@@ -29,22 +29,13 @@ try:
     host = os.environ.get('DB_HOST', source['host'])
     port = os.environ.get('DB_PORT', source['port'])
     environment = source['environment']
-    email_use_ssl = source['email_use_ssl']
+    email_use_ssl = True if source['email_use_ssl'].lower() == "true" else False
     email_host = source['email_host']
     email_port = source['email_port']
     email_host_user = source['email_host_user']
     email_host_password = source['email_host_password']
     linux_password = source_etl['linux_password']
     linux_user = source_etl['linux_user']
-    if not os.path.exists('/var/log/ezl/etl'):
-        os.system('echo {0}|sudo -S mkdir -p /var/log/ezl/etl/'.format(
-            linux_password))
-        os.system('echo {0}|sudo -S chmod 755 /var/log/ezl/etl/ -R'.format(
-            linux_password))
-        os.system('echo {0}|sudo -S chown -R {1} /var/log/ezl/etl/'.format(
-            linux_password, linux_user))
-        os.system('echo {0}|sudo -S chown -R {1} /var/log/ezl/'.format(
-            linux_password, linux_user))
 
 except KeyError as e:
     print('Invalid settings. Check the General.ini file')
@@ -86,6 +77,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'lawsuit.apps.LawsuitConfig',
     'task.apps.TaskConfig',
+    'financial.apps.FinancialConfig',
 
     'django.contrib.sites',
 
@@ -257,6 +249,14 @@ LINK_TO_RESTORE_DB_DEMO = 'http://13.68.213.60:8001'
 
 LUIGI_TARGET_PATH = os.path.join(BASE_DIR, 'luigi_targets')
 
+
+if os.name == 'nt':
+    LOG_DIR = os.path.join(tempfile.gettempdir(), 'ezl')
+else:
+    LOG_DIR = '/var/log/ezl'
+
+LOG_FILE_TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -289,30 +289,30 @@ LOGGING = {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
             'class': 'logging.FileHandler',
-            'filename': '/tmp/django_dev.log',
+            'filename': os.path.join(LOG_DIR, 'django_dev.log'),
             'formatter': 'verbose'
         },
         'ezl_logfile': {
             'level': 'INFO',
             'filters': ['require_debug_true'],
             'class': 'logging.FileHandler',
-            'filename': '/var/log/ezl/ezl.log',
+            'filename': os.path.join(LOG_DIR, 'ezl.log'),
             'formatter': 'simple'
         },
         'error_logfile': {
             'level': 'ERROR',
             'filters': ['require_debug_true'],
             'class': 'logging.FileHandler',
-            'filename': '/var/log/ezl/etl/' +
-                        datetime.datetime.now().strftime('error_%Y%m%d_%H%M%S.log'),
+            'filename': os.path.join(LOG_DIR, 'etl/error_{}.log'.format(
+                LOG_FILE_TIMESTAMP)),
             'formatter': 'simple'
         },
         'debug_logfile': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
             'class': 'logging.FileHandler',
-            'filename': '/var/log/ezl/etl/' +
-                        datetime.datetime.now().strftime('debug_%Y%m%d_%H%M%S.log'),
+            'filename': os.path.join(LOG_DIR, 'etl/debug_{}.log'.format(
+                LOG_FILE_TIMESTAMP)),
             'formatter': 'simple'
         },
     },

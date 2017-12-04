@@ -112,6 +112,7 @@ def validate_import(f):
 class GenericETL(object):
     EZL_LEGACY_CODE_FIELD = 'legacy_code'
 
+
     model = None
     import_query = None
     export_statements = None
@@ -176,7 +177,7 @@ class GenericETL(object):
 
     def export_data(self):
         self.config_export()
-        connection = self.advwin_engine.connect()
+        connection = self.advwin_engine().connect()
 
         for stmt in self.export_statements:
             trans = connection.begin()

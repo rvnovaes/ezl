@@ -1,5 +1,4 @@
 <script type="text/javascript">
-
 {% if form.errors %}
     {% comment %}
         {% for field in form %}
@@ -12,10 +11,9 @@
         {% endfor %}
     {% endcomment %}
 {% endif %}
-
 {% if messages %}
     {% for message in messages %}
-        showToast('{{ message.tags }}', '{{ message }}', '', 3000, true);
+        showToast('{{ message.tags }}', '{{ message.message }}', '', 3000, true);
     {% endfor %}
 {% endif %}
 
