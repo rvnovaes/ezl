@@ -12,14 +12,14 @@
         <form method="POST" action="{% url 'account_login' %}"> {% csrf_token %}
 
             <div class="input">
-                <label for="first_name">Login</label>
+                <label for="first_name" class="floating-label">Login</label>
                 <input id="first_name" type="text" name="login" required>
                 <span class="spin"></span>
             </div>
 
             <div class="input">
-                <label for="password">Senha</label>
-                <input id="password" type="password" name="password" required>
+                <label for="password" class="floating-label">Senha</label>
+                <input id="password" type="password" name="password" class="password" required>
                 <span class="spin"></span>
             </div>
             {% if redirect_field_value %}
@@ -79,10 +79,21 @@
             // Caso exista um usuário preenchido (casos de senha salva), o navegador passa o foco pelos campos de usuário e senha
             setTimeout(function() {
                 if($("#first_name").val() && $("#first_name").val() !== $("#first_name").attr("value")){
-                    $("#first_name").focus();
                     $("#password").focus();
+                    $(".floating-label").css("top", "0px");
+                    $(".floating-label").css("line-height", "18px");
+                    $(".floating-label").css("font-size", "18px");
+                    $(".floating-label").css("font-weight", "100");
                 };
-            },500);
+            },800);
+        });
+        $("#first_name").change(function() {
+            if (document.getElementById("password").value && $("#password").css("top") !== "0px") {
+                $(".floating-label").css("top", "0px");
+                $(".floating-label").css("line-height", "18px");
+                $(".floating-label").css("font-size", "18px");
+                $(".floating-label").css("font-weight", "100");
+            }
         });
     </script>
 {% endblock %}
