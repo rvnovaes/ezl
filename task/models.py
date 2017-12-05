@@ -109,7 +109,7 @@ class Task(Audit, LegacyCode):
                                            verbose_name='Correspondente')
     person_distributed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False,
                                               null=True,
-                                              verbose_name='Service')
+                                              verbose_name='Contratante')
     type_task = models.ForeignKey(TypeTask, on_delete=models.PROTECT, blank=False, null=False,
                                   verbose_name='Tipo de Serviço')
     delegation_date = models.DateTimeField(default=timezone.now, verbose_name='Data de Delegação')
