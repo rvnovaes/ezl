@@ -20,7 +20,8 @@ class TaskForm(BaseForm):
 
     class Meta:
         model = Task
-        fields = ['task_number', 'type_task', 'person_executed_by', 'person_asked_by',
+        fields = ['task_number', 'type_task',
+                  'person_executed_by', 'person_asked_by', 'person_distributed_by',
                   'final_deadline_date',
                   'delegation_date', 'acceptance_date', 'refused_date', 'execution_date',
                   'return_date', 'blocked_payment_date', 'finished_date', 'description',
@@ -34,6 +35,11 @@ class TaskForm(BaseForm):
     person_executed_by = forms.ModelChoiceField(
         empty_label='Selecione...',
         queryset=Person.objects.active().correspondents().order_by('name'))
+
+    person_distributed_by = forms.ModelChoiceField(
+        empty_label='Selecione...',
+        queryset=Person.objects.active().services().order_by('name'),
+        label='Contratante')
 
     type_task = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(
