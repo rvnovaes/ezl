@@ -14,6 +14,8 @@ DELETE_EXCEPTION_MESSAGE = 'Erro: impossível excluir o arquivo.'
 
 DELETE_SUCCESS_MESSAGE = 'Registros selecionados de {} excluídos com sucesso'
 
+NO_PERMISSIONS_DEFINED = 'Não existem permissões de acesso definidas para este usuário, por isso não será exibida nenhuma providência!'
+
 
 def delete_error_protected(model_name, related_model):
     return ('Não é possível excluir o(s) registros de ' +

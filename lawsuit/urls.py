@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 
 from lawsuit import views
 
+
 urlpatterns = [
 
     # Comarcas

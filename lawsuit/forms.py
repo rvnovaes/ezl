@@ -3,9 +3,10 @@ from django.core.exceptions import FieldDoesNotExist
 from django.forms import ModelForm
 from core.fields import CustomBooleanField
 from core.models import Person, State, Address
+from financial.models import CostCenter
 from core.widgets import MDModelSelect2
-from .models import TypeMovement, Instance, Movement, Folder, CourtDistrict, LawSuit, CourtDivision, \
-    Organ
+from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict,
+                     LawSuit, CourtDivision, Organ)
 from core.utils import filter_valid_choice_form
 from dal import autocomplete
 from localflavor.br.forms import BRCNPJField
@@ -84,7 +85,7 @@ class MovementForm(BaseForm):
 class FolderForm(BaseForm):
     class Meta:
         model = Folder
-        fields = ['folder_number', 'person_customer', 'is_active']
+        fields = ['folder_number', 'person_customer', 'cost_center', 'is_active']
 
     folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
 
@@ -92,6 +93,13 @@ class FolderForm(BaseForm):
         queryset=Person.objects.filter(is_active=True, is_customer=True),
         empty_label=u"Selecione...",
         widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'})
+    )
+
+    cost_center = forms.ModelChoiceField(
+        queryset=CostCenter.objects.filter(is_active=True),
+        empty_label=u"Selecione...",
+        widget=MDModelSelect2(url='costcenter_autocomplete', attrs={'class': 'form-control'}),
+        required=False,
     )
 
     def __init__(self, *args, **kwargs):
@@ -116,7 +124,7 @@ class LawSuitForm(BaseForm):
     class Meta:
         model = LawSuit
         fields = ['law_suit_number', 'organ', 'instance', 'court_division',
-                  'person_lawyer',
+                  'person_lawyer', 'opposing_party',
                   'is_current_instance', 'is_active', 'court_district']
 
     person_lawyer = forms.ModelChoiceField(
@@ -145,6 +153,7 @@ class LawSuitForm(BaseForm):
             'name'),
         empty_label=u"Selecione", required=True
     )
+    opposing_party = forms.CharField(required=False)
     law_suit_number = forms.CharField(max_length=255, required=True)
     is_current_instance = CustomBooleanField(initial=False, required=False)
     court_district = forms.CharField(required=False, widget=forms.HiddenInput(), initial=None)

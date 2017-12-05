@@ -99,7 +99,6 @@ class TaskCreateForm(FileFormMixin, TaskForm):
 class TaskDetailForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
-        self.fields['execution_date'].widget.min_date = self.instance.acceptance_date
         self.fields['execution_date'].widget.max_date = timezone.now()
 
     class Meta:
@@ -116,7 +115,7 @@ class TaskDetailForm(ModelForm):
                                                                  },
                                                                  format='DD/MM/YYYY HH:mm'))
     notes = forms.CharField(
-        required=True,
+        required=False,
         initial='',
         label='Insira um comentário',
         widget=forms.Textarea(

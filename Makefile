@@ -1,5 +1,5 @@
 build:
-	docker-compose build builder
+	docker-compose build builder luigi
 	@docker-compose build certbot || true
 
 check_compose_override:
@@ -14,7 +14,7 @@ create_certificate:
 create_certificate_teste:
 	docker-compose run certbot certbot certonly --webroot -w /tmp/www -d teste.ezlawyer.com.br -m contato@ezlawyer.com.br --agree-tos
 
-deploy: check_compose_override build run migrate collectstatic
+deploy: check_compose_override build restart run migrate collectstatic
 
 local_sqlserver:
 	ln -s docker-compose.sqlserver.yml docker-compose.override.yml
@@ -43,7 +43,7 @@ run: check_compose_override
 	docker-compose up -d
 
 restart:
-	docker-compose restart web nginx
+	docker-compose restart web nginx luigi tasks
 
 set_env_development:
 	@rm docker-compose.override.yml || true
@@ -64,4 +64,4 @@ stop:
 	docker-compose stop web nginx
 
 test:
-	docker-compose run web pytest
+	docker-compose run web python manage.py test --parallel --keepdb
