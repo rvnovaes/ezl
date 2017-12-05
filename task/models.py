@@ -25,7 +25,7 @@ class Permissions(Enum):
 # Dicionário para retornar o icone referente ao status da providencia
 icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assignment_return',
              'DONE': 'assignment_turned_in',
-             'REQUESTED': 'description',
+             'REQUESTED': 'description', 'ACCEPTED_SERVICE': 'description', 'REFUSED_SERVICE': 'description',
              'REFUSED': 'assignment_late', 'INVALID': 'error', 'FINISHED': 'gavel',
              'BLOCKEDPAYMENT': 'money_off'}
 
@@ -44,6 +44,8 @@ class TaskStatus(Enum):
     FINISHED = 'Finalizada'
     INVALID = 'Inválida'
     REQUESTED = 'Solicitada'
+    ACCEPTED_SERVICE = 'Aceita pelo Service'
+    REFUSED_SERVICE = 'Recusada pelo Service'
 
     def get_icon(self):
         return icon_dict[self.name]
@@ -131,6 +133,8 @@ class Task(Audit, LegacyCode):
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
                                    default=TaskStatus.OPEN)
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    amount = models.DecimalField(null=False, blank=False, verbose_name='Total',
+                                 max_digits=14, decimal_places=2)
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
 
