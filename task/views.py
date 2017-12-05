@@ -402,10 +402,10 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             deadline_dynamic_query = Q()
             client_query = Q()
 
-            if not self.request.user.has_perm('task.view_all_tasks'):
-                if self.request.user.has_perm('task.view_delegated_tasks'):
+            if not self.request.user.has_perm('core.view_all_tasks'):
+                if self.request.user.has_perm('core.view_delegated_tasks'):
                     person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-                elif self.request.user.has_perm('task.view_requested_tasks'):
+                elif self.request.user.has_perm('core.view_requested_tasks'):
                     person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
             if data['openned']:
