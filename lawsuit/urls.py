@@ -70,7 +70,7 @@ urlpatterns = [
     url(r'^orgaos/(?P<pk>[0-9]+)/$', login_required(views.OrganUpdateView.as_view()),
         name='organ_update'),
     url(r'orgaos/excluir$', login_required(views.OrganDeleteView.as_view()), name='organ_delete'),
-    url(r'organ_autocomplete$', login_required(views.OrganAutocomplete.as_view()),
+    url(r'organ_autocomplete$', login_required(views.OrganAutocompleteView.as_view()),
         name='organ_autocomplete'),
 
     # Address views

@@ -3,14 +3,18 @@ from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User, Group
 from django.forms import ModelForm
+from django.forms import CheckboxInput, formset_factory
 from django.forms.models import inlineformset_factory
 from django.utils.translation import ugettext_lazy as _
 
+from dal import autocomplete
 from localflavor.br.forms import BRCPFField, BRCNPJField
 from material import Layout, Row
 
 from core.fields import CustomBooleanField
-from core.models import ContactUs, Person, Address, City, ContactMechanism
+from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType
+from core.utils import filter_valid_choice_form
+from core.widgets import MDModelSelect2
 from lawsuit.forms import BaseForm
 
 
@@ -82,13 +86,73 @@ class ContactMechanismForm(ModelForm):
     )
 
 
-class PersonForm(BaseModelForm):
+class AddressForm(BaseModelForm):
+    city = forms.ModelChoiceField(
+            queryset=filter_valid_choice_form(City.objects.filter(is_active=True)).order_by('name'),
+            required=True,
+            label='Cidade',
+            widget=MDModelSelect2(url='city_autocomplete',
+                                            attrs={
+                                                'data-container-css': 'id_city_container',
+                                                'class': 'select-with-search material-ignore',
+                                                'data-minimum-input-length': 3,
+                                                'data-placeholder': '',
+                                                'data-label': 'Cidade',
+                                                'data-autocomplete-light-language': 'pt-BR',}
+                                            ))
+    address_type = forms.ModelChoiceField(
+        queryset=filter_valid_choice_form(AddressType.objects.all().order_by('name')),
+        empty_label='',
+        required=True,
+        label='Tipo',
+        )
+
+    is_active = CustomBooleanField(
+        required=True,
+        label='Ativo',
+        widget=CheckboxInput(attrs={'class': 'filled-in',})
+    )
 
     layout = Layout(
-        Row('legal_name', 'name'),
-        Row('legal_type', 'cpf_cnpj'),
-        Row('is_lawyer', 'is_customer', 'is_supplier', 'is_active'),
+        Row('address_type'),
+        Row('street', 'number', 'complement'),
+        Row('city_region', 'city', 'zip_code'),
+        Row('notes'),
+        Row('is_active'),
     )
+
+    class Meta:
+        model = Address
+        fields = [
+            'city',
+            'address_type', 'street', 'number', 'complement',
+            'zip_code',
+            'city_region',
+            'notes',
+            'is_active',
+        ]
+
+    def save(self, commit=True):
+        saved = super().save(commit=False)
+        saved.country = saved.city.state.country
+        saved.state = saved.city.state
+        if commit:
+            saved.save()
+        return saved
+
+
+class PersonForm(BaseModelForm):
+    legal_type = forms.ChoiceField(
+            label='Tipo',
+            choices=((x.value, x.format(x.value)) for x in LegalType),
+            required=True,
+        )
+
+    layout = Layout(
+            Row('legal_name', 'name'),
+            Row('legal_type', 'cpf_cnpj'),
+            Row('is_lawyer', 'is_customer', 'is_supplier', 'is_active'),
+        )
 
     class Meta:
         model = Person
@@ -117,59 +181,7 @@ class PersonForm(BaseModelForm):
         return cleaned_data
 
 
-class AddressForm(BaseModelForm):
-
-    layout = Layout(
-        Row('address_type'),
-        Row('street', 'number', 'complement'),
-        Row('city_region', 'city', 'zip_code'),
-        Row('notes'),
-        Row('is_active'),
-    )
-
-    class Meta:
-        model = Address
-        fields = ['address_type', 'street', 'number', 'complement',
-                  'zip_code',
-                  'city_region',
-                  'city',
-                  # 'state',
-                  # 'country',
-                  'notes',
-                  'is_active']
-
-    def __init__(self, *args, **kwargs):
-        instance = kwargs.pop('instance', None)
-        initial = kwargs.pop('initial', {})
-        data = kwargs.pop('data', None)
-
-        super().__init__(data=data, initial=initial, instance=instance, *args, **kwargs)
-
-        def get_option(c):
-            return '{} {} {}'.format(c.name, c.state.name, c.state.country.name)
-
-        groups = {}
-        values = ['state__country__name', 'state__name', 'state__initials', 'name', 'pk']
-
-        for row in City.objects.values(*values).order_by('name'):
-            optgroup = '{} - {}'.format(row['state__country__name'].upper(),
-                                        row['state__name'])
-            value = row['pk']
-            text = '{} - {}'.format(row['name'], row['state__initials'])
-            groups[optgroup] = groups.get(optgroup, []) + [(value, text)]
-
-        self.fields['city'].choices = groups.items()
-
-    def save(self, commit=True):
-        super().save(commit=False)
-        self.instance.country = self.instance.city.state.country
-        self.instance.state = self.instance.city.state
-        if commit:
-            self.instance.save()
-        return self.instance
-
-
-AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=3)
+AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=1, max_num=1)
 
 
 class UserCreateForm(BaseForm, UserCreationForm):
