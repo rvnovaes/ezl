@@ -546,6 +546,12 @@
                                 <b> Deseja <span id="actionText">aceitar</span> o prazo? </b></h4>
                         </div>
                         <div class="modal-body">
+                            {% if form.instance.status.name == 'REQUESTED' %}
+                            <div class="form-group" style="margin: auto">
+                                <label> {{ correspondets_table }}</label>
+                                {{ correspondets_table }}
+                            </div>
+                            {% endif %}
                             <div class="form-group" style="margin: auto">
                                 <label> {{ form.notes.label }}</label>
                                 {{ form.notes }}

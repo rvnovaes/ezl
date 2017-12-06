@@ -272,6 +272,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
+        context['correspondets_table'] = 'Tabela de Correspondentes'
 
         return context
 
