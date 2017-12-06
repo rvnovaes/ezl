@@ -31,7 +31,7 @@ class MovementETL(GenericETL):
                       ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                        (a.SubStatus = 80) OR (a.SubStatus = 10) OR 
                        (a.SubStatus = 11) OR (a.SubStatus = 20)) AND a.Status = '0' -- STATUS ATIVO
-                      -- AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171') -- marcio.batista, nagila e claudia (Em teste)
+                      AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171') -- marcio.batista, nagila e claudia (Em teste)
                   """
 
     model = Movement
