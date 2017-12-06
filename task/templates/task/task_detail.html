@@ -25,6 +25,8 @@
                 }
 
                 var nextState = {
+                    ACCEPTED_SERVICE: {text: "aceitar service", icon: "help_outline"},
+                    REFUSED_SERVICE: {text: "recusar service", icon: "help_outline"},
                     ACCEPTED: {text: "aceitar", icon: "assignment_ind"},
                     REFUSED: {text: "recusar", icon: "assignment"},
                     DELEGATED: {text: "delegar", icon: "assignment_returned"},
@@ -187,6 +189,18 @@
                         </div>
                     </div>
                     <div class="form-group text-center">
+                        {% if perms.core.can_distribute_tasks %}
+                            <button type="button" id="ACCEPTED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                               class="btn btn-sm btn-raised ACCEPTED_SERVICE {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
+                                <i class="material-icons left" style="color: white;">assignment_ind</i>
+                                Aceitar Service
+                            </button>
+                            <a id="REFUSED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                               class="btn btn-sm btn-raised REFUSED_SERVICE {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}"><i
+                                    class="material-icons left" style="color: white;">assignment_late</i>
+                                Recusar Service
+                            </a>
+                        {% endif %}
                         {% if perms.core.view_delegated_tasks %}
                             <button type="button" id="ACCEPTED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised ACCEPTED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">

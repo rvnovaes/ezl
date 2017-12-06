@@ -74,7 +74,7 @@ class EcmEtl(GenericETL):
                           AND (p.Status = 'Ativa' OR p.Dt_Saida IS NULL)
                           AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                                (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171')
+                          --AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171')
                     UNION ALL
                     SELECT DISTINCT
                       G.ID_doc AS ecm_legacy_code,
@@ -96,8 +96,9 @@ class EcmEtl(GenericETL):
                           AND cm.UsarOS = 1
                           AND (p.Status = 'Ativa' OR p.Dt_Saida IS NULL)
                           AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171')
+                               (a.SubStatus = 80) OR (a.SubStatus = 10) OR 
+                               (a.SubStatus = 11) OR (a.SubStatus = 20)) AND a.Status = '0' -- STATUS ATIVO
+                          -- AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171')
          -- marcio.batista, nagila e claudia pires(Em teste)
         """
         return sql

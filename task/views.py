@@ -136,19 +136,20 @@ class DashboardView(MultiTableMixin, TemplateView):
                     {'tags': 'error', 'message': NO_PERMISSIONS_DEFINED}
                 ]
         return context
+
     def get_tables(self):
         person = Person.objects.get(auth_user=self.request.user)
         dynamic_query = self.get_dynamic_query(person)
         data = []
         if isinstance(dynamic_query, Q):
             data = DashboardViewModel.objects.filter(dynamic_query)
-        tables = self.get_list_tables(data) if person else []
+        tables = self.get_list_tables(data, person) if person else []
         if not dynamic_query:
             return tables
         return tables
 
     @staticmethod
-    def get_list_tables(data):
+    def get_list_tables(data, person):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
@@ -159,54 +160,77 @@ class DashboardView(MultiTableMixin, TemplateView):
         refused = grouped.get(TaskStatus.REFUSED) or {}
         blocked_payment = grouped.get(TaskStatus.BLOCKEDPAYMENT) or {}
         finished = grouped.get(TaskStatus.FINISHED) or {}
-        return_table = DashboardStatusTable(returned, title='Retornadas',
-                                            status=TaskStatus.RETURN)
+        requested = grouped.get(TaskStatus.REQUESTED) or {}
+        accepted_service = grouped.get(TaskStatus.ACCEPTED_SERVICE) or {}
+        refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}
+        return_list = []
 
-        accepted_table = DashboardStatusTable(accepted,
-                                              title='A Cumprir', status=TaskStatus.ACCEPTED
-                                              )
+        if not person.auth_user.has_perm('core.view_delegated_tasks') or person.auth_user.is_superuser:
+            # status 10 - Solicitada
+            return_list.append(DashboardStatusTable(requested,
+                                                  title='Solicitadas',
+                                                  status=TaskStatus.REQUESTED))
+            #status 11 - Aceita pelo Service
+            return_list.append(DashboardStatusTable(accepted_service,
+                                                  title='Aceitas pelo Service',
+                                                  status=TaskStatus.ACCEPTED_SERVICE))
 
-        open_table = DashboardStatusTable(opened, title='Em Aberto',
-                                          status=TaskStatus.OPEN)
+        return_list.append(DashboardStatusTable(opened,
+                                                title='Delegada / Em Aberto',
+                                                status=TaskStatus.OPEN))
 
-        done_table = DashboardStatusTable(done, title='Cumpridas',
-                                          status=TaskStatus.DONE)
+        return_list.append(DashboardStatusTable(accepted,
+                                                title='A Cumprir',
+                                                status=TaskStatus.ACCEPTED))
 
-        refused_table = DashboardStatusTable(refused,
-                                             title='Recusadas', status=TaskStatus.REFUSED)
+        return_list.append(DashboardStatusTable(done,
+                                                title='Cumpridas',
+                                                status=TaskStatus.DONE))
 
-        blocked_payment_table = DashboardStatusTable(blocked_payment,
-                                                     title='Glosadas',
-                                                     status=TaskStatus.BLOCKEDPAYMENT)
+        return_list.append(DashboardStatusTable(returned,
+                                                title='Retornadas',
+                                                status=TaskStatus.RETURN))
 
-        finished_table = DashboardStatusTable(finished,
-                                              title='Finalizadas',
-                                              status=TaskStatus.FINISHED)
+        return_list.append(DashboardStatusTable(finished,
+                                                title='Finalizadas',
+                                                status=TaskStatus.FINISHED))
 
-        return [return_table, accepted_table, open_table, done_table, refused_table,
-                  blocked_payment_table,
-                  finished_table]
+        if not person.auth_user.has_perm('core.view_delegated_tasks') or person.auth_user.is_superuser:
+            #status 20 - Recusada pelo Sevice
+            return_list.append(DashboardStatusTable(refused_service,
+                                                  title='Recusadas pelo Service',
+                                                  status=TaskStatus.REFUSED_SERVICE))
+            # status 40 - Recusada
+            return_list.append(DashboardStatusTable(refused,
+                                                    title='Recusadas',
+                                                    status=TaskStatus.REFUSED))
+
+        return_list.append(DashboardStatusTable(blocked_payment,
+                                                title='Glosadas',
+                                                status=TaskStatus.BLOCKEDPAYMENT))
+
+        return return_list
 
     @staticmethod
-    def get_query_all_tasks(dynamic_query, person):
+    def get_query_all_tasks(person):
         return Q()
 
     @staticmethod
-    def get_query_delegated_tasks(dynamic_query, person):
-        return dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+    def get_query_delegated_tasks(person):
+        return Q(person_executed_by=person.id)
 
     @staticmethod
-    def get_query_requested_tasks(dynamic_query, person):
-        return dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+    def get_query_requested_tasks(person):
+        return Q(person_asked_by=person.id)
 
     @staticmethod
-    def get_query_distributed_tasks(dynamic_query, person):
-        return dynamic_query.add(Q(person_distributed_by=person.id), Q.AND)
+    def get_query_distributed_tasks(person):
+        return Q(person_distributed_by=person.id)
 
     def get_dynamic_query(self, person):
         if person.auth_user.is_superuser:
-            return self.get_query_all_tasks(Q(), person)
-        dynamic_query = False
+            return self.get_query_all_tasks(person)
+        dynamic_query = Q()
         permissions_to_check = {
             'core.view_all_tasks': self.get_query_all_tasks,
             'core.view_delegated_tasks': self.get_query_delegated_tasks,
@@ -215,8 +239,7 @@ class DashboardView(MultiTableMixin, TemplateView):
             }
         for permission in person.auth_user.get_all_permissions():
             if permission in permissions_to_check.keys():
-                dynamic_query = permissions_to_check.get(permission)(
-                    Q(), person)
+                dynamic_query |= permissions_to_check.get(permission)(person)
         return dynamic_query
 
 
