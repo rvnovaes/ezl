@@ -12,6 +12,7 @@ from advwin_models.advwin import JuridAgendaTable, JuridCorrespondenteHist, Juri
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
+from etl.utils import get_users_to_import
 from ezl import settings
 from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
@@ -56,7 +57,7 @@ def get_status_by_substatus(substatus):
 
 
 class TaskETL(GenericETL):
-    import_query = """
+    _import_query = """
 
             SELECT
                 a.Data_confirmacao AS blocked_or_finished_date,
@@ -87,13 +88,17 @@ class TaskETL(GenericETL):
                     p.Status = 'Ativa' AND
                     ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                     (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                    AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171', '20010149000165', '01605132608') -- marcio.batista, nagila e claudia, thiago.milagres (Em teste)
+                    AND a.Advogado IN ('{}')
 
     """
     model = Task
     advwin_table = 'Jurid_agenda_table'
     advwin_model = JuridAgendaTable
     has_status = False
+
+    @property
+    def import_query(self):
+        return self._import_query.format("','".join(get_users_to_import()))
 
     @validate_import
     def config_import(self, rows, user, rows_count):

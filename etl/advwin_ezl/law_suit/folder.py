@@ -4,13 +4,14 @@ from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import Folder
+from etl.utils import get_users_to_import
 from financial.models import CostCenter
 
 
 class FolderETL(GenericETL):
     advwin_table = 'Jurid_Pastas'
     model = Folder
-    import_query = """
+    _import_query = """
             SELECT DISTINCT
               p.Codigo_Comp AS legacy_code,
               p.Cliente,
@@ -29,9 +30,13 @@ class FolderETL(GenericETL):
               p.Cliente IS NOT NULL AND p.Cliente <> '' AND
               ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-              AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171', '20010149000165', '01605132608') -- marcio.batista, claudia pires e nagila(Em teste)
+              AND a.Advogado IN ('{}')
                   """
     has_status = True
+
+    @property
+    def import_query(self):
+        return self._import_query.format("','".join(get_users_to_import()))
 
     @validate_import
     def config_import(self, rows, user, rows_count):

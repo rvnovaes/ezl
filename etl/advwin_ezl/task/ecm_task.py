@@ -2,7 +2,7 @@ from django.db.utils import IntegrityError
 
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL
-from etl.utils import ecm_path_advwin2ezl
+from etl.utils import ecm_path_advwin2ezl, get_users_to_import
 from task.models import Ecm, Task
 
 
@@ -15,6 +15,10 @@ class EcmEtl(GenericETL):
         else:
             self.import_query = self.get_query_all()
     model = Ecm
+
+    @property
+    def import_query(self):
+        return self._import_query.format("','".join(get_users_to_import()))
 
     def config_import(self, rows, user, rows_count):
         """
@@ -97,9 +101,8 @@ class EcmEtl(GenericETL):
                           AND (p.Status = 'Ativa' OR p.Dt_Saida IS NULL)
                           AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                                (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171')
-         -- marcio.batista, nagila e claudia pires(Em teste)
-        """
+                          AND a.Advogado IN ('{}')
+                          """
         return sql
 
     def get_sql_filter_task(self):
