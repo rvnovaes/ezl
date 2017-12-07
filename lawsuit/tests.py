@@ -140,9 +140,9 @@ class FolderTest(TestCase):
         person_customer = mommy.make(Person, name='Joao', is_active=True, is_customer=True).id
 
         data = {'legacy_code': legacy_code,
-                'person_customer': person_customer}
+                'person_customer': person_customer,
+                'cost_center': None}
         form = FolderForm(data=data)
-        print(form.errors)
         self.assertTrue(form.is_valid())
 
     def test_list_view(self):

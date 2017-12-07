@@ -59,6 +59,7 @@ class PersonETL(GenericETL):
         correspondent_group, nil = Group.objects.get_or_create(name=Person.CORRESPONDENT_GROUP)
 
         for row in rows:
+            print(rows_count)
             rows_count -= 1
             try:
                 legal_name = row['legal_name'] or row['name']
@@ -127,11 +128,6 @@ class PersonETL(GenericETL):
                                        'is_customer',
                                        'is_supplier'])
 
-                    if instance.auth_user and row['is_correspondent']:
-                        instance.auth_user.groups.add(correspondent_group)
-                    elif instance.auth_user:
-                        instance.auth_user.groups.remove(correspondent_group)
-
                 else:
                     obj = self.model(legal_name=legal_name,
                                      name=name,
@@ -147,11 +143,6 @@ class PersonETL(GenericETL):
                                      system_prefix=LegacySystem.ADVWIN.value)
 
                     obj.save()
-
-                    if obj.auth_user and row['is_correspondent']:
-                        obj.auth_user.groups.add(correspondent_group)
-                    elif obj.auth_user:
-                        obj.auth_user.groups.remove(correspondent_group)
 
                 self.debug_logger.debug(
                     'Pessoa,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (

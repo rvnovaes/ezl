@@ -8,6 +8,7 @@ from etl.advwin_ezl.core.address import AddressETL
 from etl.advwin_ezl.core.contact_mechanism import ContactMechanismETL
 from etl.advwin_ezl.law_suit.organ import OrganETL
 from etl.advwin_ezl.factory import InvalidObjectFactory
+from etl.advwin_ezl.financial.cost_center import CostCenterETL
 from etl.advwin_ezl.law_suit.court_division import CourtDivisionETL
 from etl.advwin_ezl.law_suit.folder import FolderETL
 from etl.advwin_ezl.law_suit.instance import InstanceETL
@@ -181,7 +182,7 @@ class AddressTask(luigi.Task):
         AddressETL().import_data()
 
 
-class FolderTask(luigi.Task):
+class CostCenterTask(luigi.Task):
     date_interval = luigi.DateHourParameter()
 
     def output(self):
@@ -189,6 +190,20 @@ class FolderTask(luigi.Task):
 
     def requires(self):
         yield AddressTask(self.date_interval)
+
+    def run(self):
+        self.output().open("w").close()
+        CostCenterETL().import_data()
+
+
+class FolderTask(luigi.Task):
+    date_interval = luigi.DateHourParameter()
+
+    def output(self):
+        return luigi.LocalTarget(path=get_target_path(self))
+
+    def requires(self):
+        yield CostCenterTask(self.date_interval)
 
     def run(self):
         self.output().open("w").close()
@@ -280,6 +295,8 @@ class EcmTask(luigi.Task):
 
 
 class TaskExport(luigi.Task):
+    date_interval = luigi.DateHourParameter(default=datetime.now())
+
     def output(self):
         return luigi.LocalTarget(path=get_target_path(self))
 
@@ -299,9 +316,6 @@ def main():
 
 def export_tasks():
     try:
-        # E necessario remover os arquivos.ezl dentro do diretorio tmp para executar novamente
-        os.system('echo {0}|sudo -S rm -rf {1}/etl/advwin_ezl/tmp/*.ezl'.format(
-            linux_password, settings.BASE_DIR))
         # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
         load_luigi_scheduler()
         luigi.run(main_task_cls=TaskExport())

@@ -1,33 +1,73 @@
-{% extends "ezl_base.html" %}
+{% extends "inicial.html" %}
 
 {% load core_filters %}
 {% load material_form %}
 {% load staticfiles %}
 
-{% block head %}
-
+{% block css_head %}
+    {% include 'material/includes/material_css.html' %}
     {{ block.super }}
-
     <link rel="stylesheet" href="{% static "chosen/chosen.min.css" %}">
-
     <link rel="stylesheet" href="{% static "chosen/chosen-material-theme.min.css" %}">
-
-{% endblock %}
-
-{% block extrajs %}
-
+    <link rel="stylesheet" href="{% static "libs/toastr/build/toastr.min.css" %}">
+{% endblock css_head %}
+{% block js_head %}
     {{ block.super }}
-
+{% endblock js_head %}
+{% block extrajs%}
+    <script src="{% static "js/jquery-2.1.1.min.js" %}"></script>
+    {% include 'material/includes/material_js.html' %}
+    <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
+{#    Apesar de repetidos, os scripts a seguir são necessário para renderização do form #}
+    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
     <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>
-
     <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
-
-{% endblock %}
+{% endblock extrajs %}
 
 {% block content %}
+    {{ block.super }}
+    <script language="JavaScript">
+        $('#myModal').modal('show')
+        var pk_list = [];
+
+        function toggle(source) {
+
+
+            checkboxes = document.getElementsByName('selection');
+            for (var i in checkboxes) {
+
+                if (checkboxes.hasOwnProperty(i)) {
+                    checkboxes[i].checked = source.checked;
+                    if (source.checked)
+                        pk_list.push(checkboxes[i].id);
+                    else
+                        pk_list = []
+                }
+            }
+            if (pk_list.length > 0) {
+                document.getElementById('delete_button').disabled = false;
+            } else {
+                document.getElementById('delete_button').disabled = true;
+            }
+        }
+
+        function showDeleteButton(source) {
+            if (source.checked) {
+                pk_list.push(source.id);
+            } else {
+                pk_list.pop();
+                document.getElementById("selection_header").checked = false;
+            }
+
+            if (pk_list.length > 0)
+                document.getElementById('delete_button').disabled = false;
+            else
+                document.getElementById('delete_button').disabled = true;
+
+        }
+    </script>
 
     <form id="object_form" action="" method="post">
-        {{ form.management_form }}
 
         {% csrf_token %}
 
@@ -53,6 +93,25 @@
                 <div class="panel-body">
                     {% block form_container %}
                         {% form %}{% endform %}
+                </div>
+            </div>
+        </div>
+                        {% if personaddress.forms %}
+                            {{ personaddress.management_form }}
+                            {% for form in personaddress.forms %}
+                                {% if forloop.first %}
+        <div class="row">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h1 class="panel-title">
+                        Endereço
+                    </h1>
+                </div>
+                                {% endif %}
+                <div class="panel-body">
+                                {% include 'core/address_base_form.html' %}
+                            {% endfor %}
+                        {% endif %}
                     {% endblock %}
                 </div>
             </div>

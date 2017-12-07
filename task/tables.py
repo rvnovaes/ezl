@@ -45,11 +45,11 @@ class DashboardStatusTable(tables.Table):
                  lawsuit_number="Processo", legacy_code="Número", type_service="Serviço", title="",
                  status="", **kwargs):
         super().__init__(*args, **kwargs)
-        # self.base_columns['id'].verbose_name = legacy_code
         self.base_columns['delegation_date'].verbose_name = delegation_date
         self.base_columns['client'].verbose_name = client
         self.base_columns['lawsuit_number'].verbose_name = lawsuit_number
         self.base_columns['type_service'].verbose_name = type_service
+        self.base_columns['opposing_party'].verbose_name = 'Parte adversa'
         self.title = title
         self.status = status
 
@@ -61,12 +61,12 @@ class DashboardStatusTable(tables.Table):
     class Meta:
         model = DashboardViewModel
         fields = ['task_number', 'final_deadline_date', 'type_service', 'lawsuit_number', 'client',
-                  'delegation_date', 'legacy_code']
+                  'opposing_party', 'delegation_date', 'legacy_code']
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {
             'data_new_href': lambda record: '/dashboard/' + str(record.pk) + '/'
         }
-        order_by = ('-reminder_deadline_date', )
+        order_by = ('-final_deadline_date', )
 
 
 class TypeTaskTable(tables.Table):

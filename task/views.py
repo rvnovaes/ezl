@@ -18,7 +18,7 @@ from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
-    DELETE_EXCEPTION_MESSAGE, success_sent, success_delete
+    DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED
 from core.models import Person
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
@@ -62,9 +62,10 @@ class TaskCreateView(AuditFormMixin, CreateView):
         form.instance.__server = self.request.environ['HTTP_HOST']
         response = super(TaskCreateView, self).form_valid(form)
 
-        for document in form.cleaned_data['documents']:
-            task.ecm_set.create(path=document,
-                                create_user=task.create_user)
+        if form.cleaned_data['documents']:
+            for document in form.cleaned_data['documents']:
+                task.ecm_set.create(path=document,
+                                    create_user=task.create_user)
 
         form.delete_temporary_files()
 
@@ -106,6 +107,12 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
                                            'pk': self.kwargs['movement']})
         super(TaskUpdateView, self).get_success_url()
 
+    def get_context_data(self, **kwargs):
+        context = super(TaskUpdateView, self).get_context_data(**kwargs)
+        context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
+
+        return context
+
 
 class TaskDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
     model = Task
@@ -122,20 +129,26 @@ class DashboardView(MultiTableMixin, TemplateView):
         'per_page': 5
     }
 
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        if not self.request.user.get_all_permissions():
+            context['messages'] = [
+                    {'tags': 'error', 'message': NO_PERMISSIONS_DEFINED}
+                ]
+        return context
     def get_tables(self):
-
-        dynamic_query = Q()
-        # tasks = Task.objects.raw(query2)
         person = Person.objects.get(auth_user=self.request.user)
-        if not self.request.user.has_perm('task.view_all_tasks'):
-            # dynamic_query.add(Q(delegation_date__isnull=False), Q.AND)
+        dynamic_query = self.get_dynamic_query(person)
+        data = []
+        if isinstance(dynamic_query, Q):
+            data = DashboardViewModel.objects.filter(dynamic_query)
+        tables = self.get_list_tables(data) if person else []
+        if not dynamic_query:
+            return tables
+        return tables
 
-            if self.request.user.has_perm('task.view_delegated_tasks'):
-                dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-            elif self.request.user.has_perm('task.view_requested_tasks'):
-                dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
-        data = DashboardViewModel.objects.filter(dynamic_query)
-
+    @staticmethod
+    def get_list_tables(data):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
@@ -146,38 +159,64 @@ class DashboardView(MultiTableMixin, TemplateView):
         refused = grouped.get(TaskStatus.REFUSED) or {}
         blocked_payment = grouped.get(TaskStatus.BLOCKEDPAYMENT) or {}
         finished = grouped.get(TaskStatus.FINISHED) or {}
+        return_table = DashboardStatusTable(returned, title='Retornadas',
+                                            status=TaskStatus.RETURN)
 
-        if person:
-            return_table = DashboardStatusTable(returned, title='Retornadas',
-                                                status=TaskStatus.RETURN)
+        accepted_table = DashboardStatusTable(accepted,
+                                              title='A Cumprir', status=TaskStatus.ACCEPTED
+                                              )
 
-            accepted_table = DashboardStatusTable(accepted,
-                                                  title='A Cumprir', status=TaskStatus.ACCEPTED
-                                                  )
+        open_table = DashboardStatusTable(opened, title='Em Aberto',
+                                          status=TaskStatus.OPEN)
 
-            open_table = DashboardStatusTable(opened, title='Em Aberto',
-                                              status=TaskStatus.OPEN)
+        done_table = DashboardStatusTable(done, title='Cumpridas',
+                                          status=TaskStatus.DONE)
 
-            done_table = DashboardStatusTable(done, title='Cumpridas',
-                                              status=TaskStatus.DONE)
+        refused_table = DashboardStatusTable(refused,
+                                             title='Recusadas', status=TaskStatus.REFUSED)
 
-            refused_table = DashboardStatusTable(refused,
-                                                 title='Recusadas', status=TaskStatus.REFUSED)
+        blocked_payment_table = DashboardStatusTable(blocked_payment,
+                                                     title='Glosadas',
+                                                     status=TaskStatus.BLOCKEDPAYMENT)
 
-            blocked_payment_table = DashboardStatusTable(blocked_payment,
-                                                         title='Glosadas',
-                                                         status=TaskStatus.BLOCKEDPAYMENT)
+        finished_table = DashboardStatusTable(finished,
+                                              title='Finalizadas',
+                                              status=TaskStatus.FINISHED)
 
-            finished_table = DashboardStatusTable(finished,
-                                                  title='Finalizadas',
-                                                  status=TaskStatus.FINISHED)
+        return [return_table, accepted_table, open_table, done_table, refused_table,
+                  blocked_payment_table,
+                  finished_table]
 
-            tables = [return_table, accepted_table, open_table, done_table, refused_table,
-                      blocked_payment_table,
-                      finished_table]
-        else:
-            tables = {}
-        return tables
+    @staticmethod
+    def get_query_all_tasks(person):
+        return Q()
+
+    @staticmethod
+    def get_query_delegated_tasks(person):
+        return Q(person_executed_by=person.id)
+
+    @staticmethod
+    def get_query_requested_tasks(person):
+        return Q(person_asked_by=person.id)
+
+    @staticmethod
+    def get_query_distributed_tasks(person):
+        return Q(person_distributed_by=person.id)
+
+    def get_dynamic_query(self, person):
+        if person.auth_user.is_superuser:
+            return self.get_query_all_tasks(person)
+        dynamic_query = Q()
+        permissions_to_check = {
+            'core.view_all_tasks': self.get_query_all_tasks,
+            'core.view_delegated_tasks': self.get_query_delegated_tasks,
+            'core.view_distributed_tasks': self.get_query_distributed_tasks,
+            'core.view_requested_tasks': self.get_query_requested_tasks
+            }
+        for permission in person.auth_user.get_all_permissions():
+            if permission in permissions_to_check.keys():
+                dynamic_query |= permissions_to_check.get(permission)(person)
+        return dynamic_query
 
 
 class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
@@ -343,7 +382,7 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
     template_name = 'task/task_filter.html'
     context_object_name = 'task_filter'
     context_filter_name = 'filter'
-    ordering = ['-id']
+    ordering = ['-final_deadline_date']
     table_class = DashboardStatusTable
 
     def query_builder(self):
@@ -362,10 +401,10 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             deadline_dynamic_query = Q()
             client_query = Q()
 
-            if not self.request.user.has_perm('task.view_all_tasks'):
-                if self.request.user.has_perm('task.view_delegated_tasks'):
+            if not self.request.user.has_perm('core.view_all_tasks'):
+                if self.request.user.has_perm('core.view_delegated_tasks'):
                     person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-                elif self.request.user.has_perm('task.view_requested_tasks'):
+                elif self.request.user.has_perm('core.view_requested_tasks'):
                     person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
             if data['openned']:
