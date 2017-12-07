@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 # http://stackoverflow.com/questions/34675604/sqlacodegen-generates-mixed-models-and-tables --> Para gerar as classes é preciso comentar algumas linhas
 # do sqlacodegen conforme explicado acima, uma vez que ele não gera mapas para tabelas sem PK
-# sqlacodegen.exe - -noinflect mssql+pymssql://Rvnovaes:password@172.27.155.9:1433/Advwin > models_sqlacodegen_advwin_hack.py
+# sqlacodegen.exe - -noinflect mssql+pymssql://Rvnovaes:password@172.27.155.22:1433/Advwin > models_sqlacodegen_advwin_hack.py
 Base = declarative_base()
 metadata = Base.metadata
 
@@ -83,6 +83,23 @@ class JuridGedMain(Base):
     Obs = Column(Text(2147483647, 'Latin1_General_CI_AS'))
     chaveSync = Column(String(200, 'Latin1_General_CI_AS'))
     id_pasta = Column(Integer)
+
+
+class JuridGEDLig(Base):
+    __tablename__ = 'Jurid_GEDLig'
+    __table_args__ = (
+        {'implicit_returning': False},
+    )
+    ID_lig = Column(Integer, nullable=False, unique=True, primary_key=True)
+    Id_tabela_or = Column(String(60, 'Latin1_General_CI_AS'))
+    Id_codigo_or = Column(String(60, 'Latin1_General_CI_AS'))
+    Id_id_doc = Column(Integer)
+    id_ID_or = Column(Integer)
+    dt_inserido = Column(DateTime)
+    usuario_insercao = Column(String(60, 'Latin1_General_CI_AS'))
+
+
+
 
 
 class JuridPastas(Base):

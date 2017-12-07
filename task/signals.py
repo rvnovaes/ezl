@@ -106,7 +106,7 @@ def new_task(sender, instance, created, **kwargs):
                                         {'server': 'http://' + project_link, 'pk': instance.pk,
                                          'project_name': settings.PROJECT_NAME,
                                          'number': str(number),
-                                         'short_message': short_message[instance.task_status],
+                                         'short_message': short_message[instance.status],
                                          'custom_text': custom_text,
                                          'task': instance
                                          })

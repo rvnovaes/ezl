@@ -14,6 +14,7 @@ from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import ProtectedError, Q
+from django.db import transaction
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -23,7 +24,7 @@ from allauth.account.views import LoginView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 
-from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm
+from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, AddressFormSet
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
@@ -82,10 +83,10 @@ class CityAutoCompleteView(AutoCompleteView):
     select_related = ('state__country', 'state', )
 
     def get_result_label(self, result):
-        return '{} - {}/{} - {}'.format(result.state.country.name,
+        return '{} - {}/{} - {}'.format(result.name,
                                         result.state.initials,
                                         result.state.name,
-                                        result.name)
+                                        result.state.country.name)
 
 
 def login(request):
@@ -218,6 +219,7 @@ class AuditFormMixin(LoginRequiredMixin, SuccessMessageMixin):
             form.instance.alter_date = timezone.now()
             form.instance.alter_user = self.request.user
             form.save()
+
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -359,17 +361,36 @@ class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
 class PersonCreateView(AuditFormMixin, CreateView):
     model = Person
     form_class = PersonForm
-    success_message = CREATE_SUCCESS_MESSAGE
-    object_list_url = 'person_list'
+    success_url = reverse_lazy('person_list')
 
-    def get_success_url(self):
-        return reverse('person_update', args=(self.object.id,))
+    def get_context_data(self, **kwargs):
+        data = super(PersonCreateView, self).get_context_data(**kwargs)
+        if self.request.POST:
+            data['personaddress'] = AddressFormSet(self.request.POST)
+        else:
+            data['personaddress'] = AddressFormSet()
+            data['personaddress'].forms[0].fields['is_active'].initial = True
+            data['personaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
+        return data
+
+    def form_valid(self, form):
+        if AuditFormMixin.form_valid(self, form):
+            context = self.get_context_data()
+            personaddress = context['personaddress']
+            with transaction.atomic():
+                self.object = form.save()
+
+                if personaddress.is_valid():
+                    address = personaddress.forms[0].save(commit=False)
+                    address.person = self.object
+                    address.create_user = self.request.user
+                    address.save()
+            return super(PersonCreateView, self).form_valid(form)
 
 
 class PersonUpdateView(AuditFormMixin, UpdateView):
     model = Person
     form_class = PersonForm
-    # success_url = reverse_lazy('person_list')
     success_message = UPDATE_SUCCESS_MESSAGE
     template_name_suffix = '_update_form'
     object_list_url = 'person_list'

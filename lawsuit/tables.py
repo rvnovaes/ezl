@@ -2,7 +2,8 @@ import django_tables2 as tables
 
 from core.tables import CheckBoxMaterial
 from core.models import Address
-from .models import TypeMovement, Movement, Folder, CourtDistrict, Instance, LawSuit, Organ
+from .models import (TypeMovement, Movement, Folder, CourtDistrict, Instance,
+                     LawSuit, Organ)
 from django_tables2.utils import A
 
 
@@ -56,9 +57,9 @@ class FolderTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'folder_number', 'person_customer', 'is_active', 'legacy_code')
+        sequence = ('selection', 'folder_number', 'person_customer', 'cost_center', 'is_active', 'legacy_code')
         model = Folder
-        fields = ['folder_number', 'selection', 'legacy_code', 'person_customer', 'is_active']
+        fields = ['folder_number', 'selection', 'legacy_code', 'person_customer', 'cost_center', 'is_active']
         readonly_fields = ['folder_number']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem pastas cadastradas"
@@ -73,11 +74,11 @@ class LawSuitTable(tables.Table):
 
     class Meta:
         sequence = (
-            'selection', 'law_suit_number', 'court_district', 'instance', 'organ', 'court_division',
+            'selection', 'law_suit_number', 'opposing_party', 'court_district', 'instance', 'organ', 'court_division',
             'person_lawyer', 'is_current_instance', 'is_active', 'legacy_code')
         model = LawSuit
         fields = ['selection', 'instance', 'court_district', 'organ', 'court_division',
-                  'law_suit_number', 'person_lawyer', 'is_active', 'is_current_instance', 'legacy_code']
+                  'law_suit_number', 'person_lawyer', 'is_active', 'is_current_instance', 'legacy_code', 'opposing_party']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem processos cadastrados"
         row_attrs = {

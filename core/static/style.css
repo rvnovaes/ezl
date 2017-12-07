@@ -79,7 +79,8 @@ textarea {
     outline: none;
     height: 3rem;
     width: 100%;
-    font-size: 1rem;
+    font-size: 16px;
+    font-weight: 400;
     margin: 0 0 20px 0;
     padding: 0;
     box-shadow: none;
@@ -128,7 +129,8 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
     box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
-.OPEN {
+/*dont ask me why*/
+.OPEN, .open {
     color: white !important;
     background: linear-gradient(60deg, #DBCA34, #DBCA34);
     box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
@@ -267,22 +269,97 @@ span, .pagination > .active > span:focus, .pagination > .active > span:hover {
     height: 90px;
 }
 
-#id_city_container label, #id_address_type_container label {
-    font-size: 0.8rem;
-    top: -7px;
+.input-field label:not(.label-icon), .select-field label {
+    font-size: 16px!important;
+}
+
+#id_legal_type_container {
+    top:-10px;
     position: relative;
 }
 
-#id_city_container span.select2-selection--single {
+.input-field label {
+    color: rgb(189,189,189);
+}
+
+.input-field input, .dropdown-content li > a, li.selected {
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.select2 span.select2-selection--single {
     border-width: 0px 0px 1px 0px;
     border-radius: 0;
-    position: absolute;
-    top: -20px;
-    left:-5px;
     width: 100%;
+    font-size: 16px;
+    font-weight: 400;
 }
+
+.select2 {
+    position: relative;
+    top: -14px;
+}
+
+.select-field label.active, label#city_label.active{color: #0097a7;}
+.select2-container--focus .select2-selection {border-color: #0097a7 !important;}
 
 #confirmDelete{
     background-color: transparent ;
     box-shadow: none;
+    margin: unset;
+    width: unset;
+    max-height: unset;
+}
+
+#logout_modal {
+    background-color: transparent;
+    box-shadow: none;
+    margin: unset;
+    width: unset;
+    max-height: unset;
+}
+
+i.material-icons {
+    font-size: 24px;
+    line-height: 1;
+    float: unset !important;
+    margin-right: unset;
+}
+
+.modal .modal-footer .btn {
+    float:unset;
+    margin: 0px 0px 0px 5px;
+}
+
+.modal-content {
+    padding: unset !important;
+}
+
+.modal-footer {
+    background-color: transparent !important;
+    height: unset !important;
+}
+
+#toast-container {
+    left: unset;
+    bottom: unset;
+    max-width: unset;
+}
+
+.toast {
+    top: unset;
+    float: unset;
+    clear: unset;
+    max-width: unset;
+    height: unset;
+    min-height: unset;
+    line-height: 20px;
+    word-break: unset;
+    font-size: 14px;
+    display: block;
+}
+
+.select-wrapper input.select-dropdown {
+    font-size: 16px!important;
+    font-weight: 400;
 }

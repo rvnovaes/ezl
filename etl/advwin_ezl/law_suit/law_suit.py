@@ -2,7 +2,8 @@ from core.models import Person
 from core.utils import LegacySystem
 from lawsuit.models import Organ
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
-from etl.advwin_ezl.factory import InvalidObjectFactory
+from etl.advwin_ezl.factory import InvalidObjectFactory, INVALID_ORGAN
+from etl.utils import get_users_to_import
 from lawsuit.models import LawSuit, Folder, Instance, CourtDistrict, CourtDivision
 
 
@@ -10,8 +11,9 @@ class LawsuitETL(GenericETL):
     model = LawSuit
     advwin_table = 'Jurid_Pastas'
 
-    import_query = """
-                    SELECT DISTINCT
+    _import_query = """
+                    SELECT 
+                          p.OutraParte                             AS opposing_party, 
                           p.Codigo_Comp                            AS folder_legacy_code,
                           CASE WHEN (d.D_Atual IS NULL)
                             THEN 'False'
@@ -52,12 +54,11 @@ class LawsuitETL(GenericETL):
                                                           a.CodMov = cm.Codigo
                     WHERE
                           p.Status = 'Ativa' AND
-                          p.Dt_Saida IS NULL AND
                           cm.UsarOS = 1 AND
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
-                          ((a.prazo_lido = 0 AND a.SubStatus = 30) OR        
+                          ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                           (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          AND a.Advogado='12157458697' AND -- marcio.batista (Em teste) 
+                          AND a.Advogado IN ('{}') AND 
                           ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
                            (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
                           ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
@@ -68,6 +69,10 @@ class LawsuitETL(GenericETL):
     """
 
     has_status = True
+
+    @property
+    def import_query(self):
+        return self._import_query.format("','".join(get_users_to_import()))
 
     @validate_import
     def config_import(self, rows, user, rows_count):
@@ -85,6 +90,7 @@ class LawsuitETL(GenericETL):
                 court_division_legacy_code = row['court_division_legacy_code']
                 law_suit_number = row['law_suit_number']
                 is_current_instance = row['is_current_instance']
+                opposing_party = row['opposing_party']
                 folder = Folder.objects.filter(legacy_code=folder_legacy_code).first()
                 person_lawyer = Person.objects.filter(legacy_code=person_legacy_code).first()
                 instance = Instance.objects.filter(legacy_code=instance_legacy_code).first()
@@ -104,7 +110,7 @@ class LawsuitETL(GenericETL):
                 if not court_district:
                     court_district = InvalidObjectFactory.get_invalid_model(CourtDistrict)
                 if not organ:
-                    organ = InvalidObjectFactory.get_invalid_model(Person)
+                    organ = Organ.objects.filter(legal_name=INVALID_ORGAN).first()
                 if not court_division:
                     court_division = InvalidObjectFactory.get_invalid_model(CourtDivision)
 
@@ -120,6 +126,7 @@ class LawsuitETL(GenericETL):
                     lawsuit.organ = organ
                     lawsuit.law_suit_number = law_suit_number
                     lawsuit.is_active = True
+                    lawsuit.opposing_party = opposing_party
                     # use update_fields to specify which fields to save
                     # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
                     lawsuit.save(
@@ -134,7 +141,8 @@ class LawsuitETL(GenericETL):
                             'law_suit_number',
                             'alter_user',
                             'alter_date',
-                            'is_current_instance']
+                            'is_current_instance',
+                            'opposing_party']
                     )
                 else:
                     self.model.objects.create(
@@ -150,14 +158,15 @@ class LawsuitETL(GenericETL):
                         is_active=True,
                         is_current_instance=is_current_instance,
                         legacy_code=legacy_code,
-                        system_prefix=LegacySystem.ADVWIN.value)
-
+                        system_prefix=LegacySystem.ADVWIN.value,
+                        opposing_party=opposing_party)
                 self.debug_logger.debug(
-                    "LawSuit,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (str(folder.id), str(person_lawyer.id),
-                                                                           str(instance.id),str(court_district.id),
-                                                      str(court_division.id), str(organ.id),law_suit_number,
-                                                      str(user.id),str(user.id),str(True),str(is_current_instance),
-                                                      legacy_code,str(LegacySystem.ADVWIN.value), self.timestr))
+                    "LawSuit,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                    str(folder.id), str(person_lawyer.id),
+                    str(instance.id), str(court_district.id),
+                    str(court_division.id), str(organ.id), law_suit_number,
+                    str(user.id), str(user.id), str(True), str(is_current_instance),
+                    legacy_code, str(LegacySystem.ADVWIN.value), str(opposing_party), self.timestr))
 
             except Exception as e:
                 self.error_logger.error(

@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 
 from core.views import ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView
 from django.conf import settings
-from task.views import DashboardView, TaskDetailView, DashboardSearchView
+from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView
 
 urlpatterns = [
 
@@ -16,10 +16,11 @@ urlpatterns = [
 
     url(r'^', include('core.urls')),
     url(r'^admin/', admin.site.urls),
-    url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),
-    url(r'^providencias/', include('task.urls'), name='task'),
     url(r'^accounts/login/$', LoginCustomView.as_view(), name='account_login'),
     url(r'^accounts/', include('allauth.urls')),
+    url(r'^financeiro/', include('financial.urls'), name='financial'),
+    url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),
+    url(r'^providencias/', include('task.urls'), name='task'),
     url(r'^dashboard/$', login_required(DashboardView.as_view()), name='dashboard'),
 
     url(r'^dashboard/(?P<pk>[0-9]+)/$',
@@ -29,6 +30,11 @@ urlpatterns = [
     url(r'^dashboard/filtrar/$',
         login_required(DashboardSearchView.as_view()),
         name='task_search'),
+
+    url(r'^dashboard/verificar_status/$',
+        login_required(DashboardStatusCheckView.as_view()),
+        name='task_status_check'),
+
 
     url(r'^client_form',
         login_required(ClientAutocomplete.as_view()),

@@ -115,6 +115,13 @@ def install_docker():
     sudo("usermod -aG docker {}".format(USER))
 
 
+@task
+def setup_cron():
+    cron = 'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"\n'\
+           '0 0,19 * * * cd {} && sh scripts/db_backup.sh >> /tmp/backup.log'.format(get_repo_path())
+    run('echo "{}" | crontab -'.format(cron))
+
+
 def setup_ssh():
     put('authorized_keys', '/home/{}/.ssh/authorized_keys'.format(USER))
     put('deploy_key', '/home/{}/.ssh/id_rsa'.format(USER))

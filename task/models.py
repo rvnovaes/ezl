@@ -2,6 +2,7 @@ import os
 from enum import Enum
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from sequences import get_next_value
@@ -18,6 +19,7 @@ class Permissions(Enum):
     view_requested_tasks = 'Can view tasks requested by the user'
     block_payment_tasks = 'Can block tasks payment'
     can_access_general_data = 'Can access general data screens'
+    view_distributed_tasks = 'Can view tasks distributed by the user'
 
 
 # Dicionário para retornar o icone referente ao status da providencia
@@ -107,7 +109,7 @@ class Task(Audit, LegacyCode):
                                            verbose_name='Correspondente')
     person_distributed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False,
                                               null=True,
-                                              verbose_name='Service')
+                                              verbose_name='Contratante')
     type_task = models.ForeignKey(TypeTask, on_delete=models.PROTECT, blank=False, null=False,
                                   verbose_name='Tipo de Serviço')
     delegation_date = models.DateTimeField(default=timezone.now, verbose_name='Data de Delegação')
@@ -156,6 +158,10 @@ class Task(Audit, LegacyCode):
         return self.movement.law_suit.court_division
 
     @property
+    def court_district(self):
+        return self.movement.law_suit.court_district
+
+    @property
     def court(self):
         return self.movement.law_suit.organ
 
@@ -184,10 +190,25 @@ def get_dir_name(instance, filename):
     return 'ECM/{0}/{1}'.format(instance.task.pk, filename)
 
 
+class EcmQuerySet(models.QuerySet):
+    def delete(self):
+        # Não podemos apagar os ECMs que possuam legacy_code
+        queryset = self.exclude(legacy_code__isnull=False)
+        return super(EcmQuerySet, queryset).delete()
+
+
+class EcmManager(models.Manager):
+
+    def get_queryset(self):
+        return EcmQuerySet(self.model, using=self._db)
+
+
 class Ecm(Audit, LegacyCode):
     path = models.FileField(upload_to=get_dir_name, max_length=255, unique=True, null=False)
     task = models.ForeignKey(Task, blank=False, null=False, on_delete=models.PROTECT)
     updated = models.BooleanField(default=True, null=False)
+
+    objects = EcmManager()
 
     # Retorna o nome do arquivo no Path, para renderizar no tamplate
     @property
@@ -197,6 +218,11 @@ class Ecm(Audit, LegacyCode):
     @property
     def user(self):
         return User.objects.get(username=self.path.instance.create_user)
+
+    def delete(self, *args, **kwargs):
+        if self.legacy_code:
+            raise ValidationError("Você não pode apagar um GED cadastrado em um sistema legado")
+        return super().delete(*args, **kwargs)
 
 
 class TaskHistory(AuditCreate):
@@ -210,6 +236,8 @@ class TaskHistory(AuditCreate):
 
 
 class DashboardViewModel(Audit):
+    legacy_code = models.CharField(max_length=255, blank=True, null=True,
+                                   verbose_name='Código legado')
     task_number = models.PositiveIntegerField(default=0, verbose_name='Número da Providência')
 
     movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
@@ -245,6 +273,9 @@ class DashboardViewModel(Audit):
     client = models.CharField(null=True, verbose_name='Cliente', max_length=255)
     type_service = models.CharField(null=True, verbose_name='Serviço', max_length=255)
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    lawsuit_number = models.CharField(max_length=255, blank=True, null=True,
+                                      verbose_name='Número do Processo')
+    opposing_party = models.CharField(null=True, verbose_name=u'Parte adversa', max_length=255)
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
 
@@ -279,3 +310,11 @@ class DashboardViewModel(Audit):
         if organ:
             address = organ.address_set.first()
         return address
+
+    @property
+    def lawsuit_number(self):
+        return self.movement.law_suit.law_suit_number
+
+    @property
+    def opposing_party(self):
+        return self.movement.law_suit.opposing_party

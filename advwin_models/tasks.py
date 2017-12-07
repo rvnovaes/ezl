@@ -1,19 +1,18 @@
 from enum import Enum
 from json import loads
 from os import linesep
-
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from sqlalchemy import String, cast
 import dateutil.parser
-
-
 from advwin_models.advwin import JuridFMAudienciaCorrespondente, JuridFMAlvaraCorrespondente, \
     JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente, JuridAgendaTable, \
-    JuridGedMain, JuridCorrespondenteHist
+    JuridGedMain, JuridCorrespondenteHist, JuridGEDLig
 from connections.db_connection import get_advwin_engine
 from etl.utils import ecm_path_ezl2advwin, get_ecm_file_name
 from task.models import Task, TaskStatus, TaskHistory, Ecm, SurveyType
+from sqlalchemy import and_
+from django.utils import timezone
 
 
 LOGGER = get_task_logger(__name__)
@@ -45,7 +44,7 @@ def export_ecm(ecm_id, ecm=None, execute=True):
         'Tabela_OR': 'Agenda',
         'Codigo_OR': ecm.task.legacy_code,
         'Link': new_path,
-        'Data': ecm.create_date,
+        'Data': timezone.localtime(ecm.create_date),
         'Nome': file_name,
         'Responsavel': ecm.create_user.username,
         'Arq_Status': 'Guardado',
@@ -58,6 +57,13 @@ def export_ecm(ecm_id, ecm=None, execute=True):
         result = None
         try:
             result = get_advwin_engine().execute(stmt)
+            stmt = JuridGedMain.__table__.select().where(and_(
+                JuridGedMain.__table__.c.Codigo_OR == ecm.task.legacy_code,
+                JuridGedMain.__table__.c.Nome == file_name)
+            )
+            for row in get_advwin_engine().execute(stmt).fetchall():
+                id_doc = row['ID_doc']
+                export_ecm_related_folter_to_task(ecm, id_doc)
         except Exception as exc:
             LOGGER.warning('Não foi possíve exportar ECM: %d-%s\n%s',
                            ecm.id,
@@ -69,6 +75,47 @@ def export_ecm(ecm_id, ecm=None, execute=True):
             return result
     else:
         return stmt
+
+
+def export_ecm_related_folter_to_task(ecm, id_doc, execute=True):
+    values = {
+        'Id_tabela_or': 'Pastas',
+        'Id_codigo_or': get_folder_to_related(task=ecm.task),
+        'Id_id_doc': id_doc,
+        'id_ID_or': 0,
+        'dt_inserido': timezone.localtime(ecm.create_date),
+        'usuario_insercao': ecm.create_user.username
+    }
+    stmt = JuridGEDLig.__table__.insert().values(**values)
+    if execute:
+        result = None
+        try:
+            result = get_advwin_engine().execute(stmt)
+        except Exception as e:
+            LOGGER.warning('Não foi possíve relacionar o ECM entre Agenda e Pasta: %d-%s\n%s',
+                           ecm.id,
+                           ecm,
+                           e,
+                           exc_info=(type(e), e, e.__traceback__))
+        finally:
+            LOGGER.info('ECM %s: relacionamento criado entre Pasta e Agenda', ecm)
+            return result
+
+
+def get_folder_to_related(task):
+    if task.movement.law_suit.folder.legacy_code == 'REGISTRO-INVÁLIDO':
+        result = None
+        try:
+            stmt = JuridAgendaTable.__table__.select().where(and_(
+                JuridAgendaTable.__table__.c.Ident == task.legacy_code
+            ))
+            result = get_advwin_engine().execute(stmt).fetchone()['Pasta']
+        except Exception as e:
+            LOGGER.warning('Não foi possíve encontrar pasta para a Providencia: %d-%s\n%s',
+                           task.legacy_code, exc_info=(type(e), e, e.__traceback__))
+        finally:
+            return result
+    return task.movement.law_suit.folder.legacy_code
 
 
 def get_task_survey_values(task):
@@ -96,7 +143,7 @@ def get_task_observation(task, message, date_field):
     s = '{} *** {} {}: {} em {}'.format(
         linesep,
         message,
-        task.person_executed_by,
+        task.alter_user.username,
         last_taskhistory_notes,
         date)
     return cast(JuridAgendaTable.Obs, String()) + s
@@ -130,15 +177,18 @@ def export_task_history(task_history_id, task_history=None, execute=True):
     if task_history is None:
         task_history = TaskHistory.objects.get(pk=task_history_id)
 
+    username = ''
+    if task_history.create_user:
+        username = task_history.create_user.username[:20]
+
     task = task_history.task
-    username = task.person_executed_by.auth_user.username[:20]
     if task_history.status == TaskStatus.ACCEPTED.value:
         values = {
             'codigo_adv_correspondente': str(task_history.create_user),
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 50,
-            'data_operacao': task_history.create_date,
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Aceita por correspondente: {}'.format(
@@ -152,7 +202,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 70,
-            'data_operacao': task_history.create_date,
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Cumprida por correspondente: {}'.format(
@@ -166,7 +216,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 20,
-            'data_operacao': task_history.create_date,
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Recusada por correspondente: {}'.format(
@@ -179,7 +229,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 100,
-            'data_operacao': task_history.create_date,
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Diligência devidamente cumprida por: {}'.format(
@@ -192,7 +242,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 80,
-            'data_operacao': task_history.create_date,
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Diligência delegada ao correspondente para complementação:'
@@ -204,7 +254,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 90,
-            'data_operacao': task_history.create_date,
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Diligência não cumprida - pagamento glosado'
@@ -252,7 +302,7 @@ def export_task(task_id, task=None, execute=True):
             'prazo_lido': 0,
             'envio_alerta': 0,
             'Ag_StatusExecucao': 'Em execucao',
-            'Data_correspondente': task.execution_date,
+            'Data_correspondente': timezone.localtime(task.execution_date),
             'Obs': get_task_observation(task, 'Ordem de serviço aceita por', 'acceptance_date'),
         }
 
@@ -263,7 +313,7 @@ def export_task(task_id, task=None, execute=True):
         values = {
             'SubStatus': 70,
             'Status': 2,
-            'Data_Fech': task.execution_date,
+            'Data_Fech': timezone.localtime(task.execution_date),
             'prazo_lido': 1,
             'Prazo_Interm': 1,
             'Ag_StatusExecucao': '',
