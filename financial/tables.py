@@ -22,6 +22,7 @@ class CostCenterTable(tables.Table):
 
 class ServicePriceTableTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
+    value = tables.Column(attrs={"editable": True, "mask": "money"})
 
     class Meta:
         sequence = ('selection', 'correspondent', 'type_task', 'court_district', 'state', 'client', 'value')

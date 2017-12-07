@@ -71,6 +71,7 @@ class ServicePriceTableListView(LoginRequiredMixin, SingleTableViewMixin):
     model = ServicePriceTable
     table_class = ServicePriceTableTable
     ordering = ('correspondent', )
+    paginate_by = 30
 
 
 class ServicePriceTableCreateView(CreateView):

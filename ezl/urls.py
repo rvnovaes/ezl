@@ -4,9 +4,10 @@ from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
-from core.views import ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView
+from core.views import ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, EditableListSave
 from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView
 
@@ -45,6 +46,10 @@ urlpatterns = [
         name='generic_autocomplete'),
 
     url(r'^qa/$', TemplateView.as_view(template_name='questionnaire/generic_survey.html')),
+
+    url(r'^editable-list/save',
+        csrf_exempt(EditableListSave.as_view()),
+        name='editable-list-save'),
 
 ] + \
     static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static/')) + \

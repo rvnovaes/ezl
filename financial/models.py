@@ -61,7 +61,10 @@ class ServicePriceTable(models.Model):
         related_name='%(class)s_correspondent',
         verbose_name='Correspondente'
     )
-    value = models.DecimalField(max_digits=9, decimal_places=2)
+    value = models.DecimalField(
+        max_digits=9,
+        decimal_places=2,
+        verbose_name="Valor")
 
     class Meta:
         db_table = 'service_price_table'
