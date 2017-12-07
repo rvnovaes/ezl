@@ -218,7 +218,7 @@ class Address(Audit):
     address_type = models.ForeignKey(
         AddressType, on_delete=models.PROTECT, blank=False, null=False,
         verbose_name='Tipo')
-    street = models.CharField(max_length=255, verbose_name='Rua')
+    street = models.CharField(max_length=255, verbose_name='Logradouro')
     number = models.CharField(max_length=255, verbose_name='Número')
     complement = models.CharField(max_length=255, blank=True, verbose_name='Complemento')
     city_region = models.CharField(max_length=255, verbose_name='Bairro')
