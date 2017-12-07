@@ -66,6 +66,9 @@ class ServicePriceTable(models.Model):
         decimal_places=2,
         verbose_name="Valor")
 
+    def __str__(self):
+        return self.correspondent.name if self.correspondent else ""
+
     class Meta:
         db_table = 'service_price_table'
         ordering = ['id']
