@@ -1,6 +1,8 @@
 {% extends 'inicial.html' %}
 {% load staticfiles %}
 {% load core_filters %}
+{% load material_form %}
+{% load render_table from django_tables2 %}
 {#{% load formset_tags %}#}
 {% load tz %}
 {% block content %}
@@ -73,6 +75,16 @@
                             notes.attr('required', true).change(function () {
                                 notes.val(notes.val().trim())
                             });
+                        }
+                    });
+
+                    {# Apenas estes status devem possuir amount como required, alem de nao poder 0 #}
+
+                    var amount = $('input[id=id_amount]');
+                    amount.removeAttr('required');
+                    ['ACCEPTED'].forEach(function (status) {
+                        if (task_status === status) {
+                            amount.attr('required', true).change()
                         }
                     });
                     return true;
@@ -547,10 +559,18 @@
                         </div>
                         <div class="modal-body">
                             {% if form.instance.status.name == 'REQUESTED' %}
-                            <div class="form-group" style="margin: auto">
-                                <label> {{ correspondets_table }}</label>
-                                {{ correspondets_table }}
-                            </div>
+                                {{ form.servicepricetable_id }}
+                                <div class="form-group" style="margin: auto">
+                                    <label>Tipo de Serviço: </label>
+                                    {{ form.instance.type_task }}
+                                </div>
+                                <div class="table-responsive" style="margin: auto">
+                                    {% render_table correspondets_table %}
+                                </div>
+                                <div class="form-group" style="margin: auto">
+                                    <label>{{ form.amount.label }}</label>
+                                    {{ form.amount }}
+                                </div>
                             {% endif %}
                             <div class="form-group" style="margin: auto">
                                 <label> {{ form.notes.label }}</label>
@@ -730,5 +750,13 @@
                 document.getElementById("down").style.display = "none";
             }
         }
+    </script>
+    <script type="text/javascript">
+        $("#correspondents-table tbody tr").click(function(){
+            id = $(this).data('id');
+            $('input[name=servicepricetable_id]').val(id);
+            $(this).addClass("tr_selected");
+            $(this).siblings().removeClass("tr_selected");
+        });
     </script>
 {% endblock %}

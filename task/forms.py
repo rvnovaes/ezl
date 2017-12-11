@@ -123,6 +123,13 @@ class TaskDetailForm(ModelForm):
         )
     )
 
+    amount = forms.DecimalField(
+        required=False,
+        label='Valor:'
+    )
+
+    servicepricetable_id = forms.CharField(widget=forms.HiddenInput())
+
 
 class TypeTaskForm(BaseForm):
     class Meta:
