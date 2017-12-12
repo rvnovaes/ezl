@@ -1,11 +1,27 @@
 from os.path import join
 from config.config import get_parser
 from core.models import Person
+import logging
+import traceback
 
+ERROR_LOGGER = logging.getLogger('error_logger')
+ECM_PATH_ADVWIN2EZL = 'ERRO ao converter o path do ECM - {e}'
 
 def ecm_path_advwin2ezl(advwin_path):
-    part = advwin_path.split('Agenda\\', 1)[1].replace('\\', '/')
-    return join('ECM', part)
+    try:
+        if '\\Pastas\\' in advwin_path:
+            part = advwin_path.split('Pastas\\', 1)[1].replace('\\', '/')
+            return join('ECM', 'Pastas', part)
+        else:
+            part = advwin_path.split('Agenda\\', 1)[1].replace('\\', '/')
+            return join('ECM', part)
+    except IndexError as e:
+        import pdb; pdb.set_trace()
+        ERROR_LOGGER.error(ECM_PATH_ADVWIN2EZL.format(e=e))
+        ERROR_LOGGER.error(traceback.print_tb(e.__traceback__))
+    except Exception as e:
+        ERROR_LOGGER.error(ECM_PATH_ADVWIN2EZL.format(e=e))
+        ERROR_LOGGER.error(traceback.print_tb(e.__traceback__))
 
 
 def ecm_path_ezl2advwin(ezl_path):
