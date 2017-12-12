@@ -300,6 +300,9 @@ class ResetPasswordFormMixin(forms.Form):
         if not self.users:
             raise forms.ValidationError(_(u"O Usuário informado não está vinculado"
                                           " a nenhuma conta"))
+        if not self.users[0].email or self.users[0].email == ' ':
+            raise forms.ValidationError(_(u"O Usuário informado não possui e-mail registrado"))
+
         self.email = self.users[0].email
         return self.cleaned_data["username"]
 
