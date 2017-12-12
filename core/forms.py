@@ -2,12 +2,19 @@ from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User, Group
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.shortcuts import get_current_site
 from django.forms import ModelForm
 from django.forms.models import inlineformset_factory
 from django.utils.translation import ugettext_lazy as _
+from django.urls.base import reverse
 
 from localflavor.br.forms import BRCPFField, BRCNPJField
 from material import Layout, Row
+
+from allauth.account.adapter import get_adapter
+from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, user_email
+from allauth.utils import build_absolute_uri
 
 from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, City, ContactMechanism
@@ -275,3 +282,56 @@ class UserUpdateForm(UserChangeForm):
         model = User
         fields = ['first_name', 'last_name', 'username', 'email', 'password',
                   'groups', 'is_active']
+
+
+class ResetPasswordFormMixin(forms.Form):
+    username = forms.CharField(
+        label=_("Username"),
+        required=True,
+        widget=forms.TextInput(attrs={
+            "size": "30",
+            "placeholder": _("Username"),
+        })
+    )
+
+    def clean_username(self):
+        username = self.cleaned_data["username"]
+        self.users = filter_users_by_username(username)
+        if not self.users:
+            raise forms.ValidationError(_(u"O Usuário informado não está vinculado"
+                                          " a nenhuma conta"))
+        self.email = self.users[0].email
+        return self.cleaned_data["username"]
+
+    def save(self, request, **kwargs):
+        current_site = get_current_site(request)
+        username = self.cleaned_data["username"]
+
+        token_generator = kwargs.get("token_generator",
+                                     default_token_generator)
+
+        self.context = {}
+        for user in self.users:
+
+            temp_key = token_generator.make_token(user)
+
+            # send the password reset email
+            path = reverse("account_reset_password_from_key",
+                           kwargs=dict(uidb36=user_pk_to_url_str(user),
+                                       key=temp_key))
+            url = build_absolute_uri(
+                request, path)
+
+            context = {"current_site": current_site,
+                       "user": user,
+                       "password_reset_url": url,
+                       "request": request,
+                       'username': username}
+
+            email = user_email(user)
+            get_adapter(request).send_mail(
+                'account/email/password_reset_key',
+                email,
+                context)
+            self.context = context
+        return self.context
