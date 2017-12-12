@@ -79,7 +79,7 @@ class EcmEtl(GenericETL):
                           AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                                (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
                           AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171', '20010149000165', '01605132608')
-                    UNION ALL
+                    UNION
                     SELECT DISTINCT
                       G.ID_doc AS ecm_legacy_code,
                       A.Ident  AS task_legacy_code,
