@@ -140,7 +140,7 @@ class DashboardView(MultiTableMixin, TemplateView):
         person = Person.objects.get(auth_user=self.request.user)
         dynamic_query = self.get_dynamic_query(person)
         data = []
-        if isinstance(dynamic_query, Q):
+        if isinstance(dynamic_query, Q) and dynamic_query:
             data = DashboardViewModel.objects.filter(dynamic_query)
         tables = self.get_list_tables(data) if person else []
         if not dynamic_query:
