@@ -77,7 +77,11 @@
 {% endblock %}
 {% block javascript %}
 <script>
+    var data = '';
     $(document).ready(function(){
+      socket = new WebSocket("ws://" + window.location.host + "/chat/");
+
+
       sendMessage = function(chatId) {
           console.log(($('#' + chatId)))
           data = JSON.stringify({
@@ -86,19 +90,19 @@
           })
           socket.onopen(data)
       }
-
-      socket = new WebSocket("ws://" + window.location.host + "/chat/");
       socket.onmessage = function(e) {
-          data = JSON.parse(e.data);
-          chat = $('#' + data.chat).find('<li>');
-          elementStrong = $('<strong></strong>').text(data.text)
-          elementSmall = $('<small></small>').text(data.text)
-          elementP = $('<p></p>').text(data.text)
-          chat.append(elementStrong)
-          chat.append(elementSmall)
-          chat.append(elementP)
+        console.log(e.data)
+          // data = JSON.parse(e.data);
+          // chat = $('#' + data.chat).find('<li>');
+          // elementStrong = $('<strong></strong>').text(data.text)
+          // elementSmall = $('<small></small>').text(data.text)
+          // elementP = $('<p></p>').text(data.text)
+          // chat.append(elementStrong)
+          // chat.append(elementSmall)
+          // chat.append(elementP)
       }
       socket.onopen = function(data) {
+          console.log(data);
           socket.send(data);
       }
     });

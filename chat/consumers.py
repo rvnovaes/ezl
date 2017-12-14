@@ -9,10 +9,7 @@ def ws_connect(message):
 
 
 def ws_message(message):
-    # import pdb; pdb.set_trace()
-    Group('chat').send({
-        'text': json.dumps(json.loads(message['text']))
-    })
+    Group('chat').send({'text': message['text']})
 
 
 def ws_disconnect(message):
