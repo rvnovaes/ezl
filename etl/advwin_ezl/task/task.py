@@ -180,7 +180,7 @@ class TaskETL(GenericETL):
                                      'blocked_payment_date',
                                      'finished_date']
 
-                    task.save(update_fields=update_fields)
+                    task.save(update_fields=update_fields, **{'called_by_etl': True})
 
                 else:
                     self.model.objects.create(movement=movement,

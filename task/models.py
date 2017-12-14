@@ -177,9 +177,9 @@ class Task(Audit, LegacyCode):
         return address
 
     def save(self, *args, **kwargs):
+        self._called_by_etl = kwargs.pop('called_by_etl', False)
         if not self.task_number:
             self.task_number = get_next_value(Task.TASK_NUMBER_SEQUENCE)
-
         return super().save(*args, **kwargs)
 
 
@@ -233,6 +233,10 @@ class TaskHistory(AuditCreate):
     class Meta:
         verbose_name = 'Histórico da Providência'
         verbose_name_plural = 'Histórico das Providências'
+
+    def save(self, *args, **kwargs):
+        self._called_by_etl = kwargs.pop('called_by_etl', False)
+        return super(TaskHistory, self).save(*args, **kwargs)
 
 
 class DashboardViewModel(Audit):
