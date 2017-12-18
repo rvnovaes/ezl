@@ -253,8 +253,6 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     template_name = 'task/task_detail.html'
 
     def form_valid(self, form):
-        import pdb;
-        pdb.set_trace()
         execution_date = None
         form.instance.task_status = TaskStatus[self.request.POST['action']] or TaskStatus.INVALID
         form.instance.alter_user = User.objects.get(id=self.request.user.id)
@@ -266,7 +264,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
                                        execution_date=execution_date, survey_result=survey_result)
-        if form.instance.task_status == TaskStatus.ACCEPTED_SERVICE:
+        if form.instance.task_status == TaskStatus.OPEN:
             form.instance.amount = (form.cleaned_data['amount']
                                     if form.cleaned_data['amount'] else None)
             servicepricetable_id = self.request.POST['servicepricetable_id']
@@ -283,11 +281,13 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
+        type_task = self.object.type_task
         court_district = self.object.movement.law_suit.court_district
         state = self.object.movement.law_suit.court_district.state
         client = self.object.movement.law_suit.folder.person_customer
         context['correspondets_table'] = ServicePriceTableTaskTable(
-            ServicePriceTable.objects.filter(Q(Q(court_district=court_district) | Q(court_district=None)),
+            ServicePriceTable.objects.filter(Q(type_task=type_task),
+                                             Q(Q(court_district=court_district) | Q(court_district=None)),
                                              Q(Q(state=state) | Q(state=None)),
                                              Q(Q(client=client) | Q(client=None)))
         )

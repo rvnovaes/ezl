@@ -5,7 +5,8 @@
 
 $(document).ready(function () {
     if (location.pathname === "/dashboard/") {
-        var div_states = ['.RETURN', '.ACCEPTED', '.OPEN', '.DONE', '.REFUSED', '.BLOCKEDPAYMENT', '.FINISHED'];
+        var div_states = ['.RETURN', '.ACCEPTED', '.OPEN', '.DONE', '.REFUSED', '.BLOCKEDPAYMENT', '.FINISHED',
+                          '.REQUESTED', '.ACCEPTED_SERVICE', '.REFUSED_SERVICE'];
         div_states.forEach(function (state) {
             $(state).on('click', function () {
                 sessionStorage.setItem('dashboard-state-on', state);
