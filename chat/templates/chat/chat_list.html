@@ -9,11 +9,10 @@
 {% endblock %}
 {% block content %}
   <h1>Chat</h1>
-  {{chats}}
   <div class="container">
     {% for chat in chats %}
       <div class="row">
-          <div class="col-md-5">
+          <div class="col">
               <div class="panel panel-primary">
                   <div class="panel-heading" id="{{chat.label}}">
                       <span class="glyphicon glyphicon-comment"></span> Chat {{chat.label}}
@@ -42,7 +41,7 @@
                                   </div>
                               </li>
                               {% else %}
-                                <li class="left clearfix"><span class="chat-img pull-left" data-id={{chat.pk}}>
+                                <li class="left clearfix"><span class="chat-img pull-left">
                                     <img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User Avatar" class="img-circle" />
                                 </span>
                                     <div class="chat-body clearfix">
@@ -78,48 +77,38 @@
 {% block javascript %}
 <script>
     var data = '';
+    var edata = '';
     $(document).ready(function(){
       socket = new WebSocket("ws://" + window.location.host + "/chat/");
 
 
       sendMessage = function(chatId) {
-          console.log(($('#' + chatId)))
           data = JSON.stringify({
             'text': $('#' + chatId).find('#btn-input').val(),
-            'chat': chatId
+            'chat': chatId,
           })
           socket.onopen(data)
       }
       socket.onmessage = function(e) {
           data = JSON.parse(e.data);
+          messagePosition = 'left';
+          imgChat = 'http://placehold.it/50/55C1E7/fff&text=U'
+          if ('{{user}}' == data.user) {
+            messagePosition = 'right'
+            imgChat = 'http://placehold.it/50/FA6F57/fff&text=ME'
+          }
           elementUl = $('[data-id=' + data.chat + ']');
-          li = $($.parseHTML('<li class="right clearfix"><span class="chat-img pull-right"><img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle" />'))
+          li = $($.parseHTML('<li class=" '+ messagePosition +' clearfix"><span class="chat-img pull-' + messagePosition + '"><img src="' + imgChat + '" alt="User Avatar" class="img-circle" />'))
           divBody = $($.parseHTML('<div class="chat-body clearfix"></div>'))
           divHeader = $($.parseHTML('<div class="header"> </div>'))
           small = $($.parseHTML('<small class=" text-muted"><span class="glyphicon glyphicon-time"></span>13 mins ago</small>'))
-          strong = $($.parseHTML('<strong class="pull-right primary-font">usuario que criou</strong>'))
+          strong = $($.parseHTML('<strong class="pull-' + messagePosition + ' primary-font">' + data.user +'</strong>'))
           p = $($.parseHTML('<p>' + data.text + '</p>'))
           elementUl.append(li.append(divBody.append(divHeader.append(small).append(strong).append(p))))
       }
       socket.onopen = function(data) {
-          console.log(data);
           socket.send(data);
       }
     });
 </script>
 {% endblock javascript %}
-
-
-<li class="right clearfix"><span class="chat-img pull-right">
-    <img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle" />
-</span>
-    <div class="chat-body clearfix">
-        <div class="header">
-            <small class=" text-muted"><span class="glyphicon glyphicon-time"></span>13 mins ago</small>
-            <strong class="pull-right primary-font">{{message.create_user}}</strong>
-        </div>
-        <p>
-            {{message.message}}
-        </p>
-    </div>
-</li>
