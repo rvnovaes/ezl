@@ -9,7 +9,9 @@ def ws_connect(message):
 
 
 def ws_message(message):
-    Group('chat').send({'text': message['text']})
+    Group('chat').send({
+            'text': message.content['text']
+            })
 
 
 def ws_disconnect(message):
