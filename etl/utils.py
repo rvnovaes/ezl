@@ -1,5 +1,6 @@
 from os.path import join
 from config.config import get_parser
+from core.models import Person
 
 
 def ecm_path_advwin2ezl(advwin_path):
@@ -20,6 +21,14 @@ def ecm_path_ezl2advwin(ezl_path):
 
 def get_ecm_file_name(ezl_path):
     return ezl_path.split('/')[-1]
+
+
+def get_users_to_import():
+    """Retorna os ids dos correspondentes que devemos importar"""
+    return Person.objects.filter(
+        auth_user__groups__name=Person.CORRESPONDENT_GROUP).values_list(
+            'legacy_code', flat=True)
+
 
 def get_message_log_default(model_name, rows_count, error, time):
     msg = """Ocorreu o seguinte erro na importacao de {0}: {1}, {2}, {3}

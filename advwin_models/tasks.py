@@ -12,6 +12,8 @@ from connections.db_connection import get_advwin_engine
 from etl.utils import ecm_path_ezl2advwin, get_ecm_file_name
 from task.models import Task, TaskStatus, TaskHistory, Ecm, SurveyType
 from sqlalchemy import and_
+from django.utils import timezone
+
 
 LOGGER = get_task_logger(__name__)
 
@@ -42,7 +44,7 @@ def export_ecm(ecm_id, ecm=None, execute=True):
         'Tabela_OR': 'Agenda',
         'Codigo_OR': ecm.task.legacy_code,
         'Link': new_path,
-        'Data': ecm.create_date,
+        'Data': timezone.localtime(ecm.create_date),
         'Nome': file_name,
         'Responsavel': ecm.create_user.username,
         'Arq_Status': 'Guardado',
@@ -81,7 +83,7 @@ def export_ecm_related_folter_to_task(ecm, id_doc, execute=True):
         'Id_codigo_or': get_folder_to_related(task=ecm.task),
         'Id_id_doc': id_doc,
         'id_ID_or': 0,
-        'dt_inserido': ecm.create_date,
+        'dt_inserido': timezone.localtime(ecm.create_date),
         'usuario_insercao': ecm.create_user.username
     }
     stmt = JuridGEDLig.__table__.insert().values(**values)
@@ -186,7 +188,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 50,
-            'data_operacao': task_history.create_date,
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Aceita por correspondente: {}'.format(
@@ -200,7 +202,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 70,
-            'data_operacao': task_history.create_date,
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Cumprida por correspondente: {}'.format(
@@ -214,7 +216,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 20,
-            'data_operacao': task_history.create_date,
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Recusada por correspondente: {}'.format(
@@ -227,7 +229,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 100,
-            'data_operacao': task_history.create_date,
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Diligência devidamente cumprida por: {}'.format(
@@ -240,7 +242,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 80,
-            'data_operacao': task_history.create_date,
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Diligência delegada ao correspondente para complementação:'
@@ -252,7 +254,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 90,
-            'data_operacao': task_history.create_date,
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Diligência não cumprida - pagamento glosado'
@@ -300,7 +302,7 @@ def export_task(task_id, task=None, execute=True):
             'prazo_lido': 0,
             'envio_alerta': 0,
             'Ag_StatusExecucao': 'Em execucao',
-            'Data_correspondente': task.execution_date,
+            'Data_correspondente': timezone.localtime(task.execution_date),
             'Obs': get_task_observation(task, 'Ordem de serviço aceita por', 'acceptance_date'),
         }
 
@@ -311,7 +313,7 @@ def export_task(task_id, task=None, execute=True):
         values = {
             'SubStatus': 70,
             'Status': 2,
-            'Data_Fech': task.execution_date,
+            'Data_Fech': timezone.localtime(task.execution_date),
             'prazo_lido': 1,
             'Prazo_Interm': 1,
             'Ag_StatusExecucao': '',

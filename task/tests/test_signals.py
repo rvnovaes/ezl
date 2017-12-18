@@ -27,7 +27,7 @@ class TaskSignalsTest(TestCase):
         export_ecm_mock.assert_called_with(ecm.id)
 
         # Doesn't call if editing existing object
-        export_ecm_mock.assert_called_once()
+        self.assertTrue(export_ecm_mock.called)
 
     @patch('advwin_models.tasks.export_ecm.delay')
     def test_export_ecm_path_signal_legacy_code(self, export_ecm_mock):

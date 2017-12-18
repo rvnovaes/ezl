@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 # http://stackoverflow.com/questions/34675604/sqlacodegen-generates-mixed-models-and-tables --> Para gerar as classes é preciso comentar algumas linhas
 # do sqlacodegen conforme explicado acima, uma vez que ele não gera mapas para tabelas sem PK
-# sqlacodegen.exe - -noinflect mssql+pymssql://Rvnovaes:password@172.27.155.9:1433/Advwin > models_sqlacodegen_advwin_hack.py
+# sqlacodegen.exe - -noinflect mssql+pymssql://Rvnovaes:password@172.27.155.22:1433/Advwin > models_sqlacodegen_advwin_hack.py
 Base = declarative_base()
 metadata = Base.metadata
 

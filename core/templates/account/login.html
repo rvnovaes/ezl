@@ -1,6 +1,7 @@
-{% include 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
- {% include 'core/widgets/messages.html' %}
+{% block body %}
+     {% include 'core/widgets/messages.html' %}
 <link rel="stylesheet" type="text/css"
       href="{% static "login.css" %}">
 <script src="{% static "js/login.js" %}"></script>
@@ -9,15 +10,16 @@
 
         <div class="title"><img width="325px" class="img-responsive" src="{% static "img/logo_ezl.png" %}"></div>
         <form method="POST" action="{% url 'account_login' %}"> {% csrf_token %}
+
             <div class="input">
-                <label for="first_name">Login</label>
+                <label for="first_name" class="floating-label">Login</label>
                 <input id="first_name" type="text" name="login" required>
                 <span class="spin"></span>
             </div>
 
             <div class="input">
-                <label for="password">Senha</label>
-                <input id="password" type="password" name="password" required>
+                <input id="password" type="password" name="password" class="password" required>
+                <label for="password" class="floating-label">Senha</label>
                 <span class="spin"></span>
             </div>
             {% if redirect_field_value %}
@@ -32,7 +34,7 @@
 
         </form>
 
-        <div style="padding-top: 30px" class="pass-forgot"><label>Desenvolvido por:</label> <img
+        <div style="padding-top: 30px" class="pass-forgot"><label >Desenvolvido por:</label> <img
                 onclick="window.open('http://www.mttech.com.br')"
                 src="/static/img/logo.png" height="20"
                 style="cursor: pointer; cursor: hand;"/>
@@ -69,3 +71,16 @@
     </div>
 
 </div>
+{% endblock %}
+{% block javascript %}
+    <script type="text/javascript">
+        $("#first_name").change(function() {
+            if (document.getElementById("password").value && $("#password").css("top") !== "0px") {
+                $(".floating-label").css("top", "0px");
+                $(".floating-label").css("line-height", "18px");
+                $(".floating-label").css("font-size", "18px");
+                $(".floating-label").css("font-weight", "100");
+            }
+        });
+    </script>
+{% endblock %}

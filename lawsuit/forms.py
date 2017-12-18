@@ -3,9 +3,10 @@ from django.core.exceptions import FieldDoesNotExist
 from django.forms import ModelForm
 from core.fields import CustomBooleanField
 from core.models import Person, State, Address
+from financial.models import CostCenter
 from core.widgets import MDModelSelect2
-from .models import TypeMovement, Instance, Movement, Folder, CourtDistrict, LawSuit, CourtDivision, \
-    Organ
+from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict,
+                     LawSuit, CourtDivision, Organ)
 from core.utils import filter_valid_choice_form
 from dal import autocomplete
 from localflavor.br.forms import BRCNPJField
@@ -84,7 +85,7 @@ class MovementForm(BaseForm):
 class FolderForm(BaseForm):
     class Meta:
         model = Folder
-        fields = ['folder_number', 'person_customer', 'is_active']
+        fields = ['folder_number', 'person_customer', 'cost_center', 'is_active']
 
     folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
 
@@ -94,12 +95,19 @@ class FolderForm(BaseForm):
         widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'})
     )
 
+    cost_center = forms.ModelChoiceField(
+        queryset=CostCenter.objects.filter(is_active=True),
+        empty_label=u"Selecione...",
+        widget=MDModelSelect2(url='costcenter_autocomplete', attrs={'class': 'form-control'}),
+        required=False,
+    )
+
     def __init__(self, *args, **kwargs):
         super(FolderForm, self).__init__(*args, **kwargs)
         self.order_fields(['folder_number', 'person_customer', 'is_active'])
 
         if not self.instance.pk:
-            # Since the pk is set this is not a new instance            
+            # Since the pk is set this is not a new instance
             self.fields.pop('folder_number')
 
 
@@ -109,13 +117,14 @@ class LawSuitForm(BaseForm):
 
         def get_option(o):
             return '{}/{}'.format(o.court_district.name, o.legal_name)
+
         choices = [(organ.pk, get_option(organ)) for organ in Organ.objects.all()]
         self.fields['organ'].choices = choices
 
     class Meta:
         model = LawSuit
         fields = ['law_suit_number', 'organ', 'instance', 'court_division',
-                  'person_lawyer',
+                  'person_lawyer', 'opposing_party',
                   'is_current_instance', 'is_active', 'court_district']
 
     person_lawyer = forms.ModelChoiceField(
@@ -125,11 +134,15 @@ class LawSuitForm(BaseForm):
             'name'), required=True
     )
     organ = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(
-            filter_valid_choice_form(Organ.objects.filter(is_active=True))).order_by('name'),
-        empty_label=u"Selecione", required=True, initial=None,
-        widget=autocomplete.ListSelect2(url='organ_autocomplete', forward=['person_lawyer'], attrs={
-            'class': 'select-with-search', 'data-placeholder': 'Comarca/Tribunal'}))
+        queryset=filter_valid_choice_form(Organ.objects.filter(is_active=True)).order_by('name'),
+        empty_label=u"Selecione",
+        required=True,
+        initial=None,
+        widget=autocomplete.ListSelect2(url='organ_autocomplete',
+                                        attrs={
+                                            'class': 'select-with-search',
+                                            'data-placeholder': 'Comarca/Tribunal'
+                                        }))
 
     instance = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(Instance.objects.filter(is_active=True)).order_by('name'),
@@ -140,6 +153,7 @@ class LawSuitForm(BaseForm):
             'name'),
         empty_label=u"Selecione", required=True
     )
+    opposing_party = forms.CharField(required=False)
     law_suit_number = forms.CharField(max_length=255, required=True)
     is_current_instance = CustomBooleanField(initial=False, required=False)
     court_district = forms.CharField(required=False, widget=forms.HiddenInput(), initial=None)
