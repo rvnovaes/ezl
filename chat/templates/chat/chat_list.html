@@ -12,7 +12,7 @@
   <div class="container">
     {% for chat in chats %}
       <div class="row">
-          <div class="col">
+          <div class="col-md-10 col-md-offset-1">
               <div class="panel panel-primary">
                   <div class="panel-heading" id="{{chat.label}}">
                       <span class="glyphicon glyphicon-comment"></span> Chat {{chat.label}}
@@ -21,9 +21,9 @@
                               <span class="glyphicon glyphicon-chevron-down"></span>
                           </a>
                       </div>
-                  </div>
+                  </div>                  
                 <div class="panel-collapse collapse" id="{{chat.pk}}">
-                    <div class="panel-body">
+                    <div class="chat panel-body">
                         <ul class="chat" data-id={{chat.pk}}>
                            {% for message in chat.messages.all %}
                               {% if message.create_user == user %}
@@ -60,10 +60,10 @@
                     </div>
                     <div class="panel-footer">
                         <div class="input-group">
-                            <input id="btn-input" type="text" class="form-control input-sm" placeholder="Type your message here..." />
+                            <input id="btn-input" type="text" class="form-control input-sm" placeholder="Digite aqui sua mensagem..." />
                             <span class="input-group-btn">
                                 <button class="btn btn-warning btn-sm" id="btn-chat" onclick="sendMessage('{{chat.pk}}')">
-                                    Send</button>
+                                    Enviar</button>
                             </span>
                         </div>
                     </div>
@@ -79,9 +79,8 @@
     var data = '';
     var edata = '';
     $(document).ready(function(){
+      $('.chat.panel-body').animate({ scrollTop: 9999}, 1000);
       socket = new WebSocket("ws://" + window.location.host + "/chat/");
-
-
       sendMessage = function(chatId) {
           data = JSON.stringify({
             'text': $('#' + chatId).find('#btn-input').val(),
@@ -90,6 +89,7 @@
           socket.onopen(data)
       }
       socket.onmessage = function(e) {
+          $('.chat.panel-body').animate({ scrollTop: 9999}, 1000);
           data = JSON.parse(e.data);
           messagePosition = 'left';
           imgChat = 'http://placehold.it/50/55C1E7/fff&text=U'
