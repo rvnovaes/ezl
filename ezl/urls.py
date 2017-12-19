@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^accounts/login/$', LoginCustomView.as_view(), name='account_login'),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^financeiro/', include('financial.urls'), name='financial'),
+    url(r'^pesquisa/', include('survey.urls'), name='survey'),
     url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),
     url(r'^providencias/', include('task.urls'), name='task'),
     url(r'^dashboard/$', login_required(DashboardView.as_view()), name='dashboard'),

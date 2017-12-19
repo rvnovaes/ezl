@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'lawsuit.apps.LawsuitConfig',
     'task.apps.TaskConfig',
     'financial.apps.FinancialConfig',
+    'survey.apps.SurveyConfig',
 
     'django.contrib.sites',
 
