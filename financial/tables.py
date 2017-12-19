@@ -37,6 +37,12 @@ class ServicePriceTableTable(tables.Table):
 
 class ServicePriceTableTaskTable(tables.Table):
 
+    correspondent = tables.Column(orderable=False)
+    court_district = tables.Column(orderable=False)
+    state = tables.Column(orderable=False)
+    client = tables.Column(orderable=False)
+    value = tables.Column(orderable=False)
+
     class Meta:
         sequence = ('correspondent', 'court_district', 'state', 'client', 'value')
         model = ServicePriceTable
