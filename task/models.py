@@ -26,7 +26,7 @@ class Permissions(Enum):
 # Dicionário para retornar o icone referente ao status da providencia
 icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assignment_return',
              'DONE': 'assignment_turned_in',
-             'REQUESTED': 'help_outline', 'ACCEPTED_SERVICE': 'help_outline', 'REFUSED_SERVICE': 'help_outline',
+             'REQUESTED': 'playlist_play', 'ACCEPTED_SERVICE': 'thumb_up', 'REFUSED_SERVICE': 'thumb_down',
              'REFUSED': 'assignment_late', 'INVALID': 'error', 'FINISHED': 'gavel',
              'BLOCKEDPAYMENT': 'money_off'}
 

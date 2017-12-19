@@ -219,17 +219,17 @@
                         {% if perms.core.can_distribute_tasks %}
                             <button type="button" id="ACCEPTED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised ACCEPTED_SERVICE {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
-                                <i class="material-icons left" style="color: white;">assignment_ind</i>
-                                Aceitar Service
+                                <i class="material-icons left" style="color: white;">thumb_up</i>
+                                Aceitar Solicitação
                             </button>
                             <a id="REFUSED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised REFUSED_SERVICE {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}"><i
-                                    class="material-icons left" style="color: white;">assignment_late</i>
-                                Recusar Service
+                                    class="material-icons left" style="color: white;">thumb_down</i>
+                                Recusar Solicitação
                             </a>
                             <button type="button" id="OPEN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised OPEN {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
-                                <i class="material-icons left" style="color: white;">assignment_ind</i>
+                                <i class="material-icons left" style="color: white;">assignment</i>
                                 Delegar
                             </button>
                         {% endif %}
