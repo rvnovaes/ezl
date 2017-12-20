@@ -17,16 +17,22 @@ class MovementETL(GenericETL):
                 from Jurid_ProcMov AS pm
                 INNER JOIN Jurid_Pastas as p on
                   p.Codigo_Comp = pm.Codigo_Comp
-                INNER JOIN Jurid_agenda_table as a ON
+                LEFT JOIN Jurid_agenda_table as a ON
                   pm.Ident = a.Mov
-                INNER JOIN Jurid_CodMov as cm ON
+                LEFT JOIN Jurid_CodMov as cm ON
                   a.CodMov = cm.Codigo
                 WHERE
-                  cm.UsarOS = 1 and
-                  (p.Status = 'Ativa' OR p.Status = 'Especial') AND
-                  ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                  (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                  AND a.Advogado IN ('{}')
+                  (p.Status = 'Ativa' OR p.Status = 'Especial') AND --Filtro Padrão
+                  (
+                     a.Mov IS NULL
+                     OR
+                     (
+                       cm.UsarOS = 1 and
+                       ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
+                       (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
+                       AND a.Advogado IN ('{}')
+                     )
+                  )
                   """
 
     model = Movement
