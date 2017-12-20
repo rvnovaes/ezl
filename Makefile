@@ -1,5 +1,5 @@
 build:
-	docker-compose build builder
+	docker-compose build builder luigi
 	@docker-compose build certbot || true
 
 check_compose_override:
@@ -64,4 +64,4 @@ stop:
 	docker-compose stop web nginx
 
 test:
-	docker-compose run web pytest
+	docker-compose run web python manage.py test --parallel --keepdb

@@ -174,19 +174,35 @@ class Person(Audit, LegacyCode):
     def cnpj(self, value):
         self.cnpj = value
 
-    def contact_mechanism_by_type(self, type):
+    def contact_mechanism_by_type(self, type, formated=True):
         type = ContactMechanismType.objects.filter(name__iexact=type).first()
         contacts = self.contactmechanism_set.filter(contact_mechanism_type=type)
-        return ' | '.join([contact.description for contact in contacts]) if contacts else ''
+        items = [contact.description for contact in contacts]
+        if formated:
+            return ' | '.join(items) if items else ''
+        return items
 
     @property
     def emails(self):
-        return self.contact_mechanism_by_type('email').__add__(' | ').__add__(
-            self.auth_user.email if self.auth_user.email else '')
+        emails = self.get_emails()
+        return ' | '.join(emails) if emails else ''
 
     @property
     def phones(self):
         return self.contact_mechanism_by_type('telefone')
+
+    def get_emails(self):
+        emails = set(self.contact_mechanism_by_type('email', formated=False))
+        if (self.auth_user and self.auth_user.email and
+                self.auth_user.email.strip()):
+            emails.add(self.auth_user.email.strip())
+        return list(emails)
+
+    def get_phones(self):
+        return self.contact_mechanism_by_type('telefone', formated=False)
+
+    def get_address(self):
+        return self.address_set.exclude(id=1)
 
     class Meta:
         db_table = 'person'
@@ -202,7 +218,7 @@ class Address(Audit):
     address_type = models.ForeignKey(
         AddressType, on_delete=models.PROTECT, blank=False, null=False,
         verbose_name='Tipo')
-    street = models.CharField(max_length=255, verbose_name='Rua')
+    street = models.CharField(max_length=255, verbose_name='Logradouro')
     number = models.CharField(max_length=255, verbose_name='Número')
     complement = models.CharField(max_length=255, blank=True, verbose_name='Complemento')
     city_region = models.CharField(max_length=255, verbose_name='Bairro')
@@ -212,8 +228,10 @@ class Address(Audit):
     business_address = models.BooleanField(default=False, blank=True)
     city = models.ForeignKey(City, on_delete=models.PROTECT, blank=False, null=False,
                              verbose_name='Cidade')
-    state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False)
+    state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False,
+                             verbose_name='Estado')
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False,
+                             verbose_name='País')
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
 
     class Meta:

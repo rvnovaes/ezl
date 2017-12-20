@@ -140,7 +140,8 @@ class DashboardView(MultiTableMixin, TemplateView):
         person = Person.objects.get(auth_user=self.request.user)
         dynamic_query = self.get_dynamic_query(person)
         data = []
-        if isinstance(dynamic_query, Q):
+        # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
+        if dynamic_query or person.auth_user.is_superuser:
             data = DashboardViewModel.objects.filter(dynamic_query)
         tables = self.get_list_tables(data) if person else []
         if not dynamic_query:
@@ -188,25 +189,25 @@ class DashboardView(MultiTableMixin, TemplateView):
                   finished_table]
 
     @staticmethod
-    def get_query_all_tasks(dynamic_query, person):
+    def get_query_all_tasks(person):
         return Q()
 
     @staticmethod
-    def get_query_delegated_tasks(dynamic_query, person):
-        return dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+    def get_query_delegated_tasks(person):
+        return Q(person_executed_by=person.id)
 
     @staticmethod
-    def get_query_requested_tasks(dynamic_query, person):
-        return dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+    def get_query_requested_tasks(person):
+        return Q(person_asked_by=person.id)
 
     @staticmethod
-    def get_query_distributed_tasks(dynamic_query, person):
-        return dynamic_query.add(Q(person_distributed_by=person.id), Q.AND)
+    def get_query_distributed_tasks(person):
+        return Q(person_distributed_by=person.id)
 
     def get_dynamic_query(self, person):
         if person.auth_user.is_superuser:
-            return self.get_query_all_tasks(Q(), person)
-        dynamic_query = False
+            return self.get_query_all_tasks(person)
+        dynamic_query = Q()
         permissions_to_check = {
             'core.view_all_tasks': self.get_query_all_tasks,
             'core.view_delegated_tasks': self.get_query_delegated_tasks,
@@ -215,8 +216,7 @@ class DashboardView(MultiTableMixin, TemplateView):
             }
         for permission in person.auth_user.get_all_permissions():
             if permission in permissions_to_check.keys():
-                dynamic_query = permissions_to_check.get(permission)(
-                    Q(), person)
+                dynamic_query |= permissions_to_check.get(permission)(person)
         return dynamic_query
 
 
@@ -383,7 +383,7 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
     template_name = 'task/task_filter.html'
     context_object_name = 'task_filter'
     context_filter_name = 'filter'
-    ordering = ['-id']
+    ordering = ['-final_deadline_date']
     table_class = DashboardStatusTable
 
     def query_builder(self):
@@ -402,10 +402,10 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             deadline_dynamic_query = Q()
             client_query = Q()
 
-            if not self.request.user.has_perm('task.view_all_tasks'):
-                if self.request.user.has_perm('task.view_delegated_tasks'):
+            if not self.request.user.has_perm('core.view_all_tasks'):
+                if self.request.user.has_perm('core.view_delegated_tasks'):
                     person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-                elif self.request.user.has_perm('task.view_requested_tasks'):
+                elif self.request.user.has_perm('core.view_requested_tasks'):
                     person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
             if data['openned']:

@@ -18,13 +18,13 @@ import os
 import sys
 import logging
 import datetime
+import time
 from functools import wraps, reduce
 
 from sqlalchemy import text
 from connections.db_connection import connect_db, get_advwin_engine
 from core.utils import LegacySystem
 from config.config import get_parser
-from django.utils.lru_cache import lru_cache
 from etl.models import DashboardETL
 from django.utils import timezone
 
@@ -118,12 +118,6 @@ def validate_import(f):
 
 class GenericETL(object):
     EZL_LEGACY_CODE_FIELD = 'legacy_code'
-
-    @property
-    @lru_cache(maxsize=None)
-    def advwin_engine(self):
-        return connect_db(parser, config_connection)
-
     model = None
     import_query = None
     export_statements = None
@@ -165,16 +159,27 @@ class GenericETL(object):
         if self.has_status:
             self.deactivate_all()
 
-        connection = self.advwin_engine.connect()
-        cursor = self.advwin_engine.execute(text(self.import_query))
-        rows = cursor.fetchall()
-        rows_count = len(rows)
-        self.config_import(rows, user, rows_count, log=dashboard_log)
-        dashboard_log.execution_date_finish = timezone.now()
-        dashboard_log.read_quantity = rows_count
-        dashboard_log.status = True
-        dashboard_log.save()
-        connection.close()
+        for attempt in range(5):
+            try:
+                connection = get_advwin_engine().connect()
+                cursor = connection.execute(text(self.import_query))
+                rows = cursor.fetchall()
+                rows_count = len(rows)
+                user = User.objects.get(pk=create_alter_user)
+                self.config_import(rows, user, rows_count, log=dashboard_log)
+                dashboard_log.execution_date_finish = timezone.now()
+                dashboard_log.read_quantity = rows_count
+                dashboard_log.status = True
+                dashboard_log.save()
+                connection.close()
+            except:
+                self.error_logger.error("Erro de conexão. Nova tentativa de conexão em 5s. Tentativa: " + str(attempt + 1))
+                time.sleep(5)
+            else:
+                break
+        else:
+            self.error_logger.error("Não foi possível conectar com o banco.")
+            raise
 
     def config_export(self):
         pass
@@ -185,7 +190,7 @@ class GenericETL(object):
 
     def export_data(self):
         self.config_export()
-        connection = self.advwin_engine.connect()
+        connection = self.advwin_engine().connect()
 
         for stmt in self.export_statements:
             trans = connection.begin()

@@ -43,6 +43,12 @@ class Folder(Audit, LegacyCode):
     folder_number = models.IntegerField(verbose_name='Número da Pasta', null=False, default=0)
     person_customer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                         verbose_name='Cliente')
+    cost_center = models.ForeignKey('financial.CostCenter',
+                                    on_delete=models.PROTECT,
+                                    blank=True,
+                                    null=True,
+                                    verbose_name='Centro de custo')
+
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -134,6 +140,8 @@ class LawSuit(Audit, LegacyCode):
     law_suit_number = models.CharField(max_length=255, blank=False, null=False,
                                        verbose_name='Número do Processo')
     is_current_instance = models.BooleanField(verbose_name='Instância Atual', default=False)
+    opposing_party = models.CharField(max_length=255, blank=True, null=True,
+                                      verbose_name='Parte adversa')
 
     class Meta:
         db_table = "law_suit"

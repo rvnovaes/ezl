@@ -2,17 +2,21 @@
 from core.models import Person
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
+from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import Folder
 from etl.utils import get_message_log_default, save_error_log
+from etl.utils import get_users_to_import
+from financial.models import CostCenter
 
 
 class FolderETL(GenericETL):
     advwin_table = 'Jurid_Pastas'
     model = Folder
-    import_query = """
+    _import_query = """
             SELECT DISTINCT
               p.Codigo_Comp AS legacy_code,
-              p.Cliente
+              p.Cliente,
+              p.Setor
             FROM Jurid_Pastas AS p
                   INNER JOIN Jurid_ProcMov AS pm ON
                     pm.Codigo_Comp = p.Codigo_Comp
@@ -27,17 +31,32 @@ class FolderETL(GenericETL):
               p.Cliente IS NOT NULL AND p.Cliente <> '' AND
               ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-              AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171') -- marcio.batista, claudia pires e nagila(Em teste)
+              AND a.Advogado IN ('{}')
                   """
     has_status = True
 
+    @property
+    def import_query(self):
+        return self._import_query.format("','".join(get_users_to_import()))
+
     @validate_import
     def config_import(self, rows, user, rows_count, log=False):
+        invalid_cost_center = InvalidObjectFactory.get_invalid_model(CostCenter)
         for row in rows:
             rows_count -= 1
             try:
                 legacy_code = row['legacy_code']
                 customer_code = row['Cliente']
+                cost_center = row['Setor'].strip()
+                cost_center_instance = invalid_cost_center
+
+                if cost_center:
+                    try:
+                        cost_center_instance = CostCenter.objects.get(
+                            system_prefix=LegacySystem.ADVWIN.value,
+                            legacy_code=cost_center)
+                    except CostCenter.DoesNotExist:
+                        pass
 
                 instance = self.model.objects.filter(legacy_code=legacy_code,
                                                      system_prefix=LegacySystem.ADVWIN.value).first()
@@ -51,17 +70,20 @@ class FolderETL(GenericETL):
                         instance.person_customer = person_customer
                         instance.is_active = True
                         instance.alter_user = user
+                        instance.cost_center = cost_center_instance
                         instance.save(
                             update_fields=['person_customer',
                                            'is_active',
                                            'alter_date',
-                                           'alter_user'])
+                                           'alter_user',
+                                           'cost_center'])
                     else:
                         obj = self.model(person_customer=person_customer,
                                          is_active=True,
                                          legacy_code=legacy_code,
                                          system_prefix=LegacySystem.ADVWIN.value,
                                          create_user=user,
+                                         cost_center=cost_center_instance,
                                          alter_user=user)
                         obj.save()
 
@@ -72,7 +94,7 @@ class FolderETL(GenericETL):
                 msg = get_message_log_default(self.model._meta.verbose_name,
                                               rows_count, e)
                 save_error_log(log, user, msg)
-                
+
 
 if __name__ == "__main__":
     FolderETL().import_data()
