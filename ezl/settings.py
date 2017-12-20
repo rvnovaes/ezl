@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'lawsuit.apps.LawsuitConfig',
     'task.apps.TaskConfig',
+    'etl.apps.EtlConfig',
     'financial.apps.FinancialConfig',
     'etl.apps.EtlConfig',
 

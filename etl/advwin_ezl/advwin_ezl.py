@@ -179,7 +179,6 @@ class GenericETL(object):
                 break
         else:
             self.error_logger.error("Não foi possível conectar com o banco.")
-            raise
 
     def config_export(self):
         pass

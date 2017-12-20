@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
-from etl.utils import get_users_to_import
+from etl.utils import get_users_to_import, get_message_log_default, save_error_log
 from lawsuit.models import Movement, LawSuit, TypeMovement
 from etl.utils import get_message_log_default, save_error_log
 

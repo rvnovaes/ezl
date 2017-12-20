@@ -10,11 +10,12 @@ from advwin_models.advwin import JuridAgendaTable, JuridCorrespondenteHist, Juri
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
-from etl.utils import get_users_to_import
+from etl.utils import get_users_to_import, get_message_log_default, save_error_log
 from ezl import settings
 from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
 from etl.utils import get_message_log_default, save_error_log
+
 
 
 default_justify = 'Aceita por Correspondente: %s'
@@ -180,7 +181,7 @@ class TaskETL(GenericETL):
                                      'blocked_payment_date',
                                      'finished_date']
 
-                    task.save(update_fields=update_fields, **{'called_by_etl': True})
+                    task.save(update_fields=update_fields)
 
                 else:
                     self.model.objects.create(movement=movement,

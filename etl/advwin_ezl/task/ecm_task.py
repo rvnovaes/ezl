@@ -2,9 +2,8 @@ from django.db.utils import IntegrityError
 
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
-from etl.utils import ecm_path_advwin2ezl, get_users_to_import
+from etl.utils import ecm_path_advwin2ezl, get_users_to_import, get_message_log_default, save_error_log
 from task.models import Ecm, Task
-from etl.utils import get_message_log_default, save_error_log
 
 
 class EcmEtl(GenericETL):

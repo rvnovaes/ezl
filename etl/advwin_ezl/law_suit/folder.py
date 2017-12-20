@@ -4,8 +4,7 @@ from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import Folder
-from etl.utils import get_message_log_default, save_error_log
-from etl.utils import get_users_to_import
+from etl.utils import get_message_log_default, save_error_log, get_users_to_import
 from financial.models import CostCenter
 
 
