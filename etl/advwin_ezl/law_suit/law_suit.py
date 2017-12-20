@@ -46,32 +46,26 @@ class LawsuitETL(GenericETL):
                     FROM Jurid_Pastas AS p
                           LEFT JOIN Jurid_Distribuicao AS d ON
                                                               p.Codigo_Comp = d.Codigo_Comp
-                          LEFT JOIN Jurid_ProcMov AS pm ON
+                          INNER JOIN Jurid_ProcMov AS pm ON
                                                            pm.Codigo_Comp = p.Codigo_Comp
-                          LEFT JOIN Jurid_agenda_table AS a ON
+                          INNER JOIN Jurid_agenda_table AS a ON
                                                                pm.Ident = a.Mov
-                          LEFT JOIN Jurid_CodMov AS cm ON
+                          INNER JOIN Jurid_CodMov AS cm ON
                                                           a.CodMov = cm.Codigo
                     WHERE
-                        (p.Status = 'Ativa' OR p.Status = 'Especial') AND
-                        p.Cliente IS NOT NULL AND p.Cliente <> '' AND -- Bloco de filtro principal
-                        ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
-                         (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
-                        ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
-                         (d.Codigo_Comp IS NOT NULL AND d.Codigo_Comp <> '')) AND
-                        ((p.Instancia IS NOT NULL AND p.Instancia <> '') OR
-                         (d.D_Codigo_Inst IS NOT NULL AND d.D_Codigo_Inst <> ''))
-                        AND
-                        (
-                             (pm.Codigo_Comp IS NULL) -- Selecionar processos sem movimentação
-                             OR
-                             (cm.UsarOS = 1 AND -- Caso tenha vinculo com movimentação, filtrar movimentações
-                              ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                               AND
-                               a.Advogado IN ('{}')
-                             )
-                        )
+                          (p.Status = 'Ativa' OR p.Status = 'Especial') AND
+                          cm.UsarOS = 1 AND
+                          p.Cliente IS NOT NULL AND p.Cliente <> '' AND
+                          ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
+                          (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
+                          AND a.Advogado IN ('{}') AND 
+                          ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
+                           (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
+                          ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
+                           (d.Codigo_Comp IS NOT NULL AND d.Codigo_Comp <> '')) AND
+                          ((p.Instancia IS NOT NULL AND p.Instancia <> '') OR
+                           (d.D_Codigo_Inst IS NOT NULL AND d.D_Codigo_Inst <> ''))
+
     """
 
     has_status = True

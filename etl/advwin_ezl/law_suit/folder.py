@@ -19,24 +19,17 @@ class FolderETL(GenericETL):
             FROM Jurid_Pastas AS p
                   LEFT JOIN Jurid_ProcMov AS pm ON
                     pm.Codigo_Comp = p.Codigo_Comp
-                  LEFT JOIN Jurid_agenda_table AS a ON
+                  INNER JOIN Jurid_agenda_table AS a ON
                     a.Pasta = p.Codigo_Comp
-                  LEFT JOIN Jurid_CodMov AS cm ON
+                  INNER JOIN Jurid_CodMov AS cm ON
                     a.CodMov = cm.Codigo
             WHERE
-              (p.Status = 'Especial' OR p.Status = 'Ativa') AND
+              cm.UsarOS = 1 AND
+              (p.Status = 'Ativa' OR p.Status = 'Especial') AND
               p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '' AND
-              p.Cliente IS NOT NULL AND p.Cliente <> ''
-              AND
-              (
-                (pm.Codigo_Comp IS NULL OR a.Pasta IS NULL )
-                OR
-                ((cm.UsarOS IS NULL OR cm.UsarOS = 1) AND
-                 ((a.prazo_lido IS NULL AND a.SubStatus IS NULL) OR
-                  (a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                  (a.SubStatus = 80))
-                 AND a.Status = '0') -- STATUS ATIVO
-              ) 
+              p.Cliente IS NOT NULL AND p.Cliente <> '' AND
+              ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
+              (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
               AND a.Advogado IN ('{}')
                   """
     has_status = True
