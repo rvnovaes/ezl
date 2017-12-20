@@ -3,7 +3,7 @@ from core.utils import LegacySystem
 from lawsuit.models import Organ
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory, INVALID_ORGAN
-from etl.utils import get_users_to_import, get_message_log_default, save_error_log
+from etl.utils import get_users_to_import
 from lawsuit.models import LawSuit, Folder, Instance, CourtDistrict, CourtDivision
 from etl.utils import get_message_log_default, save_error_log
 
@@ -13,7 +13,7 @@ class LawsuitETL(GenericETL):
     advwin_table = 'Jurid_Pastas'
 
     _import_query = """
-                    SELECT DISTINCT
+                    SELECT 
                           p.OutraParte                             AS opposing_party, 
                           p.Codigo_Comp                            AS folder_legacy_code,
                           CASE WHEN (d.D_Atual IS NULL)

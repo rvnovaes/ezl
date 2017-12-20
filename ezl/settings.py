@@ -79,8 +79,6 @@ INSTALLED_APPS = [
     'task.apps.TaskConfig',
     'etl.apps.EtlConfig',
     'financial.apps.FinancialConfig',
-    'etl.apps.EtlConfig',
-
     'django.contrib.sites',
 
     'allauth',
