@@ -6,10 +6,9 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from sequences import get_next_value
-
 from core.models import Person, Audit, AuditCreate, LegacyCode
 from lawsuit.models import Movement, Folder
-
+from chat.models import Chat
 
 class Permissions(Enum):
     view_delegated_tasks = 'Can view tasks delegated to the user'
@@ -129,6 +128,7 @@ class Task(Audit, LegacyCode):
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
                                    default=TaskStatus.OPEN)
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    chat = models.ForeignKey(Chat, verbose_name='Chat', on_delete=models.SET_NULL, null=True)
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
 

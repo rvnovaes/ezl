@@ -27,7 +27,7 @@ from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable
-
+from chat.models import Chat
 
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Task
@@ -248,7 +248,10 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
-
+        if not self.object.chat:
+            self.object.chat = Chat.objects.create(create_user=self.request.user,
+                                                   label='task-{}'.format(self.object.pk))
+            self.object.save()
         return context
 
 

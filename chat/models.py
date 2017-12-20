@@ -1,6 +1,7 @@
 from django.db import models
 from core.models import Audit
 
+
 # Create your models here.
 class Chat(Audit):
     label = models.SlugField(unique=True)
