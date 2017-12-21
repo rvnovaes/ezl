@@ -252,7 +252,18 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             self.object.chat = Chat.objects.create(create_user=self.request.user,
                                                    label='task-{}'.format(self.object.pk))
             self.object.save()
+        self.create_user_by_chat(self.object, ['person_asked_by', 'person_executed_by',
+                                               'person_distributed_by'])
         return context
+
+    def create_user_by_chat(self, task, fields):
+        from chat.models import UserByChat
+        for field in fields:
+            user = getattr(task, field).auth_user
+            print(task.pk, user, field)
+            if user:
+                UserByChat.objects.get_or_create(
+                    create_user=self.request.user, user_by_chat=user, chat=task.chat)
 
 
 class EcmCreateView(LoginRequiredMixin, CreateView):
