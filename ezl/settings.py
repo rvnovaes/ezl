@@ -77,8 +77,8 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'lawsuit.apps.LawsuitConfig',
     'task.apps.TaskConfig',
+    'etl.apps.EtlConfig',
     'financial.apps.FinancialConfig',
-
     'django.contrib.sites',
 
     'allauth',
@@ -234,6 +234,7 @@ EMAIL_HOST = email_host
 EMAIL_PORT = email_port
 EMAIL_HOST_USER = email_host_user
 EMAIL_HOST_PASSWORD = email_host_password
+DEFAULT_FROM_EMAIL = email_host_user
 
 
 INTERNAL_IPS = '127.0.0.1'

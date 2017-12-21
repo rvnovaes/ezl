@@ -23,8 +23,30 @@ def get_ecm_file_name(ezl_path):
     return ezl_path.split('/')[-1]
 
 
+def get_message_log_default(model_name, rows_count, error, time):
+    msg = """Ocorreu o seguinte erro na importacao de {0}: {1}, {2}, {3}
+            """.format(model_name, rows_count, str(error), str(time))
+    return msg
+
+
+def save_error_log(log, create_user, message_error):
+    if log:
+        log.errors.create(create_user=create_user, error=message_error)
+
+
+
 def get_users_to_import():
     """Retorna os ids dos correspondentes que devemos importar"""
     return Person.objects.filter(
         auth_user__groups__name=Person.CORRESPONDENT_GROUP).values_list(
             'legacy_code', flat=True)
+
+
+def get_message_log_default(model_name, rows_count, error, time):
+    msg = """Ocorreu o seguinte erro na importacao de {0}: {1}, {2}, {3}
+            """.format(model_name, rows_count, str(error), str(time))
+    return msg
+
+def save_error_log(log, create_user, message_error):
+    if log:
+        log.errors.create(create_user=create_user, error=message_error)

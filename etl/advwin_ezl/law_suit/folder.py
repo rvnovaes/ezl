@@ -4,7 +4,7 @@ from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import Folder
-from etl.utils import get_users_to_import
+from etl.utils import get_message_log_default, save_error_log, get_users_to_import
 from financial.models import CostCenter
 
 
@@ -39,7 +39,7 @@ class FolderETL(GenericETL):
         return self._import_query.format("','".join(get_users_to_import()))
 
     @validate_import
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         invalid_cost_center = InvalidObjectFactory.get_invalid_model(CostCenter)
         for row in rows:
             rows_count -= 1
@@ -90,9 +90,9 @@ class FolderETL(GenericETL):
                                                                 str(LegacySystem.ADVWIN.value),str(user.id),str(user.id),
                                                                 self.timestr))
             except Exception as e:
-                self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Pastas: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e)
+                save_error_log(log, user, msg)
 
 
 if __name__ == "__main__":

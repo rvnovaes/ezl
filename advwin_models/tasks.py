@@ -360,13 +360,10 @@ def export_task(task_id, task=None, execute=True):
     elif task.task_status == TaskStatus.REFUSED.value:
 
         values = {
-            'SubStatus': 20,
-            'Status': 1,
-            'prazo_lido': 1,
-            'Prazo_Interm': 1,
+            'SubStatus': 40,
+            'status_correspondente': 1,
+            'Advogado': task.person_distributed_by.legacy_code,            
             'Data_correspondente': task.refused_date,
-            'Ag_StatusExecucao': '',
-            'Data_cumprimento': task.execution_date,
             'Obs': get_task_observation(task, 'Ordem de serviço recusada por', 'refused_date'),
         }
         return update_advwin_task(task, values, execute)

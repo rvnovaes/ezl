@@ -5,6 +5,7 @@ from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory, INVALID_ORGAN
 from etl.utils import get_users_to_import
 from lawsuit.models import LawSuit, Folder, Instance, CourtDistrict, CourtDivision
+from etl.utils import get_message_log_default, save_error_log
 
 
 class LawsuitETL(GenericETL):
@@ -75,7 +76,7 @@ class LawsuitETL(GenericETL):
         return self._import_query.format("','".join(get_users_to_import()))
 
     @validate_import
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         for row in rows:
             print(rows_count)
             rows_count -= 1
@@ -169,10 +170,10 @@ class LawsuitETL(GenericETL):
                     legacy_code, str(LegacySystem.ADVWIN.value), str(opposing_party), self.timestr))
 
             except Exception as e:
-                self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de LawSuit: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
-
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
+                self.error_logger.error(msg)
+                save_error_log(log, user, msg)
 
 if __name__ == "__main__":
     LawsuitETL().import_data()
