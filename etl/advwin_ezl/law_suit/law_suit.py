@@ -59,7 +59,7 @@ class LawsuitETL(GenericETL):
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
                           ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                           (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          AND a.Advogado IN ('{}') AND 
+                          AND --a.Advogado IN ('{}') AND 
                           ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
                            (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
                           ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
