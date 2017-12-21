@@ -8,6 +8,7 @@
                 {{ person|capfirst|default_if_none:"---" }}
             </td>
         </tr>
+        {% if person == form.instance.person_executed_by %}
         <tr>
             <th>
                 Endereço
@@ -30,6 +31,7 @@
                 {% endwith %}
             </td>
         </tr>
+        {% endif %}
         <tr>
             <th>
                 Email

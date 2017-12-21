@@ -14,6 +14,9 @@ class PersonManager(Manager):
     def requesters(self, *ar, **kw):
         return self.get_queryset().requesters(*ar, **kw)
 
+    def services(self, *ar, **kw):
+        return self.get_queryset().services(*ar, **kw)
+
 
 class PersonManagerQuerySet(QuerySet):
     def active(self):
@@ -24,3 +27,6 @@ class PersonManagerQuerySet(QuerySet):
 
     def requesters(self):
         return self.filter(auth_user__groups__name=self.model.REQUESTER_GROUP)
+
+    def services(self):
+        return self.filter(auth_user__groups__name=self.model.SERVICE_GROUP)

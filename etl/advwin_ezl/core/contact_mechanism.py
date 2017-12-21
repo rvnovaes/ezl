@@ -1,6 +1,6 @@
 from core.models import ContactMechanism, Person, ContactMechanismType
-from django.db import IntegrityError
-from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
+from etl.utils import get_message_log_default, save_error_log
 
 
 # noinspection SpellCheckingInspection
@@ -152,8 +152,10 @@ class ContactMechanismETL(GenericETL):
                     WHERE description IS NOT NULL AND description <> ''
                     """
     has_status = True
+    field_check = 'description'
 
-    def config_import(self, rows, user, rows_count):
+    @validate_import
+    def config_import(self, rows, user, rows_count, log=False):
         #log_file = open('log_file.txt', 'w')
         for row in rows:
             print(rows_count)
@@ -169,9 +171,12 @@ class ContactMechanismETL(GenericETL):
                                     'contact_mechanism_type']) or ContactMechanismType.objects.filter(
                                 name__iexact='CONTACT MECHANISM TYPE-INVÁLIDO')
                             if contact_mechanism_type:
-                                obj = self.model(contact_mechanism_type=contact_mechanism_type[0],
-                                                 description=row['description'], notes='', person=person, create_user=user)
-                                obj.save()
+                                defaults = {
+                                    'contact_mechanism_type': contact_mechanism_type.first(),
+                                    'description': row['description'], 'notes': '',
+                                    'person': person, 'create_user': user}
+                                self.model.objects.get_or_create(description=row['description'],
+                                                                 defaults=defaults)
                         else:
                             contact_mechanism_type = ContactMechanismType.objects.filter(
                                 name__unaccent__iexact='email') or ContactMechanismType.objects.filter(
@@ -179,18 +184,21 @@ class ContactMechanismETL(GenericETL):
                             if contact_mechanism_type:
                                 for description in row['description'].split(';'):
                                     if description:
-                                        obj = self.model(contact_mechanism_type=contact_mechanism_type[0],
-                                                         description=description, notes='', person=person, create_user=user)
-                                        obj.save()
+                                        defaults = {
+                                            'contact_mechanism_type': contact_mechanism_type.first(),
+                                            'description': row['description'], 'notes': '',
+                                            'person': person, 'create_user': user}
+                                        self.model.objects.get_or_create(description=description,
+                                                                         defaults=defaults)
 
                         self.debug_logger.debug(
                             "Contact Mechanism,%s,%s,%s,%s,%s,%s" % (
                             str(legacy_code), str(contact_mechanism_type[0]), str(description), str(person.id),
                             str(user.id), self.timestr))
             except Exception as e:
-                self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de ContactMechanism: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
+                save_error_log(log, user, msg)
 
 
 if __name__ == '__main__':

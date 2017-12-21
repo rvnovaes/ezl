@@ -1,22 +1,66 @@
 from django.db.utils import IntegrityError
 
 from core.utils import LegacySystem
-from etl.advwin_ezl.advwin_ezl import GenericETL
-from etl.utils import ecm_path_advwin2ezl
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
+from etl.utils import ecm_path_advwin2ezl, get_users_to_import, get_message_log_default, save_error_log
 from task.models import Ecm, Task
 
 
 class EcmEtl(GenericETL):
-    def __init__(self, task_legacy_code=False, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.task_legacy_code = task_legacy_code
-        if self.task_legacy_code:
-            self.import_query = self.get_sql_filter_task()
-        else:
-            self.import_query = self.get_query_all()
+    _import_query = """
+                    SELECT
+                      G.ID_doc AS ecm_legacy_code,
+                      A.Ident  AS task_legacy_code,
+                      G.Link   AS path
+                    FROM Jurid_Ged_Main AS G
+                      INNER JOIN Jurid_agenda_table AS A
+                        ON G.Codigo_OR = CAST(A.Ident AS VARCHAR(255))
+                      INNER JOIN Jurid_Pastas AS P
+                        ON A.Pasta = P.Codigo_Comp
+                      INNER JOIN Jurid_CodMov AS cm
+                        ON A.CodMov = cm.Codigo
+                    WHERE G.Tabela_OR = 'Agenda'
+                          AND P.Status = 'Ativa'
+                          AND G.Link <> ''
+                          AND G.Link IS NOT NULL
+                          AND cm.UsarOS = 1
+                          AND (p.Status = 'Ativa' OR p.Dt_Saida IS NULL)
+                          AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
+                               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
+                          AND a.Advogado IN ('{person_legacy_code}')
+                    UNION
+                    SELECT DISTINCT
+                      G.ID_doc AS ecm_legacy_code,
+                      A.Ident  AS task_legacy_code,
+                      G.Link   AS path
+                    FROM Jurid_Ged_Main AS G
+                      INNER JOIN Jurid_GEDLig AS GL
+                        ON GL.Id_id_doc = G.ID_doc
+                      INNER JOIN Jurid_agenda_table AS A
+                        ON GL.Id_codigo_or = CAST(A.Ident AS VARCHAR(255))
+                      INNER JOIN Jurid_Pastas AS P
+                        ON A.Pasta = P.Codigo_Comp
+                      INNER JOIN Jurid_CodMov AS cm
+                        ON A.CodMov = cm.Codigo
+                    WHERE GL.Id_tabela_or = 'Agenda'
+                          AND P.Status = 'Ativa'
+                          AND G.Link <> ''
+                          AND G.Link IS NOT NULL
+                          AND cm.UsarOS = 1
+                          AND (p.Status = 'Ativa' OR p.Dt_Saida IS NULL)
+                          AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
+                               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
+                          AND a.Advogado IN ('{person_legacy_code}')
+                          """
     model = Ecm
+    field_check = 'ecm_legacy_code'
 
-    def config_import(self, rows, user, rows_count):
+    @property
+    def import_query(self):
+        return self._import_query.format(person_legacy_code = "','".join(get_users_to_import()))
+
+    @validate_import
+    def config_import(self, rows, user, rows_count, log=False):
         """
         A importacao do ECM aramazena apenas o caminho com o nome do arquivo.
         Para que as duas aplicacacoes tenham acesso ao arquivo, e necessario que
@@ -46,90 +90,13 @@ class EcmEtl(GenericETL):
                                     str(row['ecm_legacy_code']), str(row['task_legacy_code']),
                                     str(row['path']), self.timestr))
                         except IntegrityError as e:
-                            print(e)
+                            msg = get_message_log_default(
+                                self.model._meta.verbose_name, rows_count, e,
+                                self.timestr)
+                            self.error_logger.error(msg)
+                            save_error_log(log, user, msg)
             except Exception as e:
-                self.error_logger.error(
-                    'Ocorreu o seguinte erro na importacao de ECM: ' + str(rows_count) + ',' + str(
-                        e) + ',' + self.timestr)
-
-
-    def get_query_all(self):
-        sql = """
-                    SELECT
-                      G.ID_doc AS ecm_legacy_code,
-                      A.Ident  AS task_legacy_code,
-                      G.Link   AS path
-                    FROM Jurid_Ged_Main AS G
-                      INNER JOIN Jurid_agenda_table AS A
-                        ON G.Codigo_OR = CAST(A.Ident AS VARCHAR(255))
-                      INNER JOIN Jurid_Pastas AS P
-                        ON A.Pasta = P.Codigo_Comp
-                      INNER JOIN Jurid_CodMov AS cm
-                        ON A.CodMov = cm.Codigo
-                    WHERE G.Tabela_OR = 'Agenda'
-                          AND P.Status = 'Ativa'
-                          AND G.Link <> ''
-                          AND G.Link IS NOT NULL
-                          AND cm.UsarOS = 1
-                          AND (p.Status = 'Ativa' OR p.Dt_Saida IS NULL)
-                          AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171')
-                    UNION ALL
-                    SELECT DISTINCT
-                      G.ID_doc AS ecm_legacy_code,
-                      A.Ident  AS task_legacy_code,
-                      G.Link   AS path
-                    FROM Jurid_Ged_Main AS G
-                      INNER JOIN Jurid_GEDLig AS GL
-                        ON GL.Id_id_doc = G.ID_doc
-                      INNER JOIN Jurid_agenda_table AS A
-                        ON GL.Id_codigo_or = CAST(A.Ident AS VARCHAR(255))
-                      INNER JOIN Jurid_Pastas AS P
-                        ON A.Pasta = P.Codigo_Comp
-                      INNER JOIN Jurid_CodMov AS cm
-                        ON A.CodMov = cm.Codigo
-                    WHERE GL.Id_tabela_or = 'Agenda'
-                          AND P.Status = 'Ativa'
-                          AND G.Link <> ''
-                          AND G.Link IS NOT NULL
-                          AND cm.UsarOS = 1
-                          AND (p.Status = 'Ativa' OR p.Dt_Saida IS NULL)
-                          AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171')
-         -- marcio.batista, nagila e claudia pires(Em teste)
-        """
-        return sql
-
-    def get_sql_filter_task(self):
-        sql = """
-                    SELECT
-                      G.ID_doc AS ecm_legacy_code,
-                      A.Ident  AS task_legacy_code,
-                      G.Link   AS path
-                    FROM Jurid_Ged_Main AS G
-                      INNER JOIN Jurid_agenda_table AS A
-                        ON G.Codigo_OR = CAST(A.Ident AS VARCHAR(255))
-                      INNER JOIN Jurid_Pastas AS P
-                        ON A.Pasta = P.Codigo_Comp
-                      INNER JOIN Jurid_CodMov AS cm
-                        ON A.CodMov = cm.Codigo
-                    WHERE A.Ident = {task}
-                    UNION ALL
-                    SELECT DISTINCT
-                      G.ID_doc AS ecm_legacy_code,
-                      A.Ident  AS task_legacy_code,
-                      G.Link   AS path
-                    FROM Jurid_Ged_Main AS G
-                      INNER JOIN Jurid_GEDLig AS GL
-                        ON GL.Id_id_doc = G.ID_doc
-                      INNER JOIN Jurid_agenda_table AS A
-                        ON GL.Id_codigo_or = CAST(A.Ident AS VARCHAR(255))
-                      INNER JOIN Jurid_Pastas AS P
-                        ON A.Pasta = P.Codigo_Comp
-                      INNER JOIN Jurid_CodMov AS cm
-                        ON A.CodMov = cm.Codigo
-                    WHERE A.Ident = {task}
-        """.format(task=self.task_legacy_code)
-        return sql
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
+                self.error_logger.error(msg)
+                save_error_log(log, user, msg)

@@ -1,5 +1,6 @@
 import importlib
 import json
+from abc import abstractproperty
 from functools import wraps
 
 from django.conf import settings
@@ -13,6 +14,7 @@ from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import ProtectedError, Q
+from django.db import transaction
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -22,7 +24,7 @@ from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 
-from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin
+from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, AddressFormSet
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
@@ -35,6 +37,56 @@ from core.tables import PersonTable, UserTable, AddressTable
 from core.utils import login_log, logout_log
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task
+
+
+class AutoCompleteView(autocomplete.Select2QuerySetView):
+    model = abstractproperty()
+    lookups = abstractproperty()
+    select_related = None
+
+    @classmethod
+    def get_part_queryset(cls, part, queryset):
+        q = Q()
+        for lookup in cls.lookups:
+            q |= Q(**{lookup: part})
+
+        return queryset.filter(q)
+
+    def get_queryset(self):
+        if self.select_related:
+            qs = self.model.objects.select_related(*self.select_related)
+
+        if self.q:
+            parts = self.q.split(' ')
+
+            for part in parts:
+                qs = self.get_part_queryset(part, qs)
+                if not qs.exists():
+                    return self.model.objects.none()
+
+            return qs
+
+        else:
+            qs = qs[:10]
+
+        return qs
+
+
+class CityAutoCompleteView(AutoCompleteView):
+    model = City
+    lookups = (
+        'name__unaccent__icontains',
+        'state__initials__exact',
+        'state__name__unaccent__contains',
+        'state__country__name__unaccent__contains',
+    )
+    select_related = ('state__country', 'state', )
+
+    def get_result_label(self, result):
+        return '{} - {}/{} - {}'.format(result.name,
+                                        result.state.initials,
+                                        result.state.name,
+                                        result.state.country.name)
 
 
 def login(request):
@@ -60,6 +112,28 @@ def logout_user(request):
     # Redireciona para a página de login
     return HttpResponseRedirect('/')
 
+class MultiDeleteViewMixin(DeleteView):
+    success_message = None
+
+    def delete(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            pks = request.POST.getlist('selection')
+
+            try:
+                self.model.objects.filter(pk__in=pks).delete()
+                messages.success(self.request, self.success_message)
+            except ProtectedError as e:
+                qs = e.protected_objects.first()
+                # type = type('Task')
+                messages.error(self.request,
+                               delete_error_protected(str(self.model._meta.verbose_name),
+                                                      qs.__str__()))
+
+        # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
+        if self.success_url:
+            return HttpResponseRedirect(self.success_url)
+        else:
+            return HttpResponseRedirect(self.get_success_url())
 
 def remove_invalid_registry(f):
     """
@@ -145,6 +219,7 @@ class AuditFormMixin(LoginRequiredMixin, SuccessMessageMixin):
             form.instance.alter_date = timezone.now()
             form.instance.alter_user = self.request.user
             form.save()
+
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -189,13 +264,13 @@ class AddressUpdateView(AddressMixin, UpdateView):
         return reverse('person_update', args=(self.object.person.pk, ))
 
 
-class AddressDeleteView(AddressMixin, DeleteView):
+class AddressDeleteView(AddressMixin, MultiDeleteViewMixin):
     model = Address
     form_class = AddressForm
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
     def get_success_url(self):
-        return reverse('person_update', args=(self.object.person.pk, ))
+        return reverse('person_update', kwargs={'pk': self.kwargs['person_pk']})
 
 
 class SingleTableViewMixin(SingleTableView):
@@ -234,27 +309,6 @@ class SingleTableViewMixin(SingleTableView):
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         return context
-
-
-class MultiDeleteViewMixin(DeleteView):
-    success_message = None
-
-    def delete(self, request, *args, **kwargs):
-        if request.method == 'POST':
-            pks = request.POST.getlist('selection')
-
-            try:
-                self.model.objects.filter(pk__in=pks).delete()
-                messages.success(self.request, self.success_message)
-            except ProtectedError as e:
-                qs = e.protected_objects.first()
-                # type = type('Task')
-                messages.error(self.request,
-                               delete_error_protected(str(self.model._meta.verbose_name),
-                                                      qs.__str__()))
-
-        # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
-        return HttpResponseRedirect(self.success_url)
 
 
 def address_update(request, pk):
@@ -308,23 +362,47 @@ class PersonCreateView(AuditFormMixin, CreateView):
     model = Person
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
-    success_message = CREATE_SUCCESS_MESSAGE
-    object_list_url = 'person_list'
+
+    def get_context_data(self, **kwargs):
+        data = super(PersonCreateView, self).get_context_data(**kwargs)
+        if self.request.POST:
+            data['personaddress'] = AddressFormSet(self.request.POST)
+        else:
+            data['personaddress'] = AddressFormSet()
+            data['personaddress'].forms[0].fields['is_active'].initial = True
+            data['personaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
+        return data
+
+    def form_valid(self, form):
+        if AuditFormMixin.form_valid(self, form):
+            context = self.get_context_data()
+            personaddress = context['personaddress']
+            with transaction.atomic():
+                self.object = form.save()
+
+                if personaddress.is_valid():
+                    address = personaddress.forms[0].save(commit=False)
+                    address.person = self.object
+                    address.create_user = self.request.user
+                    address.save()
+            return super(PersonCreateView, self).form_valid(form)
 
 
 class PersonUpdateView(AuditFormMixin, UpdateView):
     model = Person
     form_class = PersonForm
-    success_url = reverse_lazy('person_list')
     success_message = UPDATE_SUCCESS_MESSAGE
     template_name_suffix = '_update_form'
     object_list_url = 'person_list'
 
     def get_context_data(self, **kwargs):
         kwargs.update({
-            'address_table': AddressTable(self.object.address_set.all()),
+            'table': AddressTable(self.object.address_set.all()),
         })
         return super().get_context_data(**kwargs)
+
+    def get_success_url(self):
+        return reverse('person_update', args=(self.object.id,))
 
 
 class PersonDeleteView(AuditFormMixin, MultiDeleteViewMixin):

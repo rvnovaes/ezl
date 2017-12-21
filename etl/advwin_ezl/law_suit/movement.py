@@ -3,42 +3,43 @@ from django.contrib.auth.models import User
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
+from etl.utils import get_users_to_import, get_message_log_default, save_error_log
 from lawsuit.models import Movement, LawSuit, TypeMovement
+from etl.utils import get_message_log_default, save_error_log
 
 
 class MovementETL(GenericETL):
-    import_query = """
-                    SELECT DISTINCT
-                      CASE WHEN (rtrim(ltrim(d.D_Codigo)) LIKE '') OR (d.D_Codigo IS NULL)
-                        THEN
-                          p.Codigo_Comp
-                      ELSE cast(d.D_Codigo AS VARCHAR(20)) END AS law_suit_legacy_code,
-                      pm.Ident                                 AS legacy_code,
-                      pm.Advogado                              AS person_lawyer_legacy_code,
-                      pm.CodMov                                AS type_movement_legacy_code
-                    FROM Jurid_ProcMov AS pm
-                      INNER JOIN Jurid_Pastas AS p ON
-                                                     p.Codigo_Comp = pm.Codigo_Comp
-                      INNER JOIN Jurid_agenda_table AS a ON
-                                                           pm.Ident = a.Mov
-                      INNER JOIN Jurid_CodMov AS cm ON
-                                                      a.CodMov = cm.Codigo
-                      INNER JOIN Jurid_Distribuicao AS d ON
-                                                           p.Codigo_Comp = d.Codigo_Comp
-                    WHERE
-                      cm.UsarOS = 1 AND
-                      p.Status = 'Ativa' AND
-                      ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                       (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                      AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171') -- marcio.batista, nagila e claudia (Em teste)
+    _import_query = """
+                SELECT DISTINCT
+                  pm.M_Distribuicao AS law_suit_legacy_code,
+                  pm.Ident          AS legacy_code,
+                  pm.Advogado       AS person_lawyer_legacy_code,
+                  pm.CodMov         AS type_movement_legacy_code
+                from Jurid_ProcMov AS pm
+                INNER JOIN Jurid_Pastas as p on
+                  p.Codigo_Comp = pm.Codigo_Comp
+                INNER JOIN Jurid_agenda_table as a ON
+                  pm.Ident = a.Mov
+                INNER JOIN Jurid_CodMov as cm ON
+                  a.CodMov = cm.Codigo
+                WHERE
+                  cm.UsarOS = 1 and
+                  p.Status = 'Ativa' AND
+                  ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
+                  (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
+                  AND a.Advogado IN ('{}')
                   """
 
     model = Movement
     advwin_table = "Jurid_ProcMov"
     has_status = True
 
+    @property
+    def import_query(self):
+        return self._import_query.format("','".join(get_users_to_import()))
+
     @validate_import
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         for row in rows:
             rows_count -= 1
 
@@ -92,9 +93,10 @@ class MovementETL(GenericETL):
                                                     str(create_user.id),str(True),str(lawsuit.id),str(type_movement.id),self.timestr))
 
             except Exception as e:
-                self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Movimentacao: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
+                self.error_logger.error(msg)
+                save_error_log(msg)
 
 
 if __name__ == "__main__":
