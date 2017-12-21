@@ -47,7 +47,6 @@ class EcmEtl(GenericETL):
                           AND G.Link <> ''
                           AND G.Link IS NOT NULL
                           AND cm.UsarOS = 1
-                          AND (p.Status = 'Ativa' OR p.Status = 'Especial' OR p.Dt_Saida IS NULL)
                           AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                                (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
                           AND a.Advogado IN ('{person_legacy_code}')
