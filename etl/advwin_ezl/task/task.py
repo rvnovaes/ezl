@@ -1,21 +1,22 @@
 from itertools import chain
 from json import loads
 from os import linesep
-
 import pytz
 from django.db.models import Q
 from django.utils import timezone
 from sqlalchemy import update, cast, String, insert
-
 from advwin_models.advwin import JuridAgendaTable, JuridCorrespondenteHist, JuridFMAudienciaCorrespondente, \
     JuridFMAlvaraCorrespondente, JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
-from etl.utils import get_users_to_import
+from etl.utils import get_users_to_import, get_message_log_default, save_error_log
 from ezl import settings
 from lawsuit.models import Movement
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
+from etl.utils import get_message_log_default, save_error_log
+
+
 
 default_justify = 'Aceita por Correspondente: %s'
 
@@ -101,7 +102,7 @@ class TaskETL(GenericETL):
         return self._import_query.format("','".join(get_users_to_import()))
 
     @validate_import
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         from core.models import Person
         for row in rows:
 
@@ -180,7 +181,7 @@ class TaskETL(GenericETL):
                                      'blocked_payment_date',
                                      'finished_date']
 
-                    task.save(update_fields=update_fields, **{'called_by_etl': True})
+                    task.save(update_fields=update_fields)
 
                 else:
                     self.model.objects.create(movement=movement,
@@ -211,9 +212,11 @@ class TaskETL(GenericETL):
                         str(status_code_advwin), self.timestr))
 
             except Exception as e:
-                self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Task: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
+                self.error_logger.error(msg)
+                save_error_log(log, user, msg)
+
 
     def config_export(self):
         accepted_tasks = self.model.objects.filter(legacy_code__isnull=False,

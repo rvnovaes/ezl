@@ -1,8 +1,8 @@
 from django.db.utils import IntegrityError
 
 from core.utils import LegacySystem
-from etl.advwin_ezl.advwin_ezl import GenericETL
-from etl.utils import ecm_path_advwin2ezl, get_users_to_import
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
+from etl.utils import ecm_path_advwin2ezl, get_users_to_import, get_message_log_default, save_error_log
 from task.models import Ecm, Task
 
 
@@ -53,12 +53,14 @@ class EcmEtl(GenericETL):
                           AND a.Advogado IN ('{person_legacy_code}')
                           """
     model = Ecm
+    field_check = 'ecm_legacy_code'
 
     @property
     def import_query(self):
         return self._import_query.format(person_legacy_code = "','".join(get_users_to_import()))
 
-    def config_import(self, rows, user, rows_count):        
+    @validate_import
+    def config_import(self, rows, user, rows_count, log=False):
         """
         A importacao do ECM aramazena apenas o caminho com o nome do arquivo.
         Para que as duas aplicacacoes tenham acesso ao arquivo, e necessario que
@@ -88,8 +90,13 @@ class EcmEtl(GenericETL):
                                     str(row['ecm_legacy_code']), str(row['task_legacy_code']),
                                     str(row['path']), self.timestr))
                         except IntegrityError as e:
-                            print(e)
+                            msg = get_message_log_default(
+                                self.model._meta.verbose_name, rows_count, e,
+                                self.timestr)
+                            self.error_logger.error(msg)
+                            save_error_log(log, user, msg)
             except Exception as e:
-                self.error_logger.error(
-                    'Ocorreu o seguinte erro na importacao de ECM: ' + str(rows_count) + ',' + str(
-                        e) + ',' + self.timestr)
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
+                self.error_logger.error(msg)
+                save_error_log(log, user, msg)
