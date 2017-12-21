@@ -24,7 +24,7 @@ class MovementETL(GenericETL):
                   a.CodMov = cm.Codigo
                 WHERE
                   cm.UsarOS = 1 and
-                  p.Status = 'Ativa' AND
+                  (p.Status = 'Ativa' OR p.Status = 'Especial') AND
                   ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                   (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
                   AND a.Advogado IN ('{}')

@@ -20,11 +20,11 @@ class EcmEtl(GenericETL):
                       INNER JOIN Jurid_CodMov AS cm
                         ON A.CodMov = cm.Codigo
                     WHERE G.Tabela_OR = 'Agenda'
-                          AND P.Status = 'Ativa'
+                          AND (P.Status = 'Ativa' OR P.Status = 'Especial')
                           AND G.Link <> ''
                           AND G.Link IS NOT NULL
                           AND cm.UsarOS = 1
-                          AND (p.Status = 'Ativa' OR p.Dt_Saida IS NULL)
+                          AND (P.Status = 'Ativa' OR P.Status = 'Especial' OR p.Dt_Saida IS NULL)
                           AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                                (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
                           AND a.Advogado IN ('{person_legacy_code}')
@@ -43,11 +43,10 @@ class EcmEtl(GenericETL):
                       INNER JOIN Jurid_CodMov AS cm
                         ON A.CodMov = cm.Codigo
                     WHERE GL.Id_tabela_or = 'Agenda'
-                          AND P.Status = 'Ativa'
+                          AND (p.Status = 'Ativa' OR p.Status = 'Especial')
                           AND G.Link <> ''
                           AND G.Link IS NOT NULL
                           AND cm.UsarOS = 1
-                          AND (p.Status = 'Ativa' OR p.Dt_Saida IS NULL)
                           AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                                (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
                           AND a.Advogado IN ('{person_legacy_code}')

@@ -54,7 +54,7 @@ class LawsuitETL(GenericETL):
                           INNER JOIN Jurid_CodMov AS cm ON
                                                           a.CodMov = cm.Codigo
                     WHERE
-                          p.Status = 'Ativa' AND
+                          (p.Status = 'Ativa' OR p.Status = 'Especial') AND
                           cm.UsarOS = 1 AND
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
                           ((a.prazo_lido = 0 AND a.SubStatus = 30) OR

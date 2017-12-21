@@ -17,7 +17,7 @@ class FolderETL(GenericETL):
               p.Cliente,
               p.Setor
             FROM Jurid_Pastas AS p
-                  INNER JOIN Jurid_ProcMov AS pm ON
+                  LEFT JOIN Jurid_ProcMov AS pm ON
                     pm.Codigo_Comp = p.Codigo_Comp
                   INNER JOIN Jurid_agenda_table AS a ON
                     a.Pasta = p.Codigo_Comp
@@ -25,7 +25,7 @@ class FolderETL(GenericETL):
                     a.CodMov = cm.Codigo
             WHERE
               cm.UsarOS = 1 AND
-              p.Status = 'Ativa' AND
+              (p.Status = 'Ativa' OR p.Status = 'Especial') AND
               p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '' AND
               p.Cliente IS NOT NULL AND p.Cliente <> '' AND
               ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
