@@ -12,6 +12,9 @@ class Message(Audit):
     chat = models.ForeignKey(Chat, related_name='messages')
     message = models.TextField(verbose_name='Mensagem')
 
+    class Meta:
+        ordering = ['create_date']
+
 
 class UserByChat(Audit):
     user_by_chat = models.ForeignKey(User, verbose_name='Usuario')

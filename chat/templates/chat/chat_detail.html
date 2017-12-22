@@ -1,5 +1,6 @@
+{% load staticfiles %}
 <!-- Conversation Start -->
-<div class="col-sm-8 conversation">
+<div class="col-sm-8 conversation" id="chat-{{ chat.pk }}" style="display: none">
     <!-- Heading -->
     <div class="row heading">
         <div class="col-sm-2 col-md-1 col-xs-3 heading-avatar">
@@ -18,7 +19,7 @@
     </div>
     <!-- Heading End -->
     <!-- Message Box -->
-    <div class="row message" id="conversation">
+    <div class="row message" id="conversation" chat-id="{{ chat.pk }}">
         <div class="row message-previous">
             <div class="col-sm-12 previous">
                 <a onclick="previous(this)" id="ankitjain28" name="20">
@@ -29,21 +30,23 @@
         {% for message in chat.messages.all %}
             {% if message.create_user == user %}
                 <div class="row message-body">
-                    <div class="col-sm-12 message-main-receiver">
-                        <div class="receiver">
-                            <div class="message-text">
-                                {{ message.message }}
-                            </div>
-                            <span class="message-time pull-right">{{message.create_date | time}}</span>
+                    <div class="col-sm-12 message-main-sender">
+                        <div class="sender">
+                            <strong class="pull-left primary-font">{{ message.create_user }}</strong>
+                            <div class="message-text">{{ message.message }}</div>
+                            <span class="message-time pull-right">{{message.create_date|time}}</span>
                         </div>
                     </div>
                 </div>
             {% else %}
                 <div class="row message-body">
-                    <div class="col-sm-12 message-main-sender">
-                        <div class="sender">
-                            <div class="message-text">{{ message.message }}</div>
-                            <span class="message-time pull-right">{{message.create_date|time}}</span>
+                    <div class="col-sm-12 message-main-receiver">
+                        <div class="receiver">
+                            <strong class="pull-left primary-font">{{ message.create_user }}</strong>
+                            <div class="message-text">
+                                {{ message.message }}
+                            </div>
+                            <span class="message-time pull-right">{{message.create_date | time}}</span>
                         </div>
                     </div>
                 </div>
@@ -63,9 +66,34 @@
             <i class="fa fa-microphone fa-2x" aria-hidden="true"></i>
         </div>
         <div class="col-sm-1 col-xs-1 reply-send">
+            <button onclick="sendMessage()">Enviar</button>
             <i class="fa fa-send fa-2x" aria-hidden="true"></i>
         </div>
     </div>
     <!-- Reply Box End -->
 </div>
 <!-- Conversation End -->
+
+{% block javascript %}
+    <script>
+        console.log("ws://" + window.location.host + "/chat/?label={{chat.label}}");
+
+
+        $(".heading-compose").click(function () {
+            $(".side-two").css({
+                "left": "0"
+            });
+        });
+
+        $(".newMessage-back").click(function () {
+            $(".side-two").css({
+                "left": "-100%"
+            });
+        });
+
+        var setBoxMessage = function (box_id) {
+            $('.conversation').hide();
+            $('#' + box_id).show();
+        }
+    </script>
+{% endblock %}

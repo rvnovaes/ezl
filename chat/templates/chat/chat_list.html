@@ -44,32 +44,35 @@
                     <!-- sideBar -->
                     <div class="row sideBar">
                         {% for chat in chats %}
-                            <div class="row sideBar-body" onclick="setBoxMessage('chat-{{ chat.pk }}')">
-                                <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                                    <div class="avatar-icon">
-                                        <img src="http://placehold.it/50/55C1E7/fff&text=U"
-                                             alt="User Avatar" class="img-circle"/></div>
-                                </div>
-                                <div class="col-sm-9 col-xs-9 sideBar-main">
-                                    <div class="row">
-                                        <div class="col-sm-8 col-xs-8 sideBar-name">
-                                            <span class="name-meta">{{ chat.label }}</span>
-                                        </div>
-                                        <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                                            <span class="time-meta pull-right">{{ chat.create_date|time }}</span>
+                            {% if chat.messages.all|length > 0 %}
+                                <div class="row sideBar-body"
+                                     onclick="setBoxMessage('chat-{{ chat.pk }}', '{{ chat.label }}', '{{ chat.pk }}')">
+                                    <div class="col-sm-3 col-xs-3 sideBar-avatar">
+                                        <div class="avatar-icon">
+                                            <img src="http://placehold.it/50/55C1E7/fff&text=U"
+                                                 alt="User Avatar" class="img-circle"/></div>
+                                    </div>
+                                    <div class="col-sm-9 col-xs-9 sideBar-main">
+                                        <div class="row">
+                                            <div class="col-sm-8 col-xs-8 sideBar-name">
+                                                <span class="name-meta">{{ chat.label }}</span>
+                                            </div>
+                                            <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
+                                                <span class="time-meta pull-right">{{ chat.create_date|time }}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            {% endif %}
                         {% endfor %}
                     </div>
                     <!-- Sidebar End -->
                 </div>
             </div>
             {% for chat in chats %}
-                <div id="chat-{{ chat.pk }}">
+                {% if chat.messages.all|length > 0 %}
                     {% include 'chat/chat_detail.html' %}
-                </div>
+                {% endif %}
             {% endfor %}
         </div>
         <!-- App One End -->
@@ -77,50 +80,49 @@
 {% endblock %}
 {% block javascript %}
     <script>
-        var data = '';
-        var edata = '';
-        var label = "";
-        $(document).ready(function () {
-            $('.chat.panel-body').animate({scrollTop: 9999}, 1000);
-
-            {% for chat in chats %}
-                var label = "{{ chat.label }}";
-                socket = new WebSocket("ws://" + window.location.host + "/chat/?label=" + label);
-            {% endfor %}
-            sendMessage = function (chatId) {
-                data = JSON.stringify({
-                    'text': $('#' + chatId).find('#btn-input').val(),
-                    'chat': chatId,
-                    'label': label
-                });
-                socket.onopen(data)
-            };
-
-            {# Ao chegar uma mensagem#}
-            socket.onmessage = function (e) {
-                $('.chat.panel-body').animate({scrollTop: 9999}, 1000);
-                data = JSON.parse(e.data);
-                messagePosition = 'left';
-                imgChat = 'http://placehold.it/50/55C1E7/fff&text=U';
-                if ('{{user}}' === data.user) {
-                    messagePosition = 'right';
-                    imgChat = 'http://placehold.it/50/FA6F57/fff&text=ME'
-                }
-                elementUl = $('[data-id=' + data.chat + ']');
-                li = $($.parseHTML('<li class=" ' + messagePosition + ' clearfix"><span class="chat-img pull-' + messagePosition + '"><img src="' + imgChat + '" alt="User Avatar" class="img-circle" />'))
-                divBody = $($.parseHTML('<div class="chat-body clearfix"></div>'));
-                divHeader = $($.parseHTML('<div class="header"> </div>'));
-                small = $($.parseHTML(''));
-                {#                small = $($.parseHTML('<small class=" text-muted"><span class="glyphicon glyphicon-time"></span>13 mins ago</small>'));#}
-                strong = $($.parseHTML('<strong class="pull-' + messagePosition + ' primary-font">' + data.user + '</strong>'));
-                p = $($.parseHTML('<p>' + data.text + '</p>'));
-                elementUl.append(li.append(divBody.append(divHeader.append(small).append(strong).append(p))))
-            };
-            socket.onopen = function (data) {
-                socket.send(data);
-            }
-        });
-
+        {#        var data = '';#}
+        {#        var edata = '';#}
+        {#        var label = "";#}
+        {#        $(document).ready(function () {#}
+        {#            $('.chat.panel-body').animate({scrollTop: 9999}, 1000);#}
+        {##}
+        {#            {% for chat in chats %}#}
+        {#                var label = "{{ chat.label }}";#}
+        {#                socket = new WebSocket("ws://" + window.location.host + "/chat/?label=" + label);#}
+        {#            {% endfor %}#}
+        {#            sendMessage = function (chatId) {#}
+        {#                data = JSON.stringify({#}
+        {#                    'text': $('#' + chatId).find('#btn-input').val(),#}
+        {#                    'chat': chatId,#}
+        {#                    'label': label#}
+        {#                });#}
+        {#                socket.onopen(data)#}
+        {#            };#}
+        {##}
+        {# Ao chegar uma mensagem#}
+        {#            socket.onmessage = function (e) {#}
+        {#                $('.chat.panel-body').animate({scrollTop: 9999}, 1000);#}
+        {#                data = JSON.parse(e.data);#}
+        {#                messagePosition = 'left';#}
+        {#                imgChat = 'http://placehold.it/50/55C1E7/fff&text=U';#}
+        {#                if ('{{user}}' === data.user) {#}
+        {#                    messagePosition = 'right';#}
+        {#                    imgChat = 'http://placehold.it/50/FA6F57/fff&text=ME'#}
+        {#                }#}
+        {#                elementUl = $('[data-id=' + data.chat + ']');#}
+        {#                li = $($.parseHTML('<li class=" ' + messagePosition + ' clearfix"><span class="chat-img pull-' + messagePosition + '"><img src="' + imgChat + '" alt="User Avatar" class="img-circle" />'))#}
+        {#                divBody = $($.parseHTML('<div class="chat-body clearfix"></div>'));#}
+        {#                divHeader = $($.parseHTML('<div class="header"> </div>'));#}
+        {#                small = $($.parseHTML(''));#}
+        {#                small = $($.parseHTML('<small class=" text-muted"><span class="glyphicon glyphicon-time"></span>13 mins ago</small>'));#}
+        {#                strong = $($.parseHTML('<strong class="pull-' + messagePosition + ' primary-font">' + data.user + '</strong>'));#}
+        {#                p = $($.parseHTML('<p>' + data.text + '</p>'));#}
+        {#                elementUl.append(li.append(divBody.append(divHeader.append(small).append(strong).append(p))))#}
+        {#            };#}
+        {#            socket.onopen = function (data) {#}
+        {#                socket.send(data);#}
+        {#            }#}
+        {#        });#}
         $(".heading-compose").click(function () {
             $(".side-two").css({
                 "left": "0"
@@ -133,8 +135,42 @@
             });
         });
 
-        var setBoxMessage = function (box_id) {
-            alert(box_id)
+        socket = null;
+        var setBoxMessage = function (box_id, chat_label, chat_id) {
+            $('.conversation').hide();
+            $('#' + box_id).show();
+            socket = new WebSocket("ws://" + window.location.host + "/chat/?label=" + chat_label);
+            socket.onopen = function (data) {
+                socket.send(data);
+            };
+            socket.onmessage = function (e) {
+                console.log(e);
+                var data = JSON.parse(e.data);
+                $('#conversation').animate({scrollTop: 9999}, 1000);
+                var messagePosition = 'receiver ';
+                if ('{{user}}' == data.user) {
+                    messagePosition = 'sender';
+                }
+                var chatContent = $('[chat-id=' + chat_id + ']').find('.message-body').last();
+                var blockMessage = "" +
+                    "<div class='col-sm-12 message-main-" + messagePosition + "'>" +
+                    "<div class='" + messagePosition + "'>" +
+                    "<div class='message-text'>" + data.text + "</div>" +
+                    "<span class='message-time pull-right>13:57</span>" +
+                    "</div>" +
+                    "</div>";
+                chatContent.append(blockMessage);
+            };
+
+            sendMessage = function () {
+                var data = JSON.stringify({
+                    'text': $("#" + box_id).find('#comment').val(),
+                    'chat': chat_id,
+                    'label': chat_label
+                });
+                socket.onopen(data)
+            };
         }
+
     </script>
 {% endblock %}
