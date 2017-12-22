@@ -26,7 +26,8 @@ class Permissions(Enum):
 icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assignment_return',
              'DONE': 'assignment_turned_in',
              'REFUSED': 'assignment_late', 'INVALID': 'error', 'FINISHED': 'gavel',
-             'BLOCKEDPAYMENT': 'money_off'}
+             'BLOCKEDPAYMENT': 'money_off',
+             'ERROR': 'error'}
 
 
 # next_action = {'ACCEPTED': 'cumprir', 'OPEN': 'assignment', 'RETURN': 'keyboard_return',
@@ -42,6 +43,7 @@ class TaskStatus(Enum):
     BLOCKEDPAYMENT = 'Glosada'
     FINISHED = 'Finalizada'
     INVALID = 'Inválida'
+    ERROR = 'Erro no sistema de origem'
 
     def get_icon(self):
         return icon_dict[self.name]
@@ -228,7 +230,7 @@ class Ecm(Audit, LegacyCode):
 class TaskHistory(AuditCreate):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, blank=False, null=False)
     notes = models.TextField(null=True, blank=True, verbose_name=u'Observações')
-    status = models.CharField(max_length=10, choices=TaskStatus.choices())
+    status = models.CharField(max_length=30, choices=TaskStatus.choices())
 
     class Meta:
         verbose_name = 'Histórico da Providência'

@@ -21,6 +21,8 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
     DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED
 from core.models import Person
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
+from etl.models import InconsistencyETL
+from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement
 from task.filters import TaskFilter
 from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
@@ -160,6 +162,7 @@ class DashboardView(MultiTableMixin, TemplateView):
         refused = grouped.get(TaskStatus.REFUSED) or {}
         blocked_payment = grouped.get(TaskStatus.BLOCKEDPAYMENT) or {}
         finished = grouped.get(TaskStatus.FINISHED) or {}
+        error = InconsistencyETL.objects.filter(is_active=True) or {}
         return_table = DashboardStatusTable(returned, title='Retornadas',
                                             status=TaskStatus.RETURN)
 
@@ -184,7 +187,11 @@ class DashboardView(MultiTableMixin, TemplateView):
                                               title='Finalizadas',
                                               status=TaskStatus.FINISHED)
 
-        return [return_table, accepted_table, open_table, done_table, refused_table,
+        error_table = DashboardErrorStatusTable(error,
+                                                title='Erro no sistema de origem',
+                                                status=TaskStatus.ERROR)
+
+        return [error_table, return_table, accepted_table, open_table, done_table, refused_table,
                   blocked_payment_table,
                   finished_table]
 

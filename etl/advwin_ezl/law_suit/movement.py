@@ -4,13 +4,14 @@ from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from etl.utils import get_users_to_import, get_message_log_default, save_error_log
-from lawsuit.models import Movement, LawSuit, TypeMovement
+from lawsuit.models import Movement, LawSuit, TypeMovement, Folder
 from etl.utils import get_message_log_default, save_error_log
 
 
 class MovementETL(GenericETL):
     _import_query = """
                 SELECT DISTINCT
+                  p.Codigo_Comp     AS folder_legacy_code,
                   pm.M_Distribuicao AS law_suit_legacy_code,
                   pm.Ident          AS legacy_code,
                   pm.Advogado       AS person_lawyer_legacy_code,
@@ -20,7 +21,7 @@ class MovementETL(GenericETL):
                   p.Codigo_Comp = pm.Codigo_Comp
                 INNER JOIN Jurid_agenda_table as a ON
                   pm.Ident = a.Mov
-                INNER JOIN Jurid_CodMov as cm ON
+                LEFT JOIN Jurid_CodMov as cm ON
                   a.CodMov = cm.Codigo
                 WHERE
                   cm.UsarOS = 1 and
@@ -48,11 +49,18 @@ class MovementETL(GenericETL):
                 law_suit_legacy_code = row['law_suit_legacy_code']
                 person_lawyer_legacy_code = row['person_lawyer_legacy_code']
                 type_movement_legacy_code = row['type_movement_legacy_code']
+                folder_legacy_code = row['folder_legacy_code']
 
                 movement = self.model.objects.filter(legacy_code=legacy_code,
                                                      system_prefix=LegacySystem.ADVWIN.value).first()
 
-                lawsuit = LawSuit.objects.filter(legacy_code=law_suit_legacy_code).first()
+                if law_suit_legacy_code:
+                    lawsuit = LawSuit.objects.filter(
+                        legacy_code=law_suit_legacy_code).first() or InvalidObjectFactory.get_invalid_model(LawSuit)
+                else:
+                    lawsuit = None
+                    if LawSuit.objects.filter(folder__legacy_code=folder_legacy_code).first():
+                        lawsuit = InvalidObjectFactory.get_invalid_model(LawSuit)
 
                 type_movement = TypeMovement.objects.filter(
                     legacy_code=type_movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(TypeMovement)
@@ -60,21 +68,22 @@ class MovementETL(GenericETL):
                 person_lawyer = Person.objects.filter(
                     legacy_code=person_lawyer_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
 
+                folder = Folder.objects.filter(
+                    legacy_code=folder_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
+
                 # Conforme descrico no caso 0000486, nao existe person_lawyer na classe Movement, pois segundo analise da
                 # regra de negocios, identificou-se que o usuario que cria a movimentacao e o advogado
                 create_user = person_lawyer.auth_user or InvalidObjectFactory.get_invalid_model(User)
 
-                if not lawsuit:
-                    # se não encontrou o registro, busca o registro inválido
-                    lawsuit = InvalidObjectFactory.get_invalid_model(LawSuit)
-
                 if movement:
                     movement.law_suit = lawsuit
+                    movement.folder = folder
                     movement.type_movement = type_movement
                     movement.alter_user = create_user
                     movement.is_active = True
                     movement.save(update_fields=['is_active',
                                                  'law_suit',
+                                                 'folder',
                                                  'type_movement',
                                                  'alter_user',
                                                  'alter_date',
@@ -86,11 +95,12 @@ class MovementETL(GenericETL):
                                               create_user=create_user,
                                               is_active=True,
                                               law_suit=lawsuit,
+                                              folder=folder,
                                               type_movement=type_movement,
                                               )
                 self.debug_logger.debug(
                     "Movimentacao,%s,%s,%s,%s,%s,%s,%s,%s" % (str(legacy_code), str(LegacySystem.ADVWIN.value), str(create_user.id),
-                                                    str(create_user.id),str(True),str(lawsuit.id),str(type_movement.id),self.timestr))
+                                                    str(create_user.id),str(True),str(lawsuit.id if lawsuit else ''),str(type_movement.id),self.timestr))
 
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,

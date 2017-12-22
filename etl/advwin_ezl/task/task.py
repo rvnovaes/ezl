@@ -12,9 +12,10 @@ from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from etl.utils import get_users_to_import, get_message_log_default, save_error_log
 from ezl import settings
-from lawsuit.models import Movement
+from lawsuit.models import Movement, Folder
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
 from etl.utils import get_message_log_default, save_error_log
+from etl.models import InconsistencyETL, Inconsistencies
 
 
 
@@ -59,7 +60,6 @@ def get_status_by_substatus(substatus):
 
 class TaskETL(GenericETL):
     _import_query = """
-
             SELECT
                 a.Data_confirmacao AS blocked_or_finished_date,
                 a.Status,
@@ -71,26 +71,22 @@ class TaskETL(GenericETL):
                 a.CodMov AS type_task_legacy_code,
                 a.Advogado_or AS person_distributed_by_legacy_code,
                 a.OBS AS description,
-
                 CASE WHEN (a.Data_delegacao IS NULL) THEN
                     a.Data ELSE a.Data_delegacao END AS delegation_date,
-                    a.prazo_fatal AS final_deadline_date
-
+                    a.prazo_fatal AS final_deadline_date,
+                p.Codigo_Comp AS folder_legacy_code,
+                p.Cliente
                 FROM Jurid_agenda_table AS a
-
                 INNER JOIN Jurid_Pastas AS p ON
                     a.Pasta = p.Codigo_Comp
-
                 INNER JOIN Jurid_CodMov AS cm ON
                      a.CodMov = cm.Codigo
-
                 WHERE
                     (cm.UsarOS = 1) AND
                     (p.Status = 'Ativa' OR p.Status = 'Especial') AND
                     ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                     (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
                     AND a.Advogado IN ('{}')
-
     """
     model = Task
     advwin_table = 'Jurid_agenda_table'
@@ -166,6 +162,32 @@ class TaskETL(GenericETL):
                 elif status_code_advwin == TaskStatus.FINISHED:
                     finished_date = blocked_or_finished_date
 
+                inconsistencies = []
+                folder_legacy_code = row['folder_legacy_code']
+                client = row['Cliente']
+                if movement.id == 1:
+                    status_code_advwin = TaskStatus.ERROR
+                    inconsistencies.append({"inconsistency": Inconsistencies.TASKLESSMOVEMENT,
+                                            "solution": Inconsistencies.get_solution(Inconsistencies.TASKLESSMOVEMENT)})
+                if not Folder.objects.filter(legacy_code=folder_legacy_code,
+                                             person_customer__legacy_code=client,
+                                             system_prefix=LegacySystem.ADVWIN.value).first():
+                    status_code_advwin = TaskStatus.ERROR
+                    inconsistencies.append({"inconsistency": Inconsistencies.TASKINATIVEFOLDER,
+                                            "solution": Inconsistencies.get_solution(
+                                                Inconsistencies.TASKINATIVEFOLDER)})
+                if movement.id != 1 and movement.folder.id == 1:
+                    status_code_advwin = TaskStatus.ERROR
+                    inconsistencies.append({"inconsistency": Inconsistencies.TASKINATIVEFOLDER,
+                                            "solution": Inconsistencies.get_solution(
+                                                Inconsistencies.TASKINATIVEFOLDER)})
+
+                if movement.id != 1 and movement.law_suit.id == 1:
+                    status_code_advwin = TaskStatus.ERROR
+                    inconsistencies.append({"inconsistency": Inconsistencies.MOVEMENTLESSPROCESS,
+                                            "solution": Inconsistencies.get_solution(
+                                                Inconsistencies.MOVEMENTLESSPROCESS)})
+
                 if task:
                     task.delegation_date = delegation_date
                     task.final_deadline_date = final_deadline_date
@@ -201,6 +223,18 @@ class TaskETL(GenericETL):
                                               blocked_payment_date=blocked_payment_date,
                                               finished_date=finished_date,
                                               task_status=status_code_advwin)
+
+                if status_code_advwin == TaskStatus.ERROR:
+                    for inconsistency in inconsistencies:
+                        InconsistencyETL.objects.get_or_create(
+                            task=task,
+                            inconsistency=inconsistency['inconsistency'],
+                            solution=inconsistency['solution'],
+                            create_user=user,
+                            alter_user=user)
+                else:
+                    InconsistencyETL.objects.filter(task=task).update(is_active=False)
+
                 self.debug_logger.debug(
                     "Task,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
                         str(movement.id), str(legacy_code), str(LegacySystem.ADVWIN.value),
