@@ -95,6 +95,7 @@ class InvalidObjectFactory(object):
         invalid_movement, created = Movement.objects.get_or_create(
             legacy_code=invalid_legacy_code,
             create_user=user, law_suit=invalid_law_suit,
+            folder=invalid_folder,
             type_movement=invalid_type_movement)
 
         invalid_address_type, created = AddressType.objects.get_or_create(

@@ -1,5 +1,29 @@
+from enum import Enum
 from django.db import models
 from core.models import Audit
+from task.models import Task
+
+# Dicionário para retornar a solução referente à inconsistência encontrada
+solution_dict = dict(TASKLESSMOVEMENT='Preencher a movimentação na OS',
+                     MOVEMENTLESSPROCESS='Preencher o processo na movimentação',
+                     TASKINATIVEFOLDER='Alterar o status da pasta para "Especial"')
+
+
+class Inconsistencies(Enum):
+    TASKLESSMOVEMENT = 'OS sem movimentação'
+    MOVEMENTLESSPROCESS = 'Movimentação sem processo'
+    TASKINATIVEFOLDER = 'OS em Pasta Inativa'
+
+    def get_solution(self):
+        return solution_dict[self.name]
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        return [(x.value, x.name) for x in cls]
+
 
 class DashboardETL(Audit):
     execution_date_start = models.DateTimeField(
@@ -35,3 +59,22 @@ class ErrorETL(Audit):
                             related_name='errors')
     error = models.TextField(verbose_name='Descrição do erro', null=True,
                              blank=True, editable=False)
+
+
+class InconsistencyETL(Audit):
+    """
+    Classe responsável por armazenar as inconsistências ocorridas durante a execução da ETL.
+    Desde que não tenham impedido a importação completa.
+    """
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, blank=True, null=True,
+                                 verbose_name=u'Providência')
+    inconsistency = models.CharField(verbose_name=u'Inconsistência',
+                                     blank=True, null=True, max_length=50,
+                                     choices=((x.value, x.name.title()) for x in Inconsistencies)
+                                     )
+    solution = models.CharField(verbose_name=u'Solução',
+                                blank=True, null=True, max_length=100)
+
+    @property
+    def inconsistency_desc(self):
+        return Inconsistencies(self.inconsistency)
