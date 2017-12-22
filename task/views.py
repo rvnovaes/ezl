@@ -1,7 +1,7 @@
 import os
 from urllib.parse import urlparse
 import json
-
+from chat.models import UserByChat
 from django.core.cache import cache
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -249,18 +249,19 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context['task_history'] = \
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
         if not self.object.chat:
+            label = 'task-{}'.format(self.object.pk)
+            title = '#{task_id} - {type_task}'.format(task_id=self.object.pk,
+                                                      type_task=self.object.type_task)
             self.object.chat = Chat.objects.create(create_user=self.request.user,
-                                                   label='task-{}'.format(self.object.pk))
+                                                   label=label, title=title)
             self.object.save()
         self.create_user_by_chat(self.object, ['person_asked_by', 'person_executed_by',
                                                'person_distributed_by'])
         return context
 
     def create_user_by_chat(self, task, fields):
-        from chat.models import UserByChat
         for field in fields:
             user = getattr(task, field).auth_user
-            print(task.pk, user, field)
             if user:
                 UserByChat.objects.get_or_create(
                     create_user=self.request.user, user_by_chat=user, chat=task.chat)

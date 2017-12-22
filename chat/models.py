@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 # Create your models here.
 class Chat(Audit):
     label = models.SlugField(unique=True)
+    title = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
 
 
 class Message(Audit):

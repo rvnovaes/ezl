@@ -5,13 +5,13 @@
     <div class="row heading">
         <div class="col-sm-2 col-md-1 col-xs-3 heading-avatar">
             <div class="heading-avatar-icon">
-                <img src="http://placehold.it/50/55C1E7/fff&text=U"
+                <img src="http://placehold.it/50/55C1E7/fff&text=OS"
                      alt="User Avatar"
                      class="img-circle"/>
             </div>
         </div>
         <div class="col-sm-8 col-xs-7 heading-name">
-            <a class="heading-name-meta">{{ chat.label }}</a>
+            <a class="heading-name-meta">{{ chat.title }}</a>
         </div>
         <div class="col-sm-1 col-xs-1  heading-dot pull-right">
             <i class="fa fa-ellipsis-v fa-2x  pull-right" aria-hidden="true"></i>
@@ -60,13 +60,13 @@
             <i class="fa fa-smile-o fa-2x"></i>
         </div>
         <div class="col-sm-9 col-xs-9 reply-main">
-            <textarea class="form-control" rows="1" id="comment"></textarea>
-        </div>
-        <div class="col-sm-1 col-xs-1 reply-recording">
-            <i class="fa fa-microphone fa-2x" aria-hidden="true"></i>
+            <textarea class="form-control" rows="1" id="comment" placeholder="Informe seu texto aqui...">
+            </textarea>
         </div>
         <div class="col-sm-1 col-xs-1 reply-send">
-            <button onclick="sendMessage()">Enviar</button>
+            <button onclick="sendMessage()" class="btn btn-primary">
+                Enviar <span class="glyphicon glyphicon-send"></span>
+            </button>
             <i class="fa fa-send fa-2x" aria-hidden="true"></i>
         </div>
     </div>
@@ -77,8 +77,6 @@
 {% block javascript %}
     <script>
         console.log("ws://" + window.location.host + "/chat/?label={{chat.label}}");
-
-
         $(".heading-compose").click(function () {
             $(".side-two").css({
                 "left": "0"
@@ -90,10 +88,5 @@
                 "left": "-100%"
             });
         });
-
-        var setBoxMessage = function (box_id) {
-            $('.conversation').hide();
-            $('#' + box_id).show();
-        }
     </script>
 {% endblock %}

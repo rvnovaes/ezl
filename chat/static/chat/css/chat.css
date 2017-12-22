@@ -26,7 +26,7 @@ span {
 
 .app-one {
     background-color: #f7f7f7;
-    height: 85%;
+    height: 80%;
     overflow: hidden;
     margin: 0;
     padding: 0;
@@ -341,7 +341,7 @@ span {
 }
 
 .message-main-receiver {
-    /*padding: 10px 20px;*/
+    padding: 3px 20px;
     max-width: 60%;
 }
 
@@ -353,7 +353,7 @@ span {
 
 .message-text {
     margin: 0 !important;
-    padding: 5px !important;
+    padding: 18px !important;
     word-wrap:break-word;
     font-weight: 200;
     font-size: 14px;
@@ -399,7 +399,7 @@ span {
     height: 60px;
     width: 100%;
     background-color: #f5f1ee;
-    padding: 10px 5px 10px 5px !important;
+    /*padding: 10px 5px 10px 5px !important;*/
     margin: 0 !important;
     z-index: 1000;
 }
@@ -450,7 +450,7 @@ span {
     border: none;
     text-indent: 5px;
     box-shadow: none;
-    height: 100%;
+    height: 50%;
     font-size: 16px;
 }
 
@@ -570,7 +570,7 @@ span {
         font-size: 1.8em !important;
     }
     .reply-send {
-        padding: 5px 0 !important;
+        /*padding: 5px 0 !important;*/
     }
     .reply-send i {
         padding: 5px 2px 5px 0 !important;

@@ -10,5 +10,6 @@ class ChatListView(ListView):
         if self.request.user.is_superuser:
             context['chats'] = Chat.objects.all()
         else:
-            context['chats'] = Chat.objects.filter(users__user_by_chat=self.request.user)
+            context['chats'] = Chat.objects.filter(users__user_by_chat=self.request.user).order_by(
+                'pk').distinct('pk')
         return context
