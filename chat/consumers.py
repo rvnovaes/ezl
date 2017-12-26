@@ -6,17 +6,13 @@ from channels.sessions import channel_session
 from channels.auth import channel_session_user, channel_session_user_from_http
 from chat.models import Chat, Message
 from urllib.parse import parse_qs
-
+from django.utils import timezone
 
 @channel_session_user_from_http
 def ws_connect(message):
     message.reply_channel.send({'accept': True})
     params = parse_qs(message.content['query_string'])
-    print('aaaaaaaaaaaa')
-    print(params)
-    print(params[b'label'])
     if b'label' in params:
-        print(params[b'label'])
         group = params[b'label'][0].decode('utf-8')
         Group(group).add(message.reply_channel)
     else:
@@ -30,6 +26,7 @@ def ws_message(message):
         chat, created = Chat.objects.get_or_create(pk=int(data.get('chat')))
         chat.messages.create(create_user=message.user, message=data.get('text'))
         data['user'] = message.user.username
+        data['message_create_date'] = timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M')
         Group(data.get('label')).send({
                 'text': json.dumps(data),
                 })

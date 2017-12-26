@@ -16,7 +16,7 @@
                     <div class="row heading">
                         <div class="col-sm-3 col-xs-3 heading-avatar">
                             <div class="heading-avatar-icon">
-                                <img src="http://placehold.it/50/A52A2A/fff&text={{user|upper|slice:":2"}}"
+                                <img src="http://placehold.it/50/A52A2A/fff&text={{ user|upper|slice:":2" }}"
                                      alt="User Avatar" class="img-circle"/>
                             </div>
                         </div>
@@ -30,15 +30,16 @@
                     <!-- Heading End -->
 
                     <!-- SearchBox -->
-                    <div class="row searchBox">
-                        <div class="col-sm-12 searchBox-inner">
-                            <div class="form-group has-feedback">
-                                <input id="searchText" type="text" class="form-control"
-                                       name="searchText" placeholder="Pesquisar...">
-                                <span class="glyphicon glyphicon-search form-control-feedback"></span>
-                            </div>
-                        </div>
-                    </div>
+{#                Necessário implementar#}
+{#                    <div class="row searchBox">#}
+{#                        <div class="col-sm-12 searchBox-inner">#}
+{#                            <div class="form-group has-feedback">#}
+{#                                <input id="searchText" type="text" class="form-control"#}
+{#                                       name="searchText" placeholder="Pesquisar...">#}
+{#                                <span class="glyphicon glyphicon-search form-control-feedback"></span>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
 
                     <!-- Search Box End -->
                     <!-- sideBar -->
@@ -57,7 +58,7 @@
                                             <div class="col-sm-8 col-xs-8 sideBar-name">
                                                 <span class="name-meta">{{ chat.title }}</span>
                                                 <br/>
-                                                <span class="time-meta pull-left">{{chat.description|default_if_none:''}}</span>
+                                                <span class="time-meta pull-left">{{ chat.description|default_if_none:'' }}</span>
                                             </div>
                                             <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
                                                 <span class="time-meta pull-right">{{ chat.create_date|time }}</span>
@@ -95,19 +96,24 @@
         });
 
         socket = null;
+
+        var setLastMessage = function () {
+            $('#conversation').animate({scrollTop: 9999}, 1000);
+        };
         var setBoxMessage = function (box_id, chat_label, chat_id) {
+            setLastMessage();
             $('.conversation').hide();
             var elBox = $('#' + box_id);
             elBox.show();
             elBox.find('#comment').val(null);
             socket = new WebSocket("ws://" + window.location.host + "/chat/?label=" + chat_label);
+
             socket.onopen = function (data) {
                 socket.send(data);
             };
             socket.onmessage = function (e) {
-                console.log(e);
                 var data = JSON.parse(e.data);
-                $('#conversation').animate({scrollTop: 9999}, 1000);
+                setLastMessage();
                 var messagePosition = 'receiver ';
                 if ('{{user}}' == data.user) {
                     messagePosition = 'sender';
@@ -115,24 +121,29 @@
                 var chatContent = $('[chat-id=' + chat_id + ']').find('.message-body').last();
                 var blockMessage = "" +
                     "<div class='col-sm-12 message-main-" + messagePosition + "'>" +
-                        "<div class='" + messagePosition + "'>" +
-                            "<strong class='pull-left primary-font'>"+ data.user +"</strong>" +
-                            "<div class='message-text'>" + data.text + "</div>" +
-                            "<span class='message-time pull-right>13:57</span>" +
-                        "</div>" +
+                    "<div class='" + messagePosition + "'>" +
+                    "<strong class='pull-left primary-font'>" + data.user + "</strong>" +
+                    "<div class='message-text'>" + data.text + "</div>" +
+                    "<span class='message-time pull-right'>" + data.message_create_date.substr(11) + "</span>" +
+                    "</div>" +
                     "</div>";
                 chatContent.append(blockMessage);
             };
 
             sendMessage = function () {
+                setLastMessage();
                 var el = $("#" + box_id).find('#comment');
-                var data = JSON.stringify({
-                    'text': el.val(),
-                    'chat': chat_id,
-                    'label': chat_label
-                });
-                socket.onopen(data);
-                el.val('');
+                if (el.val().trim()) {
+                    var data = JSON.stringify({
+                        'text': el.val(),
+                        'chat': chat_id,
+                        'label': chat_label
+                    });
+                    socket.onopen(data);
+                    el.val(null);
+                }else {
+                    el.val(null)
+                }
             };
 
             $.fn.enterKey = function (fnc) {
