@@ -4,9 +4,11 @@ from channels.handler import AsgiHandler
 from channels import Group
 from channels.sessions import channel_session
 from channels.auth import channel_session_user, channel_session_user_from_http
-from chat.models import Chat, Message
+from chat.models import Chat, Message, UserByChat, UnreadMessage
 from urllib.parse import parse_qs
 from django.utils import timezone
+from django.db.models import Q
+
 
 @channel_session_user_from_http
 def ws_connect(message):
@@ -19,12 +21,23 @@ def ws_connect(message):
         message.reply_channel.send({"close": True})
 
 
+@channel_session_user_from_http
+def ws_connect_count(message):
+    import pdb
+    pdb.set_trace()
+    message.reply_channel.send({'accept': True})
+    Group('count').add(message.reply_channel)
+
+
 @channel_session_user
 def ws_message(message):
     try:
         data = json.loads(message['text'])
         chat, created = Chat.objects.get_or_create(pk=int(data.get('chat')))
-        chat.messages.create(create_user=message.user, message=data.get('text'))
+        chat_message = chat.messages.create(create_user=message.user, message=data.get('text'))
+        for user in UserByChat.objects.filter(~Q(user_by_chat=message.user), chat=chat):
+            UnreadMessage.objects.create(create_user=message.user, user_by_message=user,
+                                         message=chat_message)
         data['user'] = message.user.username
         data['message_create_date'] = timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M')
         Group(data.get('label')).send({
@@ -34,6 +47,13 @@ def ws_message(message):
         Group('chat').send({
             'text': message['text'],
         })
+
+
+@channel_session_user
+def ws_count_message(message):
+    Group('count').send({
+        'text': message['text'],
+    })
 
 
 @channel_session_user

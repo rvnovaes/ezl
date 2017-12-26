@@ -23,5 +23,12 @@ class UserByChat(Audit):
     chat = models.ForeignKey(Chat, verbose_name='chat', related_name='users')
 
 
+class UnreadMessage(Audit):
+    message = models.ForeignKey(Message)
+    user_by_message = models.ForeignKey(UserByChat)
+
+
+
+
 
 

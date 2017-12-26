@@ -107,9 +107,9 @@
             elBox.show();
             elBox.find('#comment').val(null);
             socket = new WebSocket("ws://" + window.location.host + "/chat/?label=" + chat_label);
-
             socket.onopen = function (data) {
                 socket.send(data);
+                socket_count.send(data)
             };
             socket.onmessage = function (e) {
                 var data = JSON.parse(e.data);
