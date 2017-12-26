@@ -24,18 +24,18 @@
                 <ul class="chat" data-id={{ chat.pk }}>
                     {% for message in chat.messages.all %}
                         {% if message.create_user == user %}
-                            <li class="right clearfix"><span
-                                    class="chat-img pull-right">
-                                  <img src="http://placehold.it/50/FA6F57/fff&text=ME"
-                                       alt="User Avatar" class="img-circle"/>
-                              </span>
+                            <li class="right clearfix">
+                                <span class="chat-img pull-right">
+                                        <img src="http://placehold.it/50/A52A2A/fff&text={{ message.create_user|upper|slice:":2" }}"
+                                             alt="User Avatar"
+                                             class="img-circle"/>
+                                </span>
                                 <div class="chat-body clearfix">
                                     <div class="header">
-{#                                        <small class=" text-muted"><span#}
-{#                                                class="glyphicon glyphicon-time"></span>13#}
-{#                                            mins ago#}
-{#                                        </small>#}
-                                        <strong class="pull-right primary-font">{{ message.create_user }}</strong>
+                                        <small class=" text-muted"><span
+                                                class="glyphicon glyphicon-time"></span>{{ message.create_date|time }}
+                                        </small>
+                                        <strong class="chat pull-right primary-font">{{ message.create_user }}</strong>
                                     </div>
                                     <p>
                                         {{ message.message }}
@@ -43,18 +43,19 @@
                                 </div>
                             </li>
                         {% else %}
-                            <li class="left clearfix"><span class="chat-img pull-left">
-                                    <img src="http://placehold.it/50/55C1E7/fff&text=U"
-                                         alt="User Avatar" class="img-circle"/>
+                            <li class="left clearfix">
+                                <span class="chat-img pull-left">
+                                      <img src="http://placehold.it/50/55C1E7/fff&text={{ message.create_user|upper|slice:":2" }}"
+                                           alt="User Avatar" class="img-circle"/>
                                 </span>
                                 <div class="chat-body clearfix">
                                     <div class="header">
                                         <strong class="pull-left primary-font">{{ message.create_user }}</strong>
-{#                                        <small class="pull-right text-muted">#}
-{#                                            <span class="glyphicon glyphicon-time"></span>12#}
-{#                                            mins ago#}
-{#                                        </small>#}
+                                        <small class="pull-right text-muted">
+                                            <span class="glyphicon glyphicon-time"></span>{{ message.create_date|time }}
+                                        </small>
                                     </div>
+                                    <br/>
                                     <p>
                                         {{ message.message }}
                                     </p>
@@ -93,6 +94,7 @@
                     'chat': chatId,
                     'label': label
                 });
+                $('#' + chatId).find('#btn-input').val(null);
                 socket.onopen(data)
             };
 
@@ -101,24 +103,76 @@
                 $('.chat.panel-body').animate({scrollTop: 9999}, 1000);
                 data = JSON.parse(e.data);
                 messagePosition = 'left';
-                imgChat = 'http://placehold.it/50/55C1E7/fff&text=U';
+                imgColor = '55C1E7';
+                timePosition = 'pull-right';
+                var userMessage = data.user.substr(0, 2).toUpperCase();
                 if ('{{user}}' === data.user) {
                     messagePosition = 'right';
-                    imgChat = 'http://placehold.it/50/FA6F57/fff&text=ME'
+                    timePosition = '';
+                    imgColor = "A52A2A"
                 }
                 elementUl = $('[data-id=' + data.chat + ']');
-                li = $($.parseHTML('<li class=" ' + messagePosition + ' clearfix"><span class="chat-img pull-' + messagePosition + '"><img src="' + imgChat + '" alt="User Avatar" class="img-circle" />'))
-                divBody = $($.parseHTML('<div class="chat-body clearfix"></div>'));
-                divHeader = $($.parseHTML('<div class="header"> </div>'));
-                small = $($.parseHTML(''));
-{#                small = $($.parseHTML('<small class=" text-muted"><span class="glyphicon glyphicon-time"></span>13 mins ago</small>'));#}
-                strong = $($.parseHTML('<strong class="pull-' + messagePosition + ' primary-font">' + data.user + '</strong>'));
-                p = $($.parseHTML('<p>' + data.text + '</p>'));
-                elementUl.append(li.append(divBody.append(divHeader.append(small).append(strong).append(p))))
+                
+                blockMessageRight = "" +
+                    "<li class='right clearfix'>" +
+                        "<span class='chat-img pull-right'>" +
+                            "<img src='http://placehold.it/50/" + imgColor + "/fff&text=" + userMessage + "' alt='User Avatar' class='img-circle'/>" +
+                        "</span>" +
+                        "<div class='chat-body clearfix'>" +
+                            "<div class='header'>" +
+                                "<small class='pull-left text-muted'>" +
+                                    "<span class='glyphicon glyphicon-time'></span>" + data.message_create_date.substr(11) +
+                                "</small>" +
+                                "<strong class='chat pull-right primary-font'>" + data.user + "</strong>" +
+                            "</div>" +
+                        "<br/>" +
+                        "<p>" +
+                            data.text +
+                        "</p>" +
+                        "</div>" +
+                    "</li>";
+                blockMessageLeft ="" +
+                     "<li class='left clearfix'>" +
+                        "<span class='chat-img pull-left'>" +
+                            "<img src='http://placehold.it/50/" + imgColor + "/fff&text=" + userMessage + "' alt='User Avatar' class='img-circle'/>" +
+                        "</span>" +
+                        "<div class='chat-body clearfix'>" +
+                            "<div class='header'>" +
+                                "<strong class='chat pull-left primary-font'>" + data.user + "</strong>" +
+                                "<small class='pull-right text-muted'>" +
+                                    "<span class='glyphicon glyphicon-time'></span>" + data.message_create_date.substr(11) +
+                                "</small>" +
+                            "</div>" +
+                            "<br/>" +
+                            "<p>" +
+                                data.text +
+                            "</p>" +
+                        "</div>" +
+                     "</li>";
+                if ('{{user}}' === data.user) {
+                    elementUl.append(blockMessageRight)
+                }else {
+                    elementUl.append(blockMessageLeft)
+                }
             };
             socket.onopen = function (data) {
                 socket.send(data);
-            }
+            };
+
+            $.fn.enterKey = function (fnc) {
+                return this.each(function () {
+                    $(this).keypress(function (ev) {
+                        var keycode = (ev.keyCode ? ev.keyCode : ev.which);
+                        if (keycode == '13') {
+                            fnc.call(this, ev);
+                        }
+                    })
+                })
+            };
+
+            $('#btn-input').enterKey(function () {
+                sendMessage('{{ chat.pk }}')
+            })
         });
     </script>
 {% endblock javascript %}

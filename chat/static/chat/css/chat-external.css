@@ -6,13 +6,13 @@
 }
 .panel.panel-primary.chat {
     position: fixed;
-    right: 23px;
+    right: 10px;
+    width: 100%;
     bottom: 23px;
     margin-bottom: 0;
     z-index: 998;
     /*top: 10px;*/
-    max-width: 300px;
-
+    max-width: 360px;
 }
 
 .chat li
