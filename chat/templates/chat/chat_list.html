@@ -31,15 +31,15 @@
 
                     <!-- SearchBox -->
 {#                Necessário implementar#}
-{#                    <div class="row searchBox">#}
-{#                        <div class="col-sm-12 searchBox-inner">#}
-{#                            <div class="form-group has-feedback">#}
-{#                                <input id="searchText" type="text" class="form-control"#}
-{#                                       name="searchText" placeholder="Pesquisar...">#}
-{#                                <span class="glyphicon glyphicon-search form-control-feedback"></span>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
+                    <div class="row searchBox">
+                        <div class="col-sm-12 searchBox-inner">
+                            <div class="form-group has-feedback">
+                                <input id="searchText" type="text" class="form-control"
+                                       name="searchText" placeholder="Pesquisar...">
+                                <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Search Box End -->
                     <!-- sideBar -->
@@ -62,6 +62,7 @@
                                             </div>
                                             <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
                                                 <span class="time-meta pull-right">{{ chat.create_date|time }}</span>
+                                                <span class="chat-badge-item badge" badge-id="{{ chat.pk }}"></span>
                                             </div>
                                         </div>
                                     </div>
