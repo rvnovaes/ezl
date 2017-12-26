@@ -128,7 +128,8 @@ class Task(Audit, LegacyCode):
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
                                    default=TaskStatus.OPEN)
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
-    chat = models.ForeignKey(Chat, verbose_name='Chat', on_delete=models.SET_NULL, null=True)
+    chat = models.ForeignKey(Chat, verbose_name='Chat', on_delete=models.SET_NULL, null=True,
+                             blank=True)
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
 

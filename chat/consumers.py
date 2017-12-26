@@ -50,12 +50,5 @@ def ws_message(message):
 
 
 @channel_session_user
-def ws_count_message(message):
-    Group('count').send({
-        'text': message['text'],
-    })
-
-
-@channel_session_user
 def ws_disconnect(message):
     Group('chat').discard(message.reply_channel)
