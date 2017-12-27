@@ -17,8 +17,6 @@ from task.models import Task, TypeTask, TaskStatus, TaskHistory
 from etl.utils import get_message_log_default, save_error_log
 from etl.models import InconsistencyETL, Inconsistencies
 
-
-
 default_justify = 'Aceita por Correspondente: %s'
 
 "'Função para converter uma instância de um objeto sqlachemy para dicionário, utilizada na inserção do survey result'"
@@ -54,6 +52,12 @@ def get_status_by_substatus(substatus):
         return TaskStatus.RETURN
     elif substatus == 30:
         return TaskStatus.OPEN
+    elif substatus == 10:
+        return TaskStatus.REQUESTED
+    elif substatus == 11:
+        return TaskStatus.ACCEPTED_SERVICE
+    elif substatus == 20:
+        return TaskStatus.REFUSED_SERVICE
     else:
         return TaskStatus.INVALID
 
@@ -84,9 +88,21 @@ class TaskETL(GenericETL):
                 WHERE
                     (cm.UsarOS = 1) AND
                     (p.Status = 'Ativa' OR p.Status = 'Especial') AND
-                    ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                    (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                    AND a.Advogado IN ('{}')
+                    (
+                        (
+                            ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
+                            (a.SubStatus = 80))
+                            AND 
+                            a.Advogado IN ('{}')
+                        )
+                        OR
+                        (
+                            (a.SubStatus = 10) OR 
+                            (a.SubStatus = 11) OR 
+                            (a.SubStatus = 20)
+                        )
+                    ) AND a.Status = '0' -- STATUS ATIVO
+                    
     """
     model = Task
     advwin_table = 'Jurid_agenda_table'
@@ -206,23 +222,23 @@ class TaskETL(GenericETL):
                     task.save(update_fields=update_fields)
 
                 else:
-                    self.model.objects.create(movement=movement,
-                                              legacy_code=legacy_code,
-                                              system_prefix=LegacySystem.ADVWIN.value,
-                                              create_user=user,
-                                              alter_user=user,
-                                              person_asked_by=person_asked_by,
-                                              person_executed_by=person_executed_by,
-                                              person_distributed_by=person_distributed_by,
-                                              type_task=type_task,
-                                              delegation_date=delegation_date,
-                                              final_deadline_date=final_deadline_date,
-                                              description=description,
-                                              refused_date=refused_date,
-                                              execution_date=execution_date,
-                                              blocked_payment_date=blocked_payment_date,
-                                              finished_date=finished_date,
-                                              task_status=status_code_advwin)
+                    task = self.model.objects.create(movement=movement,
+                                                     legacy_code=legacy_code,
+                                                     system_prefix=LegacySystem.ADVWIN.value,
+                                                     create_user=user,
+                                                     alter_user=user,
+                                                     person_asked_by=person_asked_by,
+                                                     person_executed_by=person_executed_by,
+                                                     person_distributed_by=person_distributed_by,
+                                                     type_task=type_task,
+                                                     delegation_date=delegation_date,
+                                                     final_deadline_date=final_deadline_date,
+                                                     description=description,
+                                                     refused_date=refused_date,
+                                                     execution_date=execution_date,
+                                                     blocked_payment_date=blocked_payment_date,
+                                                     finished_date=finished_date,
+                                                     task_status=status_code_advwin)
 
                 if status_code_advwin == TaskStatus.ERROR:
                     for inconsistency in inconsistencies:
@@ -250,7 +266,6 @@ class TaskETL(GenericETL):
                                               rows_count, e, self.timestr)
                 self.error_logger.error(msg)
                 save_error_log(log, user, msg)
-
 
     def config_export(self):
         accepted_tasks = self.model.objects.filter(legacy_code__isnull=False,
@@ -317,7 +332,7 @@ class TaskETL(GenericETL):
                                                 String()) + linesep + ' *** Ordem de serviço recusada por ' +
                                            str(x.person_executed_by) + ': ' + x.taskhistory_set.filter(
                          status=TaskStatus.REFUSED.value).last().notes + (
-                                               ' em ' + x.refused_date.strftime('%d/%m/%Y') if x.refused_date else'')
+                                               ' em ' + x.refused_date.strftime('%d/%m/%Y') if x.refused_date else '')
                      }).where(JuridAgendaTable.Ident == x.legacy_code)), refused_tasks)
 
         accepeted_history_query = map(lambda x: (

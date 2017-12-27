@@ -173,6 +173,24 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
     box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
+.REQUESTED {
+    color: white !important;
+    background: linear-gradient(60deg, #120a8f, #120a8f);
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.ACCEPTED_SERVICE {
+    color: white !important;
+    background: linear-gradient(60deg, #EBC15E, #EBC15E);
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.REFUSED_SERVICE {
+    color: white !important;
+    background: linear-gradient(60deg, #000000, #000000);
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
 .material-icons {
     vertical-align: middle !important;
 }
@@ -266,6 +284,9 @@ span, .pagination > .active > span:focus, .pagination > .active > span:hover {
     background-color: rgba(209, 209, 209, 0.9) !important;
 }
 
+.tr_selected{
+    background-color: rgba(209, 189, 116, 0.9) !important;
+}
 .form-group{
     margin: 13px 0 0 0;
 }

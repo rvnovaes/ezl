@@ -9,6 +9,9 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('lawsuit', '0039_folder_cost_center'),
+        ('task', '0050_auto_20171205_1548'),
+        ('core', '0051_auto_20171022_1621'),
         ('financial', '0001_initial'),
     ]
 

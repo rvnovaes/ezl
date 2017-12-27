@@ -34,3 +34,23 @@ class ServicePriceTableTable(tables.Table):
             'data_href': lambda record: reverse_lazy('servicepricetable_update', args=(record.pk,))
         }
         order_by = 'correspondent'
+
+
+class ServicePriceTableTaskTable(tables.Table):
+
+    correspondent = tables.Column(orderable=False)
+    court_district = tables.Column(orderable=False)
+    state = tables.Column(orderable=False)
+    client = tables.Column(orderable=False)
+    value = tables.Column(orderable=False)
+
+    class Meta:
+        sequence = ('correspondent', 'court_district', 'state', 'client', 'value')
+        model = ServicePriceTable
+        fields = ('correspondent', 'court_district', 'state', 'client', 'value')
+        attrs = {"class": "table stable-striped table-bordered correspondents-table", "id": "correspondents-table"}
+        empty_text = "Não existem tabelas de preços cadastradas"
+        order_by = 'value'
+        row_attrs = {
+            'data-id': lambda record: record.pk
+        }
