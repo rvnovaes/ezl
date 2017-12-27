@@ -44,7 +44,7 @@
                     <!-- Search Box End -->
                     <!-- sideBar -->
                     <div class="row sideBar">
-                        {% for chat in chats %}
+                        {% for chat in chats|dictsortreversed:'alter_date' %}
                             {% if chat.messages.all|length > 0 %}
                                 <div class="row sideBar-body"
                                      onclick="setBoxMessage('chat-{{ chat.pk }}', '{{ chat.label }}', '{{ chat.pk }}')">
