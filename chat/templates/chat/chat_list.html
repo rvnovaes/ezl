@@ -98,11 +98,12 @@
 
         socket = null;
 
-        var setLastMessage = function () {
-            $('#conversation').animate({scrollTop: 9999}, 1000);
+        var setLastMessage = function (chat_id) {
+            $("[chat-id=" + chat_id + "]").animate({scrollTop: 9999}, 1000);
         };
         var setBoxMessage = function (box_id, chat_label, chat_id) {
-            setLastMessage();
+            chatReadMessage(chat_id, '{{ csrf_token }}');
+            setLastMessage(chat_id);
             $('.conversation').hide();
             var elBox = $('#' + box_id);
             elBox.show();
@@ -110,11 +111,10 @@
             socket = new WebSocket("ws://" + window.location.host + "/chat/?label=" + chat_label);
             socket.onopen = function (data) {
                 socket.send(data);
-                socket_count.send(data)
             };
             socket.onmessage = function (e) {
                 var data = JSON.parse(e.data);
-                setLastMessage();
+                setLastMessage(chat_id);
                 var messagePosition = 'receiver ';
                 if ('{{user}}' == data.user) {
                     messagePosition = 'sender';
