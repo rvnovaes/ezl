@@ -96,6 +96,13 @@ services:
     ports:
     - "9002:8081"
 
+  redis:
+    image: redis:4.0.6
+    volumes:
+      - ".containers/redis/redis.conf:/etc/redis/redis.conf"
+    ports:
+      - "6379:6379"
+
 #  db_advwin:
 #    image: microsoft/mssql-server-linux:2017-latest
 #    environment:

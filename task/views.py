@@ -1,7 +1,7 @@
 import os
 from urllib.parse import urlparse
 import json
-
+from chat.models import UserByChat
 from django.core.cache import cache
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -29,7 +29,7 @@ from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable
-
+from chat.models import Chat
 
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Task
@@ -61,7 +61,7 @@ class TaskCreateView(AuditFormMixin, CreateView):
         task = form.instance
         form.instance.movement_id = self.kwargs.get('movement')
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
-        form.instance.__server = self.request.environ['HTTP_HOST']
+        form.instance.__server = self.request.META['HTTP_HOST']
         response = super(TaskCreateView, self).form_valid(form)
 
         if form.cleaned_data['documents']:
@@ -99,7 +99,7 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
 
     def form_valid(self, form):
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
-        form.instance.__server = self.request.environ['HTTP_HOST']
+        form.instance.__server = self.request.META['HTTP_HOST']
         super(TaskUpdateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
@@ -246,8 +246,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
                                        execution_date=execution_date, survey_result=survey_result)
-
-        form.instance.__server = self.request.environ['HTTP_HOST']
+        form.instance.__server = self.request.META['HTTP_HOST']
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
@@ -256,8 +255,25 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
-
+        if not self.object.chat:
+            label = 'task-{}'.format(self.object.pk)
+            title = '#{task_number} - {type_task}'.format(task_number=self.object.task_number,
+                                                          type_task=self.object.type_task)
+            self.object.chat = Chat.objects.create(
+                create_user=self.request.user, label=label, title=title,
+                back_url='/dashboard/{}'.format(self.object.pk))
+            self.object.save()
+        self.create_user_by_chat(self.object, ['person_asked_by', 'person_executed_by',
+                                               'person_distributed_by'])
         return context
+
+    def create_user_by_chat(self, task, fields):
+        for field in fields:
+            user = getattr(task, field).auth_user
+            if user:
+                UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
+                    'create_user': user, 'user_by_chat': user, 'chat': task.chat
+                })
 
 
 class EcmCreateView(LoginRequiredMixin, CreateView):

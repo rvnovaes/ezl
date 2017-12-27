@@ -369,3 +369,12 @@ i.material-icons {
     font-size: 16px!important;
     font-weight: 400;
 }
+
+
+.chat-badge.badge{
+    background-color: #A52A2A;
+}
+
+.chat-badge-item.badge{
+    background-color: #A52A2A;
+}

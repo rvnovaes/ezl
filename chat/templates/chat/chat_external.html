@@ -1,0 +1,173 @@
+{% extends 'inicial.html' %}
+{{ chat.pk }}
+{% load staticfiles %}
+{% block head %}
+    {% block css_head %}
+        {{ block.super }}
+        <link rel="stylesheet" href="{% static "chat/css/chat-external.css" %}">
+    {% endblock %}
+{% endblock %}
+{% block content %}
+    <div class="panel panel-primary chat">
+        <div class="panel-heading" id="{{ chat.label }}">
+            <span class="glyphicon glyphicon-comment"></span> {{ chat.title }}
+            <div class="btn-group pull-right">
+            </div>
+        </div>
+        <div class="panel-collapse" id="{{ chat.pk }}">
+            <div class="chat panel-body">
+                <ul class="chat" data-id={{ chat.pk }}>
+                    {% for message in chat.messages.all %}
+                        {% if message.create_user == user %}
+                            <li class="right clearfix">
+                                <span class="chat-img pull-right">
+                                        <img src="http://placehold.it/50/A52A2A/fff&text={{ message.create_user|upper|slice:":2" }}"
+                                             alt="User Avatar"
+                                             class="img-circle"/>
+                                </span>
+                                <div class="chat-body clearfix">
+                                    <div class="header">
+                                        <small class=" text-muted"><span
+                                                class="glyphicon glyphicon-time"></span>{{ message.create_date|date:"d/m/Y H:i" }}
+                                        </small>
+                                        <strong class="chat pull-right primary-font">{{ message.create_user }}</strong>
+                                    </div>
+                                    <p>
+                                        {{ message.message }}
+                                    </p>
+                                </div>
+                            </li>
+                        {% else %}
+                            <li class="left clearfix">
+                                <span class="chat-img pull-left">
+                                      <img src="http://placehold.it/50/55C1E7/fff&text={{ message.create_user|upper|slice:":2" }}"
+                                           alt="User Avatar" class="img-circle"/>
+                                </span>
+                                <div class="chat-body clearfix">
+                                    <div class="header">
+                                        <strong class="pull-left primary-font">{{ message.create_user }}</strong>
+                                        <small class="pull-right text-muted">
+                                            <span class="glyphicon glyphicon-time"></span>{{ message.create_date| date:"d/m/Y H:i" }}
+                                        </small>
+                                    </div>
+                                    <br/>
+                                    <p>
+                                        {{ message.message }}
+                                    </p>
+                                </div>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="panel-footer">
+                <div class="input-group">
+                    <input id="btn-input" type="text" class="form-control input-sm"
+                           placeholder="Digite aqui sua mensagem..."/>
+                    <span class="input-group-btn">
+                                <button class="btn btn-warning btn-sm" id="btn-chat"
+                                        onclick="sendMessage('{{ chat.pk }}')">
+                                    Enviar</button>
+                            </span>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascript %}
+    <script>
+        var data = '';
+        var edata = '';
+        var label = "{{ chat.label }}";
+        socket = new WebSocket("ws://" + window.location.host + "/chat/?label=" + label);
+        $('.chat.panel-body').animate({scrollTop: 9999}, 1000);
+        sendMessage = function (chatId) {
+            var el = $('#' + chatId).find('#btn-input');
+            if (el.val().trim()) {
+                data = JSON.stringify({
+                    'text': el.val(),
+                    'chat': chatId,
+                    'label': label
+                });
+                el.val(null);
+                socket.onopen(data)
+            }
+        };
+
+        {# Ao chegar uma mensagem#}
+        socket.onmessage = function (e) {
+            $('.chat.panel-body').animate({scrollTop: 9999}, 1000);
+            data = JSON.parse(e.data);
+            messagePosition = 'left';
+            imgColor = '55C1E7';
+            timePosition = 'pull-right';
+            var userMessage = data.user.substr(0, 2).toUpperCase();
+            if ('{{user}}' === data.user) {
+                messagePosition = 'right';
+                timePosition = '';
+                imgColor = "A52A2A"
+            }
+            elementUl = $('[data-id=' + data.chat + ']');
+
+            blockMessageRight = "" +
+                "<li class='right clearfix'>" +
+                    "<span class='chat-img pull-right'>" +
+                        "<img src='http://placehold.it/50/" + imgColor + "/fff&text=" + userMessage + "' alt='User Avatar' class='img-circle'/>" +
+                    "</span>" +
+                    "<div class='chat-body clearfix'>" +
+                        "<div class='header'>" +
+                            "<small class='pull-left text-muted'>" +
+                                "<span class='glyphicon glyphicon-time'></span>" + formatDate(data.message_create_date) +
+                            "</small>" +
+                            "<strong class='chat pull-right primary-font'>" + data.user + "</strong>" +
+                        "</div>" +
+                    "<br/>" +
+                    "<p>" +
+                        data.text +
+                    "</p>" +
+                    "</div>" +
+                "</li>";
+            blockMessageLeft ="" +
+                 "<li class='left clearfix'>" +
+                    "<span class='chat-img pull-left'>" +
+                        "<img src='http://placehold.it/50/" + imgColor + "/fff&text=" + userMessage + "' alt='User Avatar' class='img-circle'/>" +
+                    "</span>" +
+                    "<div class='chat-body clearfix'>" +
+                        "<div class='header'>" +
+                            "<strong class='chat pull-left primary-font'>" + data.user + "</strong>" +
+                            "<small class='pull-right text-muted'>" +
+                                "<span class='glyphicon glyphicon-time'></span>" + formatDate(data.message_create_date) +
+                            "</small>" +
+                        "</div>" +
+                        "<br/>" +
+                        "<p>" +
+                            data.text +
+                        "</p>" +
+                    "</div>" +
+                 "</li>";
+            if ('{{user}}' === data.user) {
+                elementUl.append(blockMessageRight)
+            }else {
+                elementUl.append(blockMessageLeft)
+            }
+        };
+        socket.onopen = function (data) {
+            socket.send(data);
+        };
+
+        $.fn.enterKey = function (fnc) {
+            return this.each(function () {
+                $(this).keypress(function (ev) {
+                    var keycode = (ev.keyCode ? ev.keyCode : ev.which);
+                    if (keycode == '13') {
+                        fnc.call(this, ev);
+                    }
+                })
+            })
+        };
+
+        $('#btn-input').enterKey(function () {
+            sendMessage('{{ chat.pk }}')
+        })
+    </script>
+{% endblock javascript %}
