@@ -609,6 +609,16 @@ class OrganAutocompleteView(autocomplete.Select2QuerySetView):
         return res
 
 
+class CourtDistrictAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = CourtDistrict.objects.none()
+
+        if self.q:
+            qs = CourtDistrict.objects.filter(name__unaccent__istartswith=self.q,
+                                              is_active=True)
+        return qs
+
+
 class AddressOrganCreateView(AddressCreateView):
     def get_success_url(self):
         return reverse('organ_update', args=(self.object.person.pk, ))
