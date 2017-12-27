@@ -1,7 +1,8 @@
+from django.core.urlresolvers import reverse_lazy
 import django_tables2 as tables
 
 from core.tables import CheckBoxMaterial
-from .models import CostCenter
+from .models import CostCenter, ServicePriceTable
 
 
 class CostCenterTable(tables.Table):
@@ -17,3 +18,19 @@ class CostCenterTable(tables.Table):
             'data_href': lambda record: '/financeiro/centros-de-custos/' + str(record.pk) + '/'
         }
         order_by = 'name'
+
+
+class ServicePriceTableTable(tables.Table):
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
+    value = tables.Column(attrs={"editable": True, "mask": "money"})
+
+    class Meta:
+        sequence = ('selection', 'correspondent', 'type_task', 'court_district', 'state', 'client', 'value')
+        model = ServicePriceTable
+        fields = ('selection', 'correspondent', 'type_task', 'court_district', 'state', 'client', 'value')
+        attrs = {"class": "table stable-striped table-bordered"}
+        empty_text = "Não existem tabelas de preços cadastradas"
+        row_attrs = {
+            'data_href': lambda record: reverse_lazy('servicepricetable_update', args=(record.pk,))
+        }
+        order_by = 'correspondent'
