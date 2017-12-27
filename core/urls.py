@@ -7,6 +7,10 @@ from . import views
 
 urlpatterns = [
 
+    url(r'city/autocomplete/$',
+        login_required(views.CityAutoCompleteView.as_view()),
+        name='city_autocomplete'),
+
     url(r'^ajuda/manual-do-usuario/$',
         RedirectView.as_view(url=settings.USER_MANUAL_URL, permanent=False),
         name='user_manual'),
@@ -24,7 +28,7 @@ urlpatterns = [
         views.AddressUpdateView.as_view(),
         name='address_update'),
 
-    url(r'^pessoas/(?P<person_pk>[0-9]+)/enderecos/(?P<pk>[0-9]+)/excluir/$',
+    url(r'^pessoas/(?P<person_pk>[0-9]+)/enderecos/excluir/$',
         views.AddressDeleteView.as_view(),
         name='address_delete'),
 

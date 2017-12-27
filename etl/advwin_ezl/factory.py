@@ -16,6 +16,7 @@ settings = config_parser['etl']
 
 invalid_registry = '-INVÁLIDO'
 invalid_legacy_code = 'REGISTRO' + invalid_registry
+INVALID_ORGAN = Organ._meta.verbose_name.upper() + invalid_registry
 
 
 class InvalidObjectFactory(object):
@@ -62,7 +63,7 @@ class InvalidObjectFactory(object):
         # Registros inválidos para o app lawsuit
         invalid_organ, created = Organ.objects.get_or_create(
             legacy_code=invalid_legacy_code,
-            legal_name=Organ._meta.verbose_name.upper() + invalid_registry,
+            legal_name=INVALID_ORGAN,
             court_district=invalid_court_district,
             create_user=user
         )
@@ -94,6 +95,7 @@ class InvalidObjectFactory(object):
         invalid_movement, created = Movement.objects.get_or_create(
             legacy_code=invalid_legacy_code,
             create_user=user, law_suit=invalid_law_suit,
+            folder=invalid_folder,
             type_movement=invalid_type_movement)
 
         invalid_address_type, created = AddressType.objects.get_or_create(

@@ -1,5 +1,5 @@
 build:
-	docker-compose build builder
+	docker-compose build builder luigi
 	@docker-compose build certbot || true
 
 check_compose_override:

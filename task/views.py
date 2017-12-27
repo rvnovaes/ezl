@@ -21,6 +21,8 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
     DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED
 from core.models import Person
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
+from etl.models import InconsistencyETL
+from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement
 from task.filters import TaskFilter
 from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
@@ -143,7 +145,8 @@ class DashboardView(MultiTableMixin, TemplateView):
         person = Person.objects.get(auth_user=self.request.user)
         dynamic_query = self.get_dynamic_query(person)
         data = []
-        if isinstance(dynamic_query, Q):
+        # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
+        if dynamic_query or person.auth_user.is_superuser:
             data = DashboardViewModel.objects.filter(dynamic_query)
         tables = self.get_list_tables(data, person) if person else []
         if not dynamic_query:
@@ -165,7 +168,13 @@ class DashboardView(MultiTableMixin, TemplateView):
         requested = grouped.get(TaskStatus.REQUESTED) or {}
         accepted_service = grouped.get(TaskStatus.ACCEPTED_SERVICE) or {}
         refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}
+        error = InconsistencyETL.objects.filter(is_active=True) or {}
+
         return_list = []
+
+        return_list.append(DashboardErrorStatusTable(error,
+                                                title='Erro no sistema de origem',
+                                                status=TaskStatus.ERROR))
 
         if not person.auth_user.has_perm('core.view_delegated_tasks') or person.auth_user.is_superuser:
             # status 10 - Solicitada
@@ -425,7 +434,7 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
     template_name = 'task/task_filter.html'
     context_object_name = 'task_filter'
     context_filter_name = 'filter'
-    ordering = ['-id']
+    ordering = ['-final_deadline_date']
     table_class = DashboardStatusTable
 
     def query_builder(self):
@@ -444,10 +453,10 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             deadline_dynamic_query = Q()
             client_query = Q()
 
-            if not self.request.user.has_perm('task.view_all_tasks'):
-                if self.request.user.has_perm('task.view_delegated_tasks'):
+            if not self.request.user.has_perm('core.view_all_tasks'):
+                if self.request.user.has_perm('core.view_delegated_tasks'):
                     person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-                elif self.request.user.has_perm('task.view_requested_tasks'):
+                elif self.request.user.has_perm('core.view_requested_tasks'):
                     person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
             if data['openned']:
@@ -502,6 +511,7 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
 
 
 class DashboardStatusCheckView(LoginRequiredMixin, View):
+
     def post(self, request, *args, **kwargs):
         tasks_payload = request.POST.get('tasks')
         if not tasks_payload:

@@ -9,8 +9,7 @@ import tempfile
 
 USER = 'ezl'
 REPO_PATH = "/home/{user}/ezl-{env}/"
-REPO_URL = "ssh://bitbucket.org/marcelotostes/easy_lawyer_django"
-
+REPO_URL = "ssh://bitbucket.org/mttechlegal/ezl"
 env.roledefs = {
     'production': {
         'hosts': ['{}@189.43.93.151'.format(USER)],

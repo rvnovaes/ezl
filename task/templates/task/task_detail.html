@@ -138,6 +138,14 @@
                                             </tr>
                                             <tr>
                                                 <th>
+                                        Parte adversa
+                                    </th>
+                                    <td>
+                                        {{ form.instance.movement.law_suit.opposing_party|default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
                                                     Descrição do serviço
                                                 </th>
                                                 <td>
@@ -162,10 +170,34 @@
                                             </tr>
                                             <tr>
                                                 <th>
+                                        Cliente
+                                    </th>
+                                    <td>
+                                        {{ form.instance.client|default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
                                         Processo
                                     </th>
                                     <td>
                                         {{ form.instance.movement.law_suit.law_suit_number |default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Comarca
+                                    </th>
+                                    <td>
+                                        {{ form.instance.court_district|default_if_none:"---" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        UF
+                                    </th>
+                                    <td>
+                                        {{ form.instance.court_district.state|default_if_none:"---" }}
                                     </td>
                                 </tr>
                                 <tr>
@@ -324,7 +356,7 @@
                         <div class="panel-heading">
                             <div class="panel-title">
                                 <i class="material-icons">assignment</i>
-                                Dados de quem delegou
+                                Dados do contratante
                             </div>
                         </div>
                         <div class="panel-body form-group is-focused">

@@ -28,7 +28,8 @@ icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assi
              'DONE': 'assignment_turned_in',
              'REQUESTED': 'playlist_play', 'ACCEPTED_SERVICE': 'thumb_up', 'REFUSED_SERVICE': 'thumb_down',
              'REFUSED': 'assignment_late', 'INVALID': 'error', 'FINISHED': 'gavel',
-             'BLOCKEDPAYMENT': 'money_off'}
+             'BLOCKEDPAYMENT': 'money_off',
+             'ERROR': 'error'}
 
 
 # next_action = {'ACCEPTED': 'cumprir', 'OPEN': 'assignment', 'RETURN': 'keyboard_return',
@@ -47,6 +48,7 @@ class TaskStatus(Enum):
     REFUSED = 'Recusada'
     BLOCKEDPAYMENT = 'Glosada'
     INVALID = 'Inválida'
+    ERROR = 'Erro no sistema de origem'
 
     def get_icon(self):
         return icon_dict[self.name]
@@ -114,7 +116,7 @@ class Task(Audit, LegacyCode):
                                            verbose_name='Correspondente')
     person_distributed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False,
                                               null=True,
-                                              verbose_name='Service')
+                                              verbose_name='Contratante')
     type_task = models.ForeignKey(TypeTask, on_delete=models.PROTECT, blank=False, null=False,
                                   verbose_name='Tipo de Serviço')
     delegation_date = models.DateTimeField(default=timezone.now, verbose_name='Data de Delegação')
@@ -165,6 +167,10 @@ class Task(Audit, LegacyCode):
         return self.movement.law_suit.court_division
 
     @property
+    def court_district(self):
+        return self.movement.law_suit.court_district
+
+    @property
     def court(self):
         return self.movement.law_suit.organ
 
@@ -180,9 +186,9 @@ class Task(Audit, LegacyCode):
         return address
 
     def save(self, *args, **kwargs):
+        self._called_by_etl = kwargs.pop('called_by_etl', False)
         if not self.task_number:
             self.task_number = get_next_value(Task.TASK_NUMBER_SEQUENCE)
-
         return super().save(*args, **kwargs)
 
 
@@ -237,6 +243,10 @@ class TaskHistory(AuditCreate):
         verbose_name = 'Histórico da Providência'
         verbose_name_plural = 'Histórico das Providências'
 
+    def save(self, *args, **kwargs):
+        self._called_by_etl = kwargs.pop('called_by_etl', False)
+        return super(TaskHistory, self).save(*args, **kwargs)
+
 
 class DashboardViewModel(Audit):
     legacy_code = models.CharField(max_length=255, blank=True, null=True,
@@ -278,6 +288,7 @@ class DashboardViewModel(Audit):
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
     lawsuit_number = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='Número do Processo')
+    opposing_party = models.CharField(null=True, verbose_name=u'Parte adversa', max_length=255)
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
 
@@ -316,3 +327,7 @@ class DashboardViewModel(Audit):
     @property
     def lawsuit_number(self):
         return self.movement.law_suit.law_suit_number
+
+    @property
+    def opposing_party(self):
+        return self.movement.law_suit.opposing_party
