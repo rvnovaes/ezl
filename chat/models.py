@@ -8,6 +8,7 @@ class Chat(Audit):
     label = models.SlugField(unique=True)
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
+    back_url = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.label
