@@ -34,7 +34,7 @@
                         <div class="sender">
                             <strong class="pull-left primary-font">{{ message.create_user }}</strong>
                             <div class="message-text">{{ message.message }}</div>
-                            <span class="message-time pull-right">{{message.create_date|time}}</span>
+                            <span class="message-time pull-right">{{message.create_date | date:"d/m/Y H:i"}}</span>
                         </div>
                     </div>
                 </div>
@@ -46,7 +46,7 @@
                             <div class="message-text">
                                 {{ message.message }}
                             </div>
-                            <span class="message-time pull-right">{{message.create_date | time}}</span>
+                            <span class="message-time pull-right">{{message.create_date | date:"d/m/Y H:i"}}</span>
                         </div>
                     </div>
                 </div>

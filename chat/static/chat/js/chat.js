@@ -46,5 +46,7 @@ setInterval(function () {
 }, 1000);
 
 
-
+var formatDate = function (strDate) {
+    return strDate.substr(8, 2) + '/' + strDate.substr(5, 2)+ '/' + strDate.substr(0, 4) + ' ' + strDate.substr(11)
+};
 

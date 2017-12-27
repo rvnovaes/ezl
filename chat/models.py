@@ -10,6 +10,9 @@ class Chat(Audit):
     description = models.TextField(blank=True, null=True)
     back_url = models.TextField(blank=True, null=True)
 
+    class Meta:
+        ordering = ['-alter_date']
+
     def __str__(self):
         return self.label
 

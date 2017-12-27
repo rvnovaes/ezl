@@ -125,7 +125,7 @@
                     "<div class='" + messagePosition + "'>" +
                     "<strong class='pull-left primary-font'>" + data.user + "</strong>" +
                     "<div class='message-text'>" + data.text + "</div>" +
-                    "<span class='message-time pull-right'>" + data.message_create_date.substr(11) + "</span>" +
+                    "<span class='message-time pull-right'>" + formatDate(data.message_create_date) + "</span>" +
                     "</div>" +
                     "</div>";
                 chatContent.append(blockMessage);

@@ -28,7 +28,7 @@
                                 <div class="chat-body clearfix">
                                     <div class="header">
                                         <small class=" text-muted"><span
-                                                class="glyphicon glyphicon-time"></span>{{ message.create_date|time }}
+                                                class="glyphicon glyphicon-time"></span>{{ message.create_date|date:"d/m/Y H:i" }}
                                         </small>
                                         <strong class="chat pull-right primary-font">{{ message.create_user }}</strong>
                                     </div>
@@ -47,7 +47,7 @@
                                     <div class="header">
                                         <strong class="pull-left primary-font">{{ message.create_user }}</strong>
                                         <small class="pull-right text-muted">
-                                            <span class="glyphicon glyphicon-time"></span>{{ message.create_date|time }}
+                                            <span class="glyphicon glyphicon-time"></span>{{ message.create_date| date:"d/m/Y H:i" }}
                                         </small>
                                     </div>
                                     <br/>
@@ -117,7 +117,7 @@
                     "<div class='chat-body clearfix'>" +
                         "<div class='header'>" +
                             "<small class='pull-left text-muted'>" +
-                                "<span class='glyphicon glyphicon-time'></span>" + data.message_create_date.substr(11) +
+                                "<span class='glyphicon glyphicon-time'></span>" + formatDate(data.message_create_date) +
                             "</small>" +
                             "<strong class='chat pull-right primary-font'>" + data.user + "</strong>" +
                         "</div>" +
@@ -136,7 +136,7 @@
                         "<div class='header'>" +
                             "<strong class='chat pull-left primary-font'>" + data.user + "</strong>" +
                             "<small class='pull-right text-muted'>" +
-                                "<span class='glyphicon glyphicon-time'></span>" + data.message_create_date.substr(11) +
+                                "<span class='glyphicon glyphicon-time'></span>" + formatDate(data.message_create_date) +
                             "</small>" +
                         "</div>" +
                         "<br/>" +

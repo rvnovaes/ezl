@@ -35,6 +35,7 @@ def ws_message(message):
         data = json.loads(message['text'])
         chat, created = Chat.objects.get_or_create(pk=int(data.get('chat')))
         chat_message = chat.messages.create(create_user=message.user, message=data.get('text'))
+        chat.save()
         for user in UserByChat.objects.filter(~Q(user_by_chat=message.user), chat=chat):
             UnreadMessage.objects.create(create_user=message.user, user_by_message=user,
                                          message=chat_message)
