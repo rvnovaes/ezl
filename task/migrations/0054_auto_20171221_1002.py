@@ -3,14 +3,13 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import django.db.models.deletion
 import task.models
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0052_auto_20171219_1640'),
+        ('task', '0053_auto_20171221_1002'),
     ]
 
     operations = [
@@ -23,10 +22,5 @@ class Migration(migrations.Migration):
             model_name='taskhistory',
             name='status',
             field=models.CharField(choices=[('A Cumprir', 'ACCEPTED'), ('Em Aberto', 'OPEN'), ('Retorno', 'RETURN'), ('Cumprida', 'DONE'), ('Recusada', 'REFUSED'), ('Glosada', 'BLOCKEDPAYMENT'), ('Finalizada', 'FINISHED'), ('Inválida', 'INVALID'), ('Erro no sistema de origem', 'ERROR')], max_length=10),
-        ),
-        migrations.AlterField(
-            model_name='task',
-            name='chat',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='chat.Chat', verbose_name='Chat'),
         ),
     ]
