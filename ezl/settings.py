@@ -104,7 +104,9 @@ INSTALLED_APPS = [
     # Test
     'localflavor',
     # Sequences
-    'sequences.apps.SequencesConfig'
+    'sequences.apps.SequencesConfig',
+    'channels',
+    'chat',
 ]
 
 MIDDLEWARE = [
@@ -153,6 +155,16 @@ DATABASES = {
         'PASSWORD': password,
         'HOST': host,
         'PORT': port
+    }
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "CONFIG": {
+            'hosts': [("redis", 6379)],
+        },
+        "ROUTING": "chat.routing.channel_routing"
     }
 }
 
