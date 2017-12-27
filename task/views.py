@@ -250,8 +250,8 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
         if not self.object.chat:
             label = 'task-{}'.format(self.object.pk)
-            title = '#{task_id} - {type_task}'.format(task_id=self.object.pk,
-                                                      type_task=self.object.type_task)
+            title = '#{task_number} - {type_task}'.format(task_number=self.object.task_number,
+                                                          type_task=self.object.type_task)
             self.object.chat = Chat.objects.create(
                 create_user=self.request.user, label=label, title=title,
                 back_url='/dashboard/{}'.format(self.object.pk))
