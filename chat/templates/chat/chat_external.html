@@ -2,7 +2,6 @@
 {{ chat.pk }}
 {% load staticfiles %}
 {% block head %}
-    {{ block.super }}
     {% block css_head %}
         {{ block.super }}
         <link rel="stylesheet" href="{% static "chat/css/chat-external.css" %}">

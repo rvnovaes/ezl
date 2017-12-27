@@ -1,9 +1,7 @@
 var setBadgeItem = function (items) {
-    console.log(items);
     $("[badge-id]").text(null);
     items.forEach(function (item) {
         var el = $("[badge-id=" + item.message__chat__pk + "]");
-        console.log(item.quantity);
         if (item.quantity > 0) {
             el.text(item.quantity)
         } else {
@@ -21,7 +19,7 @@ var chatReadMessage = function (chat_id, csrf_token) {
             chat_id: chat_id
         },
         success: function (response) {
-            console.log(response);
+
         },
         beforeSend: function (xhr, settings) {
             xhr.setRequestHeader("X-CSRFToken", csrf_token);
