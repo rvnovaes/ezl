@@ -428,6 +428,19 @@ class ClientAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
 
+class CorrespondentAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Person.objects.none()
+
+        if self.q:
+            Person.objects.filter()
+            qs = Person.objects.filter(
+                legal_name__unaccent__istartswith=self.q,
+                auth_user__groups__name=Person.CORRESPONDENT_GROUP
+            )
+        return qs
+
+
 class GenericAutocompleteForeignKey(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         try:

@@ -38,12 +38,12 @@ class ServicePriceTableForm(BaseModelForm):
         label="Correspondente",
         queryset=Person.objects.filter(auth_user__groups__name=Person.CORRESPONDENT_GROUP),
         empty_label=u"Selecione...",
-        widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'}),
+        widget=MDModelSelect2(url='correspondent_autocomplete', attrs={'class': 'form-control'}),
         required=True,
     )
 
     client = forms.ModelChoiceField(
-        queryset=Person.objects.filter(is_active=True, is_customer=True),
+        queryset=Person.objects.filter(is_customer=True),
         empty_label=u"Selecione...",
         widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'}),
         required=False,
@@ -51,7 +51,7 @@ class ServicePriceTableForm(BaseModelForm):
     )
 
     court_district = forms.ModelChoiceField(
-        queryset=CourtDistrict.objects.filter(is_active=True),
+        queryset=CourtDistrict.objects.filter(),
         empty_label=u"Selecione...",
         widget=MDModelSelect2(url='courtdistrict_autocomplete', attrs={'class': 'form-control'}),
         required=False,
