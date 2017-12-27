@@ -61,7 +61,7 @@ class TaskCreateView(AuditFormMixin, CreateView):
         task = form.instance
         form.instance.movement_id = self.kwargs.get('movement')
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
-        form.instance.__server = self.request.environ['HTTP_HOST']
+        form.instance.__server = self.request.META['HTTP_HOST']
         response = super(TaskCreateView, self).form_valid(form)
 
         if form.cleaned_data['documents']:
@@ -99,7 +99,7 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
 
     def form_valid(self, form):
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
-        form.instance.__server = self.request.environ['HTTP_HOST']
+        form.instance.__server = self.request.META['HTTP_HOST']
         super(TaskUpdateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
@@ -246,8 +246,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
                                        execution_date=execution_date, survey_result=survey_result)
-
-        form.instance.__server = self.request.environ['HTTP_HOST']
+        form.instance.__server = self.request.META['HTTP_HOST']
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
