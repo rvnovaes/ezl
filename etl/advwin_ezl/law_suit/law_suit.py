@@ -3,14 +3,16 @@ from core.utils import LegacySystem
 from lawsuit.models import Organ
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory, INVALID_ORGAN
+from etl.utils import get_users_to_import
 from lawsuit.models import LawSuit, Folder, Instance, CourtDistrict, CourtDivision
+from etl.utils import get_message_log_default, save_error_log
 
 
 class LawsuitETL(GenericETL):
     model = LawSuit
     advwin_table = 'Jurid_Pastas'
 
-    import_query = """
+    _import_query = """
                     SELECT 
                           p.OutraParte                             AS opposing_party, 
                           p.Codigo_Comp                            AS folder_legacy_code,
@@ -52,12 +54,12 @@ class LawsuitETL(GenericETL):
                           INNER JOIN Jurid_CodMov AS cm ON
                                                           a.CodMov = cm.Codigo
                     WHERE
-                          p.Status = 'Ativa' AND
+                          (p.Status = 'Ativa' OR p.Status = 'Especial') AND
                           cm.UsarOS = 1 AND
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
                           ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                           (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171', '20010149000165', '01605132608') AND -- marcio.batista, nagila e claudia (Em teste) 
+                          AND a.Advogado IN ('{}') AND 
                           ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
                            (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
                           ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
@@ -69,8 +71,12 @@ class LawsuitETL(GenericETL):
 
     has_status = True
 
+    @property
+    def import_query(self):
+        return self._import_query.format("','".join(get_users_to_import()))
+
     @validate_import
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         for row in rows:
             print(rows_count)
             rows_count -= 1
@@ -164,10 +170,10 @@ class LawsuitETL(GenericETL):
                     legacy_code, str(LegacySystem.ADVWIN.value), str(opposing_party), self.timestr))
 
             except Exception as e:
-                self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de LawSuit: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
-
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
+                self.error_logger.error(msg)
+                save_error_log(log, user, msg)
 
 if __name__ == "__main__":
     LawsuitETL().import_data()

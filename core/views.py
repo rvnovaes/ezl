@@ -20,11 +20,11 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 
-from allauth.account.views import LoginView
+from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 
-from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, AddressFormSet
+from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, AddressFormSet
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
@@ -697,3 +697,11 @@ class UserDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
 
     def get_success_url(self):
         return reverse_lazy('user_list')
+
+
+class PasswordResetViewMixin(PasswordResetView, FormView):
+    form_class = ResetPasswordFormMixin
+
+    def form_valid(self, form):
+        context = form.save(self.request)
+        return render(self.request, 'account/password_reset_done.html', context)

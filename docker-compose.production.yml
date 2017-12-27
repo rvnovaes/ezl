@@ -33,6 +33,7 @@ services:
       - web-media:/app/media
       - ezl-logs:/var/log/ezl
       - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas
     environment:
       ENV: production
 

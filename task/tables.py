@@ -42,14 +42,14 @@ class TaskTable(tables.Table):
 
 class DashboardStatusTable(tables.Table):
     def __init__(self, *args, delegation_date='Delegação', client="Cliente",
-                 lawsuit_number="Processo", legacy_code="Número", type_service="Serviço", title="",
-                 status="", **kwargs):
+                 lawsuit_number="Processo", type_service="Serviço", opposing_party="Parte adversa",
+                 title="", status="", **kwargs):
         super().__init__(*args, **kwargs)
         self.base_columns['delegation_date'].verbose_name = delegation_date
         self.base_columns['client'].verbose_name = client
         self.base_columns['lawsuit_number'].verbose_name = lawsuit_number
         self.base_columns['type_service'].verbose_name = type_service
-        self.base_columns['opposing_party'].verbose_name = 'Parte adversa'
+        self.base_columns['opposing_party'].verbose_name = opposing_party
         self.title = title
         self.status = status
 

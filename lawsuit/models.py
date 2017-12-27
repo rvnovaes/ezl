@@ -158,8 +158,10 @@ class LawSuit(Audit, LegacyCode):
 class Movement(Audit, LegacyCode):
     type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False,
                                       verbose_name="Tipo de Movimentação")
-    law_suit = models.ForeignKey(LawSuit, on_delete=models.PROTECT, blank=False, null=False,
+    law_suit = models.ForeignKey(LawSuit, on_delete=models.PROTECT, blank=True, null=True,
                                  verbose_name="Processo", related_name='law_suits')
+    folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False,
+                               verbose_name="Pasta", related_name='folders_movement')
 
     class Meta:
         db_table = "movement"

@@ -45939,4 +45939,15 @@
         <field name="name" type="CharField">Xambioá</field>
         <field name="state" rel="ManyToOneRel" to="core.state">28</field>
     </object>
+    <object model="lawsuit.courtdistrict" pk="2783">
+      <field name="create_date" type="DateTimeField">2017-12-21T16:06:46.375044+00:00</field>
+      <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+      <field name="alter_date" type="DateTimeField">2017-12-21T16:06:46.375076+00:00</field>
+      <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+      <field name="legacy_code" type="CharField"><None></None></field>
+      <field name="system_prefix" type="CharField"><None></None></field>
+      <field name="is_active" type="BooleanField">True</field>
+      <field name="name" type="CharField">João Pessoa</field>
+      <field name="state" rel="ManyToOneRel" to="core.state">16</field>
+    </object>
 </django-objects>

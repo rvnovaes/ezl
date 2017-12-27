@@ -25,6 +25,8 @@ from sqlalchemy import text
 from connections.db_connection import connect_db, get_advwin_engine
 from core.utils import LegacySystem
 from config.config import get_parser
+from etl.models import DashboardETL
+from django.utils import timezone
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -35,6 +37,9 @@ try:
     truncate_all_tables = source['truncate_all_tables']
     create_alter_user = source['user']
     config_connection = source['connection_name']
+    source_etl_connection = dict(parser.items(source['connection_name']))
+    db_name_source = source_etl_connection['database']
+    db_host_source = source_etl_connection['server']
 except KeyError as e:
     print('Invalid settings. Check the General.ini file')
     print(e)
@@ -64,8 +69,8 @@ def validate_import(f):
     """
 
     @wraps(f)
-    def wrapper(etl, rows, user, rows_count):
-        res = f(etl, rows, user, rows_count)
+    def wrapper(etl, rows, user, rows_count, log, *args, **kwargs):
+        res = f(etl, rows, user, rows_count, *args, **kwargs)
         debug_logger = etl.debug_logger
         error_logger = etl.error_logger
         name_class = etl.model._meta.verbose_name
@@ -101,6 +106,8 @@ def validate_import(f):
                     name_class + ' - Quantidade nao importada {0}'.format(len(not_imported)))
                 error_logger.error(
                     name_class + ' -  Registros nao importadados {0}'.format(str(not_imported)))
+            log.imported_quantity = written_amount
+            log.save()
             return res
         except Exception as exc:
             error_logger.error(etl.model._meta.verbose_name + ': Nao foi possivel validar ')
@@ -111,8 +118,6 @@ def validate_import(f):
 
 class GenericETL(object):
     EZL_LEGACY_CODE_FIELD = 'legacy_code'
-
-
     model = None
     import_query = None
     export_statements = None
@@ -140,13 +145,17 @@ class GenericETL(object):
         if not truncate_all_tables:
             self.model.objects.all().update(is_active=False)
 
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         raise NotImplementedError()
 
     def import_data(self):
         from django.contrib.auth import get_user_model
         User = get_user_model()
-
+        user = User.objects.get(pk=create_alter_user)
+        dashboard_log = DashboardETL.objects.create(
+            name=self.model._meta.verbose_name.upper(), status=False,
+            executed_query=self.import_query, create_user=user,
+            db_name_source=db_name_source, db_host_source=db_host_source)
         if self.has_status:
             self.deactivate_all()
 
@@ -157,7 +166,11 @@ class GenericETL(object):
                 rows = cursor.fetchall()
                 rows_count = len(rows)
                 user = User.objects.get(pk=create_alter_user)
-                self.config_import(rows, user, rows_count)
+                self.config_import(rows, user, rows_count, log=dashboard_log)
+                dashboard_log.execution_date_finish = timezone.now()
+                dashboard_log.read_quantity = rows_count
+                dashboard_log.status = True
+                dashboard_log.save()
                 connection.close()
             except:
                 self.error_logger.error("Erro de conexão. Nova tentativa de conexão em 5s. Tentativa: " + str(attempt + 1))
@@ -166,7 +179,6 @@ class GenericETL(object):
                 break
         else:
             self.error_logger.error("Não foi possível conectar com o banco.")
-            raise
 
     def config_export(self):
         pass

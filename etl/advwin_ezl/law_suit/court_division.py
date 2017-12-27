@@ -1,6 +1,7 @@
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from lawsuit.models import CourtDivision
+from etl.utils import get_message_log_default, save_error_log
 
 
 class CourtDivisionETL(GenericETL):
@@ -18,7 +19,7 @@ class CourtDivisionETL(GenericETL):
     has_status = False
 
     @validate_import
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         for row in rows:
 
             try:
@@ -47,10 +48,10 @@ class CourtDivisionETL(GenericETL):
                                                      self.timestr))
 
             except Exception as e:
-                self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Varas: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
-
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
+                self.error_logger.error(msg)
+                save_error_log(log, user, msg)
 
 if __name__ == "__main__":
     CourtDivisionETL().import_data()

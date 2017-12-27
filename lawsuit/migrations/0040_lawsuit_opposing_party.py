@@ -11,6 +11,10 @@ class Migration(migrations.Migration):
         ('lawsuit', '0039_folder_cost_center'),
     ]
 
+    run_before = [
+        ('task', '0001_initial'),
+    ]
+
     operations = [
         migrations.AddField(
             model_name='lawsuit',

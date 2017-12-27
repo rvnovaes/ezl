@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 
-from core.views import ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView
+from core.views import ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin
 from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView
 
@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'^', include('core.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/login/$', LoginCustomView.as_view(), name='account_login'),
+    url(r'^accounts/password/reset/$', PasswordResetViewMixin.as_view(), name='account_reset_password'),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^financeiro/', include('financial.urls'), name='financial'),
     url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),

@@ -1,5 +1,6 @@
 from core.models import Address, Person, AddressType, City, State, Country
-from etl.advwin_ezl.advwin_ezl import GenericETL
+from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
+from etl.utils import get_message_log_default, save_error_log
 
 
 # noinspection SpellCheckingInspection
@@ -58,7 +59,8 @@ class AddressETL(GenericETL):
                     """
     has_status = True
 
-    def config_import(self, rows, user, rows_count):
+    @validate_import
+    def config_import(self, rows, user, rows_count, log=False):
         """
         Metodo responsavel por importar os dados referente aos enderecos das pessoas
         cadastradas no advwin para o EZL
@@ -130,11 +132,10 @@ class AddressETL(GenericETL):
                             str(country.first().id), str(user.id), str(user.id), self.timestr))
 
             except Exception as e:
-                self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Endereco: " + str(
-                        rows_count) + "," + str(
-                        e) + "," + self.timestr)
-
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
+                self.error_logger.error(msg)
+                save_error_log(log, user, msg)
 
 if __name__ == '__main__':
     AddressETL().import_data()

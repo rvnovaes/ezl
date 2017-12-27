@@ -4,19 +4,20 @@ from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import Folder
+from etl.utils import get_message_log_default, save_error_log, get_users_to_import
 from financial.models import CostCenter
 
 
 class FolderETL(GenericETL):
     advwin_table = 'Jurid_Pastas'
     model = Folder
-    import_query = """
+    _import_query = """
             SELECT DISTINCT
               p.Codigo_Comp AS legacy_code,
               p.Cliente,
               p.Setor
             FROM Jurid_Pastas AS p
-                  INNER JOIN Jurid_ProcMov AS pm ON
+                  LEFT JOIN Jurid_ProcMov AS pm ON
                     pm.Codigo_Comp = p.Codigo_Comp
                   INNER JOIN Jurid_agenda_table AS a ON
                     a.Pasta = p.Codigo_Comp
@@ -24,17 +25,21 @@ class FolderETL(GenericETL):
                     a.CodMov = cm.Codigo
             WHERE
               cm.UsarOS = 1 AND
-              p.Status = 'Ativa' AND
+              (p.Status = 'Ativa' OR p.Status = 'Especial') AND
               p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '' AND
               p.Cliente IS NOT NULL AND p.Cliente <> '' AND
               ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-              AND a.Advogado IN ('12157458697', '12197627686', '13281750656', '11744024000171', '20010149000165', '01605132608') -- marcio.batista, claudia pires e nagila(Em teste)
+              AND a.Advogado IN ('{}')
                   """
     has_status = True
 
+    @property
+    def import_query(self):
+        return self._import_query.format("','".join(get_users_to_import()))
+
     @validate_import
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, log=False):
         invalid_cost_center = InvalidObjectFactory.get_invalid_model(CostCenter)
         for row in rows:
             rows_count -= 1
@@ -85,9 +90,9 @@ class FolderETL(GenericETL):
                                                                 str(LegacySystem.ADVWIN.value),str(user.id),str(user.id),
                                                                 self.timestr))
             except Exception as e:
-                self.error_logger.error(
-                    "Ocorreu o seguinte erro na importacao de Pastas: " + str(rows_count) + "," + str(
-                        e) + "," + self.timestr)
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e)
+                save_error_log(log, user, msg)
 
 
 if __name__ == "__main__":
