@@ -36,7 +36,20 @@ services:
       - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas
     environment:
       ENV: production
-
+  ws:
+    image: ezl:latest
+    volumes:
+      - .:/app
+      - ezl-logs:/var/log/ezl
+    ports:
+      - '8001:8001'
+    command: daphne -b 0.0.0.0 -p 8001 --ws-protocol "graphql-ws" --proxy-headers ezl.asgi:channel_layer
+  ws-worker:
+    image: ezl:latest
+    volumes:
+      - .:/app
+      - ezl-logs:/var/log/ezl
+    command: python manage.py runworker
   luigi:
     environment:
       ENV: production
