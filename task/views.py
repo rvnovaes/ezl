@@ -172,11 +172,11 @@ class DashboardView(MultiTableMixin, TemplateView):
 
         return_list = []
 
-        return_list.append(DashboardErrorStatusTable(error,
-                                                title='Erro no sistema de origem',
-                                                status=TaskStatus.ERROR))
-
         if not person.auth_user.has_perm('core.view_delegated_tasks') or person.auth_user.is_superuser:
+            return_list.append(DashboardErrorStatusTable(error,
+                                                         title='Erro no sistema de origem',
+                                                         status=TaskStatus.ERROR))
+
             # status 10 - Solicitada
             return_list.append(DashboardStatusTable(requested,
                                                     title='Solicitadas',
@@ -186,8 +186,17 @@ class DashboardView(MultiTableMixin, TemplateView):
                                                     title='Aceitas pelo Service',
                                                     status=TaskStatus.ACCEPTED_SERVICE))
 
+            # status 20 - Recusada pelo Sevice
+            return_list.append(DashboardStatusTable(refused_service,
+                                                    title='Recusadas pelo Service',
+                                                    status=TaskStatus.REFUSED_SERVICE))
+
+        return_list.append(DashboardStatusTable(returned,
+                                                title='Retornadas',
+                                                status=TaskStatus.RETURN))
+
         return_list.append(DashboardStatusTable(opened,
-                                                title='Delegada / Em Aberto',
+                                                title='Delegada/Em Aberto',
                                                 status=TaskStatus.OPEN))
 
         return_list.append(DashboardStatusTable(accepted,
@@ -198,23 +207,14 @@ class DashboardView(MultiTableMixin, TemplateView):
                                                 title='Cumpridas',
                                                 status=TaskStatus.DONE))
 
-        return_list.append(DashboardStatusTable(returned,
-                                                title='Retornadas',
-                                                status=TaskStatus.RETURN))
-
         return_list.append(DashboardStatusTable(finished,
                                                 title='Finalizadas',
                                                 status=TaskStatus.FINISHED))
 
-        if not person.auth_user.has_perm('core.view_delegated_tasks') or person.auth_user.is_superuser:
-            # status 20 - Recusada pelo Sevice
-            return_list.append(DashboardStatusTable(refused_service,
-                                                    title='Recusadas pelo Service',
-                                                    status=TaskStatus.REFUSED_SERVICE))
-            # status 40 - Recusada
-            return_list.append(DashboardStatusTable(refused,
-                                                    title='Recusadas',
-                                                    status=TaskStatus.REFUSED))
+        # status 40 - Recusada
+        return_list.append(DashboardStatusTable(refused,
+                                                title='Recusadas',
+                                                status=TaskStatus.REFUSED))
 
         return_list.append(DashboardStatusTable(blocked_payment,
                                                 title='Glosadas',
