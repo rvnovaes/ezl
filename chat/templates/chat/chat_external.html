@@ -79,7 +79,8 @@
         var data = '';
         var edata = '';
         var label = "{{ chat.label }}";
-        socket = new WebSocket("ws://" + window.location.host + "/ws/?label=" + label);
+        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+        socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + chat_label);
         $('.chat.panel-body').animate({scrollTop: 9999}, 1000);
         sendMessage = function (chatId) {
             var el = $('#' + chatId).find('#btn-input');
