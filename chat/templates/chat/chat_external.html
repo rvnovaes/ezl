@@ -80,7 +80,7 @@
         var edata = '';
         var label = "{{ chat.label }}";
         var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-        socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + chat_label);
+        socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + label);
         $('.chat.panel-body').animate({scrollTop: 9999}, 1000);
         sendMessage = function (chatId) {
             var el = $('#' + chatId).find('#btn-input');
