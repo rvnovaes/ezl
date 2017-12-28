@@ -43,7 +43,7 @@ setInterval(function () {
         },
         dataType: "json"
     });
-}, 1000);
+}, 100000);
 
 
 var formatDate = function (strDate) {

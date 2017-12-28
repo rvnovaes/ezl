@@ -101,6 +101,7 @@
         var setLastMessage = function (chat_id) {
             $("[chat-id=" + chat_id + "]").animate({scrollTop: 9999}, 1000);
         };
+        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
         var setBoxMessage = function (box_id, chat_label, chat_id) {
             chatReadMessage(chat_id, '{{ csrf_token }}');
             setLastMessage(chat_id);
@@ -108,7 +109,7 @@
             var elBox = $('#' + box_id);
             elBox.show();
             elBox.find('#comment').val(null);
-            socket = new WebSocket("ws://" + window.location.host + "/chat/?label=" + chat_label);
+            socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + chat_label);
             socket.onopen = function (data) {
                 socket.send(data);
             };
