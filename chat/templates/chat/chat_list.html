@@ -108,7 +108,7 @@
             var elBox = $('#' + box_id);
             elBox.show();
             elBox.find('#comment').val(null);
-            socket = new WebSocket("ws://" + window.location.host + "/chat/?label=" + chat_label);
+            socket = new WebSocket("ws://" + window.location.host + "/ws/?label=" + chat_label);
             socket.onopen = function (data) {
                 socket.send(data);
             };
