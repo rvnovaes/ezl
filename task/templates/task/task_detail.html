@@ -82,7 +82,7 @@
 
                     var notes = $('textarea[id=notes_id]');
                     notes.removeAttr('required');
-                    ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN'].forEach(function (status) {
+                    ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN', 'REFUSED_SERVICE'].forEach(function (status) {
                         if (task_status === status) {
                             notes.attr('required', true).change(function () {
                                 notes.val(notes.val().trim())
