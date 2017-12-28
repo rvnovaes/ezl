@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('chat', '0007_unreadmessage'),
-        ('task', '0051_auto_20171206_1344'),
+        ('task', '0051_auto_20171206_1746'),
     ]
 
     operations = [
@@ -27,5 +27,11 @@ class Migration(migrations.Migration):
             model_name='task',
             name='chat',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='chat.Chat', verbose_name='Chat'),
+        ),
+        migrations.AlterField(
+            model_name='taskhistory',
+            name='status',
+            field=models.CharField(choices=[('Solicitada', 'REQUESTED'), ('Aceita pelo Service', 'ACCEPTED_SERVICE'), ('Em Aberto', 'OPEN'), ('A Cumprir', 'ACCEPTED'), ('Cumprida', 'DONE'), ('Retorno', 'RETURN'), ('Finalizada', 'FINISHED'), ('Recusada pelo Service', 'REFUSED_SERVICE'), ('Recusada', 'REFUSED'), ('Glosada', 'BLOCKEDPAYMENT'), ('Inválida', 'INVALID')], max_length=30),
+
         ),
     ]

@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+import django.db.models.deletion
 import task.models
 
 
@@ -31,5 +32,10 @@ class Migration(migrations.Migration):
             model_name='taskhistory',
             name='status',
             field=models.CharField(choices=[('Solicitada', 'REQUESTED'), ('Aceita pelo Service', 'ACCEPTED_SERVICE'), ('Em Aberto', 'OPEN'), ('A Cumprir', 'ACCEPTED'), ('Cumprida', 'DONE'), ('Retorno', 'RETURN'), ('Finalizada', 'FINISHED'), ('Recusada pelo Service', 'REFUSED_SERVICE'), ('Recusada', 'REFUSED'), ('Glosada', 'BLOCKEDPAYMENT'), ('Inválida', 'INVALID')], max_length=10),
+        ),
+        migrations.AlterField(
+            model_name='task',
+            name='person_distributed_by',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='core.Person', verbose_name='Contratante'),
         ),
     ]
