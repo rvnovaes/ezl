@@ -50,7 +50,7 @@ class ServicePriceTableTaskTable(tables.Table):
         fields = ('correspondent', 'court_district', 'state', 'client', 'value')
         attrs = {"class": "table stable-striped table-bordered correspondents-table", "id": "correspondents-table"}
         empty_text = "Não existem tabelas de preços cadastradas"
-        order_by = 'value'
+        order_by = ("value",)
         row_attrs = {
             'data-id': lambda record: record.pk,
             'data-value': lambda record: record.value

@@ -71,7 +71,7 @@ class ServicePriceTable(models.Model):
 
     class Meta:
         db_table = 'service_price_table'
-        ordering = ['id']
+        ordering = ['value']
         verbose_name = 'Tabela de preço de serviços'
         verbose_name_plural = 'Tabelas de preço de serviços'
 
