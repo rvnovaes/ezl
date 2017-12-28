@@ -327,7 +327,9 @@ span, .pagination > .active > span:focus, .pagination > .active > span:hover {
     top: -14px;
 }
 
-.select-field label.active, label#city_label.active{color: #0097a7;}
+.select-field label.active, label#select2_label.active {
+    color: #0097a7;
+}
 .select2-container--focus .select2-selection {border-color: #0097a7 !important;}
 
 #confirmDelete{

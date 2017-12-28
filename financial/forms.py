@@ -2,8 +2,10 @@ from django import forms
 from task.models import TypeTask
 from material import Layout, Row
 from core.widgets import MDModelSelect2
-from core.models import Person
+from core.models import Person, State
+from core.utils import filter_valid_choice_form
 from lawsuit.models import CourtDistrict
+from task.models import TypeTask
 from .models import CostCenter, ServicePriceTable
 
 
@@ -37,25 +39,54 @@ class ServicePriceTableForm(BaseModelForm):
     correspondent = forms.ModelChoiceField(
         label="Correspondente",
         queryset=Person.objects.filter(auth_user__groups__name=Person.CORRESPONDENT_GROUP),
-        empty_label=u"Selecione...",
-        widget=MDModelSelect2(url='correspondent_autocomplete', attrs={'class': 'form-control'}),
+        widget=MDModelSelect2(
+            url='correspondent_autocomplete',
+            attrs={
+                'class': 'select-with-search material-ignore form-control',
+                'data-placeholder': '',
+                'data-label': 'Cidade'
+            }),
         required=True,
     )
 
     client = forms.ModelChoiceField(
         queryset=Person.objects.filter(is_customer=True),
-        empty_label=u"Selecione...",
-        widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'}),
+        widget=MDModelSelect2(
+            url='client_autocomplete',
+            attrs={
+                'class': 'select-with-search material-ignore form-control',
+                'data-placeholder': '',
+                'data-label': 'Cliente'
+            }),
         required=False,
         label="Cliente"
     )
 
     court_district = forms.ModelChoiceField(
         queryset=CourtDistrict.objects.filter(),
-        empty_label=u"Selecione...",
-        widget=MDModelSelect2(url='courtdistrict_autocomplete', attrs={'class': 'form-control'}),
+        widget=MDModelSelect2(
+            url='courtdistrict_autocomplete',
+            attrs={
+                'class': 'select-with-search material-ignore form-control',
+                'data-placeholder': '',
+                'data-label': 'Comarca'
+            }),
         required=False,
         label="Comarca"
+    )
+
+    state = forms.ModelChoiceField(
+        queryset=filter_valid_choice_form(State.objects.all().order_by('initials')),
+        empty_label='',
+        required=True,
+        label='UF',
+    )
+
+    type_task = forms.ModelChoiceField(
+        queryset=filter_valid_choice_form(TypeTask.objects.all().order_by('name')),
+        empty_label='',
+        required=True,
+        label=u"Tipo de Serviço",
     )
 
     class Meta:
