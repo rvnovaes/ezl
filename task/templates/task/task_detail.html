@@ -812,7 +812,9 @@
     <script type="text/javascript">
         $("#correspondents-table tbody tr").click(function(){
             id = $(this).data('id');
+            amount = $(this).data('value');
             $('input[name=servicepricetable_id]').val(id);
+            $('input[name=amount]').val(parseFloat(amount));
             $(this).addClass("tr_selected");
             $(this).siblings().removeClass("tr_selected");
         });

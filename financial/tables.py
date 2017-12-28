@@ -52,5 +52,6 @@ class ServicePriceTableTaskTable(tables.Table):
         empty_text = "Não existem tabelas de preços cadastradas"
         order_by = 'value'
         row_attrs = {
-            'data-id': lambda record: record.pk
+            'data-id': lambda record: record.pk,
+            'data-value': lambda record: record.value
         }

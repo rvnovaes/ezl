@@ -89,6 +89,8 @@ class ServicePriceTableForm(BaseModelForm):
         label=u"Tipo de Serviço",
     )
 
+    value = forms.DecimalField(max_digits=9, decimal_places=2, localize=True)
+
     class Meta:
         model = ServicePriceTable
         fields = ('type_task', 'court_district', 'state', 'client', 'correspondent', 'value')
