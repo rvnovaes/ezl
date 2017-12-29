@@ -23,8 +23,6 @@ def ws_connect(message):
 
 @channel_session_user_from_http
 def ws_connect_count(message):
-    import pdb
-    pdb.set_trace()
     message.reply_channel.send({'accept': True})
     Group('count').add(message.reply_channel)
 
