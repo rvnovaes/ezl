@@ -28,7 +28,7 @@ icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assi
              'REQUESTED': 'playlist_play', 'ACCEPTED_SERVICE': 'thumb_up', 'REFUSED_SERVICE': 'thumb_down',
              'REFUSED': 'assignment_late', 'INVALID': 'error', 'FINISHED': 'gavel',
              'BLOCKEDPAYMENT': 'money_off',
-             'ERROR': 'error'}
+             'ERROR': 'add_circle_outline'}
 
 
 # next_action = {'ACCEPTED': 'cumprir', 'OPEN': 'assignment', 'RETURN': 'keyboard_return',
