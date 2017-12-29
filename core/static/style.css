@@ -123,71 +123,71 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
     width: 22px !important;
 }
 
-.RETURN {
-    color: white !important;
-    background: linear-gradient(60deg, #8F0F0E, #8F0000);
-    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
-}
-
-/*dont ask me why*/
-.OPEN, .open {
-    color: white !important;
-    background: linear-gradient(60deg, #DBCA34, #DBCA34);
-    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
-}
-
-.ACCEPTED {
-    color: white !important;
-    background: linear-gradient(60deg, #CC6905, #CC6905);
-    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
-}
-
-.REFUSED {
-    color: white !important;
-    background-color: #999999 !important;
-    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
-
-}
-
-.DONE {
-    color: white !important;
-    background: linear-gradient(60deg, #5472F4, #5472F2);
-    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
-}
-
-.BLOCKEDPAYMENT {
-    color: white !important;
-    background: linear-gradient(60deg, #673AB7, #673AB0);
-    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
-}
-
-.FINISHED {
-    color: white !important;
-    background: linear-gradient(60deg, #20911F, #20901F);
-    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
-}
-
 .ERROR {
     color: white !important;
-    background: linear-gradient(60deg, #FF9494, #FF9494);
+    background-color: #CD6155 !important;
     box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
+
+.ERROR i {transform: rotate(45deg);}
 
 .REQUESTED {
     color: white !important;
-    background: linear-gradient(60deg, #120a8f, #120a8f);
+    background-color: #C39BD3 !important;
     box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
 .ACCEPTED_SERVICE {
     color: white !important;
-    background: linear-gradient(60deg, #EBC15E, #EBC15E);
+    background-color: #884EA0 !important;
     box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
 .REFUSED_SERVICE {
     color: white !important;
-    background: linear-gradient(60deg, #000000, #000000);
+    background-color: #7FB3D5 !important;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.RETURN {
+    color: white !important;
+    background-color: #2471A3 !important;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.OPEN, .open {
+    color: white !important;
+    background-color: #F4D03F !important;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.ACCEPTED {
+    color: white !important;
+    background-color: #EB984E !important;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.DONE {
+    color: white !important;
+    background-color: #48C9B0 !important;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.FINISHED {
+    color: white !important;
+    background-color: #52BE80 !important;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.REFUSED {
+    color: white !important;
+    background-color: #566573 !important;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.BLOCKEDPAYMENT {
+    color: white !important;
+    background-color: #17202A !important;
     box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
@@ -391,4 +391,13 @@ i.material-icons {
 .select-wrapper input.select-dropdown {
     font-size: 16px!important;
     font-weight: 400;
+}
+
+
+.chat-badge.badge{
+    background-color: #A52A2A;
+}
+
+.chat-badge-item.badge{
+    background-color: #A52A2A;
 }

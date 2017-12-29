@@ -22,7 +22,20 @@ services:
       driver: "json-file"
       options:
         max-size: "100m"
-
+  ws:
+    image: ezl:latest
+    volumes:
+      - .:/app
+      - ezl-logs:/var/log/ezl
+    ports:
+      - '8002:8002'
+    command: daphne -b 0.0.0.0 -p 8002 --ws-protocol "graphql-ws" --proxy-headers ezl.asgi:channel_layer
+  ws-worker:
+    image: ezl:latest
+    volumes:
+      - .:/app
+      - ezl-logs:/var/log/ezl
+    command: python manage.py runworker
   luigi:
     build:
       context: .
@@ -95,6 +108,13 @@ services:
     command: pgweb --url postgres://ezl:ezl@db:5432/ezl?sslmode=disable --bind 0.0.0.0 --auth-user=admin --auth-pass=dev@2016
     ports:
     - "9002:8081"
+
+  redis:
+    image: redis:4.0.6
+    volumes:
+      - ".containers/redis/redis.conf:/etc/redis/redis.conf"
+    ports:
+      - "6379:6379"
 
 #  db_advwin:
 #    image: microsoft/mssql-server-linux:2017-latest

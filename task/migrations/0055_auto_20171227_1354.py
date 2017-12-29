@@ -9,7 +9,7 @@ import task.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0055_merge_20171227_1354'),
+        ('task', '0054_auto_20171221_1002'),
     ]
 
     operations = [
