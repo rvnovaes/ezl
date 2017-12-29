@@ -33,7 +33,7 @@ class ServicePriceTableForm(BaseModelForm):
 
     layout = Layout(
         Row('correspondent', 'type_task', 'value'),
-        Row('client', 'court_district', 'state'),
+        Row('client', 'state', 'court_district'),
     )
 
     correspondent = forms.ModelChoiceField(
@@ -62,10 +62,18 @@ class ServicePriceTableForm(BaseModelForm):
         label="Cliente"
     )
 
+    state = forms.ModelChoiceField(
+        queryset=filter_valid_choice_form(State.objects.all().order_by('initials')),
+        empty_label='',
+        required=False,
+        label='UF',
+    )
+
     court_district = forms.ModelChoiceField(
         queryset=CourtDistrict.objects.filter(),
         widget=MDModelSelect2(
             url='courtdistrict_autocomplete',
+            forward=['state'],
             attrs={
                 'class': 'select-with-search material-ignore form-control',
                 'data-placeholder': '',
@@ -73,13 +81,6 @@ class ServicePriceTableForm(BaseModelForm):
             }),
         required=False,
         label="Comarca"
-    )
-
-    state = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(State.objects.all().order_by('initials')),
-        empty_label='',
-        required=False,
-        label='UF',
     )
 
     type_task = forms.ModelChoiceField(

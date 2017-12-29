@@ -613,9 +613,16 @@ class CourtDistrictAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = CourtDistrict.objects.none()
 
+        state = self.forwarded.get('state', None)
+
         if self.q:
             qs = CourtDistrict.objects.filter(name__unaccent__istartswith=self.q,
                                               is_active=True)
+        if self.q and state:
+            qs = CourtDistrict.objects.filter(name__unaccent__istartswith=self.q,
+                                              is_active=True,
+                                              state=state)
+
         return qs
 
 
