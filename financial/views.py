@@ -74,7 +74,7 @@ class ServicePriceTableListView(LoginRequiredMixin, SingleTableViewMixin):
     paginate_by = 30
 
 
-class ServicePriceTableCreateView(CreateView):
+class ServicePriceTableCreateView(AuditFormMixin, CreateView):
     model = ServicePriceTable
     form_class = ServicePriceTableForm
     success_url = reverse_lazy('servicepricetable_list')
