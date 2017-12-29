@@ -90,7 +90,7 @@ class ServicePriceTableForm(BaseModelForm):
         label=u"Tipo de Serviço",
     )
 
-    value = forms.CharField(widget=forms.TextInput(attrs={'mask': 'money'}))
+    value = forms.CharField(label="Valor", widget=forms.TextInput(attrs={'mask': 'money'}))
 
     class Meta:
         model = ServicePriceTable
