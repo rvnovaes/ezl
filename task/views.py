@@ -263,7 +263,6 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         execution_date = None
-        import pdb;pdb.set_trace()
         form.instance.task_status = TaskStatus[self.request.POST['action']] or TaskStatus.INVALID
         form.instance.alter_user = User.objects.get(id=self.request.user.id)
         notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None
