@@ -284,8 +284,8 @@ span, .pagination > .active > span:focus, .pagination > .active > span:hover {
     background-color: rgba(209, 209, 209, 0.9) !important;
 }
 
-.tr_selected{
-    background-color: rgba(209, 189, 116, 0.9) !important;
+.tr_select{
+    box-shadow: unset!important;
 }
 .form-group{
     margin: 13px 0 0 0;

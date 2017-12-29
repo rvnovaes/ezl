@@ -815,8 +815,15 @@
             amount = $(this).data('value');
             $('input[name=servicepricetable_id]').val(id);
             $('input[name=amount]').val(parseFloat(amount));
-            $(this).addClass("tr_selected");
-            $(this).siblings().removeClass("tr_selected");
+            $(this).addClass("OPEN");
+            $(this).siblings().removeClass("OPEN");
+            $('input[name=amount]').focus();
+        });
+
+        $('input[id=id_amount]').keypress(function(e) {
+            if(e.which == 13) {
+              e.preventDefault();
+            }
         });
     </script>
 {% endblock %}

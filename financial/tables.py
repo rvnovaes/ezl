@@ -53,5 +53,6 @@ class ServicePriceTableTaskTable(tables.Table):
         order_by = ("value",)
         row_attrs = {
             'data-id': lambda record: record.pk,
-            'data-value': lambda record: record.value
+            'data-value': lambda record: record.value,
+            'class': 'tr_select'
         }

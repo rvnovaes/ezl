@@ -78,19 +78,25 @@ class ServicePriceTableForm(BaseModelForm):
     state = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(State.objects.all().order_by('initials')),
         empty_label='',
-        required=True,
+        required=False,
         label='UF',
     )
 
     type_task = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(TypeTask.objects.all().order_by('name')),
         empty_label='',
-        required=True,
+        required=False,
         label=u"Tipo de Serviço",
     )
 
-    value = forms.DecimalField(max_digits=9, decimal_places=2, localize=True)
+    value = forms.CharField(widget=forms.TextInput(attrs={'mask': 'money'}))
 
     class Meta:
         model = ServicePriceTable
         fields = ('type_task', 'court_district', 'state', 'client', 'correspondent', 'value')
+
+    def clean_value(self):
+        value = self.cleaned_data['value']
+        value = value.replace('.', '')
+        value = value.replace(',', '.')
+        return float(value)
