@@ -26,19 +26,23 @@ services:
       - certbot
 
   web:
-    command: daphne -b 0.0.0.0 -p 8000 ezl.asgi:channel_layer
+    command: uwsgi --ini /app/config/uwsgi/uwsgi.ini
     environment:
       ENV: development
-    links:
-      - redis
+  ws:
+    image: ezl:latest
+    volumes:
+      - .:/app
+      - ezl-logs:/var/log/ezl
+    ports:
+      - '8002:8002'
+    command: daphne -b 0.0.0.0 -p 8002 --ws-protocol "graphql-ws" --proxy-headers ezl.asgi:channel_layer
   ws-worker:
     image: ezl:latest
     volumes:
       - .:/app
       - ezl-logs:/var/log/ezl
     command: python manage.py runworker
-    links:
-      - redis
   luigi:
     command: luigid
     environment:
