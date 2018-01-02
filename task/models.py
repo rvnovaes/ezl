@@ -118,6 +118,8 @@ class Task(Audit, LegacyCode):
                                               verbose_name='Contratante')
     type_task = models.ForeignKey(TypeTask, on_delete=models.PROTECT, blank=False, null=False,
                                   verbose_name='Tipo de Serviço')
+    acceptance_service_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação pelo Contratante')
+    refused_service_date = models.DateTimeField(null=True, verbose_name='Data de Recusa pelo Contratante')
     delegation_date = models.DateTimeField(default=timezone.now, verbose_name='Data de Delegação')
     acceptance_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação')
     final_deadline_date = models.DateTimeField(null=True, verbose_name='Prazo')
