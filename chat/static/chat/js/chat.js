@@ -5,7 +5,7 @@ var setBadgeItem = function (items) {
         if (item.quantity > 0) {
             el.text(item.quantity)
         } else {
-            el.text('thiago')
+            el.text(null)
         }
 
     })
@@ -43,7 +43,7 @@ setInterval(function () {
         },
         dataType: "json"
     });
-}, 100000);
+}, 1000);
 
 
 var formatDate = function (strDate) {

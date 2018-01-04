@@ -1,6 +1,8 @@
 from django.contrib import admin
 from core.models import AddressType, ContactMechanismType, ContactMechanism
 
+#Todo: Remover office
+from core.models import Office
 
 # Register your models here.
 
@@ -17,3 +19,4 @@ class ContactMechanismTypeAdmin(admin.ModelAdmin):
 admin.site.register(AddressType)
 admin.site.register(ContactMechanism)
 admin.site.register(ContactMechanismType, ContactMechanismTypeAdmin)
+admin.site.register(Office)

@@ -214,6 +214,20 @@ class Person(Audit, LegacyCode):
         return self.legal_name
 
 
+class OfficeBase(Person):
+    #Todo
+    persons = models.ManyToManyField(Person, related_name='offices', blank=True)
+
+    class Meta:
+        abstract = True
+
+
+
+class Office(OfficeBase):
+    pass
+
+
+
 class Address(Audit):
     address_type = models.ForeignKey(
         AddressType, on_delete=models.PROTECT, blank=False, null=False,
