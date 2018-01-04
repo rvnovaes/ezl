@@ -419,12 +419,19 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
 
         if task_form.is_valid():
             data = task_form.cleaned_data
-            status_dynamic_query = Q()
             task_dynamic_query = Q()
             person_dynamic_query = Q()
-            reminder_dynamic_query = Q()
-            deadline_dynamic_query = Q()
             client_query = Q()
+            requested_dynamic_query = Q()
+            accepted_service_dynamic_query = Q()
+            refused_service_query = Q()
+            open_dynamic_query = Q()
+            accepted_dynamic_query = Q()
+            refused_dynamic_query = Q()
+            return_dynamic_query = Q()
+            done_dynamic_query = Q()
+            blocked_payment_dynamic_query = Q()
+            finished_dynamic_query = Q()
 
             if not self.request.user.has_perm('core.view_all_tasks'):
                 if self.request.user.has_perm('core.view_delegated_tasks'):
@@ -452,22 +459,89 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
                 task_dynamic_query.add(Q(person_asked_by__legal_name__contains=data['person_asked_by']), Q.AND)
             if data['person_distributed_by']:
                 task_dynamic_query.add(Q(person_distributed_by__legal_name__contains=data['person_distributed_by']), Q.AND)
-            if data['deadline']:
-                if data['deadline'].start:
-                    deadline_dynamic_query.add(
-                        Q(final_deadline_date__gte=data['deadline'].start.replace(hour=0,
-                                                                                  minute=0)),
-                        Q.AND)
-                if data['deadline'].stop:
-                    deadline_dynamic_query.add(
-                        Q(final_deadline_date__lte=data['deadline'].stop.replace(hour=23,
-                                                                                 minute=59)),
-                        Q.AND)
-            if data['client']:
-                client_query.add(Q(client=data['client']), Q.AND)
-            person_dynamic_query.add(status_dynamic_query, Q.AND).add(Q(reminder_dynamic_query),
-                                                                      Q.AND).add(
-                Q(deadline_dynamic_query), Q.AND).add(Q(client_query), Q.AND)
+            if data['requested_in']:
+                if data['requested_in'].start:
+                    requested_dynamic_query.add(
+                        Q(requested_date__gte=data['requested_in'].start.replace(hour=0, minute=0)), Q.AND)
+                if data['requested_in'].stop:
+                    requested_dynamic_query.add(
+                        Q(requested_date__lte=data['requested_in'].stop.replace(hour=23, minute=59)), Q.AND)
+            if data['accepted_service_in']:
+                if data['accepted_service_in'].start:
+                    accepted_service_dynamic_query.add(
+                        Q(acceptance_service_date__gte=data['accepted_service_in'].start.replace(hour=0, minute=0)), Q.AND)
+                if data['accepted_service_in'].stop:
+                    accepted_service_dynamic_query.add(
+                        Q(acceptance_service_date__lte=data['accepted_service_in'].stop.replace(hour=23, minute=59)), Q.AND)
+            if data['refused_service_in']:
+                if data['refused_service_in'].start:
+                    refused_service_query.add(
+                        Q(refused_service_date__gte=data['refused_service_in'].start.replace(hour=0, minute=0)), Q.AND)
+                if data['refused_service_in'].stop:
+                    refused_service_query.add(
+                        Q(refused_service_date__lte=data['refused_service_in'].stop.replace(hour=23, minute=59)), Q.AND)
+            if data['open_in']:
+                if data['open_in'].start:
+                    open_dynamic_query.add(
+                        Q(delegation_date__gte=data['open_in'].start.replace(hour=0, minute=0)), Q.AND)
+                if data['open_in'].stop:
+                    open_dynamic_query.add(
+                        Q(delegation_date__lte=data['open_in'].stop.replace(hour=23, minute=59)), Q.AND)
+            if data['accepted_in']:
+                if data['accepted_in'].start:
+                    accepted_dynamic_query.add(
+                        Q(acceptance_date__gte=data['accepted_in'].start.replace(hour=0, minute=0)), Q.AND)
+                if data['accepted_in'].stop:
+                    accepted_dynamic_query.add(
+                        Q(acceptance_date__lte=data['accepted_in'].stop.replace(hour=23, minute=59)), Q.AND)
+            if data['refused_in']:
+                if data['refused_in'].start:
+                    refused_dynamic_query.add(
+                        Q(refused_date__gte=data['refused_in'].start.replace(hour=0, minute=0)), Q.AND)
+                if data['refused_in'].stop:
+                    refused_dynamic_query.add(
+                        Q(refused_date__lte=data['refused_in'].stop.replace(hour=23, minute=59)), Q.AND)
+            if data['return_in']:
+                if data['return_in'].start:
+                    return_dynamic_query.add(
+                        Q(return_date__gte=data['return_in'].start.replace(hour=0, minute=0)), Q.AND)
+                if data['return_in'].stop:
+                    return_dynamic_query.add(
+                        Q(return_date__lte=data['return_in'].stop.replace(hour=23, minute=59)), Q.AND)
+            if data['done_in']:
+                if data['done_in'].start:
+                    done_dynamic_query.add(
+                        Q(execution_date__gte=data['done_in'].start.replace(hour=0, minute=0)), Q.AND)
+                if data['done_in'].stop:
+                    done_dynamic_query.add(
+                        Q(execution_date__lte=data['done_in'].stop.replace(hour=23, minute=59)), Q.AND)
+            if data['blocked_payment_in']:
+                if data['blocked_payment_in'].start:
+                    blocked_payment_dynamic_query.add(
+                        Q(blocked_payment_date__gte=data['blocked_payment_in'].start.replace(hour=0, minute=0)), Q.AND)
+                if data['blocked_payment_in'].stop:
+                    blocked_payment_dynamic_query.add(
+                        Q(blocked_payment_date__lte=data['blocked_payment_in'].stop.replace(hour=23, minute=59)), Q.AND)
+            if data['finished_in']:
+                if data['finished_in'].start:
+                    finished_dynamic_query.add(
+                        Q(finished_date__gte=data['finished_in'].start.replace(hour=0, minute=0)), Q.AND)
+                if data['finished_in'].stop:
+                    finished_dynamic_query.add(
+                        Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
+
+            person_dynamic_query.add(Q(client_query), Q.AND)\
+                .add(Q(task_dynamic_query), Q.AND)\
+                .add(Q(requested_dynamic_query), Q.AND)\
+                .add(Q(accepted_service_dynamic_query), Q.AND)\
+                .add(Q(refused_service_query), Q.AND)\
+                .add(Q(open_dynamic_query), Q.AND)\
+                .add(Q(accepted_dynamic_query), Q.AND)\
+                .add(Q(refused_dynamic_query), Q.AND)\
+                .add(Q(return_dynamic_query), Q.AND)\
+                .add(Q(done_dynamic_query), Q.AND)\
+                .add(Q(blocked_payment_dynamic_query), Q.AND)\
+                .add(Q(finished_dynamic_query), Q.AND)
 
             query_set = DashboardViewModel.objects.filter(person_dynamic_query)
 
