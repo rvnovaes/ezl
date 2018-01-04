@@ -325,3 +325,13 @@ class DashboardViewModel(Audit):
     @property
     def opposing_party(self):
         return self.movement.law_suit.opposing_party
+
+    @property
+    def cost_center(self):
+        folder = Folder.objects.get(folders__law_suits__task__exact=self)
+        return folder.cost_center
+
+    @property
+    def folder_number(self):
+        folder = Folder.objects.get(folders__law_suits__task__exact=self)
+        return folder.folder_number

@@ -30,80 +30,163 @@
             <div id="filterCollapse" class="panel-body panel-collapse collapse">
                 <fieldset>
                     <div class="row">
-                        <div class="col-sm-1">
-                            <div class="form-group">
-                                <label>
-                                    {{ filter.form.openned.label}}
-                                    {{ filter.form.openned }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-sm-1">
-                            <div class="form-group">
-                                <label>
-                                    {{ filter.form.accepted.label }}
-                                    {{ filter.form.accepted }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-sm-1">
-                            <div class="form-group">
-                                <label>
-                                    {{ filter.form.returned.label }}
-                                    {{ filter.form.returned }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-sm-1">
-                            <div class="form-group">
-                                <label>
-                                    {{ filter.form.refused.label }}
-                                    {{ filter.form.refused }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-sm-1">
-                            <div class="form-group">
-                                <label>
-                                    {{ filter.form.done.label }}
-                                    {{ filter.form.done }}
-                                </label>
-                            </div>
-                        </div>
-                         <div class="col-sm-1">
-                            <div class="form-group">
-                                <label>
-                                    {{ filter.form.blocked.label }}
-                                    {{ filter.form.blocked }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-sm-1">
-                            <div class="form-group">
-                                <label>
-                                    {{ filter.form.finished.label }}
-                                    {{ filter.form.finished }}
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <br><br>
-
-                    <div class="row">
                         <div class=" col-sm-6">
                             <div class="form-group">
                                 <label>
-                                    Prazo
+                                    UF
                                 </label>
-                                {{ filter.form.deadline }}
+                                {{ filter.form.state }}
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>
+                                    Comarca
+                                </label>
+                                {{ filter.form.court_district }}
+                            </div>
+                        </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>
+                                    Tipo de Serviço
+                                </label>
+                                {{ filter.form.type_task }}
+                            </div>
+                        </div>
+                        <div class=" col-sm-6">
+                            <div class="form-group">
+                                <label>
+                                    {{ filter.form.cost_center.label}}
+                                </label>
+                                {{ filter.form.cost_center }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>
+                                    {{ filter.form.folder_number.label}}
+                                </label>
+                                {{ filter.form.folder_number }}
                             </div>
                         </div>
                         <div class="col-sm-4">
                             <div class="form-group">
                                 <label>
-                                    Cliente
-                                </label><br>
-                                {{ filter.form.client }}
+                                    {{ filter.form.law_suit_number.label}}
+                                </label>
+                                {{ filter.form.law_suit_number }}
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>
+                                    {{ filter.form.task_number.label}}
+                                </label>
+                                {{ filter.form.task_number }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>
+                                    Solicitadas em:
+                                </label>
+                                {{ filter.form.requested_in }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>
+                                    Aceitas pelo Sevice em:
+                                </label>
+                                {{ filter.form.accepted_service_in }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>
+                                    Recusadas pelo Service em:
+                                </label>
+                                {{ filter.form.refused_service_in }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>
+                                    Abertas em:
+                                </label>
+                                {{ filter.form.open_in }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>
+                                    Aceitas em:
+                                </label>
+                                {{ filter.form.accepted_in }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>
+                                    Recusadas em:
+                                </label>
+                                {{ filter.form.refused_in }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>
+                                    Retornadas em:
+                                </label>
+                                {{ filter.form.return_in }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>
+                                    Cumpridas em:
+                                </label>
+                                {{ filter.form.done_in }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>
+                                    Glosadas em:
+                                </label>
+                                {{ filter.form.blocked_payment_in }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>
+                                    Finalizadas em:
+                                </label>
+                                {{ filter.form.finished_in }}
                             </div>
                         </div>
                     </div>

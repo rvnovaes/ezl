@@ -420,6 +420,7 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         if task_form.is_valid():
             data = task_form.cleaned_data
             status_dynamic_query = Q()
+            task_dynamic_query = Q()
             person_dynamic_query = Q()
             reminder_dynamic_query = Q()
             deadline_dynamic_query = Q()
@@ -431,20 +432,26 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
                 elif self.request.user.has_perm('core.view_requested_tasks'):
                     person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
-            if data['openned']:
-                status_dynamic_query.add(Q(task_status=TaskStatus.OPEN.value), Q.OR)
-            if data['accepted']:
-                status_dynamic_query.add(Q(task_status=TaskStatus.ACCEPTED.value), Q.OR)
-            if data['refused']:
-                status_dynamic_query.add(Q(task_status=TaskStatus.REFUSED.value), Q.OR)
-            if data['done']:
-                status_dynamic_query.add(Q(task_status=TaskStatus.DONE.value), Q.OR)
-            if data['returned']:
-                status_dynamic_query.add(Q(task_status=TaskStatus.RETURN.value), Q.OR)
-            if data['blocked']:
-                status_dynamic_query.add(Q(task_status=TaskStatus.BLOCKEDPAYMENT.value), Q.OR)
-            if data['finished']:
-                status_dynamic_query.add(Q(task_status=TaskStatus.FINISHED.value), Q.OR)
+            if data['state']:
+                task_dynamic_query.add(Q(movement__law_suit__court_district__state=data['state']), Q.AND)
+            if data['court_district']:
+                task_dynamic_query.add(Q(movement__law_suit__court_district=data['court_district']), Q.AND)
+            if data['type_task']:
+                task_dynamic_query.add(Q(type_task=data['type_task']), Q.AND)
+            if data['cost_center']:
+                task_dynamic_query.add(Q(movement__law_suit__folder__cost_center=data['cost_center']), Q.AND)
+            if data['folder_number']:
+                task_dynamic_query.add(Q(movement__law_suit__folder__folder_number=data['folder_number']), Q.AND)
+            if data['law_suit_number']:
+                task_dynamic_query.add(Q(movement__law_suit__law_suit_number=data['law_suit_number']), Q.AND)
+            if data['task_number']:
+                task_dynamic_query.add(Q(task_number=data['task_number']), Q.AND)
+            if data['person_executed_by']:
+                task_dynamic_query.add(Q(person_executed_by__legal_name__contains=data['person_executed_by']), Q.AND)
+            if data['person_asked_by']:
+                task_dynamic_query.add(Q(person_asked_by__legal_name__contains=data['person_asked_by']), Q.AND)
+            if data['person_distributed_by']:
+                task_dynamic_query.add(Q(person_distributed_by__legal_name__contains=data['person_distributed_by']), Q.AND)
             if data['deadline']:
                 if data['deadline'].start:
                     deadline_dynamic_query.add(

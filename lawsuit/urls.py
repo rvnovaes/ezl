@@ -13,6 +13,8 @@ urlpatterns = [
         name='courtdistrict_update'),
     url(r'^comarcas/excluir$', login_required(views.CourtDistrictDeleteView.as_view()),
         name='courtdistrict_delete'),
+    url(r'courtdistrict_autocomplete$', login_required(views.CourtDistrictAutocomplete.as_view()),
+        name='courtdistrict_autocomplete'),
 
     # Varas
     url(r'^varas/listar/$', login_required(views.CourtDivisionListView.as_view()), name='courtdivision_list'),
@@ -56,7 +58,7 @@ urlpatterns = [
     url(r'instancias/excluir$', login_required(views.InstanceDeleteView.as_view()),
         name='instance_delete'),
 
-    # Pastas
+    # PastasSolicitante
     url(r'^pastas/listar/$', login_required(login_required(views.FolderListView.as_view())), name='folder_list'),
     url(r'^pastas/$', login_required(login_required(views.FolderLawsuitCreateView.as_view())), name='folder_add'),
     url(r'^pastas/(?P<pk>[0-9]+)/$', login_required(login_required(views.FolderLawsuitUpdateView.as_view())),
