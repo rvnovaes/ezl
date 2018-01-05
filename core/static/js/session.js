@@ -13,8 +13,7 @@ $(document).ready(function(){
         success: function(response) {
             console.log(response);
             localStorage.setItem('custom_session_user', response);
-            if (response.current_office_name){
-                alert(response.current_office_name)
+            if (response.current_office_name){                
                 $('#current_office').text(response.current_office_name);
             } else {
                 $('#current_office').text('Nenhum escritório selecionado');
