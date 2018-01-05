@@ -216,12 +216,24 @@ class Person(AbstractPerson):
         verbose_name = 'Pessoa'
         verbose_name_plural = 'Pessoas'
 
+
 class Office(AbstractPerson):
     persons = models.ManyToManyField(Person, blank=True, related_name='offices')
     offices = models.ManyToManyField('self', blank=True)
 
     class Meta:
         verbose_name = 'Escritório'
+
+
+class OfficeMixin(models.Model):
+    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=False,
+                                   null=False,
+                                   related_name='%(class)s_office',
+                                   verbose_name='Escritório')
+
+    class Meta:
+        abstract = True
+
 
 class Address(Audit):
     address_type = models.ForeignKey(

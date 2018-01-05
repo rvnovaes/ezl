@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import Audit, Person, State, LegacyCode
+from core.models import Audit, Person, State, LegacyCode, OfficeMixin
 from sequences import get_next_value
 from django.db import transaction
 from django.core.validators import ValidationError
@@ -12,7 +12,7 @@ def get_folder_number():
     return get_next_value('lawsuit_folder_folder_number')
 
 
-class TypeMovement(Audit, LegacyCode):
+class TypeMovement(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, blank=False, null=False, default="", unique=True, verbose_name='Nome')
     uses_wo = models.BooleanField(default=False, verbose_name='Utiliza ordem de serviço?')
 
@@ -26,7 +26,7 @@ class TypeMovement(Audit, LegacyCode):
         return self.name
 
 
-class Instance(Audit, LegacyCode):
+class Instance(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(verbose_name="Nome", max_length=255, null=False, blank=False, default="", unique=True)
 
     class Meta:
@@ -39,7 +39,7 @@ class Instance(Audit, LegacyCode):
         return self.name
 
 
-class Folder(Audit, LegacyCode):
+class Folder(Audit, LegacyCode, OfficeMixin):
     folder_number = models.IntegerField(verbose_name='Número da Pasta', null=False, default=0)
     person_customer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                         verbose_name='Cliente')
@@ -64,7 +64,7 @@ class Folder(Audit, LegacyCode):
         return str(self.folder_number)
 
 
-class CourtDivision(Audit, LegacyCode):
+class CourtDivision(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Vara")
 
     class Meta:
@@ -92,7 +92,7 @@ class CourtDistrict(Audit, LegacyCode):
         return self.name
 
 
-class Organ(Person):
+class Organ(Person, OfficeMixin):
     """
     Classe responsavel por manter o cadastro dos tribunais.
     """
@@ -124,7 +124,7 @@ class Organ(Person):
         return res
 
 
-class LawSuit(Audit, LegacyCode):
+class LawSuit(Audit, LegacyCode, OfficeMixin):
     person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                       verbose_name='Advogado', related_name='person_lawyers')
     folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False, verbose_name="Pasta",
@@ -155,7 +155,7 @@ class LawSuit(Audit, LegacyCode):
         return self.law_suit_number
 
 
-class Movement(Audit, LegacyCode):
+class Movement(Audit, LegacyCode, OfficeMixin):
     type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False,
                                       verbose_name="Tipo de Movimentação")
     law_suit = models.ForeignKey(LawSuit, on_delete=models.PROTECT, blank=True, null=True,

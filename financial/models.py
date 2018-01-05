@@ -1,8 +1,8 @@
 from django.db import models
-from core.models import Audit, LegacyCode
+from core.models import Audit, LegacyCode, OfficeMixin
 
 
-class CostCenter(Audit, LegacyCode):
+class CostCenter(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(
         verbose_name="Nome",
         max_length=255,
