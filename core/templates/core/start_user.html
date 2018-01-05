@@ -13,11 +13,11 @@
                     </div>
                     <div class="panel-body">
                         {% if request.user.person.offices.all %}
-                            <table class="table table-striped table-hover">
+                            <table class="table table-hover">
                                 <thead>
                                     <tr>
                                         <th>NOME</th>
-                                        <th>CNPJ</th>
+                                        <th>CNPJ</th>                                        
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -42,29 +42,43 @@
                     </div>
                     <div class="panel-body">
                         <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Escritório</th>
+                                    <th>Aceitar</th>
+                                    <th>Recusar</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 <tr>
-                                    <td>Escritório<td>
+                                    <td>Seu direito . com</td>
+                                    <td>
+                                        <button type="button" class="btn btn-raised btn-fab btn-fab-mini btn-success">
+                                            <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-raised btn-fab btn-fab-mini btn-danger">
+                                            <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>ADVOCACIA GERAL DO ESTADO DE MINAS GERAIS</td>
+                                    <td>
+                                        <button type="button" class="btn btn-raised btn-fab btn-fab-mini btn-success">
+                                            <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-raised btn-fab btn-fab-mini btn-danger">
+                                            <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
-                        <div class="row">
-                            <div class="col-md-8">
-                                <p>Seu direito</p>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" class="btn btn-raised btn-fab btn-success">
-                                    <i class="fa fa-1x fa-thumbs-o-up" aria-hidden="true"></i>
-                                </button>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" class="btn btn-raised btn-fab btn-danger">
-                                    <i class="fa fa-1x fa-thumbs-o-down" aria-hidden="true"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <hr/>
-                    <div/>
+                    </div>
                 </div>
             </div>
         </div>
