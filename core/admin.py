@@ -15,7 +15,6 @@ class ContactMechanismTypeAdmin(admin.ModelAdmin):
         verbose_name = 'Tipo de Contato'
         verbose_name_plural = 'Tipos de Contato'
 
-
 admin.site.register(AddressType)
 admin.site.register(ContactMechanism)
 admin.site.register(ContactMechanismType, ContactMechanismTypeAdmin)

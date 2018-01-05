@@ -2,7 +2,6 @@ import importlib
 import json
 from abc import abstractproperty
 from functools import wraps
-
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -15,10 +14,12 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import ProtectedError, Q
 from django.db import transaction
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
+from django.views import View
+from django.views.generic import ListView
 
 from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
@@ -31,9 +32,9 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     DELETE_SUCCESS_MESSAGE, \
     ADDRESS_UPDATE_ERROR_MESSAGE, \
     ADDRESS_UPDATE_SUCCESS_MESSAGE
-from core.models import Person, Address, City, State, Country, AddressType
+from core.models import Person, Address, City, State, Country, AddressType, Office
 from core.signals import create_person
-from core.tables import PersonTable, UserTable, AddressTable
+from core.tables import PersonTable, UserTable, AddressTable, OfficeTable
 from core.utils import login_log, logout_log
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task
@@ -705,3 +706,48 @@ class PasswordResetViewMixin(PasswordResetView, FormView):
     def form_valid(self, form):
         context = form.save(self.request)
         return render(self.request, 'account/password_reset_done.html', context)
+
+
+class OfficeListView(LoginRequiredMixin, SingleTableViewMixin):
+    model = Office
+    table_class = OfficeTable
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        custom_session_user = self.request.session.get('custom_session_user')
+        if custom_session_user:
+            print(custom_session_user.get(self.request.user.pk))
+        return context
+
+
+class OfficeCreateView(LoginRequiredMixin, CreateView):
+    pass
+
+class OfficeDeleteView(LoginRequiredMixin, DeleteView):
+    pass
+
+
+class CustomSession(View):
+    def post(self, request, *args, **kwargs):
+        data = {}
+        if request.POST.get('current_office'):
+            current_office = request.POST.get('current_office')
+            request.session['custom_session_user'] = {
+                self.request.user.pk: {'current_office': current_office}
+            }
+            office = Office.objects.get(pk=int(current_office))
+            data['current_office_pk'] = office.pk
+            data['current_office_name'] = office.name
+        return JsonResponse(data)
+
+    def get(self, request, *args, **kwargs):
+        data = {}
+        custom_session_user = request.session.get('custom_session_user')
+        if all([custom_session_user,
+            custom_session_user.get(str(request.user.pk))]):
+            current_office_session = custom_session_user.get(str(request.user.pk))
+            office = Office.objects.get(pk=int(current_office_session.get(
+                'current_office')))
+            data['current_office_pk'] = office.pk
+            data['current_office_name'] = office.name        
+        return JsonResponse(data)

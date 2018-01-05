@@ -28,7 +28,7 @@ var chatReadMessage = function (chat_id, csrf_token) {
     })
 };
 
-setInterval(function () {
+var count_message = setInterval(function () {
     $.ajax({
         type: "GET",
         url: "/chat/count_message/",
@@ -49,4 +49,3 @@ setInterval(function () {
 var formatDate = function (strDate) {
     return strDate.substr(8, 2) + '/' + strDate.substr(5, 2)+ '/' + strDate.substr(0, 4) + ' ' + strDate.substr(11)
 };
-

@@ -133,15 +133,12 @@ class City(Audit):
         return self.name
 
 
-class Person(Audit, LegacyCode):
+class AbstractPerson(Audit, LegacyCode):
     ADMINISTRATOR_GROUP = 'Administrador'
     CORRESPONDENT_GROUP = 'Correspondente'
     REQUESTER_GROUP = 'Solicitante'
     SERVICE_GROUP = 'Service'
     SUPERVISOR_GROUP = 'Supervisor'
-
-    objects = PersonManager()
-
     legal_name = models.CharField(max_length=255, blank=False,
                                   verbose_name='Razão social/Nome completo')
     name = models.CharField(max_length=255, null=True, blank=True,
@@ -205,27 +202,26 @@ class Person(Audit, LegacyCode):
         return self.address_set.exclude(id=1)
 
     class Meta:
-        db_table = 'person'
-        ordering = ['legal_name', 'name']
-        verbose_name = 'Pessoa'
-        verbose_name_plural = 'Pessoas'
+        abstract = True
 
     def __str__(self):
         return self.legal_name
 
 
-class OfficeBase(Person):
-    #Todo
-    persons = models.ManyToManyField(Person, related_name='offices', blank=True)
+class Person(AbstractPerson):
+    objects = PersonManager()
+    class Meta:
+        db_table = 'person'
+        ordering = ['legal_name', 'name']
+        verbose_name = 'Pessoa'
+        verbose_name_plural = 'Pessoas'
+
+class Office(AbstractPerson):
+    persons = models.ManyToManyField(Person, blank=True, related_name='offices')
+    offices = models.ManyToManyField('self', blank=True)
 
     class Meta:
-        abstract = True
-
-
-
-class Office(OfficeBase):
-    pass
-
+        verbose_name = 'Escritório'
 
 
 class Address(Audit):

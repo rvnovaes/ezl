@@ -18,6 +18,8 @@ urlpatterns = [
     url(r'^$', views.login, name='login'),
     url(r'^logout/', views.logout_user, name='logout'),
     url(r'^inicial/', login_required(views.inicial), name='inicial'),
+    url(r'^session/', login_required(views.CustomSession.as_view()),
+    name='session'),
 
     # Address views
     url(r'^pessoas/(?P<person_pk>[0-9]+)/enderecos/criar/$',
@@ -57,4 +59,8 @@ urlpatterns = [
         name='user_update'),
     url(r'^usuarios/excluir$', login_required(views.UserDeleteView.as_view()),
         name='user_delete'),
+    url(r'^escritorios/', login_required(views.OfficeListView.as_view()), name='office_list'),
+    url(r'escritorios/excluir', login_required(views.OfficeDeleteView.as_view()), name='office_delete'),
+    url(r'escritorios/criar', login_required(views.OfficeCreateView.as_view()), name='office_add')
+
 ]

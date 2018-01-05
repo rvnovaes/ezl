@@ -50,13 +50,24 @@
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li>
-
                             <a href="/chat" data-balloon="Clique para ver suas mensagens!"
                                data-balloon-pos="down">
                                 <i class="fa fa-1x fa-bell-o" aria-hidden="true">
                                     <span class="chat-badge badge"></span>
                                 </i>
                             </a>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-haspopup="true" aria-expanded="false">
+                               <span id="current_office"></span>
+                               <span class="caret"></span>
+                           </a>
+                           <ul class="dropdown-menu">
+                            {% for office in request.user.person.offices.all %}
+                                <li onclick="updateSession('current_office', '{{office.pk}}', '{{csrf_token}}');"><a href="#">{{office.name}}</a></li>
+                            {% endfor %}
+                            </ul>
                         </li>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
