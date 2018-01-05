@@ -714,9 +714,7 @@ class OfficeListView(LoginRequiredMixin, SingleTableViewMixin):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        custom_session_user = self.request.session.get('custom_session_user')
-        if custom_session_user:
-            print(custom_session_user.get(self.request.user.pk))
+        context['table'] = self.table_class(self.request.user.person.offices.all())
         return context
 
 
@@ -743,11 +741,10 @@ class CustomSession(View):
     def get(self, request, *args, **kwargs):
         data = {}
         custom_session_user = request.session.get('custom_session_user')
-        if all([custom_session_user,
-            custom_session_user.get(str(request.user.pk))]):
+        if custom_session_user and custom_session_user.get(str(request.user.pk)):
             current_office_session = custom_session_user.get(str(request.user.pk))
             office = Office.objects.get(pk=int(current_office_session.get(
                 'current_office')))
             data['current_office_pk'] = office.pk
-            data['current_office_name'] = office.name        
+            data['current_office_name'] = office.name
         return JsonResponse(data)
