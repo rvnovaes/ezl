@@ -100,10 +100,17 @@ def login(request):
 @login_required
 def inicial(request):
     if request.user.is_authenticated:
-        title_page = {'title_page': 'Principal - Easy Lawyer'}
-        return render(request, 'task/task_dashboard.html', title_page)
+        if request.user.person.offices.all().exists():
+            return HttpResponseRedirect(reverse_lazy('dashboard'))
+        return HttpResponseRedirect(reverse_lazy('start_user'))
     else:
         return HttpResponseRedirect('/')
+
+class StartUserView(View):
+    template_name = 'core/start_user.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
 
 
 @logout_log
@@ -724,6 +731,19 @@ class OfficeCreateView(LoginRequiredMixin, CreateView):
 class OfficeDeleteView(LoginRequiredMixin, DeleteView):
     pass
 
+
+class RegisterNewUser(CreateView):
+    model = User
+    fields = ('username', 'password')
+
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        email = request.POST.get('email')
+        user = User.objects.create_user(username=username, email=email,
+            password=password)
+        #Todo: Nao esta funcionando o login ao cadastrar
+        return login(request)
 
 class CustomSession(View):
     def post(self, request, *args, **kwargs):

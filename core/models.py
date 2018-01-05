@@ -223,7 +223,6 @@ class Office(AbstractPerson):
     class Meta:
         verbose_name = 'Escritório'
 
-
 class Address(Audit):
     address_type = models.ForeignKey(
         AddressType, on_delete=models.PROTECT, blank=False, null=False,

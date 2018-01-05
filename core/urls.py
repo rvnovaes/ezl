@@ -16,8 +16,10 @@ urlpatterns = [
         name='user_manual'),
 
     url(r'^$', views.login, name='login'),
+    url(r'^registrar/', views.RegisterNewUser.as_view(), name='register_user'),
     url(r'^logout/', views.logout_user, name='logout'),
     url(r'^inicial/', login_required(views.inicial), name='inicial'),
+    url(r'^start/', login_required(views.StartUserView.as_view()), name='start_user'),
     url(r'^session/', login_required(views.CustomSession.as_view()),
     name='session'),
 

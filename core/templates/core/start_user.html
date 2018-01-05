@@ -1,0 +1,71 @@
+{% extends 'core/base_start_user.html' %}
+{% load staticfiles %}
+{% block content %}
+        <div class="row">
+            <div class="col col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col col-md-6">
+                                <h3 class="panel-title">Meus escritórios</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        {% if request.user.person.offices.all %}
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>NOME</th>
+                                        <th>CNPJ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for office in request.user.person.offices.all %}
+                                    <tr>
+                                        <td>{{office.name}}</td>
+                                        <td>{{office.cpf_cnpj}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {%else%}
+                                <p>Você não possui relacionamento com escritórios</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Meus convites</h3>
+                    </div>
+                    <div class="panel-body">
+                        <table class="table table-hover">
+                            <tbody>
+                                <tr>
+                                    <td>Escritório<td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <p>Seu direito</p>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-raised btn-fab btn-success">
+                                    <i class="fa fa-1x fa-thumbs-o-up" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-raised btn-fab btn-danger">
+                                    <i class="fa fa-1x fa-thumbs-o-down" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <hr/>
+                    <div/>
+                </div>
+            </div>
+        </div>
+{% endblock content %}
