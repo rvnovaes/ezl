@@ -1,22 +1,20 @@
-{% extends 'inicial.html' %}
+{% extends "core/base_form.html" %}
+{#{% extends 'inicial.html' %}#}
+{% load material_form %}
 {% load django_tables2 %}
-{% load static %}
+{#{% load static %}#}
 {% load staticfiles %}
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
+
+{% block extrahead %}
+    {{ block.super }}
+{% endblock %}
+
 {% block content %}
 {% load core_filters %}
-    <style>
-        .select2-selection {
-            auto: flex !important;
-        }
-
-        .select2-dropdown--below {
-            auto: flex !important;
-        }
-    </style>
-    {#    <div class="container form-group"><label class="is-focused"><h2>{{ title_page }}</h2></label></div>#}
     {% include 'core/widgets/messages.html' %}
+
 
 
     <div class="panel panel-primary">
@@ -25,168 +23,186 @@
                 providências
             </h3>
         </div>
-        <form method="get">
+        <form method="get" class="filter-form">
             {% csrf_token %}
             <div id="filterCollapse" class="panel-body panel-collapse collapse">
                 <fieldset>
-                    <div class="row">
-                        <div class=" col-sm-6">
-                            <div class="form-group">
-                                <label>
-                                    UF
-                                </label>
-                                {{ filter.form.state }}
+                    <div class="layout-row row">
+                        <div class="col s12 m6">
+                            <div class="row">
+                                <div class="select-field col s12" id="{{ filter.form.state.id_for_label }}_container">
+                                    <label for="{{ filter.form.state.id_for_label }}">{{ filter.form.state.label }}</label>
+                                    {{ filter.form.state }}
+                                </div>
                             </div>
                         </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>
-                                    Comarca
-                                </label>
-                                {{ filter.form.court_district }}
-                            </div>
+                        <div class="col s12 m6">
+                            <label for="{{ filter.form.court_district.id_for_label }}" style="position: relative;top: 0px;" id="city_label">
+                                {{ filter.form.court_district.label }}</label>
+                            {{ filter.form.court_district }}
                         </div>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>
-                                    Tipo de Serviço
-                                </label>
-                                {{ filter.form.type_task }}
+                    </div>
+                    <div class="layout-row row">
+                         <div class="col s12 m6">
+                            <div class="row">
+                                <div class="select-field col s12" id="{{ filter.form.type_task.id_for_label }}_container">
+                                    <label for="{{ filter.form.type_task.id_for_label }}">{{ filter.form.type_task.label }}</label>
+                                    {{ filter.form.type_task }}
+                                </div>
                             </div>
-                        </div>
-                        <div class=" col-sm-6">
-                            <div class="form-group">
-                                <label>
-                                    {{ filter.form.cost_center.label}}
-                                </label>
-                                {{ filter.form.cost_center }}
+                         </div>
+                        <div class="col s12 m6">
+                            <div class="row">
+                                <div class="select-field col s12" id="{{ filter.form.cost_center.id_for_label }}_container">
+                                    <label for="{{ filter.form.cost_center.id_for_label }}">{{ filter.form.cost_center.label }}</label>
+                                    {{ filter.form.cost_center }}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-4">
-                            <div class="form-group">
-                                <label>
-                                    {{ filter.form.folder_number.label}}
-                                </label>
-                                {{ filter.form.folder_number }}
+                    <div class="layout-row row">
+                        <div class="col s12 m4">
+                            <div class="row">
+                                <div class="input-field col s12 required" id="{{ filter.form.folder_number.id_for_label }}_container">
+                                    <label for="{{ filter.form.folder_number.id_for_label }}">{{ filter.form.folder_number.label }}</label>
+                                    {{ filter.form.folder_number }}
+                                </div>
                             </div>
                         </div>
-                        <div class="col-sm-4">
-                            <div class="form-group">
-                                <label>
-                                    {{ filter.form.law_suit_number.label}}
-                                </label>
-                                {{ filter.form.law_suit_number }}
+                        <div class="col s12 m4">
+                            <div class="row">
+                                <div class="input-field col s12 required" id="{{ filter.form.law_suit_number.id_for_label }}_container">
+                                    <label for="{{ filter.form.law_suit_number.id_for_label }}">{{ filter.form.law_suit_number.label }}</label>
+                                    {{ filter.form.law_suit_number }}
+                                </div>
                             </div>
                         </div>
-                        <div class="col-sm-4">
-                            <div class="form-group">
-                                <label>
-                                    {{ filter.form.task_number.label}}
-                                </label>
-                                {{ filter.form.task_number }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <label>
-                                    Solicitadas em:
-                                </label>
-                                {{ filter.form.requested_in }}
+                        <div class="col s12 m4">
+                            <div class="row">
+                                <div class="input-field col s12 required" id="{{ filter.form.task_number.id_for_label }}_container">
+                                    <label for="{{ filter.form.task_number.id_for_label }}">{{ filter.form.task_number.label }}</label>
+                                    {{ filter.form.task_number }}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <label>
-                                    Aceitas pelo Sevice em:
-                                </label>
-                                {{ filter.form.accepted_service_in }}
+                    <div class="layout-row row">
+                        <div class="row">
+                            <div class="input-field col s12 required">
+                                <div class="form-group">
+                                    <span class="col s12 m2">
+                                       <label>Solicitadas entre:</label>
+                                    </span>
+                                    {{ filter.form.requested_in }}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <label>
-                                    Recusadas pelo Service em:
-                                </label>
-                                {{ filter.form.refused_service_in }}
+                    <div class="layout-row row">
+                        <div class="row">
+                            <div class="input-field col s12 required">
+                                <div class="form-group">
+                                    <span class="col s12 m2">
+                                       <label>Aceitas pelo Service entre:</label>
+                                    </span>
+                                    {{ filter.form.accepted_service_in }}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <label>
-                                    Abertas em:
-                                </label>
-                                {{ filter.form.open_in }}
+                    <div class="layout-row row">
+                        <div class="row">
+                            <div class="input-field col s12 required">
+                                <div class="form-group">
+                                    <span class="col s12 m2">
+                                       <label>Recusadas pelo Service entre:</label>
+                                    </span>
+                                    {{ filter.form.refused_service_in }}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <label>
-                                    Aceitas em:
-                                </label>
-                                {{ filter.form.accepted_in }}
+                    <div class="layout-row row">
+                        <div class="row">
+                            <div class="input-field col s12 required">
+                                <div class="form-group">
+                                    <span class="col s12 m2">
+                                       <label>Abertas entre:</label>
+                                    </span>
+                                    {{ filter.form.open_in }}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <label>
-                                    Recusadas em:
-                                </label>
-                                {{ filter.form.refused_in }}
+                    <div class="layout-row row">
+                        <div class="row">
+                            <div class="input-field col s12 required">
+                                <div class="form-group">
+                                    <span class="col s12 m2">
+                                       <label>Aceitas entre:</label>
+                                    </span>
+                                    {{ filter.form.accepted_in }}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <label>
-                                    Retornadas em:
-                                </label>
-                                {{ filter.form.return_in }}
+                    <div class="layout-row row">
+                        <div class="row">
+                            <div class="input-field col s12 required">
+                                <div class="form-group">
+                                    <span class="col s12 m2">
+                                       <label>Recusadas entre:</label>
+                                    </span>
+                                    {{ filter.form.refused_in }}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <label>
-                                    Cumpridas em:
-                                </label>
-                                {{ filter.form.done_in }}
+                    <div class="layout-row row">
+                        <div class="row">
+                            <div class="input-field col s12 required">
+                                <div class="form-group">
+                                    <span class="col s12 m2">
+                                       <label>Retornadas entre:</label>
+                                    </span>
+                                    {{ filter.form.return_in }}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <label>
-                                    Glosadas em:
-                                </label>
-                                {{ filter.form.blocked_payment_in }}
+                    <div class="layout-row row">
+                        <div class="row">
+                            <div class="input-field col s12 required">
+                                <div class="form-group">
+                                    <span class="col s12 m2">
+                                       <label>Cumpridas entre:</label>
+                                    </span>
+                                    {{ filter.form.done_in }}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <label>
-                                    Finalizadas em:
-                                </label>
-                                {{ filter.form.finished_in }}
+                    <div class="layout-row row">
+                        <div class="row">
+                            <div class="input-field col s12 required">
+                                <div class="form-group">
+                                    <span class="col s12 m2">
+                                       <label>Glosadas entre:</label>
+                                    </span>
+                                    {{ filter.form.blocked_payment_in }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layout-row row">
+                        <div class="row">
+                            <div class="input-field col s12 required">
+                                <div class="form-group">
+                                    <span class="col s12 m2">
+                                       <label>Finalizadas entre:</label>
+                                    </span>
+                                    {{ filter.form.finished_in }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -264,3 +280,14 @@
 </div>
 </div>
 {% endblock content %}
+{% block extrajs %}
+    <script src="{% static "js/jquery-2.1.1.min.js" %}"></script>
+    {% include 'material/includes/material_js.html' %}
+    <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
+{#    Apesar de repetidos, os scripts a seguir são necessário para renderização do form #}
+    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
+    <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
+    {{ form.media }}
+    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
+{% endblock %}
