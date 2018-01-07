@@ -6,9 +6,11 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from sequences import get_next_value
+
+from chat.models import Chat
 from core.models import Person, Audit, AuditCreate, LegacyCode
 from lawsuit.models import Movement, Folder
-from chat.models import Chat
+
 
 class Permissions(Enum):
     view_delegated_tasks = 'Can view tasks delegated to the user'
@@ -149,8 +151,6 @@ class Task(Audit, LegacyCode):
     @property
     def client(self):
         folder = Folder.objects.get(folders__law_suits__task__exact=self)
-        # Person.objects.get(persons__folders__law_suits__task__exact=self)
-        # self.movement.law_suit.folder.person_customer
         return folder.person_customer
 
     def __str__(self):
@@ -325,3 +325,15 @@ class DashboardViewModel(Audit):
     @property
     def opposing_party(self):
         return self.movement.law_suit.opposing_party
+
+
+class Filter(Audit):
+    auth_user = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, null=False,verbose_name='Usuário')
+    name = models.TextField(verbose_name='Nome', blank=False, null=False, max_length=255)
+    description = models.TextField(verbose_name='Descrição', blank=True, null=True)
+    query = models.TextField(verbose_name='query', blank=False, null=False)
+
+    class Meta:
+        verbose_name = 'Filtro'
+        verbose_name_plural = 'Filtros'
+        unique_together = (('auth_user', 'name'),)
