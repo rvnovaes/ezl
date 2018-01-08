@@ -219,7 +219,14 @@ class Person(AbstractPerson):
         verbose_name_plural = 'Pessoas'
 
 
+class OfficeManager(models.Manager):
+    def get_by_natural_key(self, cpf_cnpj):
+        return self.get(persons__cpf_cnpj=cpf_cnpj)
+
+
 class Office(AbstractPerson):
+    objects = OfficeManager()
+
     persons = models.ManyToManyField(Person, blank=True, related_name='offices')
     offices = models.ManyToManyField('self', blank=True)
 

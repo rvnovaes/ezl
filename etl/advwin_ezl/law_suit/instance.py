@@ -23,7 +23,7 @@ class InstanceETL(GenericETL):
     has_status = False
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         for row in rows:
 
             try:
@@ -36,7 +36,9 @@ class InstanceETL(GenericETL):
                     instance.name = name
                     instance.is_active = True
                     instance.alter_user = user
-                    instance.save(update_fields=['is_active', 'name', 'is_active', 'alter_user', 'alter_date'])
+                    instance.office = default_office
+                    instance.save(update_fields=['is_active', 'name', 'is_active', 'alter_user', 'alter_date',
+                                                 'office'])
 
                 else:
                     self.model.objects.create(
@@ -45,7 +47,8 @@ class InstanceETL(GenericETL):
                         legacy_code=code,
                         alter_user=user,
                         create_user=user,
-                        system_prefix=LegacySystem.ADVWIN.value)
+                        system_prefix=LegacySystem.ADVWIN.value,
+                        office=default_office)
 
                 self.debug_logger.debug(
                     "Instancias,%s,%s,%s,%s,%s,%s,%s" % (str(name), str(True), str(code),str(user.id), str(user.id),

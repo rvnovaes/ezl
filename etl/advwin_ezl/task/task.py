@@ -98,7 +98,7 @@ class TaskETL(GenericETL):
         return self._import_query.format("','".join(get_users_to_import()))
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         from core.models import Person
         for row in rows:
 
@@ -197,11 +197,12 @@ class TaskETL(GenericETL):
                     task.execution_date = execution_date
                     task.blocked_payment_date = blocked_payment_date
                     task.finished_date = finished_date
+                    task.office = default_office
 
                     update_fields = ['delegation_date', 'final_deadline_date', 'description',
                                      'task_status', 'refused_date', 'execution_date',
                                      'blocked_payment_date',
-                                     'finished_date']
+                                     'finished_date', 'office']
 
                     task.save(update_fields=update_fields)
 
@@ -222,7 +223,8 @@ class TaskETL(GenericETL):
                                               execution_date=execution_date,
                                               blocked_payment_date=blocked_payment_date,
                                               finished_date=finished_date,
-                                              task_status=status_code_advwin)
+                                              task_status=status_code_advwin,
+                                              office=default_office)
 
                 if status_code_advwin == TaskStatus.ERROR:
                     for inconsistency in inconsistencies:
@@ -231,7 +233,8 @@ class TaskETL(GenericETL):
                             inconsistency=inconsistency['inconsistency'],
                             solution=inconsistency['solution'],
                             create_user=user,
-                            alter_user=user)
+                            alter_user=user,
+                            office=default_office)
                 else:
                     InconsistencyETL.objects.filter(task=task).update(is_active=False)
 

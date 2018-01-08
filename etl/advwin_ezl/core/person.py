@@ -47,7 +47,7 @@ class PersonETL(GenericETL):
     has_status = True
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         """
         Metodo responsavel por importar as pessoas cadastradas no advwin para o ezl
         :param rows: Pessoas lidas do advwin
