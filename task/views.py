@@ -445,6 +445,8 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
                 task_dynamic_query.add(Q(movement__law_suit__court_district=data['court_district']), Q.AND)
             if data['type_task']:
                 task_dynamic_query.add(Q(type_task=data['type_task']), Q.AND)
+            if data['court']:
+                task_dynamic_query.add(Q(movement__law_suit__organ=data['court']), Q.AND)
             if data['cost_center']:
                 task_dynamic_query.add(Q(movement__law_suit__folder__cost_center=data['cost_center']), Q.AND)
             if data['folder_number']:
