@@ -47,7 +47,7 @@ class UserETL(GenericETL):
     # has_status = True
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         correspondent_group, nil = Group.objects.get_or_create(name=Person.CORRESPONDENT_GROUP)
 
         assert len(rows) == rows_count

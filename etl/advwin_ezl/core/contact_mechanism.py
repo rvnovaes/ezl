@@ -155,7 +155,7 @@ class ContactMechanismETL(GenericETL):
     field_check = 'description'
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         #log_file = open('log_file.txt', 'w')
         for row in rows:
             print(rows_count)
