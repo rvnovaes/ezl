@@ -1,1 +1,5 @@
 {% extends "core/base_form.html" %}
+
+{% block head %}{{ block.super }}
+    {% include "survey/survey_form_js.html" %}
+{% endblock head %}

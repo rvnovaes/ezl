@@ -33,6 +33,10 @@ class SurveyUpdateView(AuditFormMixin, UpdateView):
     template_name_suffix = '_update_form'
     object_list_url = 'survey_list'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
 
 class SurveyDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = Survey
@@ -40,4 +44,3 @@ class SurveyDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(
         model._meta.verbose_name_plural)
     object_list_url = 'survey_list'
-

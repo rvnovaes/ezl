@@ -1,10 +1,13 @@
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
-from task.models import TypeTask, SurveyType
+from task.models import TypeTask
+from survey.models import LegacySurveyType
 
-survey_dict = {'audienciaCorrespondente': 'COURTHEARING',
-               'diligenciaCorrespondente': 'DILIGENCE', 'protocoloCorrespondente': 'PROTOCOL',
-               'alvaraCorrespondente': 'OPERATIONLICENSE'}
+
+survey_map = {'audienciaCorrespondente': LegacySurveyType.COURTHEARING,
+              'diligenciaCorrespondente': LegacySurveyType.DILIGENCE,
+              'protocoloCorrespondente': LegacySurveyType.PROTOCOL,
+              'alvaraCorrespondente': LegacySurveyType.OPERATIONLICENSE}
 
 
 class TypeTaskETL(GenericETL):
@@ -35,29 +38,28 @@ class TypeTaskETL(GenericETL):
                 code = row['legacy_code']
                 name = row['Descricao']
                 survey_key = row['formulario_id']
-                key = survey_dict[survey_key]
-                survey_type = SurveyType[key].name.title()
+                survey_id = survey_map[survey_key]
 
                 # tem que verificar se é novo antes para não salvar o create_user ao fazer update
                 instance = self.model.objects.filter(legacy_code=code,
                                                      system_prefix=LegacySystem.ADVWIN.value).first()
                 if instance:
                     instance.name = name
-                    instance.survey_type = survey_type
+                      instance.survey = survey_id
                     instance.alter_user = user
                     instance.is_active = True
-                    instance.save(update_fields=['is_active', 'name', 'alter_user', 'alter_date', 'survey_type'])
+                    instance.save(update_fields=['is_active', 'name', 'alter_user', 'alter_date', 'survey'])
                 else:
                     self.model.objects.create(name=name,
                                               is_active=True,
                                               legacy_code=code,
-                                              survey_type=survey_type,
+                                              survey=survey_id,
                                               system_prefix=LegacySystem.ADVWIN.value,
                                               create_user=user,
                                               alter_user=user)
 
                 self.debug_logger.debug(
-                    "Type Task,%s,%s,%s,%s,%s,%s,%s,%s" % (str(name), str(True), str(code), str(survey_type),
+                    "Type Task,%s,%s,%s,%s,%s,%s,%s,%s" % (str(name), str(True), str(code), str(survey_id),
                                                          str(LegacySystem.ADVWIN.value), str(user.id),str(user.id),
                                                          self.timestr))
             except Exception as e:

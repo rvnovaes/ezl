@@ -7,7 +7,7 @@ from django.test import TestCase
 from model_mommy import mommy
 
 from advwin_models.tasks import export_task, TaskObservation
-from task.models import Task, TaskStatus, SurveyType, TypeTask
+from task.models import Task, TaskStatus, TypeTask
 
 
 User = get_user_model()
@@ -24,8 +24,7 @@ class TasksTest(TestCase):
         # User.objects.create(username='username')
 
         type_task = mommy.make(TypeTask,
-                               name='TypeTask',
-                               survey_type=SurveyType.COURTHEARING.name.title())
+                               name='TypeTask')
         task = mommy.make(Task,
                           legacy_code='1A2B3C',
                           task_status=TaskStatus.DONE,

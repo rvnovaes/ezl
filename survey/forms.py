@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import ugettext_lazy as _
 from .models import Survey
 from material import Layout, Row
 
@@ -11,10 +12,14 @@ class BaseModelForm(forms.ModelForm):
 class SurveyForm(BaseModelForm):
 
     layout = Layout(
-        Row('type_task'),
+        Row('name'),
         Row('data'),
+    )
+
+    data = forms.CharField(
+        label=_('Conteúdo'),
     )
 
     class Meta:
         model = Survey
-        fields = ['type_task', 'data']
+        fields = ['name', 'data']

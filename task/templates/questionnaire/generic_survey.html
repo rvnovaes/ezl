@@ -2,7 +2,9 @@
 
 {% block content %}
     {% load bootstrap3 %}
-    <script src="{% static  "js" %}/{{ generic_survey|lower }}.js"></script>
+    <script>
+        window.survey = new Survey.Model({{ survey_data|safe }});
+    </script>
         <div id="survey" class="modal">
         <div class="modal-dialog">
             <div class="modal-content ">
@@ -24,17 +26,28 @@
         </div>
     </div>
     <script>
-    //Função para retornar o método submit default
+        //Função para retornar o método submit default
         function submitSurvey() {
             $('#task_detail').unbind('submit').submit();
 
+        }
+
+        // Retorna as respostas da pesquisa formatadas corretamente
+        function getSurveyResult(result){
+            var data = {};
+            $.each(result.getAllQuestions(), function(i, question){
+                if (question.visible) {
+                    data[question.title] = question.value || "";
+                }
+            });
+            return data;
         }
 
         Survey.Survey.cssType = "bootstrapmaterial";
         Survey.defaultBootstrapMaterialCss.navigationButton = "btn btn-sm btn-raised btn-primary";
         $.material.init();
         survey.onComplete.add(function (result) {
-            var surveyResponse = JSON.stringify(result.data);
+            var surveyResponse = JSON.stringify(getSurveyResult(result));
             var surveyResult = document.getElementsByName('survey_result').item(0);
             surveyResult.value = surveyResponse;
             document.getElementById('id_survey_result').innerHTML = surveyResponse;

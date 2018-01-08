@@ -6,9 +6,9 @@ from .models import Survey
 class SurveyTable(tables.Table):
 
     class Meta:
-        sequence = ('id', 'type_task')
+        sequence = ('name',)
         model = Survey
-        fields = ['id', 'type_task']
+        fields = ['name']
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existem pesquisas cadastradas"
         row_attrs = {
