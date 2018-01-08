@@ -255,6 +255,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
+        context['survey_data'] = self.object.type_task.survey.data
         if not self.object.chat:
             label = 'task-{}'.format(self.object.pk)
             title = '#{task_number} - {type_task}'.format(task_number=self.object.task_number,

@@ -8,7 +8,7 @@
         <div class="row">
             <div class="col-md-9">
                 <form id="task_detail" action="" method="post">{% csrf_token %}
-                    {% include 'questionnaire/generic_survey.html' with generic_survey=form.instance.type_task.survey_type %}
+                    {% include 'questionnaire/generic_survey.html' %}
 
                     <script type="text/javascript">
 
@@ -579,7 +579,7 @@
                                             Cancelar
                                         </button>
                                         {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                                            {% if form.instance.type_task.survey_type %}
+                                            {% if form.instance.type_task.survey %}
                                                 <button id="actionButton"
                                                         type="submit"
                                                         onclick="beforeSubmit()"

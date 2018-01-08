@@ -10,7 +10,7 @@ from advwin_models.advwin import JuridFMAudienciaCorrespondente, JuridFMAlvaraCo
     JuridGedMain, JuridCorrespondenteHist, JuridGEDLig
 from connections.db_connection import get_advwin_engine
 from etl.utils import ecm_path_ezl2advwin, get_ecm_file_name
-from task.models import Task, TaskStatus, TaskHistory, Ecm, SurveyType
+from task.models import Task, TaskStatus, TaskHistory, Ecm
 from sqlalchemy import and_
 from django.utils import timezone
 
@@ -20,13 +20,6 @@ LOGGER = get_task_logger(__name__)
 DO_SOMETHING_SUCCESS_MESSAGE = 'Do Something successful!'
 
 DO_SOMETHING_ERROR_MESSAGE = 'ERROR during do something: {}'
-
-SURVEY_TABLES_MAPPING = {
-    SurveyType.COURTHEARING.name.title(): JuridFMAudienciaCorrespondente,
-    SurveyType.DILIGENCE.name.title(): JuridFMDiligenciaCorrespondente,
-    SurveyType.PROTOCOL.name.title(): JuridFMProtocoloCorrespondente,
-    SurveyType.OPERATIONLICENSE.name.title(): JuridFMAlvaraCorrespondente,
-}
 
 
 class TaskObservation(Enum):
@@ -324,33 +317,6 @@ def export_task(task_id, task=None, execute=True):
         result = update_advwin_task(task, values, execute)
 
         stmts = result
-
-        if task.survey_result:
-            table = SURVEY_TABLES_MAPPING[task.type_task.survey_type].__table__
-            stmt = table.insert().values(**get_task_survey_values(task))
-
-            if execute:
-                LOGGER.debug('Exportando formulário da OS %d-%s', task.id, task)
-                try:
-                    result = get_advwin_engine().execute(stmt)
-                except Exception as exc:
-                    result = None
-                    LOGGER.warning(
-                        'Não foi possíve exportar formulário da OS: %d-%s com status %s\n%s',
-                        task.id,
-                        task,
-                        task.task_status,
-                        exc,
-                        exc_info=(type(exc), exc, exc.__traceback__))
-                else:
-                    LOGGER.info('Formulário da OS %d-%s: exportada com  status %s',
-                                task.id,
-                                task,
-                                task.task_status)
-                finally:
-                    return result
-
-            stmts.append(stmt)
 
         if execute:
             return result

@@ -33,13 +33,6 @@ def to_dict(model_instance, query_instance=None):
         return {cols[i]['name']: model_instance[i] for i in range(len(cols))}
 
 
-def parse_survey_result(survey, agenda_id):
-    json = loads(survey)
-    json['agenda_id'] = agenda_id
-    json['versao'] = 1
-    return json
-
-
 survey_tables = {'Courthearing': JuridFMAudienciaCorrespondente, 'Diligence'
 : JuridFMDiligenciaCorrespondente, 'Protocol': JuridFMProtocoloCorrespondente,
                  'Operationlicense': JuridFMAlvaraCorrespondente}
@@ -262,13 +255,6 @@ class TaskETL(GenericETL):
         refused_tasks = self.model.objects.filter(legacy_code__isnull=False,
                                                   task_status=TaskStatus.REFUSED)
 
-        survey_result = done_tasks.filter(Q(survey_result__isnull=False) & ~Q(survey_result=''))
-
-        survey_result = map(lambda x: (
-            insert(survey_tables.get(x.type_task.survey_type).__table__).values(to_dict(
-                survey_tables.get(x.type_task.survey_type)(**parse_survey_result(x.survey_result, x.legacy_code))))
-        ), survey_result)
-
         accepeted_history = TaskHistory.objects.filter(task_id__in=accepted_tasks.values('id'),
                                                        status=TaskStatus.ACCEPTED.value)
 
@@ -358,7 +344,7 @@ class TaskETL(GenericETL):
 
         self.export_query_set = chain(accepted_tasks_query, done_tasks_query, refused_tasks_query,
                                       accepeted_history_query,
-                                      done_history_query, refused_history_query, survey_result)
+                                      done_history_query, refused_history_query)
 
 
 if __name__ == '__main__':
