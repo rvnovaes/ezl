@@ -32,7 +32,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     DELETE_SUCCESS_MESSAGE, \
     ADDRESS_UPDATE_ERROR_MESSAGE, \
     ADDRESS_UPDATE_SUCCESS_MESSAGE
-from core.models import Person, Address, City, State, Country, AddressType, Office
+from core.models import Person, Address, City, State, Country, AddressType, Office, Invite
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, OfficeTable
 from core.utils import login_log, logout_log
@@ -808,3 +808,20 @@ class CustomSession(View):
             data['current_office_pk'] = office.pk
             data['current_office_name'] = office.name
         return JsonResponse(data)
+
+
+class InviteCreateView(AuditFormMixin, CreateView):
+    model = Invite
+    #form_class = InviteForm
+    success_url = reverse_lazy('start_user')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'start_user'
+
+class InviteUpdateView(UpdateView):
+    def post(self, request, *args, **kargs):
+        invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
+        invite.status = request.POST.get('status')
+        if invite.status == 'A':
+            invite.office.persons.add(request.user.person.pk)
+        invite.save()
+        return HttpResponse('ok')

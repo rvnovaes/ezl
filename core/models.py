@@ -7,6 +7,8 @@ from core.managers import PersonManager
 from core.utils import LegacySystem
 
 
+INVITE_STATUS = (('A', 'ACCEPT'), ('R', 'REFUSED'), ('N', 'NOt REVIEWED'))
+
 class LegalType(Enum):
     FISICA = 'F'
     JURIDICA = 'J'
@@ -238,6 +240,7 @@ class Invite(Audit):
     person = models.ForeignKey(Person, blank=False, null=False,
         related_name='invites')
     office = models.ForeignKey(Office, blank=False, null=False)
+    status = models.CharField(choices=INVITE_STATUS, default='N', max_length=1)
 
     class Meta:
         verbose_name = 'Convite'
