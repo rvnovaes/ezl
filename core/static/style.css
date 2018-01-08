@@ -401,3 +401,7 @@ i.material-icons {
 .chat-badge-item.badge{
     background-color: #A52A2A;
 }
+
+.a_button {    
+    line-height: 40px !important;
+}

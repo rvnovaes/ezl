@@ -3,7 +3,7 @@ from django.db import connection
 from django.contrib.auth.models import User
 
 from core.models import Country, State, City, Person, Address, AddressType, ContactMechanism, \
-    ContactMechanismType
+    ContactMechanismType, Office
 from core import signals
 from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, \
     Movement, Organ
@@ -163,6 +163,18 @@ class InvalidObjectFactory(object):
                                    ' RESTART IDENTITY CASCADE;')
 
 
+class DefaultOffice(object):
+
+    @staticmethod
+    def create():
+        admin = User.objects.filter(username='admin').first()
+        default_office, created = Office.objects.get_or_create(create_user=admin,
+                                                           cpf_cnpj='03.482.042/0001-02',
+                                                           name='Marcelo Tostes Advogados Associados',
+                                                           legal_name='Marcelo Tostes Advogados Associados')
+
+
 if __name__ == '__main__':
     InvalidObjectFactory().restart_table_id()
     InvalidObjectFactory.create()
+    DefaultOffice.create()

@@ -2,7 +2,6 @@ import importlib
 import json
 from abc import abstractproperty
 from functools import wraps
-
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -15,26 +14,28 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import ProtectedError, Q
 from django.db import transaction
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.views.generic.base import View
+from django.views import View
+from django.views.generic import ListView
 
 from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 
-from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, AddressFormSet
+from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, AddressFormSet, AddressOfficeFormSet, OfficeForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
     DELETE_SUCCESS_MESSAGE, \
     ADDRESS_UPDATE_ERROR_MESSAGE, \
     ADDRESS_UPDATE_SUCCESS_MESSAGE
-from core.models import Person, Address, City, State, Country, AddressType
+from core.models import Person, Address, City, State, Country, AddressType, Office, Invite
 from core.signals import create_person
-from core.tables import PersonTable, UserTable, AddressTable
+from core.tables import PersonTable, UserTable, AddressTable, OfficeTable
 from core.utils import login_log, logout_log
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
@@ -101,10 +102,17 @@ def login(request):
 @login_required
 def inicial(request):
     if request.user.is_authenticated:
-        title_page = {'title_page': 'Principal - Easy Lawyer'}
-        return render(request, 'task/task_dashboard.html', title_page)
+        if request.user.person.offices.all().exists():
+            return HttpResponseRedirect(reverse_lazy('dashboard'))
+        return HttpResponseRedirect(reverse_lazy('start_user'))
     else:
         return HttpResponseRedirect('/')
+
+class StartUserView(View):
+    template_name = 'core/start_user.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
 
 
 @logout_log
@@ -721,6 +729,118 @@ class PasswordResetViewMixin(PasswordResetView, FormView):
     def form_valid(self, form):
         context = form.save(self.request)
         return render(self.request, 'account/password_reset_done.html', context)
+
+
+class OfficeListView(LoginRequiredMixin, SingleTableViewMixin):
+    model = Office
+    table_class = OfficeTable
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['table'] = self.table_class(self.request.user.person.offices.all())
+        return context
+
+
+class OfficeCreateView(AuditFormMixin, CreateView):
+    model = Office
+    form_class = OfficeForm
+    success_url = reverse_lazy('office_list')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'office_list'
+
+
+    def form_valid(self, form):
+        form.instance.create_user = self.request.user
+        form.instance.save()
+        form.instance.persons.add(form.instance.create_user.person)
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        if self.request.POST:
+            data['officeddress'] = AddressOfficeFormSet(self.request.POST)
+        else:
+            data['officeaddress'] = AddressOfficeFormSet()
+            data['officeaddress'].forms[0].fields['is_active'].initial = True
+            data['officeaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
+        return data
+
+class OfficeUpdateView(AuditFormMixin, UpdateView):
+    model = Office
+    form_class = OfficeForm
+    success_url = reverse_lazy('office_list')
+    success_message = UPDATE_SUCCESS_MESSAGE
+    template_name_suffix = '_update_form'
+    object_list_url = 'office_list'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        if self.request.POST:
+            data['personaddress'] = AddressOfficeFormSet(self.request.POST)
+        else:
+            data['personaddress'] = AddressOfficeFormSet()
+            data['personaddress'].forms[0].fields['is_active'].initial = True
+            data['personaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
+        return data
+
+
+class OfficeDeleteView(LoginRequiredMixin, DeleteView):
+    pass
+
+
+class RegisterNewUser(CreateView):
+    model = User
+    fields = ('username', 'password')
+
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        email = request.POST.get('email')
+        user = User.objects.create_user(username=username, email=email,
+            password=password)
+        #Todo: Nao esta funcionando o login ao cadastrar
+        return login(request)
+
+class CustomSession(View):
+    def post(self, request, *args, **kwargs):
+        data = {}
+        if request.POST.get('current_office'):
+            current_office = request.POST.get('current_office')
+            request.session['custom_session_user'] = {
+                self.request.user.pk: {'current_office': current_office}
+            }
+            office = Office.objects.get(pk=int(current_office))
+            data['current_office_pk'] = office.pk
+            data['current_office_name'] = office.name
+        return JsonResponse(data)
+
+    def get(self, request, *args, **kwargs):
+        data = {}
+        custom_session_user = request.session.get('custom_session_user')
+        if custom_session_user and custom_session_user.get(str(request.user.pk)):
+            current_office_session = custom_session_user.get(str(request.user.pk))
+            office = Office.objects.get(pk=int(current_office_session.get(
+                'current_office')))
+            data['current_office_pk'] = office.pk
+            data['current_office_name'] = office.name
+        return JsonResponse(data)
+
+
+class InviteCreateView(AuditFormMixin, CreateView):
+    model = Invite
+    #form_class = InviteForm
+    success_url = reverse_lazy('start_user')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'start_user'
+
+class InviteUpdateView(UpdateView):
+    def post(self, request, *args, **kargs):
+        invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
+        invite.status = request.POST.get('status')
+        if invite.status == 'A':
+            invite.office.persons.add(request.user.person.pk)
+        invite.save()
+        return HttpResponse('ok')
 
 
 class EditableListSave(LoginRequiredMixin, View):

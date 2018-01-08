@@ -1,8 +1,8 @@
 from django.db import models
-from core.models import Audit, LegacyCode
+from core.models import Audit, LegacyCode, OfficeMixin
 
 
-class CostCenter(Audit, LegacyCode):
+class CostCenter(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(
         verbose_name="Nome",
         max_length=255,
@@ -22,7 +22,7 @@ class CostCenter(Audit, LegacyCode):
         verbose_name_plural = 'Centros de custos'
 
 
-class ServicePriceTable(models.Model):
+class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
     type_task = models.ForeignKey(
         'task.TypeTask',
         on_delete=models.PROTECT,

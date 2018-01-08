@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from sequences import get_next_value
-from core.models import Person, Audit, AuditCreate, LegacyCode
+from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
 
@@ -81,7 +81,7 @@ class SurveyType(Enum):
         return [(x.value, x.name) for x in cls]
 
 
-class TypeTask(Audit, LegacyCode):
+class TypeTask(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, null=False, unique=True,
                             verbose_name='Tipo de Serviço')
     survey_type = models.CharField(null=False, verbose_name='Tipo de Formulário', max_length=100,
@@ -98,7 +98,7 @@ class TypeTask(Audit, LegacyCode):
         return self.name
 
 
-class Task(Audit, LegacyCode):
+class Task(Audit, LegacyCode, OfficeMixin):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
     task_number = models.PositiveIntegerField(verbose_name='Número da Providência',
