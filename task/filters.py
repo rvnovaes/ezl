@@ -4,7 +4,7 @@ from core.models import Person, State
 from core.widgets import MDCheckboxInput, MDDateTimeRangeFilter, MDModelSelect2
 from core.utils import filter_valid_choice_form
 from financial.models import CostCenter
-from lawsuit.models import CourtDistrict
+from lawsuit.models import CourtDistrict, Organ
 from task.models import TypeTask
 from .models import Task, DashboardViewModel
 
@@ -27,27 +27,47 @@ class TaskFilter(FilterSet):
                                   label=u"Tipo de Serviço")
     cost_center = ModelChoiceFilter(queryset=filter_valid_choice_form(CostCenter.objects.filter(is_active=True)),
                                     label="Setor")
+    court = ModelChoiceFilter(queryset=filter_valid_choice_form(Organ.objects.filter(is_active=True)),
+                                    label="Órgão")
     folder_number = NumberFilter(label=u"Número da Pasta")
     law_suit_number  = CharFilter(label=u"Número do processo")
     task_number = NumberFilter(label=u"Número da OS")
 
-    person_executed_by = ModelChoiceFilter(queryset=Person.objects.all(),
-                                      lookup_expr='cor', label="Correspondentes",
-                                      name='correspondent',
-                                      widget=MDModelSelect2(url='correspondent_autocomplete',
-                                                            attrs={'class': 'form-control'}))
+    person_executed_by = ModelChoiceFilter(queryset=Person.objects.filter(),
+                                           label="Correspondente",
+                                           name='person_executed_by',
+                                           required=False,
+                                           widget=MDModelSelect2(url='correspondent_autocomplete',
+                                                                 attrs={
+                                                                        'class': 'select-with-search material-ignore form-control',
+                                                                        'data-placeholder': '',
+                                                                        'data-label': 'Correspondente'
+                                                                       })
+                                           )
 
-    person_asked_by = ModelChoiceFilter(queryset=Person.objects.all(),
-                                      label="Solicitante",
-                                      name='person_asked_by',
-                                      widget=MDModelSelect2(url='requester_autocomplete',
-                                                            attrs={'class': 'form-control'}))
+    person_asked_by = ModelChoiceFilter(queryset=Person.objects.filter(),
+                                        label="Solicitante",
+                                        name='person_asked_by',
+                                        required=False,
+                                        widget=MDModelSelect2(url='requester_autocomplete',
+                                                              attrs={
+                                                                 'class': 'select-with-search material-ignore form-control',
+                                                                 'data-placeholder': '',
+                                                                 'data-label': 'Solicitante'
+                                                                    })
+                                        )
 
-    person_distributed_by = ModelChoiceFilter(queryset=Person.objects.all(),
-                                        label="Contratante",
-                                        name='person_distributed_by',
-                                        widget=MDModelSelect2(url='service_autocomplete',
-                                                              attrs={'class': 'form-control'}))
+    person_distributed_by = ModelChoiceFilter(queryset=Person.objects.filter(),
+                                              label="Contratante",
+                                              name='person_distributed_by',
+                                              required=False,
+                                              widget=MDModelSelect2(url='service_autocomplete',
+                                                                    attrs={
+                                                                        'class': 'select-with-search material-ignore form-control',
+                                                                        'data-placeholder': '',
+                                                                        'data-label': 'Contratante'
+                                                                          })
+                                              )
 
     requested_in = MDDateTimeRangeFilter(name='requested_in', label=u"Solicitadas entre:")
     accepted_service_in = MDDateTimeRangeFilter(name='accepted_service_in', label="Aceitas pelo Service entre:")

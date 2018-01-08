@@ -9,14 +9,14 @@
             ignoreReadonly: true,
             useCurrent: false,
             showClear: true,
-            showTimepicker: false,
+            timepicker: false,
             format: 'd/m/Y',
             onShow:function( ct ){
                 var maxDate = jQuery('#{{ widget.name }}_1').val()?getDate(jQuery('#{{ widget.name }}_1').val()):false;
                 this.setOptions({
                     maxDate:maxDate
                 });
-            },
+            }
         });
         $('#{{ widget.name }}_1').datetimepicker({
             tooltips: {
@@ -28,14 +28,14 @@
             ignoreReadonly: true,
             useCurrent: false,
             showClear: true,
-            showTimepicker: false,
+            timepicker: false,
             format: 'd/m/Y',
             onShow:function( ct ){
                 var minDate = jQuery('#{{ widget.name }}_0').val()?getDate(jQuery('#{{ widget.name }}_0').val()):false;
                 this.setOptions({
                     minDate:minDate
                 });
-            },
+            }
         });
         function getDate(datum){
             fn = datum.split("/");

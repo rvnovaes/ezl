@@ -454,11 +454,11 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             if data['task_number']:
                 task_dynamic_query.add(Q(task_number=data['task_number']), Q.AND)
             if data['person_executed_by']:
-                task_dynamic_query.add(Q(person_executed_by__legal_name__contains=data['person_executed_by']), Q.AND)
+                task_dynamic_query.add(Q(person_executed_by=data['person_executed_by']), Q.AND)
             if data['person_asked_by']:
-                task_dynamic_query.add(Q(person_asked_by__legal_name__contains=data['person_asked_by']), Q.AND)
+                task_dynamic_query.add(Q(person_asked_by=data['person_asked_by']), Q.AND)
             if data['person_distributed_by']:
-                task_dynamic_query.add(Q(person_distributed_by__legal_name__contains=data['person_distributed_by']), Q.AND)
+                task_dynamic_query.add(Q(person_distributed_by=data['person_distributed_by']), Q.AND)
             if data['requested_in']:
                 if data['requested_in'].start:
                     requested_dynamic_query.add(
