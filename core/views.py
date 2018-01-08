@@ -25,7 +25,7 @@ from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 
-from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, AddressFormSet
+from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, AddressFormSet, AddressOfficeFormSet, OfficeForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
@@ -725,8 +725,48 @@ class OfficeListView(LoginRequiredMixin, SingleTableViewMixin):
         return context
 
 
-class OfficeCreateView(LoginRequiredMixin, CreateView):
-    pass
+class OfficeCreateView(AuditFormMixin, CreateView):
+    model = Office
+    form_class = OfficeForm
+    success_url = reverse_lazy('office_list')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'office_list'
+
+
+    def form_valid(self, form):
+        form.instance.create_user = self.request.user
+        form.instance.save()
+        form.instance.persons.add(form.instance.create_user.person)
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        if self.request.POST:
+            data['officeddress'] = AddressOfficeFormSet(self.request.POST)
+        else:
+            data['officeaddress'] = AddressOfficeFormSet()
+            data['officeaddress'].forms[0].fields['is_active'].initial = True
+            data['officeaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
+        return data
+
+class OfficeUpdateView(AuditFormMixin, UpdateView):
+    model = Office
+    form_class = OfficeForm
+    success_url = reverse_lazy('office_list')
+    success_message = UPDATE_SUCCESS_MESSAGE
+    template_name_suffix = '_update_form'
+    object_list_url = 'office_list'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        if self.request.POST:
+            data['personaddress'] = AddressOfficeFormSet(self.request.POST)
+        else:
+            data['personaddress'] = AddressOfficeFormSet()
+            data['personaddress'].forms[0].fields['is_active'].initial = True
+            data['personaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
+        return data
+
 
 class OfficeDeleteView(LoginRequiredMixin, DeleteView):
     pass

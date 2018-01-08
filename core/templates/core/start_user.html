@@ -6,8 +6,12 @@
                 <div class="panel panel-primary">
                     <div class="panel-heading">
                         <div class="row">
-                            <div class="col col-md-6">
-                                <h3 class="panel-title">Meus escritórios</h3>
+                            <div class="col col-md-10">
+                                <h3 class="panel-title">Meus escritórios</h1>
+                            </div>
+                            <div class="col col-md-2">
+                                <a href="/escritorios/criar" class="btn btn-raised btn-fab btn-fab-mini btn-default">
+                                    <i class="fa fa-plus a_button" aria-hidden="true"></i></a>
                             </div>
                         </div>
                     </div>
@@ -17,7 +21,8 @@
                                 <thead>
                                     <tr>
                                         <th>NOME</th>
-                                        <th>CNPJ</th>                                        
+                                        <th>CNPJ</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -25,6 +30,8 @@
                                     <tr>
                                         <td>{{office.name}}</td>
                                         <td>{{office.cpf_cnpj}}</td>
+                                        <td><a href="/escritorios/{{office.pk}}">
+                                            <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -78,6 +85,54 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--  MODAL DE CADASTRO DO ESCRITORIO -->
+        <div class="modal" id='meu-modal'>
+            <div class="full modal-dialog modal-lg">
+                <div class="full modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button
+                    </div>
+                    <div class="modal-body">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <div class="panel-title">Informe os dados do novo escritório</div>
+                            </div>
+                            <div class="panel-body">
+                                <form>
+                                    <div class="row">
+                                        <div class="col col-md-6">
+                                            <div class="form-group">
+                                                <label for='name'>Razão social</label>
+                                                <input type="text" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="col col-md-6">
+                                            <div class="form-group">
+                                                <label for='name'>Nome Fantasia</label>
+                                                <input type="text" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="col col-md-6">
+                                            <div class="form-group">
+                                                <label for='name'>Tipo</label>
+                                                <select name='legal_type' class="form-control">
+                                                    <option value="F">Física</option>
+                                                    <option value="F">Jurídica</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary">Salvar</button>
                     </div>
                 </div>
             </div>

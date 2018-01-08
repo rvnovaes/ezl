@@ -234,6 +234,13 @@ class OfficeMixin(models.Model):
     class Meta:
         abstract = True
 
+class Invite(Audit):
+    person = models.ForeignKey(Person, blank=False, null=False,
+        related_name='invites')
+    office = models.ForeignKey(Office, blank=False, null=False)
+
+    class Meta:
+        verbose_name = 'Convite'
 
 class Address(Audit):
     address_type = models.ForeignKey(
@@ -254,6 +261,7 @@ class Address(Audit):
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False,
                              verbose_name='País')
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
+    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'address'

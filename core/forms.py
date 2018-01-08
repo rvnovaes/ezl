@@ -19,7 +19,7 @@ from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, 
 from allauth.utils import build_absolute_uri
 
 from core.fields import CustomBooleanField
-from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType
+from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType, Office
 from core.utils import filter_valid_choice_form
 from core.widgets import MDModelSelect2
 from lawsuit.forms import BaseForm
@@ -350,3 +350,42 @@ class ResetPasswordFormMixin(forms.Form):
                 context)
             self.context = context
         return self.context
+
+class OfficeForm(BaseModelForm):
+    legal_type = forms.ChoiceField(
+            label='Tipo',
+            choices=((x.value, x.format(x.value)) for x in LegalType),
+            required=True,
+        )
+
+    layout = Layout(
+            Row('legal_name', 'name'),
+            Row('legal_type', 'cpf_cnpj'),            
+        )
+
+    class Meta:
+        model = Office
+        fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_active']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        document_type = cleaned_data.get('legal_type')
+        document = cleaned_data.get('cpf_cnpj')
+        if document_type == 'F' and document:
+            try:
+                BRCPFField().clean(document)
+            except forms.ValidationError as exc:
+                self._errors['cpf_cnpj'] = \
+                    self.error_class(exc.messages)
+                del cleaned_data['cpf_cnpj']
+        elif document_type == 'J' and document:
+            try:
+                BRCNPJField().clean(document)
+            except forms.ValidationError as exc:
+                self._errors['cpf_cnpj'] = \
+                    self.error_class(exc.messages)
+                del cleaned_data['cpf_cnpj']
+        return cleaned_data
+
+
+AddressOfficeFormSet = inlineformset_factory(Office, Address, form=AddressForm, extra=1, max_num=1)
