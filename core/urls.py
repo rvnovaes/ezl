@@ -61,8 +61,10 @@ urlpatterns = [
         name='user_update'),
     url(r'^usuarios/excluir$', login_required(views.UserDeleteView.as_view()),
         name='user_delete'),
-    url(r'^escritorios/', login_required(views.OfficeListView.as_view()), name='office_list'),
-    url(r'escritorios/excluir', login_required(views.OfficeDeleteView.as_view()), name='office_delete'),
-    url(r'escritorios/criar', login_required(views.OfficeCreateView.as_view()), name='office_add')
-
+    url(r'^escritorios/$', login_required(views.OfficeListView.as_view()), name='office_list'),
+    url(r'escritorios/excluir$', login_required(views.OfficeDeleteView.as_view()), name='office_delete'),
+    url(r'^escritorios/(?P<pk>[0-9]+)/$', views.OfficeUpdateView.as_view(), name='office_update'),
+    url(r'escritorios/criar$', login_required(views.OfficeCreateView.as_view()), name='office_add'),
+    url(r'convites/criar$', login_required(views.InviteCreateView.as_view()), name='invite_add'),
+    url(r'convites/invite_update', login_required(views.InviteUpdateView.as_view()), name='invite_update')
 ]
