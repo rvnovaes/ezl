@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     'django_file_form.ajaxuploader',
 
     'debug_toolbar',
+    'django_extensions',
     'django_cleanup',
     # Autocomplete
     'dal',
