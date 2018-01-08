@@ -17,8 +17,6 @@ from task.models import Task, TypeTask, TaskStatus, TaskHistory
 from etl.utils import get_message_log_default, save_error_log
 from etl.models import InconsistencyETL, Inconsistencies
 
-
-
 default_justify = 'Aceita por Correspondente: %s'
 
 "'Função para converter uma instância de um objeto sqlachemy para dicionário, utilizada na inserção do survey result'"
@@ -54,6 +52,12 @@ def get_status_by_substatus(substatus):
         return TaskStatus.RETURN
     elif substatus == 30:
         return TaskStatus.OPEN
+    elif substatus == 10:
+        return TaskStatus.REQUESTED
+    elif substatus == 11:
+        return TaskStatus.ACCEPTED_SERVICE
+    elif substatus == 20:
+        return TaskStatus.REFUSED_SERVICE
     else:
         return TaskStatus.INVALID
 
@@ -73,7 +77,8 @@ class TaskETL(GenericETL):
                 a.OBS AS description,
                 CASE WHEN (a.Data_delegacao IS NULL) THEN
                     a.Data ELSE a.Data_delegacao END AS delegation_date,
-                    a.prazo_fatal AS final_deadline_date,
+                a.Data_backoffice AS accepted_or_refused_service_date,
+                a.prazo_fatal AS final_deadline_date,
                 p.Codigo_Comp AS folder_legacy_code,
                 p.Cliente
                 FROM Jurid_agenda_table AS a
@@ -84,9 +89,21 @@ class TaskETL(GenericETL):
                 WHERE
                     (cm.UsarOS = 1) AND
                     (p.Status = 'Ativa' OR p.Status = 'Especial') AND
-                    ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                    (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                    AND a.Advogado IN ('{}')
+                    (
+                        (
+                            ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
+                            (a.SubStatus = 80))
+                            AND 
+                            a.Advogado IN ('{}')
+                        )
+                        OR
+                        (
+                            (a.SubStatus = 10) OR 
+                            (a.SubStatus = 11) OR 
+                            (a.SubStatus = 20)
+                        )
+                    ) AND a.Status = '0' -- STATUS ATIVO
+                    
     """
     model = Task
     advwin_table = 'Jurid_agenda_table'
@@ -124,6 +141,12 @@ class TaskETL(GenericETL):
                 else:
                     final_deadline_date = None
 
+                if row['acceptance_or_refused_service_date']:
+                    acceptance_or_refused_service_date = pytz.timezone(settings.TIME_ZONE).localize(
+                        row['accepted_or_refused_service_date'])
+                else:
+                    acceptance_or_refused_service_date = None
+
                 description = row['description']
                 blocked_or_finished_date = row['blocked_or_finished_date']
 
@@ -152,7 +175,7 @@ class TaskETL(GenericETL):
 
                 # É necessário fazer com que as datas abaixo sejam nula, senão na execução da ETL
                 # será originado erro de variável sem valor
-                refused_date = execution_date = blocked_payment_date = finished_date = None
+                refused_date = execution_date = blocked_payment_date = finished_date = acceptance_service_date = refused_service_date = None
 
                 if status_code_advwin == TaskStatus.REFUSED:
                     refused_date = timezone.now()
@@ -161,6 +184,11 @@ class TaskETL(GenericETL):
                     blocked_payment_date = blocked_or_finished_date
                 elif status_code_advwin == TaskStatus.FINISHED:
                     finished_date = blocked_or_finished_date
+                elif status_code_advwin == TaskStatus.ACCEPTED_SERVICE:
+                    acceptance_service_date = acceptance_or_refused_service_date
+                elif status_code_advwin == TaskStatus.REFUSED_SERVICE:
+                    refused_service_date = acceptance_or_refused_service_date
+
 
                 inconsistencies = []
                 folder_legacy_code = row['folder_legacy_code']
@@ -197,32 +225,38 @@ class TaskETL(GenericETL):
                     task.execution_date = execution_date
                     task.blocked_payment_date = blocked_payment_date
                     task.finished_date = finished_date
+                    if status_code_advwin == TaskStatus.ACCEPTED_SERVICE:
+                        task.acceptance_service_date = acceptance_service_date
+                    if status_code_advwin == TaskStatus.REFUSED_SERVICE:
+                        task.refused_service_date = refused_service_date
 
                     update_fields = ['delegation_date', 'final_deadline_date', 'description',
                                      'task_status', 'refused_date', 'execution_date',
                                      'blocked_payment_date',
-                                     'finished_date']
+                                     'finished_date', 'acceptance_service_date', 'refused_service_date']
 
                     task.save(update_fields=update_fields)
 
                 else:
-                    self.model.objects.create(movement=movement,
-                                              legacy_code=legacy_code,
-                                              system_prefix=LegacySystem.ADVWIN.value,
-                                              create_user=user,
-                                              alter_user=user,
-                                              person_asked_by=person_asked_by,
-                                              person_executed_by=person_executed_by,
-                                              person_distributed_by=person_distributed_by,
-                                              type_task=type_task,
-                                              delegation_date=delegation_date,
-                                              final_deadline_date=final_deadline_date,
-                                              description=description,
-                                              refused_date=refused_date,
-                                              execution_date=execution_date,
-                                              blocked_payment_date=blocked_payment_date,
-                                              finished_date=finished_date,
-                                              task_status=status_code_advwin)
+                    task = self.model.objects.create(movement=movement,
+                                                     legacy_code=legacy_code,
+                                                     system_prefix=LegacySystem.ADVWIN.value,
+                                                     create_user=user,
+                                                     alter_user=user,
+                                                     person_asked_by=person_asked_by,
+                                                     person_executed_by=person_executed_by,
+                                                     person_distributed_by=person_distributed_by,
+                                                     type_task=type_task,
+                                                     delegation_date=delegation_date,
+                                                     final_deadline_date=final_deadline_date,
+                                                     description=description,
+                                                     refused_date=refused_date,
+                                                     execution_date=execution_date,
+                                                     blocked_payment_date=blocked_payment_date,
+                                                     finished_date=finished_date,
+                                                     task_status=status_code_advwin,
+                                                     acceptance_service_date=acceptance_service_date,
+                                                     refused_service_date=refused_service_date)
 
                 if status_code_advwin == TaskStatus.ERROR:
                     for inconsistency in inconsistencies:
@@ -251,7 +285,6 @@ class TaskETL(GenericETL):
                 self.error_logger.error(msg)
                 save_error_log(log, user, msg)
 
-
     def config_export(self):
         accepted_tasks = self.model.objects.filter(legacy_code__isnull=False,
                                                    task_status=TaskStatus.ACCEPTED)
@@ -261,6 +294,12 @@ class TaskETL(GenericETL):
 
         refused_tasks = self.model.objects.filter(legacy_code__isnull=False,
                                                   task_status=TaskStatus.REFUSED)
+
+        accepted_service_tasks = self.model.objects.filter(legacy_code__isnull=False,
+                                                          task_status=TaskStatus.ACCEPTED_SERVICE)
+
+        refused_service_tasks = self.model.objects.filter(legacy_code__isnull=False,
+                                                          task_status=TaskStatus.REFUSED_SERVICE)
 
         survey_result = done_tasks.filter(Q(survey_result__isnull=False) & ~Q(survey_result=''))
 
@@ -276,6 +315,12 @@ class TaskETL(GenericETL):
 
         refused_history = TaskHistory.objects.filter(task_id__in=refused_tasks.values('id'),
                                                      status=TaskStatus.REFUSED.value)
+
+        accepted_service_history = TaskHistory.objects.filter(task_id__in=accepted_service_tasks.values('id'),
+                                                              status=TaskStatus.ACCEPTED_SERVICE.value)
+
+        refused_service_history = TaskHistory.objects.filter(task_id__in=refused_service_tasks.values('id'),
+                                                              status=TaskStatus.REFUSED_SERVICE.value)
 
         accepted_tasks_query = map(
             lambda x: (
@@ -317,8 +362,35 @@ class TaskETL(GenericETL):
                                                 String()) + linesep + ' *** Ordem de serviço recusada por ' +
                                            str(x.person_executed_by) + ': ' + x.taskhistory_set.filter(
                          status=TaskStatus.REFUSED.value).last().notes + (
-                                               ' em ' + x.refused_date.strftime('%d/%m/%Y') if x.refused_date else'')
+                                               ' em ' + x.refused_date.strftime('%d/%m/%Y') if x.refused_date else '')
                      }).where(JuridAgendaTable.Ident == x.legacy_code)), refused_tasks)
+
+        accepted_service_tasks_query = map(
+            lambda x: (
+                update(JuridAgendaTable.__table__).values(
+                    {JuridAgendaTable.SubStatus: 11, JuridAgendaTable.Status: 0,
+                     JuridAgendaTable.Data_backoffice: x.acceptance_service_date,
+                     JuridAgendaTable.Obs: cast(JuridAgendaTable.Obs,
+                                                String()) + linesep + ' Aceita por Back Office ' +
+                                           str(x.person_distributed_by) + ': ' + x.taskhistory_set.filter(
+                         status=TaskStatus.ACCEPTED_SERVICE.value).last().notes + (
+                                               ' em ' + x.acceptance_service_date.strftime(
+                                                   '%d/%m/%Y') if x.acceptance_service_date else '')
+                     }).where(JuridAgendaTable.Ident == x.legacy_code)), refused_service_tasks)
+
+        refused_service_tasks_query = map(
+            lambda x: (
+                update(JuridAgendaTable.__table__).values(
+                    {JuridAgendaTable.SubStatus: 20, JuridAgendaTable.Status: 1,
+                     JuridAgendaTable.prazo_lido: 1,
+                     JuridAgendaTable.Data_backoffice: x.refused_service_date,
+                     JuridAgendaTable.Obs: cast(JuridAgendaTable.Obs,
+                                                String()) + linesep + ' Recusada por Back Office ' +
+                                           str(x.person_distributed_by) + ': ' + x.taskhistory_set.filter(
+                         status=TaskStatus.ACCEPTED_SERVICE.value).last().notes + (
+                                               ' em ' + x.acceptance_service_date.strftime(
+                                                   '%d/%m/%Y') if x.acceptance_service_date else '')
+                     }).where(JuridAgendaTable.Ident == x.legacy_code)), accepted_service_tasks)
 
         accepeted_history_query = map(lambda x: (
             insert(JuridCorrespondenteHist.__table__).values(
@@ -356,9 +428,36 @@ class TaskETL(GenericETL):
                  JuridCorrespondenteHist.descricao: 'Recusada por correspondente: ' +
                                                     x.task.person_executed_by.legal_name})), refused_history)
 
+        accepted_service_history_query = map(lambda x: (
+            insert(JuridCorrespondenteHist.__table__).values(
+                {JuridCorrespondenteHist.codigo_adv_solicitante: str(x.person_asked_by),
+                 JuridCorrespondenteHist.codigo_adv_origem: str(x.person_distributed_by),
+                 JuridCorrespondenteHist.ident_agenda: x.task.legacy_code,
+                 JuridCorrespondenteHist.status: 0,
+                 JuridCorrespondenteHist.SubStatus: 11,
+                 JuridCorrespondenteHist.data_operacao: x.create_date,
+                 JuridCorrespondenteHist.justificativa: x.notes,
+                 JuridCorrespondenteHist.usuario: x.task.person_executed_by.auth_user.username,
+                 JuridCorrespondenteHist.descricao: 'Aceita por Back Office: ' +
+                                                    x.task.person_executed_by.legal_name})), accepted_service_history)
+
+        refused_service_history_query = map(lambda x: (
+            insert(JuridCorrespondenteHist.__table__).values(
+                {JuridCorrespondenteHist.codigo_adv_solicitante: str(x.person_asked_by),
+                 JuridCorrespondenteHist.codigo_adv_origem: str(x.person_distributed_by),
+                 JuridCorrespondenteHist.ident_agenda: x.task.legacy_code,
+                 JuridCorrespondenteHist.status: 1,
+                 JuridCorrespondenteHist.SubStatus: 20,
+                 JuridCorrespondenteHist.data_operacao: x.create_date,
+                 JuridCorrespondenteHist.justificativa: x.notes,
+                 JuridCorrespondenteHist.usuario: x.task.person_executed_by.auth_user.username,
+                 JuridCorrespondenteHist.descricao: 'Recusada por Back Office: ' +
+                                                    x.task.person_executed_by.legal_name})), refused_service_history)
+
         self.export_query_set = chain(accepted_tasks_query, done_tasks_query, refused_tasks_query,
-                                      accepeted_history_query,
-                                      done_history_query, refused_history_query, survey_result)
+                                      accepted_service_tasks_query, refused_service_tasks_query,
+                                      accepeted_history_query, done_history_query, refused_history_query, survey_result,
+                                      accepted_service_history_query, refused_service_history_query)
 
 
 if __name__ == '__main__':

@@ -13,6 +13,8 @@ urlpatterns = [
         name='courtdistrict_update'),
     url(r'^comarcas/excluir$', login_required(views.CourtDistrictDeleteView.as_view()),
         name='courtdistrict_delete'),
+    url(r'courtdistrict_autocomplete$', login_required(views.CourtDistrictAutocomplete.as_view()),
+        name='courtdistrict_autocomplete'),
 
     # Varas
     url(r'^varas/listar/$', login_required(views.CourtDivisionListView.as_view()), name='courtdivision_list'),

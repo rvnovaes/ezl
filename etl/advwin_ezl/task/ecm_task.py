@@ -20,14 +20,24 @@ class EcmEtl(GenericETL):
                       INNER JOIN Jurid_CodMov AS cm
                         ON A.CodMov = cm.Codigo
                     WHERE G.Tabela_OR = 'Agenda'
-                          AND (P.Status = 'Ativa' OR P.Status = 'Especial')
                           AND G.Link <> ''
                           AND G.Link IS NOT NULL
                           AND cm.UsarOS = 1
                           AND (P.Status = 'Ativa' OR P.Status = 'Especial' OR p.Dt_Saida IS NULL)
-                          AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          AND a.Advogado IN ('{person_legacy_code}')
+                          (
+                                (
+                                    ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
+                                    (a.SubStatus = 80))
+                                    AND 
+                                    a.Advogado IN ('{person_legacy_code}')
+                                )
+                                OR
+                                (
+                                    (a.SubStatus = 10) OR 
+                                    (a.SubStatus = 11) OR 
+                                    (a.SubStatus = 20)
+                                )
+                          ) AND a.Status = '0' -- STATUS ATIVO
                     UNION
                     SELECT DISTINCT
                       G.ID_doc AS ecm_legacy_code,
@@ -47,9 +57,20 @@ class EcmEtl(GenericETL):
                           AND G.Link <> ''
                           AND G.Link IS NOT NULL
                           AND cm.UsarOS = 1
-                          AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          AND a.Advogado IN ('{person_legacy_code}')
+                          (
+                                (
+                                    ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
+                                    (a.SubStatus = 80))
+                                    AND 
+                                    a.Advogado IN ('{person_legacy_code}')
+                                )
+                                OR
+                                (
+                                    (a.SubStatus = 10) OR 
+                                    (a.SubStatus = 11) OR 
+                                    (a.SubStatus = 20)
+                                )
+                          ) AND a.Status = '0' -- STATUS ATIVO
                           """
     model = Ecm
     field_check = 'ecm_legacy_code'

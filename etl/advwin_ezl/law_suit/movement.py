@@ -26,9 +26,20 @@ class MovementETL(GenericETL):
                 WHERE
                   cm.UsarOS = 1 and
                   (p.Status = 'Ativa' OR p.Status = 'Especial') AND
-                  ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                  (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                  AND a.Advogado IN ('{}')
+                  (
+                        (
+                            ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
+                            (a.SubStatus = 80))
+                            AND 
+                            a.Advogado IN ('{}')
+                        )
+                        OR
+                        (
+                            (a.SubStatus = 10) OR 
+                            (a.SubStatus = 11) OR 
+                            (a.SubStatus = 20)
+                        )
+                  ) AND a.Status = '0' -- STATUS ATIVO
                   """
 
     model = Movement
@@ -63,7 +74,8 @@ class MovementETL(GenericETL):
                         lawsuit = InvalidObjectFactory.get_invalid_model(LawSuit)
 
                 type_movement = TypeMovement.objects.filter(
-                    legacy_code=type_movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(TypeMovement)
+                    legacy_code=type_movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
+                    TypeMovement)
 
                 person_lawyer = Person.objects.filter(
                     legacy_code=person_lawyer_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
@@ -99,8 +111,10 @@ class MovementETL(GenericETL):
                                               type_movement=type_movement,
                                               )
                 self.debug_logger.debug(
-                    "Movimentacao,%s,%s,%s,%s,%s,%s,%s,%s" % (str(legacy_code), str(LegacySystem.ADVWIN.value), str(create_user.id),
-                                                    str(create_user.id),str(True),str(lawsuit.id if lawsuit else ''),str(type_movement.id),self.timestr))
+                    "Movimentacao,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                    str(legacy_code), str(LegacySystem.ADVWIN.value), str(create_user.id),
+                    str(create_user.id), str(True), str(lawsuit.id if lawsuit else ''), str(type_movement.id),
+                    self.timestr))
 
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,

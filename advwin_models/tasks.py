@@ -260,6 +260,34 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'descricao': 'Diligência não cumprida - pagamento glosado'
         }
         return insert_advwin_history(task_history, values, execute)
+    elif task_history.status == TaskStatus.ACCEPTED_SERVICE.value:
+        values = {
+            'ident_agenda': task.legacy_code,
+            'codigo_adv_solicitante': task.person_asked_by.legacy_code,
+            'codigo_adv_origem': task.person_distributed_by.legacy_code,
+            'SubStatus': 11,
+            'status': 0,
+            'data_operacao': timezone.localtime(task.acceptance_service_date),
+            'justificativa': task_history.notes,
+            'usuario': username,
+            'descricao': 'Aceita por Back Office: {}'.format(
+                task.person_executed_by.legal_name),
+        }
+        return insert_advwin_history(task_history, values, execute)
+    elif task_history.status == TaskStatus.REFUSED_SERVICE.value:
+        values = {
+            'ident_agenda': task.legacy_code,
+            'codigo_adv_solicitante': task.person_asked_by.legacy_code,
+            'codigo_adv_origem': task.person_distributed_by.legacy_code,
+            'SubStatus': 20,
+            'status': 1,
+            'data_operacao': timezone.localtime(task.acceptance_service_date),
+            'justificativa': task_history.notes,
+            'usuario': username,
+            'descricao': 'Recusada por Back Office: {}'.format(
+                task.person_executed_by.legal_name),
+        }
+        return insert_advwin_history(task_history, values, execute)
 
 
 def update_advwin_task(task, values, execute=True):
@@ -407,4 +435,28 @@ def export_task(task_id, task=None, execute=True):
                                         'Diligência não cumprida - pagamento glosado por',
                                         'blocked_payment_date')
         }
+        return update_advwin_task(task, values, execute)
+    elif task.task_status == TaskStatus.ACCEPTED_SERVICE.value:
+
+        values = {
+            'SubStatus': 11,
+            'Status': 0,
+            'Advogado_or': task.person_distributed_by.legacy_code,
+            'Data_backoffice': timezone.localtime(task.acceptance_service_date),
+            'envio_alerta': 0,
+            'Obs': get_task_observation(task, 'Aceita por Back Office:', 'acceptance_service_date'),
+        }
+
+        return update_advwin_task(task, values, execute)
+    elif task.task_status == TaskStatus.REFUSED_SERVICE.value:
+
+        values = {
+            'SubStatus': 20,
+            'Status': 1,
+            'prazo_lido': 1,
+            'Data_backoffice': timezone.localtime(task.refused_service_date),
+            'envio_alerta': 0,
+            'Obs': get_task_observation(task, 'Recusada por Back Office', 'refused_service_date'),
+        }
+
         return update_advwin_task(task, values, execute)
