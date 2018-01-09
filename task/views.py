@@ -59,6 +59,11 @@ class TaskCreateView(AuditFormMixin, CreateView):
 
         return self.initial.copy()
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
     def form_valid(self, form):
         task = form.instance
         form.instance.movement_id = self.kwargs.get('movement')
@@ -98,6 +103,11 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
         elif isinstance(self, UpdateView):
             self.form_class.declared_fields['is_active'].disabled = False
         return self.initial.copy()
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
     def form_valid(self, form):
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})

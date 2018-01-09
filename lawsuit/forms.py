@@ -2,12 +2,12 @@ from django import forms
 from django.core.exceptions import FieldDoesNotExist
 from django.forms import ModelForm
 from core.fields import CustomBooleanField
-from core.models import Person, State, Address
+from core.models import Person, State, Address, Office
 from financial.models import CostCenter
 from core.widgets import MDModelSelect2
 from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict,
                      LawSuit, CourtDivision, Organ)
-from core.utils import filter_valid_choice_form
+from core.utils import filter_valid_choice_form, get_office_field
 from dal import autocomplete
 from localflavor.br.forms import BRCNPJField
 from material import Layout, Row
@@ -73,13 +73,18 @@ class InstanceForm(BaseForm):
 class MovementForm(BaseForm):
     class Meta:
         model = Movement
-        fields = ['type_movement', 'is_active']
+        fields = ['office', 'type_movement', 'is_active']
 
     type_movement = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(TypeMovement.objects.filter(is_active=True)).order_by(
             'name'),
         empty_label=u"Selecione...",
     )
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request')
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
 
 
 class FolderForm(BaseForm):

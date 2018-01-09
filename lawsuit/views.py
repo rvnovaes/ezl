@@ -514,6 +514,11 @@ class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
                                    kwargs={'folder': self.kwargs['folder'],
                                            'pk': self.kwargs['lawsuit']})
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
                              UpdateView):
@@ -533,6 +538,11 @@ class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
         self.success_url = reverse('lawsuit_update',
                                    kwargs={'folder': self.kwargs['folder'],
                                            'pk': self.kwargs['lawsuit']})
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class OrganCreateView(AuditFormMixin, CreateView):

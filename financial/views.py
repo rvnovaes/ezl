@@ -38,6 +38,11 @@ class CostCenterCreateView(AuditFormMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'costcenter_list'
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class CostCenterUpdateView(AuditFormMixin, UpdateView):
     model = CostCenter
@@ -46,6 +51,11 @@ class CostCenterUpdateView(AuditFormMixin, UpdateView):
     success_message = UPDATE_SUCCESS_MESSAGE
     template_name_suffix = '_update_form'
     object_list_url = 'costcenter_list'
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class CostCenterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
@@ -81,6 +91,11 @@ class ServicePriceTableCreateView(AuditFormMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'servicepricetable_list'
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
     model = ServicePriceTable
@@ -89,6 +104,11 @@ class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
     success_message = UPDATE_SUCCESS_MESSAGE
     template_name_suffix = '_update_form'
     object_list_url = 'servicepricetable_list'
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):
