@@ -44,6 +44,11 @@ class InstanceCreateView(AuditFormMixin, CreateView):
     form_class = InstanceForm
     success_url = reverse_lazy('instance_list')
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class InstanceUpdateView(AuditFormMixin, UpdateView):
     model = Instance
@@ -75,6 +80,11 @@ class InstanceUpdateView(AuditFormMixin, UpdateView):
         if cache.get('instance_page'):
             self.success_url = cache.get('instance_page')
         return super(InstanceUpdateView, self).post(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class InstanceDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):

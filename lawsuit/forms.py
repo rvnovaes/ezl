@@ -66,13 +66,18 @@ class TypeMovementForm(BaseForm):
 class InstanceForm(BaseForm):
     class Meta:
         model = Instance
-        fields = ['name', 'is_active']
+        fields = ['office', 'name', 'is_active']
 
     name = forms.CharField(
         label=u"Nome da Instância",
         max_length=255,
 
     )
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
 
 
 class MovementForm(BaseForm):
