@@ -168,7 +168,6 @@ class FolderCreateView(AuditFormMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
 
     def get_form_kwargs(self):
-        import pdb;pdb.set_trace()
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
