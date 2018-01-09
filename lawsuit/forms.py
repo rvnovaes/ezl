@@ -210,18 +210,21 @@ class CourtDistrictForm(BaseForm):
 
 class OrganForm(BaseModelForm):
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super(OrganForm, self).__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
         for field_name, field in self.fields.items():
             if field_name is 'cnpj':
                 field.initial = self.instance.cpf_cnpj
     layout = Layout(
+        Row('office'),
         Row('legal_name', 'cpf_cnpj'),
         Row('court_district', 'is_active')
     )
 
     class Meta:
         model = Organ
-        fields = ['legal_name', 'cpf_cnpj', 'court_district', 'is_active']
+        fields = ['office', 'legal_name', 'cpf_cnpj', 'court_district', 'is_active']
 
     def clean(self):
         cleaned_data = super(OrganForm, self).clean()

@@ -615,6 +615,11 @@ class OrganCreateView(AuditFormMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'organ_list'
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class OrganUpdateView(AuditFormMixin, UpdateView):
     """
@@ -632,6 +637,11 @@ class OrganUpdateView(AuditFormMixin, UpdateView):
             'address_table': AddressOrganTable(self.object.address_set.all()),
         })
         return super().get_context_data(**kwargs)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class OrganDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
