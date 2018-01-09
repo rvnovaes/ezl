@@ -275,12 +275,22 @@ class CourtDivisionCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('courtdivision_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class CourtDivisionUpdateView(AuditFormMixin, UpdateView):
     model = CourtDivision
     form_class = CourtDivisionForm
     success_url = reverse_lazy('courtdivision_list')
     success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class CourtDivisionDeleteView(AuditFormMixin, MultiDeleteViewMixin):

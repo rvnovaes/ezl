@@ -184,9 +184,12 @@ class LawSuitForm(BaseForm):
 class CourtDivisionForm(BaseForm):
     class Meta:
         model = CourtDivision
-        fields = ['name', 'is_active']
+        fields = ['office', 'name', 'is_active']
 
-        # legacy_code = forms.CharField(max_length=255, required=False)
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
 
 
 class CourtDistrictForm(BaseForm):
