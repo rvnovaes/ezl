@@ -392,6 +392,11 @@ class TypeTaskCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('typetask_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class TypeTaskUpdateView(AuditFormMixin, UpdateView):
     model = TypeTask
@@ -410,6 +415,11 @@ class TypeTaskUpdateView(AuditFormMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         cache.set('type_task_page', self.request.META.get('HTTP_REFERER'))
         return context
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
     def post(self, request, *args, **kwargs):
         """

@@ -169,4 +169,9 @@ class TaskDetailForm(ModelForm):
 class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
-        fields = ['name', 'survey_type', 'is_active']
+        fields = ['office', 'name', 'survey_type', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
