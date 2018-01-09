@@ -96,7 +96,7 @@ class TaskForm(BaseForm):
                                              'id': 'details_id'}))
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request')
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 
@@ -108,7 +108,7 @@ class TaskCreateForm(FileFormMixin, TaskForm):
         fields = ['office'] + TaskForm.Meta.fields + ['documents']
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request')
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 

@@ -94,6 +94,11 @@ class TypeMovementCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('type_movement_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class TypeMovementUpdateView(AuditFormMixin, UpdateView):
     model = TypeMovement
@@ -112,6 +117,11 @@ class TypeMovementUpdateView(AuditFormMixin, UpdateView):
         context = super(TypeMovementUpdateView, self).get_context_data(**kwargs)
         cache.set('type_movement_page', self.request.META.get('HTTP_REFERER'))
         return context
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
     def post(self, request, *args, **kwargs):
         """

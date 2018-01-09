@@ -30,7 +30,7 @@ class CostCenterForm(BaseModelForm):
         fields = ['office', 'name', 'legacy_code', 'is_active']
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request')
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 
@@ -110,6 +110,6 @@ class ServicePriceTableForm(BaseModelForm):
         return float(value)
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request')
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)

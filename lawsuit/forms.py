@@ -49,13 +49,18 @@ class BaseForm(ModelForm):
 class TypeMovementForm(BaseForm):
     class Meta:
         model = TypeMovement
-        fields = ['name', 'is_active']
+        fields = ['office', 'name', 'is_active']
 
     name = forms.CharField(
         max_length=255,
         required=True,
         error_messages={'required': 'O campo de descrição é obrigatório'}
     )
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
 
 
 class InstanceForm(BaseForm):
@@ -82,7 +87,7 @@ class MovementForm(BaseForm):
     )
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request')
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 
