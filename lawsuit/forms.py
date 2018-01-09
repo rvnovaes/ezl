@@ -95,7 +95,7 @@ class MovementForm(BaseForm):
 class FolderForm(BaseForm):
     class Meta:
         model = Folder
-        fields = ['folder_number', 'person_customer', 'cost_center', 'is_active']
+        fields = ['office', 'folder_number', 'person_customer', 'cost_center', 'is_active']
 
     folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
 
@@ -113,12 +113,15 @@ class FolderForm(BaseForm):
     )
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super(FolderForm, self).__init__(*args, **kwargs)
-        self.order_fields(['folder_number', 'person_customer', 'is_active'])
+        self.fields['office'] = get_office_field(self.request)
+        self.order_fields(['office', 'folder_number', 'person_customer', 'is_active'])
 
         if not self.instance.pk:
             # Since the pk is set this is not a new instance
             self.fields.pop('folder_number')
+
 
 
 class LawSuitForm(BaseForm):

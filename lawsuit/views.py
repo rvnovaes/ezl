@@ -167,12 +167,23 @@ class FolderCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('folder_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
+    def get_form_kwargs(self):
+        import pdb;pdb.set_trace()
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class FolderUpdateView(AuditFormMixin, UpdateView):
     model = Folder
     form_class = FolderForm
     success_url = reverse_lazy('folder_list')
     success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class FolderDeleteView(AuditFormMixin, MultiDeleteViewMixin):
@@ -293,6 +304,11 @@ class FolderLawsuitCreateView(SuccessMessageMixin, GenericFormOneToMany, CreateV
         RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateView):
     model = Folder
@@ -329,6 +345,11 @@ class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateV
         if cache.get('folder_lawsuit_page'):
             self.success_url = cache.get('folder_lawsuit_page')
         return super(FolderLawsuitUpdateView, self).post(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class LawSuitListView(LoginRequiredMixin, SingleTableViewMixin):
