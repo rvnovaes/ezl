@@ -141,6 +141,7 @@ class PersonETL(GenericETL):
                                      system_prefix=LegacySystem.ADVWIN.value)
 
                     obj.save()
+                    default_office.persons.add(obj)
 
                 self.debug_logger.debug(
                     'Pessoa,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (

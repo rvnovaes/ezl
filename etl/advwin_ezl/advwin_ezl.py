@@ -28,6 +28,7 @@ from core.models import Office
 from config.config import get_parser
 from etl.models import DashboardETL
 from django.utils import timezone
+from etl.utils import get_default_office
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -153,7 +154,7 @@ class GenericETL(object):
         from django.contrib.auth import get_user_model
         User = get_user_model()
         user = User.objects.get(pk=create_alter_user)
-        default_office = Office.objects.get(cpf_cnpj='03.482.042/0001-02')
+        default_office = get_default_office()
         dashboard_log = DashboardETL.objects.create(
             name=self.model._meta.verbose_name.upper(), status=False,
             executed_query=self.import_query, create_user=user,
