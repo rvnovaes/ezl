@@ -126,7 +126,9 @@ class FolderForm(BaseForm):
 
 class LawSuitForm(BaseForm):
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super(LawSuitForm, self).__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
 
         def get_option(o):
             return '{}/{}'.format(o.court_district.name, o.legal_name)
@@ -136,7 +138,7 @@ class LawSuitForm(BaseForm):
 
     class Meta:
         model = LawSuit
-        fields = ['law_suit_number', 'organ', 'instance', 'court_division',
+        fields = ['office', 'law_suit_number', 'organ', 'instance', 'court_division',
                   'person_lawyer', 'opposing_party',
                   'is_current_instance', 'is_active', 'court_district']
 

@@ -422,6 +422,11 @@ class LawsuitMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, Generic
         self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
         super(LawsuitMovementCreateView, self).get_success_url()
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
                                 UpdateView):
@@ -452,6 +457,11 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
         if cache.get('lawsuit_movement_page'):
             self.success_url = cache.get('lawsuit_movement_page')
         return super(LawsuitMovementUpdateView, self).post(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class MovementListView(LoginRequiredMixin, SingleTableViewMixin):
