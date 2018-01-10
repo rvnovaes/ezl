@@ -404,6 +404,12 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
         })
         return super().get_context_data(**kwargs)
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        user = User.objects.get(id=self.request.user.id)
+        kw['is_superuser'] = user.is_superuser
+        return kw
+
     def get_success_url(self):
         return reverse('person_update', args=(self.object.id,))
 
