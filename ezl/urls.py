@@ -6,7 +6,8 @@ from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 
-from core.views import ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin
+from core.views import ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin, \
+    CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete
 from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView
 
@@ -41,6 +42,18 @@ urlpatterns = [
     url(r'^client_form',
         login_required(ClientAutocomplete.as_view()),
         name='client_autocomplete'),
+
+    url(r'^correspondent_form',
+        login_required(CorrespondentAutocomplete.as_view()),
+        name='correspondent_autocomplete'),
+
+    url(r'^requester_form',
+        login_required(RequesterAutocomplete.as_view()),
+        name='requester_autocomplete'),
+
+    url(r'^service_form',
+        login_required(ServiceAutocomplete.as_view()),
+        name='service_autocomplete'),
 
     url(r'^generic_autocomplete_foreignkey',
         login_required(GenericAutocompleteForeignKey.as_view()),

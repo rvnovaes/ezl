@@ -303,7 +303,8 @@ span, .pagination > .active > span:focus, .pagination > .active > span:hover {
 
 .select2 {
     position: relative;
-    top: -14px;
+    top: -15px;
+    min-width: 100%!important;
 }
 
 .select-field label.active, label#city_label.active{color: #0097a7;}

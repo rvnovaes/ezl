@@ -425,6 +425,45 @@ class ClientAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
 
+class CorrespondentAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        # if not self.request.user.is_authenticated():
+        #     return Person.objects.none()
+
+        qs = Person.objects.none()
+
+        if self.q:
+            qs = Person.objects.active().correspondents().filter(legal_name__unaccent__istartswith=self.q)
+        return qs
+
+
+class RequesterAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        # if not self.request.user.is_authenticated():
+        #     return Person.objects.none()
+
+        qs = Person.objects.none()
+
+        if self.q:
+            qs = Person.objects.active().requesters().filter(legal_name__unaccent__istartswith=self.q)
+        return qs
+
+
+class ServiceAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        # if not self.request.user.is_authenticated():
+        #     return Person.objects.none()
+
+        qs = Person.objects.none()
+
+        if self.q:
+            qs = Person.objects.active().services().filter(legal_name__unaccent__istartswith=self.q)
+        return qs
+
+
 class GenericAutocompleteForeignKey(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         try:

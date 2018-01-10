@@ -16,7 +16,6 @@ def ecm_path_advwin2ezl(advwin_path):
             part = advwin_path.split('Agenda\\', 1)[1].replace('\\', '/')
             return join('ECM', part)
     except IndexError as e:
-        import pdb; pdb.set_trace()
         ERROR_LOGGER.error(ECM_PATH_ADVWIN2EZL.format(e=e))
         ERROR_LOGGER.error(traceback.print_tb(e.__traceback__))
     except Exception as e:
