@@ -803,6 +803,12 @@ class RegisterNewUser(CreateView):
 
 class CustomSession(View):
     def post(self, request, *args, **kwargs):
+        """
+        Cria uma sessao customizada do usuario para armazenar o escritorio atual
+        do usuario. O Valor e armazenando na sessao atravez da chave
+        custom_session_user, que ira possuir um dicionario contendo como chave
+        o id do usuario e como valor um dicionario contendo o current_office. 
+        """
         data = {}
         if request.POST.get('current_office'):
             current_office = request.POST.get('current_office')
@@ -815,6 +821,10 @@ class CustomSession(View):
         return JsonResponse(data)
 
     def get(self, request, *args, **kwargs):
+        """
+        Busca a sessao customizada pra do usuario que retorna informacoes
+        do escritorio atual do usuario
+        """
         data = {}
         custom_session_user = request.session.get('custom_session_user')
         if custom_session_user and custom_session_user.get(str(request.user.pk)):
