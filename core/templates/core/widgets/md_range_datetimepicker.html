@@ -1,14 +1,9 @@
 <script>
     $(function () {
         $('#{{ widget.name }}_0').datetimepicker({
-            tooltips: {
-                selectTime: 'seleciona horas e minutos',
-                selectMonth: 'seleciona o mês',
-                clear: 'Limpar data e hora'
-            },
-            ignoreReadonly: true,
-            useCurrent: false,
-            showClear: true,
+            scrollInput: false,
+            lang: 'pt',
+            closeOnDateSelect: true,
             timepicker: false,
             format: 'd/m/Y',
             onShow:function( ct ){
@@ -19,15 +14,9 @@
             }
         });
         $('#{{ widget.name }}_1').datetimepicker({
-            tooltips: {
-                selectTime: 'seleciona horas e minutos',
-                selectYear: 'seleciona o ano',
-                selectMonth: 'seleciona o mês',
-                clear: 'Limpar data e hora'
-            },
-            ignoreReadonly: true,
-            useCurrent: false,
-            showClear: true,
+            scrollInput: false,
+            lang: 'pt',
+            closeOnDateSelect: true,
             timepicker: false,
             format: 'd/m/Y',
             onShow:function( ct ){
@@ -49,7 +38,7 @@
     {% for widget in widget.subwidgets %}
         <span class="col s12 m5">
             <span class="input-group date">
-                <input id="{{ widget.name }}" class="form-control text-center" type="text" readonly
+                <input id="{{ widget.name }}" class="form-control text-center" type="text"
                        name="{{ widget.name }}" data-toggle="tooltip" data-placement="top"
                        title="Clique no ícone ao lado"
                         {% if widget.value != None %}
@@ -62,12 +51,9 @@
                             print placeholder="Data final"
                         {% endif %}
                 />
-                <span class="input-group-addon">
-                    <span class="material-icons event" style="color: #009688">event</span>
+                <span class="input-group-addon" style="color: #009688;cursor: default;">
+                    <i class="material-icons event">event</i>
                 </span>
             </span>
         </span>
-        <script>
-            jQuery("input[name='{{ widget.name }}']").datetimepicker();
-        </script>
     {% endfor %}
