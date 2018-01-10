@@ -8,8 +8,8 @@ from django.db.models import Q
 
 
 @transaction.atomic
-def get_folder_number():
-    return get_next_value('lawsuit_folder_folder_number')
+def get_folder_number(office):
+    return get_next_value('lawsuit_office_%s_folder_folder_number' % office.pk)
 
 
 class TypeMovement(Audit, LegacyCode, OfficeMixin):
@@ -49,11 +49,11 @@ class Folder(Audit, LegacyCode, OfficeMixin):
                                     null=True,
                                     verbose_name='Centro de custo')
 
-
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.folder_number = get_folder_number()
+            self.folder_number = get_folder_number(self.office)
         super(Folder, self).save(*args, **kwargs)
+
     class Meta:
         db_table = "folder"
         ordering = ['-id']
