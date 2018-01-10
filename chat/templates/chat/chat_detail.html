@@ -10,11 +10,11 @@
                      class="img-circle"/>
             </div>
         </div>
-        <div class="col-sm-8 col-xs-7 heading-name">
-            <a class="heading-name-meta" href="{{ chat.back_url }}">{{ chat.title }}</a>
-        </div>
-        <div class="col-sm-1 col-xs-1  heading-dot pull-right">
-
+        <div class="col-sm-10 col-xs-7 heading-name">
+            <a class="heading-name-meta" href="{{ chat.back_url }}">
+                {{ chat.title }}
+            </a>
+            <span class="heading-description text-wrap">{{ chat.description|default_if_none:'' }}</span>
         </div>
     </div>
     <!-- Heading End -->
@@ -75,7 +75,6 @@
 
 {% block javascript %}
     <script>
-        console.log("ws://" + window.location.host + "/chat/?label={{chat.label}}");
         $(".heading-compose").click(function () {
             $(".side-two").css({
                 "left": "0"

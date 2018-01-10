@@ -5,7 +5,7 @@ var setBadgeItem = function (items) {
         if (item.quantity > 0) {
             el.text(item.quantity)
         } else {
-            el.text('thiago')
+            el.text(null)
         }
 
     })
@@ -34,6 +34,7 @@ setInterval(function () {
         url: "/chat/count_message/",
         data: {},
         success: function (response) {
+            console.log(response.all_messages);
             if (response.all_messages > 0) {
                 $('.chat-badge.badge').text(response.all_messages)
             } else {
@@ -43,10 +44,9 @@ setInterval(function () {
         },
         dataType: "json"
     });
-}, 100000);
+}, 1000);
 
 
 var formatDate = function (strDate) {
     return strDate.substr(8, 2) + '/' + strDate.substr(5, 2)+ '/' + strDate.substr(0, 4) + ' ' + strDate.substr(11)
 };
-

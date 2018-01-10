@@ -23,7 +23,7 @@ from core.models import Person
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
-from lawsuit.models import Movement
+from lawsuit.models import Movement, CourtDistrict
 from task.filters import TaskFilter
 from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
@@ -255,13 +255,30 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
-        if not self.object.chat:
+
+        # Atualiza ou cria o chat, (Eh necessario encontrar um lugar melhor para este bloco de codigo)
+        state = ''
+        if isinstance(self.object.court_district, CourtDistrict):
+            state = self.object.court_district.state
+        opposing_party = ''
+        if self.object.movement and self.object.movement.law_suit:
+            opposing_party = self.object.movement.law_suit.opposing_party
+        description = """
+        Parte adversa: {opposing_party}, Cliente: {client},
+        {court_district} - {state}, Prazo: {final_deadline_date}
+        """.format(opposing_party=opposing_party, client=self.object.client,
+        court_district=self.object.court_district, state=state,
+        final_deadline_date=self.object.final_deadline_date.strftime('%d/%m/%Y %H:%M'))
+        if self.object.chat:
+            self.object.chat.description = description
+            self.object.chat.save()
+        else:
             label = 'task-{}'.format(self.object.pk)
-            title = '#{task_number} - {type_task}'.format(task_number=self.object.task_number,
-                                                          type_task=self.object.type_task)
+            title = """#{task_number} - {type_task}""".format(
+            task_number=self.object.task_number, type_task=self.object.type_task)
             self.object.chat = Chat.objects.create(
                 create_user=self.request.user, label=label, title=title,
-                back_url='/dashboard/{}'.format(self.object.pk))
+                description=description, back_url='/dashboard/{}'.format(self.object.pk))
             self.object.save()
         self.create_user_by_chat(self.object, ['person_asked_by', 'person_executed_by',
                                                'person_distributed_by'])
