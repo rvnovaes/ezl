@@ -28,7 +28,7 @@ class MovementETL(GenericETL):
                   (p.Status = 'Ativa' OR p.Status = 'Especial') AND
                   ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
                   (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                  AND a.Advogado IN ('{}')
+                  --AND a.Advogado IN ('{}')
                   """
 
     model = Movement

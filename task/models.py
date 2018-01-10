@@ -6,11 +6,9 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from sequences import get_next_value
-
-from chat.models import Chat
 from core.models import Person, Audit, AuditCreate, LegacyCode
 from lawsuit.models import Movement, Folder
-
+from chat.models import Chat
 
 class Permissions(Enum):
     view_delegated_tasks = 'Can view tasks delegated to the user'
@@ -120,6 +118,9 @@ class Task(Audit, LegacyCode):
     final_deadline_date = models.DateTimeField(null=True, verbose_name='Prazo')
     execution_date = models.DateTimeField(null=True, verbose_name='Data de Cumprimento')
 
+    requested_date = models.DateTimeField(null=True, verbose_name='Data de Solicitação')
+    acceptance_service_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação pelo Contratante')
+    refused_service_date = models.DateTimeField(null=True, verbose_name='Data de Recusa pelo Contratante')
     return_date = models.DateTimeField(null=True, verbose_name='Data de Retorno')
     refused_date = models.DateTimeField(null=True, verbose_name='Data de Recusa')
 
@@ -261,6 +262,9 @@ class DashboardViewModel(Audit):
                                               verbose_name='Service')
     type_task = models.ForeignKey(TypeTask, on_delete=models.PROTECT, blank=False, null=False,
                                   verbose_name='Tipo de Serviço')
+    requested_date = models.DateTimeField(null=True, verbose_name='Data de Solicitação')
+    acceptance_service_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação pelo Contratante')
+    refused_service_date = models.DateTimeField(null=True, verbose_name='Data de Recusa pelo Contratante')
     delegation_date = models.DateTimeField(default=timezone.now, verbose_name='Data de Delegação')
     acceptance_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação')
     final_deadline_date = models.DateTimeField(null=True, verbose_name='Prazo')
@@ -325,6 +329,16 @@ class DashboardViewModel(Audit):
     @property
     def opposing_party(self):
         return self.movement.law_suit.opposing_party
+
+    @property
+    def cost_center(self):
+        folder = Folder.objects.get(folders__law_suits__task__exact=self)
+        return folder.cost_center
+
+    @property
+    def folder_number(self):
+        folder = Folder.objects.get(folders__law_suits__task__exact=self)
+        return folder.folder_number
 
 
 class Filter(Audit):
