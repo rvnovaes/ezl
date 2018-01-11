@@ -4,7 +4,6 @@ Ex: O Escritorio que usuario esta trabalhando
 */
 
 $(document).ready(function(){
-    console.log('passo aqui');
     $('#current_office').text('...');
     $.ajax({
         type: 'GET',

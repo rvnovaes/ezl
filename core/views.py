@@ -841,6 +841,7 @@ class CustomSession(View):
         do escritorio atual do usuario
         """
         data = {}
+        # import pdb;pdb.set_trace()
         custom_session_user = request.session.get('custom_session_user')
         if custom_session_user and custom_session_user.get(str(request.user.pk)):
             current_office_session = custom_session_user.get(str(request.user.pk))
@@ -848,6 +849,11 @@ class CustomSession(View):
                 'current_office')))
             data['current_office_pk'] = office.pk
             data['current_office_name'] = office.name
+        else:
+            default_office = DefaultOffice.objects.filter(auth_user=request.user).first()
+            if default_office:
+                data['current_office_pk'] = default_office.office.pk
+                data['current_office_name'] = default_office.office.name
         return JsonResponse(data)
 
 
