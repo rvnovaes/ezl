@@ -199,19 +199,21 @@ span {
 
 .sideBar-name {
     padding: 10px !important;
+    white-space: nowrap;
+    width: 21em;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .name-meta {
     font-size: 100%;
     padding: 1% !important;
     text-align: left;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     color: #000;
 }
 
 .sideBar-time {
-    padding: 10px !important;
+    padding: 1px 1px 1px 1px !important;
 }
 
 .time-meta {
@@ -222,6 +224,16 @@ span {
     vertical-align: baseline;
 }
 
+
+@media screen and (max-width: 1024px){
+    .sideBar-name {
+        padding: 10px !important;
+        white-space: nowrap;
+        width: 15em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
 /*New Message*/
 
 .newMessage {
