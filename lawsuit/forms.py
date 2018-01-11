@@ -107,7 +107,9 @@ class FolderForm(BaseForm):
     person_customer = forms.ModelChoiceField(
         queryset=Person.objects.filter(is_active=True, is_customer=True),
         empty_label=u"Selecione...",
-        widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'})
+        widget=MDModelSelect2(url='client_autocomplete',
+                              forward=['office'],
+                              attrs={'class': 'form-control'})
     )
 
     cost_center = forms.ModelChoiceField(

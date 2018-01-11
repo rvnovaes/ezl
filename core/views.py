@@ -430,9 +430,12 @@ class ClientAutocomplete(autocomplete.Select2QuerySetView):
         #     return Person.objects.none()
 
         qs = Person.objects.none()
+        office = self.forwarded.get('office', None)
 
         if self.q:
-            qs = Person.objects.filter(legal_name__unaccent__istartswith=self.q, is_customer=True)
+            qs = Person.objects.filter(legal_name__unaccent__istartswith=self.q,
+                                       is_customer=True,
+                                       offices=office)
         return qs
 
 
