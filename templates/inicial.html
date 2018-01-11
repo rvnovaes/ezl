@@ -29,7 +29,9 @@
                                     <li><a href="{% url 'instance_list' %}" target="_self">Instâncias</a></li>
                                     <li><a href="{% url 'organ_list' %}" target="_self">Órgãos</a></li>
                                     <li><a href="{% url 'folder_list' %}" target="_self">Pastas</a></li>
-                                    <li><a href="{% url 'survey_list' %} "target="_self">Pesquisas</a></li>
+                                    {% if perms.core.can_edit_surveys %}
+                                        <li><a href="{% url 'survey_list' %} "target="_self">Pesquisas</a></li>
+                                    {% endif %}
                                     <li><a href="{% url 'person_list' %}" target="_self">Pessoas</a></li>
                                     <li><a href="{% url 'type_movement_list' %}" target="_self">Tipos de Movimentação</a></li>
                                     <li><a href="{% url 'typetask_list' %}" target="_self">Tipos de Serviço</a>

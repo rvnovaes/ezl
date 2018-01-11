@@ -1,4 +1,10 @@
 from django.db import models
+from enum import Enum
+
+
+class SurveyPermissions(Enum):
+    can_edit_surveys = 'Can edit surveys'
+    can_view_survey_results = 'Can view surveys results'
 
 
 class LegacySurveyType:

@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
 from core.models import Person
 from task.models import Permissions
+from survey.models import SurveyPermissions
 
 
 GROUP_PERMISSIONS = {
@@ -12,7 +13,9 @@ GROUP_PERMISSIONS = {
         Permissions.return_all_tasks,
         Permissions.validate_all_tasks,
         Permissions.block_payment_tasks,
-        Permissions.can_access_general_data        
+        Permissions.can_access_general_data,
+        SurveyPermissions.can_edit_surveys,
+        SurveyPermissions.can_view_survey_results,
     ),
 
     Person.SUPERVISOR_GROUP: (
@@ -20,7 +23,9 @@ GROUP_PERMISSIONS = {
         Permissions.return_all_tasks,
         Permissions.validate_all_tasks,
         Permissions.block_payment_tasks,
-        Permissions.can_access_general_data
+        Permissions.can_access_general_data,
+        SurveyPermissions.can_edit_surveys,
+        SurveyPermissions.can_view_survey_results,
     ),
 
     Person.SERVICE_GROUP: (
@@ -28,7 +33,9 @@ GROUP_PERMISSIONS = {
         Permissions.return_all_tasks,
         Permissions.validate_all_tasks,
         Permissions.block_payment_tasks,
-        Permissions.can_access_general_data
+        Permissions.can_access_general_data,
+        SurveyPermissions.can_edit_surveys,
+        SurveyPermissions.can_view_survey_results,
     ),
 
     Person.CORRESPONDENT_GROUP: (
