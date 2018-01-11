@@ -10,7 +10,7 @@ from advwin_models.advwin import JuridAgendaTable, JuridCorrespondenteHist, Juri
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
-from etl.utils import get_users_to_import, get_message_log_default, save_error_log
+from etl.utils import get_message_log_default, save_error_log, get_clients_to_import
 from ezl import settings
 from lawsuit.models import Movement, Folder
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
@@ -77,7 +77,6 @@ class TaskETL(GenericETL):
                 a.OBS AS description,
                 CASE WHEN (a.Data_delegacao IS NULL) THEN
                     a.Data ELSE a.Data_delegacao END AS delegation_date,
-                a.Data_backoffice AS accepted_or_refused_service_date,
                 a.prazo_fatal AS final_deadline_date,
                 p.Codigo_Comp AS folder_legacy_code,
                 p.Cliente
@@ -87,22 +86,11 @@ class TaskETL(GenericETL):
                 INNER JOIN Jurid_CodMov AS cm ON
                      a.CodMov = cm.Codigo
                 WHERE
-                    (cm.UsarOS = 1) AND
+                    cm.UsarOS = 1 AND
                     (p.Status = 'Ativa' OR p.Status = 'Especial') AND
-                    (
-                        (
-                            ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                            (a.SubStatus = 80))
-                            AND 
-                            a.Advogado IN ('{}')
-                        )
-                        OR
-                        (
-                            (a.SubStatus = 10) OR 
-                            (a.SubStatus = 11) OR 
-                            (a.SubStatus = 20)
-                        )
-                    ) AND a.Status = '0' -- STATUS ATIVO
+                    a.SubStatus = 10 AND
+                    p.Cliente IN ('{cliente}') AND 
+                    a.Status = '0' -- STATUS ATIVO
                     
     """
     model = Task
@@ -112,7 +100,7 @@ class TaskETL(GenericETL):
 
     @property
     def import_query(self):
-        return self._import_query.format("','".join(get_users_to_import()))
+        return self._import_query.format(cliente="','".join(get_clients_to_import()))
 
     @validate_import
     def config_import(self, rows, user, rows_count, log=False):
@@ -140,12 +128,6 @@ class TaskETL(GenericETL):
                         row['final_deadline_date'])
                 else:
                     final_deadline_date = None
-
-                if row['acceptance_or_refused_service_date']:
-                    acceptance_or_refused_service_date = pytz.timezone(settings.TIME_ZONE).localize(
-                        row['accepted_or_refused_service_date'])
-                else:
-                    acceptance_or_refused_service_date = None
 
                 description = row['description']
                 blocked_or_finished_date = row['blocked_or_finished_date']
