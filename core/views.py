@@ -807,7 +807,7 @@ class CustomSession(View):
         Cria uma sessao customizada do usuario para armazenar o escritorio atual
         do usuario. O Valor e armazenando na sessao atravez da chave
         custom_session_user, que ira possuir um dicionario contendo como chave
-        o id do usuario e como valor um dicionario contendo o current_office. 
+        o id do usuario e como valor um dicionario contendo o current_office.
         """
         data = {}
         if request.POST.get('current_office'):
@@ -854,6 +854,10 @@ class InviteUpdateView(UpdateView):
 
 
 class EditableListSave(LoginRequiredMixin, View):
+    """
+    O nome da classe ficou generico pelo fato desta view poder ser utilizada
+    em outras classes.
+    """
 
     models = {"ServicePriceTable": ServicePriceTable}
 
