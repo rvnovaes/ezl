@@ -71,16 +71,21 @@ def logout_log(f):
 
     return wrapper
 
-def get_office_field(request):
+
+def get_office_field(request, profile=None):
     """
     Método para montar o campo de office, de acordo com a variável de sessão custom_session_user
     :param request:
+    :param profile:
     :return: forms.ModelChoiceField
     """
 
-    from core.models import Office
+    from core.models import Office, DefaultOffice
     from django import forms
-    if request.session.get('custom_session_user'):
+    if profile:
+        queryset = profile.person.offices.all()
+        initial = DefaultOffice.objects.filter(auth_user=profile).first()
+    elif request.session.get('custom_session_user'):
         custom_session_user = list(request.session.get('custom_session_user').values())
         queryset = Office.objects.filter(pk=custom_session_user[0]['current_office'])
         initial = queryset.first().id

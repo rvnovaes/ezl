@@ -33,7 +33,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     DELETE_SUCCESS_MESSAGE, \
     ADDRESS_UPDATE_ERROR_MESSAGE, \
     ADDRESS_UPDATE_SUCCESS_MESSAGE
-from core.models import Person, Address, City, State, Country, AddressType, Office, Invite
+from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, OfficeTable
 from core.utils import login_log, logout_log
@@ -686,6 +686,13 @@ class UserUpdateView(AuditFormMixin, UpdateView):
 
             for group in Group.objects.filter(id__in=ids):
                 group.user_set.add(form.instance)
+            default_office = form.cleaned_data['office']
+            record, created = DefaultOffice.objects.update_or_create(
+                auth_user=form.instance,
+                defaults={"auth_user": form.instance,
+                          "office": default_office,
+                          "create_user": self.request.user}
+            )
 
         super(UserUpdateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
@@ -715,6 +722,11 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         if cache.get('user_page'):
             self.success_url = cache.get('user_page')
         return super(UserUpdateView, self).post(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class UserDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):

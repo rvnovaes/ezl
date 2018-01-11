@@ -20,7 +20,7 @@ from allauth.utils import build_absolute_uri
 
 from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType, Office
-from core.utils import filter_valid_choice_form
+from core.utils import filter_valid_choice_form, get_office_field
 from core.widgets import MDModelSelect2
 from lawsuit.forms import BaseForm
 
@@ -294,6 +294,11 @@ class UserUpdateForm(UserChangeForm):
         model = User
         fields = ['first_name', 'last_name', 'username', 'email', 'password',
                   'groups', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request, profile=kwargs['instance'])
 
 
 class ResetPasswordFormMixin(forms.Form):

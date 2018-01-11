@@ -236,12 +236,23 @@ class Office(AbstractPerson):
 
 class OfficeMixin(models.Model):
     office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=False,
-                                   null=False,
-                                   related_name='%(class)s_office',
-                                   verbose_name='Escritório')
+                               null=False,
+                               related_name='%(class)s_office',
+                               verbose_name='Escritório')
 
     class Meta:
         abstract = True
+
+
+class DefaultOffice(OfficeMixin, Audit):
+    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+                                     blank=False, null=False,
+                                     verbose_name='Usuário do sistema')
+
+    class Meta:
+        verbose_name = 'Escritório Padrão'
+        verbose_name_plural = 'Escritórios Padrão'
+
 
 class Invite(Audit):
     person = models.ForeignKey(Person, blank=False, null=False,
