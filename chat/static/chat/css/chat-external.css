@@ -4,6 +4,7 @@
     margin: 0;
     padding: 0;
 }
+
 .panel.panel-primary.chat {
     position: fixed;
     right: 10px;
@@ -74,4 +75,20 @@
 
 #btn-input {
     font-size: 14px;
+}
+
+#btn-chat-toggle {
+    background-color: #5bc0de;
+    border-color: #46b8da;
+    outline: none;
+    position: fixed;
+    bottom: 23px;
+    left: 95%;
+    z-index: 999;
+}
+
+@media screen and (max-width: 1024px) {
+    #btn-chat-toggle {
+        left: 92%;
+    }
 }
