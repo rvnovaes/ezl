@@ -20,13 +20,6 @@ def ws_connect(message):
     else:
         message.reply_channel.send({"close": True})
 
-
-@channel_session_user_from_http
-def ws_connect_count(message):
-    message.reply_channel.send({'accept': True})
-    Group('count').add(message.reply_channel)
-
-
 @channel_session_user
 def ws_message(message):
     try:
