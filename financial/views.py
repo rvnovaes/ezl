@@ -80,7 +80,6 @@ class CostCenterAutocomplete(LoginRequiredMixin,
 
 class ServicePriceTableListView(LoginRequiredMixin, SingleTableViewMixin):
     model = ServicePriceTable
-    queryset = model.objects.get_queryset(office=2)
     table_class = ServicePriceTableTable
     ordering = ('correspondent', )
     paginate_by = 30

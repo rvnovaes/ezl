@@ -49,7 +49,7 @@ class OfficeManager(models.Manager):
     def get_queryset(self, office=False):
         res = super().get_queryset()
         if office:
-            res = super().get_queryset().filter(office__id=office)
+            res = super().get_queryset().filter(office__id__in=office)
         return res
 
     def get_by_natural_key(self, cpf_cnpj):

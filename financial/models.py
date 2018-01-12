@@ -12,6 +12,8 @@ class CostCenter(Audit, LegacyCode, OfficeMixin):
         unique=True
     )
 
+    objects = OfficeManager()
+
     def __str__(self):
         return self.name
 
