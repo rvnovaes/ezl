@@ -18,16 +18,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='task',
-            name='acceptance_service_date',
-            field=models.DateTimeField(null=True, verbose_name='Data de Aceitação pelo Contratante'),
-        ),
-        migrations.AddField(
-            model_name='task',
-            name='refused_service_date',
-            field=models.DateTimeField(null=True, verbose_name='Data de Recusa pelo Contratante'),
-        ),
-        migrations.AddField(
-            model_name='task',
             name='requested_date',
             field=models.DateTimeField(null=True, verbose_name='Data de Solicitação'),
         ),

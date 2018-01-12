@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
 from core.views import ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin, \
-    CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete
+    CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave
 from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView
 
