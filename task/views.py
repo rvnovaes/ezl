@@ -562,6 +562,12 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
                 .add(Q(blocked_payment_dynamic_query), Q.AND)\
                 .add(Q(finished_dynamic_query), Q.AND)
 
+            filtro = str(person_dynamic_query)
+            # print('o filtro e:',filtro)
+            pesquisa = person_dynamic_query.__dict__
+            # teste = eval(filtro)
+            # print('o dict e:', pesquisa)
+
             query_set = DashboardViewModel.objects.filter(person_dynamic_query)
 
         return query_set, task_filter

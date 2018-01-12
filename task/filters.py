@@ -5,7 +5,7 @@ from core.widgets import MDCheckboxInput, MDDateTimeRangeFilter, MDModelSelect2
 from core.utils import filter_valid_choice_form
 from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ
-from task.models import TypeTask
+from task.models import TypeTask,Filter
 from .models import Task, DashboardViewModel
 
 
@@ -80,6 +80,9 @@ class TaskFilter(FilterSet):
     blocked_payment_in = MDDateTimeRangeFilter(name='blocked_payment_in', label="Glosadas entre:")
     finished_in = MDDateTimeRangeFilter(name='finished_in', label="Finalizadas entre:")
 
+    custom_filter = ModelChoiceFilter(queryset=filter_valid_choice_form(Filter.objects.all()),
+                                              label="")
+    custom_filter_name = CharFilter(label=u"Nome do Filtro*")
     class Meta:
         model = DashboardViewModel
         fields = []

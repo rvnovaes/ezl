@@ -11,38 +11,52 @@
 
 {% block js_head %}
     <!-- Compiled and minified JavaScript -->
-            <script src="{% static "libs/jquery-3.2.17/jquery.min.js" %}"></script>
-            <script src="{% static "js/utils.js" %}"></script>
-            <script src="{% static "js/modal.js" %}"></script>
-            <script src="{% static "js/table-tr-link.js" %}"></script>
-            <script src="{% static "js/pagination-fixed.js" %}"></script>
-            <script src="{% static "chat/js/chat.js" %}"></script>
-            <script src="{% static "js/masks.js" %}"></script>
-            <script src="{% static "libs/bootstrap-3.3.7/js/bootstrap.min.js" %}"></script>
-            <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
+    <script src="{% static "libs/jquery-3.2.17/jquery.min.js" %}"></script>
+    <script src="{% static "js/utils.js" %}"></script>
+    <script src="{% static "js/modal.js" %}"></script>
+    <script src="{% static "js/table-tr-link.js" %}"></script>
+    <script src="{% static "js/pagination-fixed.js" %}"></script>
+    <script src="{% static "chat/js/chat.js" %}"></script>
+    <script src="{% static "js/masks.js" %}"></script>
+    <script src="{% static "libs/bootstrap-3.3.7/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
     <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.js" %}"></script>
-            <script src="{% static "libs/bootstrap-material-design-0.5.10/js/ripples.min.js" %}"></script>
-            <script src="{% static "libs/bootstrap-ajax-typeahead/js/bootstrap-typeahead.min.js" %}"></script>
-            <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
-            <script src="{% static "js/dashboard.js" %}"></script>
-            <script src="{% static "js/widget_toast.js" %}"></script>
-            <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
+    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/ripples.min.js" %}"></script>
+    <script src="{% static "libs/bootstrap-ajax-typeahead/js/bootstrap-typeahead.min.js" %}"></script>
+    <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
+    <script src="{% static "js/dashboard.js" %}"></script>
+    <script src="{% static "js/widget_toast.js" %}"></script>
+    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
 {% endblock js_head %}
 
 {% block content %}
-{% load core_filters %}
+    {% load core_filters %}
     {% include 'core/widgets/messages.html' %}
 
+    <script>
+        function resetForm() {
+            console.log('xhwfou')
+            $('#filter-form').reset();
+        }
 
+    </script>
+    <form method="get" class="filter-form" id="filter-form">
+        {% csrf_token %}
+        <div class="panel panel-primary">
+            <div class="panel-heading " data-toggle="collapse" data-target="#filterCollapse">
+                <div class="col s12 m12 row">
+                    <div class="panel-title">
+                        <i class="material-icons">filter_list</i> Filtrar providências
+                        <div class="select-field col s4"
+                             id="{{ filter.form.custom_filter.id_for_label }}_container">
+                            <label for="{{ filter.form.custom_filter.id_for_label }}">{{ filter.form.custom_filter.label }}</label>
+                            {{ filter.form.custom_filter }}
+                        </div>
 
-    <div class="panel panel-primary">
-        <div class="panel-heading " data-toggle="collapse" data-target="#filterCollapse">
-            <h3 class="panel-title"><i class="material-icons">filter_list</i> Filtrar
-                providências
-            </h3>
-        </div>
-        <form method="get" class="filter-form">
-            {% csrf_token %}
+                    </div>
+                </div>
+            </div>
+
             <div id="filterCollapse" class="panel-body panel-collapse collapse">
                 <fieldset>
                     <div class="layout-row row">
@@ -55,23 +69,26 @@
                             </div>
                         </div>
                         <div class="col s12 m6">
-                            <label for="{{ filter.form.court_district.id_for_label }}" style="position: relative;top: 0px;" id="city_label">
+                            <label for="{{ filter.form.court_district.id_for_label }}"
+                                   style="position: relative;top: 0px;" id="city_label">
                                 {{ filter.form.court_district.label }}</label>
                             {{ filter.form.court_district }}
                         </div>
                     </div>
                     <div class="layout-row row">
-                         <div class="col s12 m4">
+                        <div class="col s12 m4">
                             <div class="row">
-                                <div class="select-field col s12" id="{{ filter.form.type_task.id_for_label }}_container">
+                                <div class="select-field col s12"
+                                     id="{{ filter.form.type_task.id_for_label }}_container">
                                     <label for="{{ filter.form.type_task.id_for_label }}">{{ filter.form.type_task.label }}</label>
                                     {{ filter.form.type_task }}
                                 </div>
                             </div>
-                         </div>
+                        </div>
                         <div class="col s12 m4">
                             <div class="row">
-                                <div class="select-field col s12" id="{{ filter.form.cost_center.id_for_label }}_container">
+                                <div class="select-field col s12"
+                                     id="{{ filter.form.cost_center.id_for_label }}_container">
                                     <label for="{{ filter.form.cost_center.id_for_label }}">{{ filter.form.cost_center.label }}</label>
                                     {{ filter.form.cost_center }}
                                 </div>
@@ -89,7 +106,8 @@
                     <div class="layout-row row">
                         <div class="col s12 m4">
                             <div class="row">
-                                <div class="input-field col s12 required" id="{{ filter.form.folder_number.id_for_label }}_container">
+                                <div class="input-field col s12 required"
+                                     id="{{ filter.form.folder_number.id_for_label }}_container">
                                     <label for="{{ filter.form.folder_number.id_for_label }}">{{ filter.form.folder_number.label }}</label>
                                     {{ filter.form.folder_number }}
                                 </div>
@@ -97,7 +115,8 @@
                         </div>
                         <div class="col s12 m4">
                             <div class="row">
-                                <div class="input-field col s12 required" id="{{ filter.form.law_suit_number.id_for_label }}_container">
+                                <div class="input-field col s12 required"
+                                     id="{{ filter.form.law_suit_number.id_for_label }}_container">
                                     <label for="{{ filter.form.law_suit_number.id_for_label }}">{{ filter.form.law_suit_number.label }}</label>
                                     {{ filter.form.law_suit_number }}
                                 </div>
@@ -105,7 +124,8 @@
                         </div>
                         <div class="col s12 m4">
                             <div class="row">
-                                <div class="input-field col s12 required" id="{{ filter.form.task_number.id_for_label }}_container">
+                                <div class="input-field col s12 required"
+                                     id="{{ filter.form.task_number.id_for_label }}_container">
                                     <label for="{{ filter.form.task_number.id_for_label }}">{{ filter.form.task_number.label }}</label>
                                     {{ filter.form.task_number }}
                                 </div>
@@ -114,17 +134,20 @@
                     </div>
                     <div class="layout-row row">
                         <div class="col s12 m4">
-                            <label for="{{ filter.form.person_executed_by.id_for_label }}" style="position: relative;top: 0px;" id="person_executed_by_label">
+                            <label for="{{ filter.form.person_executed_by.id_for_label }}"
+                                   style="position: relative;top: 0px;" id="person_executed_by_label">
                                 {{ filter.form.person_executed_by.label }}</label>
                             {{ filter.form.person_executed_by }}
                         </div>
                         <div class="col s12 m4">
-                            <label for="{{ filter.form.person_asked_by.id_for_label }}" style="position: relative;top: 0px;" id="person_asked_by_label">
+                            <label for="{{ filter.form.person_asked_by.id_for_label }}"
+                                   style="position: relative;top: 0px;" id="person_asked_by_label">
                                 {{ filter.form.person_asked_by.label }}</label>
                             {{ filter.form.person_asked_by }}
                         </div>
                         <div class="col s12 m4">
-                            <label for="{{ filter.form.person_distributed_by.id_for_label }}" style="position: relative;top: 0px;" id="person_distributed_by_label">
+                            <label for="{{ filter.form.person_distributed_by.id_for_label }}"
+                                   style="position: relative;top: 0px;" id="person_distributed_by_label">
                                 {{ filter.form.person_distributed_by.label }}</label>
                             {{ filter.form.person_distributed_by }}
                         </div>
@@ -133,7 +156,7 @@
                         <div class="input-field col s12 m6">
                             <div class="form-group">
                                 <span class="row s12 m12">
-                                   <label>Solicitadas entre:</label><br />
+                                   <label>Solicitadas entre:</label><br/>
                                 </span>
                                 {{ filter.form.requested_in }}
                             </div>
@@ -141,7 +164,7 @@
                         <div class="input-field col s12 m6">
                             <div class="form-group">
                                 <span class="row s12 m12">
-                                   <label>Aceitas pelo Service entre:</label><br />
+                                   <label>Aceitas pelo Service entre:</label><br/>
                                 </span>
                                 {{ filter.form.accepted_service_in }}
                             </div>
@@ -151,7 +174,7 @@
                         <div class="input-field col s12 m6">
                             <div class="form-group">
                                 <span class="row s12 m12">
-                                   <label>Recusadas pelo Service entre:</label><br />
+                                   <label>Recusadas pelo Service entre:</label><br/>
                                 </span>
                                 {{ filter.form.refused_service_in }}
                             </div>
@@ -159,7 +182,7 @@
                         <div class="input-field col s12 m6">
                             <div class="form-group">
                                 <span class="row s12 m12">
-                                   <label>Abertas entre:</label><br />
+                                   <label>Abertas entre:</label><br/>
                                 </span>
                                 {{ filter.form.open_in }}
                             </div>
@@ -169,7 +192,7 @@
                         <div class="input-field col s12 m6">
                             <div class="form-group">
                                 <span class="row s12 m12">
-                                   <label>Aceitas entre:</label><br />
+                                   <label>Aceitas entre:</label><br/>
                                 </span>
                                 {{ filter.form.accepted_in }}
                             </div>
@@ -177,7 +200,7 @@
                         <div class="input-field col s12 m6">
                             <div class="form-group">
                                 <span class="row s12 m12">
-                                   <label>ARecusadas entre:</label><br />
+                                   <label>ARecusadas entre:</label><br/>
                                 </span>
                                 {{ filter.form.refused_in }}
                             </div>
@@ -187,7 +210,7 @@
                         <div class="input-field col s12 m6">
                             <div class="form-group">
                                 <span class="row s12 m12">
-                                   <label>Retornadas entre:</label><br />
+                                   <label>Retornadas entre:</label><br/>
                                 </span>
                                 {{ filter.form.return_in }}
                             </div>
@@ -195,7 +218,7 @@
                         <div class="input-field col s12 m6">
                             <div class="form-group">
                                 <span class="row s12 m12">
-                                   <label>Cumpridas entre:</label><br />
+                                   <label>Cumpridas entre:</label><br/>
                                 </span>
                                 {{ filter.form.done_in }}
                             </div>
@@ -205,7 +228,7 @@
                         <div class="input-field col s12 m6">
                             <div class="form-group">
                                 <span class="row s12 m12">
-                                   <label>Glosadas entre:</label><br />
+                                   <label>Glosadas entre:</label><br/>
                                 </span>
                                 {{ filter.form.blocked_payment_in }}
                             </div>
@@ -213,7 +236,7 @@
                         <div class="input-field col s12 m6">
                             <div class="form-group">
                                 <span class="row s12 m12">
-                                   <label>Finalizadas entre:</label><br />
+                                   <label>Finalizadas entre:</label><br/>
                                 </span>
                                 {{ filter.form.finished_in }}
                             </div>
@@ -223,13 +246,57 @@
                 <br>
                 <br>
                 <div class="footer text-right">
-                    <button type="submit" class="btn btn-sm btn-primary btn-raised">
+
+                    <span onclick="$('#saveFilter').show();" class="btn btn-sm btn-primary btn-raised">
+                        <i class="material-icons">save</i>Salvar
+                    </span>
+                    <span onclick="resetForm()" class="btn btn-sm btn-primary btn-raised">
+                        <i class="material-icons">clear</i>Limpar
+                    </span>
+                    <button class="btn btn-sm btn-primary btn-raised">
                         <i class="material-icons">search</i>Filtrar
                     </button>
                 </div>
             </div>
-        </form>
-    </div>
+
+        </div>
+        <!-- Modal -->
+        <div id="saveFilter" class="modal">
+            <div class="modal-dialog">
+                <div class="modal-content ">
+                    <div id="modalHeader">
+                        <h4 class="panel-title text-primary text-center">
+                            <i id="icon" class="material-icons ">save</i>
+                            <b> Salvar filtro </b></h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group" style="margin: auto">
+                           <div class="input-field col s8 required"
+                                     id="{{ filter.form.custom_filter_name.id_for_label }}_container">
+                                    <label for="{{ filter.form.custom_filter_name.id_for_label }}">{{ filter.form.custom_filter_name.label }}</label>
+                                    {{ filter.form.custom_filter_name }}
+                                </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="text-center">
+                            <span
+                                    {#                                    type="submit"#}
+                                    {#                                    onclick="beforeSubmit()"#}
+                                    style="width: 95px!important;"
+                                    class="btn btn-sm btn-raised btn-primary">Salvar
+                            </span>
+                            <span style="width: 95px!important;"
+                                    class="btn btn-sm btn-raised btn-default"
+                                    data-dismiss="modal">
+                                Cancelar
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
     {{ filter.form.media }}
     {% block table %}
         <div class="panel panel-primary">
@@ -297,7 +364,7 @@
     <script src="{% static "js/jquery-2.1.1.min.js" %}"></script>
     {% include 'material/includes/material_js.html' %}
     <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
-{#    Apesar de repetidos, os scripts a seguir são necessário para renderização do form #}
+    {#    Apesar de repetidos, os scripts a seguir são necessário para renderização do form #}
     <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
     <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
