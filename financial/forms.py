@@ -86,18 +86,20 @@ class ServicePriceTableForm(BaseModelForm):
     type_task = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(TypeTask.objects.all().order_by('name')),
         empty_label='',
-        required=False,
+        required=True,
         label=u"Tipo de Serviço",
     )
 
-    value = forms.CharField(label="Valor", widget=forms.TextInput(attrs={'mask': 'money'}))
+    value = forms.CharField(label="Valor",
+                            required=False, # O valor pode ser 0.00 porque os correspondentes internos não cobram para fazer serviço
+                            widget=forms.TextInput(attrs={'mask': 'money'}))
 
     class Meta:
         model = ServicePriceTable
         fields = ('type_task', 'court_district', 'state', 'client', 'correspondent', 'value')
 
     def clean_value(self):
-        value = self.cleaned_data['value']
+        value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'
         value = value.replace('.', '')
         value = value.replace(',', '.')
         return float(value)

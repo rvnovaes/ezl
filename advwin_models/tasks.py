@@ -288,6 +288,22 @@ def export_task_history(task_history_id, task_history=None, execute=True):
                 task.person_executed_by.legal_name),
         }
         return insert_advwin_history(task_history, values, execute)
+    elif task_history.status == TaskStatus.OPEN.value:
+        values = {
+            'ident_agenda': task.legacy_code,
+            'codigo_adv_solicitante': task.person_asked_by.legacy_code,
+            'codigo_adv_origem': task.person_distributed_by.legacy_code,
+            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'SubStatus': 30,
+            'status': 0,
+            'data_operacao': timezone.localtime(task.delegation_date),
+            'justificativa': task_history.notes,
+            'usuario': username,
+            'descricao': 'Solicitada ao correspondente ('+task.person_executed_by.auth_user.username +
+                         ') por BackOffice: {}'.format(
+                task.person_distributed_by.legal_name),
+        }
+        return insert_advwin_history(task_history, values, execute)
 
 
 def update_advwin_task(task, values, execute=True):
@@ -457,6 +473,18 @@ def export_task(task_id, task=None, execute=True):
             'Data_backoffice': timezone.localtime(task.refused_service_date),
             'envio_alerta': 0,
             'Obs': get_task_observation(task, 'Recusada por Back Office', 'refused_service_date'),
+        }
+
+        return update_advwin_task(task, values, execute)
+    elif task.task_status == TaskStatus.OPEN.value:
+
+        values = {
+            'SubStatus': 30,
+            'Advogado': task.person_executed_by.legacy_code,
+            'Advogado_or': task.person_distributed_by.legacy_code,
+            'prazo_lido': 0,
+            'Data_delegacao': task.delegation_date,
+            'Obs': get_task_observation(task, '*** Ordem de Serviço delegada para:' + task.person_executed_by.auth_user.username, 'acceptance_service_date'),
         }
 
         return update_advwin_task(task, values, execute)

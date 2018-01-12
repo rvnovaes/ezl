@@ -17,7 +17,7 @@
                         $(function () {
                             $("input[name=execution_date]").attr({'required': true,
                                 'placeholder': 'Data de Cumprimento'});
-                    $("input[name=amount]").attr({'required': true,
+                            $("input[name=amount]").attr({'required': true,
                                                   'placeholder': 'Valor'});
                         });
 
@@ -35,6 +35,10 @@
                         if ($('input[name=servicepricetable_id]').val() == "") {
                             e.preventDefault();
                             showToast('error', 'Favor selecionar um correspondente', '', 5000, true);
+                        }
+                        if ($('input[name=amount]').val() == "") {
+                            e.preventDefault();
+                            showToast('error', 'Favor selecionar um valor para a OS', '', 5000, true);
                         }
                     });
                 }
@@ -84,7 +88,7 @@
 
                             var notes = $('textarea[id=notes_id]');
                             notes.removeAttr('required');
-                    ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN', 'REFUSED_SERVICE'].forEach(function (status) {
+                            ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN', 'REFUSED_SERVICE'].forEach(function (status) {
                                 if (task_status === status) {
                                     notes.attr('required', true).change(function () {
                                         notes.val(notes.val().trim())
@@ -92,18 +96,18 @@
                                 }
                             });
 
-                    {# Apenas estes status devem possuir amount como required, alem de nao poder 0 #}
+                            {# Apenas estes status devem possuir amount como required, alem de nao poder 0 #}
+                            var amount = $('input[id=id_amount]');
+                            var servicepricetable_id = $('input[name=servicepricetable_id]');
+                            amount.removeAttr('required');
+                            ['OPEN'].forEach(function (status) {
+                                console.log(value.id)
+                                if (task_status === status) {
+                                    {#amount.attr('required', true).change()#}
+                                    servicepricetable_id.attr('required', true).change()
+                                }
+                            });
 
-                    var amount = $('input[id=id_amount]');
-                    var servicepricetable_id = $('input[name=servicepricetable_id]');
-                    amount.removeAttr('required');
-                    ['OPEN'].forEach(function (status) {
-                        console.log(value.id)
-                        if (task_status === status) {
-                            amount.attr('required', true).change()
-                            servicepricetable_id.attr('required', true).change()
-                        }
-                    });
                             return true;
                         }
                     </script>

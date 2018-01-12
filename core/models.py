@@ -157,7 +157,8 @@ class Person(Audit, LegacyCode):
                                      verbose_name='Usuário do sistema')
     is_customer = models.BooleanField(null=False, default=False, verbose_name='É Cliente?')
     is_supplier = models.BooleanField(null=False, default=False, verbose_name='É Fornecedor?')
-    import_from_legacy = models.BooleanField(null=False, default=False, verbose_name='Importar OSs do sistema de origem para esse cliente')
+    import_from_legacy = models.BooleanField(null=False, default=False,
+                                             verbose_name='Importar OSs do sistema de origem para esse cliente',)
 
     @property
     def cpf(self):

@@ -279,8 +279,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         if form.instance.task_status == TaskStatus.REFUSED_SERVICE:
             form.instance.refused_service_date = timezone.now()
         if form.instance.task_status == TaskStatus.OPEN:
-            form.instance.amount = (form.cleaned_data['amount']
-                                    if form.cleaned_data['amount'] else None)
+            form.instance.amount = form.cleaned_data['amount']
             servicepricetable_id = self.request.POST['servicepricetable_id']
             servicepricetable = ServicePriceTable.objects.get(id=servicepricetable_id)
             form.instance.person_executed_by = (servicepricetable.correspondent

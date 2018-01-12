@@ -1,5 +1,6 @@
 from django.db import models
 from core.models import Audit, LegacyCode
+from decimal import Decimal
 
 
 class CostCenter(Audit, LegacyCode):
@@ -64,7 +65,9 @@ class ServicePriceTable(models.Model):
     value = models.DecimalField(
         max_digits=9,
         decimal_places=2,
-        verbose_name="Valor")
+        verbose_name="Valor",
+        default=Decimal('0.00')
+    )
 
     def __str__(self):
         return self.correspondent.name if self.correspondent else ""
