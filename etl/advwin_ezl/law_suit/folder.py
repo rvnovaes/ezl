@@ -4,7 +4,7 @@ from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from lawsuit.models import Folder
-from etl.utils import get_message_log_default, save_error_log, get_users_to_import
+from etl.utils import get_message_log_default, save_error_log, get_clients_to_import
 from financial.models import CostCenter
 
 
@@ -28,26 +28,15 @@ class FolderETL(GenericETL):
               (p.Status = 'Ativa' OR p.Status = 'Especial') AND
               p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '' AND
               p.Cliente IS NOT NULL AND p.Cliente <> '' AND
-              (
-                (
-                    ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                    (a.SubStatus = 80))
-                    AND 
-                    a.Advogado IN ('{}')
-                )
-                OR
-                (
-                    (a.SubStatus = 10) OR 
-                    (a.SubStatus = 11) OR 
-                    (a.SubStatus = 20)
-                )
-              ) AND a.Status = '0' -- STATUS ATIVO
+              a.SubStatus = 10 AND
+              p.Cliente IN ('{cliente}') AND 
+              a.Status = '0' -- STATUS ATIVO
                   """
     has_status = True
 
     @property
     def import_query(self):
-        return self._import_query.format("','".join(get_users_to_import()))
+        return self._import_query.format(cliente="','".join(get_clients_to_import()))
 
     @validate_import
     def config_import(self, rows, user, rows_count, log=False):

@@ -404,6 +404,12 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
         })
         return super().get_context_data(**kwargs)
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        user = User.objects.get(id=self.request.user.id)
+        kw['is_superuser'] = user.is_superuser
+        return kw
+
     def get_success_url(self):
         return reverse('person_update', args=(self.object.id,))
 
@@ -438,6 +444,45 @@ class CorrespondentAutocomplete(autocomplete.Select2QuerySetView):
                 legal_name__unaccent__istartswith=self.q,
                 auth_user__groups__name=Person.CORRESPONDENT_GROUP
             )
+        return qs
+
+
+class CorrespondentAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        # if not self.request.user.is_authenticated():
+        #     return Person.objects.none()
+
+        qs = Person.objects.none()
+
+        if self.q:
+            qs = Person.objects.active().correspondents().filter(legal_name__unaccent__istartswith=self.q)
+        return qs
+
+
+class RequesterAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        # if not self.request.user.is_authenticated():
+        #     return Person.objects.none()
+
+        qs = Person.objects.none()
+
+        if self.q:
+            qs = Person.objects.active().requesters().filter(legal_name__unaccent__istartswith=self.q)
+        return qs
+
+
+class ServiceAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        # if not self.request.user.is_authenticated():
+        #     return Person.objects.none()
+
+        qs = Person.objects.none()
+
+        if self.q:
+            qs = Person.objects.active().services().filter(legal_name__unaccent__istartswith=self.q)
         return qs
 
 

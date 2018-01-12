@@ -53,12 +53,12 @@
                                             <img src="https://placehold.it/50/55C1E7/fff&text=OS"
                                                  alt="User Avatar" class="img-circle"/></div>
                                     </div>
-                                    <div class="col-sm-9 col-xs-9 sideBar-main">
+                                    <div class="col-sm-9 col-xs-9 sideBar-main" data-balloon-length="fit" data-balloon="{{ chat.description|default_if_none:'' }}"
+                                       data-balloon-pos="botton">
                                         <div class="row">
                                             <div class="col-sm-8 col-xs-8 sideBar-name">
-                                                <span class="name-meta">{{ chat.title }}</span>
+                                                <span class="name-meta" >{{ chat.title }}</span>
                                                 <br/>
-                                                <span class="time-meta pull-left">{{ chat.description|default_if_none:'' }}</span>
                                             </div>
                                             <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
                                                 <span class="time-meta pull-right">{{ chat.alter_date|time }}</span>

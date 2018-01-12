@@ -155,16 +155,10 @@ class PersonForm(BaseModelForm):
             required=True,
         )
 
-    layout = Layout(
-            Row('legal_name', 'name'),
-            Row('legal_type', 'cpf_cnpj'),
-            Row('is_lawyer', 'is_customer', 'is_supplier', 'is_active'),
-        )
-
     class Meta:
         model = Person
         fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj',
-                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active']
+                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active', 'import_from_legacy']
 
     def clean(self):
         cleaned_data = super().clean()
@@ -186,6 +180,21 @@ class PersonForm(BaseModelForm):
                 del cleaned_data['cpf_cnpj']
 
         return cleaned_data
+
+    def __init__(self, *args, **kwargs):
+        is_superuser = kwargs.pop('is_superuser', None)
+        super().__init__(*args, **kwargs)
+        if is_superuser:
+            self.layout = Layout(
+                Row('legal_name', 'name'),
+                Row('legal_type', 'cpf_cnpj'),
+                Row('is_lawyer', 'is_customer', 'is_supplier', 'is_active'),
+                Row('import_from_legacy'))
+        else:
+            self.layout = Layout(
+                Row('legal_name', 'name'),
+                Row('legal_type', 'cpf_cnpj'),
+                Row('is_lawyer', 'is_customer', 'is_supplier', 'is_active'))
 
 
 AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=1, max_num=1)

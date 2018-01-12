@@ -26,7 +26,7 @@ span {
 
 .app-one {
     background-color: #f7f7f7;
-    height: 80%;
+    height: 90%;
     overflow: hidden;
     margin: 0;
     padding: 0;
@@ -65,9 +65,9 @@ span {
 
 
 .heading {
-    padding: 10px 16px 10px 15px;
+    padding: 1px 16px 10px 15px;
     margin: 0;
-    height: 60px;
+    height: 70px;
     width: 100%;
     background-color: #eee;
     z-index: 1000;
@@ -313,7 +313,7 @@ span {
     background-size: cover;
     overflow-y: auto;
     border: 1px solid #f7f7f7;
-    height: calc(100% - 120px);
+    height: calc(100% - 140px);
 }
 .message-previous {
     margin : 0 !important;
@@ -370,7 +370,7 @@ span {
 }
 
 .receiver {
-    width: auto !important;
+    width: 100%;
     padding: 4px 10px 7px !important;
     border-radius: 10px 10px 10px 0;
     background: #ffffff;
@@ -382,7 +382,7 @@ span {
 
 .sender {
     float: right;
-    width: auto !important;
+    width: 100%;
     background: #dcf8c6;
     border-radius: 10px 10px 0 10px;
     padding: 4px 10px 7px !important;
@@ -399,7 +399,7 @@ span {
     height: 60px;
     width: 100%;
     background-color: #f5f1ee;
-    /*padding: 10px 5px 10px 5px !important;*/
+    padding: 10px 5px 10px 5px !important;
     margin: 0 !important;
     z-index: 1000;
 }
@@ -576,4 +576,12 @@ span {
         padding: 5px 2px 5px 0 !important;
         font-size: 1.8em !important;
     }
+}
+
+.text-wrap {
+    word-wrap: break-word !important;
+}
+
+.heading-description {
+    color: #93918f;
 }

@@ -32,4 +32,14 @@ class Migration(migrations.Migration):
             name='chat',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='chat.Chat', verbose_name='Chat'),
         ),
+        migrations.AddField(
+            model_name='task',
+            name='requested_date',
+            field=models.DateTimeField(null=True, verbose_name='Data de Solicitação'),
+        ),
+        migrations.AlterField(
+            model_name='taskhistory',
+            name='status',
+            field=models.CharField(choices=[('A Cumprir', 'ACCEPTED'), ('Em Aberto', 'OPEN'), ('Retorno', 'RETURN'), ('Cumprida', 'DONE'), ('Recusada', 'REFUSED'), ('Glosada', 'BLOCKEDPAYMENT'), ('Finalizada', 'FINISHED'), ('Inválida', 'INVALID'), ('Erro no sistema de origem', 'ERROR')], max_length=30),
+        ),
     ]
