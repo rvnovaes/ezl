@@ -84,8 +84,7 @@ def get_office_field(request, profile=None):
     from django import forms
     if profile:
         queryset = profile.person.offices.all()
-        initial = DefaultOffice.objects.filter(auth_user=profile).first()
-        initial = initial.office
+        initial = DefaultOffice.objects.filter(auth_user=profile).first().office
     elif request.session.get('custom_session_user'):
         custom_session_user = list(request.session.get('custom_session_user').values())
         queryset = Office.objects.filter(pk=custom_session_user[0]['current_office'])

@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView
 from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
                            DELETE_SUCCESS_MESSAGE)
+from core.models import Office
 from core.views import (AuditFormMixin, MultiDeleteViewMixin,
                         SingleTableViewMixin)
 from .forms import CostCenterForm, ServicePriceTableForm
@@ -79,6 +80,7 @@ class CostCenterAutocomplete(LoginRequiredMixin,
 
 class ServicePriceTableListView(LoginRequiredMixin, SingleTableViewMixin):
     model = ServicePriceTable
+    queryset = model.objects.get_queryset(office=2)
     table_class = ServicePriceTableTable
     ordering = ('correspondent', )
     paginate_by = 30

@@ -305,17 +305,32 @@ class SingleTableViewMixin(SingleTableView):
             pass
         context['form_name'] = self.model._meta.verbose_name
         context['form_name_plural'] = self.model._meta.verbose_name_plural
+        custom_session_user = self.request.session.get('custom_session_user')
+
+        office = False
+        if custom_session_user and custom_session_user.get(str(self.request.user.pk)):
+            current_office_session = custom_session_user.get(str(self.request.user.pk))
+            office = Office.objects.filter(pk=int(current_office_session.get(
+                'current_office'))).first()
+
         generic_search = GenericSearchFormat(self.request, self.model, self.model._meta.fields)
-        args = generic_search.despatch()
+        args = generic_search.despatch(office=office)
         if args:
             table = eval(args)
         else:
+            qs = self.model.objects.get_queryset()
+            try:
+                office_field = self.model._meta.get_field('office')
+                if office:
+                    qs = self.model.objects.get_queryset(office=office.id)
+            except:
+                pass
             if kwargs.get('remove_invalid'):
                 qs = self.filter_queryset(
-                    self.model.objects.filter(~Q(pk=kwargs.get('remove_invalid'))))
+                    qs.filter(~Q(pk=kwargs.get('remove_invalid'))))
                 table = self.table_class(qs)
             else:
-                qs = self.filter_queryset(self.model.objects.all())
+                qs = self.filter_queryset(qs)
                 table = self.table_class(qs)
         RequestConfig(self.request, paginate={'per_page': self.paginate_by}).configure(table)
         context['table'] = table

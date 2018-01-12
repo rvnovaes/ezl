@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import Audit, LegacyCode, OfficeMixin
+from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager
 
 
 class CostCenter(Audit, LegacyCode, OfficeMixin):
@@ -65,6 +65,8 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         max_digits=9,
         decimal_places=2,
         verbose_name="Valor")
+
+    objects = OfficeManager()
 
     def __str__(self):
         return self.correspondent.name if self.correspondent else ""

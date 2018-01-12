@@ -73,7 +73,7 @@ class GenericSearchFormat(object):
             'OneToOneField': GenericSearchForeignKey(self.model),
             'BooleanField': GenericSearchBooleanField()}
 
-    def despatch(self):
+    def despatch(self, office=False):
         params = []
 
         if not any([self.params, params]):
@@ -83,7 +83,15 @@ class GenericSearchFormat(object):
             self.params.pop('is_active')
             self.model_type_fields.remove({'type': 'BooleanField', 'name': 'is_active'})
 
-        search = "self.table_class(self.model.objects.filter({params}))"
+        search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
+
+        try:
+            office_field = self.model._meta.get_field('office')
+            if office:
+                search = "self.table_class(self.model.objects.get_queryset(office=office.id).filter({params}))"
+        except:
+            pass
+
         for field in self.model_type_fields:
             if field.get('type') in ['DateField', 'DateTimeField']:
                 value = self.params.get(field.get('name') + '_ini'), self.params.get(field.get('name') + '_fim')

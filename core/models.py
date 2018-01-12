@@ -45,6 +45,17 @@ class AuditCreate(models.Model):
         abstract = True
 
 
+class OfficeManager(models.Manager):
+    def get_queryset(self, office=False):
+        res = super().get_queryset()
+        if office:
+            res = super().get_queryset().filter(office__id=office)
+        return res
+
+    def get_by_natural_key(self, cpf_cnpj):
+        return self.get(persons__cpf_cnpj=cpf_cnpj)
+
+
 class AuditAlter(models.Model):
     # auto_now - toda vez que for salvo
     alter_date = models.DateTimeField('Atualizado em', auto_now=True, blank=True, null=True)
@@ -217,11 +228,6 @@ class Person(AbstractPerson):
         ordering = ['legal_name', 'name']
         verbose_name = 'Pessoa'
         verbose_name_plural = 'Pessoas'
-
-
-class OfficeManager(models.Manager):
-    def get_by_natural_key(self, cpf_cnpj):
-        return self.get(persons__cpf_cnpj=cpf_cnpj)
 
 
 class Office(AbstractPerson):
