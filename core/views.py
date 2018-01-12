@@ -816,6 +816,7 @@ class RegisterNewUser(CreateView):
         #Todo: Nao esta funcionando o login ao cadastrar
         return login(request)
 
+
 class CustomSession(View):
     def post(self, request, *args, **kwargs):
         """
@@ -830,9 +831,14 @@ class CustomSession(View):
             request.session['custom_session_user'] = {
                 self.request.user.pk: {'current_office': current_office}
             }
-            office = Office.objects.get(pk=int(current_office))
-            data['current_office_pk'] = office.pk
-            data['current_office_name'] = office.name
+            office = Office.objects.filter(pk=int(current_office)).first()
+            if office:
+                data['current_office_pk'] = office.pk
+                data['current_office_name'] = office.name
+            else:
+                request.session.modified = True
+                del request.session['custom_session_user']
+
         return JsonResponse(data)
 
     def get(self, request, *args, **kwargs):
@@ -841,14 +847,14 @@ class CustomSession(View):
         do escritorio atual do usuario
         """
         data = {}
-        # import pdb;pdb.set_trace()
         custom_session_user = request.session.get('custom_session_user')
         if custom_session_user and custom_session_user.get(str(request.user.pk)):
             current_office_session = custom_session_user.get(str(request.user.pk))
-            office = Office.objects.get(pk=int(current_office_session.get(
-                'current_office')))
-            data['current_office_pk'] = office.pk
-            data['current_office_name'] = office.name
+            office = Office.objects.filter(pk=int(current_office_session.get(
+                'current_office'))).first()
+            if office:
+                data['current_office_pk'] = office.pk
+                data['current_office_name'] = office.name
         else:
             default_office = DefaultOffice.objects.filter(auth_user=request.user).first()
             if default_office:

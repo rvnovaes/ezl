@@ -69,7 +69,9 @@
                             {% for office in request.user.person.offices.all %}
                                 <li onclick="updateSession('current_office', '{{office.pk}}', '{{csrf_token}}');"><a href="#">{{office.name}}</a></li>
                             {% endfor %}
-                            </ul>
+                            <li class="list-group-separator">&nbsp;</li>
+                            <li onclick="updateSession('current_office', '0', '{{csrf_token}}');"><a href="#">Todos</a></li>
+                           </ul>
                         </li>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"

@@ -19,7 +19,7 @@ $(document).ready(function(){
             }
         }
     })
-})
+});
 
 var updateSession = function(key, value, csrf_token){
     var data = {}
@@ -29,13 +29,19 @@ var updateSession = function(key, value, csrf_token){
         url: '/session/',
         data: data,
         success: function(response){
-                var current_office_name = response.current_office_name
-                var current_office_pk = response.current_office_pk
-                $('#current_office').text(response.current_office_name)
-                localStorage.setItem
+                if (response.current_office_name) {
+                    var current_office_name = response.current_office_name;
+                    var current_office_pk = response.current_office_pk;
+                    $('#current_office').text(response.current_office_name);
+                    localStorage.setItem
+                }else{
+                    $('#current_office').text('Todos');
+                    localStorage.clear();
+                }
+
             },
         beforeSend: function(xhr, settings){
             xhr.setRequestHeader('X-CSRFToken', csrf_token)
         }
     })
-}
+};
