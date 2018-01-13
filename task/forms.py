@@ -10,7 +10,7 @@ from core.models import Person
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimepicker, MDDatePicker
 from lawsuit.forms import BaseForm
-from task.models import Task, TypeTask
+from task.models import Task, TypeTask, Filter
 
 
 class TaskForm(BaseForm):
@@ -134,3 +134,14 @@ class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
         fields = ['name', 'survey_type', 'is_active']
+
+
+class FilterForm(BaseForm):
+    class Meta:
+        model = Filter
+        fields = ['name', 'description','query']
+
+    query = forms.CharField(required=False, initial='', label='Query',
+                                  widget=forms.Textarea(
+                                      attrs={'class': 'form-control',
+                                             'readonly':'readonly'}))

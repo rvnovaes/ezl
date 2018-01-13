@@ -344,10 +344,9 @@ class DashboardViewModel(Audit):
 
 
 class Filter(Audit):
-    auth_user = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, null=False, verbose_name='Usuário')
     name = models.TextField(verbose_name='Nome', blank=False, null=False, max_length=255)
     description = models.TextField(verbose_name='Descrição', blank=True, null=True)
-    query = models.TextField(verbose_name='query', blank=False, null=False)
+    query = models.TextField(verbose_name='query', blank=False, null=False                             )
 
     def __str__(self):
         return self.name
@@ -355,4 +354,4 @@ class Filter(Audit):
     class Meta:
         verbose_name = 'Filtro'
         verbose_name_plural = 'Filtros'
-        unique_together = (('auth_user', 'name'),)
+        unique_together = (('create_user', 'name'),)
