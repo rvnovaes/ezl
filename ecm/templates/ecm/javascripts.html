@@ -61,13 +61,11 @@
                 console.log("Request Failed: " + err);
             });
     }
-    $(document).on('ready', function() {
-        get_attachments();;
-    });
 
     $('#attachment-modal').on('shown.bs.modal', function () {
       console.log('modal show')
     });
+    get_attachments();
 
     function dropAttachment(id) {
         swal({

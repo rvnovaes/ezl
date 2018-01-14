@@ -1,5 +1,11 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% block css_head %}
+    {{ block.super }}
+    {% if object %}
+        {% include 'ecm/styles.html' %}
+    {% endif %}
+{% endblock %}
 {% block body %}
     {% if user.is_authenticated %}
         <div class="navbar navbar-default navbar-fixed-top">
@@ -79,6 +85,11 @@
             {% block content %}
                 {% include 'core/widgets/messages.html' %}
             {% endblock content %}
+            {% block attachment %}
+                {% if object %}
+                    {% include 'ecm/attachments.html' %}
+                {% endif %}
+            {% endblock attachment %}
         </div>
 
         <!-- Janela modal de logout -->
@@ -136,6 +147,10 @@
     {% else %}
         <!-- TODO: Se não for usar quando não tiver usuário logado, remover o else  -->.
     {% endif %}
+{% endblock %}
 
-
+{% block extrajs %}
+    {% if object %}
+        {% include 'ecm/javascripts.html' %}
+    {% endif %}
 {% endblock %}

@@ -23,10 +23,6 @@ class Attachment(AuditCreate, LegacyCode):
     object_id = models.PositiveSmallIntegerField(
         verbose_name="ID do Registro", db_index=True
     )
-    repr_name = models.CharField(
-        verbose_name="Nome Representativo", max_length=250,
-        help_text="Nome Representativo do Registro retornado através da função __str__ da Classe"
-    )
     file = models.FileField(
         verbose_name="Arquivo", upload_to=get_uploda_to
     )
@@ -38,5 +34,9 @@ class Attachment(AuditCreate, LegacyCode):
 
     @property
     def filename(self):
-        print('>>> *********', self.file.name)
         return os.path.basename(self.file.name)
+
+    def __str__(self):
+        return '{}/{}: {}'.format(
+            self.object_id, self.model_name, self.filename
+        )

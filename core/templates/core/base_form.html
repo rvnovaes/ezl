@@ -8,14 +8,13 @@
     <link rel="stylesheet" href="{% static "chosen/chosen.min.css" %}">
     <link rel="stylesheet" href="{% static "chosen/chosen-material-theme.min.css" %}">
     <link rel="stylesheet" href="{% static "libs/toastr/build/toastr.min.css" %}">
-    {% if object %}
-        {% include 'ecm/styles.html' %}
-    {% endif %}
 {% endblock css_head %}
 {% block js_head %}
     {{ block.super }}
 {% endblock js_head %}
 {% block extrajs%}
+    {{ block.super }}
+
     <script src="{% static "js/jquery-2.1.1.min.js" %}"></script>
     {% include 'material/includes/material_js.html' %}
     <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
@@ -23,9 +22,6 @@
     <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
     <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
-    {% if object %}
-        {% include 'ecm/javascripts.html' %}
-    {% endif %}
 {% endblock extrajs %}
 
 {% block content %}
@@ -137,7 +133,4 @@
 
         </div>
     </form>
-    {% if object %}
-        {% include 'ecm/attachments.html' %}
-    {% endif %}
 {% endblock content %}
