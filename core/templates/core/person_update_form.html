@@ -8,7 +8,7 @@
 {% block content %}
 
     {{ block.super }}
-
+<div class="content-block row">
     <form action="{% url 'address_delete' person_pk=object.pk %}" method="post">
     {% csrf_token %}
     <div class="row">
@@ -109,5 +109,5 @@
         </div>
     </div>
     </form>
-
+</div>
 {% endblock %}

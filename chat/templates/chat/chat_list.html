@@ -133,7 +133,13 @@
             };
 
             sendMessage = function () {
-                setLastMessage();
+                setLastMessage();"<div class='col-sm-12 message-main-" + messagePosition + "'>" +
+                    "<div class='" + messagePosition + "'>" +
+                    "<strong class='pull-left primary-font'>" + data.user + "</strong>" +
+                    "<div class='message-text'>" + data.text + "</div>" +
+                    "<span class='message-time pull-right'>" + formatDate(data.message_create_date) + "</span>" +
+                    "</div>" +
+                    "</div>";
                 var el = $("#" + box_id).find('#comment');
                 if (el.val().trim()) {
                     var data = JSON.stringify({

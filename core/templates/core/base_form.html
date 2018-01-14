@@ -1,8 +1,6 @@
 {% extends "inicial.html" %}
 
-{% load core_filters %}
-{% load material_form %}
-{% load staticfiles %}
+{% load core_filters material_form staticfiles ecm_tags %}
 
 {% block css_head %}
     {% include 'material/includes/material_css.html' %}
@@ -10,6 +8,9 @@
     <link rel="stylesheet" href="{% static "chosen/chosen.min.css" %}">
     <link rel="stylesheet" href="{% static "chosen/chosen-material-theme.min.css" %}">
     <link rel="stylesheet" href="{% static "libs/toastr/build/toastr.min.css" %}">
+    {% if object %}
+        {% include 'ecm/styles.html' %}
+    {% endif %}
 {% endblock css_head %}
 {% block js_head %}
     {{ block.super }}
@@ -22,6 +23,9 @@
     <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
     <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
+    {% if object %}
+        {% include 'ecm/javascripts.html' %}
+    {% endif %}
 {% endblock extrajs %}
 
 {% block content %}
@@ -100,15 +104,15 @@
                             {{ personaddress.management_form }}
                             {% for form in personaddress.forms %}
                                 {% if forloop.first %}
-        <div class="row">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h1 class="panel-title">
-                        Endereço
-                    </h1>
-                </div>
+                                <div class="row">
+                                    <div class="panel panel-primary">
+                                        <div class="panel-heading">
+                                            <h1 class="panel-title">
+                                                Endereço
+                                            </h1>
+                                        </div>
                                 {% endif %}
-                <div class="panel-body">
+                                <div class="panel-body">
                                 {% include 'core/address_base_form.html' %}
                             {% endfor %}
                         {% endif %}
@@ -132,7 +136,8 @@
             {% endblock %}
 
         </div>
-
     </form>
-
+    {% if object %}
+        {% include 'ecm/attachments.html' %}
+    {% endif %}
 {% endblock content %}

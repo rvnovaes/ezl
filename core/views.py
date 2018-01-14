@@ -37,7 +37,7 @@ from core.tables import PersonTable, UserTable, AddressTable
 from core.utils import login_log, logout_log
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task
-
+from ecm.forms import AttachmentForm
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
     model = abstractproperty()
@@ -190,6 +190,7 @@ class AuditFormMixin(LoginRequiredMixin, SuccessMessageMixin):
     object_list_url = None
 
     def get_context_data(self, **kwargs):
+        kwargs.update({'form_attachment': AttachmentForm})
         return super().get_context_data(object_list_url=self.get_object_list_url(), **kwargs)
 
     def get_object_list_url(self):
