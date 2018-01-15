@@ -744,3 +744,8 @@ class PasswordResetViewMixin(PasswordResetView, FormView):
     def form_valid(self, form):
         context = form.save(self.request)
         return render(self.request, 'account/password_reset_done.html', context)
+
+
+def home(request):
+    print('HOME ***')
+    return render(request, 'skeleton/base.html', {'page_title': 'Home'})

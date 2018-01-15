@@ -6,6 +6,7 @@ from django.views.generic import RedirectView
 from . import views
 
 urlpatterns = [
+    url(r'^home/', views.home, name='home'),
 
     url(r'city/autocomplete/$',
         login_required(views.CityAutoCompleteView.as_view()),
