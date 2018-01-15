@@ -1,12 +1,13 @@
-from django_filters import FilterSet, BooleanFilter, ModelChoiceFilter, NumberFilter, CharFilter
+from django.forms import Select
+from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter
 
 from core.models import Person, State
-from core.widgets import MDCheckboxInput, MDDateTimeRangeFilter, MDModelSelect2
 from core.utils import filter_valid_choice_form
+from core.widgets import MDDateTimeRangeFilter, MDModelSelect2
 from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ
-from task.models import TypeTask,Filter
-from .models import Task, DashboardViewModel
+from task.models import TypeTask, Filter
+from .models import DashboardViewModel
 
 
 class TaskFilter(FilterSet):
@@ -28,7 +29,7 @@ class TaskFilter(FilterSet):
     cost_center = ModelChoiceFilter(queryset=filter_valid_choice_form(CostCenter.objects.filter(is_active=True)),
                                     label="Setor")
     court = ModelChoiceFilter(queryset=filter_valid_choice_form(Organ.objects.filter(is_active=True)),
-                                    label="Órgão")
+                              label="Órgão")
     folder_number = NumberFilter(label=u"Número da Pasta")
     law_suit_number = CharFilter(label=u"Número do processo")
     task_number = NumberFilter(label=u"Número da OS")
@@ -39,10 +40,10 @@ class TaskFilter(FilterSet):
                                            required=False,
                                            widget=MDModelSelect2(url='correspondent_autocomplete',
                                                                  attrs={
-                                                                        'class': 'select-with-search material-ignore form-control',
-                                                                        'data-placeholder': '',
-                                                                        'data-label': 'Correspondente'
-                                                                       })
+                                                                     'class': 'select-with-search material-ignore form-control',
+                                                                     'data-placeholder': '',
+                                                                     'data-label': 'Correspondente'
+                                                                 })
                                            )
 
     person_asked_by = ModelChoiceFilter(queryset=Person.objects.filter(),
@@ -51,10 +52,10 @@ class TaskFilter(FilterSet):
                                         required=False,
                                         widget=MDModelSelect2(url='requester_autocomplete',
                                                               attrs={
-                                                                 'class': 'select-with-search material-ignore form-control',
-                                                                 'data-placeholder': '',
-                                                                 'data-label': 'Solicitante'
-                                                                    })
+                                                                  'class': 'select-with-search material-ignore form-control',
+                                                                  'data-placeholder': '',
+                                                                  'data-label': 'Solicitante'
+                                                              })
                                         )
 
     person_distributed_by = ModelChoiceFilter(queryset=Person.objects.filter(),
@@ -66,7 +67,7 @@ class TaskFilter(FilterSet):
                                                                         'class': 'select-with-search material-ignore form-control',
                                                                         'data-placeholder': '',
                                                                         'data-label': 'Contratante'
-                                                                          })
+                                                                    })
                                               )
 
     requested_in = MDDateTimeRangeFilter(name='requested_in', label=u"Solicitadas entre:")
@@ -81,8 +82,9 @@ class TaskFilter(FilterSet):
     finished_in = MDDateTimeRangeFilter(name='finished_in', label="Finalizadas entre:")
 
     custom_filter = ModelChoiceFilter(queryset=filter_valid_choice_form(Filter.objects.all()),
-                                              label="")
+                                      label="", widget=Select(attrs={'onchange': 'this.form.submit()'}))
     custom_filter_name = CharFilter(label=u"Nome do Filtro*")
+
     class Meta:
         model = DashboardViewModel
         fields = []

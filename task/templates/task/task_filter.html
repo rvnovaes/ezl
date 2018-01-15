@@ -33,30 +33,22 @@
     {% load core_filters %}
     {% include 'core/widgets/messages.html' %}
 
-    <script>
-        function resetForm() {
-            console.log('xhwfou')
-            $('#filter-form').reset();
-        }
 
-    </script>
     <form method="get" class="filter-form" id="filter-form">
         {% csrf_token %}
         <div class="panel panel-primary">
             <div class="panel-heading " data-toggle="collapse" data-target="#filterCollapse">
-                <div class="col s12 m12 row">
-                    <div class="panel-title">
+                <div class="layout-row row">
+                    <div class="col s10 m10">
                         <i class="material-icons">filter_list</i> Filtrar providências
-                        <div class="select-field col s4"
-                             id="{{ filter.form.custom_filter.id_for_label }}_container">
-                            <label for="{{ filter.form.custom_filter.id_for_label }}">{{ filter.form.custom_filter.label }}</label>
-                            {{ filter.form.custom_filter }}
-                        </div>
-
+                    </div>
+                    <div class="select-field col s2 m2"
+                         id="{{ filter.form.custom_filter.id_for_label }}_container">
+                        <label for="{{ filter.form.custom_filter.id_for_label }}">{{ filter.form.custom_filter.label }}</label>
+                        {{ filter.form.custom_filter }}
                     </div>
                 </div>
             </div>
-
             <div id="filterCollapse" class="panel-body panel-collapse collapse">
                 <fieldset>
                     <div class="layout-row row">
@@ -250,7 +242,7 @@
                     <span onclick="$('#saveFilter').show();" class="btn btn-sm btn-primary btn-raised">
                         <i class="material-icons">save</i>Salvar
                     </span>
-                    <span onclick="resetForm()" class="btn btn-sm btn-primary btn-raised">
+                    <span onclick="$('#filter-form').form.reset()" class="btn btn-sm btn-primary btn-raised">
                         <i class="material-icons">clear</i>Limpar
                     </span>
                     <button class="btn btn-sm btn-primary btn-raised">
@@ -267,25 +259,25 @@
                     <div id="modalHeader">
                         <h4 class="panel-title text-primary text-center">
                             <i id="icon" class="material-icons ">save</i>
-                            <b> Salvar filtro </b></h4>
+                            <b> Novo Filtro </b></h4>
                     </div>
-                    <div class="modal-body">
+                    <div cmlass="modal-body">
                         <div class="form-group" style="margin: auto">
-                           <div class="input-field col s8 required"
-                                     id="{{ filter.form.custom_filter_name.id_for_label }}_container">
-                                    <label for="{{ filter.form.custom_filter_name.id_for_label }}">{{ filter.form.custom_filter_name.label }}</label>
-                                    {{ filter.form.custom_filter_name }}
-                                </div>
+                            <div class="input-field col s8 required"
+                                 id="{{ filter.form.custom_filter_name.id_for_label }}_container">
+                                <label for="{{ filter.form.custom_filter_name.id_for_label }}">{{ filter.form.custom_filter_name.label }}</label>
+                                {{ filter.form.custom_filter_name }}
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <div class="text-center">
-                            <input  name="save_filter"
-                                                                        type="submit"
+                            <button name="save_filter"
+                                   type="submit"
                                     {#                                    onclick="beforeSubmit()"#}
-                                    style="width: 95px!important;"
-                                    class="btn btn-sm btn-raised btn-primary">Salvar
-                            </input>
+                                   style="width: 95px!important;"
+                                   class="btn btn-sm btn-raised btn-primary">Salvar
+                            </button>
                             <button style="width: 95px!important;"
                                     class="btn btn-sm btn-raised btn-default"
                                     data-dismiss="modal">

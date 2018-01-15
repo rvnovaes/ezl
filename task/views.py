@@ -2,6 +2,7 @@ import json
 import os
 from urllib.parse import urlparse
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
@@ -578,11 +579,15 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
                     .add(Q(finished_dynamic_query), Q.AND)
 
                 query_set = DashboardViewModel.objects.filter(person_dynamic_query)
-                if request.get('save_filter', None):
+
+            try:
+                if request.get('save_filter', None) is not None:
                     filter_name = data['custom_filter_name']
                     new_filter = Filter(name=filter_name, query=query_set.query, create_user=self.request.user,
                                         create_date=timezone.now())
                     new_filter.save()
+            except IntegrityError:
+                messages.add_message(self.request, messages.ERROR, 'Já existe filtro com este nome.')
 
         return query_set, task_filter
 

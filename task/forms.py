@@ -1,9 +1,9 @@
 from datetime import datetime
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django.utils import timezone
-
 from django_file_form.forms import FileFormMixin, MultipleUploadedFileField
 
 from core.models import Person
@@ -16,7 +16,7 @@ from task.models import Task, TypeTask, Filter
 class TaskForm(BaseForm):
     task_number = forms.CharField(disabled=True, required=False,
                                   widget=forms.TextInput(attrs={
-                                    'placeholder': 'Gerado automaticamente'}))
+                                      'placeholder': 'Gerado automaticamente'}))
 
     class Meta:
         model = Task
@@ -30,7 +30,7 @@ class TaskForm(BaseForm):
     person_asked_by = forms.ModelChoiceField(
         empty_label='Selecione...',
         queryset=filter_valid_choice_form(
-          Person.objects.active().requesters().order_by('name')))
+            Person.objects.active().requesters().order_by('name')))
 
     person_executed_by = forms.ModelChoiceField(
         empty_label='Selecione...',
@@ -63,8 +63,8 @@ class TaskForm(BaseForm):
 
     final_deadline_date = forms.DateTimeField(required=True,
                                               widget=MDDateTimepicker(attrs={
-                                                                        'class': 'form-control'},
-                                                                      format='DD/MM/YYYY HH:mm'))
+                                                  'class': 'form-control'},
+                                                  format='DD/MM/YYYY HH:mm'))
 
     execution_date = forms.DateTimeField(required=False,
                                          widget=MDDatePicker(attrs={'class': 'form-control'},
@@ -117,9 +117,9 @@ class TaskDetailForm(ModelForm):
                                          initial=timezone.now(),
                                          label='Data de Cumprimento',
                                          widget=MDDateTimepicker(attrs={
-                                                                    'class': 'form-control',
-                                                                 },
-                                                                 format='DD/MM/YYYY HH:mm'))
+                                             'class': 'form-control',
+                                         },
+                                             format='DD/MM/YYYY HH:mm'))
     notes = forms.CharField(
         required=False,
         initial='',
@@ -137,11 +137,29 @@ class TypeTaskForm(BaseForm):
 
 
 class FilterForm(BaseForm):
+
+    # def clean(self):
+    #     """
+    #     Override the default clean method to check whether this course has
+    #     been already inputted.
+    #     """
+    #     cleaned_data = self.cleaned_data
+    #     name = cleaned_data.get('name')
+    #
+    #     filter = Filter.objects.filter(name=name)
+    #     if self.instance:
+    #         filter = filter.exclude(pk=self.instance.pk)
+    #     if filter.exists():
+    #         msg = u"Nome do filtro: %s já existe na base de dados." % name
+    #         raise ValidationError(msg)
+    #     else:
+    #         return self.cleaned_data
+
     class Meta:
         model = Filter
-        fields = ['name', 'description','query']
+        fields = ['name', 'description', 'query']
 
     query = forms.CharField(required=False, initial='', label='Query',
-                                  widget=forms.Textarea(
-                                      attrs={'class': 'form-control',
-                                             'readonly':'readonly'}))
+                            widget=forms.Textarea(
+                                attrs={'class': 'form-control',
+                                       'readonly': 'readonly'}))
