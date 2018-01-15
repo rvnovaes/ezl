@@ -38,7 +38,7 @@ var updateSession = function(key, value, csrf_token){
                     $('#current_office').text('Todos');
                     localStorage.clear();
                 }
-
+                location.reload();
             },
         beforeSend: function(xhr, settings){
             xhr.setRequestHeader('X-CSRFToken', csrf_token)

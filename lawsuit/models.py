@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import Audit, Person, State, LegacyCode, OfficeMixin
+from core.models import Audit, Person, State, LegacyCode, OfficeMixin, OfficeManager
 from sequences import get_next_value
 from django.db import transaction
 from django.core.validators import ValidationError
@@ -16,6 +16,8 @@ class TypeMovement(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, blank=False, null=False, default="", unique=True, verbose_name='Nome')
     uses_wo = models.BooleanField(default=False, verbose_name='Utiliza ordem de serviço?')
 
+    objects = OfficeManager()
+
     class Meta:
         db_table = "type_movement"
         ordering = ['-id']
@@ -28,6 +30,8 @@ class TypeMovement(Audit, LegacyCode, OfficeMixin):
 
 class Instance(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(verbose_name="Nome", max_length=255, null=False, blank=False, default="", unique=True)
+
+    objects = OfficeManager()
 
     class Meta:
         db_table = "instance"
@@ -49,6 +53,8 @@ class Folder(Audit, LegacyCode, OfficeMixin):
                                     null=True,
                                     verbose_name='Centro de custo')
 
+    objects = OfficeManager()
+
     def save(self, *args, **kwargs):
         if not self.pk:
             self.folder_number = get_folder_number(self.office)
@@ -66,6 +72,8 @@ class Folder(Audit, LegacyCode, OfficeMixin):
 
 class CourtDivision(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Vara")
+
+    objects = OfficeManager()
 
     class Meta:
         db_table = "court_division"
@@ -98,6 +106,8 @@ class Organ(Person, OfficeMixin):
     """
     court_district = models.ForeignKey(CourtDistrict, on_delete=models.PROTECT,
                                        verbose_name='Comarca')
+
+    objects = OfficeManager()
 
     class Meta:
         db_table = 'organ'
@@ -143,6 +153,8 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
     opposing_party = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='Parte adversa')
 
+    objects = OfficeManager()
+
     class Meta:
         db_table = "law_suit"
         ordering = ['-id']
@@ -162,6 +174,8 @@ class Movement(Audit, LegacyCode, OfficeMixin):
                                  verbose_name="Processo", related_name='law_suits')
     folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False,
                                verbose_name="Pasta", related_name='folders_movement')
+
+    objects = OfficeManager()
 
     class Meta:
         db_table = "movement"
