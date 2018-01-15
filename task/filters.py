@@ -88,7 +88,7 @@ class TaskFilter(FilterSet):
     def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None, user=None):
         super(TaskFilter, self).__init__(data=None, queryset=None, prefix=None, strict=None, request=None)
         if user:
-            self._meta.fields['custom_filter'].queryset = Filter.objects.filter(user=user).order_by('name')
+            self.filters['custom_filter'].queryset = Filter.objects.filter(create_user=user).order_by('name')
 
     class Meta:
         model = DashboardViewModel

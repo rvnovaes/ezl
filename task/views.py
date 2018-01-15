@@ -435,12 +435,11 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         person = Person.objects.get(auth_user=self.request.user)
 
         request = self.request.GET
-        task_filter = TaskFilter(request=request,data)
+        task_filter = TaskFilter(request=request,user=self.request.user)
         task_form = task_filter.form
 
         if task_form.is_valid():
             data = task_form.cleaned_data
-            # print('filtro selecionado:',data['custom_filter'].query)
 
             if data['custom_filter']:
                 query_set = DashboardViewModel.objects.raw(data['custom_filter'].query)
