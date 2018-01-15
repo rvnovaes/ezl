@@ -75,7 +75,7 @@ class TaskETL(GenericETL):
                 a.Advogado_or AS person_distributed_by_legacy_code,
                 a.OBS AS description,
                 a.Data_confirmacao AS blocked_or_finished_date,
-                a.Data_delegacao END AS delegation_date,
+                a.Data_delegacao AS delegation_date,
                 a.Data AS requested_date,
                 a.prazo_fatal AS final_deadline_date,
                 p.Codigo_Comp AS folder_legacy_code,
