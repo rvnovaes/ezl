@@ -65,7 +65,6 @@ def get_status_by_substatus(substatus):
 class TaskETL(GenericETL):
     _import_query = """
             SELECT
-                a.Data_confirmacao AS blocked_or_finished_date,
                 a.Status,
                 a.SubStatus AS status_code_advwin,
                 a.ident AS legacy_code,
@@ -75,8 +74,9 @@ class TaskETL(GenericETL):
                 a.CodMov AS type_task_legacy_code,
                 a.Advogado_or AS person_distributed_by_legacy_code,
                 a.OBS AS description,
-                CASE WHEN (a.Data_delegacao IS NULL) THEN
-                    a.Data ELSE a.Data_delegacao END AS delegation_date,
+                a.Data_confirmacao AS blocked_or_finished_date,
+                a.Data_delegacao END AS delegation_date,
+                a.Data AS requested_date,
                 a.prazo_fatal AS final_deadline_date,
                 p.Codigo_Comp AS folder_legacy_code,
                 p.Cliente
@@ -129,6 +129,12 @@ class TaskETL(GenericETL):
                 else:
                     final_deadline_date = None
 
+                if row['requested_date']:
+                    requested_date = pytz.timezone(settings.TIME_ZONE).localize(
+                        row['requested_date'])
+                else:
+                    requested_date = None
+
                 description = row['description']
                 blocked_or_finished_date = row['blocked_or_finished_date']
 
@@ -159,19 +165,6 @@ class TaskETL(GenericETL):
                 # será originado erro de variável sem valor
                 refused_date = execution_date = blocked_payment_date = finished_date = acceptance_service_date = refused_service_date = None
 
-                if status_code_advwin == TaskStatus.REFUSED:
-                    refused_date = timezone.now()
-                    execution_date = None
-                elif status_code_advwin == TaskStatus.BLOCKEDPAYMENT:
-                    blocked_payment_date = blocked_or_finished_date
-                elif status_code_advwin == TaskStatus.FINISHED:
-                    finished_date = blocked_or_finished_date
-                elif status_code_advwin == TaskStatus.ACCEPTED_SERVICE:
-                    acceptance_service_date = acceptance_or_refused_service_date
-                elif status_code_advwin == TaskStatus.REFUSED_SERVICE:
-                    refused_service_date = acceptance_or_refused_service_date
-
-
                 inconsistencies = []
                 folder_legacy_code = row['folder_legacy_code']
                 client = row['Cliente']
@@ -200,22 +193,13 @@ class TaskETL(GenericETL):
 
                 if task:
                     task.delegation_date = delegation_date
+                    task.requested_date = requested_date
                     task.final_deadline_date = final_deadline_date
                     task.description = description
                     task.task_status = status_code_advwin
-                    task.refused_date = refused_date
-                    task.execution_date = execution_date
-                    task.blocked_payment_date = blocked_payment_date
-                    task.finished_date = finished_date
-                    if status_code_advwin == TaskStatus.ACCEPTED_SERVICE:
-                        task.acceptance_service_date = acceptance_service_date
-                    if status_code_advwin == TaskStatus.REFUSED_SERVICE:
-                        task.refused_service_date = refused_service_date
 
-                    update_fields = ['delegation_date', 'final_deadline_date', 'description',
-                                     'task_status', 'refused_date', 'execution_date',
-                                     'blocked_payment_date',
-                                     'finished_date', 'acceptance_service_date', 'refused_service_date']
+                    update_fields = ['requested_date', 'delegation_date', 'final_deadline_date', 'description',
+                                     'task_status', ]
 
                     task.save(update_fields=update_fields)
 
@@ -237,8 +221,7 @@ class TaskETL(GenericETL):
                                                      blocked_payment_date=blocked_payment_date,
                                                      finished_date=finished_date,
                                                      task_status=status_code_advwin,
-                                                     acceptance_service_date=acceptance_service_date,
-                                                     refused_service_date=refused_service_date)
+                                                     requested_date=requested_date)
 
                 if status_code_advwin == TaskStatus.ERROR:
                     for inconsistency in inconsistencies:

@@ -184,7 +184,7 @@ def export_task_history(task_history_id, task_history=None, task_instance=False,
     task = task_instance if task_instance else task_history.task
     if task_history.status == TaskStatus.ACCEPTED.value:
         values = {
-            'codigo_adv_correspondente': str(task_history.create_user),
+            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 50,
@@ -198,7 +198,7 @@ def export_task_history(task_history_id, task_history=None, task_instance=False,
 
     elif task_history.status == TaskStatus.DONE.value:
         values = {
-            'codigo_adv_correspondente': str(task_history.create_user),
+            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 70,
@@ -212,7 +212,7 @@ def export_task_history(task_history_id, task_history=None, task_instance=False,
 
     elif task_history.status == TaskStatus.REFUSED.value:
         values = {
-            'codigo_adv_correspondente': str(task_history.create_user),
+            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 20,
@@ -225,7 +225,7 @@ def export_task_history(task_history_id, task_history=None, task_instance=False,
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.FINISHED.value:
         values = {
-            'codigo_adv_correspondente': str(task_history.create_user),
+            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 100,
@@ -238,7 +238,7 @@ def export_task_history(task_history_id, task_history=None, task_instance=False,
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.RETURN.value:
         values = {
-            'codigo_adv_correspondente': str(task_history.create_user),
+            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 80,
@@ -250,7 +250,7 @@ def export_task_history(task_history_id, task_history=None, task_instance=False,
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.BLOCKEDPAYMENT.value:
         values = {
-            'codigo_adv_correspondente': str(task_history.create_user),
+            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 90,
@@ -267,7 +267,7 @@ def export_task_history(task_history_id, task_history=None, task_instance=False,
             'codigo_adv_origem': task.person_distributed_by.legacy_code,
             'SubStatus': 11,
             'status': 0,
-            'data_operacao': timezone.localtime(task.acceptance_service_date),
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Aceita por Back Office: {}'.format(
@@ -281,7 +281,7 @@ def export_task_history(task_history_id, task_history=None, task_instance=False,
             'codigo_adv_origem': task.person_distributed_by.legacy_code,
             'SubStatus': 20,
             'status': 1,
-            'data_operacao': timezone.localtime(task.refused_service_date),
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Recusada por Back Office: {}'.format(
@@ -296,7 +296,7 @@ def export_task_history(task_history_id, task_history=None, task_instance=False,
             'codigo_adv_correspondente': task.person_executed_by.legacy_code,
             'SubStatus': 30,
             'status': 0,
-            'data_operacao': timezone.localtime(timezone.now()),
+            'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Solicitada ao correspondente ('+task.person_executed_by.legal_name +
