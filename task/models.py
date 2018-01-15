@@ -9,6 +9,7 @@ from sequences import get_next_value
 from core.models import Person, Audit, AuditCreate, LegacyCode
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
+from decimal import Decimal
 
 class Permissions(Enum):
     view_delegated_tasks = 'Can view tasks delegated to the user'
@@ -19,14 +20,16 @@ class Permissions(Enum):
     block_payment_tasks = 'Can block tasks payment'
     can_access_general_data = 'Can access general data screens'
     view_distributed_tasks = 'Can view tasks distributed by the user'
+    can_distribute_tasks = 'Can distribute tasks to another user'
 
 
 # Dicionário para retornar o icone referente ao status da providencia
 icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assignment_return',
              'DONE': 'assignment_turned_in',
+             'REQUESTED': 'playlist_play', 'ACCEPTED_SERVICE': 'thumb_up', 'REFUSED_SERVICE': 'thumb_down',
              'REFUSED': 'assignment_late', 'INVALID': 'error', 'FINISHED': 'gavel',
              'BLOCKEDPAYMENT': 'money_off',
-             'ERROR': 'error'}
+             'ERROR': 'add_circle_outline'}
 
 
 # next_action = {'ACCEPTED': 'cumprir', 'OPEN': 'assignment', 'RETURN': 'keyboard_return',
@@ -34,13 +37,16 @@ icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assi
 
 
 class TaskStatus(Enum):
-    ACCEPTED = 'A Cumprir'
+    REQUESTED = 'Solicitada'
+    ACCEPTED_SERVICE = 'Aceita pelo Service'
     OPEN = 'Em Aberto'
-    RETURN = 'Retorno'
+    ACCEPTED = 'A Cumprir'
     DONE = 'Cumprida'
+    RETURN = 'Retorno'
+    FINISHED = 'Finalizada'
+    REFUSED_SERVICE = 'Recusada pelo Service'
     REFUSED = 'Recusada'
     BLOCKEDPAYMENT = 'Glosada'
-    FINISHED = 'Finalizada'
     INVALID = 'Inválida'
     ERROR = 'Erro no sistema de origem'
 
@@ -113,6 +119,8 @@ class Task(Audit, LegacyCode):
                                               verbose_name='Contratante')
     type_task = models.ForeignKey(TypeTask, on_delete=models.PROTECT, blank=False, null=False,
                                   verbose_name='Tipo de Serviço')
+    acceptance_service_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação pelo Contratante')
+    refused_service_date = models.DateTimeField(null=True, verbose_name='Data de Recusa pelo Contratante')
     delegation_date = models.DateTimeField(default=timezone.now, verbose_name='Data de Delegação')
     acceptance_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação')
     final_deadline_date = models.DateTimeField(null=True, verbose_name='Prazo')
@@ -133,6 +141,8 @@ class Task(Audit, LegacyCode):
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
                                    default=TaskStatus.OPEN)
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    amount = models.DecimalField(null=False, blank=False, verbose_name='Valor',
+                                 max_digits=9, decimal_places=2, default=Decimal('0.00'))
     chat = models.ForeignKey(Chat, verbose_name='Chat', on_delete=models.SET_NULL, null=True,
                              blank=True)
     __previous_status = None  # atributo transient

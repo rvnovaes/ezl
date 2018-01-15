@@ -1,5 +1,5 @@
 // Responsavel por gerar a linha da listagem como um link para o formulario de edicao
-$(document).ready(function () {
+function addLinkOnRows(){
     $('tr[data-href]').each(function () {
         $(this).find('a').removeAttr('target').removeAttr('href');
         var $url = $(this).attr('data-href');
@@ -19,7 +19,18 @@ $(document).ready(function () {
             })
         })
     });
+}
+
+function removeLinkFromRows(){
+    $('tr[data-href] td').each(function () {
+        $(this).off('click');
+    });
+}
+
+$(document).ready(function () {
+    addLinkOnRows();
 });
+
 // abre linha em nova janela
 $(document).ready(function () {
     $('tr[data-new-href]').each(function () {

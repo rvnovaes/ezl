@@ -12,7 +12,8 @@ GROUP_PERMISSIONS = {
         Permissions.return_all_tasks,
         Permissions.validate_all_tasks,
         Permissions.block_payment_tasks,
-        Permissions.can_access_general_data        
+        Permissions.can_access_general_data,
+        Permissions.can_distribute_tasks
     ),
 
     Person.SUPERVISOR_GROUP: (
@@ -20,7 +21,8 @@ GROUP_PERMISSIONS = {
         Permissions.return_all_tasks,
         Permissions.validate_all_tasks,
         Permissions.block_payment_tasks,
-        Permissions.can_access_general_data
+        Permissions.can_access_general_data,
+        Permissions.can_distribute_tasks
     ),
 
     Person.SERVICE_GROUP: (
@@ -28,7 +30,8 @@ GROUP_PERMISSIONS = {
         Permissions.return_all_tasks,
         Permissions.validate_all_tasks,
         Permissions.block_payment_tasks,
-        Permissions.can_access_general_data
+        Permissions.can_access_general_data,
+        Permissions.can_distribute_tasks
     ),
 
     Person.CORRESPONDENT_GROUP: (
