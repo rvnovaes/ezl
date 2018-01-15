@@ -63,13 +63,13 @@
                 </div>
             </form>
             <hr/>
-            <ul class="nav nav-pills">
+            <ul class="nav nav-tabs">
                 <li><a data-toggle="tab" href="#home">Endereços</a></li>
                 <li class="active"><a data-toggle="tab" href="#menu1">Convites para usuários</a></li>
                 <li><a data-toggle="tab" href="#menu2">Escritórios relacionados</a></li>
             </ul>
             <div class="tab-content">
-                <div id="home" class="tab-pane fade">
+                <div id="home" class="tab-pane fade in active">
                     <table class="table table-hover">
                         <thead>
                             <tr>
@@ -81,18 +81,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {{object.address}}
-                            <tr>
-                                <td>Minas Gerais</td>
-                                <td>Sete Lagoas</td>
-                                <td>Antônio Batista</td>
-                                <td>Boa Vista</td>
-                                <td>351</td>
-                            </tr>
+                            {% for address in office.adresses.all %}
+                                <tr>
+                                    <td>{{address.state}}</td>
+                                    <td>{{address.state}}</td>
+                                    <td>{{address.street}}</td>
+                                    <td>{{address.city_region}}</td>
+                                    <td>{{address.number}}</td>
+                                </tr>
+                            {% endfor %}
                         </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" style="text-align: left;">
+                                    <a type="button" class="btn btn-primary btn-raised btn-fab"><i class="fa fa-plus"></i></button>
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
-                <div id="menu1" class="tab-pane fade in active">
+                <div id="menu1" class="tab-pane fade">
                     <table class="table table-hover">
                         <thead>
                             <tr>

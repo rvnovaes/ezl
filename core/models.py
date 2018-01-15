@@ -289,7 +289,7 @@ class Address(Audit):
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False,
                              verbose_name='País')
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
-    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True, related_name='addresses')
+    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True, related_name='adresses')
 
     class Meta:
         db_table = 'address'
