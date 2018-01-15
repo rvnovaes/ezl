@@ -63,9 +63,9 @@
                 </div>
             </form>
             <hr/>
-            <ul class="nav nav-tabs">
+            <ul class="nav nav-pills">
                 <li><a data-toggle="tab" href="#home">Endereços</a></li>
-                <li class="active"><a data-toggle="tab" href="#menu1">Pessoas relacionadas</a></li>
+                <li class="active"><a data-toggle="tab" href="#menu1">Convites para usuários</a></li>
                 <li><a data-toggle="tab" href="#menu2">Escritórios relacionados</a></li>
             </ul>
             <div class="tab-content">
@@ -92,31 +92,28 @@
                     </table>
                 </div>
                 <div id="menu1" class="tab-pane fade in active">
-                    <div class="row">
-                        <div class="col col-md-6">
-                            <select class="js-example-basic-single form-control" name="state">
-                              <option value="AL">Teste 1</option>
-                                ...
-                              <option value="WY">Teste 2</option>
-                            </select>
-                        </div>
-                    </div>
                     <table class="table table-hover">
                         <thead>
                             <tr>
                                 <th>Nome</th>
-                                <th>CPF/CNPJ</th>
-                                <th></th>
+                                <th>Usuário</th>
+                                <th>Status</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for person in object.persons.all %}
+                            {% for invite in object.invites.all %}
                             <tr>
-                                    <td>{{person.name}}</td>
-                                    <td>{{person.cpf_cnpj}}</td>
-                                    <td><a href="#"><i class="fa fa-edit"></i></td>
-                                    <td><a href="#"><i class="fa fa-trash text-danger"></i></td>
+                                <td>{{invite.person.name}}</td>
+                                <td>{{invite.person.auth_user.username}}</td>
+                                {% if invite.status == 'N' %}
+                                    <td>Enviado</td>
+                                {% elif invite.status == 'R' %}
+                                    <td>Recusado</td>
+                                {% else %}
+                                    <td>Aceito</td>
+                                {% endif %}
+                                <td><a href="#"><i class="fa fa-trash text-danger"></i></td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -149,7 +146,7 @@
            </div>
         </div>
     </div>
- {% include 'core/new_invite.html' %}
+ {% include 'core/new_invite.html' with office=object.pk%}
 
  {%endblock%}
 
@@ -161,7 +158,22 @@
      {% endblock %}
      <script>
          $(document).ready(function() {
-             $('.js-example-basic-single').select2();
+             var elUsersToInvite = $('.users_to_invite');
+             var data = {};
+             $.ajax({
+                 type: 'GET',
+                 url: '/users_to_invite/',
+                 data: data,
+                 success: function(response){
+                        response.data.forEach(function(user){
+                            elUsersToInvite.append($('<option>', {
+                                value: user.person__pk,
+                                text: user.person__name + ' (' + user.username + ')',
+                            }))
+                        })
+                    },
+             })
+             elUsersToInvite.select2();
          });
      </script>
  {% endblock %}

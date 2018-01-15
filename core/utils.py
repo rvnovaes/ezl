@@ -82,15 +82,19 @@ def get_office_field(request, profile=None):
 
     from core.models import Office, DefaultOffice
     from django import forms
-    if profile:
-        queryset = profile.person.offices.all()
-        initial = DefaultOffice.objects.filter(auth_user=profile).first().office
-    elif request.session.get('custom_session_user'):
-        custom_session_user = list(request.session.get('custom_session_user').values())
-        queryset = Office.objects.filter(pk=custom_session_user[0]['current_office'])
-        initial = queryset.first().id
-    else:
-        queryset = request.user.person.offices.all()
+    try:
+        if profile:
+            queryset = profile.person.offices.all()
+            initial = DefaultOffice.objects.filter(auth_user=profile).first().office
+        elif request.session.get('custom_session_user'):
+            custom_session_user = list(request.session.get('custom_session_user').values())
+            queryset = Office.objects.filter(pk=custom_session_user[0]['current_office'])
+            initial = queryset.first().id
+        else:
+            queryset = request.user.person.offices.all()
+            initial = None
+    except Exception as e:
+        queryset = Office.objects.none()
         initial = None
 
     return forms.ModelChoiceField(

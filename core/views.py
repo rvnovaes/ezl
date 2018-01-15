@@ -308,7 +308,6 @@ class SingleTableViewMixin(SingleTableView):
         custom_session_user = self.request.session.get('custom_session_user')
 
         office = False
-        import pdb;pdb.set_trace()
         if custom_session_user and custom_session_user.get(str(self.request.user.pk)):
             current_office_session = custom_session_user.get(str(self.request.user.pk))
             office = Office.objects.filter(pk=int(current_office_session.get(
@@ -888,6 +887,7 @@ class InviteCreateView(AuditFormMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'start_user'
 
+
 class InviteUpdateView(UpdateView):
     def post(self, request, *args, **kargs):
         invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
@@ -918,3 +918,24 @@ class EditableListSave(LoginRequiredMixin, View):
             instance.save()
 
         return JsonResponse({"ok": True})
+
+class ListUsersToInviteView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        users = User.objects.all().values(
+        'pk', 'username', 'email', 'person__name', 'person__pk')
+        return JsonResponse({'data': list(users)})
+
+
+class InviteMultipleUsersView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        import pdb; pdb.set_trace()
+        if self.request.POST.get('persons') and self.request.POST.get('office'):
+            persons = self.request.POST.get('persons')
+            office_pk = self.request.POST.get('office')
+            for person_pk in persons:
+                person = Person.objects.get(pk=person_pk)
+                office = Office.objects.get(pk=office_pk)
+                Invite.objects.create(create_user=request.user, person=person,
+                    office=office, status='N')
+        return HttpResponseRedirect(
+            reverse_lazy('office_update', kwargs={'pk': office.pk}))

@@ -105,7 +105,7 @@ INSTALLED_APPS = [
     'localflavor',
     # Sequences
     'sequences.apps.SequencesConfig',
-    'channels',
+    # 'channels',
     'chat',
 ]
 

@@ -19,9 +19,11 @@ urlpatterns = [
     url(r'^registrar/', views.RegisterNewUser.as_view(), name='register_user'),
     url(r'^logout/', views.logout_user, name='logout'),
     url(r'^inicial/', login_required(views.inicial), name='inicial'),
-    url(r'^start/', login_required(views.StartUserView.as_view()), name='start_user'),
-    url(r'^session/', login_required(views.CustomSession.as_view()),
+    url(r'^start/$', login_required(views.StartUserView.as_view()), name='start_user'),
+    url(r'^session/$', login_required(views.CustomSession.as_view()),
     name='session'),
+    url(r'^users_to_invite/$', login_required(views.ListUsersToInviteView.as_view()),
+    name='users_to_invite'),
 
     # Address views
     url(r'^pessoas/(?P<person_pk>[0-9]+)/enderecos/criar/$',
@@ -62,9 +64,10 @@ urlpatterns = [
     url(r'^usuarios/excluir$', login_required(views.UserDeleteView.as_view()),
         name='user_delete'),
     url(r'^escritorios/$', login_required(views.OfficeListView.as_view()), name='office_list'),
-    url(r'escritorios/excluir$', login_required(views.OfficeDeleteView.as_view()), name='office_delete'),
+    url(r'^escritorios/excluir$', login_required(views.OfficeDeleteView.as_view()), name='office_delete'),
     url(r'^escritorios/(?P<pk>[0-9]+)/$', views.OfficeUpdateView.as_view(), name='office_update'),
-    url(r'escritorios/criar$', login_required(views.OfficeCreateView.as_view()), name='office_add'),
-    url(r'convites/criar$', login_required(views.InviteCreateView.as_view()), name='invite_add'),
-    url(r'convites/invite_update', login_required(views.InviteUpdateView.as_view()), name='invite_update')
+    url(r'^escritorios/criar$', login_required(views.OfficeCreateView.as_view()), name='office_add'),
+    url(r'^convites/criar$', login_required(views.InviteCreateView.as_view()), name='invite_add'),
+    url(r'^convites/invite_update/$', login_required(views.InviteUpdateView.as_view()), name='invite_update'),
+    url(r'^convites/convidar$', login_required(views.InviteMultipleUsersView.as_view()), name='invite_multiple_users')
 ]

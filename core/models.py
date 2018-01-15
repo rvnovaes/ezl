@@ -263,7 +263,8 @@ class DefaultOffice(OfficeMixin, Audit):
 class Invite(Audit):
     person = models.ForeignKey(Person, blank=False, null=False,
         related_name='invites')
-    office = models.ForeignKey(Office, blank=False, null=False)
+    office = models.ForeignKey(Office, blank=False, null=False,
+    related_name='invites')
     status = models.CharField(choices=INVITE_STATUS, default='N', max_length=1)
 
     class Meta:
