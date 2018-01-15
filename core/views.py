@@ -308,13 +308,12 @@ class SingleTableViewMixin(SingleTableView):
         custom_session_user = self.request.session.get('custom_session_user')
 
         office = False
-        import pdb;pdb.set_trace()
         if custom_session_user and custom_session_user.get(str(self.request.user.pk)):
             current_office_session = custom_session_user.get(str(self.request.user.pk))
             office = Office.objects.filter(pk=int(current_office_session.get(
                 'current_office'))).values_list('id', flat=True)
-            if not office:
-                office = self.request.user.person.offices.all().values_list('id', flat=True)
+        if not office:
+            office = self.request.user.person.offices.all().values_list('id', flat=True)
 
         generic_search = GenericSearchFormat(self.request, self.model, self.model._meta.fields)
         args = generic_search.despatch(office=office)

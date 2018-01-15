@@ -83,14 +83,11 @@ class GenericSearchFormat(object):
             self.params.pop('is_active')
             self.model_type_fields.remove({'type': 'BooleanField', 'name': 'is_active'})
 
-        search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
-
         try:
             office_field = self.model._meta.get_field('office')
-            if office:
-                search = "self.table_class(self.model.objects.get_queryset(office=office.id).filter({params}))"
+            search = "self.table_class(self.model.objects.get_queryset(office=office).filter({params}))"
         except:
-            pass
+            search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
 
         for field in self.model_type_fields:
             if field.get('type') in ['DateField', 'DateTimeField']:
