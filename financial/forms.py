@@ -46,7 +46,7 @@ class ServicePriceTableForm(BaseModelForm):
                 'data-placeholder': '',
                 'data-label': 'Cidade'
             }),
-        required=True,
+        required=False,
     )
 
     client = forms.ModelChoiceField(
@@ -86,7 +86,7 @@ class ServicePriceTableForm(BaseModelForm):
     type_task = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(TypeTask.objects.all().order_by('name')),
         empty_label='',
-        required=True,
+        required=False,
         label=u"Tipo de Serviço",
     )
 
@@ -103,3 +103,15 @@ class ServicePriceTableForm(BaseModelForm):
         value = value.replace('.', '')
         value = value.replace(',', '.')
         return float(value)
+
+    def clean_correspondent(self):
+        correspondent = self.cleaned_data['correspondent']
+        if not correspondent:
+            raise forms.ValidationError("Favor Selecionar um correspondente")
+        return correspondent
+
+    def clean_type_task(self):
+        type_task = self.cleaned_data['type_task']
+        if not type_task:
+            raise forms.ValidationError("Favor Selecionar um Tipo de Serviço")
+        return type_task

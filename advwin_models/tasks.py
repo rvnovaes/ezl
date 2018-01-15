@@ -173,7 +173,7 @@ def insert_advwin_history(task_history, values, execute=True):
 
 
 @shared_task()
-def export_task_history(task_history_id, task_history=None, execute=True):
+def export_task_history(task_history_id, task_history=None, task_instance=False, execute=True):
     if task_history is None:
         task_history = TaskHistory.objects.get(pk=task_history_id)
 
@@ -181,7 +181,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
     if task_history.create_user:
         username = task_history.create_user.username[:20]
 
-    task = task_history.task
+    task = task_instance if task_instance else task_history.task
     if task_history.status == TaskStatus.ACCEPTED.value:
         values = {
             'codigo_adv_correspondente': str(task_history.create_user),
@@ -281,7 +281,7 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'codigo_adv_origem': task.person_distributed_by.legacy_code,
             'SubStatus': 20,
             'status': 1,
-            'data_operacao': timezone.localtime(task.acceptance_service_date),
+            'data_operacao': timezone.localtime(task.refused_service_date),
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Recusada por Back Office: {}'.format(
@@ -296,10 +296,10 @@ def export_task_history(task_history_id, task_history=None, execute=True):
             'codigo_adv_correspondente': task.person_executed_by.legacy_code,
             'SubStatus': 30,
             'status': 0,
-            'data_operacao': timezone.localtime(task.delegation_date),
+            'data_operacao': timezone.localtime(timezone.now()),
             'justificativa': task_history.notes,
             'usuario': username,
-            'descricao': 'Solicitada ao correspondente ('+task.person_executed_by.auth_user.username +
+            'descricao': 'Solicitada ao correspondente ('+task.person_executed_by.legal_name +
                          ') por BackOffice: {}'.format(
                 task.person_distributed_by.legal_name),
         }
@@ -484,7 +484,7 @@ def export_task(task_id, task=None, execute=True):
             'Advogado_or': task.person_distributed_by.legacy_code,
             'prazo_lido': 0,
             'Data_delegacao': task.delegation_date,
-            'Obs': get_task_observation(task, '*** Ordem de Serviço delegada para:' + task.person_executed_by.auth_user.username, 'acceptance_service_date'),
+            'Obs': get_task_observation(task, 'Ordem de Serviço delegada para:' + task.person_executed_by.auth_user.username + ' por ', 'delegation_date'),
         }
 
         return update_advwin_task(task, values, execute)
