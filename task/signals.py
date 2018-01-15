@@ -128,6 +128,12 @@ def change_status(sender, instance, **kwargs):
     previous_status = TaskStatus(instance.__previous_status) or TaskStatus.INVALID
 
     if new_status is not previous_status:
+        if new_status is TaskStatus.ACCEPTED_SERVICE:
+            instance.acceptance_service_date = now_date
+        if new_status is TaskStatus.REFUSED_SERVICE:
+            instance.refused_service_date = now_date
+        if new_status is TaskStatus.OPEN:
+            instance.delegation_date = now_date
         if new_status is TaskStatus.ACCEPTED:
             instance.acceptance_date = now_date
         elif new_status is TaskStatus.REFUSED:
@@ -148,7 +154,7 @@ def change_status(sender, instance, **kwargs):
                                    status=instance.task_status,
                                    create_date=now_date,
                                    notes=getattr(instance, '__notes', ''))
-        instance.__previous_status = instance.task_status
+        # instance.__previous_status = instance.task_status
 
 
 @receiver(post_save, sender=Task)
@@ -160,4 +166,4 @@ def ezl_export_task_to_advwin(sender, instance, **kwargs):
 @receiver(post_save, sender=TaskHistory)
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
     if not getattr(instance, '_called_by_etl'):
-        export_task_history.delay(instance.pk)
+        export_task_history.delay(instance.pk, task_instance=instance.task)

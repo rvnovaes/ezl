@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
-from etl.utils import get_users_to_import, get_message_log_default, save_error_log
+from etl.utils import get_message_log_default, save_error_log, get_clients_to_import
 from lawsuit.models import Movement, LawSuit, TypeMovement, Folder
 from etl.utils import get_message_log_default, save_error_log
 
@@ -26,9 +26,9 @@ class MovementETL(GenericETL):
                 WHERE
                   cm.UsarOS = 1 and
                   (p.Status = 'Ativa' OR p.Status = 'Especial') AND
-                  ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                  (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                  --AND a.Advogado IN ('{}')
+                  a.SubStatus = 10 AND
+                  p.Cliente IN ('{cliente}') AND 
+                  a.Status = '0' -- STATUS ATIVO
                   """
 
     model = Movement
@@ -37,7 +37,7 @@ class MovementETL(GenericETL):
 
     @property
     def import_query(self):
-        return self._import_query.format("','".join(get_users_to_import()))
+        return self._import_query.format(cliente="','".join(get_clients_to_import()))
 
     @validate_import
     def config_import(self, rows, user, rows_count, log=False):
@@ -63,7 +63,8 @@ class MovementETL(GenericETL):
                         lawsuit = InvalidObjectFactory.get_invalid_model(LawSuit)
 
                 type_movement = TypeMovement.objects.filter(
-                    legacy_code=type_movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(TypeMovement)
+                    legacy_code=type_movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
+                    TypeMovement)
 
                 person_lawyer = Person.objects.filter(
                     legacy_code=person_lawyer_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
@@ -99,8 +100,10 @@ class MovementETL(GenericETL):
                                               type_movement=type_movement,
                                               )
                 self.debug_logger.debug(
-                    "Movimentacao,%s,%s,%s,%s,%s,%s,%s,%s" % (str(legacy_code), str(LegacySystem.ADVWIN.value), str(create_user.id),
-                                                    str(create_user.id),str(True),str(lawsuit.id if lawsuit else ''),str(type_movement.id),self.timestr))
+                    "Movimentacao,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                    str(legacy_code), str(LegacySystem.ADVWIN.value), str(create_user.id),
+                    str(create_user.id), str(True), str(lawsuit.id if lawsuit else ''), str(type_movement.id),
+                    self.timestr))
 
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,

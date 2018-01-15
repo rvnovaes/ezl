@@ -27,3 +27,35 @@
     <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
 
 {% endblock %}
+
+{% block form_container %}
+    {% form %}
+{#        {% for field in form %}#}
+{#            <div class="form-group col-sm-5">#}
+{#                <label>#}
+{#                    {{ field.label }}#}
+{#                </label>#}
+{#                {{ field }}#}
+{#            </div>#}
+{#        {% endfor %}#}
+    {% endform %}
+                </div>
+            </div>
+        </div>
+                        {% if personaddress.forms %}
+                            {{ personaddress.management_form }}
+                            {% for form in personaddress.forms %}
+                                {% if forloop.first %}
+        <div class="row">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h1 class="panel-title">
+                        Endereço
+                    </h1>
+                </div>
+                                {% endif %}
+                <div class="panel-body">
+                                {% include 'core/address_base_form.html' %}
+                            {% endfor %}
+                        {% endif %}
+{% endblock form_container %}
