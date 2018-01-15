@@ -435,7 +435,7 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         person = Person.objects.get(auth_user=self.request.user)
 
         request = self.request.GET
-        task_filter = TaskFilter(request)
+        task_filter = TaskFilter(request=request,data)
         task_form = task_filter.form
 
         if task_form.is_valid():

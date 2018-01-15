@@ -81,9 +81,14 @@ class TaskFilter(FilterSet):
     blocked_payment_in = MDDateTimeRangeFilter(name='blocked_payment_in', label="Glosadas entre:")
     finished_in = MDDateTimeRangeFilter(name='finished_in', label="Finalizadas entre:")
 
-    custom_filter = ModelChoiceFilter(queryset=filter_valid_choice_form(Filter.objects.all()),
+    custom_filter = ModelChoiceFilter(queryset=filter_valid_choice_form(Filter.objects.all().order_by('name')),
                                       label="", widget=Select(attrs={'onchange': 'this.form.submit()'}))
     custom_filter_name = CharFilter(label=u"Nome do Filtro*")
+
+    def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None, user=None):
+        super(TaskFilter, self).__init__(data=None, queryset=None, prefix=None, strict=None, request=None)
+        if user:
+            self._meta.fields['custom_filter'].queryset = Filter.objects.filter(user=user).order_by('name')
 
     class Meta:
         model = DashboardViewModel
