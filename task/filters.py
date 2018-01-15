@@ -81,14 +81,13 @@ class TaskFilter(FilterSet):
     blocked_payment_in = MDDateTimeRangeFilter(name='blocked_payment_in', label="Glosadas entre:")
     finished_in = MDDateTimeRangeFilter(name='finished_in', label="Finalizadas entre:")
 
-    custom_filter = ModelChoiceFilter(queryset=filter_valid_choice_form(Filter.objects.all().order_by('name')),
-                                      label="", widget=Select(attrs={'onchange': 'this.form.submit()'}))
-    custom_filter_name = CharFilter(label=u"Nome do Filtro*")
+    custom_filter = ModelChoiceFilter(queryset=filter_valid_choice_form(Filter.objects.all()),
+                                      label="", required=False, widget=Select(attrs={'onchange': 'this.form.submit()'}))
+    custom_filter_name = CharFilter(label=u"Nome do Filtro", required=False)
 
-    def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None, user=None):
-        super(TaskFilter, self).__init__(data=None, queryset=None, prefix=None, strict=None, request=None)
-        if user:
-            self.filters['custom_filter'].queryset = Filter.objects.filter(create_user=user).order_by('name')
+    def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
+        super(TaskFilter, self).__init__(data, queryset, prefix, strict, request)
+        self.filters['custom_filter'].queryset = Filter.objects.filter(create_user=self.request.user).order_by('name')
 
     class Meta:
         model = DashboardViewModel

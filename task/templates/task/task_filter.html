@@ -242,7 +242,7 @@
                     <span onclick="$('#saveFilter').show();" class="btn btn-sm btn-primary btn-raised">
                         <i class="material-icons">save</i>Salvar
                     </span>
-                    <span onclick="$('#filter-form').form.reset()" class="btn btn-sm btn-primary btn-raised">
+                    <span  class="btn btn-sm btn-primary btn-raised">
                         <i class="material-icons">clear</i>Limpar
                     </span>
                     <button class="btn btn-sm btn-primary btn-raised">
@@ -263,7 +263,7 @@
                     </div>
                     <div cmlass="modal-body">
                         <div class="form-group" style="margin: auto">
-                            <div class="input-field col s8 required"
+                            <div class="input-field col s8"
                                  id="{{ filter.form.custom_filter_name.id_for_label }}_container">
                                 <label for="{{ filter.form.custom_filter_name.id_for_label }}">{{ filter.form.custom_filter_name.label }}</label>
                                 {{ filter.form.custom_filter_name }}

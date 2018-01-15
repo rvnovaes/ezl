@@ -434,8 +434,8 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         query_set = {}
         person = Person.objects.get(auth_user=self.request.user)
 
-        request = self.request.GET
-        task_filter = TaskFilter(request=request,user=self.request.user)
+        filters = self.request.GET
+        task_filter = TaskFilter(data=filters,request=self.request)
         task_form = task_filter.form
 
         if task_form.is_valid():
@@ -580,14 +580,15 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
                 query_set = DashboardViewModel.objects.filter(person_dynamic_query)
 
             try:
-                if request.get('save_filter', None) is not None:
+                if filters.get('save_filter', None) is not None:
                     filter_name = data['custom_filter_name']
                     new_filter = Filter(name=filter_name, query=query_set.query, create_user=self.request.user,
                                         create_date=timezone.now())
                     new_filter.save()
             except IntegrityError:
                 messages.add_message(self.request, messages.ERROR, 'Já existe filtro com este nome.')
-
+        else:
+            messages.add_message(self.request, messages.ERROR, 'Formulário inválido.')
         return query_set, task_filter
 
     def get_queryset(self, **kwargs):
