@@ -802,7 +802,6 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
     form_class = OfficeForm
     success_url = reverse_lazy('office_list')
     success_message = UPDATE_SUCCESS_MESSAGE
-    template_name_suffix = '_update_form'
     object_list_url = 'office_list'
 
     def get_context_data(self, **kwargs):
@@ -928,9 +927,8 @@ class ListUsersToInviteView(LoginRequiredMixin, View):
 
 class InviteMultipleUsersView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        import pdb; pdb.set_trace()
         if self.request.POST.get('persons') and self.request.POST.get('office'):
-            persons = self.request.POST.get('persons')
+            persons = self.request.POST.getlist('persons')
             office_pk = self.request.POST.get('office')
             for person_pk in persons:
                 person = Person.objects.get(pk=person_pk)
@@ -938,4 +936,4 @@ class InviteMultipleUsersView(LoginRequiredMixin, View):
                 Invite.objects.create(create_user=request.user, person=person,
                     office=office, status='N')
         return HttpResponseRedirect(
-            reverse_lazy('office_update', kwargs={'pk': office.pk}))
+            reverse_lazy('office', kwargs={'pk': office.pk}))

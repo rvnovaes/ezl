@@ -11,7 +11,7 @@ MUST_LOGIN = True
 
 CELERY_BROKER_URL = 'amqp://guest:guest@queues:5672/'
 
-CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_ALWAYS_EAGER = False
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -105,7 +105,7 @@ INSTALLED_APPS = [
     'localflavor',
     # Sequences
     'sequences.apps.SequencesConfig',
-    # 'channels',
+    'channels',
     'chat',
 ]
 

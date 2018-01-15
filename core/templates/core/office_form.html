@@ -1,5 +1,11 @@
 {% extends 'inicial.html' %}
-
+{% block head %}
+    {{block.super}}
+    {% block css_head %}
+        {{block.super}}
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    {% endblock %}
+{% endblock %}
 {% block content %}
     <div class="panel panel-primary">
         <div class="panel-heading">
@@ -10,50 +16,165 @@
                 {% csrf_token %}
                 <div class="inputs">
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <fieldset>
                                 <legend>Dados do escritório</legend>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group label-static">
                                             <label for="name" class='control-label'>Razão Social</label>
-                                            <input type='name' class='form-control' name='name'></input>
+                                            <input type='name' class='form-control' name='name' value={{object.name}}></input>
                                         </div>
-
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group label-static">
                                             <label for="legal_name" class='control-label'>Nome fatasia</label>
-                                            <input type='legal_name' class='form-control' name='legal_name'></input>
+                                            <input type='legal_name' class='form-control' name='legal_name' value={{object.legal_name}}></input>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group label-static">
                                             <label for="legal_type" class='control-label'>Tipo</label>
                                             <select class="form-control" name="legal_type">
-                                                <option value="F">Física</option>
-                                                <option value="J">Jurídica</option>
+                                                <option value="F" {% if object.legal_type == 'F' %} selected {% endif %}>Física</option>
+                                                <option value="J" {% if object.legal_type == 'J' %} selected {% endif %}>Jurídica</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group label-static">
                                             <label for="cpf_cnpj" class='control-label'>CPF/CNPJ</label>
-                                            <input type='text' class='form-control' name=cpf_cnpj></input>
+                                            <input type='text' class='form-control' name=cpf_cnpj value={{object.cpf_cnpj}}></input>
                                         </div>
                                     </div>
                                 </div>
                             </fieldset>
                         </div>
                     </div>
+                    <hr/>
                     <div class="row">
-                        <div class="col-md-6 col-md-offset-5">
-                            <a class="btn btn-default" href="{% url 'start_user' %}">Cancelar</a>
-                            <input type="submit" value="Salvar" class="btn btn-primary btn-raised"></input>
+                        <div class="col-md-2 col-md-offset-4">
+                            <a class="btn btn-danger btn-block" href="{% url 'start_user' %}">Cancelar</a>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="submit" value="Salvar" class="btn btn-primary btn-block"></input>
                         </div>
                     </div>
                 </div>
             </form>
+            <hr/>
+            <ul class="nav nav-pills">
+                <li><a data-toggle="tab" href="#home">Endereços</a></li>
+                <li class="active"><a data-toggle="tab" href="#menu1">Convites para usuários</a></li>
+                <li><a data-toggle="tab" href="#menu2">Escritórios relacionados</a></li>
+            </ul>
+            <div class="tab-content">
+                <div id="home" class="tab-pane fade">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Estado</th>
+                                <th>Cidade</th>
+                                <th>Rua</th>
+                                <th>Bairro</th>
+                                <th>Número</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{object.address}}
+                            <tr>
+                                <td>Minas Gerais</td>
+                                <td>Sete Lagoas</td>
+                                <td>Antônio Batista</td>
+                                <td>Boa Vista</td>
+                                <td>351</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="menu1" class="tab-pane fade in active">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Usuário</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invite in object.invites.all %}
+                            <tr>
+                                <td>{{invite.person.name}}</td>
+                                <td>{{invite.person.auth_user.username}}</td>
+                                {% if invite.status == 'N' %}
+                                    <td>Enviado</td>
+                                {% elif invite.status == 'R' %}
+                                    <td>Recusado</td>
+                                {% else %}
+                                    <td>Aceito</td>
+                                {% endif %}
+                                <td><a href="#"><i class="fa fa-trash text-danger"></i></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" style="text-align: left;">
+                                    <button type="button" class="btn btn-primary btn-raised btn-fab" data-toggle="modal" data-target="#new_invite"><i class="fa fa-plus"></i></button>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div id="menu2" class="tab-pane fade">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>CPF/CNPJ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Milagres && Machado</td>
+                                <td>068.964.296-23</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+           </div>
         </div>
     </div>
-{% endblock %}
+ {% include 'core/new_invite.html' with office=object.pk%}
+
+ {%endblock%}
+
+ {% block javascript %}
+     {{block.super}}
+     {% block extrajs %}
+         {{block.super}}
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+     {% endblock %}
+     <script>
+         $(document).ready(function() {
+             var elUsersToInvite = $('.users_to_invite');
+             var data = {};
+             $.ajax({
+                 type: 'GET',
+                 url: '/users_to_invite/',
+                 data: data,
+                 success: function(response){
+                        response.data.forEach(function(user){
+                            elUsersToInvite.append($('<option>', {
+                                value: user.person__pk,
+                                text: user.person__name + ' (' + user.username + ')',
+                            }))
+                        })
+                    },
+             })
+             elUsersToInvite.select2();
+         });
+     </script>
+ {% endblock %}
