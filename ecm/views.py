@@ -56,7 +56,6 @@ class UploadView(View):
             attachment = Attachment(
                 model_name=data.get('model_name'),
                 object_id=data.get('object_id'),
-                repr_name='teste',
                 file=request.FILES.get('qqfile'),
                 create_user_id=request.user.id
             )

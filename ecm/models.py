@@ -14,7 +14,6 @@ class Attachment(AuditCreate, LegacyCode):
     """
     Anexos do Sistema
     app_name:
-    repr_name:
     reg_id:
     """
     model_name = models.CharField(
