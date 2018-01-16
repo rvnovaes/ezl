@@ -28,7 +28,6 @@ from django.core.cache import cache
 from dal import autocomplete
 from django.db.models import Q
 from core.utils import get_office_session
-from core.models import Person
 
 
 class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
