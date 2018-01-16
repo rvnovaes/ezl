@@ -135,11 +135,16 @@ class DashboardView(MultiTableMixin, TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+
+        person = Person.objects.get(auth_user=self.request.user)
+        context['task_count'] = DashboardViewModel.objects.all().count()
+
         if not self.request.user.get_all_permissions():
             context['messages'] = [
                     {'tags': 'error', 'message': NO_PERMISSIONS_DEFINED}
                 ]
         return context
+
     def get_tables(self):
         person = Person.objects.get(auth_user=self.request.user)
         dynamic_query = self.get_dynamic_query(person)
@@ -607,15 +612,30 @@ class DashboardStatusCheckView(LoginRequiredMixin, View):
 
 @login_required
 def ajax_get_task_data_table(request):
-    query = Task.objects.filter(task_status=request.GET.get('status')).values(
-        'task_number', 'movement', 'person_asked_by', 'type_task', 'requested_date'
-    )
+    status = request.GET.get('status')
+    query = DashboardViewModel.objects.filter(task_status=status)
     xdata = []
-    for x in query:
-        xdata.append(list(dict(x).values()))
+    xdata.append(
+        list(
+            map(lambda x: [
+                x.pk,
+                x.task_number,
+                x.final_deadline_date.strftime('%d/%m/%Y %H:%M'),
+                x.type_service,
+                x.lawsuit_number,
+                x.client,
+                x.opposing_party,
+                x.delegation_date.strftime('%d/%m/%Y %H:%M'),
+                x.legacy_code,
+                'Movimentação sem processo',
+                'Preencher o processo na movimentação',
+            ], query)
+        )
+    )
+
 
     data = {
-        "data": [xdata]
+        "data": xdata[0]
     }
-    print('>>>>>>>>', request.GET)
+    print('<>>>>', data)
     return JsonResponse(data)

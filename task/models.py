@@ -35,15 +35,15 @@ icon_dict = {
 }
 
 color_dict = {
-    'ACCEPTED': 'text-success',
-    'OPEN': 'text-primary',
-    'RETURN': 'text-warning',
-    'DONE': 'text-info',
-    'REFUSED': 'text-warning',
-    'INVALID': 'text-muted',
-    'FINISHED': 'text-success',
-    'BLOCKEDPAYMENT':'text-muted',
-    'ERROR': 'text-danger'
+    'ACCEPTED': 'success',
+    'OPEN': 'primary',
+    'RETURN': 'warning',
+    'DONE': 'info',
+    'REFUSED': 'warning',
+    'INVALID': 'muted',
+    'FINISHED': 'success',
+    'BLOCKEDPAYMENT':'muted',
+    'ERROR': 'danger'
 }
 
 
@@ -333,6 +333,8 @@ class DashboardViewModel(Audit):
     @property
     def court(self):
         return self.movement.law_suit.organ
+
+
 
     # TODO fazer composição para buscar no endereço completo
     # TODO Modifiquei pois quando não há orgão cadastrado em lawsuit lança erro de

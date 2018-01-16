@@ -11,15 +11,16 @@
     <title>{{ title_page }}</title>
     <!-- ============================================================== -->
     <!-- Stylesheets block -->
-    {% block stylesheets %}
-        {% include 'skeleton/includes/stylesheets.html' %}
-    {% endblock stylesheets %}
     {% block extra_stylesheets %}
         {% comment %}
             Utilize esse bloco para adicionar estilos/css em páginas
             específicas que extendem esse template
         {% endcomment %}
     {% endblock %}
+
+    {% block stylesheets %}
+        {% include 'skeleton/includes/stylesheets.html' %}
+    {% endblock stylesheets %}
     <!-- End Stylesheets block -->
     <!-- ============================================================== -->
 
