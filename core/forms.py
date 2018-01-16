@@ -155,10 +155,17 @@ class PersonForm(BaseModelForm):
             required=True,
         )
 
+    auth_user = forms.ModelChoiceField(
+        queryset=filter_valid_choice_form(User.objects.all().order_by('username')),
+        empty_label='',
+        required=False,
+        label='Usuário do sistema',
+        )
+
     class Meta:
         model = Person
         fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj',
-                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active', 'import_from_legacy']
+                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active', 'import_from_legacy', 'auth_user']
 
     def clean(self):
         cleaned_data = super().clean()
@@ -188,8 +195,9 @@ class PersonForm(BaseModelForm):
             self.layout = Layout(
                 Row('legal_name', 'name'),
                 Row('legal_type', 'cpf_cnpj'),
+                Row('auth_user', 'import_from_legacy'),
                 Row('is_lawyer', 'is_customer', 'is_supplier', 'is_active'),
-                Row('import_from_legacy'))
+                )
         else:
             self.layout = Layout(
                 Row('legal_name', 'name'),
