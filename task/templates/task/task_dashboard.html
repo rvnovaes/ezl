@@ -1,13 +1,108 @@
-{% extends 'inicial.html' %}
-{% load django_tables2 %}
-{% load static %}
+
+{% extends 'skeleton/base.html' %}
+{% load django_tables2  static bootstrap3 %}
 {% load querystring from django_tables2 %}
-{% load bootstrap3 %}
+
+{% block extra_stylesheets %}
+    <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
+{% endblock %}
 {% block content %}
+    <div class="col-sm-12 col-xs-12">
+        <div class="white-box p-t-0 p-b-0">
+            <div class="row minus-margin">
+                {% for table in tables %}
+                <div class="col-sm-12 col-sm-4 b-t b-r b-b">
+                    <ul class="expense-box">
+                        <li>
+                            <i class="{{ table.status.get_icon }} {{ table.status.get_color }}"></i>
+                            <span><h2>{{ table.length }}</h2><h4>{{ table.title }}</h4></span>
+                        </li>
+                    </ul>
+                <ul class="side-icon-text pull-right p-b-20">
+                    <li>
+                        <button class="btn btn-outline btn-default waves-effect waves-light"
+                                data-toggle="modal" data-target="#modal-view-task-table" data-status="{{ table.status }}">
+                            <i class="mdi mdi-table-edit"></i>
+                        </button>
+                    </li>
+                </ul>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% comment %}
+        <div class="white-box">
+            <section>
+                <div class="sttabs tabs-style-iconbox">
+                    <nav>
+                        <ul>
+                            {% for table in tables %}
+                                <li>
+                                    <a href="#section-{{ table.status.name|lower }}" class="sticon {{ table.status.get_icon }}">
+                                        <span><small>{{ table.title|upper }}<br></small></span><small class="badge badge-inverse">{{ table.length }}</small>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </nav>
+                    <div class="content-wrap">
+                        {% for table in tables %}
+                            <section id="{{ table.status.name|lower }}">
+                                <table class="table table-striped table-hover">
+                                        <thead>
+                                        <tr>
+                                            {% for column in table.columns %}
+                                                {% if column.orderable %}
+                                                    <th {{ column.attrs.th.as_html }}><a
+                                                            href="{% querystring table.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header|title }}</a>
+                                                    </th>
+                                                {% else %}
+                                                    <th {{ column.attrs.th.as_html }}>{{ column.header|title }}</th>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for row in table.page.object_list|default:table.rows %}
+                                                {# support pagination #}
+                                                        {% if table.status.name != 'ERROR' %}
+                                                            <tr class="{% cycle "odd" "even" %}" data-new-href="{{ row.attrs.data_new_href }}" data-task data-task-id="{{ row.record.id}}" data-task-status="{{ row.record.status}}">
+                                                        {% else %}
+                                                            <tr class="{% cycle "odd" "even" %}" data-new-href="{{ row.attrs.data_new_href }}" >
+                                                        {% endif %}
+                                                        {% for column, cell in row.items %}
+                                                            <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
+                                                        {% endfor %}
+                                                    </tr>
+                                            {% empty %}
+                                                {% if table.empty_text %}
+
+                                                        <tr>
+                                                            <td colspan="{{ table.columns|length }}">{{ table.empty_text }}</td>
+                                                        </tr>
+
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                        <tfoot></tfoot>
+                                </table>
+                            </section>
+                        {% endfor %}
+                    </div>
+                    <!-- /content -->
+                </div>
+                <!-- /tabs -->
+            </section>
+        </div>
+        {% endcomment %}
+    </div>
+
     {#    <div class="container form-group"><label class="is-focused"><h2>{{ title_page }}</h2></label></div>#}
     {% include 'core/widgets/messages.html' %}
     {% for message in messages %}      
     {%endfor%}
+    {% comment %}
     {% block table %}
         <div class="container">
             {% if table.page %}
@@ -83,6 +178,7 @@
             </div>
         </div>
     {% endblock table %}
+    {% endcomment %}
 {% endblock content %}
 
 {% block javascript %}{{ block.super }}
@@ -114,4 +210,44 @@
         }, 500);
     });
 </script>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+    <!-- start - This is for export functionality only -->
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.flash.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
+{% endblock %}
+
+{% block script_document_ready %}
+
+        $('#modal-view-task-table').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var status = button.data('status');
+            console.log('>>>', status);
+            if ($.fn.dataTable.isDataTable('#example')) {
+                $('#example').DataTable().clear().destroy();
+            };
+            $('#example').DataTable({
+                "ajax": '{% url 'ajax_get_task_data_table' %}?status=' + status,
+                buttons: [
+                    'copy', 'csv', 'excel', 'pdf', 'print'
+                ]
+            });
+        });
+        $('#modal-view-task-table').on('hide.bs.modal', function (event) {
+            $('#example').DataTable();
+            console.log('fechou modal');
+        });
+
+
+{% endblock %}
+
+{% block extra_modal %}
+    {% include 'task/modal/view-task-table.html' %}
 {% endblock %}

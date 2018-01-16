@@ -22,11 +22,29 @@ class Permissions(Enum):
 
 
 # Dicionário para retornar o icone referente ao status da providencia
-icon_dict = {'ACCEPTED': 'assignment_ind', 'OPEN': 'assignment', 'RETURN': 'assignment_return',
-             'DONE': 'assignment_turned_in',
-             'REFUSED': 'assignment_late', 'INVALID': 'error', 'FINISHED': 'gavel',
-             'BLOCKEDPAYMENT': 'money_off',
-             'ERROR': 'error'}
+icon_dict = {
+    'ACCEPTED': 'mdi mdi-timer',
+    'OPEN': 'mdi mdi-lock-open-outline',
+    'RETURN': 'mdi mdi-undo-variant',
+    'DONE': 'mdi mdi-checkbox-marked-circle-outline',
+    'REFUSED': 'mdi mdi-delete',
+    'INVALID': 'mdi mdi-exclamation',
+    'FINISHED': 'mdi mdi-gavel',
+    'BLOCKEDPAYMENT':'mdi mdi-grease-pencil',
+    'ERROR': 'mdi mdi-skull'
+}
+
+color_dict = {
+    'ACCEPTED': 'text-success',
+    'OPEN': 'text-primary',
+    'RETURN': 'text-warning',
+    'DONE': 'text-info',
+    'REFUSED': 'text-warning',
+    'INVALID': 'text-muted',
+    'FINISHED': 'text-success',
+    'BLOCKEDPAYMENT':'text-muted',
+    'ERROR': 'text-danger'
+}
 
 
 # next_action = {'ACCEPTED': 'cumprir', 'OPEN': 'assignment', 'RETURN': 'keyboard_return',
@@ -46,6 +64,9 @@ class TaskStatus(Enum):
 
     def get_icon(self):
         return icon_dict[self.name]
+
+    def get_color(self):
+        return color_dict[self.name]
 
     def __str__(self):
         return str(self.value)

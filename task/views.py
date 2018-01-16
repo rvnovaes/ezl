@@ -1,12 +1,12 @@
+import json
 import os
 from urllib.parse import urlparse
-import json
-from chat.models import UserByChat
-from django.core.cache import cache
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
@@ -15,6 +15,8 @@ from django.utils import timezone
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
+from chat.models import Chat
+from chat.models import UserByChat
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
@@ -29,7 +31,7 @@ from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable
-from chat.models import Chat
+
 
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Task
@@ -601,3 +603,19 @@ class DashboardStatusCheckView(LoginRequiredMixin, View):
         # Comparamos as tasks que foram enviadas com as que estão no banco para saber se houve mudanças
         has_changed = tuple(db_tasks) != tasks
         return JsonResponse({"has_changed": has_changed})
+
+
+@login_required
+def ajax_get_task_data_table(request):
+    query = Task.objects.filter(task_status=request.GET.get('status')).values(
+        'task_number', 'movement', 'person_asked_by', 'type_task', 'requested_date'
+    )
+    xdata = []
+    for x in query:
+        xdata.append(list(dict(x).values()))
+
+    data = {
+        "data": [xdata]
+    }
+    print('>>>>>>>>', request.GET)
+    return JsonResponse(data)
