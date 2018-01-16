@@ -775,11 +775,10 @@ class OfficeListView(LoginRequiredMixin, SingleTableViewMixin):
 
 class OfficeCreateView(AuditFormMixin, CreateView):
     model = Office
-    form_class = OfficeForm
+    fields = ('name', 'legal_name', 'cpf_cnpj', 'legal_type')
     success_url = reverse_lazy('office_list')
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'office_list'
-
 
     def form_valid(self, form):
         form.instance.create_user = self.request.user
@@ -790,26 +789,28 @@ class OfficeCreateView(AuditFormMixin, CreateView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         if self.request.POST:
-            data['officeddress'] = AddressOfficeFormSet(self.request.POST)
+            data['personaddress'] = AddressFormSet(self.request.POST)
         else:
-            data['officeaddress'] = AddressOfficeFormSet()
-            data['officeaddress'].forms[0].fields['is_active'].initial = True
-            data['officeaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
+            data['personaddress'] = AddressFormSet()
+            data['personaddress'].forms[0].fields['is_active'].initial = True
+            data['personaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
         return data
+
 
 class OfficeUpdateView(AuditFormMixin, UpdateView):
     model = Office
-    form_class = OfficeForm
+    fields = ('name', 'legal_name', 'cpf_cnpj', 'legal_type')
     success_url = reverse_lazy('office_list')
+    template_name_suffix = '_update_form'
     success_message = UPDATE_SUCCESS_MESSAGE
     object_list_url = 'office_list'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         if self.request.POST:
-            data['personaddress'] = AddressOfficeFormSet(self.request.POST)
+            data['personaddress'] = AddressFormSet(self.request.POST)
         else:
-            data['personaddress'] = AddressOfficeFormSet()
+            data['personaddress'] = AddressFormSet()
             data['personaddress'].forms[0].fields['is_active'].initial = True
             data['personaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
         return data
@@ -924,10 +925,11 @@ class EditableListSave(LoginRequiredMixin, View):
 
         return JsonResponse({"ok": True})
 
+
 class ListUsersToInviteView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         users = User.objects.all().values(
-        'pk', 'username', 'email', 'person__name', 'person__pk')
+            'pk', 'username', 'email', 'person__name', 'person__pk')
         return JsonResponse({'data': list(users)})
 
 
@@ -940,6 +942,5 @@ class InviteMultipleUsersView(LoginRequiredMixin, View):
                 person = Person.objects.get(pk=person_pk)
                 office = Office.objects.get(pk=office_pk)
                 Invite.objects.create(create_user=request.user, person=person,
-                    office=office, status='N')
-        return HttpResponseRedirect(
-            reverse_lazy('office', kwargs={'pk': office.pk}))
+                                      office=office, status='N')
+        return HttpResponseRedirect(reverse_lazy('office_update', kwargs={'pk': office.pk}))

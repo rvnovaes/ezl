@@ -223,6 +223,9 @@ class AbstractPerson(Audit, LegacyCode):
 
 class Person(AbstractPerson):
     objects = PersonManager()
+    cpf_cnpj = models.CharField(max_length=255, blank=True, null=True, unique=False,
+                                verbose_name='CPF/CNPJ')
+    
     class Meta:
         db_table = 'person'
         ordering = ['legal_name', 'name']

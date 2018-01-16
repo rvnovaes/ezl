@@ -356,6 +356,7 @@ class ResetPasswordFormMixin(forms.Form):
             self.context = context
         return self.context
 
+
 class OfficeForm(BaseModelForm):
     legal_type = forms.ChoiceField(
             label='Tipo',
@@ -393,4 +394,12 @@ class OfficeForm(BaseModelForm):
         return cleaned_data
 
 
-AddressOfficeFormSet = inlineformset_factory(Office, Address, form=AddressForm, extra=1, max_num=1)
+class AddressOfficeForm(ModelForm):
+    class Meta:
+        model = Address
+        fields = ['zip_code', 'city_region', 'address_type', 'state', 'city', 'street', 'number',
+                  'notes', 'is_active']
+
+
+AddressOfficeFormSet = inlineformset_factory(Office, Address, form=AddressForm, extra=1,
+                                             max_num=1)
