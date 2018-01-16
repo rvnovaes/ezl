@@ -305,8 +305,8 @@ class SingleTableViewMixin(SingleTableView):
             pass
         context['form_name'] = self.model._meta.verbose_name
         context['form_name_plural'] = self.model._meta.verbose_name_plural
-        custom_session_user = self.request.session.get('custom_session_user')
 
+        custom_session_user = self.request.session.get('custom_session_user')
         office = False
         if custom_session_user and custom_session_user.get(str(self.request.user.pk)):
             current_office_session = custom_session_user.get(str(self.request.user.pk))
@@ -844,6 +844,11 @@ class CustomSession(View):
         """
         data = {}
         if request.POST.get('current_office'):
+            custom_session_user = self.request.session.get('custom_session_user')
+            if not custom_session_user and request.POST.get('current_office') != '0':
+                data['modified'] = True
+            elif custom_session_user.get(str(self.request.user.pk)).get('current_office') != request.POST.get('current_office'):
+                data['modified'] = True
             current_office = request.POST.get('current_office')
             request.session['custom_session_user'] = {
                 self.request.user.pk: {'current_office': current_office}
@@ -855,6 +860,7 @@ class CustomSession(View):
             else:
                 request.session.modified = True
                 del request.session['custom_session_user']
+                data['modified'] = True
 
         return JsonResponse(data)
 
