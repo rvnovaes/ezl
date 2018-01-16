@@ -3,14 +3,14 @@
 
 {% block content %}
     {% include 'core/widgets/messages.html' %}
-<div class="panel panel-default">
+    <div class="panel panel-default">
         <div class="panel-heading"><i class="ti-pencil-alt"></i> {{ form.title }}</div>
         <div class="panel-wrapper collapse in">
             <div class="panel-body">
                 <form action="" method="post">{% csrf_token %}
                     <fieldset>
                         {% for field in form %}
-                            <div class="form-group col-md-2">
+                            <div class="form-group col-md-4">
                                 <label>
                                     {{ field | append_ast_if_req  | label_capitalizer }}{{ field }}
                                 </label>
