@@ -1,17 +1,14 @@
-{% extends 'inicial.html' %}
+{% extends 'skeleton/base.html' %}
 {% load core_filters %}
 
 {% block content %}
     {% include 'core/widgets/messages.html' %}
-
-    <form action="" method="post">{% csrf_token %}
-        <div class="col-lg-12 ">
-            <fieldset>
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h1 class="panel-title">{{ form.title }}</h1>
-                    </div>
-                    <div class="panel-body">
+<div class="panel panel-default">
+        <div class="panel-heading"><i class="ti-pencil-alt"></i> {{ form.title }}</div>
+        <div class="panel-wrapper collapse in">
+            <div class="panel-body">
+                <form action="" method="post">{% csrf_token %}
+                    <fieldset>
                         {% for field in form %}
                             <div class="form-group col-md-2">
                                 <label>
@@ -19,19 +16,13 @@
                                 </label>
                             </div>
                         {% endfor %}
-
-                    </div>
-                    <div class="form-row  text-center">
-                        {% include 'core/widgets/cancel_button.html' with link_list='courtdistrict_list' %}
-                        <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
-                                class="material-icons left">done</i>
-                            Salvar
-                        </button>
-                    </div>
-                </div>
-            </fieldset>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="panel-footer">
+                {% include 'core/widgets/cancel_button.html' with link_list='courtdistrict_list' %}
+                {% include 'skeleton/componentes/buttons/submit_save.html' %}
+            </div>
         </div>
-
-    </form>
-
+    </div>
 {% endblock content %}
