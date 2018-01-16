@@ -100,3 +100,19 @@ def get_office_field(request, profile=None):
                 label=u'Escritório',
                 initial=initial
             )
+
+
+def get_office_session(request):
+    """
+    Retorna o objeto Office de acordo com a sessão atual do usuário; Ou False caso não tenha selecionado escritório
+    :param request:
+    :return: Office object or False
+    """
+    from core.models import Office
+    if request.session.get('custom_session_user'):
+        custom_session_user = list(request.session.get('custom_session_user').values())
+        office = Office.objects.filter(pk=custom_session_user[0]['current_office']).first()
+    else:
+        office = False
+
+    return office
