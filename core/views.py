@@ -273,6 +273,14 @@ class AddressUpdateView(AddressMixin, UpdateView):
     def get_success_url(self):
         return reverse('person_update', args=(self.object.person.pk, ))
 
+    def dispatch(self, request, *args, **kwargs):
+        if self.kwargs.get('person_pk'):
+            obj = Person.objects.get(id=self.kwargs.get('person_pk'))
+        office_session = get_office_session(request=request)
+        if obj.offices.filter(pk=office_session.pk).first() != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class AddressDeleteView(AddressMixin, MultiDeleteViewMixin):
     model = Address
@@ -434,10 +442,9 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
         return reverse('person_update', args=(self.object.id,))
 
     def dispatch(self, request, *args, **kwargs):
-        import pdb;pdb.set_trace()
         obj = self.get_object()
         office_session = get_office_session(request=request)
-        if obj.person.organ.office != office_session:
+        if obj.offices.filter(pk=office_session.pk).first() != office_session:
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
