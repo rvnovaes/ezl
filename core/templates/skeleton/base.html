@@ -113,6 +113,7 @@
                                 <li><b>Choose other demos</b></li>
                             </ul>
                             <ul class="m-t-20 chatonline">
+                                {% comment %}
                                 <li><b>Chat option</b></li>
                                 <li>
                                     <a href="javascript:void(0)"><img src="../plugins/images/users/varun.jpg" alt="user-img" class="img-circle"> <span>Varun Dhavan <small class="text-success">online</small></span></a>
@@ -138,6 +139,7 @@
                                 <li>
                                     <a href="javascript:void(0)"><img src="../plugins/images/users/pawandeep.jpg" alt="user-img" class="img-circle"> <span>Pwandeep rajan <small class="text-success">online</small></span></a>
                                 </li>
+                                {% endcomment %}
                             </ul>
                         </div>
                     </div>
@@ -169,6 +171,11 @@
         <script>
             $(document).on('ready', function() {
                 console.log('ready!');
+                jQuery('.datepicker-autoclose').datepicker({
+                    autoclose: true,
+                    todayHighlight: true,
+                    format: 'dd/mm/yyyy'
+                });
                 {% block script_document_ready %}
                     {% comment %}
                         A page can't be manipulated safely until the document is "ready." jQuery detects this state

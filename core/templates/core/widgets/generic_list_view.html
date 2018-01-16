@@ -9,6 +9,7 @@
         <div class="table-container">
     {% endif %}
 <script language="JavaScript">
+    {% comment %}
     $('#myModal').modal('show')
     var pk_list = [];
 
@@ -32,7 +33,7 @@
             document.getElementById('delete_button').disabled = true;
         }
     }
-
+    {% endcomment %}
     function showDeleteButton(source) {
         if (source.checked) {
             pk_list.push(source.id);
