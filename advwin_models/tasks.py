@@ -173,7 +173,7 @@ def insert_advwin_history(task_history, values, execute=True):
 
 
 @shared_task()
-def export_task_history(task_history_id, task_history=None, task_instance=False, execute=True):
+def export_task_history(task_history_id, task_history=None, execute=True, **kwargs):
     if task_history is None:
         task_history = TaskHistory.objects.get(pk=task_history_id)
 
@@ -181,7 +181,7 @@ def export_task_history(task_history_id, task_history=None, task_instance=False,
     if task_history.create_user:
         username = task_history.create_user.username[:20]
 
-    task = task_instance if task_instance else task_history.task
+    task = task_history.task
     if task_history.status == TaskStatus.ACCEPTED.value:
         values = {
             'codigo_adv_correspondente': task.person_executed_by.legacy_code,

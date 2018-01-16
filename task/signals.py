@@ -150,15 +150,17 @@ def change_status(sender, instance, **kwargs):
 
         instance.alter_date = now_date
 
-        TaskHistory.objects.create(task=instance, create_user=instance.alter_user,
-                                   status=instance.task_status,
-                                   create_date=now_date,
-                                   notes=getattr(instance, '__notes', ''))
         # instance.__previous_status = instance.task_status
 
 
 @receiver(post_save, sender=Task)
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
+    now_date = timezone.now()
+    TaskHistory.objects.create(task=instance, create_user=instance.alter_user,
+                               status=instance.task_status,
+                               create_date=now_date,
+                               notes=getattr(instance, '__notes', ''))
+
     if not getattr(instance, '_called_by_etl'):
         export_task.delay(instance.pk)
 
@@ -166,4 +168,4 @@ def ezl_export_task_to_advwin(sender, instance, **kwargs):
 @receiver(post_save, sender=TaskHistory)
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
     if not getattr(instance, '_called_by_etl'):
-        export_task_history.delay(instance.pk, task_instance=instance.task)
+        export_task_history.delay(instance.pk)
