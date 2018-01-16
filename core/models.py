@@ -231,7 +231,6 @@ class Person(AbstractPerson):
 
 
 class Office(AbstractPerson):
-    objects = OfficeManager()
 
     persons = models.ManyToManyField(Person, blank=True, related_name='offices')
     offices = models.ManyToManyField('self', blank=True)

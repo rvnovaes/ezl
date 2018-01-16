@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from sequences import get_next_value
-from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin
+from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
 
@@ -88,6 +88,8 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
                                    choices=((x.name.title(), x.value) for x in SurveyType),
                                    default=SurveyType.BLANK)
 
+    objects = OfficeManager()
+
     class Meta:
         db_table = 'type_task'
         ordering = ('name',)
@@ -143,6 +145,8 @@ class Task(Audit, LegacyCode, OfficeMixin):
                              blank=True)
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
+
+    objects = OfficeManager()
 
     class Meta:
         db_table = 'task'
