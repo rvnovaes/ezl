@@ -29,6 +29,9 @@ urlpatterns = [
     url(r'^pessoas/(?P<person_pk>[0-9]+)/enderecos/criar/$',
         views.AddressCreateView.as_view(),
         name='address_create'),
+    url(r'^escritorio/(?P<office_pk>[0-9]+)/enderecos/criar/$',
+        views.AddressOfficeCreateView.as_view(),
+        name='address_office_create'),
 
     url(r'^pessoas/(?P<person_pk>[0-9]+)/enderecos/(?P<pk>[0-9]+)/$',
         views.AddressUpdateView.as_view(),

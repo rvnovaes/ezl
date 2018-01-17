@@ -49,6 +49,7 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
                          ' type="checkbox" %s onclick="showDeleteButton(this)"/>'
                          '</label></div>' % attrs.as_html())
 
+
 class AddressTable(tables.Table):
 
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
@@ -66,8 +67,15 @@ class AddressTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/pessoas/' + str(record.person.pk) + '/enderecos/' + str(record.pk) + '/'
         }
-
 # Logradouro, N, COmplemento, Bairro, Cidade, Estado, Cep, Pais, Observacao, Tipo, Ativo
+
+
+class AddressOfficeTable(AddressTable):
+    class Meta:
+        row_attrs = {
+            'data_href': lambda record: '/escritorios/' + str(record.office.pk) + '/enderecos/' + str(record.pk) + '/'
+        }
+
 
 class PersonTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)

@@ -276,6 +276,7 @@ class Invite(Audit):
     class Meta:
         verbose_name = 'Convite'
 
+
 class Address(Audit):
     address_type = models.ForeignKey(
         AddressType, on_delete=models.PROTECT, blank=False, null=False,
@@ -294,7 +295,7 @@ class Address(Audit):
                              verbose_name='Estado')
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False,
                              verbose_name='País')
-    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
+    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True)
     office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True, related_name='adresses')
 
     class Meta:

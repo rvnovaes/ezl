@@ -39,7 +39,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     ADDRESS_UPDATE_SUCCESS_MESSAGE
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice
 from core.signals import create_person
-from core.tables import PersonTable, UserTable, AddressTable, OfficeTable
+from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable
 from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
@@ -244,22 +244,28 @@ class AuditFormMixin(LoginRequiredMixin, SuccessMessageMixin):
 
 
 class AddressMixin(AuditFormMixin):
+    def __init__(self, related_model=None, related_field_pk=False, related_model_name=''):
+        self.related_model = related_model
+        self.related_model_name = related_model_name
+        self.related_field_pk = related_field_pk
+        self.object_related = None
 
     def dispatch(self, *args, **kwargs):
-        self.person = Person.objects.get(pk=self.kwargs['person_pk'])
+        self.object_related = self.related_model.objects.get(
+            pk=kwargs['{}_pk'.format(self.related_field_pk)])
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(person=self.person, **kwargs)
+        return super().get_context_data(person=self.object_related, **kwargs)
 
     def form_valid(self, form):
         form.save(commit=False)
-        form.instance.person = self.person
+        setattr(form.instance, self.related_model_name, self.object_related)
         return super().form_valid(form)
 
     def get_object_list_url(self):
         # TODO: Este método parece ser inútil, success_url pode ser usado.
-        return reverse('person_update', args=(self.person.pk, ))
+        return reverse('{}_update'.format(self.related_model_name), args=(self.object_related.pk, ))
 
 
 class AddressCreateView(AddressMixin, CreateView):
@@ -267,8 +273,25 @@ class AddressCreateView(AddressMixin, CreateView):
     form_class = AddressForm
     success_message = CREATE_SUCCESS_MESSAGE
 
+    def __init__(self):
+        super().__init__(related_model=Person, related_model_name='person',
+                         related_field_pk='person')
+
     def get_success_url(self):
         return reverse('person_update', args=(self.object.person.pk, ))
+
+
+class AddressOfficeCreateView(AddressMixin, CreateView):
+    model = Address
+    form_class = AddressForm
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def __init__(self):
+        super().__init__(related_model=Office, related_model_name='office',
+                         related_field_pk='office')
+
+    def get_success_url(self):
+        return reverse('office_update', args=(self.object.office.pk, ))
 
 
 class AddressUpdateView(AddressMixin, UpdateView):
@@ -812,7 +835,6 @@ class OfficeListView(LoginRequiredMixin, SingleTableViewMixin):
 class OfficeCreateView(AuditFormMixin, CreateView):
     model = Office
     fields = ('name', 'legal_name', 'cpf_cnpj', 'legal_type')
-    success_url = reverse_lazy('office_list')
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'office_list'
 
@@ -822,15 +844,8 @@ class OfficeCreateView(AuditFormMixin, CreateView):
         form.instance.persons.add(form.instance.create_user.person)
         return super().form_valid(form)
 
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        if self.request.POST:
-            data['personaddress'] = AddressFormSet(self.request.POST)
-        else:
-            data['personaddress'] = AddressFormSet()
-            data['personaddress'].forms[0].fields['is_active'].initial = True
-            data['personaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
-        return data
+    def get_success_url(self):
+        return reverse('office_update', kwargs={'pk': self.object.pk})
 
 
 class OfficeUpdateView(AuditFormMixin, UpdateView):
@@ -842,14 +857,10 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
     object_list_url = 'office_list'
 
     def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        if self.request.POST:
-            data['personaddress'] = AddressFormSet(self.request.POST)
-        else:
-            data['personaddress'] = AddressFormSet()
-            data['personaddress'].forms[0].fields['is_active'].initial = True
-            data['personaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
-        return data
+        kwargs.update({
+            'table': AddressOfficeTable(self.object.adresses.all()),
+        })
+        return super().get_context_data(**kwargs)
 
 
 class OfficeDeleteView(LoginRequiredMixin, DeleteView):
