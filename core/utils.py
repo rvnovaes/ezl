@@ -85,7 +85,8 @@ def get_office_field(request, profile=None):
     try:
         if profile:
             queryset = profile.person.offices.all()
-            initial = DefaultOffice.objects.filter(auth_user=profile).first().office
+            initial = DefaultOffice.objects.filter(auth_user=profile).first().office if \
+                      DefaultOffice.objects.filter(auth_user=profile).first() else None
         elif request.session.get('custom_session_user'):
             custom_session_user = list(request.session.get('custom_session_user').values())
             queryset = Office.objects.filter(pk=custom_session_user[0]['current_office'])
