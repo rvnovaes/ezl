@@ -75,7 +75,6 @@ class TaskETL(GenericETL):
                 a.Advogado_or AS person_distributed_by_legacy_code,
                 a.OBS AS description,
                 a.Data_confirmacao AS blocked_or_finished_date,
-                a.Data_delegacao AS delegation_date,
                 a.Data AS requested_date,
                 a.prazo_fatal AS final_deadline_date,
                 p.Codigo_Comp AS folder_legacy_code,
@@ -106,7 +105,8 @@ class TaskETL(GenericETL):
     def config_import(self, rows, user, rows_count, log=False):
         from core.models import Person
         for row in rows:
-
+            print(rows_count)
+            rows_count -= 1
             try:
                 legacy_code = row['legacy_code']
                 movement_legacy_code = row['movement_legacy_code']
@@ -114,12 +114,6 @@ class TaskETL(GenericETL):
                 person_executed_by_legacy_code = row['person_executed_by_legacy_code']
                 person_distributed_by_legacy_code = row['person_distributed_by_legacy_code']
                 type_task_legacy_code = row['type_task_legacy_code']
-
-                if row['delegation_date']:
-                    delegation_date = pytz.timezone(settings.TIME_ZONE).localize(
-                        row['delegation_date'])
-                else:
-                    delegation_date = None
 
                 status_code_advwin = get_status_by_substatus(row['status_code_advwin'])
 
@@ -192,13 +186,12 @@ class TaskETL(GenericETL):
                                                 Inconsistencies.MOVEMENTLESSPROCESS)})
 
                 if task:
-                    task.delegation_date = delegation_date
                     task.requested_date = requested_date
                     task.final_deadline_date = final_deadline_date
                     task.description = description
                     task.task_status = status_code_advwin
 
-                    update_fields = ['requested_date', 'delegation_date', 'final_deadline_date', 'description',
+                    update_fields = ['requested_date', 'final_deadline_date', 'description',
                                      'task_status', ]
 
                     task.save(update_fields=update_fields)
@@ -213,7 +206,6 @@ class TaskETL(GenericETL):
                                                      person_executed_by=person_executed_by,
                                                      person_distributed_by=person_distributed_by,
                                                      type_task=type_task,
-                                                     delegation_date=delegation_date,
                                                      final_deadline_date=final_deadline_date,
                                                      description=description,
                                                      refused_date=refused_date,
@@ -235,11 +227,11 @@ class TaskETL(GenericETL):
                     InconsistencyETL.objects.filter(task=task).update(is_active=False)
 
                 self.debug_logger.debug(
-                    "Task,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                    "Task,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
                         str(movement.id), str(legacy_code), str(LegacySystem.ADVWIN.value),
                         str(user.id), str(user.id), str(person_asked_by.id),
                         str(person_executed_by.id), str(person_distributed_by.id),
-                        str(type_task.id), str(delegation_date), str(final_deadline_date),
+                        str(type_task.id), str(final_deadline_date),
                         str(description), str(refused_date), str(execution_date),
                         str(blocked_payment_date), str(finished_date),
                         str(status_code_advwin), self.timestr))
