@@ -2,6 +2,8 @@ from enum import Enum
 
 from django.conf import settings
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from core.managers import PersonManager
 from core.utils import LegacySystem
@@ -219,15 +221,32 @@ class AbstractPerson(Audit, LegacyCode):
 
     def __str__(self):
         return self.legal_name
+#
+#
+# def validate_cpf_cnpj(instance):
+#     import pdb;pdb.set_trace()
+#     raise ValidationError(
+#         _('%(value)s is not an even number'),
+#         params={'value': instance.cpf_cnpj},
+#     )
 
 
 class Person(AbstractPerson):
     objects = PersonManager()
+
+    cpf_cnpj = models.CharField(max_length=255, blank=True, null=True, unique=False,
+                                verbose_name='CPF/CNPJ')
+
     class Meta:
         db_table = 'person'
         ordering = ['legal_name', 'name']
         verbose_name = 'Pessoa'
         verbose_name_plural = 'Pessoas'
+    #
+    # def save(self, *args, **kwargs):
+    #     import pdb;pdb.set_trace()
+    #     validate_cpf_cnpj(self)
+    #     return super(*args, **kwargs)
 
 
 class Office(AbstractPerson):
