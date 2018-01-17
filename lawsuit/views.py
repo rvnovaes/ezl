@@ -27,6 +27,7 @@ from core.views import remove_invalid_registry
 from django.core.cache import cache
 from dal import autocomplete
 from django.db.models import Q
+from core.utils import get_office_session
 
 
 class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -86,6 +87,13 @@ class InstanceUpdateView(AuditFormMixin, UpdateView):
         kw['request'] = self.request
         return kw
 
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class InstanceDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
     model = Instance
@@ -132,6 +140,13 @@ class TypeMovementUpdateView(AuditFormMixin, UpdateView):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """
@@ -302,6 +317,13 @@ class CourtDivisionUpdateView(AuditFormMixin, UpdateView):
         kw['request'] = self.request
         return kw
 
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class CourtDivisionDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = CourtDivision
@@ -369,6 +391,13 @@ class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateV
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class LawSuitListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -446,6 +475,14 @@ class LawsuitMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, Generic
         kw['request'] = self.request
         return kw
 
+    def dispatch(self, request, *args, **kwargs):
+        if self.kwargs.get('folder'):
+            obj = Folder.objects.get(id=self.kwargs.get('folder'))
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
                                 UpdateView):
@@ -481,6 +518,13 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class MovementListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -579,6 +623,14 @@ class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
         kw['request'] = self.request
         return kw
 
+    def dispatch(self, request, *args, **kwargs):
+        if self.kwargs.get('lawsuit'):
+            obj = LawSuit.objects.get(id=self.kwargs.get('lawsuit'))
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
                              UpdateView):
@@ -603,6 +655,13 @@ class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class OrganCreateView(AuditFormMixin, CreateView):
@@ -710,10 +769,25 @@ class AddressOrganCreateView(AddressCreateView):
     def get_success_url(self):
         return reverse('organ_update', args=(self.object.person.pk, ))
 
+    def dispatch(self, request, *args, **kwargs):
+        if self.kwargs.get('person_pk'):
+            obj = Organ.objects.get(id=self.kwargs.get('person_pk'))
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class AddressOrganUpdateView(AddressUpdateView):
     def get_success_url(self):
         return reverse('organ_update', args=(self.object.person.pk, ))
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.person.organ.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class AddressOrganDeleteView(AddressDeleteView):

@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse
 
 from django.views.generic.edit import CreateView, UpdateView
 from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
@@ -12,6 +12,8 @@ from .models import CostCenter, ServicePriceTable
 from .tables import CostCenterTable, ServicePriceTableTable
 from core.views import remove_invalid_registry
 from dal import autocomplete
+from core.utils import get_office_session
+from django.http import HttpResponseRedirect
 
 
 class CostCenterListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -57,6 +59,13 @@ class CostCenterUpdateView(AuditFormMixin, UpdateView):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class CostCenterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
@@ -110,6 +119,13 @@ class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):

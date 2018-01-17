@@ -36,7 +36,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, OfficeTable
-from core.utils import login_log, logout_log
+from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task
@@ -273,6 +273,14 @@ class AddressUpdateView(AddressMixin, UpdateView):
     def get_success_url(self):
         return reverse('person_update', args=(self.object.person.pk, ))
 
+    def dispatch(self, request, *args, **kwargs):
+        if self.kwargs.get('person_pk'):
+            obj = Person.objects.get(id=self.kwargs.get('person_pk'))
+        office_session = get_office_session(request=request)
+        if obj.offices.filter(pk=office_session.pk).first() != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class AddressDeleteView(AddressMixin, MultiDeleteViewMixin):
     model = Address
@@ -379,8 +387,9 @@ class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
         :rtype: dict
         """
         context = super(PersonListView, self).get_context_data(**kwargs)
+        office_session = get_office_session(request=self.request)
         table = self.table_class(
-            context['table'].data.data.exclude(pk__in=Organ.objects.all()).order_by('-pk'))
+            context['table'].data.data.filter(offices=office_session).exclude(pk__in=Organ.objects.all()).order_by('-pk'))
         context['table'] = table
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         return context
@@ -431,6 +440,13 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('person_update', args=(self.object.id,))
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.offices.filter(pk=office_session.pk).first() != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class PersonDeleteView(AuditFormMixin, MultiDeleteViewMixin):
@@ -845,9 +861,10 @@ class CustomSession(View):
         data = {}
         if request.POST.get('current_office'):
             custom_session_user = self.request.session.get('custom_session_user')
-            if not custom_session_user and request.POST.get('current_office') != '0':
+            if not custom_session_user:
                 data['modified'] = True
-            elif custom_session_user.get(str(self.request.user.pk)).get('current_office') != request.POST.get('current_office'):
+            elif custom_session_user.get(str(self.request.user.pk)).get('current_office') \
+                    != request.POST.get('current_office'):
                 data['modified'] = True
             current_office = request.POST.get('current_office')
             request.session['custom_session_user'] = {

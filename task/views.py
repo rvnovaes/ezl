@@ -32,6 +32,7 @@ from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable
 from financial.models import ServicePriceTable
 from chat.models import Chat
 from financial.tables import ServicePriceTableTaskTable
+from core.utils import get_office_session
 
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Task
@@ -63,6 +64,14 @@ class TaskCreateView(AuditFormMixin, CreateView):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.kwargs.get('movement'):
+            obj = Movement.objects.get(id=self.kwargs.get('movement'))
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         task = form.instance
@@ -108,6 +117,13 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
@@ -420,6 +436,13 @@ class TypeTaskUpdateView(AuditFormMixin, UpdateView):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """
