@@ -2,6 +2,8 @@ import importlib
 import json
 from abc import abstractproperty
 from functools import wraps
+from django import forms
+from django.forms.utils import ErrorList
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -21,6 +23,8 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormVi
 from django.views.generic.base import View
 from django.views import View
 from django.views.generic import ListView
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
@@ -122,6 +126,7 @@ def logout_user(request):
     # Redireciona para a página de login
     return HttpResponseRedirect('/')
 
+
 class MultiDeleteViewMixin(DeleteView):
     success_message = None
 
@@ -144,6 +149,7 @@ class MultiDeleteViewMixin(DeleteView):
             return HttpResponseRedirect(self.success_url)
         else:
             return HttpResponseRedirect(self.get_success_url())
+
 
 def remove_invalid_registry(f):
     """
@@ -411,11 +417,25 @@ class PersonCreateView(AuditFormMixin, CreateView):
         return data
 
     def form_valid(self, form):
+        import pdb;pdb.set_trace()
+        # else:
+        #     office_session.persons.add(instance)
+
         if AuditFormMixin.form_valid(self, form):
             context = self.get_context_data()
             personaddress = context['personaddress']
             with transaction.atomic():
+                self.object = form.save(commit=False)
+                office_session = get_office_session(self.request)
+                if self.object.cpf_cnpj is not None and\
+                        office_session.persons.filter(cpf_cnpj=self.object.cpf_cnpj).first():
+                    form._errors[forms.forms.NON_FIELD_ERRORS] = ErrorList([
+                        u'Já existe uma pessoa cadastrada com este CPF/CNPJ para este escritório'
+                    ])
+                    return self.form_invalid(form)
+
                 self.object = form.save()
+                self.object.offices.add(office_session)
 
                 if personaddress.is_valid():
                     address = personaddress.forms[0].save(commit=False)

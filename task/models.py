@@ -255,7 +255,7 @@ class TaskHistory(AuditCreate):
         return super(TaskHistory, self).save(*args, **kwargs)
 
 
-class DashboardViewModel(Audit):
+class DashboardViewModel(Audit, OfficeMixin):
     legacy_code = models.CharField(max_length=255, blank=True, null=True,
                                    verbose_name='Código legado')
     task_number = models.PositiveIntegerField(default=0, verbose_name='Número da Providência')

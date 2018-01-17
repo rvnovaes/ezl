@@ -2,6 +2,8 @@ from enum import Enum
 
 from django.conf import settings
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from core.managers import PersonManager
 from core.utils import LegacySystem
@@ -223,9 +225,10 @@ class AbstractPerson(Audit, LegacyCode):
 
 class Person(AbstractPerson):
     objects = PersonManager()
+
     cpf_cnpj = models.CharField(max_length=255, blank=True, null=True, unique=False,
                                 verbose_name='CPF/CNPJ')
-    
+
     class Meta:
         db_table = 'person'
         ordering = ['legal_name', 'name']
