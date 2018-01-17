@@ -173,7 +173,8 @@ class DashboardView(MultiTableMixin, TemplateView):
         data = []
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
         if dynamic_query or person.auth_user.is_superuser:
-            data = DashboardViewModel.objects.filter(dynamic_query)
+            office_session = get_office_session(self.request)
+            data = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query)
         tables = self.get_list_tables(data, person) if person else []
         if not dynamic_query:
             return tables
@@ -501,7 +502,8 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
     table_class = DashboardStatusTable
 
     def query_builder(self):
-        query_set = {}
+        office_session = get_office_session(self.request)
+        query_set = DashboardViewModel.objects.filter(office_id=office_session.id)
         person = Person.objects.get(auth_user=self.request.user)
 
         request = self.request.GET
@@ -553,7 +555,8 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
                                                                       Q.AND).add(
                 Q(deadline_dynamic_query), Q.AND).add(Q(client_query), Q.AND)
 
-            query_set = DashboardViewModel.objects.filter(person_dynamic_query)
+            # office_session = get_office_session(self.request)
+            query_set = DashboardViewModel.objects.filter(office_id=office_session.id).filter(person_dynamic_query)
 
         return query_set, task_filter
 
