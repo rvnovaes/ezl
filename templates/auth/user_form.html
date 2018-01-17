@@ -1,5 +1,9 @@
 {% extends 'skeleton/forms/base.html' %}
-{% load bootstrap3 %}
+{% load bootstrap3 static %}
+
+{% block extra_stylesheets %}
+    <link href="{% static 'skeleton/plugins/bower_components/multiselect/css/multi-select.css' %}" rel="stylesheet" type="text/css" />
+{% endblock %}
 
 {% block form %}
     <div class="row">
@@ -13,5 +17,13 @@
     </div>
     <div class="row">
         {% bootstrap_field form.is_active form_group_class="form-group col-sm-6" %}
+        {% bootstrap_field form.groups form_group_class="form-group col-sm-6" %}
     </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script type="text/javascript" src="{% static 'skeleton/plugins/bower_components/multiselect/js/jquery.multi-select.js' %}"></script>
+{% endblock %}
+{% block script_document_ready %}
+    $('#id_groups').multiSelect();
 {% endblock %}
