@@ -2,8 +2,7 @@ from enum import Enum
 
 from django.conf import settings
 from django.db import models
-from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import User
 
 from core.managers import PersonManager
 from core.utils import LegacySystem
@@ -259,6 +258,8 @@ class DefaultOffice(OfficeMixin, Audit):
     auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
                                      blank=False, null=False,
                                      verbose_name='Usuário do sistema')
+
+    objects = OfficeManager()
 
     class Meta:
         verbose_name = 'Escritório Padrão'

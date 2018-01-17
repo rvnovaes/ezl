@@ -417,9 +417,6 @@ class PersonCreateView(AuditFormMixin, CreateView):
         return data
 
     def form_valid(self, form):
-        import pdb;pdb.set_trace()
-        # else:
-        #     office_session.persons.add(instance)
 
         if AuditFormMixin.form_valid(self, form):
             context = self.get_context_data()

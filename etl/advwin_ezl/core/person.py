@@ -125,6 +125,8 @@ class PersonETL(GenericETL):
                                        'is_active',
                                        'is_customer',
                                        'is_supplier'])
+                    if not default_office.persons.filter(cpf_cnpj=instance.cpf_cnpj):
+                        default_office.persons.add(instance)
 
                 else:
                     obj = self.model(legal_name=legal_name,
@@ -141,7 +143,8 @@ class PersonETL(GenericETL):
                                      system_prefix=LegacySystem.ADVWIN.value)
 
                     obj.save()
-                    default_office.persons.add(obj)
+                    if not default_office.persons.filter(cpf_cnpj=obj.cpf_cnpj):
+                        default_office.persons.add(obj)
 
                 self.debug_logger.debug(
                     'Pessoa,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (

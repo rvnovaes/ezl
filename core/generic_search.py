@@ -1,6 +1,7 @@
 from functools import wraps
 from itertools import groupby
 from datetime import datetime
+from django.contrib.auth.models import User
 
 
 def field_to_html_input(field):
@@ -85,7 +86,10 @@ class GenericSearchFormat(object):
 
         try:
             office_field = self.model._meta.get_field('office')
-            search = "self.table_class(self.model.objects.get_queryset(office=office).filter({params}))"
+            if self.model == User:
+                search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
+            else:
+                search = "self.table_class(self.model.objects.get_queryset(office=office).filter({params}))"
         except:
             search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
 
