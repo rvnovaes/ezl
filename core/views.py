@@ -34,7 +34,7 @@ from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, 
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
-    DELETE_SUCCESS_MESSAGE, \
+    record_from_wrong_office, DELETE_SUCCESS_MESSAGE, \
     ADDRESS_UPDATE_ERROR_MESSAGE, \
     ADDRESS_UPDATE_SUCCESS_MESSAGE
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice
@@ -284,6 +284,7 @@ class AddressUpdateView(AddressMixin, UpdateView):
             obj = Person.objects.get(id=self.kwargs.get('person_pk'))
         office_session = get_office_session(request=request)
         if obj.offices.filter(pk=office_session.pk).first() != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -462,6 +463,8 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
         obj = self.get_object()
         office_session = get_office_session(request=request)
         if obj.offices.filter(pk=office_session.pk).first() != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 

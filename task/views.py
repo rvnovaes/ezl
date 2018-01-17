@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 import json
 from chat.models import UserByChat
 from django.core.cache import cache
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
@@ -18,7 +19,7 @@ from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
-    DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED
+    DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
 from core.models import Person
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from etl.models import InconsistencyETL
@@ -70,6 +71,8 @@ class TaskCreateView(AuditFormMixin, CreateView):
             obj = Movement.objects.get(id=self.kwargs.get('movement'))
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -122,6 +125,7 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
         obj = self.get_object()
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -445,6 +449,8 @@ class TypeTaskUpdateView(AuditFormMixin, UpdateView):
         obj = self.get_object()
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 

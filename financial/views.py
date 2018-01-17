@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.urlresolvers import reverse_lazy, reverse
+from django.contrib import messages
 
 from django.views.generic.edit import CreateView, UpdateView
 from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
@@ -14,6 +15,7 @@ from core.views import remove_invalid_registry
 from dal import autocomplete
 from core.utils import get_office_session
 from django.http import HttpResponseRedirect
+from core.messages import record_from_wrong_office
 
 
 class CostCenterListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -64,6 +66,7 @@ class CostCenterUpdateView(AuditFormMixin, UpdateView):
         obj = self.get_object()
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request,record_from_wrong_office(),)
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -124,6 +127,7 @@ class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
         obj = self.get_object()
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 

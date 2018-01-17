@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
-    delete_error_protected
+    delete_error_protected, record_from_wrong_office
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin, \
     GenericFormOneToMany, AddressCreateView, AddressUpdateView, AddressDeleteView
 from task.models import Task
@@ -91,6 +91,8 @@ class InstanceUpdateView(AuditFormMixin, UpdateView):
         obj = self.get_object()
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -145,6 +147,8 @@ class TypeMovementUpdateView(AuditFormMixin, UpdateView):
         obj = self.get_object()
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -321,6 +325,8 @@ class CourtDivisionUpdateView(AuditFormMixin, UpdateView):
         obj = self.get_object()
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -396,6 +402,8 @@ class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateV
         obj = self.get_object()
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -480,6 +488,8 @@ class LawsuitMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, Generic
             obj = Folder.objects.get(id=self.kwargs.get('folder'))
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -523,6 +533,8 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
         obj = self.get_object()
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -628,6 +640,8 @@ class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
             obj = LawSuit.objects.get(id=self.kwargs.get('lawsuit'))
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -660,6 +674,8 @@ class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
         obj = self.get_object()
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -774,6 +790,8 @@ class AddressOrganCreateView(AddressCreateView):
             obj = Organ.objects.get(id=self.kwargs.get('person_pk'))
         office_session = get_office_session(request=request)
         if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -786,6 +804,8 @@ class AddressOrganUpdateView(AddressUpdateView):
         obj = self.get_object()
         office_session = get_office_session(request=request)
         if obj.person.organ.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
