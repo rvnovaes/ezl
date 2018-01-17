@@ -1,38 +1,17 @@
-{% extends 'inicial.html' %}
-{#{% load staticfiles %}#}
-{#{% load formset_tags %}#}
-{% load core_filters %}
+{% extends 'skeleton/forms/base.html' %}
+{% load bootstrap3 %}
 
-{% block content %}
-    {% include 'core/widgets/messages.html' %}
-
-    <form action="" method="post">{% csrf_token %}
-            <fieldset>
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h1 class="panel-title">Usuário</h1>
-                    </div>
-                    <div class="panel-body">
-                        {% for field in form %}
-                            <div class="form-group col-sm-3">
-                                <label>
-                                    {{ field | append_ast_if_req  | capfirst }}{{ field }}
-                                </label>
-                            </div>
-                        {% endfor %}
-
-                    </div>
-                    <div class="form-row  text-center">
-                        {% include 'core/widgets/cancel_button.html' with link_list='user_list'%}
-                        <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
-                                class="material-icons left">done</i>
-                            Salvar
-                        </button>
-                    </div>
-                </div>
-            </fieldset>
-        </div>
-
-    </form>
-
-{% endblock content %}
+{% block form %}
+    <div class="row">
+        {% bootstrap_field form.first_name form_group_class="form-group col-sm-4" %}
+        {% bootstrap_field form.last_name form_group_class="form-group col-sm-4" %}
+        {% bootstrap_field form.email form_group_class="form-group col-sm-4" %}
+    </div>
+    <div class="row">
+        {% bootstrap_field form.username form_group_class="form-group col-sm-6" %}
+        {% bootstrap_field form.password form_group_class="form-group col-sm-6" %}
+    </div>
+    <div class="row">
+        {% bootstrap_field form.is_active form_group_class="form-group col-sm-6" %}
+    </div>
+{% endblock %}
