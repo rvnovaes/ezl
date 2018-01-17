@@ -867,7 +867,9 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
 
 
 class OfficeDeleteView(LoginRequiredMixin, DeleteView):
-    pass
+    model = Address
+    form_class = AddressForm
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
 class RegisterNewUser(CreateView):
@@ -878,9 +880,8 @@ class RegisterNewUser(CreateView):
         username = request.POST.get('username')
         password = request.POST.get('password')
         email = request.POST.get('email')
-        user = User.objects.create_user(username=username, email=email,
-            password=password)
-        #Todo: Nao esta funcionando o login ao cadastrar
+        User.objects.create_user(username=username, email=email, password=password)
+        # Todo: Nao esta redirecionando para o dashboard ao se cadastrar
         return login(request)
 
 
@@ -939,7 +940,6 @@ class CustomSession(View):
 
 class InviteCreateView(AuditFormMixin, CreateView):
     model = Invite
-    #form_class = InviteForm
     success_url = reverse_lazy('start_user')
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'start_user'
@@ -994,4 +994,5 @@ class InviteMultipleUsersView(LoginRequiredMixin, View):
                 office = Office.objects.get(pk=office_pk)
                 Invite.objects.create(create_user=request.user, person=person,
                                       office=office, status='N')
-        return HttpResponseRedirect(reverse_lazy('office_update', kwargs={'pk': office.pk}))
+            return HttpResponseRedirect(reverse_lazy('office_update', kwargs={'pk': office_pk}))
+        return reverse_lazy('office_list')
