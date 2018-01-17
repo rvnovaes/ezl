@@ -36,12 +36,12 @@ def receive_notes_execution_date(notes, instance, execution_date, survey_result,
 
 @receiver(post_save, sender=Task)
 def new_task(sender, instance, created, **kwargs):
-    if created:
-        TaskHistory.objects.create(task=instance,
-                                   create_user=instance.create_user,
-                                   status=instance.task_status,
-                                   create_date=instance.create_date, notes='Nova providência')
-
+    notes = 'Nova providência' if created else getattr(instance, '__notes', '')
+    user = instance.alter_user if instance.alter_user else instance.create_user
+    TaskHistory.objects.create(task=instance,
+                               create_user=user,
+                               status=instance.task_status,
+                               create_date=instance.create_date, notes=notes)
     contact_mechanism_type = ContactMechanismType.objects.filter(name__iexact='email')
     if not contact_mechanism_type:
         return
@@ -155,12 +155,6 @@ def change_status(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Task)
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
-    now_date = timezone.now()
-    TaskHistory.objects.create(task=instance, create_user=instance.alter_user,
-                               status=instance.task_status,
-                               create_date=now_date,
-                               notes=getattr(instance, '__notes', ''))
-
     if not getattr(instance, '_called_by_etl'):
         export_task.delay(instance.pk)
 
