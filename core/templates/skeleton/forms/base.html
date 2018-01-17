@@ -1,0 +1,23 @@
+{% extends 'skeleton/base.html' %}
+{% load core_filters bootstrap3 %}
+{% block content %}
+    {% include 'core/widgets/messages.html' %}
+    {% block form %}
+    <div class="panel panel-default">
+        <div class="panel-heading">{% include 'skeleton/forms/form-title.html' with form=form %}</div>
+        <form action="" method="post">{% csrf_token %}
+        <div class="panel-wrapper collapse in">
+            <div class="panel-body">
+                    {% for field in form %}
+                        {% bootstrap_field field form_group_class="form-group col-sm-6"%}
+                    {% endfor %}
+            </div>
+            <div class="panel-footer text-center">
+                {% include 'core/widgets/cancel_button.html'  with link_list='instance_list' %}
+                {% include 'skeleton/componentes/buttons/submit_save.html' %}
+            </div>
+        </div>
+        </form>
+    </div>
+    {% endblock form %}
+{% endblock content %}
