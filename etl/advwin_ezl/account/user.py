@@ -4,7 +4,7 @@ from django.contrib.auth.models import User, Group
 from django.db import models
 from django.utils import timezone
 
-from core.models import Person
+from core.models import Person, DefaultOffice
 from core.signals import create_person
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
@@ -173,6 +173,11 @@ class UserETL(GenericETL):
                                         legacy_code=legacy_code,
                                         system_prefix=LegacySystem.ADVWIN.value),
                                     created=created)
+
+                obj = DefaultOffice.objects.filter(auth_user=instance).first()
+                if not obj:
+                    DefaultOffice.objects.create(auth_user=instance, office=default_office,
+                                                 create_user=user)
 
                 self.debug_logger.debug(
                     'Usuario,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (

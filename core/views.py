@@ -763,12 +763,15 @@ class UserUpdateView(AuditFormMixin, UpdateView):
             for group in Group.objects.filter(id__in=ids):
                 group.user_set.add(form.instance)
             default_office = form.cleaned_data['office']
-            record, created = DefaultOffice.objects.update_or_create(
-                auth_user=form.instance,
-                defaults={"auth_user": form.instance,
-                          "office": default_office,
-                          "create_user": self.request.user}
-            )
+
+            obj = DefaultOffice.objects.filter(auth_user=form.instance).first()
+            if obj:
+                obj.office=default_office
+                obj.alter_user=self.request.user
+                obj.save()
+            else:
+                DefaultOffice.objects.create(auth_user=form.instance, office=default_office,
+                                             create_user=self.request.user)
 
         super(UserUpdateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)

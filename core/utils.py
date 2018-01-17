@@ -86,7 +86,7 @@ def get_office_field(request, profile=None):
         if profile:
             queryset = profile.person.offices.all()
             initial = DefaultOffice.objects.filter(auth_user=profile).first().office if \
-                      DefaultOffice.objects.filter(auth_user=profile).first() else None
+                DefaultOffice.objects.filter(auth_user=profile).first() else None
         elif request.session.get('custom_session_user'):
             custom_session_user = list(request.session.get('custom_session_user').values())
             queryset = Office.objects.filter(pk=custom_session_user[0]['current_office'])
@@ -99,12 +99,12 @@ def get_office_field(request, profile=None):
         initial = None
 
     return forms.ModelChoiceField(
-                queryset=queryset,
-                empty_label='',
-                required=True,
-                label=u'Escritório',
-                initial=initial
-            )
+        queryset=queryset,
+        empty_label='',
+        required=True,
+        label=u'Escritório',
+        initial=initial
+    )
 
 
 def get_office_session(request):
