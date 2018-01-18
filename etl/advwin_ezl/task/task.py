@@ -31,13 +31,6 @@ def to_dict(model_instance, query_instance=None):
         return {cols[i]['name']: model_instance[i] for i in range(len(cols))}
 
 
-def parse_survey_result(survey, agenda_id):
-    json = loads(survey)
-    json['agenda_id'] = agenda_id
-    json['versao'] = 1
-    return json
-
-
 survey_tables = {'Courthearing': JuridFMAudienciaCorrespondente, 'Diligence'
 : JuridFMDiligenciaCorrespondente, 'Protocol': JuridFMProtocoloCorrespondente,
                  'Operationlicense': JuridFMAlvaraCorrespondente}

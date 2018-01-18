@@ -79,6 +79,8 @@ INSTALLED_APPS = [
     'task.apps.TaskConfig',
     'etl.apps.EtlConfig',
     'financial.apps.FinancialConfig',
+    'survey.apps.SurveyConfig',
+
     'django.contrib.sites',
 
     'allauth',
@@ -95,6 +97,7 @@ INSTALLED_APPS = [
     'django_file_form.ajaxuploader',
 
     'debug_toolbar',
+    'django_extensions',
     'django_cleanup',
     # Autocomplete
     'dal',
