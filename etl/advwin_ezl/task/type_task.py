@@ -30,7 +30,7 @@ class TypeTaskETL(GenericETL):
     has_status = True
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         for row in rows:
 
             try:
@@ -48,7 +48,9 @@ class TypeTaskETL(GenericETL):
                     instance.survey_type = survey_type
                     instance.alter_user = user
                     instance.is_active = True
-                    instance.save(update_fields=['is_active', 'name', 'alter_user', 'alter_date', 'survey_type'])
+                    instance.office = default_office
+                    instance.save(update_fields=['is_active', 'name', 'alter_user', 'alter_date', 'survey_type'
+                                                 'office'])
                 else:
                     self.model.objects.create(name=name,
                                               is_active=True,
@@ -56,7 +58,8 @@ class TypeTaskETL(GenericETL):
                                               survey_type=survey_type,
                                               system_prefix=LegacySystem.ADVWIN.value,
                                               create_user=user,
-                                              alter_user=user)
+                                              alter_user=user,
+                                              office=default_office)
 
                 self.debug_logger.debug(
                     "Type Task,%s,%s,%s,%s,%s,%s,%s,%s" % (str(name), str(True), str(code), str(survey_type),

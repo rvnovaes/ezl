@@ -102,7 +102,7 @@ class TaskETL(GenericETL):
         return self._import_query.format(cliente="','".join(get_clients_to_import()))
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         from core.models import Person
         for row in rows:
             print(rows_count)
@@ -213,7 +213,8 @@ class TaskETL(GenericETL):
                                                      blocked_payment_date=blocked_payment_date,
                                                      finished_date=finished_date,
                                                      task_status=status_code_advwin,
-                                                     requested_date=requested_date)
+                                                     requested_date=requested_date,
+                                                     office=default_office)
 
                 if status_code_advwin == TaskStatus.ERROR:
                     for inconsistency in inconsistencies:
@@ -222,7 +223,8 @@ class TaskETL(GenericETL):
                             inconsistency=inconsistency['inconsistency'],
                             solution=inconsistency['solution'],
                             create_user=user,
-                            alter_user=user)
+                            alter_user=user,
+                            office=default_office)
                 else:
                     InconsistencyETL.objects.filter(task=task).update(is_active=False)
 

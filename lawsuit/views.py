@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
-    delete_error_protected
+    delete_error_protected, record_from_wrong_office
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin, \
     GenericFormOneToMany, AddressCreateView, AddressUpdateView, AddressDeleteView
 from task.models import Task
@@ -27,6 +27,7 @@ from core.views import remove_invalid_registry
 from django.core.cache import cache
 from dal import autocomplete
 from django.db.models import Q
+from core.utils import get_office_session
 
 
 class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -43,6 +44,11 @@ class InstanceCreateView(AuditFormMixin, CreateView):
     model = Instance
     form_class = InstanceForm
     success_url = reverse_lazy('instance_list')
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class InstanceUpdateView(AuditFormMixin, UpdateView):
@@ -76,6 +82,20 @@ class InstanceUpdateView(AuditFormMixin, UpdateView):
             self.success_url = cache.get('instance_page')
         return super(InstanceUpdateView, self).post(request, *args, **kwargs)
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class InstanceDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
     model = Instance
@@ -93,6 +113,11 @@ class TypeMovementCreateView(AuditFormMixin, CreateView):
     form_class = TypeMovementForm
     success_url = reverse_lazy('type_movement_list')
     success_message = CREATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class TypeMovementUpdateView(AuditFormMixin, UpdateView):
@@ -112,6 +137,20 @@ class TypeMovementUpdateView(AuditFormMixin, UpdateView):
         context = super(TypeMovementUpdateView, self).get_context_data(**kwargs)
         cache.set('type_movement_page', self.request.META.get('HTTP_REFERER'))
         return context
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """
@@ -157,12 +196,22 @@ class FolderCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('folder_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class FolderUpdateView(AuditFormMixin, UpdateView):
     model = Folder
     form_class = FolderForm
     success_url = reverse_lazy('folder_list')
     success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class FolderDeleteView(AuditFormMixin, MultiDeleteViewMixin):
@@ -255,12 +304,31 @@ class CourtDivisionCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('courtdivision_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class CourtDivisionUpdateView(AuditFormMixin, UpdateView):
     model = CourtDivision
     form_class = CourtDivisionForm
     success_url = reverse_lazy('courtdivision_list')
     success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class CourtDivisionDeleteView(AuditFormMixin, MultiDeleteViewMixin):
@@ -282,6 +350,11 @@ class FolderLawsuitCreateView(SuccessMessageMixin, GenericFormOneToMany, CreateV
         context = super(FolderLawsuitCreateView, self).get_context_data(**kwargs)
         RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateView):
@@ -319,6 +392,20 @@ class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateV
         if cache.get('folder_lawsuit_page'):
             self.success_url = cache.get('folder_lawsuit_page')
         return super(FolderLawsuitUpdateView, self).post(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class LawSuitListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -391,6 +478,21 @@ class LawsuitMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, Generic
         self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
         super(LawsuitMovementCreateView, self).get_success_url()
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.kwargs.get('folder'):
+            obj = Folder.objects.get(id=self.kwargs.get('folder'))
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
                                 UpdateView):
@@ -421,6 +523,20 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
         if cache.get('lawsuit_movement_page'):
             self.success_url = cache.get('lawsuit_movement_page')
         return super(LawsuitMovementUpdateView, self).post(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class MovementListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -514,6 +630,21 @@ class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
                                    kwargs={'folder': self.kwargs['folder'],
                                            'pk': self.kwargs['lawsuit']})
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.kwargs.get('lawsuit'):
+            obj = LawSuit.objects.get(id=self.kwargs.get('lawsuit'))
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
                              UpdateView):
@@ -534,6 +665,20 @@ class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
                                    kwargs={'folder': self.kwargs['folder'],
                                            'pk': self.kwargs['lawsuit']})
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class OrganCreateView(AuditFormMixin, CreateView):
     """
@@ -544,6 +689,11 @@ class OrganCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('organ_list')
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'organ_list'
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class OrganUpdateView(AuditFormMixin, UpdateView):
@@ -562,6 +712,11 @@ class OrganUpdateView(AuditFormMixin, UpdateView):
             'address_table': AddressOrganTable(self.object.address_set.all()),
         })
         return super().get_context_data(**kwargs)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class OrganDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
@@ -630,10 +785,29 @@ class AddressOrganCreateView(AddressCreateView):
     def get_success_url(self):
         return reverse('organ_update', args=(self.object.person.pk, ))
 
+    def dispatch(self, request, *args, **kwargs):
+        if self.kwargs.get('person_pk'):
+            obj = Organ.objects.get(id=self.kwargs.get('person_pk'))
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class AddressOrganUpdateView(AddressUpdateView):
     def get_success_url(self):
         return reverse('organ_update', args=(self.object.person.pk, ))
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.person.organ.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class AddressOrganDeleteView(AddressDeleteView):

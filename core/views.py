@@ -2,7 +2,8 @@ import importlib
 import json
 from abc import abstractproperty
 from functools import wraps
-
+from django import forms
+from django.forms.utils import ErrorList
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -15,27 +16,31 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import ProtectedError, Q
 from django.db import transaction
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.views.generic.base import View
+from django.views import View
+from django.views.generic import ListView
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 
-from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, AddressFormSet
+from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, AddressFormSet, AddressOfficeFormSet, OfficeForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
-    DELETE_SUCCESS_MESSAGE, \
+    record_from_wrong_office, DELETE_SUCCESS_MESSAGE, \
     ADDRESS_UPDATE_ERROR_MESSAGE, \
     ADDRESS_UPDATE_SUCCESS_MESSAGE
-from core.models import Person, Address, City, State, Country, AddressType
+from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice
 from core.signals import create_person
-from core.tables import PersonTable, UserTable, AddressTable
-from core.utils import login_log, logout_log
+from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable
+from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task
@@ -101,10 +106,17 @@ def login(request):
 @login_required
 def inicial(request):
     if request.user.is_authenticated:
-        title_page = {'title_page': 'Principal - Easy Lawyer'}
-        return render(request, 'task/task_dashboard.html', title_page)
+        if request.user.person.offices.all().exists():
+            return HttpResponseRedirect(reverse_lazy('dashboard'))
+        return HttpResponseRedirect(reverse_lazy('start_user'))
     else:
         return HttpResponseRedirect('/')
+
+class StartUserView(View):
+    template_name = 'core/start_user.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
 
 
 @logout_log
@@ -113,6 +125,7 @@ def logout_user(request):
     logout(request)
     # Redireciona para a página de login
     return HttpResponseRedirect('/')
+
 
 class MultiDeleteViewMixin(DeleteView):
     success_message = None
@@ -136,6 +149,7 @@ class MultiDeleteViewMixin(DeleteView):
             return HttpResponseRedirect(self.success_url)
         else:
             return HttpResponseRedirect(self.get_success_url())
+
 
 def remove_invalid_registry(f):
     """
@@ -230,22 +244,28 @@ class AuditFormMixin(LoginRequiredMixin, SuccessMessageMixin):
 
 
 class AddressMixin(AuditFormMixin):
+    def __init__(self, related_model=None, related_field_pk=False, related_model_name=''):
+        self.related_model = related_model
+        self.related_model_name = related_model_name
+        self.related_field_pk = related_field_pk
+        self.object_related = None
 
     def dispatch(self, *args, **kwargs):
-        self.person = Person.objects.get(pk=self.kwargs['person_pk'])
+        self.object_related = self.related_model.objects.get(
+            pk=kwargs['{}_pk'.format(self.related_field_pk)])
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(person=self.person, **kwargs)
+        return super().get_context_data(person=self.object_related, **kwargs)
 
     def form_valid(self, form):
         form.save(commit=False)
-        form.instance.person = self.person
+        setattr(form.instance, self.related_model_name, self.object_related)
         return super().form_valid(form)
 
     def get_object_list_url(self):
         # TODO: Este método parece ser inútil, success_url pode ser usado.
-        return reverse('person_update', args=(self.person.pk, ))
+        return reverse('{}_update'.format(self.related_model_name), args=(self.object_related.pk, ))
 
 
 class AddressCreateView(AddressMixin, CreateView):
@@ -253,8 +273,25 @@ class AddressCreateView(AddressMixin, CreateView):
     form_class = AddressForm
     success_message = CREATE_SUCCESS_MESSAGE
 
+    def __init__(self):
+        super().__init__(related_model=Person, related_model_name='person',
+                         related_field_pk='person')
+
     def get_success_url(self):
         return reverse('person_update', args=(self.object.person.pk, ))
+
+
+class AddressOfficeCreateView(AddressMixin, CreateView):
+    model = Address
+    form_class = AddressForm
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def __init__(self):
+        super().__init__(related_model=Office, related_model_name='office',
+                         related_field_pk='office')
+
+    def get_success_url(self):
+        return reverse('office_update', args=(self.object.office.pk, ))
 
 
 class AddressUpdateView(AddressMixin, UpdateView):
@@ -264,6 +301,15 @@ class AddressUpdateView(AddressMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('person_update', args=(self.object.person.pk, ))
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.kwargs.get('person_pk'):
+            obj = Person.objects.get(id=self.kwargs.get('person_pk'))
+        office_session = get_office_session(request=request)
+        if obj.offices.filter(pk=office_session.pk).first() != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class AddressDeleteView(AddressMixin, MultiDeleteViewMixin):
@@ -297,17 +343,34 @@ class SingleTableViewMixin(SingleTableView):
             pass
         context['form_name'] = self.model._meta.verbose_name
         context['form_name_plural'] = self.model._meta.verbose_name_plural
+
+        custom_session_user = self.request.session.get('custom_session_user')
+        office = False
+        if custom_session_user and custom_session_user.get(str(self.request.user.pk)):
+            current_office_session = custom_session_user.get(str(self.request.user.pk))
+            office = Office.objects.filter(pk=int(current_office_session.get(
+                'current_office'))).values_list('id', flat=True)
+        if not office:
+            office = self.request.user.person.offices.all().values_list('id', flat=True)
+
         generic_search = GenericSearchFormat(self.request, self.model, self.model._meta.fields)
-        args = generic_search.despatch()
+        args = generic_search.despatch(office=office)
         if args:
             table = eval(args)
         else:
+            qs = self.model.objects.get_queryset()
+            try:
+                office_field = self.model._meta.get_field('office')
+                if office:
+                    qs = self.model.objects.get_queryset(office=office)
+            except:
+                pass
             if kwargs.get('remove_invalid'):
                 qs = self.filter_queryset(
-                    self.model.objects.filter(~Q(pk=kwargs.get('remove_invalid'))))
+                    qs.filter(~Q(pk=kwargs.get('remove_invalid'))))
                 table = self.table_class(qs)
             else:
-                qs = self.filter_queryset(self.model.objects.all())
+                qs = self.filter_queryset(qs)
                 table = self.table_class(qs)
         RequestConfig(self.request, paginate={'per_page': self.paginate_by}).configure(table)
         context['table'] = table
@@ -354,8 +417,9 @@ class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
         :rtype: dict
         """
         context = super(PersonListView, self).get_context_data(**kwargs)
+        office_session = get_office_session(request=self.request)
         table = self.table_class(
-            context['table'].data.data.exclude(pk__in=Organ.objects.all()).order_by('-pk'))
+            context['table'].data.data.filter(offices=office_session).exclude(pk__in=Organ.objects.all()).order_by('-pk'))
         context['table'] = table
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         return context
@@ -377,11 +441,22 @@ class PersonCreateView(AuditFormMixin, CreateView):
         return data
 
     def form_valid(self, form):
+
         if AuditFormMixin.form_valid(self, form):
             context = self.get_context_data()
             personaddress = context['personaddress']
             with transaction.atomic():
+                self.object = form.save(commit=False)
+                office_session = get_office_session(self.request)
+                if self.object.cpf_cnpj is not None and\
+                        office_session.persons.filter(cpf_cnpj=self.object.cpf_cnpj).first():
+                    form._errors[forms.forms.NON_FIELD_ERRORS] = ErrorList([
+                        u'Já existe uma pessoa cadastrada com este CPF/CNPJ para este escritório'
+                    ])
+                    return self.form_invalid(form)
+
                 self.object = form.save()
+                self.object.offices.add(office_session)
 
                 if personaddress.is_valid():
                     address = personaddress.forms[0].save(commit=False)
@@ -413,6 +488,15 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
     def get_success_url(self):
         return reverse('person_update', args=(self.object.id,))
 
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.offices.filter(pk=office_session.pk).first() != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class PersonDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = Person
@@ -428,9 +512,12 @@ class ClientAutocomplete(autocomplete.Select2QuerySetView):
         #     return Person.objects.none()
 
         qs = Person.objects.none()
+        office = self.forwarded.get('office', None)
 
         if self.q:
-            qs = Person.objects.filter(legal_name__unaccent__istartswith=self.q, is_customer=True)
+            qs = Person.objects.filter(legal_name__unaccent__istartswith=self.q,
+                                       is_customer=True,
+                                       offices=office)
         return qs
 
 
@@ -720,6 +807,16 @@ class UserUpdateView(AuditFormMixin, UpdateView):
 
             for group in Group.objects.filter(id__in=ids):
                 group.user_set.add(form.instance)
+            default_office = form.cleaned_data['office']
+
+            obj = DefaultOffice.objects.filter(auth_user=form.instance).first()
+            if obj:
+                obj.office=default_office
+                obj.alter_user=self.request.user
+                obj.save()
+            else:
+                DefaultOffice.objects.create(auth_user=form.instance, office=default_office,
+                                             create_user=self.request.user)
 
         super(UserUpdateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
@@ -750,6 +847,11 @@ class UserUpdateView(AuditFormMixin, UpdateView):
             self.success_url = cache.get('user_page')
         return super(UserUpdateView, self).post(request, *args, **kwargs)
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class UserDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
     model = User
@@ -768,7 +870,141 @@ class PasswordResetViewMixin(PasswordResetView, FormView):
         return render(self.request, 'account/password_reset_done.html', context)
 
 
+class OfficeListView(LoginRequiredMixin, SingleTableViewMixin):
+    model = Office
+    table_class = OfficeTable
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['table'] = self.table_class(self.request.user.person.offices.all())
+        return context
+
+
+class OfficeCreateView(AuditFormMixin, CreateView):
+    model = Office
+    fields = ('name', 'legal_name', 'cpf_cnpj', 'legal_type')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'office_list'
+
+    def form_valid(self, form):
+        form.instance.create_user = self.request.user
+        form.instance.save()
+        form.instance.persons.add(form.instance.create_user.person)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('office_update', kwargs={'pk': self.object.pk})
+
+
+class OfficeUpdateView(AuditFormMixin, UpdateView):
+    model = Office
+    fields = ('name', 'legal_name', 'cpf_cnpj', 'legal_type')
+    success_url = reverse_lazy('office_list')
+    template_name_suffix = '_update_form'
+    success_message = UPDATE_SUCCESS_MESSAGE
+    object_list_url = 'office_list'
+
+    def get_context_data(self, **kwargs):
+        kwargs.update({
+            'table': AddressOfficeTable(self.object.adresses.all()),
+        })
+        return super().get_context_data(**kwargs)
+
+
+class OfficeDeleteView(LoginRequiredMixin, DeleteView):
+    model = Address
+    form_class = AddressForm
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+
+
+class RegisterNewUser(CreateView):
+    model = User
+    fields = ('username', 'password')
+
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        email = request.POST.get('email')
+        User.objects.create_user(username=username, email=email, password=password)
+        # Todo: Nao esta redirecionando para o dashboard ao se cadastrar
+        return login(request)
+
+
+class CustomSession(View):
+    def post(self, request, *args, **kwargs):
+        """
+        Cria uma sessao customizada do usuario para armazenar o escritorio atual
+        do usuario. O Valor e armazenando na sessao atravez da chave
+        custom_session_user, que ira possuir um dicionario contendo como chave
+        o id do usuario e como valor um dicionario contendo o current_office.
+        """
+        data = {}
+        if request.POST.get('current_office'):
+            custom_session_user = self.request.session.get('custom_session_user')
+            if not custom_session_user:
+                data['modified'] = True
+            elif custom_session_user.get(str(self.request.user.pk)).get('current_office') \
+                    != request.POST.get('current_office'):
+                data['modified'] = True
+            current_office = request.POST.get('current_office')
+            request.session['custom_session_user'] = {
+                self.request.user.pk: {'current_office': current_office}
+            }
+            office = Office.objects.filter(pk=int(current_office)).first()
+            if office:
+                data['current_office_pk'] = office.pk
+                data['current_office_name'] = office.name
+            else:
+                request.session.modified = True
+                del request.session['custom_session_user']
+                data['modified'] = True
+
+        return JsonResponse(data)
+
+    def get(self, request, *args, **kwargs):
+        """
+        Busca a sessao customizada pra do usuario que retorna informacoes
+        do escritorio atual do usuario
+        """
+        data = {}
+        custom_session_user = request.session.get('custom_session_user')
+        if custom_session_user and custom_session_user.get(str(request.user.pk)):
+            current_office_session = custom_session_user.get(str(request.user.pk))
+            office = Office.objects.filter(pk=int(current_office_session.get(
+                'current_office'))).first()
+            if office:
+                data['current_office_pk'] = office.pk
+                data['current_office_name'] = office.name
+        else:
+            default_office = DefaultOffice.objects.filter(auth_user=request.user).first()
+            if default_office:
+                data['current_office_pk'] = default_office.office.pk
+                data['current_office_name'] = default_office.office.name
+        return JsonResponse(data)
+
+
+class InviteCreateView(AuditFormMixin, CreateView):
+    model = Invite
+    success_url = reverse_lazy('start_user')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'start_user'
+
+
+class InviteUpdateView(UpdateView):
+    def post(self, request, *args, **kargs):
+        invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
+        invite.status = request.POST.get('status')
+        if invite.status == 'A':
+            invite.office.persons.add(request.user.person.pk)
+        invite.save()
+        return HttpResponse('ok')
+
+
 class EditableListSave(LoginRequiredMixin, View):
+    """
+    O nome da classe ficou generico pelo fato desta view poder ser utilizada
+    em outras classes.
+    """
 
     models = {"ServicePriceTable": ServicePriceTable}
 
@@ -784,3 +1020,24 @@ class EditableListSave(LoginRequiredMixin, View):
             instance.save()
 
         return JsonResponse({"ok": True})
+
+
+class ListUsersToInviteView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        users = User.objects.all().values(
+            'pk', 'username', 'email', 'person__name', 'person__pk')
+        return JsonResponse({'data': list(users)})
+
+
+class InviteMultipleUsersView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        if self.request.POST.get('persons') and self.request.POST.get('office'):
+            persons = self.request.POST.getlist('persons')
+            office_pk = self.request.POST.get('office')
+            for person_pk in persons:
+                person = Person.objects.get(pk=person_pk)
+                office = Office.objects.get(pk=office_pk)
+                Invite.objects.create(create_user=request.user, person=person,
+                                      office=office, status='N')
+            return HttpResponseRedirect(reverse_lazy('office_update', kwargs={'pk': office_pk}))
+        return reverse_lazy('office_list')
