@@ -56,14 +56,6 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         related_name='%(class)s_client',
         verbose_name='Cliente'
     )
-    correspondent = models.ForeignKey(
-        'core.Person',
-        null=False,
-        blank=False,
-        on_delete=models.PROTECT,
-        related_name='%(class)s_correspondent',
-        verbose_name='Correspondente'
-    )
     value = models.DecimalField(
         max_digits=9,
         decimal_places=2,
@@ -74,7 +66,7 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
     objects = OfficeManager()
 
     def __str__(self):
-        return self.correspondent.name if self.correspondent else ""
+        return self.office.name if self.office else ""
 
     class Meta:
         db_table = 'service_price_table'
