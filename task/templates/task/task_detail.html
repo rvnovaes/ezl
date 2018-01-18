@@ -265,9 +265,15 @@
                                     class="material-icons left" style="color: white;">thumb_down</i>
                                 Recusar Solicitação
                             </a>
+                            <button type="button" data-toggle="modal" data-target="#to-assign"
+                                    class="btn btn-sm btn-raised OUTSOURCE {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
+                                <i class="material-icons left" style="color: white;">assignment</i>
+                                Atribuir
+                            </button>
+                            {% include 'task/task_to_assign.html' with task=task %}
                             <button type="button" id="OPEN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised OPEN {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
-                                <i class="material-icons left" style="color: white;">assignment</i>
+                                <i class="material-icons left" style="color: white;">input</i>
                                 Delegar
                             </button>
                         {% endif %}

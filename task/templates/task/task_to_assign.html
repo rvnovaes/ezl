@@ -1,0 +1,58 @@
+<div class="modal" id='to-assign'>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="">{% csrf_token %}
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                    </button>
+                    <label>Selecione o corrensponde que irá executar esta OS.</label>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col col-md-12">
+                            <input type='hidden' name='office' value='{{ task.office }}'>
+                            <select class="person-to-assign form-control" style='width: 100%;' name="person_executed_by">
+                                <option value="" selected></option>
+                                {% for person in task.office.persons.all %}
+                                    {% for group in person.auth_user.groups.all %}
+                                        {% if group.name == 'Correspondente' %}
+                                            <option value="{{person.pk}}">{{person.name}}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Fechar
+                    </button>
+                    <input type="submit" class="btn btn-primary" value='Atribuir'>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+    <script>
+        $(document).ready(function () {
+            var elPersonToAssign = $('.person-to-assign');
+{#            var data = {};#}
+{#            $.ajax({#}
+{#                type: 'GET',#}
+{#                url: '/users_to_invite/',#}
+{#                data: data,#}
+{#                success: function (response) {#}
+{#                    response.data.forEach(function (user) {#}
+{#                        elUsersToInvite.append($('<option>', {#}
+{#                            value: user.person__pk,#}
+{#                            text: user.person__name + ' (' + user.username + ')'#}
+{#                        }))#}
+{#                    })#}
+{#                }#}
+{#            });#}
+            elPersonToAssign.select2();
+        });
+    </script>
