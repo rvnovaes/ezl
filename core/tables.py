@@ -25,9 +25,7 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         attrs = AttributeDict(default, **(specific or general or {}))
         attrs['selectable'] = True
         return mark_safe(
-            ('<div class="checkbox"><label>'
-             '<input %s id="selection_header"  onclick="toggle(this)"/>'
-             '</label></div>')
+            ('<input %s id="selection_header"  onclick="toggle(this)"/>')
             % attrs.as_html())
 
     def render(self, value, bound_column, record):
@@ -45,9 +43,9 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         specific = self.attrs.get('td__input')
         attrs = AttributeDict(default, **(specific or general or {}))
         attrs['id'] = record.id
-        return mark_safe('<div class="checkbox"><label><input name="selection"'
-                         ' type="checkbox" %s onclick="showDeleteButton(this)"/>'
-                         '</label></div>' % attrs.as_html())
+        return mark_safe(
+            '<input name="selection" type="checkbox" %s onclick="showDeleteButton(this)"/>'% attrs.as_html()
+        )
 
 class AddressTable(tables.Table):
 
