@@ -84,9 +84,9 @@ class ServicePriceTableForm(BaseModelForm):
     )
 
     value = forms.CharField(label="Valor",
+                            localize=True,
                             required=False, # O valor pode ser 0.00 porque os correspondentes internos não cobram para fazer serviço
-                            widget=forms.TextInput(attrs={'mask': 'money',
-                                                          'onload': 'loadInputsMask()'}))
+                            widget=forms.TextInput(attrs={'mask': 'money'}))
 
     class Meta:
         model = ServicePriceTable
@@ -114,3 +114,6 @@ class ServicePriceTableForm(BaseModelForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
+        # import pdb;pdb.set_trace()
+        # value_initial = self.get_initial_for_field(self.fields['value'], 'value')
+        # self.fields['value'].initial = str(value_initial).replace(".", ",")
