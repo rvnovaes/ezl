@@ -176,19 +176,20 @@ class DashboardView(MultiTableMixin, TemplateView):
         dynamic_query = self.get_dynamic_query(person)
         data = []
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
+        office_session = get_office_session(self.request)
         if dynamic_query or person.auth_user.is_superuser:
-            office_session = get_office_session(self.request)
             if office_session:
                 data = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query)
             else:
                 data = DashboardViewModel.objects.filter(office_id=0).filter(dynamic_query)
-        tables = self.get_list_tables(data, person) if person else []
+
+        tables = self.get_list_tables(data, person, office=office_session) if person else []
         if not dynamic_query:
             return tables
         return tables
 
     @staticmethod
-    def get_list_tables(data, person):
+    def get_list_tables(data, person, office=None):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
@@ -202,7 +203,7 @@ class DashboardView(MultiTableMixin, TemplateView):
         requested = grouped.get(TaskStatus.REQUESTED) or {}
         accepted_service = grouped.get(TaskStatus.ACCEPTED_SERVICE) or {}
         refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}
-        error = InconsistencyETL.objects.filter(is_active=True) or {}
+        error = InconsistencyETL.objects.filter(office=office).filter(is_active=True) or {}
 
         return_list = []
 
