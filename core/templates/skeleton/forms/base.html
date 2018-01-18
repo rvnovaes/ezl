@@ -15,8 +15,12 @@
             </div>
             <div class="panel-footer text-center">
                 {% block form_buttons %}
-                    {% include 'core/widgets/cancel_button.html'  with link_list='instance_list' %}
-                    {% include 'skeleton/componentes/buttons/submit_save.html' %}
+                    {% block button_cancel %}
+                        {% include 'core/widgets/cancel_button.html'  with link_list='instance_list' %}
+                    {% endblock %}
+                    {% block button_save %}
+                        {% include 'skeleton/componentes/buttons/submit_save.html' %}
+                    {% endblock %}
                 {% endblock %}
             </div>
         </div>

@@ -21,6 +21,11 @@
     </div>
 {% endblock %}
 
+{% block button_cancel %}
+    {% include 'core/widgets/cancel_button.html'  with link_list='user_list' %}
+{% endblock %}
+
+
 {% block extra_scripts %}
     <script type="text/javascript" src="{% static 'skeleton/plugins/bower_components/multiselect/js/jquery.multi-select.js' %}"></script>
 {% endblock %}
