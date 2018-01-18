@@ -269,14 +269,15 @@ class DefaultOffice(OfficeMixin, Audit):
 
 
 class Invite(Audit):
-    person = models.ForeignKey(Person, blank=False, null=False,
-        related_name='invites')
-    office = models.ForeignKey(Office, blank=False, null=False,
-    related_name='invites')
+    person = models.ForeignKey(Person, blank=False, null=False, related_name='invites')
+    office = models.ForeignKey(Office, blank=False, null=False, related_name='invites')
     status = models.CharField(choices=INVITE_STATUS, default='N', max_length=1)
 
     class Meta:
         verbose_name = 'Convite'
+
+    def __str__(self):
+        return self.person
 
 
 class Address(Audit):
