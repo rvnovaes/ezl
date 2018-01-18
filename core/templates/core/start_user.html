@@ -61,7 +61,7 @@
                                         {% for invite in request.user.person.invites.all %}
                                             {% if invite.status == 'N' %}
                                                 <tr>
-                                                    <td>{{invite.office.name}} - {{invite.status}}</td>
+                                                    <td>{{invite.office.name}}</td>
                                                     <td>
                                                         <button type="button" class="btn btn-raised btn-fab btn-fab-mini btn-success"
                                                         onclick="updateInvite('{{invite.pk}}', 'A', '{{csrf_token}}')">
