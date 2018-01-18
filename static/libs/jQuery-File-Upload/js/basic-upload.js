@@ -1,6 +1,8 @@
 SurveyUploadDatabase  = {
-    currentField: null
+    currentField: null,
+    inProgress: false
 }
+
 
 FileUploadSettings = {
     dataType: 'json',
@@ -9,12 +11,19 @@ FileUploadSettings = {
 
     // Mostra a janela modal com progress bar ao início do upload
     start: function (e) {
+        if ($('#survey').is(':visible')){
+            $("#survey").modal("hide");
+        }
         $("#modal-progress").modal("show");
     },
 
     // Depois de enviado o(s) arquivo(s), encerra a janela modal
     stop: function (e) {
         $("#modal-progress").modal("hide");
+        if (SurveyUploadDatabase.inProgress){
+            SurveyUploadDatabase.inProgress = false;
+            $("#survey").modal("show");
+        }
     },
 
     // Atualiza o Progress bar de acordo com o andamento do envio do arquivo
@@ -26,7 +35,8 @@ FileUploadSettings = {
     },
     done: function (e, data) {
         if (data.result.success) {
-            if ($('#survey').is(':visible')) {
+            //if ($('#survey').is(':visible')) {
+            if(SurveyUploadDatabase.inProgress){
                 $.each(survey.getAllQuestions(), function(i, question){
                     if (question.id == SurveyUploadDatabase.currentField) {
                         question.isRequired = false;

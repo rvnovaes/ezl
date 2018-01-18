@@ -27,20 +27,24 @@
     </div>
     <script>
         setInterval(function(){
-            $('#survey input[type=file]:visible').each(function(){
+            $('#survey input[type=file]').each(function(){
                 var $el = $(this),
                     id = $el.attr('id').replace('i', ''),
-                    $button = $('<button type="button" class="btn btn-sm btn-primary btn-raised" style="color: #fff !important;"><i class="material-icons">cloud_upload</i> &nbsp; Enviar Arquivo(s)<div class="ripple-container"></div></button>');                              
-  
-                $el.parent().append($button);
-                $el.hide();
-                $button.click(function(){
-                    SurveyUploadDatabase.currentField = id;
-                    $('.js-upload-files').click();
-                    return false;
-                });
+                    $button = $('<button type="button" class="btn btn-sm btn-primary btn-raised" style="color: #fff !important;"><i class="material-icons">cloud_upload</i> &nbsp; Enviar Arquivo(s)<div class="ripple-container"></div></button>'),
+                    $parent = $el.parent();
+
+                if ($parent.find('button').length == 0){
+                    $parent.append($button);
+                    $el.hide();
+                    $button.click(function(){
+                        SurveyUploadDatabase.currentField = id;
+                        SurveyUploadDatabase.inProgress = true;
+                        $('.js-upload-files').click();
+                        return false;
+                    });
+                }
             });
-        }, 2000);
+        }, 1000);
 
 
         //Função para retornar o método submit default
