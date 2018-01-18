@@ -53,7 +53,7 @@
                             <div class="col s12 m4">
                                 <div class="row">
                                     <div class="checkbox-field col s12 required" id="id_required_container">
-                                        <input class="filled-in " :id="'id_'+i+'_required'" :name="'id_'+i+'_required'" type="checkbox" v-model="question.isRequired"><label :for="'id_'+i+'_required'">Obrigatório</label>
+                                        <input class="filled-in " :id="'id_'+if+'_required'" :name="'id_'+i+'_required'" type="checkbox" v-model="question.isRequired"><label :for="'id_'+i+'_required'">Obrigatório</label>
                                     </div>
                                 </div>
                             </div>
@@ -68,6 +68,7 @@
                                             <option value="comment">Comentário</option>
                                             <option value="radiogroup">Seleção</option>
                                             <option value="checkbox">Seleção múltipla</option>
+                                            <option value="file">Upload de arquivo</option>
                                         </select>
                                     </div>
                                 </div>
