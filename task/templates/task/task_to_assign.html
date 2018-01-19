@@ -1,10 +1,11 @@
 <div class="modal" id='to-assign'>
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form method="POST" action="">{% csrf_token %}
+            <form method="POST" action="{% url 'task_to_assign' task.pk %}">{% csrf_token %}
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
                     </button>
+                    {% url 'task_to_assign' task.pk %}
                     <label>Selecione o corrensponde que irá executar esta OS.</label>
                 </div>
                 <div class="modal-body">
@@ -39,20 +40,6 @@
     <script>
         $(document).ready(function () {
             var elPersonToAssign = $('.person-to-assign');
-{#            var data = {};#}
-{#            $.ajax({#}
-{#                type: 'GET',#}
-{#                url: '/users_to_invite/',#}
-{#                data: data,#}
-{#                success: function (response) {#}
-{#                    response.data.forEach(function (user) {#}
-{#                        elUsersToInvite.append($('<option>', {#}
-{#                            value: user.person__pk,#}
-{#                            text: user.person__name + ' (' + user.username + ')'#}
-{#                        }))#}
-{#                    })#}
-{#                }#}
-{#            });#}
             elPersonToAssign.select2();
         });
     </script>

@@ -98,6 +98,18 @@ class TaskCreateView(AuditFormMixin, CreateView):
                                'pk': self.kwargs['movement']})
 
 
+class TaskToAssignView(UpdateView):
+    model = Task
+    form_class = TaskForm
+
+    def form_valid(self, form):
+        import pdb; pdb.set_trace()
+        raise
+
+    def get(self, request, *args, **kwargs):
+        import pdb;pdb.set_trace()
+
+
 class TaskUpdateView(AuditFormMixin, UpdateView):
     model = Task
     form_class = TaskForm
