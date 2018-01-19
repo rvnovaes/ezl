@@ -159,4 +159,4 @@ class TaskDetailForm(ModelForm):
 class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
-        fields = ['name', 'survey_type', 'is_active']
+        fields = ['name', 'survey', 'is_active']
