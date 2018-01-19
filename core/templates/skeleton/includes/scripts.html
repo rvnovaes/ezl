@@ -14,6 +14,7 @@
 <!-- Sweet-Alert  -->
 <script src="{% static 'skeleton/plugins/bower_components/sweetalert/sweetalert.min.js' %}"></script>
 <script src="{% static 'skeleton/plugins/bower_components/sweetalert/jquery.sweet-alert.custom.js' %}"></script>
+<script src="{% static 'skeleton/plugins/bower_components/toast-master/js/jquery.toast.js' %}"></script>
 <!-- Custom Theme JavaScript -->
 <script src="{% static 'skeleton/js/custom.min.js' %}"></script>
 <!--Style Switcher -->
@@ -36,4 +37,20 @@
             window.location.href = "{% url 'logout' %}";
         });
     }
+    function message_toast(tag, title, message, time) {
+        if (!time) {
+            time = 5000;
+        }
+        $.toast({
+                heading: title,
+                text: message,
+                position: 'top-right',
+                icon: tag,
+                hideAfter: time,
+                stack: 6
+            });
+    }
+    {% for message in messages %}
+        message_toast('{{ message.tags }}', '{{ message.tags }}', '{{ message }}');
+    {% endfor %}
 </script>

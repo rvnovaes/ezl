@@ -306,8 +306,10 @@ class SingleTableViewMixin(SingleTableView):
             else:
                 qs = self.filter_queryset(self.model.objects.all())
                 table = self.table_class(qs)
+        total_colums = len(table.columns.items())
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
+        context['total_columns'] = total_colums
         return context
 
 

@@ -6,12 +6,8 @@
     <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
     <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
     <style>
-        table.dataTable.row-border tbody tr:first-child th, table.dataTable.row-border tbody tr:first-child td, table.dataTable.display tbody tr:first-child th, table.dataTable.display tbody tr:first-child td {
+        table.dataTable.row-border tbody tr:first-child th, table.dataTable.row-border tbody tr:first-child td, table.dataTable.display tbody tr:first-child th, table.dataTable.display tbody tr td {
             font-size: small !important;
-            cursor: pointer;
-        }
-        tr {
-            cursor: pointer;
         }
     </style>
 {% endblock %}
@@ -23,38 +19,47 @@
             <div class="panel panel-default">
                 <div class="panel-heading">{{ form_name_plural|capfirst }}
                     <div class="panel-action">
-                        <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#confirmDelete"
-                                disabled id="delete_button">
+                        <button class="btn btn-sm btn-danger" disabled id="delete_button">
                             <i class="fa fa-trash"></i> Apagar
                         </button>
                         <button  class="btn btn-sm btn-success"
                             onclick="window.open('{% if link_add_url %}{{ link_add_url }}{% elif link_add %}{% url link_add %}{% endif %}', '_self')">
                             <i class="fa fa-plus"></i> Novo
                         </button>
+
                     </div>
                 </div>
                 <div class="panel-wrapper collapse in">
                     <div class="panel-body">
-                        <table id="tableList" class="display" cellspacing="0">
+                        <form id="formTable" action="{% url link_ex %}" method="post">
+                        {% csrf_token %}
+
+                        <table id="tableList" class="table table-striped dataTable no-footer" role="grid" aria-describedby="tableList_info">
                             <thead>
                                 <tr>
                                     {% for column in table.columns %}
                                     <th>{{ column.header }}</th>
                                     {% endfor %}
+                                    <th></th>
                                 </tr>
                             </thead>
                         <tbody>
-                        {% for row in table.page.object_list|default:table.rows %} {# support pagination #}
-                            <a href="{{ row.attrs.data_href }}">
+                        {% for row in table.rows %} {# support pagination #}
                             <tr>
                                 {% for column, cell in row.items %}
                                     <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                                 {% endfor %}
+                                <td data-href="{{ row.attrs.data_href }}">
+                                    <a class="btn btn-info btn-outline btn-circle btn-sm m-r-5">
+                                        <i class="ti-pencil-alt"></i>
+                                    </a>
+                                </td>
                             </tr>
                             </a>
                         {% endfor %}
                         </tbody>
                         </table>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -64,31 +69,7 @@
 </div>
 {% endblock content %}
 {% block modal %}
-    <!-- Modal -->
-    <div id="confirmDelete" class="modal">
-        <div class="modal-dialog">
-            <div class="modal-content ">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h4 class="modal-title"><i class="fa fa-trash">warning</i></h4>
-                    <h4 class="modal-title">Atenção!</h4>
-                </div>
-                <div class="modal-body">
-                    {% if on_delete == 'CASCADE' %}
-                        <p>Ao excluir o(s) registro(s) de {{ form_name.title }} todos os seus vínculos também
-                            serão excluídos! Essa ação é irreversível. Deseja continuar?</p>
-                    {% else %}
-                        <p>Tem certeza que deseja excluir o(s) registro(s)
-                            de {{ form_name.title }} selecionado(s)? Essa ação é irreversível. Deseja continuar?</p>
-                    {% endif %}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Sim</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
 {% endblock %}
 {% block extra_scripts %}
     <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
@@ -103,11 +84,43 @@
     <script src="{% static "libs/bootstrap-ajax-typeahead/js/bootstrap-typeahead.min.js" %}"></script>
     <script src="{% static "js/autocomplete.js" %}"></script>
     <script>
+        //Custom Image
+        $('#delete_button').click(function(){
+            {% if on_delete == 'CASCADE' %}
+                var message = "Ao excluir o(s) registro(s) de <strong>{{ form_name.title }}</strong> todos os seus vínculos também serão excluídos! Essa ação é irreversível."
+            {% else %}
+                var message = "Tem certeza que deseja excluir o(s) registro(s) de {{ form_name.title }} selecionado(s)? Essa ação é irreversível. Deseja continuar?"
+            {% endif %}
+            var pks = [];
+            checkboxes = document.getElementsByName('selection');
+            for (var i in checkboxes){
+                pk = checkboxes[i].value;
+                if (checkboxes[i].checked) {
+                    pks.push(pk)
+                }
+            }
+            console.log('ids', pks);
+            if (pks) {
+                swal({
+                    title: "Excluir",
+                    html: true,
+                    text: message,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Sim, desejo excluir!",
+                    cancelButtonText: "Cancelar",
+                    closeOnConfirm: false
+                }, function(){
+                    $('#formTable').submit()
+                });
+            } else {
+                swal('alert')
+            }
+        });
         var pk_list = [];
 
         function toggle(source) {
-
-
             checkboxes = document.getElementsByName('selection');
             for (var i in checkboxes) {
 
@@ -125,6 +138,7 @@
                 document.getElementById('delete_button').disabled = true;
             }
         }
+
         function showDeleteButton(source) {
             if (source.checked) {
                 pk_list.push(source.id);
@@ -138,7 +152,8 @@
             else
                 document.getElementById('delete_button').disabled = true;
 
-        }
+        };
+
     </script>
 {% endblock %}
 
@@ -153,15 +168,17 @@
                 language: {
                     "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
                 },
-                columnDefs: [ {
-                    orderable: false,
-                    searchable: false,
-                    targets:   0
-                } ],
+                columnDefs: [
+                    {orderable: false, searchable: false, targets:   0 },
+                    {orderable: false, searchable: false, targets:   {{ total_columns }} }
+                ],
+                order: [
+                    [1, 'asc']
+                ],
         })
         $('#tableList tbody').on( 'click', 'tr', function () {
             var pk = table.row( this ).data();
-            console.log('>>>', pk)
+            console.log('>>>>', pk)
         });
 {% endblock %}
 
