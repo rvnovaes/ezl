@@ -874,11 +874,6 @@ class OfficeListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Office
     table_class = OfficeTable
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['table'] = self.table_class(self.request.user.person.offices.all())
-        return context
-
 
 class OfficeCreateView(AuditFormMixin, CreateView):
     model = Office
