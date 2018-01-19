@@ -223,6 +223,11 @@
                 <br>
                 <br>
                 <div class="footer text-right">
+                    {% if perms.core.can_view_survey_results %}
+                    <button type="submit" class="btn btn-sm btn-primary btn-raised" name="export_answers" value="true">
+                        <i class="material-icons">file_download</i>Exportar respostas dos formulários
+                    </button>
+                    {% endif %}
                     <button type="submit" class="btn btn-sm btn-primary btn-raised">
                         <i class="material-icons">search</i>Filtrar
                     </button>
