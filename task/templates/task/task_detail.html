@@ -265,9 +265,15 @@
                                     class="material-icons left" style="color: white;">thumb_down</i>
                                 Recusar Solicitação
                             </a>
+                            <button type="button" data-toggle="modal" data-target="#to-assign"
+                                    class="btn btn-sm btn-raised OUTSOURCE {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
+                                <i class="material-icons left" style="color: white;">assignment</i>
+                                Atribuir
+                            </button>
+                            {% include 'task/task_to_assign.html' with task=task %}
                             <button type="button" id="OPEN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                class="btn btn-sm btn-raised OPEN {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
-                                <i class="material-icons left" style="color: white;">assignment</i>
+                                <i class="material-icons left" style="color: white;">input</i>
                                 Delegar
                             </button>
                         {% endif %}
@@ -334,12 +340,20 @@
                                 <div class="panel-heading">
                                     <div class="panel-title">
                                         <i class="material-icons">assignment</i>
-                                        Dados do correspondente
+                                        {% if form.instance.get_child %}
+                                            Dados do Escritório Contratado
+                                        {% else %}
+                                            Dados do Correspondente
+                                        {% endif %}
                                     </div>
                                 </div>
                                 <div class="panel-body form-group is-focused">
                                     <div class="form-row">
-                                        {% include 'task/person_info.html' with person=form.instance.person_executed_by %}
+                                        {% if form.instance.get_child %}
+                                            {% include 'task/office_info.html' with office=form.instance.child.office %}
+                                        {% else %}
+                                            {% include 'task/person_info.html' with person=form.instance.person_executed_by %}
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -352,9 +366,11 @@
                                     </div>
                                 </div>
                                 <div class="panel-body form-group is-focused">
-                                    <div class="form-row">
-                                        {% include 'task/person_info.html' with person=form.instance.person_asked_by %}
-                                    </div>
+                                    {% if form.instance.parent %}
+                                            {% include 'task/office_info.html' with office=form.instance.parent.office %}
+                                        {% else %}
+                                            {% include 'task/person_info.html' with person=form.instance.person_asked_by %}
+                                        {% endif %}
                                 </div>
                             </div>
 

@@ -238,6 +238,7 @@ class Person(AbstractPerson):
 
 
 class Office(AbstractPerson):
+    objects = PersonManager()
 
     persons = models.ManyToManyField(Person, blank=True, related_name='offices')
     offices = models.ManyToManyField('self', blank=True)
@@ -299,7 +300,7 @@ class Address(Audit):
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False,
                              verbose_name='País')
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True)
-    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True, related_name='adresses')
+    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'address'
@@ -331,7 +332,8 @@ class ContactMechanism(Audit):
         ContactMechanismType, on_delete=models.PROTECT, blank=False, null=False)
     description = models.CharField(max_length=255, null=False, unique=True)
     notes = models.CharField(max_length=400, blank=True)
-    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
+    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True)
+    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'contact_mechanism'

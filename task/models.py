@@ -104,7 +104,7 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
 class Task(Audit, LegacyCode, OfficeMixin):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
-    parent = models.ForeignKey('self', null=True, blank=True)
+    parent = models.OneToOneField('self', null=True, blank=True, related_name='child')
 
     task_number = models.PositiveIntegerField(verbose_name='Número da Providência',
                                               unique=True)
@@ -131,8 +131,6 @@ class Task(Audit, LegacyCode, OfficeMixin):
     execution_date = models.DateTimeField(null=True, verbose_name='Data de Cumprimento')
 
     requested_date = models.DateTimeField(null=True, verbose_name='Data de Solicitação')
-    acceptance_service_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação pelo Contratante')
-    refused_service_date = models.DateTimeField(null=True, verbose_name='Data de Recusa pelo Contratante')
     return_date = models.DateTimeField(null=True, verbose_name='Data de Retorno')
     refused_date = models.DateTimeField(null=True, verbose_name='Data de Recusa')
 
@@ -203,6 +201,12 @@ class Task(Audit, LegacyCode, OfficeMixin):
         if not self.task_number:
             self.task_number = get_next_value(Task.TASK_NUMBER_SEQUENCE)
         return super().save(*args, **kwargs)
+
+    @property
+    def get_child(self):
+        if hasattr(self, 'child'):
+            return self.child
+        return None
 
 
 def get_dir_name(instance, filename):
