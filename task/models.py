@@ -104,7 +104,7 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
 class Task(Audit, LegacyCode, OfficeMixin):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
-    parent = models.ForeignKey('self', null=True, blank=True)
+    parent = models.OneToOneField('self', null=True, blank=True, related_name='child')
 
     task_number = models.PositiveIntegerField(verbose_name='Número da Providência',
                                               unique=True)
