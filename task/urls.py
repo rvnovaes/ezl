@@ -36,4 +36,15 @@ urlpatterns = [
     url(r'^tipo_servico/excluir$', login_required(views.TypeTaskDeleteView.as_view()),
         name='typetask_delete'),
 
+    # Filtros
+    url(r'^filtros/listar/$',
+        login_required(views.FilterListView.as_view()),
+        name='filter_list'),
+
+    url(r'^filtros/(?P<pk>[0-9]+)/$', login_required(views.FilterUpdateView.as_view()),
+        name='filter_update'),
+
+    url(r'^filtros/excluir$', login_required(views.FilterDeleteView.as_view()),
+        name='filter_delete'),
+
 ]

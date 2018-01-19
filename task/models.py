@@ -162,8 +162,6 @@ class Task(Audit, LegacyCode):
     @property
     def client(self):
         folder = Folder.objects.get(folders__law_suits__task__exact=self)
-        # Person.objects.get(persons__folders__law_suits__task__exact=self)
-        # self.movement.law_suit.folder.person_customer
         return folder.person_customer
 
     def __str__(self):
@@ -351,3 +349,17 @@ class DashboardViewModel(Audit):
     def folder_number(self):
         folder = Folder.objects.get(folders__law_suits__task__exact=self)
         return folder.folder_number
+
+
+class Filter(Audit):
+    name = models.TextField(verbose_name='Nome', blank=False, null=False, max_length=255)
+    description = models.TextField(verbose_name='Descrição', blank=True, null=True)
+    query = models.TextField(verbose_name='query', blank=False, null=False                             )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Filtro'
+        verbose_name_plural = 'Filtros'
+        unique_together = (('create_user', 'name'),)
