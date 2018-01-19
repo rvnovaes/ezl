@@ -198,7 +198,20 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
     {% endblock %}
     <script>
+
         $(document).ready(function () {
+            var elLegalType = $('[name=legal_type]');
+            var elCpfCnpj = $('[name=cpf_cnpj]');
+            var formatCpfCnpj = function () {
+                if (elLegalType.val() == 'F') {
+                    elCpfCnpj.attr('mask', 'cpf')
+                } else {
+                    elCpfCnpj.attr('mask', 'cnpj')
+                }
+                loadInputsMask();
+            };
+            elLegalType.on('change', formatCpfCnpj);
+            formatCpfCnpj();
             var elUsersToInvite = $('.users_to_invite');
             var data = {};
             $.ajax({
