@@ -113,7 +113,4 @@ class ServicePriceTableForm(BaseModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        self.fields['office'] = get_office_field(self.request)
-        # import pdb;pdb.set_trace()
-        # value_initial = self.get_initial_for_field(self.fields['value'], 'value')
-        # self.fields['value'].initial = str(value_initial).replace(".", ",")
+        self.fields['office'] = get_office_field(self.request, profile=self.request.user)
