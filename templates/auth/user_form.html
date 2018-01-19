@@ -5,21 +5,6 @@
     <link href="{% static 'skeleton/plugins/bower_components/multiselect/css/multi-select.css' %}" rel="stylesheet" type="text/css" />
 {% endblock %}
 
-{% block form %}
-    <div class="row">
-        {% bootstrap_field form.first_name form_group_class="form-group col-sm-4" %}
-        {% bootstrap_field form.last_name form_group_class="form-group col-sm-4" %}
-        {% bootstrap_field form.email form_group_class="form-group col-sm-4" %}
-    </div>
-    <div class="row">
-        {% bootstrap_field form.username form_group_class="form-group col-sm-6" %}
-        {% bootstrap_field form.password form_group_class="form-group col-sm-6" %}
-    </div>
-    <div class="row">
-        {% bootstrap_field form.is_active form_group_class="form-group col-sm-6" %}
-        {% bootstrap_field form.groups form_group_class="form-group col-sm-6" %}
-    </div>
-{% endblock %}
 
 {% block button_cancel %}
     {% include 'core/widgets/cancel_button.html'  with link_list='user_list' %}

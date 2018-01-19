@@ -49,8 +49,8 @@
                                 {% for column, cell in row.items %}
                                     <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                                 {% endfor %}
-                                <td data-href="{{ row.attrs.data_href }}">
-                                    <a class="btn btn-info btn-outline btn-circle btn-sm m-r-5">
+                                <td>
+                                    <a href="{{ row.attrs.data_href }}" class="btn btn-info btn-outline btn-circle btn-sm m-r-5">
                                         <i class="ti-pencil-alt"></i>
                                     </a>
                                 </td>

@@ -1,24 +1,5 @@
-{% extends "lawsuit/organ_form.html" %}
+{% extends 'skeleton/forms/base.html' %}
 
-{% load render_table from django_tables2 %}
-{% load bootstrap3 %}
-
-{% block form %}
-    {{ block.super }}
-
-    <div class="panel panel-default">
-        <div class="panel-heading"><i class="ti-list-ol"></i> Endereços </div>
-        <form action="" method="post">{% csrf_token %}
-        <div class="panel-wrapper collapse in">
-            <div class="panel-body">
-                    {% render_table address_table %}
-            </div>
-            <div class="panel-footer text-center">
-                {% url 'address_organ_create' object.pk  as url %}
-                {% bootstrap_button content="Adicionar" button_type='link' href=url button_class="btn btn-success btn-sm waves-effect waves-light" %}
-
-            </div>
-        </div>
-        </form>
-    </div>
+{% block button_cancel %}
+    {% include 'core/widgets/cancel_button.html'  with link_list='organ_list' %}
 {% endblock %}
