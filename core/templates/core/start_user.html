@@ -7,6 +7,27 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col col-md-10">
+                                <h3 class="panel-title">Meus dados</h3>
+                            </div>
+                            <div class="col col-md-2">
+                                <a href="{% url 'user_update' request.user.pk %}" class="btn btn-raised btn-fab btn-fab-mini" id="add_office">
+                                    <i class="material-icons" aria-hidden="true">edit</i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <p><strong>Nome:</strong> {{ request.user.person.legal_name }}</p>
+                        <p><strong>Usuário:</strong> {{ request.user.username }}</p>
+                        <p><strong>E-mail:</strong> {{ request.user.email }}</p>
+                        <a class="btn btn-raised btn-primary btn-block" href="/accounts/password/change/">Alterar Senha</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col col-md-10">
                                 <h3 class="panel-title">Meus escritórios</h3>
                             </div>
                             <div class="col col-md-2">
@@ -21,7 +42,7 @@
                                 <thead>
                                     <tr>
                                         <th>NOME</th>
-                                        <th>CNPJ</th>
+                                        <th>CPF/CNPJ</th>
                                         <th></th>
                                     </tr>
                                 </thead>
