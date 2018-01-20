@@ -354,7 +354,7 @@ class DashboardViewModel(Audit):
 class Filter(Audit):
     name = models.TextField(verbose_name='Nome', blank=False, null=False, max_length=255)
     description = models.TextField(verbose_name='Descrição', blank=True, null=True)
-    query = models.TextField(verbose_name='query', blank=False, null=False                             )
+    query = models.BinaryField(verbose_name='query', blank=True, null=True)
 
     def __str__(self):
         return self.name

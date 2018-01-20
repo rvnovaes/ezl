@@ -1,7 +1,7 @@
 import json
 import os
 from urllib.parse import urlparse
-
+import pickle
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -478,6 +478,7 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
 
     def query_builder(self):
         query_set = {}
+        person_dynamic_query = Q()
         person = Person.objects.get(auth_user=self.request.user)
 
         filters = self.request.GET
@@ -488,11 +489,11 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             data = task_form.cleaned_data
 
             if data['custom_filter']:
-                query_set = DashboardViewModel.objects.raw(data['custom_filter'].query)
+                q = pickle.loads(data['custom_filter'].query)
+                query_set = DashboardViewModel.objects.filter(q)
 
             else:
                 task_dynamic_query = Q()
-                person_dynamic_query = Q()
                 client_query = Q()
                 requested_dynamic_query = Q()
                 accepted_service_dynamic_query = Q()
@@ -628,7 +629,8 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             try:
                 if filters.get('save_filter', None) is not None:
                     filter_name = data['custom_filter_name']
-                    new_filter = Filter(name=filter_name, query=query_set.query, create_user=self.request.user,
+                    q = pickle.dumps(person_dynamic_query)
+                    new_filter = Filter(name=filter_name, query=q, create_user=self.request.user,
                                         create_date=timezone.now())
                     new_filter.save()
             except IntegrityError:

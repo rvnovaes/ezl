@@ -163,29 +163,6 @@ class TypeTaskForm(BaseForm):
 
 
 class FilterForm(BaseForm):
-
-    # def clean(self):
-    #     """
-    #     Override the default clean method to check whether this course has
-    #     been already inputted.
-    #     """
-    #     cleaned_data = self.cleaned_data
-    #     name = cleaned_data.get('name')
-    #
-    #     filter = Filter.objects.filter(name=name)
-    #     if self.instance:
-    #         filter = filter.exclude(pk=self.instance.pk)
-    #     if filter.exists():
-    #         msg = u"Nome do filtro: %s já existe na base de dados." % name
-    #         raise ValidationError(msg)
-    #     else:
-    #         return self.cleaned_data
-
     class Meta:
         model = Filter
-        fields = ['name', 'description', 'query']
-
-    query = forms.CharField(required=False, initial='', label='Query',
-                            widget=forms.Textarea(
-                                attrs={'class': 'form-control',
-                                       'readonly': 'readonly'}))
+        fields = ['name', 'description']
