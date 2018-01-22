@@ -1,5 +1,9 @@
 {% extends 'inicial.html' %}
 {% load core_filters %}
+{% block js_head %}
+    {{ block.super }}
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+{% endblock js_head %}
 {% block content %}
     {% include 'core/widgets/messages.html' %}
     <form action="" method="post">{% csrf_token %}
@@ -21,8 +25,8 @@
                                 {% endif %}
                             {% endfor %}
                             <div class="col-sm-12">
-                                <label for="{{ form.query.id_for_label }}">{{ form.query.label }}</label>
-                                    {{ form.query }}
+                                <label for="query_sql">SQL</label><br />
+                                <code class="prettyprint lang-sql">{{ form.instance.query_sql }}</code>
                             </div>
 
                         </div>

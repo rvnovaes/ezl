@@ -1,6 +1,7 @@
 import os
 from enum import Enum
 
+import pickle
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -360,6 +361,10 @@ class Filter(Audit):
 
     def __str__(self):
         return self.name
+
+    @property
+    def query_sql(self):
+        return str(DashboardViewModel.objects.filter(pickle.loads(self.query)).query)
 
     class Meta:
         verbose_name = 'Filtro'
