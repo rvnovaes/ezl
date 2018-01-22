@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager
+from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager, Office
 from decimal import Decimal
 
 
@@ -26,6 +26,10 @@ class CostCenter(Audit, LegacyCode, OfficeMixin):
 
 
 class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
+    office_correspondent = models.ForeignKey(Office, on_delete=models.PROTECT, blank=False,
+                                             null=False,
+                                             related_name='office_correspondent',
+                                             verbose_name='Escritório Correspondente')
     type_task = models.ForeignKey(
         'task.TypeTask',
         on_delete=models.PROTECT,
@@ -73,4 +77,3 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         ordering = ['value']
         verbose_name = 'Tabela de preço de serviços'
         verbose_name_plural = 'Tabelas de preço de serviços'
-

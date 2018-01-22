@@ -50,7 +50,7 @@ class TaskForm(BaseForm):
     # TODO verificar como aplicar os formulários com dateTimeField
 
     delegation_date = forms.DateTimeField(show_hidden_initial=True, initial=datetime.now(),
-                                          required=True,
+                                          required=False,
                                           widget=MDDatePicker(attrs={'class': 'form-control'},
                                                               format='DD/MM/YYYY'
                                                               )

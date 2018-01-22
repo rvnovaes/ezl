@@ -25,9 +25,9 @@ class ServicePriceTableTable(tables.Table):
     value = tables.Column(attrs={"editable": True, "mask": "money"})
 
     class Meta:
-        sequence = ('selection', 'office', 'type_task', 'court_district', 'state', 'client', 'value')
+        sequence = ('selection', 'office', 'office_correspondent', 'type_task', 'court_district', 'state', 'client', 'value')
         model = ServicePriceTable
-        fields = ('selection', 'office', 'type_task', 'court_district', 'state', 'client', 'value')
+        fields = ('selection', 'office', 'office_correspondent', 'type_task', 'court_district', 'state', 'client', 'value')
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existe tabela de preços cadastrada."
         row_attrs = {
