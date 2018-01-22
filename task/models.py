@@ -1,6 +1,7 @@
 import os
 from enum import Enum
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -10,6 +11,7 @@ from core.models import Person, Audit, AuditCreate, LegacyCode
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
 from decimal import Decimal
+
 
 class Permissions(Enum):
     view_delegated_tasks = 'Can view tasks delegated to the user'

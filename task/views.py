@@ -36,6 +36,7 @@ from financial.models import ServicePriceTable
 from chat.models import Chat
 from financial.tables import ServicePriceTableTaskTable
 
+
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Task
     table_class = TaskTable
