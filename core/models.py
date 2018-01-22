@@ -221,7 +221,7 @@ class AbstractPerson(Audit, LegacyCode):
         abstract = True
 
     def __str__(self):
-        return self.legal_name
+        return self.legal_name or ''
 
 
 class Person(AbstractPerson):

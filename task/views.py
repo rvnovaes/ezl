@@ -26,7 +26,7 @@ from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
 from task.filters import TaskFilter
-from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
+from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm, TaskToAssignForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable
@@ -98,16 +98,18 @@ class TaskCreateView(AuditFormMixin, CreateView):
                                'pk': self.kwargs['movement']})
 
 
-class TaskToAssignView(UpdateView):
+class TaskToAssignView(AuditFormMixin, UpdateView):
     model = Task
-    form_class = TaskForm
+    form_class = TaskToAssignForm
+    success_url = reverse_lazy('dashboard')
+    template_name_suffix = '_to_assign'
 
     def form_valid(self, form):
-        import pdb; pdb.set_trace()
-        raise
-
-    def get(self, request, *args, **kwargs):
-        import pdb;pdb.set_trace()
+        super().form_valid(form)
+        if form.is_valid():
+            form.instance.task_status = TaskStatus('Em Aberto')  # Tudo Este enum esta invertido, verificar e ajustar
+            form.save()
+        return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
 
 class TaskUpdateView(AuditFormMixin, UpdateView):

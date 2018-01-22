@@ -171,3 +171,9 @@ class TypeTaskForm(BaseForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
+
+
+class TaskToAssignForm(BaseForm):
+    class Meta:
+        model = Task
+        fields = ['person_executed_by']
