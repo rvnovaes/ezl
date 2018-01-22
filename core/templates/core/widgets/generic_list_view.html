@@ -4,6 +4,15 @@
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
 {% load core_filters %}
+
+{% block extra_stylesheets %}
+    <style>
+        tr {
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
     {% if table.page %}
         <div class="table-container">
