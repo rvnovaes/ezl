@@ -257,12 +257,12 @@
             <div class="modal-dialog">
                 <div class="modal-content ">
                     <div id="modalHeader">
-                        <h4 class="panel-title text-primary text-center">
+                        <h4 class="panel-title text-primary text-center" style="padding-top: 15px;padding-bottom: 15px;">
                             <i id="icon" class="material-icons ">save</i>
                             <b> Novo Filtro </b></h4>
                     </div>
                     <div cmlass="modal-body">
-                        <div class="form-group" style="margin: auto">
+                        <div class="form-group" style="margin: 15px;">
                             <div class="input-field col s8"
                                  id="{{ filter.form.custom_filter_name.id_for_label }}_container">
                                 <label for="{{ filter.form.custom_filter_name.id_for_label }}">{{ filter.form.custom_filter_name.label }}</label>
@@ -274,7 +274,6 @@
                         <div class="text-center">
                             <button name="save_filter"
                                    type="submit"
-                                    {#                                    onclick="beforeSubmit()"#}
                                    style="width: 95px!important;"
                                    class="btn btn-sm btn-raised btn-primary">Salvar
                             </button>

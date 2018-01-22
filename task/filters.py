@@ -11,7 +11,7 @@ from .models import DashboardViewModel
 
 
 class TaskFilter(FilterSet):
-    state = ModelChoiceFilter(queryset=filter_valid_choice_form(State.objects.filter(is_active=True)),
+    state = ModelChoiceFilter(queryset=filter_valid_choice_form(State.objects.filter(is_active=True).order_by('name')),
                               label="UF")
     court_district = ModelChoiceFilter(queryset=CourtDistrict.objects.filter(),
                                        widget=MDModelSelect2(
@@ -24,7 +24,7 @@ class TaskFilter(FilterSet):
                                            }),
                                        required=False,
                                        label="Comarca")
-    type_task = ModelChoiceFilter(queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True)),
+    type_task = ModelChoiceFilter(queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True).order_by('name')),
                                   label=u"Tipo de Serviço")
     cost_center = ModelChoiceFilter(queryset=filter_valid_choice_form(CostCenter.objects.filter(is_active=True)),
                                     label="Setor")
