@@ -1,193 +1,4 @@
-
 {% extends 'skeleton/base.html' %}
-{% load static core_match %}
-
-{% block extra_stylesheets %}
-    <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
-    <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
-    <style>
-        table.dataTable.row-border tbody tr:first-child th, table.dataTable.row-border tbody tr:first-child td, table.dataTable.display tbody tr:first-child th, table.dataTable.display tbody tr td {
-            font-size: small !important;
-        }
-    </style>
-{% endblock %}
-
-{% block content %}
-    <div class="row">
-        <div class="col-md-12">
-            {% include 'core/widgets/generic_search_view.html' %}
-            <div class="panel panel-default">
-                <div class="panel-heading">{{ form_name_plural|capfirst }}
-                    <div class="panel-action">
-                        <button class="btn btn-sm btn-danger" disabled id="delete_button">
-                            <i class="fa fa-trash"></i> Apagar
-                        </button>
-                        <button  class="btn btn-sm btn-success"
-                            onclick="window.open('{% if link_add_url %}{{ link_add_url }}{% elif link_add %}{% url link_add %}{% endif %}', '_self')">
-                            <i class="fa fa-plus"></i> Novo
-                        </button>
-
-                    </div>
-                </div>
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        <form id="formTable" action="{% url link_ex %}" method="post">
-                        {% csrf_token %}
-
-                        <table id="tableList" class="table table-striped dataTable no-footer" role="grid" aria-describedby="tableList_info">
-                            <thead>
-                                <tr>
-                                    {% for column in table.columns %}
-                                    <th>{{ column.header }}</th>
-                                    {% endfor %}
-                                    <th></th>
-                                </tr>
-                            </thead>
-                        <tbody>
-                        {% for row in table.rows %} {# support pagination #}
-                            <tr>
-                                {% for column, cell in row.items %}
-                                    <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
-                                {% endfor %}
-                                <td>
-                                    <a href="{{ row.attrs.data_href }}" class="btn btn-info btn-outline btn-circle btn-sm m-r-5">
-                                        <i class="ti-pencil-alt"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            </a>
-                        {% endfor %}
-                        </tbody>
-                        </table>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-{% endblock content %}
-{% block modal %}
-
-{% endblock %}
-{% block extra_scripts %}
-    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
-    <!-- start - This is for export functionality only -->
-    <script src="//cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
-    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.flash.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
-    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
-    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
-    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
-    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
-    <script src="{% static "libs/bootstrap-ajax-typeahead/js/bootstrap-typeahead.min.js" %}"></script>
-    <script src="{% static "js/autocomplete.js" %}"></script>
-    <script>
-        //Custom Image
-        $('#delete_button').click(function(){
-            {% if on_delete == 'CASCADE' %}
-                var message = "Ao excluir o(s) registro(s) de <strong>{{ form_name.title }}</strong> todos os seus vínculos também serão excluídos! Essa ação é irreversível."
-            {% else %}
-                var message = "Tem certeza que deseja excluir o(s) registro(s) de {{ form_name.title }} selecionado(s)? Essa ação é irreversível. Deseja continuar?"
-            {% endif %}
-            var pks = [];
-            checkboxes = document.getElementsByName('selection');
-            for (var i in checkboxes){
-                pk = checkboxes[i].value;
-                if (checkboxes[i].checked) {
-                    pks.push(pk)
-                }
-            }
-            console.log('ids', pks);
-            if (pks) {
-                swal({
-                    title: "Excluir",
-                    html: true,
-                    text: message,
-                    type: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "Sim, desejo excluir!",
-                    cancelButtonText: "Cancelar",
-                    closeOnConfirm: false
-                }, function(){
-                    $('#formTable').submit()
-                });
-            } else {
-                swal('alert')
-            }
-        });
-        var pk_list = [];
-
-        function toggle(source) {
-            checkboxes = document.getElementsByName('selection');
-            for (var i in checkboxes) {
-
-                if (checkboxes.hasOwnProperty(i)) {
-                    checkboxes[i].checked = source.checked;
-                    if (source.checked)
-                        pk_list.push(checkboxes[i].id);
-                    else
-                        pk_list = []
-                }
-            }
-            if (pk_list.length > 0) {
-                document.getElementById('delete_button').disabled = false;
-            } else {
-                document.getElementById('delete_button').disabled = true;
-            }
-        }
-
-        function showDeleteButton(source) {
-            if (source.checked) {
-                pk_list.push(source.id);
-            } else {
-                pk_list.pop();
-                document.getElementById("selection_header").checked = false;
-            }
-
-            if (pk_list.length > 0)
-                document.getElementById('delete_button').disabled = false;
-            else
-                document.getElementById('delete_button').disabled = true;
-
-        };
-
-    </script>
-{% endblock %}
-
-{% block script_document_ready %}
-        var table = $('#tableList').DataTable({
-                pageLength: 5,
-                dom: 'Bfrtip',
-                //ajax: '{% url 'ajax_get_task_data_table' %}?status=' + status,
-                buttons: [
-                    'copy', 'csv', 'excel', 'pdf', 'print'
-                ],
-                language: {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-                },
-                columnDefs: [
-                    {orderable: false, searchable: false, targets:   0 },
-                    {orderable: false, searchable: false, targets:   {{ total_columns }} }
-                ],
-                order: [
-                    [1, 'asc']
-                ],
-        })
-        $('#tableList tbody').on( 'click', 'tr', function () {
-            var pk = table.row( this ).data();
-            console.log('>>>>', pk)
-        });
-{% endblock %}
-
-{% block extra_modal %}
-    {% include 'task/modal/view-task-table.html' %}
-{% endblock %}
-
-{% comment %}
-{% extends 'inicial.html' %}
 {% load render_table from django_tables2 %}
 {% load static %}
 {% load querystring from django_tables2 %}
@@ -197,51 +8,11 @@
     {% if table.page %}
         <div class="table-container">
     {% endif %}
-<script language="JavaScript">
-    $('#myModal').modal('show')
-    var pk_list = [];
-
-    function toggle(source) {
-
-
-        checkboxes = document.getElementsByName('selection');
-        for (var i in checkboxes) {
-
-            if (checkboxes.hasOwnProperty(i)) {
-                checkboxes[i].checked = source.checked;
-                if (source.checked)
-                    pk_list.push(checkboxes[i].id);
-                else
-                    pk_list = []
-            }
-        }
-        if (pk_list.length > 0) {
-            document.getElementById('delete_button').disabled = false;
-        } else {
-            document.getElementById('delete_button').disabled = true;
-        }
-    }
-    function showDeleteButton(source) {
-        if (source.checked) {
-            pk_list.push(source.id);
-        } else {
-            pk_list.pop();
-            document.getElementById("selection_header").checked = false;
-        }
-
-        if (pk_list.length > 0)
-            document.getElementById('delete_button').disabled = false;
-        else
-            document.getElementById('delete_button').disabled = true;
-
-    }
-</script>
-{% include 'core/widgets/messages.html' %}
 {% include 'core/widgets/generic_search_view.html' %}
 <form action="{% url link_ex %}" method="post">
     {% csrf_token %}
     {% block table %}
-        <div class="panel panel-primary">
+        <div class="panel panel-default">
         <div class="panel-heading">
             <div class="panel-title form-row">{{ form_name_plural.capitalize }}</div>
         </div>
@@ -302,11 +73,12 @@
             </div>
             <div class="text-right" style="margin: auto">
                 <div class="fixed-btn">
-                    <input type="button" data-toggle="modal" data-target="#confirmDelete" disabled id="delete_button"
-                           class="btn btn-fab btn-warning material-icons"
-                           value="remove">
-                    <a class="btn btn-fab btn-primary" href="{% if link_add_url %}{{ link_add_url }}{% elif link_add %}{% url link_add %}{% endif %}">
-                        <i class="material-icons">add</i></a>
+                    <button type="button" data-toggle="modal" data-target="#confirmDelete" disabled id="delete_button"
+                           class="btn btn-danger"
+                            value="remove">Remover</button>
+                    <a class="btn btn-success" href="{% if link_add_url %}{{ link_add_url }}{% elif link_add %}{% url link_add %}{% endif %}">
+                        Adicionar
+                    </a>
                 </div>
             </div>
         </div>
@@ -338,4 +110,46 @@
     </div>
 </form>
 {% endblock content %}
-{% endcomment %}
+{% block extra_scripts %}
+    <script language="JavaScript">
+        $('#myModal').modal('show')
+        var pk_list = [];
+
+        function toggle(source) {
+
+
+            checkboxes = document.getElementsByName('selection');
+            for (var i in checkboxes) {
+
+                if (checkboxes.hasOwnProperty(i)) {
+                    checkboxes[i].checked = source.checked;
+                    if (source.checked)
+                        pk_list.push(checkboxes[i].id);
+                    else
+                        pk_list = []
+                }
+            }
+            if (pk_list.length > 0) {
+                document.getElementById('delete_button').disabled = false;
+            } else {
+                document.getElementById('delete_button').disabled = true;
+            }
+        }
+
+        function showDeleteButton(source) {
+            if (source.checked) {
+                pk_list.push(source.id);
+            } else {
+                pk_list.pop();
+                document.getElementById("selection_header").checked = false;
+            }
+
+            if (pk_list.length > 0)
+                document.getElementById('delete_button').disabled = false;
+            else
+                document.getElementById('delete_button').disabled = true;
+
+        }
+    </script>
+
+{% endblock %}
