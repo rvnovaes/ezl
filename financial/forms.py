@@ -123,3 +123,5 @@ class ServicePriceTableForm(BaseModelForm):
         self.fields['office'] = get_office_field(self.request)
         self.fields['office_correspondent'] = get_office_field(self.request, profile=self.request.user)
         self.fields['office_correspondent'].label = u"Escritório Correspondente"
+        self.fields['office_correspondent'].required = False
+        self.fields['office'].required = False
