@@ -1,4 +1,5 @@
 import os
+import copy
 from urllib.parse import urlparse
 import json
 from chat.models import UserByChat
@@ -331,8 +332,9 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             form.instance.amount = form.cleaned_data['amount']
             servicepricetable_id = self.request.POST['servicepricetable_id']
             servicepricetable = ServicePriceTable.objects.get(id=servicepricetable_id)
-            form.instance.person_executed_by = (servicepricetable.correspondent
-                                                if servicepricetable.correspondent else None)
+            if servicepricetable:
+                self.delegate_child_task(form.instance, servicepricetable.office_correspondent)
+                form.instance.person_executed_by = None
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
@@ -382,11 +384,27 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
     def create_user_by_chat(self, task, fields):
         for field in fields:
-            user = getattr(task, field).auth_user
-            if user:
+            if getattr(task, field) and getattr(task, field).auth_user:
+                user = getattr(task, field).auth_user
                 UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
                     'create_user': user, 'user_by_chat': user, 'chat': task.chat
                 })
+
+    @staticmethod
+    def delegate_child_task(object_parent, office_correspondent):
+        """
+        Este metodo e chamado quando um escritorio delega uma OS para outro escritorio
+        Ao realizar este processo a nova OS criada devera ficar com o status de Solicitada
+        enquanto a OS pai devera ficar com o status de Delegada/Em Aberti
+        :param object_parent: Task que sera copiada para gerar a nova task
+        :param office_correspondent: Escritorio responsavel pela nova task
+        :return:
+        """
+        new_task = copy.copy(object_parent)
+        new_task.pk = new_task.task_number = None
+        new_task.office = office_correspondent
+        new_task.task_status = TaskStatus.REQUESTED
+        new_task.save()
 
 
 class EcmCreateView(LoginRequiredMixin, CreateView):

@@ -1,6 +1,6 @@
 import os
 from enum import Enum
-
+from django.db import transaction
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -114,8 +114,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
     person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                         related_name='%(class)s_asked_by',
                                         verbose_name='Solicitante')
-    person_executed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False,
-                                           null=False,
+    person_executed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True,
                                            related_name='%(class)s_executed_by',
                                            verbose_name='Correspondente')
     person_distributed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False,
@@ -199,7 +198,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
     def save(self, *args, **kwargs):
         self._called_by_etl = kwargs.pop('called_by_etl', False)
         if not self.task_number:
-            self.task_number = get_next_value(Task.TASK_NUMBER_SEQUENCE)
+            self.task_number = self.get_task_number()
         return super().save(*args, **kwargs)
 
     @property
@@ -207,6 +206,11 @@ class Task(Audit, LegacyCode, OfficeMixin):
         if hasattr(self, 'child'):
             return self.child
         return None
+
+    @transaction.atomic
+    def get_task_number(self):
+        return get_next_value('office_{office_pk}_{name}'.format(office_pk=self.office.pk,
+                                                                 name=self.TASK_NUMBER_SEQUENCE))
 
 
 def get_dir_name(instance, filename):
