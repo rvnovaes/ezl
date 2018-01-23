@@ -1,4 +1,5 @@
 from django_filters import FilterSet, BooleanFilter, ModelChoiceFilter, NumberFilter, CharFilter
+from django import forms
 
 from core.models import Person, State
 from core.widgets import MDCheckboxInput, MDDateTimeRangeFilter, MDModelSelect2
@@ -10,7 +11,8 @@ from .models import Task, DashboardViewModel
 
 
 class TaskFilter(FilterSet):
-    state = ModelChoiceFilter(queryset=filter_valid_choice_form(State.objects.filter(is_active=True)),
+    state = ModelChoiceFilter(queryset=filter_valid_choice_form(
+        State.objects.filter(is_active=True).order_by('name')),
                               label="UF")
     court_district = ModelChoiceFilter(queryset=CourtDistrict.objects.filter(),
                                        widget=MDModelSelect2(
