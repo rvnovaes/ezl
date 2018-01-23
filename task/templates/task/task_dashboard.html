@@ -28,7 +28,7 @@
                 </div>
             </div>
             {% for table in tables %}
-            <div class="col-lg-3 col-md-6    col-sm-6 col-xs-12">
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
                 <a {% if table.length %}href="#modal-view-task-table" data-toggle="modal"{% else %}href="javascript:swal('Não há dados para exibir.')"{% endif %} data-status="{{ table.status }}">
                 <div class="white-box">
                     <h5 class="font-bold text-{{ table.status.get_color }}">{{ table.title }}</h5>

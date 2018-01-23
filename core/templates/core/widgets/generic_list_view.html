@@ -85,9 +85,6 @@
                     <button type="button" data-toggle="modal" data-target="#confirmDelete" disabled id="delete_button"
                            class="btn btn-danger"
                             value="remove">Remover</button>
-                    <a class="btn btn-success" href="{% if link_add_url %}{{ link_add_url }}{% elif link_add %}{% url link_add %}{% endif %}">
-                        Adicionar
-                    </a>
                 </div>
             </div>
         </div>
@@ -160,5 +157,9 @@
 
         }
     </script>
-
+{% endblock %}
+{% block bar_buttons %}
+    <a class="btn btn-success pull-right m-l-20 hidden-xs hidden-sm waves-effect waves-light" href="{% if link_add_url %}{{ link_add_url }}{% elif link_add %}{% url link_add %}{% endif %}">
+        Adicionar
+    </a>
 {% endblock %}

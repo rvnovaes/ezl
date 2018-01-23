@@ -294,6 +294,7 @@ class SingleTableViewMixin(SingleTableView):
             pass
         context['form_name'] = self.model._meta.verbose_name
         context['form_name_plural'] = self.model._meta.verbose_name_plural
+        context['page_title'] = self.model._meta.verbose_name_plural
         generic_search = GenericSearchFormat(self.request, self.model, self.model._meta.fields)
         args = generic_search.despatch()
         if args:
@@ -342,6 +343,7 @@ class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Person
     table_class = PersonTable
     ordering = ('legal_name', 'name', )
+
 
     @remove_invalid_registry
     def get_context_data(self, **kwargs):
