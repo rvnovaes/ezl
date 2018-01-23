@@ -37,16 +37,16 @@ class ServicePriceTableTable(tables.Table):
 
 
 class ServicePriceTableTaskTable(tables.Table):
-    office = tables.Column(orderable=False)
+    office_correspondent = tables.Column(orderable=False)
     court_district = tables.Column(orderable=False)
     state = tables.Column(orderable=False)
     client = tables.Column(orderable=False)
     value = tables.Column(orderable=False)
 
     class Meta:
-        sequence = ('office', 'court_district', 'state', 'client', 'value')
+        sequence = ('office_correspondent', 'court_district', 'state', 'client', 'value')
         model = ServicePriceTable
-        fields = ('office', 'court_district', 'state', 'client', 'value')
+        fields = ('office_correspondent', 'court_district', 'state', 'client', 'value')
         attrs = {"class": "table stable-striped table-bordered correspondents-table", "id": "correspondents-table"}
         empty_text = "Não existe tabela de preços cadastrada."
         order_by = ("value",)
