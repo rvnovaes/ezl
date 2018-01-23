@@ -61,6 +61,8 @@ class TaskStatus(Enum):
     FINISHED = 'Finalizada'
     INVALID = 'Inválida'
     ERROR = 'Erro no sistema de origem'
+    SOLICITADA = 'Solicitada'
+    RES = 'Recusada pelo Service'
 
     def get_icon(self):
         return icon_dict[self.name]

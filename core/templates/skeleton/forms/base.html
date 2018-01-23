@@ -1,14 +1,24 @@
 {% extends 'skeleton/base.html' %}
-{% load static bootstrap3 %}
+{% load static bootstrap3 form_tags %}
 {% block content %}
-    <form action="{% block action %}{% endblock %}" method="{% block method %}{% endblock %}">{% csrf_token %}
+    <form id="{{ object_form }}" action="{% block action %}{% endblock %}" method="{% block method %}post{% endblock %}">{% csrf_token %}
     <div class="panel panel-default">
         <div class="panel-heading">{% include 'skeleton/forms/form-title.html' with form=form %}</div>
         <div class="panel-wrapper collapse in">
             <div class="panel-body">
                     {% block form %}
                         {% for field in form %}
-                            {% bootstrap_field field form_group_class="form-group col-sm-6" %}
+                            {% field_type field as field_type %}
+                            {% if field_type == 'checkbox' %}
+                                <div class="form-group col-sm-6">
+                                    <div class="checkbox checkbox-success">
+                                        {{ field }}
+                                        {{ field.label_tag }}
+                                    </div>
+                                </div>
+                            {% else %}
+                                {% bootstrap_field field form_group_class="form-group col-sm-6" %}
+                            {% endif %}
                         {% endfor %}
                     {% endblock %}
             </div>
@@ -30,5 +40,8 @@
 {% endblock content %}
 
 {% block extra_scripts %}
+    <script>
+    // Extra scripts
+    </script>
     {{ form.media }}
 {% endblock %}
