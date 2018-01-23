@@ -1,79 +1,63 @@
-{% extends "skeleton/base.html" %}
+{% extends "skeleton/forms/base.html" %}
 {% load render_table from django_tables2 %}
 {% load static %}
 {% load querystring from django_tables2 %}
-{% load core_filters bootstrap3 %}
+{% load bootstrap3 %}
 
-{% block content %}
-    <div class="panel panel-default">
-        <div class="panel-heading ">
-            <i class="ti-filter"></i>Filtrar providências
-            <div class="panel-action">
-                <a href="#" data-perform="panel-collapse"><i class="ti-plus"></i></a>
-            </div>
+
+    {% block method %}method="get"{% endblock method %}
+    {% block form %}
+        <div class="row">
+            {% bootstrap_field filter.form.state form_group_class="form-group col-sm-6" bound_css_class='' %}
+            {% bootstrap_field filter.form.court_district form_group_class="form-group col-sm-6" bound_css_class='' %}
         </div>
-        <div class="panel-wrapper collapse" aria-expanded="true">
-            <form method="get" class="filter-form">
-                {% csrf_token %}
-                <div class="panel-body">
-                    <fieldset>
-                        <div class="row">
-                            {% bootstrap_field filter.form.state form_group_class="form-group col-sm-6"%}
-                            {% bootstrap_field filter.form.court_district form_group_class="form-group col-sm-6"%}
-                        </div>
-                        <div class="row">
-                            {% bootstrap_field filter.form.type_task form_group_class="form-group col-sm-4"%}
-                            {% bootstrap_field filter.form.cost_center form_group_class="form-group col-sm-4"%}
-                            {% bootstrap_field filter.form.court form_group_class="form-group col-sm-4"%}
-                        </div>
-                        <div class="row">
-                            {% bootstrap_field filter.form.folder_number form_group_class="form-group col-sm-4"%}
-                            {% bootstrap_field filter.form.law_suit_number form_group_class="form-group col-sm-4"%}
-                            {% bootstrap_field filter.form.task_number form_group_class="form-group col-sm-4"%}
-                        </div>
-                        <div class="row">
-                            {% bootstrap_field filter.form.person_executed_by form_group_class="form-group col-sm-12 col-md-4"%}
-                            {% bootstrap_field filter.form.person_asked_by form_group_class="form-group col-sm-12 col-md-4"%}
-                            {% bootstrap_field filter.form.person_distributed_by form_group_class="form-group col-sm-12 col-md-4"%}
-                        </div>
-                        <div class="row">
-                            {% bootstrap_field filter.form.requested_in form_group_class="form-group col-sm-12 col-md-6"%}
-                            {% bootstrap_field filter.form.accepted_service_in form_group_class="form-group col-sm-12 col-md-6"%}
-                        </div>
-                        <div class="row">
-                            {% bootstrap_field filter.form.refused_service_in form_group_class="form-group col-sm-12 col-md-6"%}
-                            {% bootstrap_field filter.form.open_in form_group_class="form-group col-sm-12 col-md-6"%}
-                        </div>
-                        <div class="row">
-                            {% bootstrap_field filter.form.accepted_in form_group_class="form-group col-sm-12 col-md-6"%}
-                            {% bootstrap_field filter.form.refused_in form_group_class="form-group col-sm-12 col-md-6"%}
-                        </div>
-                        <div class="row">
-                            {% bootstrap_field filter.form.return_in form_group_class="form-group col-sm-12 col-md-6"%}
-                            {% bootstrap_field filter.form.done_in form_group_class="form-group col-sm-12 col-md-6"%}
-                        </div>
-                        <div class="row">
-                            {% bootstrap_field filter.form.blocked_payment_in form_group_class="form-group col-sm-12 col-md-6"%}
-                            {% bootstrap_field filter.form.finished_in form_group_class="form-group col-sm-12 col-md-6"%}
-                        </div>
-                    </fieldset>
-                    <br>
-                    <br>
-                     <div class="panel-footer">
-                        <button class="btn btn-success waves-effect waves-light" type="submit">
-                            <span class="btn-label"><i class="fa fa-filter"></i></span>Filtar
-                        </button>
-                         <button class="btn btn-info waves-effect waves-light" type="button"
-                                onclick="javascript:window.open('{{ request.META.PATH_INFO }}', '_self')">
-                            <span class="btn-label"><i class="fa fa-trash-o"></i></span>Limpar
-                        </button>
-                    </div>
-                </div>
-            </form>
+        <div class="row">
+            {% bootstrap_field filter.form.type_task form_group_class="form-group col-sm-4" bound_css_class='' %}
+            {% bootstrap_field filter.form.cost_center form_group_class="form-group col-sm-4" bound_css_class='' %}
+            {% bootstrap_field filter.form.court form_group_class="form-group col-sm-4" bound_css_class='' %}
         </div>
-    </div>
-{#    {{ filter.form.media }}#}
-    {% block table %}
+        <div class="row">
+            {% bootstrap_field filter.form.folder_number form_group_class="form-group col-sm-4" bound_css_class='' %}
+            {% bootstrap_field filter.form.law_suit_number form_group_class="form-group col-sm-4" bound_css_class='' %}
+            {% bootstrap_field filter.form.task_number form_group_class="form-group col-sm-4" bound_css_class='' %}
+        </div>
+        <div class="row">
+            {% bootstrap_field filter.form.person_executed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}
+            {% bootstrap_field filter.form.person_asked_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}
+            {% bootstrap_field filter.form.person_distributed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}
+        </div>
+        <div class="row">
+            {% bootstrap_field filter.form.requested_in form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}
+            {% bootstrap_field filter.form.accepted_service_in form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}
+        </div>
+        <div class="row">
+            {% bootstrap_field filter.form.refused_service_in form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}
+            {% bootstrap_field filter.form.open_in form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}
+        </div>
+        <div class="row">
+            {% bootstrap_field filter.form.accepted_in form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}
+            {% bootstrap_field filter.form.refused_in form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}
+        </div>
+        <div class="row">
+            {% bootstrap_field filter.form.return_in form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}
+            {% bootstrap_field filter.form.done_in form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}
+        </div>
+        <div class="row">
+            {% bootstrap_field filter.form.blocked_payment_in form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}
+            {% bootstrap_field filter.form.finished_in form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}
+        </div>
+    {% endblock form %}
+
+    {% block form_buttons %}
+        <button class="btn btn-success waves-effect waves-light" type="submit">
+            <span class="btn-label"><i class="fa fa-filter"></i></span>Filtar
+        </button>
+         <button class="btn btn-info waves-effect waves-light" type="button"
+                onclick="javascript:window.open('{{ request.META.PATH_INFO }}', '_self')">
+            <span class="btn-label"><i class="fa fa-trash-o"></i></span>Limpar
+        </button>
+    {% endblock form_buttons %}
+    {% block extra_content %}
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="panel-title form-row">Listagem de providências ({{ table.length }})</div>
@@ -131,5 +115,8 @@
             </div>
         </div>
     </div>
-    {% endblock table %}
-{% endblock content %}
+    {% endblock extra_content %}
+
+{% block extra_scripts %}
+    {{ filter.form.media }}
+{% endblock %}

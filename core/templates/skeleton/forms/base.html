@@ -4,7 +4,7 @@
     {% include 'core/widgets/messages.html' %}
     <div class="panel panel-default">
         <div class="panel-heading">{% include 'skeleton/forms/form-title.html' with form=form %}</div>
-        <form action="" method="post">{% csrf_token %}
+        <form action="" {% block method %}method="post"{% endblock method %}>{% csrf_token %}
         <div class="panel-wrapper collapse in">
             <div class="panel-body">
                     {% block form %}
