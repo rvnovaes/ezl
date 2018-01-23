@@ -1,15 +1,14 @@
 {% extends 'skeleton/base.html' %}
-{% load core_filters bootstrap3 %}
+{% load static bootstrap3 %}
 {% block content %}
-    {% include 'core/widgets/messages.html' %}
+    <form action="{% block action %}{% endblock %}" method="post">{% csrf_token %}
     <div class="panel panel-default">
         <div class="panel-heading">{% include 'skeleton/forms/form-title.html' with form=form %}</div>
-        <form action="" method="post">{% csrf_token %}
         <div class="panel-wrapper collapse in">
             <div class="panel-body">
                     {% block form %}
                         {% for field in form %}
-                            {% bootstrap_field field form_group_class="form-group col-sm-6"%}
+                            {% bootstrap_field field form_group_class="form-group col-sm-6" %}
                         {% endfor %}
                     {% endblock %}
             </div>
@@ -24,9 +23,12 @@
                 {% endblock %}
             </div>
         </div>
-        </form>
     </div>
-    {% block extra_content %}
-    
-    {% endblock %}
+    {% block extra_form %}{% endblock %}
+    </form>
+    {% block extra_content %}{% endblock %}
 {% endblock content %}
+
+{% block extra_scripts %}
+    {{ form.media }}
+{% endblock %}
