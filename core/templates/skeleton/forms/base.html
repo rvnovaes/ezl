@@ -1,7 +1,7 @@
 {% extends 'skeleton/base.html' %}
 {% load static bootstrap3 %}
 {% block content %}
-    <form action="{% block action %}{% endblock %}" method="post">{% csrf_token %}
+    <form action="{% block action %}{% endblock %}" method="{% block method %}{% endblock %}">{% csrf_token %}
     <div class="panel panel-default">
         <div class="panel-heading">{% include 'skeleton/forms/form-title.html' with form=form %}</div>
         <div class="panel-wrapper collapse in">
