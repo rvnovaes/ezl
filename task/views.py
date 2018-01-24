@@ -187,8 +187,7 @@ class DashboardView(MultiTableMixin, TemplateView):
             return tables
         return tables
 
-    @staticmethod
-    def get_list_tables(data, person):
+    def get_list_tables(self, data, person):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
@@ -202,7 +201,8 @@ class DashboardView(MultiTableMixin, TemplateView):
         requested = grouped.get(TaskStatus.REQUESTED) or {}
         accepted_service = grouped.get(TaskStatus.ACCEPTED_SERVICE) or {}
         refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}
-        error = InconsistencyETL.objects.filter(is_active=True) or {}
+        office = get_office_session(self.request)
+        error = InconsistencyETL.objects.filter(is_active=True, office=office) or {}
 
         return_list = []
 
