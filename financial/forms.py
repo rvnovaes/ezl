@@ -7,6 +7,7 @@ from core.utils import filter_valid_choice_form
 from lawsuit.models import CourtDistrict
 from task.models import TypeTask
 from .models import CostCenter, ServicePriceTable
+from decimal import Decimal
 
 
 class BaseModelForm(forms.ModelForm):
@@ -103,7 +104,7 @@ class ServicePriceTableForm(BaseModelForm):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'
         value = value.replace('.', '')
         value = value.replace(',', '.')
-        return float(value)
+        return Decimal(value)
 
     def clean_correspondent(self):
         correspondent = self.cleaned_data['correspondent']
