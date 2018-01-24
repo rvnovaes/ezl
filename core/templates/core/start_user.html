@@ -1,0 +1,110 @@
+{% extends 'inicial.html' %}
+{% load staticfiles %}
+{% block content %}
+        <div class="row">
+            <div class="col col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col col-md-10">
+                                <h3 class="panel-title">Meus dados</h3>
+                            </div>
+                            <div class="col col-md-2">
+                                <a href="{% url 'user_update' request.user.pk %}" class="btn btn-raised btn-fab btn-fab-mini" id="add_office">
+                                    <i class="material-icons" aria-hidden="true">edit</i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <p><strong>Nome:</strong> {{ request.user.person.legal_name }}</p>
+                        <p><strong>Usuário:</strong> {{ request.user.username }}</p>
+                        <p><strong>E-mail:</strong> {{ request.user.email }}</p>
+                        <a class="btn btn-raised btn-primary btn-block" href="/accounts/password/change/">Alterar Senha</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col col-md-10">
+                                <h3 class="panel-title">Meus escritórios</h3>
+                            </div>
+                            <div class="col col-md-2">
+                                <a href="/escritorios/criar" class="btn btn-raised btn-fab btn-fab-mini" id="add_office">
+                                    <i class="material-icons" aria-hidden="true">add</i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        {% if request.user.person.offices.all %}
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>NOME</th>
+                                        <th>CPF/CNPJ</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for office in request.user.person.offices.all %}
+                                    <tr>
+                                        <td>{{office.name}}</td>
+                                        <td>{{office.cpf_cnpj}}</td>
+                                        <td><a href="/escritorios/{{office.pk}}">
+                                            <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {%else%}
+                                <p>Você não possui relacionamento com escritórios</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Meus convites</h3>
+                    </div>
+                    <div class="panel-body">
+                        {% if request.user.person.invites.all %}
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Escritório</th>
+                                        <th>Aceitar</th>
+                                        <th>Recusar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                        {% for invite in request.user.person.invites.all %}
+                                            {% if invite.status == 'N' %}
+                                                <tr>
+                                                    <td>{{invite.office.name}}</td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-raised btn-fab btn-fab-mini btn-success"
+                                                        onclick="updateInvite('{{invite.pk}}', 'A', '{{csrf_token}}')">
+                                                            <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-raised btn-fab btn-fab-mini btn-danger"
+                                                         onclick="updateInvite('{{invite.pk}}', 'R', '{{csrf_token}}')">
+                                                            <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                </tbody>
+                            </table>
+                            <p>Você não possui relacionamento com escritórios</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock content %}

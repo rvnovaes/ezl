@@ -1,9 +1,9 @@
 from django.db import models
-from core.models import Audit, LegacyCode
+from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager
 from decimal import Decimal
 
 
-class CostCenter(Audit, LegacyCode):
+class CostCenter(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(
         verbose_name="Nome",
         max_length=255,
@@ -12,6 +12,8 @@ class CostCenter(Audit, LegacyCode):
         default="",
         unique=True
     )
+
+    objects = OfficeManager()
 
     def __str__(self):
         return self.name
@@ -23,7 +25,7 @@ class CostCenter(Audit, LegacyCode):
         verbose_name_plural = 'Centros de custos'
 
 
-class ServicePriceTable(models.Model):
+class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
     type_task = models.ForeignKey(
         'task.TypeTask',
         on_delete=models.PROTECT,
@@ -68,6 +70,8 @@ class ServicePriceTable(models.Model):
         verbose_name="Valor",
         default=Decimal('0.00')
     )
+
+    objects = OfficeManager()
 
     def __str__(self):
         return self.correspondent.name if self.correspondent else ""

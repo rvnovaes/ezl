@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 import json
 from chat.models import UserByChat
 from django.core.cache import cache
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
@@ -19,7 +20,7 @@ from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
-    DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED
+    DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
 from core.models import Person
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from etl.models import InconsistencyETL
@@ -34,6 +35,7 @@ from financial.models import ServicePriceTable
 from chat.models import Chat
 from survey.models import SurveyPermissions
 from financial.tables import ServicePriceTableTaskTable
+from core.utils import get_office_session
 
 
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -61,6 +63,21 @@ class TaskCreateView(AuditFormMixin, CreateView):
             self.form_class.declared_fields['is_active'].disabled = False
 
         return self.initial.copy()
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.kwargs.get('movement'):
+            obj = Movement.objects.get(id=self.kwargs.get('movement'))
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         task = form.instance
@@ -101,6 +118,19 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
         elif isinstance(self, UpdateView):
             self.form_class.declared_fields['is_active'].disabled = False
         return self.initial.copy()
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
@@ -150,7 +180,11 @@ class DashboardView(MultiTableMixin, TemplateView):
         data = []
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
         if dynamic_query or person.auth_user.is_superuser:
-            data = DashboardViewModel.objects.filter(dynamic_query)
+            office_session = get_office_session(self.request)
+            if office_session:
+                data = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query)
+            else:
+                data = DashboardViewModel.objects.filter(office_id=0).filter(dynamic_query)
         tables = self.get_list_tables(data, person) if person else []
         if not dynamic_query:
             return tables
@@ -402,6 +436,11 @@ class TypeTaskCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('typetask_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class TypeTaskUpdateView(AuditFormMixin, UpdateView):
     model = TypeTask
@@ -420,6 +459,20 @@ class TypeTaskUpdateView(AuditFormMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         cache.set('type_task_page', self.request.META.get('HTTP_REFERER'))
         return context
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """
@@ -478,7 +531,11 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
     table_class = DashboardStatusTable
 
     def query_builder(self):
-        query_set = {}
+        office_session = get_office_session(self.request)
+        if office_session:
+            query_set = DashboardViewModel.objects.filter(office_id=office_session.id)
+        else:
+            query_set = DashboardViewModel.objects.filter(office_id=0)
         person = Person.objects.get(auth_user=self.request.user)
 
         request = self.request.GET
@@ -613,7 +670,8 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
                 .add(Q(blocked_payment_dynamic_query), Q.AND)\
                 .add(Q(finished_dynamic_query), Q.AND)
 
-            query_set = DashboardViewModel.objects.filter(person_dynamic_query)
+            # office_session = get_office_session(self.request)
+            query_set = query_set.filter(person_dynamic_query)
 
         return query_set, task_filter
 

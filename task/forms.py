@@ -7,7 +7,7 @@ from django.utils import timezone
 from django_file_form.forms import FileFormMixin, MultipleUploadedFileField
 
 from core.models import Person
-from core.utils import filter_valid_choice_form
+from core.utils import filter_valid_choice_form, get_office_field
 from core.widgets import MDDateTimepicker, MDDatePicker
 from lawsuit.forms import BaseForm
 from task.models import Task, TypeTask
@@ -20,7 +20,8 @@ class TaskForm(BaseForm):
 
     class Meta:
         model = Task
-        fields = ['task_number', 'type_task',
+        fields = ['office',
+                  'task_number', 'type_task',
                   'person_executed_by', 'person_asked_by', 'person_distributed_by',
                   'final_deadline_date',
                   'delegation_date', 'acceptance_date', 'refused_date', 'execution_date',
@@ -94,6 +95,11 @@ class TaskForm(BaseForm):
                                       attrs={'class': 'form-control', 'rows': '5',
                                              'id': 'details_id'}))
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
+
 
 class TaskCreateForm(FileFormMixin, TaskForm):
     documents = MultipleUploadedFileField(required=False)
@@ -159,4 +165,9 @@ class TaskDetailForm(ModelForm):
 class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
-        fields = ['name', 'survey', 'is_active']
+        fields = ['office', 'name', 'survey', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
