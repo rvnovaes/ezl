@@ -91,9 +91,9 @@ class ServicePriceTableForm(BaseModelForm):
     )
 
     value = forms.CharField(label="Valor",
+                            localize=True,
                             required=False, # O valor pode ser 0.00 porque os correspondentes internos não cobram para fazer serviço
-                            widget=forms.TextInput(attrs={'mask': 'money',
-                                                          'onload': 'loadInputsMask()'}))
+                            widget=forms.TextInput(attrs={'mask': 'money'}))
 
     class Meta:
         model = ServicePriceTable
