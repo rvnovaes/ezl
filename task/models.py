@@ -88,9 +88,11 @@ class SurveyType(Enum):
 class TypeTask(Audit, LegacyCode):
     name = models.CharField(max_length=255, null=False, unique=True,
                             verbose_name='Tipo de Serviço')
-    survey_type = models.CharField(null=False, verbose_name='Tipo de Formulário', max_length=100,
-                                   choices=((x.name.title(), x.value) for x in SurveyType),
-                                   default=SurveyType.BLANK)
+    survey = models.ForeignKey(
+        'survey.Survey',
+        null=False,
+        verbose_name='Tipo de Formulário'
+    )
 
     class Meta:
         db_table = 'type_task'

@@ -34,7 +34,6 @@ setInterval(function () {
         url: "/chat/count_message/",
         data: {},
         success: function (response) {
-            console.log(response.all_messages);
             if (response.all_messages > 0) {
                 $('.chat-badge.badge').text(response.all_messages)
             } else {
