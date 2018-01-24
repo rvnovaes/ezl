@@ -1,5 +1,4 @@
 $(function () {
-
     $(".js-upload-files").click(function () {
         $("#fileupload").click();
     });
@@ -30,62 +29,10 @@ $(function () {
             if (data.result.success) {
                 document.getElementById("no-providence").innerHTML="";
                 showToast('success', data.result.message, '', 3000, true);
-                $("#files tbody").prepend(
-                    "<tr class='lineFile' id='row-"+ data.result.id +"'>" +
-                        "<td id='cell-table'>" +
-                            "<div class='row' id='row-file'>" +
-                                "<div class='col-sm-2' style='text-align: center !important; vertical-align: middle !important;'>" +
-                                    "<i class='material-icons'>person_pin</i>" +
-                                "</div>" +
-                                "<div class='col-sm-8' style='text-align: left; padding-left: 0;'>" +
-                                    "<h6 style='margin-bottom: 3px !important;'>" + data.result.username + " (" + data.result.user + ")" +
-                                    "</h6>" +
-                                    "<div style='font-size: x-small'>" +
-                                         moment().tz("America/Sao_Paulo").format("DD [de] MMMM [de] YYYY [às] HH:mm") +
-                                    "</div>" +
-                                "</div>" +
-                            "</div>" +
-                        "</td>" +
-                        "<td id='cell-table' style='font-size: small; width: 70% !important;'>" +
-                            "<a href='/media/ECM/"+ data.result.task_id + '/' +data.result.filename +"' download " +
-                            "style='text-decoration: none;'>"+ data.result.filename +"</a>" +
-                        "</td>" +
-                        "<td id='cell-table' style='font-size: small'>" +
-                            "<i class='material-icons' id='' style='cursor: pointer; font-size: medium;'" +
-                            "data-toggle='modal'" +
-                            "data-target='#confirmDelete-"+ data.result.id +"'>delete</i>" +
-                        "</td>" +
-                    "</tr>" +
-                    "<tr class='spaceFile' id='row-space"+ data.result.id +"'></tr>"
-                );
-
-                $("#modals").prepend(
-                    "<div id='confirmDelete-" + data.result.id + "' class='modal'>" +
-                        "<div class='modal-dialog'>" +
-                            "<div class='modal-content '>" +
-                                "<div class='modal-body' style='text-align: center !important;'>" +
-                                    "Tem certeza que deseja excluir o arquivo <b>" + data.result.filename + "</b> ?" +
-                                "</div>" +
-                                "<div class='modal-footer'>" +
-                                    "<div class='form-group text-center'>" +
-                                        "<button type='button' style='width: 95px!important;'" +
-                                            "class='btn btn-sm btn-raised btn-default'" +
-                                            "data-dismiss='modal'>" +
-                                            "Não" +
-                                        "</button>" +
-                                        "<button value='1' id='delete-ecm-" + data.result.id + "'" +
-                                            "style='width: 95px!important;'" +
-                                            "class='btn btn-sm btn-raised btn-primary'" +
-                                            "data-dismiss='modal'>Sim" +
-                                        "</button>" +
-                                    "</div>" +
-                                "</div>" +
-                            "</div>" +
-                        "</div>" +
-                    "</div>"
-                );
+                get_ecms(data.result.task_id);
 
                 //language=HTML
+                /*
                 $("#scripts").prepend(
                     "<script>"+
                     "$('#delete-ecm-"+ data.result.id +"').click(function () {" +
@@ -115,7 +62,7 @@ $(function () {
                         "}" +
                     ");"+
                     "</script>"
-                );
+                );*/
 
             }
 

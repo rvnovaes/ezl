@@ -53,6 +53,7 @@
                 stack: 6
             });
     }
+    var showToast = message_toast
     {% for message in messages %}
         message_toast('{{ message.tags }}', '{{ message.tags }}', '{{ message }}');
     {% endfor %}

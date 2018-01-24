@@ -38,5 +38,7 @@ urlpatterns = [
 
     url(r'^ajax_get_task_data_table/$', login_required(views.ajax_get_task_data_table),
         name='ajax_get_task_data_table'),
+    url(r'^ajax_get_ecms/$', login_required(views.ajax_get_ecms),
+        name='ajax_get_ecms'),
 
 ]
