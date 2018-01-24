@@ -77,4 +77,5 @@ class ServicePriceTable(models.Model):
         ordering = ['value']
         verbose_name = 'Tabela de preço de serviços'
         verbose_name_plural = 'Tabelas de preço de serviços'
+        unique_together = (("correspondent", "type_task"),)
 
