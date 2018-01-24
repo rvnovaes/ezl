@@ -15,11 +15,16 @@ class TaskFilter(FilterSet):
         State.objects.filter(is_active=True).order_by('name')),
                               label="UF")
     court_district = ModelChoiceFilter(queryset=CourtDistrict.objects.filter(),
+                                       name="court_district",
+                                       widget=MDModelSelect2(
+                                           url='courtdistrict_autocomplete',
+                                           forward=['state'],
+                                           attrs={
+                                               'class': '',
+                                               'data-placeholder': '',
+                                               'data-label': 'Comarca'
+                                           }),
                                        required=False,
-                                       widget=forms.Select(attrs={
-                                           'class': 'select2 m-b-10 select2-multiple select2-max-size',
-
-                                       }),
                                        label="Comarca")
 
     type_task = ModelChoiceFilter(queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True)),

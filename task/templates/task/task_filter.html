@@ -9,7 +9,7 @@
         <div class="panel-heading ">
             <i class="ti-filter"></i>Filtrar providências
             <div class="panel-action">
-                <a href="#" data-perform="panel-collapse" onclick="update_select2()"><i class="ti-plus"></i></a>
+                <a href="#" data-perform="panel-collapse"><i class="ti-plus"></i></a>
             </div>
         </div>
         <div id="filter_content" class="panel-wrapper collapse" aria-expanded="false">
@@ -165,11 +165,11 @@
 
 {% block extra_scripts %}
     {{ filter.form.media }}
-    <script src="{% static 'js/select2.js' %}" type="text/javascript"></script>
 {% endblock %}
 
 {% block extra_stylesheets %}
     <link rel="stylesheet" type="text/css" href="{% static 'skeleton/plugins/bower_components/bootstrap-daterangepicker/daterangepicker.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static '/select2.css' %}" />
 {% endblock extra_stylesheets %}
 
 {% block script_window_load %}
