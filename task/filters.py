@@ -15,16 +15,13 @@ class TaskFilter(FilterSet):
         State.objects.filter(is_active=True).order_by('name')),
                               label="UF")
     court_district = ModelChoiceFilter(queryset=CourtDistrict.objects.filter(),
-                                       widget=MDModelSelect2(
-                                           url='courtdistrict_autocomplete',
-                                           forward=['state'],
-                                           attrs={
-                                               'class': 'select-with-search material-ignore form-control',
-                                               'data-placeholder': '',
-                                               'data-label': 'Comarca'
-                                           }),
                                        required=False,
+                                       widget=forms.Select(attrs={
+                                           'class': 'select2 m-b-10 select2-multiple select2-max-size',
+
+                                       }),
                                        label="Comarca")
+
     type_task = ModelChoiceFilter(queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True)),
                                   label=u"Tipo de Serviço")
     cost_center = ModelChoiceFilter(queryset=filter_valid_choice_form(CostCenter.objects.filter(is_active=True)),
@@ -41,7 +38,7 @@ class TaskFilter(FilterSet):
                                            required=False,
                                            widget=MDModelSelect2(url='correspondent_autocomplete',
                                                                  attrs={
-                                                                        'class': 'select-with-search material-ignore form-control',
+                                                                        'class': '',
                                                                         'data-placeholder': '',
                                                                         'data-label': 'Correspondente'
                                                                        })
@@ -53,7 +50,7 @@ class TaskFilter(FilterSet):
                                         required=False,
                                         widget=MDModelSelect2(url='requester_autocomplete',
                                                               attrs={
-                                                                 'class': 'select-with-search material-ignore form-control',
+                                                                 'class': '',
                                                                  'data-placeholder': '',
                                                                  'data-label': 'Solicitante'
                                                                     })
@@ -65,7 +62,7 @@ class TaskFilter(FilterSet):
                                               required=False,
                                               widget=MDModelSelect2(url='service_autocomplete',
                                                                     attrs={
-                                                                        'class': 'select-with-search material-ignore form-control',
+                                                                        'class': '',
                                                                         'data-placeholder': '',
                                                                         'data-label': 'Contratante'
                                                                           })
