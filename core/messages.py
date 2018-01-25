@@ -47,3 +47,7 @@ def exception_create():
 
 def integrity_error_delete():
     return 'Erro: impossível excluir o arquivo.'
+
+
+def record_from_wrong_office():
+    return 'Erro: este registro pertence a outro escritório.'
