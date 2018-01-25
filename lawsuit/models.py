@@ -140,8 +140,7 @@ class LawSuit(Audit, LegacyCode):
     law_suit_number = models.CharField(max_length=255, blank=False, null=False,
                                        verbose_name='Número do Processo')
     is_current_instance = models.BooleanField(verbose_name='Instância Atual', default=False)
-    opposing_party = models.CharField(max_length=255, blank=True, null=True,
-                                      verbose_name='Parte adversa')
+    opposing_party = models.TextField(blank=True, null=True, verbose_name='Parte adversa')
 
     class Meta:
         db_table = "law_suit"
