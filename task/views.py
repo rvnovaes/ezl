@@ -148,6 +148,12 @@ class DashboardView(MultiTableMixin, TemplateView):
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
         if dynamic_query or person.auth_user.is_superuser:
             data = DashboardViewModel.objects.filter(dynamic_query)
+
+        if person.auth_user.groups.filter(~Q(name='Correspondente')).exists():
+            data = data | DashboardViewModel.objects.filter(
+                task_status__in=[TaskStatus.REQUESTED, TaskStatus.REFUSED_SERVICE,
+                                 TaskStatus.ACCEPTED_SERVICE, TaskStatus.ERROR])
+
         tables = self.get_list_tables(data, person) if person else []
         if not dynamic_query:
             return tables
