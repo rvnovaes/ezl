@@ -637,21 +637,26 @@ def ajax_get_task_data_table(request):
     data = {
         "data": xdata[0]
     }
-    print('<>>>>', data)
     return JsonResponse(data)
 
 
 def ajax_get_ecms(request):
     task_id = request.GET.get('task_id')
     data_list = []
-    for ecm in Ecm.objects.filter(task_id=task_id):
+    ecms = Ecm.objects.filter(task_id=task_id)
+    for ecm in ecms:
         data_list.append({
-            'pk': ecm.pk,
             'task_id': ecm.task_id,
+            'pk': ecm.pk,
             'url': ecm.path.name,
             'filename': ecm.filename,
             'user': ecm.create_user.username,
             'data': ecm.create_date.strftime('%d/%m/%Y %H:%M'),
-            'state': ecm.task.get_task_status_display()
+            'state': ecm.task.get_task_status_display(),
         })
-    return JsonResponse(data_list, safe=False)
+    data = {
+        'task_id': task_id,
+        'total_ecms': ecms.count(),
+        'ecms': data_list
+    }
+    return JsonResponse(data)

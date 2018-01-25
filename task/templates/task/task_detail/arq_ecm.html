@@ -1,19 +1,19 @@
 {% load tz %}
 <div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="headingOne">
-        <h4 class="panel-title">
-            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" class="font-bold"><i class="fa fa-paperclip fa-2x" style="font-size: 20px "></i> Anexos </a>
-        </h4>
-    </div>
-    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+    <div class="panel-heading" role="tab" id="panelECM">
+        <a class="panel-title collapsed" role="button"
+           data-toggle="collapse" data-parent="#accordion"
+           href="#collapseECM" aria-expanded="false"
+           aria-controls="collapseECM"><i class="panel-title mdi mdi-paperclip"></i> Anexos </a> </div>
+    <div id="collapseECM" class="panel-collapse collapse" role="tabpanel" aria-labelledby="panelECM" aria-expanded="false" style="height: 0px;">
         <div class="panel-body">
-            <p class="text-center" id="no-providence">
-            {% if ecms|length == 0 %}
+            <div id="no-providence" class="">
+                <div class="alert alert-warning font-bold m-0">
                     Esta providência não possui nenhum arquivo em
                     anexo.
-            {% endif %}
-            </p>
-
+                </div>
+            </div>
+            <!-- TABELA USADA PARA EXIBIR OS ARQUIVOS -->
             <div class="inbox-center table-responsive">
                 <table class="table table-hover" id="files">
                     <tbody id="containnerUploads"></tbody>
@@ -39,28 +39,6 @@
                     </div>
                 </div>
             </div>
-            <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído o conteúdo das novas janelas modais
-            a medida que for adicionando novos arquivos -->
-            <div id="modals"></div>
-
-
-            <!-- Janela modal para mostrar progresso do envio de arquivos -->
-            <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title" style="text-align: center">Enviando ...</h4>
-                        </div>
-                        <div class="modal-body">
-                            <div class="progress progress-lg">
-                                <div class="progress-bar progress-bar-info active progress-bar-striped" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" style="width: 0%" role="progressbar">
-                                    0
-                                </div>
-                            </div>
-                            </div>
-                    </div>
-                </div>
-            </div>
         </div>
         {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
             <div class="panel-footer">
@@ -78,4 +56,3 @@
         {% endif %}
     </div>
 </div>
-

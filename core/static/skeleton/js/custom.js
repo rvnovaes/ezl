@@ -179,8 +179,8 @@ $(document).ready(function () {
     $('.chat-list').slimScroll({
         height: '100%',
         position: 'right',
-        size: "0px",
-        color: '#dcdcdc'
+        size: "5px",
+        color: '#78c5dc'
     });
 
     /* ===== Resize all elements ===== */

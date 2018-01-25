@@ -3,105 +3,71 @@
 {% load core_filters %}
 {#{% load formset_tags %}#}
 {% load tz %}
-
+{% block right-sidebar-chat %}
+    {% include 'chat/chat-right-sidebar.html' %}
+{% endblock %}
 {% block content %}
+    ***{{ object.person_distributed_by }}
     <form id="task_detail" action="" method="post">{% csrf_token %}
         {% include 'questionnaire/generic_survey.html' with generic_survey=form.instance.type_task.survey_type %}
-        <script type="text/javascript">
-
-            $(function () {
-                $("input[name=execution_date]").attr({'required': true,
-                    'placeholder': 'Data de Cumprimento'});
-            });
-
-            //Função para tratar erro ao enviar formulário com justificativa de cumprimento em branco
-            function beforeSubmit() {
-                $('#task_detail').submit(function (e) {
-                    e.preventDefault();
-                    $('#confirmAction').modal('hide');
-                    $('#survey').modal('show');
-                });
-            }
-
-            var nextState = {
-                ACCEPTED: {text: "aceitar", icon: "assignment_ind"},
-                REFUSED: {text: "recusar", icon: "assignment"},
-                DELEGATED: {text: "delegar", icon: "assignment_returned"},
-                DONE: {text: "Cumprir", icon: "assignment_turned_in"},
-                FINISHED: {text: "Finalizar", icon: "gavel"},
-                BLOCKEDPAYMENT: {text: "Glosar", icon: "money_off"},
-                RETURN: {text: "Retornar", icon: "assignment_late"}
-            };
-
-            function getId(value) {
-                var task_status = value.id;
-
-                var $input = $("input[name=execution_date]");
-                if ($input.length > 0) {
-                    var input = $input.get(0);
-                    if (! input.checkValidity()) {
-                        input.reportValidity();
-                        return false
-                    }
-                }
-
-                $('#confirmAction').modal('show');
-
-                // $("#confirmAction").on('shown.bs.modal', function () {
-                var actionButton = document.getElementById("actionButton");
-                var nextText = document.getElementById("actionText");
-                var icon = document.getElementById("icon");
-                var modalHeader = document.getElementById("modalHeader");
-                nextText.innerHTML = nextState[task_status]['text'];
-                icon.innerHTML = nextState[task_status]['icon'];
-
-                modalHeader.setAttribute("class", "panel-header panel-heading" + " " + task_status);
-
-                actionButton.setAttribute("name", "action");
-                actionButton.setAttribute("value", task_status);
-
-                {# Apenas estes status devem possuir notes como required, alem de nao poder #}
-                {# espacos em branco #}
-
-                var notes = $('textarea[id=notes_id]');
-                notes.removeAttr('required');
-                ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN'].forEach(function (status) {
-                    if (task_status === status) {
-                        notes.attr('required', true).change(function () {
-                            notes.val(notes.val().trim())
-                        });
-                    }
-                });
-                return true;
-            }
-        </script>
         {% include 'task/task_detail/tab.html' %}
-        <!-- Arquivos ECM -->
         <div class="panel-group" role="tablist" aria-multiselectable="true">
+            <!-- Arquivos ECM -->
             {% include 'task/task_detail/arq_ecm.html' %}
-            <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingOne">
-                    <h4 class="panel-title"> <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" class="font-bold"> How can i purchase my admin ? </a> </h4> </div>
-                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-                    <div class="panel-body"> Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer la. </div>
+            {% include 'task/task_detail/historico.html' %}
+        </div>
+        <!-- CONFIRMAR AÇÃO -->
+        <div id="confirmAction" class="modal">
+            <div class="modal-dialog">
+                <div class="modal-content ">
+                    <div id="modalHeader">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="panel-title text-center">
+                            <i id="icon" class="material-icons "></i>
+                            <b> Deseja <span id="actionText">aceitar</span> o prazo? </b></h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group" style="margin: auto">
+                            <label> {{ form.notes.label }}</label>
+                            {{ form.notes }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="form-group text-center">
+                            <button style="width: 95px!important;" onClick="this.form.reset()"
+                                    class="btn btn-sm btn-raised btn-default"
+                                    data-dismiss="modal">
+                                Cancelar
+                            </button>
+                            {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
+                                {% if form.instance.type_task.survey_type %}
+                                    <button id="actionButton"
+                                            type="submit"
+                                            onclick="beforeSubmit()"
+                                            style="width: 95px!important;"
+                                            class="btn btn-sm btn-raised btn-primary">Sim
+                                    </button>
+                                {% else %}
+                                    <button id="actionButton"
+                                            type="submit"
+                                            style="width: 95px!important;"
+                                            class="btn btn-sm btn-raised btn-primary">Sim
+                                    </button>
+                                {% endif %}
+
+                            {% else %}
+                                <button id="actionButton"
+                                        style="width: 95px!important;"
+                                        type="submit" class="btn btn-sm btn-raised btn-primary">Sim
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
     </form>
-    <div id="result"></div>
-
-    <script id="theTmpl" type="text/x-jsrender">
-    {% verbatim %}
-    <div>
-       <em>Name:</em> {{:name}}
-       {{ if showNickname && nickname}}
-          (Goes by <em>{{:nickname}}</em>)
-       {{/if}}
-    </div>
-    {% endverbatim %}
-    </script>
-
+{#    {% include 'chat/chat_external.html' with chat=task.chat %}#}
 {% endblock %}
 
 {% block contente %}
@@ -561,74 +527,20 @@
                     </div>
                 </form>
             </div>
-{#    <div class="col-md-3">#}
-{#        {% include 'chat/chat_external.html' with chat=task.chat %}#}
-{#    </div>#}
 
 
-    <!-- Janela modal para mostrar progresso de deleção do arquivo -->
-    <div id="deleting" class="modal">
-        <div class="modal-dialog">
-            <div class="modal-content ">
-                <div class="modal-body" style="text-align: center;">
-                    Excluindo arquivo ...
-                </div>
-                <div class="modal-footer">
-                    <div class="progress progress-striped active">
-                        <div class="progress-bar" style="width: 100%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Janela modal para mostrar sucesso ao enviar arquivo -->
-    <div id="sucessSent" class="modal">
-        <div class="modal-dialog">
-            <div class="modal-content ">
-                <div class="modal-body" style="text-align: center !important;">
-                    <p id="message-success-sent">
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <div class="form-group text-center">
-                        <button type="button" style="width: 95px!important;"
-                                class="btn btn-sm btn-raised btn-primary"
-                                data-dismiss="modal">
-                            OK
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Janela modal para mostrar erro ao enviar arquivo -->
-    <div id="errorSent" class="modal">
-        <div class="modal-dialog">
-            <div class="modal-content ">
-                <div class="modal-body" style="text-align: center !important;">
-                    <p id="error-message">
-
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <div class="form-group text-center">
-                        <button type="button" style="width: 95px!important;"
-                                class="btn btn-sm btn-raised btn-primary"
-                                data-dismiss="modal">
-                            OK
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
 {% endblock contente %}
 
 {% block extra_scripts %}
+    <!-- CHAT SCRIPTS  -->
+    {% with object.chat as chat %}
+        {% include 'chat/script.html' with chat=chat%}
+    {% endwith %}
+
+    <!-- UPLOADS SCRIPTS  -->
     {% include 'task/includes/upload.html' %}
+    <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
     <!--Style Switcher -->
     <script src="{% static 'skeleton/js/cbpFWTabs.js' %}"></script>
     <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
@@ -685,5 +597,113 @@
                 document.getElementById("down").style.display = "none";
             }
         }
+
     </script>
+
+    <script type="text/javascript">
+
+        $(function () {
+            $("input[name=execution_date]").attr({'required': true,
+                'placeholder': 'Data de Cumprimento'});
+        });
+
+        //Função para tratar erro ao enviar formulário com justificativa de cumprimento em branco
+        function beforeSubmit() {
+            $('#task_detail').submit(function (e) {
+                e.preventDefault();
+                $('#confirmAction').modal('hide');
+                $('#survey').modal('show');
+            });
+        }
+
+        var nextState = {
+            ACCEPTED: {text: "aceitar", icon: "assignment_ind"},
+            REFUSED: {text: "recusar", icon: "assignment"},
+            DELEGATED: {text: "delegar", icon: "assignment_returned"},
+            DONE: {text: "Cumprir", icon: "assignment_turned_in"},
+            FINISHED: {text: "Finalizar", icon: "gavel"},
+            BLOCKEDPAYMENT: {text: "Glosar", icon: "money_off"},
+            RETURN: {text: "Retornar", icon: "assignment_late"}
+        };
+
+        function getId(value) {
+            var task_status = value.id;
+
+            var $input = $("input[name=execution_date]");
+            if ($input.length > 0) {
+                var input = $input.get(0);
+                if (! input.checkValidity()) {
+                    input.reportValidity();
+                    return false
+                }
+            }
+
+            $('#confirmAction').modal('show');
+
+            // $("#confirmAction").on('shown.bs.modal', function () {
+            var actionButton = document.getElementById("actionButton");
+            var nextText = document.getElementById("actionText");
+            var icon = document.getElementById("icon");
+            var modalHeader = document.getElementById("modalHeader");
+            nextText.innerHTML = nextState[task_status]['text'];
+            icon.innerHTML = nextState[task_status]['icon'];
+
+            modalHeader.setAttribute("class", "panel-header panel-heading" + " " + task_status);
+
+            actionButton.setAttribute("name", "action");
+            actionButton.setAttribute("value", task_status);
+
+            {# Apenas estes status devem possuir notes como required, alem de nao poder #}
+            {# espacos em branco #}
+
+            var notes = $('textarea[id=notes_id]');
+            notes.removeAttr('required');
+            ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN'].forEach(function (status) {
+                if (task_status === status) {
+                    notes.attr('required', true).change(function () {
+                        notes.val(notes.val().trim())
+                    });
+                }
+            });
+            return true;
+        }
+    </script>
+{% endblock %}
+{% block script_window_load %}
+    get_ecms({{form.instance.pk}})
+{% endblock %}
+
+{% block extra_modal %}
+    <!-- Janela modal para mostrar progresso de deleção do arquivo -->
+    <div id="deleting" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center;">
+                    Excluindo arquivo ...
+                </div>
+                <div class="modal-footer">
+                    <div class="progress progress-striped active">
+                        <div class="progress-bar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Janela modal para mostrar progresso do envio de arquivos -->
+    <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" style="text-align: center">Enviando ...</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="progress progress-lg">
+                        <div class="progress-bar progress-bar-info active progress-bar-striped" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" style="width: 0%" role="progressbar">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

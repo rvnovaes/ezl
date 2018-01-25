@@ -1,10 +1,10 @@
 <div class="white-box">
     <!-- Tabstyle start -->
-    <h4 class="box-title m-b-0 text-{{ form.instance.status.get_color }} font-bold">
+    <h3 class="text-{{ form.instance.status.get_color }} font-bold">
         <i class="{{ form.instance.status.get_icon }}"></i>
-        {{ form.instance.status }} - {{ form.instance.type_task }}
-        <span class="pull-right text-right">#{{ form.instance.task_number|stringformat:"05d" }}</span>
-    </h4>
+        #{{ form.instance.task_number|stringformat:"05d" }} - {{ form.instance.type_task }}
+        <span class="text-white pull-right text-right bg-{{form.instance.status.get_color}} p-10 m-b-5">{{ form.instance.status }}</span>
+    </h3>
     <hr>
     <section>
         <div class="sttabs tabs-style-iconbox">
@@ -69,7 +69,7 @@
                             </button>
                         {% endif %}
                         {% if perms.core.view_delegated_tasks %}
-                            {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
+
                                 <div  class="col-sm-3">
                                     <a>{{ form.execution_date }}</a>
                                 </div>
@@ -78,7 +78,7 @@
                                         class="btn btn-sm btn-success DONE ">
                                     Cumprir
                                 </button>
-                            {% endif %}
+
                         {% endif %}
                     </div>
 
