@@ -1,5 +1,6 @@
 from django.db import models
-from core.models import AuditCreate, LegacyCode
+from core.models import AuditCreate, LegacyCode, Audit, OfficeMixin
+from task.models import TypeTask
 import os
 
 
@@ -39,3 +40,21 @@ class Attachment(AuditCreate, LegacyCode):
         return '{}/{}: {}'.format(
             self.object_id, self.model_name, self.filename
         )
+
+
+class DefaultAttachmentRule (Audit, OfficeMixin):
+    name = models.CharField(max_length=255, null=False)
+    description = models.TextField(blank=True, verbose_name='Descrição')
+    type_task = models.ForeignKey('task.TypeTask', on_delete=models.PROTECT, blank=True, null=True,
+                                  verbose_name='Tipo de Serviço')
+    person_customer = models.ForeignKey('core.Person', on_delete=models.PROTECT, blank=True, null=True,
+                                        related_name='%(class)s_customer',
+                                        verbose_name='Solicitante')
+    court_district = models.ForeignKey('lawsuit.CourtDistrict', on_delete=models.PROTECT,
+                                       blank=True, null=True,
+                                       verbose_name='Comarca')
+    state = models.ForeignKey('core.State', on_delete=models.PROTECT, blank=True, null=True,
+                              verbose_name="Estado")
+    city = models.ForeignKey('core.City', on_delete=models.PROTECT, blank=True, null=True,
+                              verbose_name="Cidade")
+
