@@ -3,12 +3,13 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+import django.utils.timezone
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0057_auto_20180104_1742'),
+        ('task', '0057_dashboardviewmodel_new_dates'),
     ]
 
     operations = [
@@ -16,5 +17,11 @@ class Migration(migrations.Migration):
             model_name='taskhistory',
             name='status',
             field=models.CharField(choices=[('Solicitada', 'REQUESTED'), ('Aceita pelo Service', 'ACCEPTED_SERVICE'), ('Em Aberto', 'OPEN'), ('A Cumprir', 'ACCEPTED'), ('Cumprida', 'DONE'), ('Retorno', 'RETURN'), ('Finalizada', 'FINISHED'), ('Recusada pelo Service', 'REFUSED_SERVICE'), ('Recusada', 'REFUSED'), ('Glosada', 'BLOCKEDPAYMENT'), ('Inválida', 'INVALID'), ('Erro no sistema de origem', 'ERROR')], max_length=30),
+        ),
+        migrations.AlterField(
+            model_name='task',
+            name='delegation_date',
+            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, null=True,
+                                       verbose_name='Data de Delegação'),
         ),
     ]
