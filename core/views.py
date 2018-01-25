@@ -906,10 +906,12 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
         return super().get_context_data(**kwargs)
 
 
-class OfficeDeleteView(LoginRequiredMixin, DeleteView):
-    model = Address
-    form_class = AddressForm
+class OfficeDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
+    model = Office
+    form_class = OfficeForm
+    success_url = reverse_lazy('office_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+    object_list_url = 'office_list'
 
 
 class RegisterNewUser(CreateView):
