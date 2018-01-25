@@ -54,6 +54,7 @@
                                     {% if perms.core.can_edit_surveys %}
                                         <li><a href="{% url 'survey_list' %} "target="_self">Pesquisas</a></li>
                                     {% endif %}
+                                    <li><a href="{% url 'ecm:defaultattachmentrule_list' %}" target="_self">Regras de Anexos</a></li>
                                     <li><a href="{% url 'user_list' %}" target="_self">Usuários</a></li>
                                 </ul>
                             </li>

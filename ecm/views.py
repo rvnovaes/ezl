@@ -111,9 +111,9 @@ class DefaultAttachmentRuleListView(LoginRequiredMixin, SingleTableViewMixin):
 class DefaultAttachmentRuleCreateView(AuditFormMixin, CreateView):
     model = DefaultAttachmentRule
     form_class = DefaultAttachmentRuleForm
-    success_url = reverse_lazy('defaultattachmentrule_list')
+    success_url = reverse_lazy('ecm:defaultattachmentrule_list')
     success_message = CREATE_SUCCESS_MESSAGE
-    object_list_url = 'defaultattachmentrule_list'
+    object_list_url = 'ecm:defaultattachmentrule_list'
 
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
@@ -124,10 +124,10 @@ class DefaultAttachmentRuleCreateView(AuditFormMixin, CreateView):
 class DefaultAttachmentRuleUpdateView(AuditFormMixin, UpdateView):
     model = DefaultAttachmentRule
     form_class = DefaultAttachmentRuleForm
-    success_url = reverse_lazy('defaultattachmentrule_list')
+    success_url = reverse_lazy('ecm:defaultattachmentrule_list')
     success_message = UPDATE_SUCCESS_MESSAGE
     template_name_suffix = '_update_form'
-    object_list_url = 'defaultattachmentrule_list'
+    object_list_url = 'ecm:defaultattachmentrule_list'
 
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
@@ -145,8 +145,8 @@ class DefaultAttachmentRuleUpdateView(AuditFormMixin, UpdateView):
 
 class DefaultAttachmentRuleDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = DefaultAttachmentRule
-    success_url = reverse_lazy('defaultattachmentrule_list')
+    success_url = reverse_lazy('ecm:defaultattachmentrule_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(
         model._meta.verbose_name_plural)
-    object_list_url = 'defaultattachmentrule_list'
+    object_list_url = 'ecm:defaultattachmentrule_list'
 

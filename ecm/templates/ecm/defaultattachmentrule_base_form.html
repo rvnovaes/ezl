@@ -1,0 +1,24 @@
+{% load material_form %}
+{% load staticfiles %}
+
+<div class="valign-wrapper layout-row row">
+    <div class="select-field col s12 m12" id="{{ form.office.id_for_label }}_container">
+        <label for="{{ form.office.id_for_label }}">{{ form.office.label }}</label>
+        {{ form.office }}
+    </div>
+</div>
+<div class="valign-wrapper layout-row row">
+    <div class="select-field col s12 m6 required" id="{{ form.name.id_for_label }}_container">
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        {{ form.name }}
+    </div>
+    <div class="select-field col s12 m6 required" id="{{ form.description.id_for_label }}_container">
+        <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+        {{ form.description }}
+    </div>
+</div>
+
+{% block extrajs %}
+    {{ form.media }}
+    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
+{% endblock %}
