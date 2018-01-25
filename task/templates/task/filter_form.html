@@ -24,10 +24,12 @@
                                 </div>
                                 {% endif %}
                             {% endfor %}
+                            {% if request.user.is_superuser %}
                             <div class="col-sm-12">
                                 <label for="query_sql">SQL</label><br />
                                 <code class="prettyprint lang-sql">{{ form.instance.query_sql }}</code>
                             </div>
+                            {% endif %}
 
                         </div>
                         <div class="form-row  text-center">

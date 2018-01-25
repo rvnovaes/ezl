@@ -269,6 +269,13 @@
                                 {{ filter.form.custom_filter_name }}
                             </div>
                         </div>
+                        <div class="form-group" style="margin: 15px;">
+                            <div class="input-field col s8"
+                                 id="{{ filter.form.custom_filter_description.id_for_label }}_container">
+                                <label for="{{ filter.form.custom_filter_description.id_for_label }}">{{ filter.form.custom_filter_description.label }}</label>
+                                {{ filter.form.custom_filter_description }}
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <div class="text-center">

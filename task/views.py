@@ -632,9 +632,10 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             try:
                 if filters.get('save_filter', None) is not None:
                     filter_name = data['custom_filter_name']
+                    filter_description = data['custom_filter_description']
                     q = pickle.dumps(person_dynamic_query)
-                    new_filter = Filter(name=filter_name, query=q, create_user=self.request.user,
-                                        create_date=timezone.now())
+                    new_filter = Filter(name=filter_name, query=q, description=filter_description,
+                                        create_user=self.request.user, create_date=timezone.now())
                     new_filter.save()
             except IntegrityError:
                 messages.add_message(self.request, messages.ERROR, 'Já existe filtro com este nome.')
@@ -742,7 +743,10 @@ class FilterListView(LoginRequiredMixin, SingleTableViewMixin):
         :rtype: dict
         """
         context = super(FilterListView, self).get_context_data(**kwargs)
-        table = self.table_class(Filter.objects.filter(create_user=self.request.user))
+        if self.request.user.is_superuser:
+            table = self.table_class(Filter.objects.filter())
+        else:
+            table = self.table_class(Filter.objects.filter(create_user=self.request.user))
         context['table'] = table
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         return context

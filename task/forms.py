@@ -163,6 +163,11 @@ class TypeTaskForm(BaseForm):
 
 
 class FilterForm(BaseForm):
+    description = forms.CharField(label=u"Descrição", required=False,
+                                           widget=forms.Textarea(
+                                               attrs={'class': 'form-control input-sm',
+                                                      'rows': '4',
+                                                      'cols': '50'}))
     class Meta:
         model = Filter
         fields = ['name', 'description']

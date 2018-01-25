@@ -1,4 +1,4 @@
-from django.forms import Select
+from django.forms import Select, Textarea
 from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter
 
 from core.models import Person, State
@@ -11,7 +11,7 @@ from .models import DashboardViewModel
 
 
 class TaskFilter(FilterSet):
-    state = ModelChoiceFilter(queryset=filter_valid_choice_form(State.objects.filter(is_active=True)),
+    state = ModelChoiceFilter(queryset=filter_valid_choice_form(State.objects.filter(is_active=True)).order_by('name'),
                               label="UF")
     court_district = ModelChoiceFilter(queryset=CourtDistrict.objects.filter(),
                                        widget=MDModelSelect2(
@@ -84,6 +84,9 @@ class TaskFilter(FilterSet):
     custom_filter = ModelChoiceFilter(queryset=filter_valid_choice_form(Filter.objects.all()),
                                       label="", required=False, widget=Select(attrs={'onchange': 'this.form.submit()'}))
     custom_filter_name = CharFilter(label=u"Nome do Filtro", required=False)
+
+    custom_filter_description = CharFilter(label=u"Descrição", required=False,
+                                           widget=Textarea(attrs={'class': 'form-control input-sm'}))
 
     def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
         super(TaskFilter, self).__init__(data, queryset, prefix, strict, request)

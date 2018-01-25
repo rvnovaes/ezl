@@ -87,11 +87,11 @@ class FilterTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'name', 'description')
+        sequence = ('selection', 'create_user', 'name', 'description')
         model = Filter
-        fields = ['selection', 'name', 'description']
+        fields = ['selection', 'create_user', 'name', 'description']
         empty_text = "Não existem filtros cadastrados"
         row_attrs = {
             'data_href': lambda record: '/providencias/filtros/' + str(record.pk) + '/'
         }
-        order_by = ('-name',)
+        order_by = ('create_user', 'name',)
