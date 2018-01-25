@@ -45,4 +45,10 @@ class Migration(migrations.Migration):
             model_name='typetask',
             name='survey_type',
         ),
+        migrations.AlterField(
+            model_name='typetask',
+            name='survey',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='survey.Survey',
+                                    verbose_name='Tipo de Formulário'),
+        ),
     ]
