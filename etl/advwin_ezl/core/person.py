@@ -47,7 +47,7 @@ class PersonETL(GenericETL):
     has_status = True
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         """
         Metodo responsavel por importar as pessoas cadastradas no advwin para o ezl
         :param rows: Pessoas lidas do advwin
@@ -125,6 +125,8 @@ class PersonETL(GenericETL):
                                        'is_active',
                                        'is_customer',
                                        'is_supplier'])
+                    if not default_office.persons.filter(cpf_cnpj=instance.cpf_cnpj):
+                        default_office.persons.add(instance)
 
                 else:
                     obj = self.model(legal_name=legal_name,
@@ -141,6 +143,8 @@ class PersonETL(GenericETL):
                                      system_prefix=LegacySystem.ADVWIN.value)
 
                     obj.save()
+                    if not default_office.persons.filter(cpf_cnpj=obj.cpf_cnpj):
+                        default_office.persons.add(obj)
 
                 self.debug_logger.debug(
                     'Pessoa,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (

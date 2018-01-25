@@ -1,6 +1,7 @@
 from os.path import join
+from django.contrib.auth.models import User
 from config.config import get_parser
-from core.models import Person
+from core.models import Person, Office
 import logging
 import traceback
 
@@ -64,3 +65,12 @@ def get_message_log_default(model_name, rows_count, error, time):
 def save_error_log(log, create_user, message_error):
     if log:
         log.errors.create(create_user=create_user, error=message_error)
+
+
+def get_default_office():
+    admin = User.objects.filter(username='admin').first()
+    default_office, created = Office.objects.get_or_create(create_user=admin,
+                                                           cpf_cnpj='03.482.042/0001-02',
+                                                           name='Marcelo Tostes Advogados Associados',
+                                                           legal_name='Marcelo Tostes Advogados Associados')
+    return default_office

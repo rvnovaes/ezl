@@ -10,7 +10,7 @@
         <div class="row">
             <div class="col-md-9">
                 <form id="task_detail" action="" method="post">{% csrf_token %}
-                    {% include 'questionnaire/generic_survey.html' with generic_survey=form.instance.type_task.survey_type %}
+                    {% include 'questionnaire/generic_survey.html' %}
 
                     <script type="text/javascript">
 
@@ -535,24 +535,24 @@
 
                                 <!-- Janela modal para mostrar progresso do envio de arquivos -->
 
-                                <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h4 class="modal-title" style="text-align: center">Enviando ...</h4>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="progress">
-                                                    <div class="progress-bar" role="progressbar" style="width: 0%;">0%</div>
-                                                </div>
-                                            </div>
-                                        </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" style="text-align: center">Enviando ...</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width: 0%;">0%</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                     <div class="panel panel-primary">
                         <div class="panel-heading " data-toggle="collapse" data-target="#history" id="header-history"
                              onclick="toggleArrowHist()">
@@ -643,7 +643,7 @@
                                             Cancelar
                                         </button>
                                         {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                                            {% if form.instance.type_task.survey_type %}
+                                            {% if form.instance.type_task.survey %}
                                                 <button id="actionButton"
                                                         type="submit"
                                                         onclick="beforeSubmit()"

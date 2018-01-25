@@ -1,6 +1,7 @@
 from functools import wraps
 from itertools import groupby
 from datetime import datetime
+from django.contrib.auth.models import User
 
 
 def field_to_html_input(field):
@@ -73,7 +74,7 @@ class GenericSearchFormat(object):
             'OneToOneField': GenericSearchForeignKey(self.model),
             'BooleanField': GenericSearchBooleanField()}
 
-    def despatch(self):
+    def despatch(self, office=False):
         params = []
 
         if not any([self.params, params]):
@@ -83,7 +84,15 @@ class GenericSearchFormat(object):
             self.params.pop('is_active')
             self.model_type_fields.remove({'type': 'BooleanField', 'name': 'is_active'})
 
-        search = "self.table_class(self.model.objects.filter({params}))"
+        try:
+            office_field = self.model._meta.get_field('office')
+            if self.model == User:
+                search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
+            else:
+                search = "self.table_class(self.model.objects.get_queryset(office=office).filter({params}))"
+        except:
+            search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
+
         for field in self.model_type_fields:
             if field.get('type') in ['DateField', 'DateTimeField']:
                 value = self.params.get(field.get('name') + '_ini'), self.params.get(field.get('name') + '_fim')

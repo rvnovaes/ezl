@@ -79,6 +79,8 @@ INSTALLED_APPS = [
     'task.apps.TaskConfig',
     'etl.apps.EtlConfig',
     'financial.apps.FinancialConfig',
+    'survey.apps.SurveyConfig',
+
     'django.contrib.sites',
 
     'allauth',
@@ -95,6 +97,7 @@ INSTALLED_APPS = [
     'django_file_form.ajaxuploader',
 
     'debug_toolbar',
+    'django_extensions',
     'django_cleanup',
     # Autocomplete
     'dal',
@@ -229,7 +232,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
+LOGIN_REDIRECT_URL = reverse_lazy('inicial')
 
 AUTHENTICATION_BACKENDS = (
 

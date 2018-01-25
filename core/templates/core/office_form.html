@@ -1,0 +1,117 @@
+{% extends 'inicial.html' %}
+{% block head %}
+    {{ block.super }}
+    {% block css_head %}
+        {{ block.super }}
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css"
+              rel="stylesheet"/>
+    {% endblock %}
+{% endblock %}
+{% block content %}
+    <div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">Cadastre um novo escritório</h3>
+    </div>
+    <div class="panel-body">
+    <form action="{% url 'office_add' %}" method="POST">
+        {% csrf_token %}
+        <div class="inputs">
+            <div class="row">
+                <div class="col-md-12">
+                    <fieldset>
+                        <legend>Dados do escritório</legend>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group label-static">
+                                    <label for="name" class='control-label'>Razão
+                                        Social</label>
+                                    <input type='name' class='form-control' name='name'
+                                           value="{{ object.name }}" id="name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group label-static">
+                                    <label for="legal_name" class='control-label'>Nome
+                                        fantasia</label>
+                                    <input type='text' class='form-control'
+                                           name='legal_name' id="legal_name"
+                                           value="{{ object.legal_name }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group label-static">
+                                    <label for="legal_type"
+                                           class='control-label'>Tipo</label>
+                                    <select class="form-control" name="legal_type">
+                                        <option value="F" {% if object.legal_type == 'F' %}
+                                                selected {% endif %}>Física
+                                        </option>
+                                        <option value="J" {% if object.legal_type == 'J' %}
+                                                selected {% endif %}>Jurídica
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group label-static">
+                                    <label for="cpf_cnpj"
+                                           class='control-label'>CPF/CNPJ</label>
+                                    <input type='text' class='form-control' name=cpf_cnpj
+                                           value={{ object.cpf_cnpj }}>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2 col-md-offset-4">
+                    <a class="btn btn-danger btn-block" href="{% url 'start_user' %}">Cancelar</a>
+                </div>
+                <div class="col-md-2">
+                    <input type="submit" value="Salvar" class="btn btn-primary btn-block">
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block javascript %}
+    {{ block.super }}
+    {% block extrajs %}
+        {{ block.super }}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    {% endblock %}
+    <script>
+        $(document).ready(function () {
+            var elLegalType = $('[name=legal_type]');
+            var elCpfCnpj = $('[name=cpf_cnpj]');
+            var formatCpfCnpj = function () {
+                if (elLegalType.val() == 'F') {
+                    elCpfCnpj.attr('mask', 'cpf')
+                } else {
+                    elCpfCnpj.attr('mask', 'cnpj')
+                }
+                loadInputsMask();
+            };
+            elLegalType.on('change', formatCpfCnpj);
+            formatCpfCnpj();
+            var elUsersToInvite = $('.users_to_invite');
+            var data = {};
+            $.ajax({
+                type: 'GET',
+                url: '/users_to_invite/',
+                data: data,
+                success: function (response) {
+                    response.data.forEach(function (user) {
+                        elUsersToInvite.append($('<option>', {
+                            value: user.person__pk,
+                            text: user.person__name + ' (' + user.username + ')'
+                        }))
+                    })
+                }
+            });
+            elUsersToInvite.select2();
+        });
+    </script>
+{% endblock %}
