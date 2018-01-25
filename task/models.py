@@ -87,7 +87,7 @@ class TypeTask(Audit, LegacyCode):
                             verbose_name='Tipo de Serviço')
     survey = models.ForeignKey(
         'survey.Survey',
-        null=False,
+        null=True,
         verbose_name='Tipo de Formulário'
     )
 
