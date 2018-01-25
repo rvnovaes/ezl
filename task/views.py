@@ -282,8 +282,10 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         form.instance.__server = self.request.META['HTTP_HOST']
         if form.instance.task_status == TaskStatus.ACCEPTED_SERVICE:
             form.instance.acceptance_service_date = timezone.now()
+            form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.REFUSED_SERVICE:
             form.instance.refused_service_date = timezone.now()
+            form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.OPEN:
             form.instance.amount = form.cleaned_data['amount']
             servicepricetable_id = self.request.POST['servicepricetable_id']
