@@ -1,0 +1,18 @@
+{% extends "core/base_form.html" %}
+
+{% load material_form %}
+{% load staticfiles %}
+
+{% block extrahead %}
+    {{ block.super }}
+{% endblock %}
+
+{% block form_container %}
+    {% include 'ecm/defaultattachmentrule_base_form.html' %}
+{% endblock %}
+
+{% block extrajs %}
+    {{ block.super }}
+    {{ form.media }}
+    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
+{% endblock %}
