@@ -4,12 +4,22 @@ import shutil
 import json
 import logging
 from django.conf import settings
-from django.http import HttpResponse, JsonResponse
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.urlresolvers import reverse_lazy, reverse
+from core.views import (AuditFormMixin, MultiDeleteViewMixin,
+                        SingleTableViewMixin)
+from core.messages import CREATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, \
+    record_from_wrong_office
+from core.utils import get_office_session
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
+from django.views.generic.edit import CreateView, UpdateView
 from . import utils
-from .forms import UploadFileForm
-from .models import Attachment
+from .forms import UploadFileForm, DefaultAttachmentRuleForm
+from .tables import DefaulAttachmentRuleTable
+from .models import Attachment, DefaultAttachmentRule
 
 logger = logging.getLogger('django')
 
@@ -89,3 +99,54 @@ def ajax_dsrop_attachment(request):
         pk=request.GET.get('attachment_pk'),
     ).delete()
     return JsonResponse({'success': True})
+
+
+class DefaultAttachmentRuleListView(LoginRequiredMixin, SingleTableViewMixin):
+    model = DefaultAttachmentRule
+    table_class = DefaulAttachmentRuleTable
+    ordering = ('correspondent', )
+    paginate_by = 30
+
+
+class DefaultAttachmentRuleCreateView(AuditFormMixin, CreateView):
+    model = DefaultAttachmentRule
+    form_class = DefaultAttachmentRuleForm
+    success_url = reverse_lazy('defaultattachmentrule_list')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'defaultattachmentrule_list'
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+
+class DefaultAttachmentRuleUpdateView(AuditFormMixin, UpdateView):
+    model = DefaultAttachmentRule
+    form_class = DefaultAttachmentRuleForm
+    success_url = reverse_lazy('defaultattachmentrule_list')
+    success_message = UPDATE_SUCCESS_MESSAGE
+    template_name_suffix = '_update_form'
+    object_list_url = 'defaultattachmentrule_list'
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
+
+
+class DefaultAttachmentRuleDeleteView(AuditFormMixin, MultiDeleteViewMixin):
+    model = DefaultAttachmentRule
+    success_url = reverse_lazy('defaultattachmentrule_list')
+    success_message = DELETE_SUCCESS_MESSAGE.format(
+        model._meta.verbose_name_plural)
+    object_list_url = 'defaultattachmentrule_list'
+

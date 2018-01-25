@@ -58,3 +58,12 @@ class DefaultAttachmentRule (Audit, OfficeMixin):
     city = models.ForeignKey('core.City', on_delete=models.PROTECT, blank=True, null=True,
                               verbose_name="Cidade")
 
+    class Meta:
+        ordering = ['-id']
+        verbose_name = "Regra de Anexo Padrão"
+        verbose_name_plural = "Regras de Anexo Padrão"
+
+    def __str__(self):
+        return '{}:{}'.format(
+            self.name, self.description
+        )

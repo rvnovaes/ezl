@@ -329,7 +329,8 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
-        context['survey_data'] = self.object.type_task.survey.data
+        context['survey_data'] = (self.object.type_task.survey.data
+                                  if self.object.type_task.survey else None)
 
         # Atualiza ou cria o chat, (Eh necessario encontrar um lugar melhor para este bloco de codigo)
         state = ''
