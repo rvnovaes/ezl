@@ -8,8 +8,7 @@ from core.models import Person
 from core.signals import create_person
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
-from etl.advwin_ezl.signals import new_person, temp_disconnect_signal
-from etl.models import ErrorETL
+from etl.advwin_ezl.signals import temp_disconnect_signal
 from etl.utils import get_message_log_default, save_error_log
 
 
@@ -28,7 +27,7 @@ class UserETL(GenericETL):
         FROM
             (ADVWeb_usuario AS ADVWEB_USER INNER JOIN Jurid_Advogado AS ADVOGADO
              ON ADVWEB_USER.codigo_adv = ADVOGADO.Codigo)
-        WHERE  ADVOGADO.Correspondente = 1 AND  ADVWEB_USER.status = 'A' AND
+        WHERE  ADVWEB_USER.status = 'A' AND
                ADVWEB_USER.usuarioNome IS NOT NULL AND
                ADVWEB_USER.usuarioNome <> '' AND
                ADVWEB_USER.usuarioLogin IS NOT NULL AND
@@ -44,7 +43,6 @@ class UserETL(GenericETL):
     # como não tem o nosso model de usuario não tem como herdar de LegacyCode e não tem como
     # inativar os que são advwin
     # todo: fazer model de usuario pra ter herança com LegacyCode e Audit
-    # has_status = True
 
     @validate_import
     def config_import(self, rows, user, rows_count, log=False):
@@ -94,28 +92,31 @@ class UserETL(GenericETL):
                 # tenta encontrar o usuario pelo username (unique)
                 instance = User.objects.filter(username__unaccent=username).first() or None
 
-                # todo: fazer usuario independente do usuario do django (extend, override or
-                # custom user???)
+                # todo: fazer usuario independente do usuario do django (extend, override or custom user???)
                 # todo: deve herdar de LegacyCode e Audit e já deve criar person ao criar o usuário
-                # tenta encontrar a pessoa pelo legacy_code
-                person = Person.objects.filter(legacy_code=legacy_code,
-                                               system_prefix=LegacySystem.ADVWIN.value).first()
 
                 if instance:
+                    # tenta encontrar a pessoa pelo vinculo com o usuario
+                    person = Person.objects.filter(auth_user=instance).first()
+                else:
+                    # tenta encontrar a pessoa pelo legacy_code
                     person = Person.objects.filter(legacy_code=legacy_code,
-                                                   auth_user=instance,
                                                    system_prefix=LegacySystem.ADVWIN.value).first()
 
-                if instance and person:
+                if person:
                     person_id = person.id
-                    if person.auth_user is None:
-                        # vincula o usuario encontrado à pessoa encontrada
-                        person.auth_user = instance
-                elif person:
-                    person_id = person.id
-                    # tenta encontrar o usuario vinculado a essa pessoa
-                    instance = self.model.objects.get(id=person.auth_user.id)
 
+                    # verifica se a pessoa tem usuario vinculado
+                    if person.auth_user:
+                        # tenta encontrar o usuario vinculado a essa pessoa
+                        instance = self.model.objects.filter(id=person.auth_user.id).first()
+                    else:
+                        if instance:
+                            # vincula o usuario encontrado à pessoa encontrada
+                            person.auth_user = instance
+                            person.save()
+
+                # se o usuário já existe, só atualiza
                 if instance:
                     created = False
                     # use update_fields to specify which fields to save
@@ -136,15 +137,17 @@ class UserETL(GenericETL):
                                        'first_name',
                                        'last_name'])
 
-                elif not person and not instance:
+                # elif not person and not instance:
+                else:
                     created = True
-                    # deve ser usada a funcao create_user para gerar a senha criptografada
+
                     with temp_disconnect_signal(
                             signal=models.signals.post_save,
                             receiver=create_person,
                             sender=User,
                             dispatch_uid='create_person'):
 
+                        # deve ser usada a funcao create_user para gerar a senha criptografada
                         instance = self.model.objects.create_user(
                             password=password,
                             is_superuser=is_superuser,
@@ -156,23 +159,27 @@ class UserETL(GenericETL):
                             is_active=is_active,
                             date_joined=date_joined)
 
-                    new_person.send(sender=self,
-                                    person=Person(
-                                        id=person_id,
-                                        legal_name=legal_name,
-                                        name=name,
-                                        is_lawyer=is_lawyer,
-                                        legal_type=legal_type,
-                                        cpf_cnpj=cpf_cnpj,
-                                        alter_user=user,
-                                        auth_user=instance,
-                                        create_user=user,
-                                        is_active=is_active,
-                                        is_customer=is_customer,
-                                        is_supplier=is_supplier,
-                                        legacy_code=legacy_code,
-                                        system_prefix=LegacySystem.ADVWIN.value),
-                                    created=created)
+                        # cria a pessoa somente se não existe
+                        if not person:
+                            person = Person(id=person_id,
+                                            legal_name=legal_name,
+                                            name=name,
+                                            is_lawyer=is_lawyer,
+                                            legal_type=legal_type,
+                                            cpf_cnpj=cpf_cnpj,
+                                            alter_user=user,
+                                            auth_user=instance,
+                                            create_user=user,
+                                            is_active=is_active,
+                                            is_customer=is_customer,
+                                            is_supplier=is_supplier,
+                                            legacy_code=legacy_code,
+                                            system_prefix=LegacySystem.ADVWIN.value)
+                        else:
+                            # vincula o usuario encontrado à pessoa encontrada
+                            person.auth_user = instance
+
+                        person.save()
 
                 self.debug_logger.debug(
                     'Usuario,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (

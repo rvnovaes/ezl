@@ -38,8 +38,22 @@
                                     <li><a href="{% url 'person_list' %}" target="_self">Pessoas</a></li>
                                     <li><a href="{% url 'type_movement_list' %}" target="_self">Tipos de Movimentação</a></li>
                                     <li><a href="{% url 'typetask_list' %}" target="_self">Tipos de Serviço</a>
-                                    <li><a href="{% url 'user_list' %}" target="_self">Usuários</a></li>
+                                    <li><a href="{% url 'servicepricetable_list' %}" target="_self">Tabela de preços dos serviços</a></li>
                                     <li><a href="{% url 'courtdivision_list' %}" target="_self">Varas</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                        {% if perms.core.can_access_general_data %}
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle"
+                                   data-toggle="dropdown" role="button"
+                                   aria-haspopup="true" aria-expanded="false">Administração<span
+                                        class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    {% if perms.core.can_edit_surveys %}
+                                        <li><a href="{% url 'survey_list' %} "target="_self">Pesquisas</a></li>
+                                    {% endif %}
+                                    <li><a href="{% url 'user_list' %}" target="_self">Usuários</a></li>
                                 </ul>
                             </li>
                         {% endif %}
@@ -59,7 +73,7 @@
 
                             <a href="/chat" data-balloon="Clique para ver suas mensagens!"
                                data-balloon-pos="down">
-                                <i class="fa fa-1x fa-bell-o" aria-hidden="true">
+                                <i class="fa fa-1x fa-commenting" aria-hidden="true">
                                     <span class="chat-badge badge"></span>
                                 </i>
                             </a>

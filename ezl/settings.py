@@ -11,7 +11,7 @@ MUST_LOGIN = True
 
 CELERY_BROKER_URL = 'amqp://guest:guest@queues:5672/'
 
-CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_ALWAYS_EAGER = False
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -79,6 +79,8 @@ INSTALLED_APPS = [
     'task.apps.TaskConfig',
     'etl.apps.EtlConfig',
     'financial.apps.FinancialConfig',
+    'survey.apps.SurveyConfig',
+
     'django.contrib.sites',
 
     'allauth',
@@ -95,6 +97,7 @@ INSTALLED_APPS = [
     'django_file_form.ajaxuploader',
 
     'debug_toolbar',
+    'django_extensions',
     'django_cleanup',
     # Autocomplete
     'dal',

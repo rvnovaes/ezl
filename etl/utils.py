@@ -49,11 +49,10 @@ def save_error_log(log, create_user, message_error):
         log.errors.create(create_user=create_user, error=message_error)
 
 
-
-def get_users_to_import():
+def get_clients_to_import():
     """Retorna os ids dos correspondentes que devemos importar"""
     return Person.objects.filter(
-        auth_user__groups__name=Person.CORRESPONDENT_GROUP).values_list(
+        import_from_legacy=True).values_list(
             'legacy_code', flat=True)
 
 

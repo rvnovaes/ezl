@@ -19,6 +19,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
+from django.views.generic.base import View
 
 from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
@@ -35,6 +36,7 @@ from core.models import Person, Address, City, State, Country, AddressType
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable
 from core.utils import login_log, logout_log
+from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task
 from ecm.forms import AttachmentForm
@@ -276,6 +278,7 @@ class AddressDeleteView(AddressMixin, MultiDeleteViewMixin):
 
 class SingleTableViewMixin(SingleTableView):
     ordering = None
+    paginate_by = 10
 
     @classmethod
     def filter_queryset(cls, queryset):
@@ -307,7 +310,7 @@ class SingleTableViewMixin(SingleTableView):
             else:
                 qs = self.filter_queryset(self.model.objects.all())
                 table = self.table_class(qs)
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        RequestConfig(self.request, paginate={'per_page': self.paginate_by}).configure(table)
         context['table'] = table
         return context
 
@@ -402,6 +405,12 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
         })
         return super().get_context_data(**kwargs)
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        user = User.objects.get(id=self.request.user.id)
+        kw['is_superuser'] = user.is_superuser
+        return kw
+
     def get_success_url(self):
         return reverse('person_update', args=(self.object.id,))
 
@@ -423,6 +432,19 @@ class ClientAutocomplete(autocomplete.Select2QuerySetView):
 
         if self.q:
             qs = Person.objects.filter(legal_name__unaccent__istartswith=self.q, is_customer=True)
+        return qs
+
+
+class CorrespondentAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Person.objects.none()
+
+        if self.q:
+            Person.objects.filter()
+            qs = Person.objects.filter(
+                legal_name__unaccent__istartswith=self.q,
+                auth_user__groups__name=Person.CORRESPONDENT_GROUP
+            )
         return qs
 
 
@@ -745,3 +767,21 @@ class PasswordResetViewMixin(PasswordResetView, FormView):
     def form_valid(self, form):
         context = form.save(self.request)
         return render(self.request, 'account/password_reset_done.html', context)
+
+
+class EditableListSave(LoginRequiredMixin, View):
+
+    models = {"ServicePriceTable": ServicePriceTable}
+
+    def post(self, request):
+        items = json.loads(request.POST['items'])
+        for item in items:
+            model_class = self.models.get(item['model'])
+            if model_class is None:
+                continue
+            instance = model_class.objects.get(id=item['id'])
+            for field_item in item['fields']:
+                setattr(instance, field_item['field'], field_item['value'])
+            instance.save()
+
+        return JsonResponse({"ok": True})

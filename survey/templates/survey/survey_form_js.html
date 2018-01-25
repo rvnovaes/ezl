@@ -1,0 +1,108 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static "survey/survey-editor.css" %}">
+<script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/sortablejs@1.7.0/Sortable.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.15.0/vuedraggable.min.js"></script>
+<script type="text/html" survey-template>
+{% verbatim %}
+<div id="app">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <b>Formulário</b>
+            </div>
+        </div>
+        <div class="panel-body form-group is-focused">
+
+        <draggable :list="questions" class="dragArea">
+            <div class="panel id_form_pannel" v-for="(question, i) in questions">
+                <div class="panel-heading" data-toggle="collapse" :data-target="'#id_'+i+'collapse'"
+                    href="#id_collapse">
+                    <div class="panel-title">
+                        <i class="material-icons">edit</i>
+                        <b panel-title>{{ question.title }}</b>
+                        <button type="button"
+                            class="close"
+                            v-on:click="removeQuestion(question)"
+                            btn-close>
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                        </button>
+                        <span class="pull-right">{{ question.visibleIf }}</span>
+                    </div>
+                </div>
+                <div class="panel-body form-group is-focused collapse" :id="'id_'+i+'collapse'">
+                        <div class="layout-row row">
+                            <div class="col s12 m4">
+                                <div class="row">
+                                    <div class="input-field col s12 required" id="id_title_container">
+                                        <input :id="'id_'+i+'_title'" name="title" type="text" v-model="question.title">
+                                        <label :for="'id_'+i+'_title'">Titulo do campo</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col s12 m4">
+                                <div class="row">
+                                    <div class="input-field col s12 required" id="id_name_container">
+                                        <input :id="'id_'+i+'_name'" type="text" v-model="question.name">
+                                        <label :for="'id_'+i+'_name'">Código do campo</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col s12 m4">
+                                <div class="row">
+                                    <div class="checkbox-field col s12 required" id="id_required_container">
+                                        <input class="filled-in " :id="'id_'+i+'_required'" :name="'id_'+i+'_required'" type="checkbox" v-model="question.isRequired"><label :for="'id_'+i+'_required'">Obrigatório</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layout-row row">
+                            <div class="col s12 m6">
+                                <div class="row">
+                                    <div class="input-field col s12 required select-field" id="id_question_type_container">
+                                        <label :for="'id_'+i+'_question_type'">Tipo de campo</label>
+                                        <select :id="'id_'+i+'_question_type'" name="question_type" v-model="question.type" class="material-ignore">
+                                            <option value="text" se>Texto</option>
+                                            <option value="comment">Comentário</option>
+                                            <option value="radiogroup">Seleção</option>
+                                            <option value="checkbox">Seleção múltipla</option>
+                                            <option value="file">Upload de arquivo</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col s12 m6">
+                                <div class="row">
+                                    <div class="input-field col s12 required" id="id_condition_container">
+                                        <input :id="'id_'+i+'_condition'" :name="'id_'+i+'_condition'" type="text" v-model="question.visibleIf">
+                                        <label :for="'id_'+i+'_condition'">Condição de exibição</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layout-row row" v-if="question.type == 'radiogroup' || question.type == 'checkbox'">
+                            <div class="col s12 m12">
+                                <div class="row">
+                                    <div class="input-field col s12 required" id="id_choices">
+                                        <input :id="'id_'+i+'_choices'" :name="'id_'+i+'_choices'" type="text" v-model="question.choices">
+                                        <label :for="'id_'+i+'_choices'">Opções</label>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </draggable>
+        <button type="button" class="btn btn-sm btn-raised btn-primary " v-on:click="addQuestion">
+            <i class="material-icons left">done</i>Adicionar
+        </button>
+
+        </div>
+    </div>
+</div>
+{% endverbatim %}
+</script>
+<script type="text/javascript" src="{% static 'survey/survey-editor.js' %}"></script>

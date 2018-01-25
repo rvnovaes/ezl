@@ -1,3 +1,4 @@
+import csv
 import os
 from urllib.parse import urlparse
 import json
@@ -9,7 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import IntegrityError, OperationalError
 from django.db.models import Q
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic import CreateView, UpdateView, TemplateView, View
@@ -29,7 +30,11 @@ from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable
+from financial.models import ServicePriceTable
 from chat.models import Chat
+from survey.models import SurveyPermissions
+from financial.tables import ServicePriceTableTaskTable
+
 
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Task
@@ -135,9 +140,10 @@ class DashboardView(MultiTableMixin, TemplateView):
         context = super().get_context_data(*args, **kwargs)
         if not self.request.user.get_all_permissions():
             context['messages'] = [
-                    {'tags': 'error', 'message': NO_PERMISSIONS_DEFINED}
-                ]
+                {'tags': 'error', 'message': NO_PERMISSIONS_DEFINED}
+            ]
         return context
+
     def get_tables(self):
         person = Person.objects.get(auth_user=self.request.user)
         dynamic_query = self.get_dynamic_query(person)
@@ -145,13 +151,13 @@ class DashboardView(MultiTableMixin, TemplateView):
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
         if dynamic_query or person.auth_user.is_superuser:
             data = DashboardViewModel.objects.filter(dynamic_query)
-        tables = self.get_list_tables(data) if person else []
+        tables = self.get_list_tables(data, person) if person else []
         if not dynamic_query:
             return tables
         return tables
 
     @staticmethod
-    def get_list_tables(data):
+    def get_list_tables(data, person):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
@@ -162,38 +168,62 @@ class DashboardView(MultiTableMixin, TemplateView):
         refused = grouped.get(TaskStatus.REFUSED) or {}
         blocked_payment = grouped.get(TaskStatus.BLOCKEDPAYMENT) or {}
         finished = grouped.get(TaskStatus.FINISHED) or {}
+        requested = grouped.get(TaskStatus.REQUESTED) or {}
+        accepted_service = grouped.get(TaskStatus.ACCEPTED_SERVICE) or {}
+        refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}
         error = InconsistencyETL.objects.filter(is_active=True) or {}
-        return_table = DashboardStatusTable(returned, title='Retornadas',
-                                            status=TaskStatus.RETURN)
 
-        accepted_table = DashboardStatusTable(accepted,
-                                              title='A Cumprir', status=TaskStatus.ACCEPTED
-                                              )
+        return_list = []
 
-        open_table = DashboardStatusTable(opened, title='Em Aberto',
-                                          status=TaskStatus.OPEN)
+        if not person.auth_user.has_perm('core.view_delegated_tasks') or person.auth_user.is_superuser:
+            return_list.append(DashboardErrorStatusTable(error,
+                                                         title='Erro no sistema de origem',
+                                                         status=TaskStatus.ERROR))
 
-        done_table = DashboardStatusTable(done, title='Cumpridas',
-                                          status=TaskStatus.DONE)
+            # status 10 - Solicitada
+            return_list.append(DashboardStatusTable(requested,
+                                                    title='Solicitadas',
+                                                    status=TaskStatus.REQUESTED))
+            # status 11 - Aceita pelo Service
+            return_list.append(DashboardStatusTable(accepted_service,
+                                                    title='Aceitas pelo Service',
+                                                    status=TaskStatus.ACCEPTED_SERVICE))
 
-        refused_table = DashboardStatusTable(refused,
-                                             title='Recusadas', status=TaskStatus.REFUSED)
+            # status 20 - Recusada pelo Sevice
+            return_list.append(DashboardStatusTable(refused_service,
+                                                    title='Recusadas pelo Service',
+                                                    status=TaskStatus.REFUSED_SERVICE))
 
-        blocked_payment_table = DashboardStatusTable(blocked_payment,
-                                                     title='Glosadas',
-                                                     status=TaskStatus.BLOCKEDPAYMENT)
+        return_list.append(DashboardStatusTable(returned,
+                                                title='Retornadas',
+                                                status=TaskStatus.RETURN))
 
-        finished_table = DashboardStatusTable(finished,
-                                              title='Finalizadas',
-                                              status=TaskStatus.FINISHED)
+        return_list.append(DashboardStatusTable(opened,
+                                                title='Delegada/Em Aberto',
+                                                status=TaskStatus.OPEN))
 
-        error_table = DashboardErrorStatusTable(error,
-                                                title='Erro no sistema de origem',
-                                                status=TaskStatus.ERROR)
+        return_list.append(DashboardStatusTable(accepted,
+                                                title='A Cumprir',
+                                                status=TaskStatus.ACCEPTED))
 
-        return [error_table, return_table, accepted_table, open_table, done_table, refused_table,
-                  blocked_payment_table,
-                  finished_table]
+        return_list.append(DashboardStatusTable(done,
+                                                title='Cumpridas',
+                                                status=TaskStatus.DONE))
+
+        return_list.append(DashboardStatusTable(finished,
+                                                title='Finalizadas',
+                                                status=TaskStatus.FINISHED))
+
+        # status 40 - Recusada
+        return_list.append(DashboardStatusTable(refused,
+                                                title='Recusadas',
+                                                status=TaskStatus.REFUSED))
+
+        return_list.append(DashboardStatusTable(blocked_payment,
+                                                title='Glosadas',
+                                                status=TaskStatus.BLOCKEDPAYMENT))
+
+        return return_list
 
     @staticmethod
     def get_query_all_tasks(person):
@@ -220,7 +250,7 @@ class DashboardView(MultiTableMixin, TemplateView):
             'core.view_delegated_tasks': self.get_query_delegated_tasks,
             'core.view_distributed_tasks': self.get_query_distributed_tasks,
             'core.view_requested_tasks': self.get_query_requested_tasks
-            }
+        }
         for permission in person.auth_user.get_all_permissions():
             if permission in permissions_to_check.keys():
                 dynamic_query |= permissions_to_check.get(permission)(person)
@@ -247,6 +277,16 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
                                        execution_date=execution_date, survey_result=survey_result)
         form.instance.__server = self.request.META['HTTP_HOST']
+        if form.instance.task_status == TaskStatus.ACCEPTED_SERVICE:
+            form.instance.acceptance_service_date = timezone.now()
+        if form.instance.task_status == TaskStatus.REFUSED_SERVICE:
+            form.instance.refused_service_date = timezone.now()
+        if form.instance.task_status == TaskStatus.OPEN:
+            form.instance.amount = form.cleaned_data['amount']
+            servicepricetable_id = self.request.POST['servicepricetable_id']
+            servicepricetable = ServicePriceTable.objects.get(id=servicepricetable_id)
+            form.instance.person_executed_by = (servicepricetable.correspondent
+                                                if servicepricetable.correspondent else None)
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
@@ -255,6 +295,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
+        context['survey_data'] = self.object.type_task.survey.data
 
         # Atualiza ou cria o chat, (Eh necessario encontrar um lugar melhor para este bloco de codigo)
         state = ''
@@ -282,6 +323,16 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             self.object.save()
         self.create_user_by_chat(self.object, ['person_asked_by', 'person_executed_by',
                                                'person_distributed_by'])
+        type_task = self.object.type_task
+        court_district = self.object.movement.law_suit.court_district
+        state = self.object.movement.law_suit.court_district.state
+        client = self.object.movement.law_suit.folder.person_customer
+        context['correspondents_table'] = ServicePriceTableTaskTable(
+            ServicePriceTable.objects.filter(Q(type_task=type_task),
+                                             Q(Q(court_district=court_district) | Q(court_district=None)),
+                                             Q(Q(state=state) | Q(state=None)),
+                                             Q(Q(client=client) | Q(client=None)))
+        )
         return context
 
     def create_user_by_chat(self, task, fields):
@@ -580,6 +631,57 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         return context
+
+
+    def get(self, request):        
+        if (self.request.GET.get('export_answers') and
+                self.request.user.has_perm(SurveyPermissions.can_view_survey_results)):
+            return self._export_answers(request)
+
+        return super().get(request)
+
+    def _export_answers(self, request):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="respostas_dos_formularios.csv"'
+        writer = csv.writer(response)
+
+        queryset = self.get_queryset().filter(survey_result__isnull=False)
+        tasks = self._fill_tasks_answers(queryset)
+        columns = self._get_answers_columns(tasks)
+        writer.writerow(['N° da OS', 'N° da OS no sistema de origem'] + columns)
+
+        for task in tasks:
+            self._export_answers_write_task(writer, task, columns)
+        return response
+
+    def _fill_tasks_answers(self, queryset):
+        tasks = []
+        for task in queryset:
+            try:
+                task.survey_result = json.loads(task.survey_result)
+                tasks.append(task)
+            except ValueError:
+                return
+        return tasks
+
+    def _export_answers_write_task(self, writer, task, columns):
+        base_fields = [task.id, task.legacy_code]
+        answers = ['' for x in range(len(columns))]
+        for question, answer in task.survey_result.items():
+            question_index = columns.index(question) 
+            answers[question_index] = answer
+
+        writer.writerow(base_fields + answers)
+
+    def _get_answers_columns(self, tasks):
+        columns = []
+        i = 0
+        for task in tasks:
+            for question, answer in task.survey_result.items():
+                if question not in columns:
+                    columns.append(question)
+        columns.sort()
+        return columns
 
 
 class DashboardStatusCheckView(LoginRequiredMixin, View):

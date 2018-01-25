@@ -36,12 +36,12 @@ def receive_notes_execution_date(notes, instance, execution_date, survey_result,
 
 @receiver(post_save, sender=Task)
 def new_task(sender, instance, created, **kwargs):
-    if created:
-        TaskHistory.objects.create(task=instance,
-                                   create_user=instance.create_user,
-                                   status=instance.task_status,
-                                   create_date=instance.create_date, notes='Nova providência')
-
+    notes = 'Nova providência' if created else getattr(instance, '__notes', '')
+    user = instance.alter_user if instance.alter_user else instance.create_user
+    TaskHistory.objects.create(task=instance,
+                               create_user=user,
+                               status=instance.task_status,
+                               create_date=instance.create_date, notes=notes)
     contact_mechanism_type = ContactMechanismType.objects.filter(name__iexact='email')
     if not contact_mechanism_type:
         return
@@ -128,6 +128,12 @@ def change_status(sender, instance, **kwargs):
     previous_status = TaskStatus(instance.__previous_status) or TaskStatus.INVALID
 
     if new_status is not previous_status:
+        if new_status is TaskStatus.ACCEPTED_SERVICE:
+            instance.acceptance_service_date = now_date
+        if new_status is TaskStatus.REFUSED_SERVICE:
+            instance.refused_service_date = now_date
+        if new_status is TaskStatus.OPEN:
+            instance.delegation_date = now_date
         if new_status is TaskStatus.ACCEPTED:
             instance.acceptance_date = now_date
         elif new_status is TaskStatus.REFUSED:
@@ -144,11 +150,7 @@ def change_status(sender, instance, **kwargs):
 
         instance.alter_date = now_date
 
-        TaskHistory.objects.create(task=instance, create_user=instance.alter_user,
-                                   status=instance.task_status,
-                                   create_date=now_date,
-                                   notes=getattr(instance, '__notes', ''))
-        instance.__previous_status = instance.task_status
+        # instance.__previous_status = instance.task_status
 
 
 @receiver(post_save, sender=Task)

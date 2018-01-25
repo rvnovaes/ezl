@@ -129,8 +129,34 @@ class TaskDetailForm(ModelForm):
         )
     )
 
+    amount = forms.CharField(
+        required=False,
+        label='Valor:',
+        widget=forms.TextInput(attrs={'mask': 'money'})
+    )
+
+    servicepricetable_id = forms.CharField(required=False,
+                                           widget=forms.HiddenInput())
+
+    def clean_servicepricetable_id(self):
+        servicepricetable_id = self.cleaned_data['servicepricetable_id']
+        amount = (self.cleaned_data['amount'] if self.cleaned_data['amount'] else 0)
+        if amount and amount >= 0.0 and not servicepricetable_id:
+            raise forms.ValidationError("Favor Selecionar um correspondente")
+        return servicepricetable_id
+
+    def clean_amount(self):
+        amount = (self.cleaned_data['amount'] if self.cleaned_data['amount'] else str(0))
+        amount = amount.replace('.', '')
+        amount = amount.replace(',', '.')
+        return float(amount)
+
+    def clean(self):
+        form_data = self.cleaned_data
+        return form_data
+
 
 class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
-        fields = ['name', 'survey_type', 'is_active']
+        fields = ['name', 'survey', 'is_active']
