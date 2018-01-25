@@ -54,6 +54,10 @@ class Folder(Audit, LegacyCode):
         if not self.pk:
             self.folder_number = get_folder_number()
         super(Folder, self).save(*args, **kwargs)
+
+    def simple_serialize(self):
+        return {"id": self.id}
+
     class Meta:
         db_table = "folder"
         ordering = ['-id']
@@ -143,6 +147,16 @@ class LawSuit(Audit, LegacyCode):
     opposing_party = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='Parte adversa')
 
+    def serialize(self):
+        """JSON representation of instance"""
+        data = {
+            "id": self.id,
+            "person_lawyer": self.person_lawyer.simple_serialize(),
+            "law_suit_number": self.law_suit_number,
+            "folder": self.folder.simple_serialize()
+        }
+        return data
+
     class Meta:
         db_table = "law_suit"
         ordering = ['-id']
@@ -162,6 +176,14 @@ class Movement(Audit, LegacyCode):
                                  verbose_name="Processo", related_name='law_suits')
     folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False,
                                verbose_name="Pasta", related_name='folders_movement')
+
+    def serialize(self):
+        """JSON representation of instance"""
+        data = {
+            "id": self.id,
+            "type_movement_name": self.type_movement.name
+        }
+        return data
 
     class Meta:
         db_table = "movement"

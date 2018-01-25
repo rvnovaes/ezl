@@ -17,6 +17,7 @@ send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'executi
 @receiver(post_save, sender=Ecm)
 def export_ecm_path(sender, instance, created, **kwargs):
     if created and instance.legacy_code is None:
+        return
         export_ecm.delay(instance.id)
 
 
@@ -156,10 +157,12 @@ def change_status(sender, instance, **kwargs):
 @receiver(post_save, sender=Task)
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
     if not getattr(instance, '_called_by_etl'):
+        return
         export_task.delay(instance.pk)
 
 
 @receiver(post_save, sender=TaskHistory)
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
     if not getattr(instance, '_called_by_etl'):
+        return
         export_task_history.delay(instance.pk)

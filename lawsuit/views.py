@@ -626,6 +626,46 @@ class CourtDistrictAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
 
+class FolderAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Folder.objects.none()
+
+        if self.q:
+            filters = Q(person_customer__name__unaccent__istartswith=self.q)
+            filters |= Q(folder_number__startswith=self.q)
+            qs = Folder.objects.filter(is_active=True).filter(filters)
+        return qs
+
+    def get_result_label(self, result):
+        return "{} - {}".format(result.folder_number, result.person_customer.name)
+
+
+class LawsuitAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Folder.objects.none()
+
+        if self.q:
+            filters = Q(person_lawyer__name__unaccent__istartswith=self.q)
+            filters |= Q(law_suit_number__startswith=self.q)
+            qs = LawSuit.objects.filter(is_active=True).filter(filters)
+        return qs
+
+    def get_result_label(self, result):
+        return "{} - {}".format(result.law_suit_number, result.person_lawyer.name)
+
+
+class MovementAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Movement.objects.none()
+
+        if self.q:
+            qs = Movement.objects.filter(is_active=True, type_movement__name__unaccent__icontains=self.q)
+        return qs
+
+    def get_result_label(self, result):
+        return result.type_movement.name
+
+
 class AddressOrganCreateView(AddressCreateView):
     def get_success_url(self):
         return reverse('organ_update', args=(self.object.person.pk, ))

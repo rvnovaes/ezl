@@ -1,9 +1,11 @@
 import os
 from enum import Enum
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls.base import reverse
 from django.utils import timezone
 from sequences import get_next_value
 from core.models import Person, Audit, AuditCreate, LegacyCode
@@ -193,6 +195,25 @@ class Task(Audit, LegacyCode):
         if organ:
             address = organ.address_set.first()
         return address
+
+    def get_absolute_url(self):
+        return reverse("task_update",
+                       kwargs={"movement": self.movement_id, "pk": self.id})
+
+    def serialize(self):
+        """JSON representation of object"""
+        data = {
+            "id": self.id,
+            "url": self.get_absolute_url(),
+            "task_number": self.task_number,
+            "status": str(self.status),
+            "type_task": {"name": self.type_task.name, "id": self.type_task.id},
+            "final_deadline_date": self.final_deadline_date.strftime(settings.DATETIME_FORMAT) if self.final_deadline_date else "",
+            "delegation_date": self.delegation_date.strftime(settings.DATETIME_FORMAT) if self.delegation_date else "",
+            "person_asked_by": self.person_asked_by.simple_serialize(),
+            "person_executed_by": self.person_executed_by.simple_serialize(),
+        }
+        return data
 
     def save(self, *args, **kwargs):
         self._called_by_etl = kwargs.pop('called_by_etl', False)
