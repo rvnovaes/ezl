@@ -1,0 +1,9 @@
+.select-field label{
+    margin-top: -30px;
+}
+.row{
+    margin-bottom: 0!important;
+}
+#id_data_container{
+    display: none;
+}

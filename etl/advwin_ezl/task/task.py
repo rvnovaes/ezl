@@ -31,13 +31,6 @@ def to_dict(model_instance, query_instance=None):
         return {cols[i]['name']: model_instance[i] for i in range(len(cols))}
 
 
-def parse_survey_result(survey, agenda_id):
-    json = loads(survey)
-    json['agenda_id'] = agenda_id
-    json['versao'] = 1
-    return json
-
-
 survey_tables = {'Courthearing': JuridFMAudienciaCorrespondente, 'Diligence'
 : JuridFMDiligenciaCorrespondente, 'Protocol': JuridFMProtocoloCorrespondente,
                  'Operationlicense': JuridFMAlvaraCorrespondente}
@@ -74,7 +67,6 @@ class TaskETL(GenericETL):
                 a.CodMov AS type_task_legacy_code,
                 a.Advogado_or AS person_distributed_by_legacy_code,
                 a.OBS AS description,
-                a.Data_confirmacao AS blocked_or_finished_date,
                 a.Data AS requested_date,
                 a.prazo_fatal AS final_deadline_date,
                 p.Codigo_Comp AS folder_legacy_code,
@@ -130,7 +122,6 @@ class TaskETL(GenericETL):
                     requested_date = None
 
                 description = row['description']
-                blocked_or_finished_date = row['blocked_or_finished_date']
 
                 task = Task.objects.filter(legacy_code=legacy_code,
                                            system_prefix=LegacySystem.ADVWIN.value).first()
@@ -190,9 +181,10 @@ class TaskETL(GenericETL):
                     task.final_deadline_date = final_deadline_date
                     task.description = description
                     task.task_status = status_code_advwin
+                    task.type_task = type_task
 
                     update_fields = ['requested_date', 'final_deadline_date', 'description',
-                                     'task_status', ]
+                                     'task_status', 'type_task']
 
                     task.save(update_fields=update_fields)
 
@@ -260,10 +252,10 @@ class TaskETL(GenericETL):
 
         survey_result = done_tasks.filter(Q(survey_result__isnull=False) & ~Q(survey_result=''))
 
-        survey_result = map(lambda x: (
-            insert(survey_tables.get(x.type_task.survey_type).__table__).values(to_dict(
-                survey_tables.get(x.type_task.survey_type)(**parse_survey_result(x.survey_result, x.legacy_code))))
-        ), survey_result)
+        # survey_result = map(lambda x: (
+        #     insert(survey_tables.get(x.type_task.survey_type).__table__).values(to_dict(
+        #         survey_tables.get(x.type_task.survey_type)(**parse_survey_result(x.survey_result, x.legacy_code))))
+        # ), survey_result)
 
         accepeted_history = TaskHistory.objects.filter(task_id__in=accepted_tasks.values('id'),
                                                        status=TaskStatus.ACCEPTED.value)

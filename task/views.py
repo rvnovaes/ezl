@@ -1,3 +1,4 @@
+import csv
 import os
 from urllib.parse import urlparse
 import json
@@ -9,7 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import IntegrityError, OperationalError
 from django.db.models import Q
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic import CreateView, UpdateView, TemplateView, View
@@ -31,7 +32,9 @@ from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable
 from financial.models import ServicePriceTable
 from chat.models import Chat
+from survey.models import SurveyPermissions
 from financial.tables import ServicePriceTableTaskTable
+
 
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Task
@@ -298,6 +301,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
+        context['survey_data'] = self.object.type_task.survey.data
 
         # Atualiza ou cria o chat, (Eh necessario encontrar um lugar melhor para este bloco de codigo)
         state = ''
@@ -633,6 +637,57 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         return context
+
+
+    def get(self, request):        
+        if (self.request.GET.get('export_answers') and
+                self.request.user.has_perm(SurveyPermissions.can_view_survey_results)):
+            return self._export_answers(request)
+
+        return super().get(request)
+
+    def _export_answers(self, request):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="respostas_dos_formularios.csv"'
+        writer = csv.writer(response)
+
+        queryset = self.get_queryset().filter(survey_result__isnull=False)
+        tasks = self._fill_tasks_answers(queryset)
+        columns = self._get_answers_columns(tasks)
+        writer.writerow(['N° da OS', 'N° da OS no sistema de origem'] + columns)
+
+        for task in tasks:
+            self._export_answers_write_task(writer, task, columns)
+        return response
+
+    def _fill_tasks_answers(self, queryset):
+        tasks = []
+        for task in queryset:
+            try:
+                task.survey_result = json.loads(task.survey_result)
+                tasks.append(task)
+            except ValueError:
+                return
+        return tasks
+
+    def _export_answers_write_task(self, writer, task, columns):
+        base_fields = [task.id, task.legacy_code]
+        answers = ['' for x in range(len(columns))]
+        for question, answer in task.survey_result.items():
+            question_index = columns.index(question) 
+            answers[question_index] = answer
+
+        writer.writerow(base_fields + answers)
+
+    def _get_answers_columns(self, tasks):
+        columns = []
+        i = 0
+        for task in tasks:
+            for question, answer in task.survey_result.items():
+                if question not in columns:
+                    columns.append(question)
+        columns.sort()
+        return columns
 
 
 class DashboardStatusCheckView(LoginRequiredMixin, View):

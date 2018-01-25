@@ -27,9 +27,8 @@ class TypeTaskTest(TestCase):
         # st = dict(form.fields['survey_type'].choices)['Diligence']
         # Para charfield com choices em enum, usar as escolhas do enum em lowercase
 
-        data = {'name': 'Tipo1', 'survey_type': 'Diligence'}
+        data = {'name': 'Tipo1', 'survey': 1}
         form = TypeTaskForm(data=data)
-        print(form.errors)
         self.assertTrue(form.is_valid())
 
     def test_list_view(self):
