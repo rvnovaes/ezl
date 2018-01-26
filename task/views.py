@@ -148,23 +148,24 @@ class DashboardView(MultiTableMixin, TemplateView):
         person = Person.objects.get(auth_user=self.request.user)
         dynamic_query = self.get_dynamic_query(person)
         data = []
+        data_error = []
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
         if dynamic_query or person.auth_user.is_superuser:
             # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
             data = DashboardViewModel.objects.filter(dynamic_query)
+            data_error = DashboardViewModel.objects.filter(dynamic_query, task_status=TaskStatus.ERROR)
 
         # nao mostra as OSs dos status de "erro" e "solicitadas" para pessoas que forem correspondente ou solicitante
         if person.auth_user.groups.filter(~Q(name__in=['Correspondente', 'Solicitante'])).exists():
-            data = data | DashboardViewModel.objects.filter(
-                task_status__in=[TaskStatus.REQUESTED, TaskStatus.ERROR])
-
-        tables = self.get_list_tables(data, person) if person else []
+            data = data | DashboardViewModel.objects.filter(task_status=TaskStatus.REQUESTED)
+            data_error = data_error | DashboardViewModel.objects.filter(task_status=TaskStatus.ERROR)
+        tables = self.get_list_tables(data, data_error, person) if person else []
         if not dynamic_query:
             return tables
         return tables
 
     @staticmethod
-    def get_list_tables(data, person):
+    def get_list_tables(data, data_error, person):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
@@ -178,7 +179,8 @@ class DashboardView(MultiTableMixin, TemplateView):
         requested = grouped.get(TaskStatus.REQUESTED) or {}
         accepted_service = grouped.get(TaskStatus.ACCEPTED_SERVICE) or {}
         refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}
-        error = InconsistencyETL.objects.filter(is_active=True) or {}
+        #  Necessario filtrar as inconsistencias pelos ids das tasks pelo fato das instancias de error serem de DashboardTaskView
+        error  = InconsistencyETL.objects.filter(is_active=True, task__id__in=[task.pk for task in data_error]) or {}
 
         return_list = []
 
