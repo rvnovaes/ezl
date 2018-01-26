@@ -147,9 +147,11 @@ class DashboardView(MultiTableMixin, TemplateView):
         data = []
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
         if dynamic_query or person.auth_user.is_superuser:
+            # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
             data = DashboardViewModel.objects.filter(dynamic_query)
 
-        if person.auth_user.groups.filter(~Q(name='Correspondente')).exists():
+        # nao mostra as OSs dos status de "erro" e "solicitadas" para pessoas que forem correspondente ou solicitante
+        if person.auth_user.groups.filter(~Q(name__in=['Correspondente', 'Solicitante'])).exists():
             data = data | DashboardViewModel.objects.filter(
                 task_status__in=[TaskStatus.REQUESTED, TaskStatus.ERROR])
 
