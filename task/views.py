@@ -154,8 +154,7 @@ class DashboardView(MultiTableMixin, TemplateView):
 
         if person.auth_user.groups.filter(~Q(name='Correspondente')).exists():
             data = data | DashboardViewModel.objects.filter(
-                task_status__in=[TaskStatus.REQUESTED, TaskStatus.REFUSED_SERVICE,
-                                 TaskStatus.ACCEPTED_SERVICE, TaskStatus.ERROR])
+                task_status__in=[TaskStatus.REQUESTED, TaskStatus.ERROR])
 
         tables = self.get_list_tables(data, person) if person else []
         if not dynamic_query:
@@ -285,8 +284,10 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         form.instance.__server = self.request.META['HTTP_HOST']
         if form.instance.task_status == TaskStatus.ACCEPTED_SERVICE:
             form.instance.acceptance_service_date = timezone.now()
+            form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.REFUSED_SERVICE:
             form.instance.refused_service_date = timezone.now()
+            form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.OPEN:
             form.instance.amount = form.cleaned_data['amount']
             servicepricetable_id = self.request.POST['servicepricetable_id']
