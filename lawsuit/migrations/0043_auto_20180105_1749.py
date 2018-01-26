@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0053_office'),
-        ('lawsuit', '0041_auto_20171221_1002'),
+        ('lawsuit', '0042_auto_20180125_1248'),
     ]
 
     operations = [
