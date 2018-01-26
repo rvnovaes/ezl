@@ -151,8 +151,7 @@ class DashboardView(MultiTableMixin, TemplateView):
 
         if person.auth_user.groups.filter(~Q(name='Correspondente')).exists():
             data = data | DashboardViewModel.objects.filter(
-                task_status__in=[TaskStatus.REQUESTED, TaskStatus.REFUSED_SERVICE,
-                                 TaskStatus.ACCEPTED_SERVICE, TaskStatus.ERROR])
+                task_status__in=[TaskStatus.REQUESTED, TaskStatus.ERROR])
 
         tables = self.get_list_tables(data, person) if person else []
         if not dynamic_query:
