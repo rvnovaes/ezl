@@ -49,7 +49,7 @@ class DefaultAttachmentRule (Audit, OfficeMixin):
                                   verbose_name='Tipo de Serviço')
     person_customer = models.ForeignKey('core.Person', on_delete=models.PROTECT, blank=True, null=True,
                                         related_name='%(class)s_customer',
-                                        verbose_name='Solicitante')
+                                        verbose_name='Cliente')
     court_district = models.ForeignKey('lawsuit.CourtDistrict', on_delete=models.PROTECT,
                                        blank=True, null=True,
                                        verbose_name='Comarca')

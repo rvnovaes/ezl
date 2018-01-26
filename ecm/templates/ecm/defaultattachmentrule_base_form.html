@@ -17,6 +17,34 @@
         {{ form.description }}
     </div>
 </div>
+<div class="valign-wrapper layout-row row">
+    <div class="select-field col s12 m6" id="{{ form.type_task.id_for_label }}_container">
+        <label for="{{ form.type_task.id_for_label }}">{{ form.type_task.label }}</label>
+        {{ form.type_task }}
+    </div>
+    <div class="col s12 m6">
+        <label for="{{ form.person_customer.id_for_label }}" style="position: relative;"
+               id="select2_label">{{ form.person_customer.label }}</label>
+        {{ form.person_customer }}
+    </div>
+</div>
+</div>
+<div class="valign-wrapper layout-row row">
+    <div class="select-field col s12 m4" id="{{ form.state.id_for_label }}_container">
+        <label for="{{ form.state.id_for_label }}">{{ form.state.label }}</label>
+        {{ form.state }}
+    </div>
+    <div class="col s12 m4">
+        <label for="{{ form.court_district.id_for_label }}" style="position: relative;"
+               id="select2_label">{{ form.court_district.label }}</label>
+        {{ form.court_district }}
+    </div>
+    <div class="col s12 m4">
+        <label for="{{ form.city.id_for_label }}" style="position: relative;"
+               id="select2_label">{{ form.city.label }}</label>
+        {{ form.city }}
+    </div>
+</div>
 
 {% block extrajs %}
     {{ form.media }}

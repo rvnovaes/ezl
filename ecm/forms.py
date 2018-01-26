@@ -41,14 +41,15 @@ class DefaultAttachmentRuleForm(BaseModelForm):
     description = forms.CharField(
         label=u'Descrição',
         required=False,
-        widget=forms.Textarea(attrs={'class': 'form-control input-sm'})
+        widget=forms.Textarea(attrs={'class': 'form-control input-sm',
+                                     'rows': '2'})
     )
 
     type_task = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(TypeTask.objects.all()).order_by('name'),
         empty_label='',
         required=False,
-        label='UF',
+        label='Tipo de Serviço',
     )
 
     person_customer = forms.ModelChoiceField(
