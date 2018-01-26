@@ -30,6 +30,7 @@ class Command(BaseCommand):
         from etl.advwin_ezl.law_suit.movement import MovementETL
         MovementETL().import_data()
 
+
     def run_task_etl(self):
         from etl.advwin_ezl.task.task import TaskETL
         TaskETL().import_data()
@@ -46,7 +47,7 @@ class Command(BaseCommand):
         from etl.advwin_ezl.luigi_jobs import EcmTask
         luigi.build([EcmTask()])
 
-    def handle(self, *args, **options):        
+    def handle(self, *args, **options):
         etl = options['etl']
         options = {
             'user': self.run_user_etl,
@@ -55,7 +56,7 @@ class Command(BaseCommand):
             'lawsuit': self.run_lawsuit_etl,
             'movement': self.run_movement_etl,
             'task': self.run_task_etl,
-        'type_task': self.run_type_task_etl,
+            'type_task': self.run_type_task_etl,
             'ecm': self.run_ecm_etl,
             'luigi': self.run_luigi
         }
