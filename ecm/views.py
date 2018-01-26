@@ -17,7 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.views.generic.edit import CreateView, UpdateView
 from . import utils
-from .forms import UploadFileForm, DefaultAttachmentRuleForm
+from .forms import UploadFileForm, DefaultAttachmentRuleForm, DefaultAttachmentRuleCreateForm
 from .tables import DefaulAttachmentRuleTable
 from .models import Attachment, DefaultAttachmentRule
 
@@ -110,16 +110,29 @@ class DefaultAttachmentRuleListView(LoginRequiredMixin, SingleTableViewMixin):
 
 class DefaultAttachmentRuleCreateView(AuditFormMixin, CreateView):
     model = DefaultAttachmentRule
-    form_class = DefaultAttachmentRuleForm
+    form_class = DefaultAttachmentRuleCreateForm
     success_url = reverse_lazy('ecm:defaultattachmentrule_list')
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'ecm:defaultattachmentrule_list'
+    template_name_suffix = '_create_form'
 
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if form.cleaned_data['documents']:
+            instance = form.save()
+            attachment = Attachment(
+                model_name='ecm.defaultattachmentrule',
+                object_id=instance.id,
+                file=self.request.FILES.get('documents'),
+                create_user_id=self.request.user.id
+            )
+            attachment.save()
+        return response
 
 class DefaultAttachmentRuleUpdateView(AuditFormMixin, UpdateView):
     model = DefaultAttachmentRule
@@ -150,3 +163,10 @@ class DefaultAttachmentRuleDeleteView(AuditFormMixin, MultiDeleteViewMixin):
         model._meta.verbose_name_plural)
     object_list_url = 'ecm:defaultattachmentrule_list'
 
+    def delete(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            pks = request.POST.getlist('selection')
+            if Attachment.objects.filter(model_name='ecm.defaultattachmentrule').filter(object_id__in=pks):
+                Attachment.objects.filter(model_name='ecm.defaultattachmentrule').filter(object_id__in=pks).delete()
+
+        return MultiDeleteViewMixin.delete(self, request, *args, **kwargs)

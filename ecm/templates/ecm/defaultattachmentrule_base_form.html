@@ -45,6 +45,23 @@
         {{ form.city }}
     </div>
 </div>
+{% if form.documents %}
+<div class="clearfix">&nbsp;</div>
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h1 class="panel-title">Anexos</h1>
+    </div>
+    <div class="panel-body">
+        <fieldset>
+
+            {{ form.documents }}
+
+            {% include 'django_file_form/upload_template.html' %}
+
+        </fieldset>
+    </div>
+</div>
+{% endif %}
 
 {% block extrajs %}
     {{ form.media }}

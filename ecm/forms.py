@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Author: Christian Douglas <christian.douglas.alcantara@gmail.com>
 from django import forms
+from django.utils.translation import ugettext_lazy as _
+from django_file_form.forms import FileFormMixin, MultipleUploadedFileField
+
 from .models import Attachment, DefaultAttachmentRule
 from core.forms import BaseModelForm
 from core.utils import filter_valid_choice_form, get_office_field
@@ -88,7 +91,7 @@ class DefaultAttachmentRuleForm(BaseModelForm):
 
     city = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(City.objects.filter(is_active=True)).order_by('name'),
-        required=True,
+        required=False,
         label='Cidade',
         widget=MDModelSelect2(url='city_autocomplete',
                               attrs={
@@ -104,7 +107,31 @@ class DefaultAttachmentRuleForm(BaseModelForm):
         model = DefaultAttachmentRule
         fields = ('name', 'description', 'type_task', 'person_customer', 'state', 'court_district', 'city', 'office')
 
+    def clean(self):
+        cleaned_data = super().clean()
+        type_task = cleaned_data.get('type_task')
+        person_customer = cleaned_data.get('person_customer')
+        state = cleaned_data.get('state')
+        court_district = cleaned_data.get('court_district')
+        city = cleaned_data.get('city')
+
+        if not type_task and not person_customer and not state and not court_district and not city:
+            raise forms.ValidationError(_(u"Deve ser informado pelo menos um dos seguintes campos:"
+                                          u" Tipo de Serviço,"+ chr(12) +
+                                          u" Cliente,"
+                                          u" UF,"
+                                          u" Comarca"
+                                          u" ou Cidade"))
+        return cleaned_data
+
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
+
+
+class DefaultAttachmentRuleCreateForm(FileFormMixin, DefaultAttachmentRuleForm):
+    documents = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}), required=False)
+
+    class Meta(DefaultAttachmentRuleForm.Meta):
+        fields = DefaultAttachmentRuleForm.Meta.fields + ('documents',)

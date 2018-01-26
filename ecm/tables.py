@@ -17,6 +17,6 @@ class DefaulAttachmentRuleTable(tables.Table):
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existe regra de anexo padrão cadastrada."
         row_attrs = {
-            'data_href': lambda record: reverse_lazy('defaultattachmentrule_update', args=(record.pk,))
+            'data_href': lambda record: reverse_lazy('ecm:defaultattachmentrule_update', args=(record.pk,))
         }
         order_by = 'name'
