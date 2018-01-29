@@ -60,7 +60,7 @@ class AddressETL(GenericETL):
     has_status = True
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         """
         Metodo responsavel por importar os dados referente aos enderecos das pessoas
         cadastradas no advwin para o EZL

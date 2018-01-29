@@ -2,12 +2,12 @@ from django import forms
 from django.core.exceptions import FieldDoesNotExist
 from django.forms import ModelForm
 from core.fields import CustomBooleanField
-from core.models import Person, State, Address
+from core.models import Person, State, Address, Office
 from financial.models import CostCenter
 from core.widgets import MDModelSelect2
 from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict,
                      LawSuit, CourtDivision, Organ)
-from core.utils import filter_valid_choice_form
+from core.utils import filter_valid_choice_form, get_office_field
 from dal import autocomplete
 from localflavor.br.forms import BRCNPJField
 from material import Layout, Row
@@ -49,7 +49,7 @@ class BaseForm(ModelForm):
 class TypeMovementForm(BaseForm):
     class Meta:
         model = TypeMovement
-        fields = ['name', 'is_active']
+        fields = ['office', 'name', 'is_active']
 
     name = forms.CharField(
         max_length=255,
@@ -57,11 +57,16 @@ class TypeMovementForm(BaseForm):
         error_messages={'required': 'O campo de descrição é obrigatório'}
     )
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
+
 
 class InstanceForm(BaseForm):
     class Meta:
         model = Instance
-        fields = ['name', 'is_active']
+        fields = ['office', 'name', 'is_active']
 
     name = forms.CharField(
         label=u"Nome da Instância",
@@ -69,11 +74,16 @@ class InstanceForm(BaseForm):
 
     )
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
+
 
 class MovementForm(BaseForm):
     class Meta:
         model = Movement
-        fields = ['type_movement', 'is_active']
+        fields = ['office', 'type_movement', 'is_active']
 
     type_movement = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(TypeMovement.objects.filter(is_active=True)).order_by(
@@ -81,18 +91,25 @@ class MovementForm(BaseForm):
         empty_label=u"Selecione...",
     )
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
+
 
 class FolderForm(BaseForm):
     class Meta:
         model = Folder
-        fields = ['folder_number', 'person_customer', 'cost_center', 'is_active']
+        fields = ['office', 'folder_number', 'person_customer', 'cost_center', 'is_active']
 
     folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
 
     person_customer = forms.ModelChoiceField(
         queryset=Person.objects.filter(is_active=True, is_customer=True),
         empty_label=u"Selecione...",
-        widget=MDModelSelect2(url='client_autocomplete', attrs={'class': 'form-control'})
+        widget=MDModelSelect2(url='client_autocomplete',
+                              forward=['office'],
+                              attrs={'class': 'form-control'})
     )
 
     cost_center = forms.ModelChoiceField(
@@ -103,17 +120,22 @@ class FolderForm(BaseForm):
     )
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super(FolderForm, self).__init__(*args, **kwargs)
-        self.order_fields(['folder_number', 'person_customer', 'is_active'])
+        self.fields['office'] = get_office_field(self.request)
+        self.order_fields(['office', 'folder_number', 'person_customer', 'is_active'])
 
         if not self.instance.pk:
             # Since the pk is set this is not a new instance
             self.fields.pop('folder_number')
 
 
+
 class LawSuitForm(BaseForm):
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super(LawSuitForm, self).__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
 
         def get_option(o):
             return '{}/{}'.format(o.court_district.name, o.legal_name)
@@ -123,7 +145,7 @@ class LawSuitForm(BaseForm):
 
     class Meta:
         model = LawSuit
-        fields = ['law_suit_number', 'organ', 'instance', 'court_division',
+        fields = ['office', 'law_suit_number', 'organ', 'instance', 'court_division',
                   'person_lawyer', 'opposing_party',
                   'is_current_instance', 'is_active', 'court_district']
 
@@ -169,9 +191,12 @@ class LawSuitForm(BaseForm):
 class CourtDivisionForm(BaseForm):
     class Meta:
         model = CourtDivision
-        fields = ['name', 'is_active']
+        fields = ['office', 'name', 'is_active']
 
-        # legacy_code = forms.CharField(max_length=255, required=False)
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
 
 
 class CourtDistrictForm(BaseForm):
@@ -187,18 +212,21 @@ class CourtDistrictForm(BaseForm):
 
 class OrganForm(BaseModelForm):
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super(OrganForm, self).__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
         for field_name, field in self.fields.items():
             if field_name is 'cnpj':
                 field.initial = self.instance.cpf_cnpj
     layout = Layout(
+        Row('office'),
         Row('legal_name', 'cpf_cnpj'),
         Row('court_district', 'is_active')
     )
 
     class Meta:
         model = Organ
-        fields = ['legal_name', 'cpf_cnpj', 'court_district', 'is_active']
+        fields = ['office', 'legal_name', 'cpf_cnpj', 'court_district', 'is_active']
 
     def clean(self):
         cleaned_data = super(OrganForm, self).clean()

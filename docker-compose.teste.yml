@@ -49,6 +49,9 @@ services:
       ENV: development
 
   tasks:
+    environment:
+      ENV: development
+      PYTHONPATH: /app
     depends_on:
       - builder
       - db
