@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 import json
 from chat.models import UserByChat
 from django.core.cache import cache
+from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -36,6 +37,7 @@ from chat.models import Chat
 from survey.models import SurveyPermissions
 from financial.tables import ServicePriceTableTaskTable
 from core.utils import get_office_session
+from ecm.models import DefaultAttachmentRule, Attachment
 
 
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -321,6 +323,25 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             servicepricetable = ServicePriceTable.objects.get(id=servicepricetable_id)
             form.instance.person_executed_by = (servicepricetable.correspondent
                                                 if servicepricetable.correspondent else None)
+            import pdb;pdb.set_trace()
+            attachmentrules = DefaultAttachmentRule.objects.filter(
+                Q(office=get_office_session(self.request)),
+                Q(Q(type_task=form.instance.type_task) | Q(type_task=None)),
+                Q(Q(person_customer=form.instance.client) | Q(person_customer=None)),
+                Q(Q(state=form.instance.court_district.state) | Q(state=None)),
+                Q(Q(court_district=form.instance.court_district) | Q(court_district=None)),
+                Q(Q(city=(form.instance.movement.law_suit.organ.address_set.first().city if
+                          form.instance.movement.law_suit.organ.address_set.first() else None)) | Q(city=None)))
+
+            for rule in attachmentrules:
+                attachments = Attachment.objects.filter(model_name='ecm.defaultattachmentrule').filter(object_id=rule.id)
+                for attachment in attachments:
+                    fs = FileSystemStorage()
+                    filename = fs.save(attachment.file.name, attachment.file)
+                    obj = Attachment(model_name='task.task', object_id=form.instance.id,
+                                     file=filename, create_user_id=self.request.user.id)
+                    obj.save()
+
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
