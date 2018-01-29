@@ -11,6 +11,7 @@ var setBadgeItem = function (items) {
     })
 };
 
+
 var chatReadMessage = function (chat_id, csrf_token) {
     $.ajax({
         type: 'POST',

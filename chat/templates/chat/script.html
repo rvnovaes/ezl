@@ -33,26 +33,12 @@
 
     {# Ao chegar uma mensagem#}
     socket.onmessage = function (e) {
-        $('.chat.panel-body').animate({scrollTop: 9999}, 1000);
         data = JSON.parse(e.data);
-        messagePosition = 'left';
-        imgColor = '55C1E7';
-        timePosition = 'pull-right';
-        var userMessage = data.user.substr(0, 2).toUpperCase();
-        if ('{{user}}' === data.user) {
-            messagePosition = 'right';
-            timePosition = '';
-            imgColor = "A52A2A"
-        }
-        elementUl = $('[data-id=' + data.chat + ']');
-
         if ('{{user}}' === data.user) {
             data.odd =  "odd bounceInRight animated";
-            console.log('>>>>', data);
             $.tmpl(msgli, data).appendTo("#messageList")
         }else {
             data.odd =  "bounceInLeft animated";
-            console.log('>>>>', data);
             $.tmpl(msgli, data).appendTo("#messageList")
         }
         var bottomCoord = $('#messageList')[0].scrollHeight;

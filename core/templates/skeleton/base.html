@@ -39,7 +39,7 @@
     <!-- ============================================================== -->
     <!-- Wrapper -->
     <!-- ============================================================== -->
-    <div id="wrapper">
+    <div id="wrapper" >
         <!-- Topbar header - style you can find in pages.scss -->
         {% include 'skeleton/includes/navbar.html' %}
         <!-- End Top Navigation -->
@@ -51,7 +51,7 @@
         <!-- ============================================================== -->
         <!-- Page Content -->
         <!-- ============================================================== -->
-        <div id="page-wrapper">
+        <div id="page-wrapper" style="min-height: 551px;">
             <div class="container-fluid">
                 <!-- Block Containner -->
                 {% block containner %}
@@ -76,7 +76,6 @@
                         </div>
                     {% endblock page_title %}
                     <!-- End Block Page Title -->
-                    <div class="row">
                         <!-- Block Content  -->
                         {% block content %}
                             <div class="col-md-12">
@@ -85,7 +84,6 @@
                             </div>
                         {% endblock %}
                         <!-- End Block Content  -->
-                    </div>
                 {% endblock containner %}
                 <!-- End Block Containner  -->
 

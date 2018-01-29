@@ -1,100 +1,146 @@
-{% extends 'inicial.html' %}
+{% extends 'skeleton/base.html' %}
 {% load staticfiles %}
-{% block head %}
-    {{ block.super }}
-    {% block css_head %}
-        {{ block.super }}
-        <link rel="stylesheet" href="{% static "chat/css/chat.css" %}">
-    {% endblock %}
-{% endblock %}
+
+
 {% block content %}
-    <div class="app">
-        <div class="row app-one">
-            <div class="col-sm-4 side">
-                <div class="side-one">
-                    <!-- Heading -->
-                    <div class="row heading">
-                        <div class="col-sm-3 col-xs-3 heading-avatar">
-                            <div class="heading-avatar-icon">
-                                <img src="https://placehold.it/50/A52A2A/fff&text={{ user|upper|slice:":2" }}"
-                                     alt="User Avatar" class="img-circle"/>
-                            </div>
-                        </div>
-{#                        <div class="col-sm-1 col-xs-1  heading-dot  pull-right">#}
-{#                            <i class="fa fa-ellipsis-v fa-2x  pull-right" aria-hidden="true"></i>#}
-{#                        </div>#}
-{#                        <div class="col-sm-2 col-xs-2 heading-compose  pull-right">#}
-{#                            <i class="fa fa-comments fa-2x  pull-right" aria-hidden="true"></i>#}
-{#                        </div>#}
-                    </div>
-                    <!-- Heading End -->
+    <div class="chat-main-box">
+        <!-- .chat-left-panel -->
+        <div class="chat-left-aside">
+            <div class="open-panel"><i class="ti-angle-right"></i></div>
+            <div class="chat-left-inner">
+                <div class="form-material">
+                    <input class="form-control p-20" type="text" placeholder="Search Contact">
+                </div>
+                <ul class="chatonline style-none ">
+                    {% for chat in chats|dictsortreversed:'alter_date' %}
+                        {% if chat.messages.all|length > 0 %}
+                        <li>
+                            <a href="javascript:chatGetMessages('{{ chat.pk }}')" class="mytooltip">
+                                <span class="tooltip-content5"><span class="tooltip-text3"><span class="tooltip-inner2">Howdy, Ben!<br> There are 13 unread messages in your inbox.</span></span></span>
+                                <div class="circle circle-sm bg-info di">OS</div>
+                                <span>{{ chat.title }}</span>
+                                <p class="text-muted pull-right"><i class="fa fa-clock-o"></i> {{ chat.alter_date|time }}</p>
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
 
-                    <!-- SearchBox -->
-{#                Necessário implementar#}
-{#                    <div class="row searchBox">#}
-{#                        <div class="col-sm-12 searchBox-inner">#}
-{#                            <div class="form-group has-feedback">#}
-{#                                <input id="searchText" type="text" class="form-control"#}
-{#                                       name="searchText" placeholder="Pesquisar...">#}
-{#                                <span class="glyphicon glyphicon-search form-control-feedback"></span>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-
-                    <!-- Search Box End -->
-                    <!-- sideBar -->
-                    <div class="row sideBar">
-                        {% for chat in chats|dictsortreversed:'alter_date' %}
-                            {% if chat.messages.all|length > 0 %}
-                                <div class="row sideBar-body"
-                                     onclick="setBoxMessage('chat-{{ chat.pk }}', '{{ chat.label }}', '{{ chat.pk }}')">
-                                    <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                                        <div class="avatar-icon">
-                                            <img src="https://placehold.it/50/55C1E7/fff&text=OS"
-                                                 alt="User Avatar" class="img-circle"/></div>
-                                    </div>
-                                    <div class="col-sm-9 col-xs-9 sideBar-main" data-balloon-length="fit" data-balloon="{{ chat.description|default_if_none:'' }}"
-                                       data-balloon-pos="botton">
-                                        <div class="row">
-                                            <div class="col-sm-8 col-xs-8 sideBar-name">
-                                                <span class="name-meta" >{{ chat.title }}</span>
-                                                <br/>
-                                            </div>
-                                            <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                                                <span class="time-meta pull-right">{{ chat.alter_date|time }}</span>
-                                                <span class="chat-badge-item badge" badge-id="{{ chat.pk }}"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                    <!-- Sidebar End -->
+                    <li class="p-20"></li>
+                </ul>
+            </div>
+        </div>
+        <!-- .chat-left-panel -->
+        <!-- .chat-right-panel -->
+        <div class="chat-right-aside">
+            <div class="chat-main-header">
+                <div class="p-20 b-b" id="chatMessageTitle">
+                    <h3 class="box-title">Chat Message</h3>
+                    <p class="box-title">Chat Message</p>
                 </div>
             </div>
-            {% for chat in chats %}
-                {% if chat.messages.all|length > 0 %}
-                    {% include 'chat/chat_detail.html' %}
-                {% endif %}
-            {% endfor %}
+            <div class="chat-box">
+                <ul class="chat-list slimscroll p-t-30" id="messageList">
+                </ul>
+                <div class="row send-chat-box">
+                    <div class="col-sm-12">
+                        <input class="form-control" placeholder="Digite sua mensagem" id="inputMsg"/>
+                        <div class="custom-send"><a href="javacript:void(0)" class="cst-icon" data-toggle="tooltip" title="Insert Emojis"><i class="ti-face-smile"></i></a> <a href="javacript:void(0)" class="cst-icon" data-toggle="tooltip" title="File Attachment"><i class="fa fa-paperclip"></i></a>
+                            <button class="btn btn-danger btn-rounded" type="button">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- App One End -->
+        <!-- .chat-right-panel -->
     </div>
-{% endblock %}
-{% block javascript %}
-    <script>
-        $(".heading-compose").click(function () {
-            $(".side-two").css({
-                "left": "0"
-            });
-        });
+    </div>
 
-        $(".newMessage-back").click(function () {
-            $(".side-two").css({
-                "left": "-100%"
-            });
-        });
+{% endblock %}
+
+
+{% block extra_scripts %}
+    <script src="{% static 'skeleton/js/chat.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+
+    <script>
+        var tmplMsgLi = '<li class="${odd}">\n' +
+            '  <div class="chat-image">\n' +
+            '    <div class="circle circle-sm bg-info di"> <i class="fa fa-user"></i></div>\n' +
+            '  </div>\n' +
+            '  <div class="chat-body">\n' +
+            '    <div class="chat-text">\n' +
+            '        <h4>${user}</h4>\n' +
+            '        <p>${message}</p> <b>${message_create_date}</b> ' +
+            '    </div>\n' +
+            '  </div>\n' +
+            '</li>\n';
+
+        var tmplChatMessageTitle = '<h4 class="box-title"><a href="${back_url}">${title}</a></h4>\n' +
+                                   '<p>${description}</p>';
+
+        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+        socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + label);
+        {# Ao chegar uma mensagem#}
+        socket.onmessage = function (e) {
+            data = JSON.parse(e.data);
+            if ('{{user}}' === data.user) {
+                data.odd =  "odd bounceInRight animated";
+                $.tmpl(tmplMsgLi, data).appendTo("#messageList")
+            }else {
+                data.odd =  "bounceInLeft animated";
+                $.tmpl(tmplMsgLi, data).appendTo("#messageList")
+            }
+            var bottomCoord = $('#messageList')[0].scrollHeight;
+            $('#messageList').slimScroll({scrollTo: bottomCoord});
+        };
+        socket.onopen = function (data) {
+            socket.send(data);
+        };
+        function sendMessage(chatId) {
+            var el = $('#inputMsg');
+            if (el.val().trim()) {
+                data = JSON.stringify({
+                    'text': el.val(),
+                    'chat': chatId,
+                    'label': 'label'
+                });
+                el.val(null);
+                socket.onopen(data)
+            }
+        }
+
+        function chatGetMessages(chat_id, csrf_token) {
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'chat_get_message' %}',
+                data: {
+                    chat_id: chat_id
+                },
+                success: function (response) {
+                    $("#messageList").html('');
+                    $("#chatMessageTitle").html('');
+                    console.log('***', response.chat);
+                    $.tmpl(tmplChatMessageTitle, response.chat).appendTo($("#chatMessageTitle"));
+                    $.each(response.messages, function( index, value ) {
+                        if ('{{user}}' === value.user) {
+                            value.odd =  "odd bounceInRight animated";
+                            $.tmpl(tmplMsgLi, value).appendTo("#messageList");
+                        }else {
+                            value.odd =  "bounceInLeft animated";
+                            $.tmpl(tmplMsgLi, value).appendTo("#messageList");
+                        }
+
+                    });
+                    var bottomCoord = $('#messageList')[0].scrollHeight;
+                    $('#messageList').slimScroll({scrollTo: bottomCoord});
+
+                },
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                },
+                dataType: 'json'
+            })
+        };
 
         socket = null;
 
@@ -132,21 +178,21 @@
                 chatContent.append(blockMessage);
             };
 
-            sendMessage = function () {
-                setLastMessage();
-                var el = $("#" + box_id).find('#comment');
-                if (el.val().trim()) {
-                    var data = JSON.stringify({
-                        'text': el.val(),
-                        'chat': chat_id,
-                        'label': chat_label
-                    });
-                    socket.onopen(data);
-                    el.val(null);
-                }else {
-                    el.val(null)
-                }
-            };
+{#            sendMessage = function () {#}
+{#                setLastMessage();#}
+{#                var el = $("#" + box_id).find('#comment');#}
+{#                if (el.val().trim()) {#}
+{#                    var data = JSON.stringify({#}
+{#                        'text': el.val(),#}
+{#                        'chat': chat_id,#}
+{#                        'label': chat_label#}
+{#                    });#}
+{#                    socket.onopen(data);#}
+{#                    el.val(null);#}
+{#                }else {#}
+{#                    el.val(null)#}
+{#                }#}
+{#            };#}
 
             $.fn.enterKey = function (fnc) {
                 return this.each(function () {

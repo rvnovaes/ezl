@@ -7,7 +7,6 @@
     {% include 'chat/chat-right-sidebar.html' %}
 {% endblock %}
 {% block content %}
-    ***{{ object.person_distributed_by }}
     <form id="task_detail" action="" method="post">{% csrf_token %}
         {% include 'questionnaire/generic_survey.html' with generic_survey=form.instance.type_task.survey_type %}
         {% include 'task/task_detail/tab.html' %}
