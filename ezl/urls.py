@@ -25,7 +25,6 @@ urlpatterns = [
     url(r'^providencias/', include('task.urls'), name='task'),
     url(r'^dashboard/$', login_required(DashboardView.as_view()), name='dashboard'),
     url(r'^chat/', include('chat.urls'), name='chat'),
-    url(r'^select2/', include('select2.urls')),
 
     url(r'^dashboard/(?P<pk>[0-9]+)/$',
         login_required(TaskDetailView.as_view()),
