@@ -133,6 +133,18 @@
                         <form role="search" class="app-search hidden-sm hidden-xs m-r-10">
                             <input type="text" placeholder="Pesquisar..." class="form-control"> <a href=""><i class="fa fa-search"></i></a> </form>
                     </li>
+                    <li>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                          aria-haspopup="true" aria-expanded="false">
+                          <span id="current_office"></span>
+                          <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                        {% for office in request.user.person.offices.all %}
+                           <li onclick="updateSession('current_office', '{{office.pk}}', '{{csrf_token}}');"><a href="#">{{office.name}}</a></li>
+                        {% endfor %}
+                        </ul>
+                    </li>
                     <li class="dropdown">
                         <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#">
                             <img src="{% static 'skeleton/no-profile.jpeg' %}" alt="user-img" width="36" class="img-circle">
