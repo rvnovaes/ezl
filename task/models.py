@@ -157,6 +157,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
         verbose_name = 'Providência'
         verbose_name_plural = 'Providências'
         permissions = [(i.name, i.value) for i in Permissions]
+        unique_together = ('task_number', 'office')
 
     @property
     def status(self):

@@ -198,6 +198,12 @@ class DashboardView(MultiTableMixin, TemplateView):
             else:
                 data = DashboardViewModel.objects.filter(office_id=0).filter(dynamic_query)
 
+        q = ~Q(name__in=['Correspondente', 'Solicitante'])
+        if person.auth_user.groups.filter(q).exists():
+            data = data | DashboardViewModel.objects.filter(
+                task_status__in=[TaskStatus.REQUESTED, TaskStatus.REFUSED_SERVICE,
+                                 TaskStatus.ACCEPTED_SERVICE, TaskStatus.ERROR], office=office_session)
+
         tables = self.get_list_tables(data, person, office=office_session) if person else []
         if not dynamic_query:
             return tables
@@ -405,6 +411,20 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         new_task.office = office_correspondent
         new_task.task_status = TaskStatus.REQUESTED
         new_task.save()
+
+    def change_state_child_task(self, task):
+        pass
+
+    # Partindo da OS filha pro pai
+
+    regras = {
+        'solicitada': {'pai': 'DELEGADA/ABERTO'},
+        'Aceita/Service': {'pai': 'DELEGADA/ABERTO'},
+        'Recusada/Service': {'pai': 'Solicitada'},
+        'Delegada/Aberto': {'pai':
+
+                            '                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               '}
+    }
 
 
 class EcmCreateView(LoginRequiredMixin, CreateView):
