@@ -114,7 +114,6 @@ class DefaultAttachmentRuleCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('ecm:defaultattachmentrule_list')
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'ecm:defaultattachmentrule_list'
-    template_name_suffix = '_create_form'
 
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
