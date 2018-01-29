@@ -1,0 +1,47 @@
+{% load ecm_tags %}
+<br><br>
+<div class="container-fluid" style="margin-top: 20px; display: flow-root">
+    <div class="panel panel-primary">
+        <div class="panel-heading " data-toggle="collapse" data-target="#attachment" id="header-attachment">
+            <div class="panel-title"><i class="material-icons">attach_file</i>
+                <b>Anexos</b>
+                <i class="material-icons" style="float: right;" id="down">arrow_drop_down</i>
+                <i class="material-icons" style="float: right; display: none;" id="up">arrow_drop_up</i>
+            </div>
+        </div>
+        <div id="attachment" class="panel-collapse collapse">
+            <div class="panel-body form-group is-focused">
+                <a href="#attachment-modal" data-toggle="modal"
+                   class="btn btn-sm btn-primary btn-raised js-upload-files"
+                   style="color: #fff !important;">
+                    <i class="material-icons">cloud_upload</i> &nbsp; Enviar Arquivo
+                </a>
+                <div class="row" id="render-attachments">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL ANEXO -->
+<div class="modal" id="attachment-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <a href="" class="close" data-dismiss="modal" aria-hidden="true">×</a>
+                <h4 class="modal-title">Anexar Arquivo</h4>
+            </div>
+            <div class="modal-body">
+                <!-- Fine Uploader DOM Element
+                ====================================================================== -->
+                <div id="fine-uploader-manual-trigger"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="trigger-upload" class="btn btn-primary">
+                <i class="icon-upload icon-white"></i> Enviar
+            </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Fechar</button>
+            </div>
+
+        </div>
+    </div>
+</div>

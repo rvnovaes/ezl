@@ -7,7 +7,7 @@ from django.utils import timezone
 from django_file_form.forms import FileFormMixin, MultipleUploadedFileField
 
 from core.models import Person
-from core.utils import filter_valid_choice_form
+from core.utils import filter_valid_choice_form, get_office_field
 from core.widgets import MDDateTimepicker, MDDatePicker
 from lawsuit.forms import BaseForm
 from task.models import Task, TypeTask
@@ -20,7 +20,8 @@ class TaskForm(BaseForm):
 
     class Meta:
         model = Task
-        fields = ['task_number', 'type_task',
+        fields = ['office',
+                  'task_number', 'type_task',
                   'person_executed_by', 'person_asked_by', 'person_distributed_by',
                   'final_deadline_date',
                   'delegation_date', 'acceptance_date', 'refused_date', 'execution_date',
@@ -94,6 +95,11 @@ class TaskForm(BaseForm):
                                       attrs={'class': 'form-control', 'rows': '5',
                                              'id': 'details_id'}))
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
+
 
 class TaskCreateForm(FileFormMixin, TaskForm):
     documents = MultipleUploadedFileField(required=False)
@@ -129,8 +135,39 @@ class TaskDetailForm(ModelForm):
         )
     )
 
+    amount = forms.CharField(
+        required=False,
+        label='Valor:',
+        widget=forms.TextInput(attrs={'mask': 'money'})
+    )
+
+    servicepricetable_id = forms.CharField(required=False,
+                                           widget=forms.HiddenInput())
+
+    def clean_servicepricetable_id(self):
+        servicepricetable_id = self.cleaned_data['servicepricetable_id']
+        amount = (self.cleaned_data['amount'] if self.cleaned_data['amount'] else 0)
+        if amount and amount >= 0.0 and not servicepricetable_id:
+            raise forms.ValidationError("Favor Selecionar um correspondente")
+        return servicepricetable_id
+
+    def clean_amount(self):
+        amount = (self.cleaned_data['amount'] if self.cleaned_data['amount'] else str(0))
+        amount = amount.replace('.', '')
+        amount = amount.replace(',', '.')
+        return float(amount)
+
+    def clean(self):
+        form_data = self.cleaned_data
+        return form_data
+
 
 class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
-        fields = ['name', 'survey_type', 'is_active']
+        fields = ['office', 'name', 'survey', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)

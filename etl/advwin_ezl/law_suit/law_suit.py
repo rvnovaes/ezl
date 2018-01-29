@@ -3,7 +3,7 @@ from core.utils import LegacySystem
 from lawsuit.models import Organ
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory, INVALID_ORGAN
-from etl.utils import get_users_to_import
+from etl.utils import get_clients_to_import
 from lawsuit.models import LawSuit, Folder, Instance, CourtDistrict, CourtDivision
 from etl.utils import get_message_log_default, save_error_log
 
@@ -57,9 +57,10 @@ class LawsuitETL(GenericETL):
                           (p.Status = 'Ativa' OR p.Status = 'Especial') AND
                           cm.UsarOS = 1 AND
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
-                          ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                          (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          AND --a.Advogado IN ('{}') AND 
+                          a.SubStatus = 10 AND
+                          p.Cliente IN ('{cliente}') AND 
+                          a.Status = '0' -- STATUS ATIVO
+                          AND 
                           ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
                            (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
                           ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
@@ -73,10 +74,10 @@ class LawsuitETL(GenericETL):
 
     @property
     def import_query(self):
-        return self._import_query.format("','".join(get_users_to_import()))
+        return self._import_query.format(cliente="','".join(get_clients_to_import()))
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         for row in rows:
             print(rows_count)
             rows_count -= 1
@@ -128,6 +129,7 @@ class LawsuitETL(GenericETL):
                     lawsuit.law_suit_number = law_suit_number
                     lawsuit.is_active = True
                     lawsuit.opposing_party = opposing_party
+                    lawsuit.office = default_office
                     # use update_fields to specify which fields to save
                     # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
                     lawsuit.save(
@@ -143,7 +145,8 @@ class LawsuitETL(GenericETL):
                             'alter_user',
                             'alter_date',
                             'is_current_instance',
-                            'opposing_party']
+                            'opposing_party',
+                            'office']
                     )
                 else:
                     self.model.objects.create(
@@ -160,7 +163,8 @@ class LawsuitETL(GenericETL):
                         is_current_instance=is_current_instance,
                         legacy_code=legacy_code,
                         system_prefix=LegacySystem.ADVWIN.value,
-                        opposing_party=opposing_party)
+                        opposing_party=opposing_party,
+                        office=default_office)
                 self.debug_logger.debug(
                     "LawSuit,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
                     str(folder.id), str(person_lawyer.id),

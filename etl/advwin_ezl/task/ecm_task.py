@@ -2,7 +2,8 @@ from django.db.utils import IntegrityError
 
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
-from etl.utils import ecm_path_advwin2ezl, get_users_to_import, get_message_log_default, save_error_log
+from etl.utils import ecm_path_advwin2ezl, get_message_log_default, save_error_log, \
+    get_clients_to_import
 from task.models import Ecm, Task
 
 
@@ -20,14 +21,13 @@ class EcmEtl(GenericETL):
                       INNER JOIN Jurid_CodMov AS cm
                         ON A.CodMov = cm.Codigo
                     WHERE G.Tabela_OR = 'Agenda'
-                          AND (P.Status = 'Ativa' OR P.Status = 'Especial')
                           AND G.Link <> ''
                           AND G.Link IS NOT NULL
                           AND cm.UsarOS = 1
                           AND (P.Status = 'Ativa' OR P.Status = 'Especial' OR p.Dt_Saida IS NULL)
-                          AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          --AND a.Advogado IN ('{person_legacy_code}')
+                          AND a.SubStatus = 10 AND
+                          p.Cliente IN ('{cliente}') AND 
+                          a.Status = '0' -- STATUS ATIVO
                     UNION
                     SELECT DISTINCT
                       G.ID_doc AS ecm_legacy_code,
@@ -47,19 +47,19 @@ class EcmEtl(GenericETL):
                           AND G.Link <> ''
                           AND G.Link IS NOT NULL
                           AND cm.UsarOS = 1
-                          AND ((a.prazo_lido = 0 AND a.SubStatus = 30) OR
-                               (a.SubStatus = 80)) AND a.Status = '0' -- STATUS ATIVO
-                          --AND a.Advogado IN ('{person_legacy_code}')
+                          AND a.SubStatus = 10 AND
+                          p.Cliente IN ('{cliente}') AND 
+                          a.Status = '0' -- STATUS ATIVO
                           """
     model = Ecm
     field_check = 'ecm_legacy_code'
 
     @property
     def import_query(self):
-        return self._import_query.format(person_legacy_code = "','".join(get_users_to_import()))
+        return self._import_query.format(cliente="','".join(get_clients_to_import()))
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         """
         A importacao do ECM aramazena apenas o caminho com o nome do arquivo.
         Para que as duas aplicacacoes tenham acesso ao arquivo, e necessario que

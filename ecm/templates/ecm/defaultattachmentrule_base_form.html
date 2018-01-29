@@ -1,0 +1,69 @@
+{% load material_form %}
+{% load staticfiles %}
+
+<div class="valign-wrapper layout-row row">
+    <div class="select-field col s12 m12" id="{{ form.office.id_for_label }}_container">
+        <label for="{{ form.office.id_for_label }}">{{ form.office.label }}</label>
+        {{ form.office }}
+    </div>
+</div>
+<div class="valign-wrapper layout-row row">
+    <div class="select-field col s12 m6 required" id="{{ form.name.id_for_label }}_container">
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        {{ form.name }}
+    </div>
+    <div class="select-field col s12 m6 required" id="{{ form.description.id_for_label }}_container">
+        <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+        {{ form.description }}
+    </div>
+</div>
+<div class="valign-wrapper layout-row row">
+    <div class="select-field col s12 m6" id="{{ form.type_task.id_for_label }}_container">
+        <label for="{{ form.type_task.id_for_label }}">{{ form.type_task.label }}</label>
+        {{ form.type_task }}
+    </div>
+    <div class="col s12 m6">
+        <label for="{{ form.person_customer.id_for_label }}" style="position: relative;"
+               id="select2_label">{{ form.person_customer.label }}</label>
+        {{ form.person_customer }}
+    </div>
+</div>
+</div>
+<div class="valign-wrapper layout-row row">
+    <div class="select-field col s12 m4" id="{{ form.state.id_for_label }}_container">
+        <label for="{{ form.state.id_for_label }}">{{ form.state.label }}</label>
+        {{ form.state }}
+    </div>
+    <div class="col s12 m4">
+        <label for="{{ form.court_district.id_for_label }}" style="position: relative;"
+               id="select2_label">{{ form.court_district.label }}</label>
+        {{ form.court_district }}
+    </div>
+    <div class="col s12 m4">
+        <label for="{{ form.city.id_for_label }}" style="position: relative;"
+               id="select2_label">{{ form.city.label }}</label>
+        {{ form.city }}
+    </div>
+</div>
+{% if form.documents %}
+<div class="clearfix">&nbsp;</div>
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h1 class="panel-title">Anexos</h1>
+    </div>
+    <div class="panel-body">
+        <fieldset>
+
+            {{ form.documents }}
+
+            {% include 'django_file_form/upload_template.html' %}
+
+        </fieldset>
+    </div>
+</div>
+{% endif %}
+
+{% block extrajs %}
+    {{ form.media }}
+    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
+{% endblock %}

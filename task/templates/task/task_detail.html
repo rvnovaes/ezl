@@ -72,13 +72,15 @@
 {% block contente %}
             <div class="col-md-12">
                 <form id="task_detail" action="" method="post">{% csrf_token %}
-                    {% include 'questionnaire/generic_survey.html' with generic_survey=form.instance.type_task.survey_type %}
+                    {% include 'questionnaire/generic_survey.html' %}
 
                     <script type="text/javascript">
 
                         $(function () {
                             $("input[name=execution_date]").attr({'required': true,
                                 'placeholder': 'Data de Cumprimento'});
+                            $("input[name=amount]").attr({'required': true,
+                                                  'placeholder': 'Valor'});
                         });
 
                         //Função para tratar erro ao enviar formulário com justificativa de cumprimento em branco
@@ -90,7 +92,23 @@
                             });
                         }
 
+                function checkDelegated() {
+                    $('#task_detail').submit(function (e) {
+                        if ($('input[name=servicepricetable_id]').val() == "") {
+                            e.preventDefault();
+                            showToast('error', 'Favor selecionar um correspondente', '', 5000, true);
+                        }
+                        if ($('input[name=amount]').val() == "") {
+                            e.preventDefault();
+                            showToast('error', 'Favor selecionar um valor para a OS', '', 5000, true);
+                        }
+                    });
+                }
+
                         var nextState = {
+                    ACCEPTED_SERVICE: {text: "aceitar", icon: "help_outline"},
+                    REFUSED_SERVICE: {text: "recusar", icon: "help_outline"},
+                    OPEN: {text: "delegar", icon: "help_outline"},
                             ACCEPTED: {text: "aceitar", icon: "assignment_ind"},
                             REFUSED: {text: "recusar", icon: "assignment"},
                             DELEGATED: {text: "delegar", icon: "assignment_returned"},
@@ -132,13 +150,26 @@
 
                             var notes = $('textarea[id=notes_id]');
                             notes.removeAttr('required');
-                            ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN'].forEach(function (status) {
+                            ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN', 'REFUSED_SERVICE'].forEach(function (status) {
                                 if (task_status === status) {
                                     notes.attr('required', true).change(function () {
                                         notes.val(notes.val().trim())
                                     });
                                 }
                             });
+
+                            {# Apenas estes status devem possuir amount como required, alem de nao poder 0 #}
+                            var amount = $('input[id=id_amount]');
+                            var servicepricetable_id = $('input[name=servicepricetable_id]');
+                            amount.removeAttr('required');
+                            ['OPEN'].forEach(function (status) {
+                                console.log(value.id)
+                                if (task_status === status) {
+                                    {#amount.attr('required', true).change()#}
+                                    servicepricetable_id.attr('required', true).change()
+                                }
+                            });
+
                             return true;
                         }
                     </script>
@@ -285,6 +316,23 @@
                                 </div>
                             </div>
                             <div class="form-group text-center">
+                        {% if perms.core.can_distribute_tasks %}
+                            <button type="button" id="ACCEPTED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                               class="btn btn-sm btn-raised ACCEPTED_SERVICE {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
+                                <i class="material-icons left" style="color: white;">thumb_up</i>
+                                Aceitar Solicitação
+                            </button>
+                            <a id="REFUSED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                               class="btn btn-sm btn-raised REFUSED_SERVICE {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}"><i
+                                    class="material-icons left" style="color: white;">thumb_down</i>
+                                Recusar Solicitação
+                            </a>
+                            <button type="button" id="OPEN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                               class="btn btn-sm btn-raised OPEN {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
+                                <i class="material-icons left" style="color: white;">assignment</i>
+                                Delegar
+                            </button>
+                        {% endif %}
                                 {% if perms.core.view_delegated_tasks %}
                                     <button type="button" id="ACCEPTED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                                             class="btn btn-sm btn-raised ACCEPTED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
@@ -485,6 +533,20 @@
                                         <b> Deseja <span id="actionText">aceitar</span> o prazo? </b></h4>
                                 </div>
                                 <div class="modal-body">
+                            {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
+                                {{ form.servicepricetable_id }}
+                                <div class="form-group" style="margin: auto">
+                                    <label>Tipo de Serviço: </label>
+                                    {{ form.instance.type_task }}
+                                </div>
+                                <div class="table-responsive" style="margin: auto">
+                                    {% render_table correspondents_table %}
+                                </div>
+                                <div class="form-group" style="margin: auto">
+                                    <label>{{ form.amount.label }}</label>
+                                    {{ form.amount }}
+                                </div>
+                            {% endif %}
                                     <div class="form-group" style="margin: auto">
                                         <label> {{ form.notes.label }}</label>
                                         {{ form.notes }}
@@ -498,7 +560,7 @@
                                             Cancelar
                                         </button>
                                         {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                                            {% if form.instance.type_task.survey_type %}
+                                            {% if form.instance.type_task.survey %}
                                                 <button id="actionButton"
                                                         type="submit"
                                                         onclick="beforeSubmit()"
@@ -513,6 +575,12 @@
                                                 </button>
                                             {% endif %}
 
+                                {% elif form.instance.status.name == 'ACCEPTED_SERVICE' %}
+                                    <button id="actionButton"
+                                            style="width: 95px!important;"
+                                            onclick="checkDelegated()"
+                                            type="submit" class="btn btn-sm btn-raised btn-primary">Sim
+                                    </button>
                                         {% else %}
                                             <button id="actionButton"
                                                     style="width: 95px!important;"
@@ -666,6 +734,23 @@
             });
             return true;
         }
+    </script>
+    <script type="text/javascript">
+        $("#correspondents-table tbody tr").click(function(){
+            id = $(this).data('id');
+            amount = $(this).data('value');
+            $('input[name=servicepricetable_id]').val(id);
+            $('input[name=amount]').val(parseFloat(amount));
+            $(this).addClass("OPEN");
+            $(this).siblings().removeClass("OPEN");
+            $('input[name=amount]').focus();
+        });
+
+        $('input[id=id_amount]').keypress(function(e) {
+            if(e.which == 13) {
+              e.preventDefault();
+            }
+        });
     </script>
 {% endblock %}
 {% block script_window_load %}

@@ -11,7 +11,7 @@ MUST_LOGIN = True
 
 CELERY_BROKER_URL = 'amqp://guest:guest@queues:5672/'
 
-CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_ALWAYS_EAGER = False
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -79,6 +79,8 @@ INSTALLED_APPS = [
     'task.apps.TaskConfig',
     'etl.apps.EtlConfig',
     'financial.apps.FinancialConfig',
+    'survey.apps.SurveyConfig',
+
     'django.contrib.sites',
 
     'allauth',
@@ -95,6 +97,7 @@ INSTALLED_APPS = [
     'django_file_form.ajaxuploader',
 
     'debug_toolbar',
+    'django_extensions',
     'django_cleanup',
     # Autocomplete
     'dal',
@@ -107,6 +110,7 @@ INSTALLED_APPS = [
     'sequences.apps.SequencesConfig',
     'channels',
     'chat',
+    'ecm'
 ]
 
 MIDDLEWARE = [
@@ -126,9 +130,12 @@ SITE_ID = 1
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'),
-                 os.path.join(BASE_DIR, 'core/templates'),
-                 os.path.join(BASE_DIR, 'core/templates/core/http_errors')],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'core/templates'),
+            os.path.join(BASE_DIR, 'core/templates/core/http_errors'),
+            os.path.join(BASE_DIR, 'ecm/templates')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -229,7 +236,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
+LOGIN_REDIRECT_URL = reverse_lazy('inicial')
 
 AUTHENTICATION_BACKENDS = (
 
@@ -360,3 +367,5 @@ LOGGING = {
         },
     }
 }
+
+UPLOAD_DIRECTORY = 'uploads'

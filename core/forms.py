@@ -19,8 +19,8 @@ from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, 
 from allauth.utils import build_absolute_uri
 
 from core.fields import CustomBooleanField
-from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType
-from core.utils import filter_valid_choice_form
+from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType, Office
+from core.utils import filter_valid_choice_form, get_office_field
 from core.widgets import MDModelSelect2
 from lawsuit.forms import BaseForm
 
@@ -155,16 +155,17 @@ class PersonForm(BaseModelForm):
             required=True,
         )
 
-    layout = Layout(
-            Row('legal_name', 'name'),
-            Row('legal_type', 'cpf_cnpj'),
-            Row('is_lawyer', 'is_customer', 'is_supplier', 'is_active'),
+    auth_user = forms.ModelChoiceField(
+        queryset=filter_valid_choice_form(User.objects.all().order_by('username')),
+        empty_label='',
+        required=False,
+        label='Usuário do sistema',
         )
 
     class Meta:
         model = Person
         fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj',
-                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active']
+                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active', 'import_from_legacy', 'auth_user']
 
     def clean(self):
         cleaned_data = super().clean()
@@ -186,6 +187,22 @@ class PersonForm(BaseModelForm):
                 del cleaned_data['cpf_cnpj']
 
         return cleaned_data
+
+    def __init__(self, *args, **kwargs):
+        is_superuser = kwargs.pop('is_superuser', None)
+        super().__init__(*args, **kwargs)
+        if is_superuser:
+            self.layout = Layout(
+                Row('legal_name', 'name'),
+                Row('legal_type', 'cpf_cnpj'),
+                Row('auth_user', 'import_from_legacy'),
+                Row('is_lawyer', 'is_customer', 'is_supplier', 'is_active'),
+                )
+        else:
+            self.layout = Layout(
+                Row('legal_name', 'name'),
+                Row('legal_type', 'cpf_cnpj'),
+                Row('is_lawyer', 'is_customer', 'is_supplier', 'is_active'))
 
 
 AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=1, max_num=1)
@@ -295,6 +312,11 @@ class UserUpdateForm(UserChangeForm):
         fields = ['first_name', 'last_name', 'username', 'email', 'password',
                   'groups', 'is_active']
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request, profile=kwargs['instance'])
+
 
 class ResetPasswordFormMixin(forms.Form):
     username = forms.CharField(
@@ -350,3 +372,51 @@ class ResetPasswordFormMixin(forms.Form):
                 context)
             self.context = context
         return self.context
+
+
+class OfficeForm(BaseModelForm):
+    legal_type = forms.ChoiceField(
+            label='Tipo',
+            choices=((x.value, x.format(x.value)) for x in LegalType),
+            required=True,
+        )
+
+    layout = Layout(
+            Row('legal_name', 'name'),
+            Row('legal_type', 'cpf_cnpj'),            
+        )
+
+    class Meta:
+        model = Office
+        fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_active']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        document_type = cleaned_data.get('legal_type')
+        document = cleaned_data.get('cpf_cnpj')
+        if document_type == 'F' and document:
+            try:
+                BRCPFField().clean(document)
+            except forms.ValidationError as exc:
+                self._errors['cpf_cnpj'] = \
+                    self.error_class(exc.messages)
+                del cleaned_data['cpf_cnpj']
+        elif document_type == 'J' and document:
+            try:
+                BRCNPJField().clean(document)
+            except forms.ValidationError as exc:
+                self._errors['cpf_cnpj'] = \
+                    self.error_class(exc.messages)
+                del cleaned_data['cpf_cnpj']
+        return cleaned_data
+
+
+class AddressOfficeForm(ModelForm):
+    class Meta:
+        model = Address
+        fields = ['zip_code', 'city_region', 'address_type', 'state', 'city', 'street', 'number',
+                  'notes', 'is_active']
+
+
+AddressOfficeFormSet = inlineformset_factory(Office, Address, form=AddressForm, extra=1,
+                                             max_num=1)

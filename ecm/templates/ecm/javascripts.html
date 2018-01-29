@@ -1,0 +1,90 @@
+{% load static ecm_tags %}
+<script src="{% static "ecm/fine-uploader/fine-uploader.js" %}"></script>
+<script src="{% static "js/sweetalert.min.js" %}"></script>
+{% include 'ecm/fineuploader-template.html' %}
+<script>
+    var manualUploader = new qq.FineUploader({
+        element: document.getElementById('fine-uploader-manual-trigger'),
+        template: 'qq-template-manual-trigger',
+        request: {
+            endpoint: '{% url 'ecm:ajax-upload' %}'
+        },
+        thumbnails: {
+            placeholders: {
+                waitingPath: "{% static 'ecm/fine-uploader/placeholders/waiting-generic.png' %}",
+                notAvailablePath: "{% static 'ecm/fine-uploader/placeholders/not_available-generic.png' %}"
+            }
+        },
+        autoUpload: false,
+        debug: true,
+        multiple: false,
+        callbacks: {
+            onComplete: function (id, name, object, xhr) {
+                get_attachments();
+                $('.qq-upload-cancel').click();
+                $('#attachment-modal').modal().hide();
+                $('.modal-backdrop').hide();
+            }
+        }
+    });
+    manualUploader.setParams({
+        model_name: '{{ object|get_modelname_from_object }}',
+        object_id: {{ object.pk }}
+    });
+    qq(document.getElementById("trigger-upload")).attach("click", function () {
+        manualUploader.uploadStoredFiles();
+    });
+
+    function get_attachments() {
+        var data = {
+            model_name: '{{ object|get_modelname_from_object }}',
+            object_id: {{ object.pk }}
+        }
+        $.getJSON("{% url 'ecm:ajax-get-attachments' %}", data)
+            .done(function (json) {
+                console.log("Sucesso", json);
+                var items = [];
+                $.each(json, function (key, val) {
+                    var elm = '<div class="col-sm-4"><div class="alert alert-info fade in alert-dismissable">' +
+                        '  <a href="javascript:dropAttachment(' + val.id + ')" class="close" title="Apagar" data-id="' + val.id + '">×</a>' +
+                        '  <strong><a href="/media/' + val.file + '" target="_blank">' + val.filename + '</a></strong>' +
+                        '</div></div>';
+                    items.push(elm);
+                });
+                $('#render-attachments').html(
+                    items.join("")
+                );
+
+            })
+            .fail(function (jqxhr, textStatus, error) {
+                var err = textStatus + ", " + error;
+                console.log("Request Failed: " + err);
+            });
+    }
+
+    $('#attachment-modal').on('shown.bs.modal', function () {
+      console.log('modal show')
+    });
+    get_attachments();
+
+    function dropAttachment(id) {
+        swal({
+            title: "Ops...",
+            text: "Você deseja excluir o anexo",
+            icon: "warning",
+            buttons: ['Cancelar', 'Excluir'],
+            dangerMode: true,
+        }).then((willDelete) => {
+            if (willDelete) {
+                $.getJSON("{% url 'ecm:ajax-drop-attachment' %}", {attachment_pk: id})
+                    .done(function (json) {
+                        get_attachments()
+                    })
+                    .fail(function (jqxhr, textStatus, error) {
+                        swal("Request Failed: " + error);
+                    });
+            }
+        });
+    }
+
+</script>

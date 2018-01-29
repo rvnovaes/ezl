@@ -6,9 +6,10 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from sequences import get_next_value
-from core.models import Person, Audit, AuditCreate, LegacyCode
+from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
+from decimal import Decimal
 
 class Permissions(Enum):
     view_delegated_tasks = 'Can view tasks delegated to the user'
@@ -19,6 +20,7 @@ class Permissions(Enum):
     block_payment_tasks = 'Can block tasks payment'
     can_access_general_data = 'Can access general data screens'
     view_distributed_tasks = 'Can view tasks distributed by the user'
+    can_distribute_tasks = 'Can distribute tasks to another user'
 
 
 # Dicionário para retornar o icone referente ao status da providencia
@@ -31,7 +33,10 @@ icon_dict = {
     'INVALID': 'mdi mdi-exclamation',
     'FINISHED': 'mdi mdi-gavel',
     'BLOCKEDPAYMENT':'mdi mdi-grease-pencil',
-    'ERROR': 'mdi mdi-skull'
+    'ERROR': 'mdi mdi-skull',
+    'REQUESTED': 'playlist_play',
+    'ACCEPTED_SERVICE': 'thumb_up',
+    'REFUSED_SERVICE': 'thumb_down',
 }
 
 color_dict = {
@@ -43,7 +48,10 @@ color_dict = {
     'INVALID': 'muted',
     'FINISHED': 'success',
     'BLOCKEDPAYMENT':'muted',
-    'ERROR': 'danger'
+    'ERROR': 'danger',
+    'REQUESTED': 'danger',
+    'ACCEPTED_SERVICE': 'danger',
+    'REFUSED_SERVICE': 'danger',
 }
 
 
@@ -52,17 +60,18 @@ color_dict = {
 
 
 class TaskStatus(Enum):
-    ACCEPTED = 'A Cumprir'
+    REQUESTED = 'Solicitada'
+    ACCEPTED_SERVICE = 'Aceita pelo Service'
     OPEN = 'Em Aberto'
-    RETURN = 'Retorno'
+    ACCEPTED = 'A Cumprir'
     DONE = 'Cumprida'
+    RETURN = 'Retorno'
+    FINISHED = 'Finalizada'
+    REFUSED_SERVICE = 'Recusada pelo Service'
     REFUSED = 'Recusada'
     BLOCKEDPAYMENT = 'Glosada'
-    FINISHED = 'Finalizada'
     INVALID = 'Inválida'
     ERROR = 'Erro no sistema de origem'
-    SOLICITADA = 'Solicitada'
-    RES = 'Recusada pelo Service'
 
     def get_icon(self):
         return icon_dict[self.name]
@@ -99,12 +108,16 @@ class SurveyType(Enum):
         return [(x.value, x.name) for x in cls]
 
 
-class TypeTask(Audit, LegacyCode):
+class TypeTask(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, null=False, unique=True,
                             verbose_name='Tipo de Serviço')
-    survey_type = models.CharField(null=False, verbose_name='Tipo de Formulário', max_length=100,
-                                   choices=((x.name.title(), x.value) for x in SurveyType),
-                                   default=SurveyType.BLANK)
+    survey = models.ForeignKey(
+        'survey.Survey',
+        null=True,
+        verbose_name='Tipo de Formulário'
+    )
+
+    objects = OfficeManager()
 
     class Meta:
         db_table = 'type_task'
@@ -116,7 +129,7 @@ class TypeTask(Audit, LegacyCode):
         return self.name
 
 
-class Task(Audit, LegacyCode):
+class Task(Audit, LegacyCode, OfficeMixin):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
     task_number = models.PositiveIntegerField(verbose_name='Número da Providência',
@@ -138,7 +151,7 @@ class Task(Audit, LegacyCode):
                                   verbose_name='Tipo de Serviço')
     delegation_date = models.DateTimeField(default=timezone.now, verbose_name='Data de Delegação')
     acceptance_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação')
-    final_deadline_date = models.DateTimeField(null=True, verbose_name='Prazo')
+    final_deadline_date = models.DateTimeField(null=True, blank=True, verbose_name='Prazo')
     execution_date = models.DateTimeField(null=True, verbose_name='Data de Cumprimento')
 
     requested_date = models.DateTimeField(null=True, verbose_name='Data de Solicitação')
@@ -156,10 +169,14 @@ class Task(Audit, LegacyCode):
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
                                    default=TaskStatus.OPEN)
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    amount = models.DecimalField(null=False, blank=False, verbose_name='Valor',
+                                 max_digits=9, decimal_places=2, default=Decimal('0.00'))
     chat = models.ForeignKey(Chat, verbose_name='Chat', on_delete=models.SET_NULL, null=True,
                              blank=True)
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
+
+    objects = OfficeManager()
 
     class Meta:
         db_table = 'task'
@@ -268,7 +285,7 @@ class TaskHistory(AuditCreate):
         return super(TaskHistory, self).save(*args, **kwargs)
 
 
-class DashboardViewModel(Audit):
+class DashboardViewModel(Audit, OfficeMixin):
     legacy_code = models.CharField(max_length=255, blank=True, null=True,
                                    verbose_name='Código legado')
     task_number = models.PositiveIntegerField(default=0, verbose_name='Número da Providência')

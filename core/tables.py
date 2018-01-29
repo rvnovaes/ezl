@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 import django_tables2 as tables
 from django_tables2.utils import AttributeDict, A
 
-from .models import Person, Address
+from .models import Person, Address, Office
 
 
 class CheckBoxMaterial(tables.CheckBoxColumn):
@@ -47,6 +47,7 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
             '<input name="selection" type="checkbox" %s onclick="showDeleteButton(this)"/>'% attrs.as_html()
         )
 
+
 class AddressTable(tables.Table):
 
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
@@ -64,8 +65,15 @@ class AddressTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/pessoas/' + str(record.person.pk) + '/enderecos/' + str(record.pk) + '/'
         }
-
 # Logradouro, N, COmplemento, Bairro, Cidade, Estado, Cep, Pais, Observacao, Tipo, Ativo
+
+
+class AddressOfficeTable(AddressTable):
+    class Meta:
+        row_attrs = {
+            'data_href': lambda record: '/escritorios/' + str(record.office.pk) + '/enderecos/' + str(record.pk) + '/'
+        }
+
 
 class PersonTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
@@ -116,4 +124,20 @@ class UserTable(tables.Table):
 
         row_attrs = {
             'data_href': lambda record: '/usuarios/' + str(record.pk) + '/'
+        }
+
+class OfficeTable(tables.Table):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # self.exclude = ('pk', 'name', 'legal_name')
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
+    class Meta:
+        exclude = ('id', 'create_date', 'create_user', 'auth_user',
+        'alter_user', 'is_customer', 'is_supplier', 'alter_date', 'legacy_code',
+        'system_prefix', 'is_lawyer')
+        sequence = ('selection', 'legal_name', 'name', 'legal_type',
+        'cpf_cnpj')
+        model = Office
+        row_attrs = {
+            'data_href': lambda record: '/escritorios/' + str(record.pk) + '/'
         }
