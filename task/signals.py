@@ -9,7 +9,7 @@ from core.models import ContactMechanism, ContactMechanismType, Person
 from django.conf import settings
 from task.mail import SendMail
 from task.models import Task, TaskStatus, TaskHistory, Ecm
-
+from task.workflow import get_parent_status, get_child_status
 
 send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'execution_date'])
 
@@ -163,3 +163,33 @@ def ezl_export_task_to_advwin(sender, instance, **kwargs):
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
     if not getattr(instance, '_called_by_etl'):
         export_task_history.delay(instance.pk)
+
+
+# update parent task
+@receiver(pre_save, sender=Task)
+def update_status_parent_task(sender, instance, **kwargs):
+    """
+    Responsavel por alterar o status da OS pai, quando o status da OS filha e modificado
+    :param sender:
+    :param instance:
+    :param kwargs:
+    :return:
+    """
+    if instance.parent:
+        instance.parent.task_status = get_parent_status(instance.status)
+        instance.parent.save()
+
+
+@receiver(pre_save, sender=Task)
+def update_status_child_task(sender, instance, **kwargs):
+    """
+    Responsavel por atualizar o status da os filha se a o estatus da OS pai e modificado
+    :param sender:
+    :param instance:
+    :param kwargs:
+    :return:
+    """
+    status = get_child_status(instance.status)
+    if instance.get_child and status:
+        instance.child.task_status = status
+        instance.child.save()

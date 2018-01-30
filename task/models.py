@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from sequences import get_next_value
-from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager
+from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
 from decimal import Decimal
@@ -107,7 +107,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
     parent = models.OneToOneField('self', null=True, blank=True, related_name='child')
 
     task_number = models.PositiveIntegerField(verbose_name='Número da Providência',
-                                              unique=True)
+                                              unique=False)
 
     movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
                                  verbose_name='Movimentação')

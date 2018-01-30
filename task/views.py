@@ -108,7 +108,7 @@ class TaskToAssignView(AuditFormMixin, UpdateView):
     def form_valid(self, form):
         super().form_valid(form)
         if form.is_valid():
-            form.instance.task_status = TaskStatus('Em Aberto')  # Tudo Este enum esta invertido, verificar e ajustar
+            form.instance.task_status = TaskStatus.OPEN
             form.save()
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
@@ -410,21 +410,8 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         new_task.pk = new_task.task_number = None
         new_task.office = office_correspondent
         new_task.task_status = TaskStatus.REQUESTED
+        new_task.parent = object_parent
         new_task.save()
-
-    def change_state_child_task(self, task):
-        pass
-
-    # Partindo da OS filha pro pai
-
-    regras = {
-        'solicitada': {'pai': 'DELEGADA/ABERTO'},
-        'Aceita/Service': {'pai': 'DELEGADA/ABERTO'},
-        'Recusada/Service': {'pai': 'Solicitada'},
-        'Delegada/Aberto': {'pai':
-
-                            '                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               '}
-    }
 
 
 class EcmCreateView(LoginRequiredMixin, CreateView):
