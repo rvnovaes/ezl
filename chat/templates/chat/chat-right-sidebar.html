@@ -28,15 +28,16 @@
 <button class="right-side-toggle  kc_fab_main_btn"><i class="ti-comments"></i></button>
 {% with object.chat as chat %}
 <div class="right-sidebar">
-    <div class="slimscrollright">
+    <div>
         <div class="rpanel-title bg-info"> Chat: {{ chat }}
             <span> <i class="ti-close right-side-toggle"></i></span>
         </div>
         <div class="r-panel-body">
             <div class="panel panel-info">
                 <div class="panel-body">
-                    <div class="chat-box" style="height: 580px;">
-                        <ul class="chat-list slimscroll" style="overflow: hidden;" tabindex="5005" id="messageList">
+                    <div class="chat-box" id="chatBox">
+                        <ul class="chat-list" style="overflow: hidden;" tabindex="5005" id="messageList">
+                            <div class="slimscroll">
                             {% for message in chat.messages.all %}
                                 {% if message.create_user == user %}
                                     <li class="odd">
@@ -55,6 +56,7 @@
                                     </div>
                                 </li>
                             {% endfor %}
+                            </div>
 
                         </ul>
                     </div>

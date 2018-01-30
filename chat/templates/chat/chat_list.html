@@ -8,16 +8,22 @@
         <div class="chat-left-aside">
             <div class="open-panel"><i class="ti-angle-right"></i></div>
             <div class="chat-left-inner">
-                <div class="form-material">
-                    <input class="form-control p-20" type="text" placeholder="Search Contact">
+                <div class="chat-main-header">
+                <div class="p-20 b-b">
+                    <h3 class="box-title">Conversas</h3>
                 </div>
+            </div>
                 <ul class="chatonline style-none ">
                     {% for chat in chats|dictsortreversed:'alter_date' %}
                         {% if chat.messages.all|length > 0 %}
                         <li>
-                            <a href="javascript:chatGetMessages('{{ chat.pk }}')" class="mytooltip">
-                                <span class="tooltip-content5"><span class="tooltip-text3"><span class="tooltip-inner2">Howdy, Ben!<br> There are 13 unread messages in your inbox.</span></span></span>
-                                <div class="circle circle-sm bg-info di">OS</div>
+                            <a href="javascript:chatGetMessages('{{ chat.pk }}', '{{ chat.label }}')" class="mytooltip" data-chat-label="{{ chat.label }}">
+                                <div class="circle circle-sm bg-info di">OS
+                                    <div class="notify hide" id="notify-{{ chat.pk }}">
+                                        <span class="heartbit"></span>
+                                        <span class="point"></span>
+                                    </div>
+                                </div>
                                 <span>{{ chat.title }}</span>
                                 <p class="text-muted pull-right"><i class="fa fa-clock-o"></i> {{ chat.alter_date|time }}</p>
                             </a>
@@ -34,18 +40,20 @@
         <div class="chat-right-aside">
             <div class="chat-main-header">
                 <div class="p-20 b-b" id="chatMessageTitle">
-                    <h3 class="box-title">Chat Message</h3>
-                    <p class="box-title">Chat Message</p>
+                    <h3 class="box-title">Mensagens</h3>
+                    <p class="box-title">Selecione um bate papo ao lado</p>
                 </div>
             </div>
             <div class="chat-box">
                 <ul class="chat-list slimscroll p-t-30" id="messageList">
                 </ul>
-                <div class="row send-chat-box">
-                    <div class="col-sm-12">
-                        <input class="form-control" placeholder="Digite sua mensagem" id="inputMsg"/>
-                        <div class="custom-send"><a href="javacript:void(0)" class="cst-icon" data-toggle="tooltip" title="Insert Emojis"><i class="ti-face-smile"></i></a> <a href="javacript:void(0)" class="cst-icon" data-toggle="tooltip" title="File Attachment"><i class="fa fa-paperclip"></i></a>
-                            <button class="btn btn-danger btn-rounded" type="button">Send</button>
+                <div class="send-chat-box">
+                    <div class="col-sm-12 p-b-10">
+                        <input class="form-control" placeholder="Digite sua mensagem" id="inputMsg" disabled/>
+                        <div class="custom-send p-r-10 p-b-10">
+                            <button class="btn btn-success btn-lg btn-circle" type="button" onclick="sendMessage()"
+                                    id="btnSend" disabled>
+                                <i class="fa fa-paper-plane-o"></i></button>
                         </div>
                     </div>
                 </div>
@@ -61,8 +69,29 @@
 {% block extra_scripts %}
     <script src="{% static 'skeleton/js/chat.js' %}"></script>
     <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/ion.sound-3.0.7/ion.sound.min.js' %}"></script>
 
     <script>
+    // init bunch of sounds
+        ion.sound({
+            sounds: [
+                {name: "beer_can_opening"},
+                {name: "bell_ring"},
+                {name: "branch_break"},
+                {name: "water_droplet_3"},
+                {name: "button_click"}
+            ],
+
+            // main config
+            path: "{% static 'skeleton/plugins/ion.sound-3.0.7/sounds/' %}",
+            preload: true,
+            multiplay: true,
+            volume: 0.9
+        });
+        window.chat_id = false;
+        window.socket_open = [];
+        window.chat_label = false;
+
         var tmplMsgLi = '<li class="${odd}">\n' +
             '  <div class="chat-image">\n' +
             '    <div class="circle circle-sm bg-info di"> <i class="fa fa-user"></i></div>\n' +
@@ -70,7 +99,7 @@
             '  <div class="chat-body">\n' +
             '    <div class="chat-text">\n' +
             '        <h4>${user}</h4>\n' +
-            '        <p>${message}</p> <b>${message_create_date}</b> ' +
+            '        <p>${text}</p> <b>${message_create_date}</b> ' +
             '    </div>\n' +
             '  </div>\n' +
             '</li>\n';
@@ -78,38 +107,64 @@
         var tmplChatMessageTitle = '<h4 class="box-title"><a href="${back_url}">${title}</a></h4>\n' +
                                    '<p>${description}</p>';
 
-        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-        socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + label);
-        {# Ao chegar uma mensagem#}
-        socket.onmessage = function (e) {
-            data = JSON.parse(e.data);
-            if ('{{user}}' === data.user) {
-                data.odd =  "odd bounceInRight animated";
-                $.tmpl(tmplMsgLi, data).appendTo("#messageList")
-            }else {
-                data.odd =  "bounceInLeft animated";
-                $.tmpl(tmplMsgLi, data).appendTo("#messageList")
+        function to_listen(label) {
+            if (window.socket_open.indexOf(label) == -1) {
+                window.socket_open.push(label)
+                var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+                socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + label);
+                {# Ao chegar uma mensagem#}
+                console.log('escutando: ' + label);
+                socket.onmessage = function (e) {
+                    data = JSON.parse(e.data);
+                    console.log('DATA CHAT', data, window.chat_id);
+                    if (data.chat == window.chat_id) {
+                        ion.sound.play("water_droplet_3");
+                        desktopNotify(data.text);
+                        if ('{{user}}' === data.user) {
+                            data.odd = "odd bounceInRight animated";
+                            $.tmpl(tmplMsgLi, data).appendTo("#messageList")
+                        } else {
+                            data.odd = "bounceInLeft animated";
+                            $.tmpl(tmplMsgLi, data).appendTo("#messageList")
+                        }
+                        var bottomCoord = $('#messageList')[0].scrollHeight;
+                        $('#messageList').slimScroll({scrollTo: bottomCoord});
+                    } else {
+                        $('#notify-' + data.chat).removeClass('hide');
+                        ion.sound.play("bell_ring");
+                    }
+                };
             }
-            var bottomCoord = $('#messageList')[0].scrollHeight;
-            $('#messageList').slimScroll({scrollTo: bottomCoord});
-        };
-        socket.onopen = function (data) {
-            socket.send(data);
-        };
-        function sendMessage(chatId) {
+        }
+
+
+
+        function sendMessage() {
+            var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+            var socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + window.chat_label);
+
             var el = $('#inputMsg');
             if (el.val().trim()) {
                 data = JSON.stringify({
                     'text': el.val(),
-                    'chat': chatId,
-                    'label': 'label'
+                    'chat': window.chat_id,
+                    'label': window.chat_label
                 });
                 el.val(null);
-                socket.onopen(data)
+                socket.onopen = function() {
+                    socket.send(data);
+                }
+                // Call onopen directly if socket is already open
+                if (socket.readyState == WebSocket.OPEN) socket.onopen();
+            } else {
+                $('#inputMsg').notify(
+                    "Digite uma mensagem!",
+                    {position: "top"}
+                );
             }
         }
 
-        function chatGetMessages(chat_id, csrf_token) {
+        function chatGetMessages(chat_id, label) {
             $.ajax({
                 type: 'POST',
                 url: '{% url 'chat_get_message' %}',
@@ -117,11 +172,14 @@
                     chat_id: chat_id
                 },
                 success: function (response) {
+                    window.chat_id = chat_id;
+                    window.chat_label = label;
+                    $('#notify-' + chat_id).addClass('hide')
                     $("#messageList").html('');
                     $("#chatMessageTitle").html('');
-                    console.log('***', response.chat);
                     $.tmpl(tmplChatMessageTitle, response.chat).appendTo($("#chatMessageTitle"));
                     $.each(response.messages, function( index, value ) {
+                        console.log('get message', value)
                         if ('{{user}}' === value.user) {
                             value.odd =  "odd bounceInRight animated";
                             $.tmpl(tmplMsgLi, value).appendTo("#messageList");
@@ -133,7 +191,9 @@
                     });
                     var bottomCoord = $('#messageList')[0].scrollHeight;
                     $('#messageList').slimScroll({scrollTo: bottomCoord});
-
+                    to_listen(label);  // Verificar mensagens para a conversa atual
+                    $('#inputMsg').prop('disabled', false);
+                    $('#btnSend').prop('disabled', false);
                 },
                 beforeSend: function (xhr, settings) {
                     xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
@@ -147,67 +207,19 @@
         var setLastMessage = function (chat_id) {
             $("[chat-id=" + chat_id + "]").animate({scrollTop: 9999}, 1000);
         };
-        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-        var setBoxMessage = function (box_id, chat_label, chat_id) {
-            chatReadMessage(chat_id, '{{ csrf_token }}');
-            setLastMessage(chat_id);
-            $('.conversation').hide();
-            var elBox = $('#' + box_id);
-            elBox.show();
-            elBox.find('#comment').val(null);
-            socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + chat_label);
-            socket.onopen = function (data) {
-                socket.send(data);
-            };
-            socket.onmessage = function (e) {
-                var data = JSON.parse(e.data);
-                setLastMessage(chat_id);
-                var messagePosition = 'receiver ';
-                if ('{{user}}' == data.user) {
-                    messagePosition = 'sender';
-                }
-                var chatContent = $('[chat-id=' + chat_id + ']').find('.message-body').last();
-                var blockMessage = "" +
-                    "<div class='col-sm-12 message-main-" + messagePosition + "'>" +
-                    "<div class='" + messagePosition + "'>" +
-                    "<strong class='pull-left primary-font'>" + data.user + "</strong>" +
-                    "<div class='message-text'>" + data.text + "</div>" +
-                    "<span class='message-time pull-right'>" + formatDate(data.message_create_date) + "</span>" +
-                    "</div>" +
-                    "</div>";
-                chatContent.append(blockMessage);
-            };
 
-{#            sendMessage = function () {#}
-{#                setLastMessage();#}
-{#                var el = $("#" + box_id).find('#comment');#}
-{#                if (el.val().trim()) {#}
-{#                    var data = JSON.stringify({#}
-{#                        'text': el.val(),#}
-{#                        'chat': chat_id,#}
-{#                        'label': chat_label#}
-{#                    });#}
-{#                    socket.onopen(data);#}
-{#                    el.val(null);#}
-{#                }else {#}
-{#                    el.val(null)#}
-{#                }#}
-{#            };#}
-
-            $.fn.enterKey = function (fnc) {
-                return this.each(function () {
-                    $(this).keypress(function (ev) {
-                        var keycode = (ev.keyCode ? ev.keyCode : ev.which);
-                        if (keycode == '13') {
-                            fnc.call(this, ev);
-                        }
-                    })
+        $.fn.enterKey = function (fnc) {
+            return this.each(function () {
+                $(this).keypress(function (ev) {
+                    var keycode = (ev.keyCode ? ev.keyCode : ev.which);
+                    if (keycode == '13') {
+                        fnc.call(this, ev);
+                    }
                 })
-            };
-            elBox.find('#comment').enterKey(function () {
-                sendMessage();
             })
-        }
-
+        };
+        $('#inputMsg').enterKey(function () {
+            sendMessage();
+        })
     </script>
 {% endblock %}

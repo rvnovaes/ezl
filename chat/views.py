@@ -54,7 +54,7 @@ class ChatGetMessages(LoginRequiredMixin, View):
         )
         messages = map(
             lambda x: {
-                'message': x.message,
+                'text': x.message,
                 'message_create_date': x.create_date.strftime("%d-%m-%Y às %H:%M:%S"),
                 'user': x.create_user.username
                 },

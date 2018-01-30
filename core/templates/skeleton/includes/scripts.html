@@ -17,11 +17,12 @@
 <script src="{% static 'skeleton/plugins/bower_components/sweetalert/jquery.sweet-alert.custom.js' %}"></script>
 <script src="{% static 'skeleton/plugins/bower_components/toast-master/js/jquery.toast.js' %}"></script>
 <!-- Custom Theme JavaScript -->
-<script src="{% static 'skeleton/js/custom.min.js' %}"></script>
+<script src="{% static 'skeleton/js/custom.js' %}"></script>
 <!--Style Switcher -->
 <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
 <!--CORE SCRIPTS-->
-<script src="{% static 'core/js/utils.js' %}"></script>
+<script src="{% static 'skeleton/js/ezl.js' %}"></script>
+<script src="{% static 'skeleton/plugins/jquery.notify.min.js' %}"></script>
 <script src="{% static 'js/table-tr-link.js' %}"></script>
 <script src="{% static "js/session.js" %}"></script>
 <script src="{% static "js/office.js" %}"></script>
@@ -42,20 +43,7 @@
             window.location.href = "{% url 'logout' %}";
         });
     }
-    function message_toast(tag, title, message, time) {
-        if (!time) {
-            time = 5000;
-        }
-        $.toast({
-                heading: title,
-                text: message,
-                position: 'top-right',
-                icon: tag,
-                hideAfter: time,
-                stack: 6
-            });
-    }
-    var showToast = message_toast
+
     {% for message in messages %}
         message_toast('{{ message.tags }}', '{{ message.tags }}', '{{ message }}');
     {% endfor %}

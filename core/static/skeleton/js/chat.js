@@ -15,12 +15,12 @@ $(document).ready(function () {
     $(function () {
         $(window).on("load", function () { // On load
             $('.chat-list').css({
-                'height': (($(window).height()) - 470) + 'px'
+                'height': (($(window).height()) - 370) + 'px'
             });
         });
         $(window).on("resize", function () { // On resize
             $('.chat-list').css({
-                'height': (($(window).height()) - 470) + 'px'
+                'height': (($(window).height()) - 370) + 'px'
             });
         });
     });
@@ -30,12 +30,12 @@ $(document).ready(function () {
     $(function () {
         $(window).on("load", function () { // On load
             $('.chat-left-inner').css({
-                'height': (($(window).height()) - 240) + 'px'
+                'height': (($(window).height()) - 140) + 'px'
             });
         });
         $(window).on("resize", function () { // On resize
             $('.chat-left-inner').css({
-                'height': (($(window).height()) - 240) + 'px'
+                'height': (($(window).height()) - 140) + 'px'
             });
         });
     });

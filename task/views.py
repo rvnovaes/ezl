@@ -802,7 +802,7 @@ def ajax_get_task_data_table(request):
             map(lambda x: [
                 x.pk,
                 x.task_number,
-                x.final_deadline_date.strftime('%d/%m/%Y %H:%M'),
+                x.final_deadline_date.strftime('%d/%m/%Y %H:%M') if x.final_deadline_date else '',
                 x.type_service,
                 x.lawsuit_number,
                 x.client,

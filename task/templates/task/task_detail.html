@@ -67,7 +67,6 @@
             </div>
         </div>
     </form>
-{#    {% include 'chat/chat_external.html' with chat=task.chat %}#}
 {% endblock %}
 
 {% block contente %}
@@ -755,7 +754,8 @@
     </script>
 {% endblock %}
 {% block script_window_load %}
-    get_ecms({{form.instance.pk}})
+    {{ block.super }}
+    get_ecms({{form.instance.pk}});
 {% endblock %}
 
 {% block extra_modal %}
