@@ -190,9 +190,23 @@ class TaskETL(GenericETL):
                     task.final_deadline_date = final_deadline_date
                     task.description = description
                     task.task_status = status_code_advwin
+                    task.alter_user = user
+                    task.person_asked_by = person_asked_by
+                    task.person_executed_by = person_executed_by
+                    task.person_distributed_by = person_distributed_by
+                    task.type_task = type_task
+                    task.refused_date = refused_date
+                    task.execution_date = execution_date
+                    task.blocked_payment_date = blocked_payment_date
+                    task.finished_date = finished_date
+                    task.requested_date = requested_date
+                    task.movement = movement
 
                     update_fields = ['requested_date', 'final_deadline_date', 'description',
-                                     'task_status', ]
+                                     'task_status', 'task_status', 'alter_user', 'person_asked_by',
+                                     'person_executed_by', 'person_distributed_by', 'type_task', 'refused_date',
+                                     'execution_date', 'blocked_payment_date', 'finished_date', 'requested_date',
+                                     'movement']
 
                     task.save(update_fields=update_fields)
 
