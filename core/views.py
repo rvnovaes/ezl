@@ -882,7 +882,7 @@ class OfficeListView(LoginRequiredMixin, SingleTableViewMixin):
 
 class OfficeCreateView(AuditFormMixin, CreateView):
     model = Office
-    fields = ('name', 'legal_name', 'cpf_cnpj', 'legal_type')
+    form_class = OfficeForm
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'office_list'
 

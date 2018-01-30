@@ -375,17 +375,6 @@ class ResetPasswordFormMixin(forms.Form):
 
 
 class OfficeForm(BaseModelForm):
-    legal_type = forms.ChoiceField(
-            label='Tipo',
-            choices=((x.value, x.format(x.value)) for x in LegalType),
-            required=True,
-        )
-
-    layout = Layout(
-            Row('legal_name', 'name'),
-            Row('legal_type', 'cpf_cnpj'),            
-        )
-
     class Meta:
         model = Office
         fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_active']
