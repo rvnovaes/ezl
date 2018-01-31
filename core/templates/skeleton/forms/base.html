@@ -1,7 +1,7 @@
 {% extends 'skeleton/base.html' %}
 {% load static bootstrap3 form_tags %}
 {% block content %}
-    <form id="{{ object_form }}" action="{% block action %}{% endblock %}" method="{% block method %}post{% endblock %}">{% csrf_token %}
+    <form enctype="multipart/form-data" id="{{ object_form }}" action="{% block action %}{% endblock %}" method="{% block method %}post{% endblock %}">{% csrf_token %}
     <div class="panel panel-default">
         <div class="panel-heading">{% include 'skeleton/forms/form-title.html' with form=form %}</div>
         <div class="panel-wrapper collapse in">

@@ -40,7 +40,7 @@
                 </div>
             </div>
         </div>
-        {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
+{#        {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}#}
             <div class="panel-footer">
                 <button type="button" class="btn btn-sm btn-info js-upload-files">
                     <i class="icon-cloud-upload"></i> Enviar Arquivo(s)
@@ -53,6 +53,6 @@
                        data-url="{% url 'ecm_add' object.id %}"
                        data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
             </div>
-        {% endif %}
+{#        {% endif %}#}
     </div>
 </div>
