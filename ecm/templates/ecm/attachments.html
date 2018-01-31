@@ -45,12 +45,14 @@
                 <i class="icon-cloud-upload"></i> Enviar Arquivo(s)
             </button>
 
-            <input id="fileupload" type="file" name="path" multiple
+            <input id="fileupload" type="file" name="file" multiple
                    style="display: none;"
                    data-method="POST"
                    enctype="multipart/form-data"
-                   data-url="{% url 'ecm_add' object.id %}"
-                   data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+                   data-url="{% url 'ecm:ajax-upload' %}"
+                   data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}",
+                                    "model_name": "{{ object|get_modelname_from_object }}",
+                                    "object_id": "{{ object.id }}"}'>
         </div>
     </div>
 </div>

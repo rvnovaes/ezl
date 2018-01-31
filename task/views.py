@@ -415,9 +415,6 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
         data = {'success': False,
                 'message': exception_create()}
 
-        data = {'success': False,
-                'message': exception_create()
-                }
         for file in files:
 
             ecm = Ecm(path=file,

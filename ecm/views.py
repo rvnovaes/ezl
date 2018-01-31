@@ -48,9 +48,8 @@ def make_response(status=200, content_type='text/plain', content=None):
 # Views
 ##
 class UploadView(View):
-    """ View which will handle all upload requests sent by Fine Uploader.
-    See: https://docs.djangoproject.com/en/dev/topics/security/#user-uploaded-content-security
-    Handles POST and DELETE requests.
+    """
+    View which will handle all upload requests sent by Uploader.
     """
 
     @csrf_exempt
@@ -68,11 +67,13 @@ class UploadView(View):
             attachment = Attachment(
                 model_name=data.get('model_name'),
                 object_id=data.get('object_id'),
-                file=request.FILES.get('qqfile'),
+                file=request.FILES.get('file'),
                 create_user_id=request.user.id
             )
             attachment.save()
-            return make_response(content=json.dumps({'success': True}))
+            return make_response(content=json.dumps({'success': True,
+                                                     'model_name': data.get('model_name'),
+                                                     'object_id': data.get('object_id')}))
         else:
             return make_response(status=400,
                                  content=json.dumps({

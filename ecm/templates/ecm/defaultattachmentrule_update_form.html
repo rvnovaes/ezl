@@ -4,13 +4,13 @@
 {% include 'ecm/attachments.html' %}
 {% endblock %}
 {% block extra_scripts %}
+    {{  block.super }}
 <!-- UPLOADS SCRIPTS  -->
     {% include 'ecm/javascripts.html' %}
 
     <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
     <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
     <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
-    <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>
     <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
     <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
          a medida que for adicionando novos arquivos -->
