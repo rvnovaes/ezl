@@ -11,7 +11,7 @@ import task.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0058_auto_20180112_1653'),
+        ('task', '0060_auto_20180105_1749'),
     ]
 
     operations = []

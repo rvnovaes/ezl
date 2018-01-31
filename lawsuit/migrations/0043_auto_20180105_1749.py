@@ -54,7 +54,7 @@ def get_default_office(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0053_office'),
+        ('core', '0057_office'),
         ('lawsuit', '0042_auto_20180125_1248'),
     ]
 

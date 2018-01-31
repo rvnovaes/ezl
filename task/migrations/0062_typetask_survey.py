@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('survey', '0002_auto_20171228_1808'),
-        ('task', '0059_dashboardviewmodel_office_id'),
+        ('task', '0061_dashboardviewmodel_office_id'),
     ]
 
     operations = [

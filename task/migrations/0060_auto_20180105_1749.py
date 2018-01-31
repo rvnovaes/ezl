@@ -15,8 +15,13 @@ def get_default_office(apps, schema_editor):
                                                                cpf_cnpj='03.482.042/0001-02',
                                                                name='Marcelo Tostes Advogados Associados',
                                                                legal_name='Marcelo Tostes Advogados Associados')
-        Costcenter = apps.get_model('financial', 'costcenter')
-        for record in Costcenter.objects.all():
+        Task = apps.get_model('task', 'task')
+        for record in Task.objects.all():
+            record.office_id = default_office.id
+            record.save()
+
+        TypeTask = apps.get_model('task', 'typetask')
+        for record in TypeTask.objects.all():
             record.office_id = default_office.id
             record.save()
 
@@ -24,26 +29,42 @@ def get_default_office(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0053_office'),
-        ('financial', '0001_initial'),
+        ('core', '0057_office'),
+        ('task', '0059_auto_20180117_0944'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='costcenter',
+            model_name='task',
             name='office',
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
                                     blank=True, null=True,
-                                    related_name='costcenter_office', to='core.Office', verbose_name='Escritório'),
+                                    related_name='task_office', to='core.Office', verbose_name='Escritório'),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='typetask',
+            name='office',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
+                                    blank=True, null=True,
+                                    related_name='typetask_office', to='core.Office', verbose_name='Escritório'),
             preserve_default=False,
         ),
         migrations.RunPython(get_default_office),
         migrations.AlterField(
-            model_name='costcenter',
+            model_name='task',
             name='office',
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
                                     blank=False, null=False,
-                                    related_name='costcenter_office', to='core.Office', verbose_name='Escritório'),
+                                    related_name='task_office', to='core.Office', verbose_name='Escritório'),
             preserve_default=False,
-        )
+        ),
+        migrations.AlterField(
+            model_name='typetask',
+            name='office',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
+                                    blank=False, null=False,
+                                    related_name='typetask_office', to='core.Office', verbose_name='Escritório'),
+            preserve_default=False,
+        ),
     ]

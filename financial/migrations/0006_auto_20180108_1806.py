@@ -7,27 +7,12 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 
-def get_default_office(apps, schema_editor):
-    User = apps.get_model('auth', 'User')
-    admin = User.objects.filter(username='admin').first()
-    if admin:
-        Office = apps.get_model('core', 'Office')
-        default_office, created = Office.objects.get_or_create(create_user=admin,
-                                                               cpf_cnpj='03.482.042/0001-02',
-                                                               name='Marcelo Tostes Advogados Associados',
-                                                               legal_name='Marcelo Tostes Advogados Associados')
-        ServicePriceTable = apps.get_model('financial', 'servicepricetable')
-        for record in ServicePriceTable.objects.all():
-            record.office_id = default_office.id
-            record.save()
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('core', '0057_merge_20180108_1756'),
-        ('financial', '0005_merge_20180108_1800'),
+        ('core', '0057_office'),
+        ('financial', '0005_auto_20180112_1653'),
     ]
 
     operations = [
@@ -73,15 +58,6 @@ class Migration(migrations.Migration):
             name='office',
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
                                     blank=True, null=True,
-                                    related_name='servicepricetable_office', to='core.Office',
-                                    verbose_name='Escritório'),
-            preserve_default=False,
-        ),
-        migrations.RunPython(get_default_office),
-        migrations.AlterField(
-            model_name='servicepricetable',
-            name='office',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
                                     related_name='servicepricetable_office', to='core.Office',
                                     verbose_name='Escritório'),
             preserve_default=False,
