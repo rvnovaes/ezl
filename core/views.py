@@ -1051,5 +1051,5 @@ class TypeaHeadGenericSearch(View):
         module = importlib.import_module(self.request.GET.get('module'))
         model = getattr(module, self.request.GET.get('model'))
         field = request.GET.get('field')
-        f = "model.objects.filter({field}__unaccent__icontains=request.GET.get('q')).annotate(value=F('{field}')).values('id', 'value')".format(field=field)
+        f = "model.objects.filter({field}__unaccent__icontains=request.GET.get('q')).annotate(value=F('{field}')).values('id', 'value').order_by({field})".format(field=field)
         return JsonResponse(list(eval(f)), safe=False)

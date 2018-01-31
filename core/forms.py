@@ -376,7 +376,6 @@ class ResetPasswordFormMixin(forms.Form):
 
 
 class OfficeForm(BaseModelForm):
-
     class Meta:
         model = Office
         fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_active']

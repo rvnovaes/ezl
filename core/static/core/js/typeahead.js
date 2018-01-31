@@ -3,7 +3,7 @@ $(document).ready(function () {
         console.debug($(this).attr('data-url'));
         var module = $(this).attr('data-module');
         var model = $(this).attr('data-model');
-        var field = $(this).attr('name')
+        var field = $(this).attr('name');
         var getTypeaheadData = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -21,9 +21,14 @@ $(document).ready(function () {
             }
         });
 
-        $(this).typeahead(null, {
+        $(this).typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 1,
+        }, {
             name: $(this).attr('id'),
             display: 'value',
+            limit: 10,
             source: getTypeaheadData
         });
 
