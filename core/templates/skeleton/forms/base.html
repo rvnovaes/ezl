@@ -16,12 +16,14 @@
                                         {{ field.label_tag }}
                                     </div>
                                 </div>
-                            {% else %}
+                            {% elif field_type != 'clearablefile' %}
                                 {% bootstrap_field field form_group_class="form-group col-sm-6" %}
                             {% endif %}
                         {% endfor %}
                     {% endblock %}
             </div>
+
+            {% block extra_form %}{% endblock %}
             <div class="panel-footer text-center">
                 {% block form_buttons %}
                     {% block button_cancel %}
@@ -34,7 +36,6 @@
             </div>
         </div>
     </div>
-    {% block extra_form %}{% endblock %}
     </form>
     {% block extra_content %}{% endblock %}
 {% endblock content %}

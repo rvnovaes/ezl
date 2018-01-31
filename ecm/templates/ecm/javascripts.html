@@ -19,6 +19,18 @@
                         '    </td>\n' +
                         '</tr>';
 
+     var tmplRowUploadCreate =  '<tr class="zoomInDown animated">\n' +
+                                '    <td style="width: 50px;">\n' +
+                                '       <h4><i class="fa fa-file-o"></i> ${name}</h4>' +
+                                '    </td>\n' +
+                                '    <td class="text-left">\n' +
+                                '       <h4> ${type}</h4>\n' +
+                                '    </td>\n' +
+                                '    <td class="text-right">\n' +
+                                '       <h4> ${size}</h4>\n' +
+                                '    </td>\n' +
+                                '</tr>';
+
     function get_attachments(model_name, object_id) {
         $.ajax({
             url: "/ecm/ajax_get_attachments/",
@@ -106,11 +118,33 @@
                     swal("Sucesso", data.result.message, "success");
                     get_attachments(data.result.model_name, data.result.object_id);
                 } else {
+                    $("#modal-progress").modal("hide");
                     swal('Erro', data.result.message, 'error');
                 }
             }
 
         });
 
+    });
+
+    $(function () {
+        $(".js-upload-files-create").click(function () {
+            $("#fileupload-create").click();
+        });
+    });
+
+    $('#fileupload-create').change(function(){
+        console.log("The text has been changed.");
+        totalFiles = $('#fileupload-create')[0].files.length;
+        if (totalFiles > 0) {
+            $('#no-data').addClass('hide');
+        }else{
+            $('#no-data').removeClass('show');
+        }
+        $('#containnerUploads').html('');
+        $.each($('#fileupload-create')[0].files, function( index, value ) {
+            console.log(value);
+            $.tmpl(tmplRowUploadCreate, value).appendTo('#containnerUploads');
+        })
     });
 </script>

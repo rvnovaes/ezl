@@ -41,18 +41,27 @@
             </div>
         </div>
         <div class="panel-footer">
-            <button type="button" class="btn btn-sm btn-info js-upload-files">
+            {% if object %}
+                <button type="button" class="btn btn-sm btn-info js-upload-files">
+            {% else %}
+                <button type="button" class="btn btn-sm btn-info js-upload-files-create">
+            {% endif %}
                 <i class="icon-cloud-upload"></i> Enviar Arquivo(s)
             </button>
 
-            <input id="fileupload" type="file" name="file" multiple
-                   style="display: none;"
-                   data-method="POST"
-                   enctype="multipart/form-data"
-                   data-url="{% url 'ecm:ajax-upload' %}"
-                   data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}",
-                                    "model_name": "{{ object|get_modelname_from_object }}",
-                                    "object_id": "{{ object.id }}"}'>
+            {% if object %}
+                <input id="fileupload" type="file" name="file" multiple
+                       style="display: none;"
+                       data-method="POST"
+                       enctype="multipart/form-data"
+                       data-url="{% url 'ecm:ajax-upload' %}"
+                       data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}",
+                                        "model_name": "{{ object|get_modelname_from_object }}",
+                                        "object_id": "{{ object.id }}"}'>
+            {% else %}
+                <input id="fileupload-create" type="file" name="file" multiple
+                       style="display: none;">
+            {% endif %}
         </div>
     </div>
 </div>

@@ -151,7 +151,7 @@ class DefaultAttachmentRuleCreateView(AuditFormMixin, CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        files = self.request.FILES.getlist('documents')
+        files = self.request.FILES.getlist('file')
         if files:
             instance = form.save()
             for f in files:

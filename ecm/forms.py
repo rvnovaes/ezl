@@ -131,7 +131,9 @@ class DefaultAttachmentRuleForm(BaseModelForm):
 
 
 class DefaultAttachmentRuleCreateForm(FileFormMixin, DefaultAttachmentRuleForm):
-    documents = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}), required=True)
+    file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True,
+                                                                       "id": "fileupload-create"}),
+                                required=True)
 
     class Meta(DefaultAttachmentRuleForm.Meta):
-        fields = DefaultAttachmentRuleForm.Meta.fields + ('documents',)
+        fields = DefaultAttachmentRuleForm.Meta.fields + ('file',)
