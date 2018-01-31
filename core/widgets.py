@@ -5,6 +5,9 @@ from django.utils import six, translation
 from django.utils import timezone
 from django.utils.encoding import force_text
 from django_filters import RangeFilter
+from django.forms.widgets import Widget
+from django.template import loader
+from django.utils.safestring import mark_safe
 
 from django.conf import settings
 
@@ -242,8 +245,8 @@ class MDSelect(ChoiceWidget):
         """Return True if the choice's value is empty string or None."""
         value, _ = choice
         return (
-            (isinstance(value, six.string_types) and not bool(value)) or
-            value is None
+                (isinstance(value, six.string_types) and not bool(value)) or
+                value is None
         )
 
     def use_required_attribute(self, initial):
@@ -266,3 +269,28 @@ class MDModelSelect2(QuerySetSelectMixin,
                      MDSelect2WidgetMixin,
                      MDSelect):
     """Select widget for QuerySet choices and Select2."""
+
+
+class TypeaHeadWidget(Widget):
+    template_name = 'skeleton/componentes/fields/typeahead.html'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    class Media:
+        js = ('skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js',
+              'core/js/typeahead.js')
+
+    def get_context_data(self, name, value, attrs=None):
+        return {'widget': {
+            'name': name,
+            'value': value,
+            'url': attrs.get('url', '/typeahead/search'), #Se nao passar url como paramentro faz a pesquisa padrao,
+            'module': attrs.get('model').__module__,
+            'model': attrs.get('model').__name__
+        }}
+
+    def render(self, name, value, attrs=None):
+        context = self.get_context_data(name, value, attrs)
+        template = loader.get_template(self.template_name).render(context)
+        return mark_safe(template)

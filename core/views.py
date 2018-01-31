@@ -14,7 +14,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.db.models import ProtectedError, Q
+from django.db.models import ProtectedError, Q, F
 from django.db import transaction
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -898,7 +898,7 @@ class OfficeCreateView(AuditFormMixin, CreateView):
 
 class OfficeUpdateView(AuditFormMixin, UpdateView):
     model = Office
-    fields = ('name', 'legal_name', 'cpf_cnpj', 'legal_type')
+    form_class = OfficeForm
     success_url = reverse_lazy('office_list')
     template_name_suffix = '_update_form'
     success_message = UPDATE_SUCCESS_MESSAGE
@@ -1041,3 +1041,15 @@ class InviteMultipleUsersView(LoginRequiredMixin, View):
                                       office=office, status='N')
             return HttpResponseRedirect(reverse_lazy('office_update', kwargs={'pk': office_pk}))
         return reverse_lazy('office_list')
+
+
+class TypeaHeadGenericSearch(View):
+    """
+    Responsavel por gerar os filtros do campo typeahead
+    """
+    def get(self, request, *args, **kwargs):
+        module = importlib.import_module(self.request.GET.get('module'))
+        model = getattr(module, self.request.GET.get('model'))
+        field = request.GET.get('field')
+        f = "model.objects.filter({field}__unaccent__icontains=request.GET.get('q')).annotate(value=F('{field}')).values('id', 'value')".format(field=field)
+        return JsonResponse(list(eval(f)), safe=False)
