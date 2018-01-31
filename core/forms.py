@@ -23,6 +23,7 @@ from core.models import ContactUs, Person, Address, City, ContactMechanism, Addr
 from core.utils import filter_valid_choice_form, get_office_field
 from core.widgets import MDModelSelect2
 from lawsuit.forms import BaseForm
+from core.widgets import TypeaHeadWidget
 
 
 class BaseModelForm(forms.ModelForm):
@@ -375,17 +376,6 @@ class ResetPasswordFormMixin(forms.Form):
 
 
 class OfficeForm(BaseModelForm):
-    legal_type = forms.ChoiceField(
-            label='Tipo',
-            choices=((x.value, x.format(x.value)) for x in LegalType),
-            required=True,
-        )
-
-    layout = Layout(
-            Row('legal_name', 'name'),
-            Row('legal_type', 'cpf_cnpj'),            
-        )
-
     class Meta:
         model = Office
         fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_active']

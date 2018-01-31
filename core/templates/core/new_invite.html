@@ -6,12 +6,10 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
                     </button>
                     <div class="row">
-                        <div class="col col-md-12">
+                        <div class="col-md-12">
                             <input type='hidden' name='office' value='{{ office }}'>
                             <label>Informe os usuários a convidar</label>
-                            <select class="users_to_invite form-control" name="persons"
-                                    multiple="multiple" style='width: 100%;'>
-                            </select>
+                        {% include 'skeleton/componentes/fields/typeahead.html' with placeholder='correspondentes' field_id='invite-person'  typeaurl='typeahed_person'%}
                         </div>
                     </div>
                 </div>
@@ -26,4 +24,3 @@
         </div>
     </div>
 </div>
-
