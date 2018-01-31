@@ -1,6 +1,6 @@
 from enum import Enum
 from django.db import models
-from core.models import Audit, OfficeMixin
+from core.models import Audit, OfficeMixin, OfficeManager
 from task.models import Task
 
 # Dicionário para retornar a solução referente à inconsistência encontrada
@@ -74,6 +74,8 @@ class InconsistencyETL(Audit, OfficeMixin):
                                      )
     solution = models.CharField(verbose_name=u'Solução',
                                 blank=True, null=True, max_length=100)
+
+    objects = OfficeManager()
 
     @property
     def inconsistency_desc(self):

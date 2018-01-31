@@ -9,7 +9,6 @@
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
         <field name="name" type="CharField">TIPO DE SERVIÇO-INVÁLIDO</field>
-        <field name="survey_type" type="CharField"></field>
         <field name="office_id" rel="ManyToOneRel" to="core.office">1</field>
     </object>
     <object model="task.typetask" pk="3">
@@ -21,7 +20,7 @@
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
         <field name="name" type="CharField">Audiência Avulsa</field>
-        <field name="survey_type" type="CharField">Courthearing</field>
+        <field name="survey_id" rel="ManyToOneRel" to="survey.survey">2</field>
         <field name="office_id" rel="ManyToOneRel" to="core.office">1</field>
     </object>
     <object model="task.typetask" pk="4">
@@ -33,7 +32,7 @@
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
         <field name="name" type="CharField">Audiência Cível - Apenas Advogado</field>
-        <field name="survey_type" type="CharField">Courthearing</field>
+        <field name="survey_id" rel="ManyToOneRel" to="survey.survey">2</field>
         <field name="office_id" rel="ManyToOneRel" to="core.office">1</field>
     </object>
     <object model="task.typetask" pk="5">
@@ -45,7 +44,7 @@
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
         <field name="name" type="CharField">Diligência</field>
-        <field name="survey_type" type="CharField">Diligence</field>
+        <field name="survey_id" rel="ManyToOneRel" to="survey.survey">3</field>
         <field name="office_id" rel="ManyToOneRel" to="core.office">1</field>
     </object>
     <object model="task.typetask" pk="6">
@@ -57,7 +56,7 @@
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
         <field name="name" type="CharField">Protocolo</field>
-        <field name="survey_type" type="CharField">Protocol</field>
+        <field name="survey_id" rel="ManyToOneRel" to="survey.survey">4</field>
         <field name="office_id" rel="ManyToOneRel" to="core.office">1</field>
     </object>
     <object model="task.typetask" pk="7">
@@ -69,7 +68,7 @@
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
         <field name="name" type="CharField">Alvará</field>
-        <field name="survey_type" type="CharField">Operationlicense</field>
+        <field name="survey_id" rel="ManyToOneRel" to="survey.survey">1</field>
         <field name="office_id" rel="ManyToOneRel" to="core.office">1</field>
     </object>
     <object model="task.typetask" pk="8">
@@ -81,7 +80,7 @@
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
         <field name="name" type="CharField">Diligência Urgente</field>
-        <field name="survey_type" type="CharField">Operationlicense</field>
+        <field name="survey_id" rel="ManyToOneRel" to="survey.survey">1</field>
         <field name="office_id" rel="ManyToOneRel" to="core.office">1</field>
     </object>
     <object model="task.typetask" pk="10">
@@ -93,7 +92,7 @@
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
         <field name="name" type="CharField">Audiência Cível - Apenas Preposto</field>
-        <field name="survey_type" type="CharField">Courthearing</field>
+        <field name="survey_id" rel="ManyToOneRel" to="survey.survey">2</field>
         <field name="office_id" rel="ManyToOneRel" to="core.office">1</field>
     </object>
     <object model="task.typetask" pk="11">
@@ -105,7 +104,7 @@
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
         <field name="name" type="CharField">Audiência Cível - Advogado e Preposto</field>
-        <field name="survey_type" type="CharField">Courthearing</field>
+        <field name="survey_id" rel="ManyToOneRel" to="survey.survey">2</field>
         <field name="office_id" rel="ManyToOneRel" to="core.office">1</field>
     </object>
     <object model="task.typetask" pk="12">
@@ -117,7 +116,7 @@
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
         <field name="name" type="CharField">Audiência Cível - Apenas Advogado - Na condição de preposto</field>
-        <field name="survey_type" type="CharField">Courthearing</field>
+        <field name="survey_id" rel="ManyToOneRel" to="survey.survey">2</field>
         <field name="office_id" rel="ManyToOneRel" to="core.office">1</field>
     </object>
 </django-objects>

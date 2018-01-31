@@ -58,9 +58,6 @@ services:
   tasks:
     image: ezl:latest
     command: celery -A ezl worker -l debug --concurrency 10 -P eventlet
-    environment:
-      ENV: development
-      PYTHONPATH: /app
     volumes:
       - .:/app
       - ezl-logs:/var/log/ezl
