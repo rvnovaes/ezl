@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0053_office'),
-        ('financial', '0001_initial'),
+        ('financial', '0006_auto_20180108_1806'),
     ]
 
     operations = [
