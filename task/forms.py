@@ -50,7 +50,7 @@ class TaskForm(BaseForm):
     # TODO verificar como aplicar os formulários com dateTimeField
 
     delegation_date = forms.DateTimeField(show_hidden_initial=True, initial=datetime.now(),
-                                          required=True,
+                                          required=False,
                                           widget=MDDatePicker(attrs={'class': 'form-control'},
                                                               format='DD/MM/YYYY'
                                                               )
@@ -171,3 +171,9 @@ class TypeTaskForm(BaseForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
+
+
+class TaskToAssignForm(BaseForm):
+    class Meta:
+        model = Task
+        fields = ['person_executed_by']

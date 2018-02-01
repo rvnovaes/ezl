@@ -221,7 +221,7 @@ class AbstractPerson(Audit, LegacyCode):
         abstract = True
 
     def __str__(self):
-        return self.legal_name
+        return self.legal_name or ''
 
 
 class Person(AbstractPerson):
@@ -238,6 +238,7 @@ class Person(AbstractPerson):
 
 
 class Office(AbstractPerson):
+    objects = PersonManager()
 
     persons = models.ManyToManyField(Person, blank=True, related_name='offices')
     offices = models.ManyToManyField('self', blank=True)
@@ -269,14 +270,15 @@ class DefaultOffice(OfficeMixin, Audit):
 
 
 class Invite(Audit):
-    person = models.ForeignKey(Person, blank=False, null=False,
-        related_name='invites')
-    office = models.ForeignKey(Office, blank=False, null=False,
-    related_name='invites')
+    person = models.ForeignKey(Person, blank=False, null=False, related_name='invites')
+    office = models.ForeignKey(Office, blank=False, null=False, related_name='invites')
     status = models.CharField(choices=INVITE_STATUS, default='N', max_length=1)
 
     class Meta:
         verbose_name = 'Convite'
+
+    def __str__(self):
+        return self.person
 
 
 class Address(Audit):
@@ -298,7 +300,7 @@ class Address(Audit):
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False,
                              verbose_name='País')
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True)
-    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True, related_name='adresses')
+    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'address'
@@ -330,7 +332,8 @@ class ContactMechanism(Audit):
         ContactMechanismType, on_delete=models.PROTECT, blank=False, null=False)
     description = models.CharField(max_length=255, null=False, unique=True)
     notes = models.CharField(max_length=400, blank=True)
-    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
+    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True)
+    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'contact_mechanism'

@@ -1,5 +1,6 @@
 import csv
 import os
+import copy
 from urllib.parse import urlparse
 import json
 from chat.models import UserByChat
@@ -27,7 +28,7 @@ from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
 from task.filters import TaskFilter
-from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
+from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm, TaskToAssignForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable
@@ -99,6 +100,20 @@ class TaskCreateView(AuditFormMixin, CreateView):
         return reverse('movement_update',
                        kwargs={'lawsuit': self.kwargs['lawsuit'],
                                'pk': self.kwargs['movement']})
+
+
+class TaskToAssignView(AuditFormMixin, UpdateView):
+    model = Task
+    form_class = TaskToAssignForm
+    success_url = reverse_lazy('dashboard')
+    template_name_suffix = '_to_assign'
+
+    def form_valid(self, form):
+        super().form_valid(form)
+        if form.is_valid():
+            form.instance.task_status = TaskStatus.OPEN
+            form.save()
+        return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
 
 class TaskUpdateView(AuditFormMixin, UpdateView):
@@ -180,6 +195,7 @@ class DashboardView(MultiTableMixin, TemplateView):
         data = []
         data_error = []
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
+        office_session = get_office_session(self.request)
         if dynamic_query or person.auth_user.is_superuser:
             # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
             office_session = get_office_session(self.request)
@@ -195,13 +211,13 @@ class DashboardView(MultiTableMixin, TemplateView):
         if person.auth_user.groups.filter(~Q(name__in=['Correspondente', 'Solicitante'])).exists():
             data = data | DashboardViewModel.objects.filter(task_status=TaskStatus.REQUESTED)
             data_error = data_error | DashboardViewModel.objects.filter(task_status=TaskStatus.ERROR)
-        tables = self.get_list_tables(data, data_error, person) if person else []
+        tables = self.get_list_tables(data, data_error, person, office=office_session) if person else []
         if not dynamic_query:
             return tables
         return tables
 
     @staticmethod
-    def get_list_tables(data, data_error, person):
+    def get_list_tables(data, data_error, person, office=None):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
@@ -216,7 +232,7 @@ class DashboardView(MultiTableMixin, TemplateView):
         accepted_service = grouped.get(TaskStatus.ACCEPTED_SERVICE) or {}
         refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}
         #  Necessario filtrar as inconsistencias pelos ids das tasks pelo fato das instancias de error serem de DashboardTaskView
-        error  = InconsistencyETL.objects.filter(is_active=True, task__id__in=[task.pk for task in data_error]) or {}
+        error  = InconsistencyETL.objects.filter(office=office, is_active=True, task__id__in=[task.pk for task in data_error]) or {}
 
         return_list = []
 
@@ -332,8 +348,9 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             form.instance.amount = form.cleaned_data['amount']
             servicepricetable_id = self.request.POST['servicepricetable_id']
             servicepricetable = ServicePriceTable.objects.get(id=servicepricetable_id)
-            form.instance.person_executed_by = (servicepricetable.correspondent
-                                                if servicepricetable.correspondent else None)
+            if servicepricetable:
+                self.delegate_child_task(form.instance, servicepricetable.office_correspondent)
+                form.instance.person_executed_by = None
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
@@ -376,7 +393,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         state = self.object.movement.law_suit.court_district.state
         client = self.object.movement.law_suit.folder.person_customer
         context['correspondents_table'] = ServicePriceTableTaskTable(
-            ServicePriceTable.objects.filter(Q(type_task=type_task),
+            ServicePriceTable.objects.filter(Q(office=self.object.office), Q(type_task=type_task),
                                              Q(Q(court_district=court_district) | Q(court_district=None)),
                                              Q(Q(state=state) | Q(state=None)),
                                              Q(Q(client=client) | Q(client=None)))
@@ -385,11 +402,28 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
     def create_user_by_chat(self, task, fields):
         for field in fields:
-            user = getattr(task, field).auth_user
-            if user:
+            if getattr(task, field) and getattr(task, field).auth_user:
+                user = getattr(task, field).auth_user
                 UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
                     'create_user': user, 'user_by_chat': user, 'chat': task.chat
                 })
+
+    @staticmethod
+    def delegate_child_task(object_parent, office_correspondent):
+        """
+        Este metodo e chamado quando um escritorio delega uma OS para outro escritorio
+        Ao realizar este processo a nova OS criada devera ficar com o status de Solicitada
+        enquanto a OS pai devera ficar com o status de Delegada/Em Aberti
+        :param object_parent: Task que sera copiada para gerar a nova task
+        :param office_correspondent: Escritorio responsavel pela nova task
+        :return:
+        """
+        new_task = copy.copy(object_parent)
+        new_task.pk = new_task.task_number = None
+        new_task.office = office_correspondent
+        new_task.task_status = TaskStatus.REQUESTED
+        new_task.parent = object_parent
+        new_task.save()
 
 
 class EcmCreateView(LoginRequiredMixin, CreateView):
@@ -705,7 +739,7 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         return context
 
 
-    def get(self, request):        
+    def get(self, request):
         if (self.request.GET.get('export_answers') and
                 self.request.user.has_perm(SurveyPermissions.can_view_survey_results)):
             return self._export_answers(request)
@@ -740,7 +774,7 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         base_fields = [task.id, task.legacy_code]
         answers = ['' for x in range(len(columns))]
         for question, answer in task.survey_result.items():
-            question_index = columns.index(question) 
+            question_index = columns.index(question)
             answers[question_index] = answer
 
         writer.writerow(base_fields + answers)

@@ -1,12 +1,12 @@
 import os
 from enum import Enum
-
+from django.db import transaction
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from sequences import get_next_value
-from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager
+from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
 from decimal import Decimal
@@ -106,16 +106,17 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
 class Task(Audit, LegacyCode, OfficeMixin):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
+    parent = models.OneToOneField('self', null=True, blank=True, related_name='child')
+
     task_number = models.PositiveIntegerField(verbose_name='Número da Providência',
-                                              unique=True)
+                                              unique=False)
 
     movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
                                  verbose_name='Movimentação')
     person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                         related_name='%(class)s_asked_by',
                                         verbose_name='Solicitante')
-    person_executed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False,
-                                           null=False,
+    person_executed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True,
                                            related_name='%(class)s_executed_by',
                                            verbose_name='Correspondente')
     person_distributed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False,
@@ -131,8 +132,6 @@ class Task(Audit, LegacyCode, OfficeMixin):
     execution_date = models.DateTimeField(null=True, verbose_name='Data de Cumprimento')
 
     requested_date = models.DateTimeField(null=True, verbose_name='Data de Solicitação')
-    acceptance_service_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação pelo Contratante')
-    refused_service_date = models.DateTimeField(null=True, verbose_name='Data de Recusa pelo Contratante')
     return_date = models.DateTimeField(null=True, verbose_name='Data de Retorno')
     refused_date = models.DateTimeField(null=True, verbose_name='Data de Recusa')
 
@@ -160,6 +159,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
         verbose_name = 'Providência'
         verbose_name_plural = 'Providências'
         permissions = [(i.name, i.value) for i in Permissions]
+        unique_together = ('task_number', 'office')
 
     @property
     def status(self):
@@ -201,8 +201,19 @@ class Task(Audit, LegacyCode, OfficeMixin):
     def save(self, *args, **kwargs):
         self._called_by_etl = kwargs.pop('called_by_etl', False)
         if not self.task_number:
-            self.task_number = get_next_value(Task.TASK_NUMBER_SEQUENCE)
+            self.task_number = self.get_task_number()
         return super().save(*args, **kwargs)
+
+    @property
+    def get_child(self):
+        if hasattr(self, 'child'):
+            return self.child
+        return None
+
+    @transaction.atomic
+    def get_task_number(self):
+        return get_next_value('office_{office_pk}_{name}'.format(office_pk=self.office.pk,
+                                                                 name=self.TASK_NUMBER_SEQUENCE))
 
 
 def get_dir_name(instance, filename):

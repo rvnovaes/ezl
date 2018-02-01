@@ -13,7 +13,8 @@ urlpatterns = [
     url(r'^providencias/(?P<movement>[0-9]+)/(?P<pk>[0-9]+)/$',
         login_required(views.TaskUpdateView.as_view()),
         name='task_update'),
-
+    url(r'^(?P<pk>[0-9]+)/atribuir$',
+        login_required(views.TaskToAssignView.as_view()), name='task_to_assign'),
     url(r'^providencias/excluir$', login_required(views.TaskDeleteView.as_view()),
         name='task_delete'),
 
