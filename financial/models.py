@@ -81,5 +81,5 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         ordering = ['value']
         verbose_name = 'Tabela de preço de serviços'
         verbose_name_plural = 'Tabelas de preço de serviços'
-        unique_together = (("correspondent", "type_task", "client", "court_district", "state"),)
+        unique_together = (("office", "correspondent", "type_task", "client", "court_district", "state"),)
 
