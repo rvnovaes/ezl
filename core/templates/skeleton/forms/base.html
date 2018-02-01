@@ -1,5 +1,6 @@
 {% extends 'skeleton/base.html' %}
 {% load static bootstrap3 form_tags %}
+{% load ecm_tags %}
 {% block content %}
     <form enctype="multipart/form-data" id="{{ object_form }}" action="{% block action %}{% endblock %}" method="{% block method %}post{% endblock %}">{% csrf_token %}
     <div class="panel panel-default">
@@ -23,7 +24,10 @@
                     {% endblock %}
             </div>
 
-            {% block extra_form %}{% endblock %}
+            {% block attachment_form %}
+                {% include 'ecm/attachments.html' %}
+            {% endblock attachment_form %}
+
             <div class="panel-footer text-center">
                 {% block form_buttons %}
                     {% block button_cancel %}
@@ -34,6 +38,7 @@
                     {% endblock %}
                 {% endblock %}
             </div>
+        {% block extra_form %}{% endblock %}
         </div>
     </div>
     </form>
@@ -44,5 +49,23 @@
     <script>
     // Extra scripts
     </script>
+    {% block upload_scripts %}
+        <!-- UPLOADS SCRIPTS  -->
+        {% include 'ecm/javascripts.html' %}
+
+        <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+        <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+        <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
+             a medida que for adicionando novos arquivos -->
+        <div id="scripts">
+        </div>
+    {% endblock upload_scripts %}
     {{ form.media }}
+{% endblock %}
+{% block script_window_load %}
+    {% if object %}
+        get_attachments('{{ object|get_modelname_from_object }}', {{form.instance.pk}})
+    {% endif %}
 {% endblock %}

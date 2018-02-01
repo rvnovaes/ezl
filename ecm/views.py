@@ -47,6 +47,28 @@ def make_response(status=200, content_type='text/plain', content=None):
 ##
 # Views
 ##
+
+class AttachmentFormMixin(CreateView):
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        files = self.request.FILES.getlist('file')
+        if files:
+            instance = form.save(commit=False)
+            for f in files:
+                model_name = self.model._meta.app_label.lower() + '.' + \
+                             self.model.__name__.lower()
+                attachment = Attachment(
+                    model_name=model_name,
+                    object_id=instance.id,
+                    file=f,
+                    create_user_id=self.request.user.id
+                )
+                attachment.save()
+        form.save()
+        return response
+
+
 class UploadView(View):
     """
     View which will handle all upload requests sent by Uploader.
@@ -137,7 +159,7 @@ class DefaultAttachmentRuleListView(LoginRequiredMixin, SingleTableViewMixin):
     paginate_by = 30
 
 
-class DefaultAttachmentRuleCreateView(AuditFormMixin, CreateView):
+class DefaultAttachmentRuleCreateView(AuditFormMixin, AttachmentFormMixin):
     model = DefaultAttachmentRule
     form_class = DefaultAttachmentRuleCreateForm
     success_url = reverse_lazy('ecm:defaultattachmentrule_list')
@@ -149,22 +171,6 @@ class DefaultAttachmentRuleCreateView(AuditFormMixin, CreateView):
         kw['request'] = self.request
         return kw
 
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        files = self.request.FILES.getlist('file')
-        if files:
-            instance = form.save()
-            for f in files:
-                model_name = self.model.__module__.split('.')[0].lower() + '.' + \
-                             self.model.__name__.lower()
-                attachment = Attachment(
-                    model_name=model_name,
-                    object_id=instance.id,
-                    file=f,
-                    create_user_id=self.request.user.id
-                )
-                attachment.save()
-        return response
 
 class DefaultAttachmentRuleUpdateView(AuditFormMixin, UpdateView):
     model = DefaultAttachmentRule
