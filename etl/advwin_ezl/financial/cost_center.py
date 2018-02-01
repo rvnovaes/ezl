@@ -18,7 +18,7 @@ class CostCenterETL(GenericETL):
     has_status = True
 
     @validate_import
-    def config_import(self, rows, user, rows_count):
+    def config_import(self, rows, user, rows_count, default_office):
         for row in rows:
             rows_count -= 1
             try:
@@ -33,11 +33,13 @@ class CostCenterETL(GenericETL):
                     instance.name = name
                     instance.is_active = True
                     instance.alter_user = user
+                    instance.office = default_office
                     instance.save(
                         update_fields=['name',
                                        'is_active',
                                        'alter_date',
-                                       'alter_user'])
+                                       'alter_user',
+                                       'office'])
                 else:
                     instance = self.model.objects.create(
                         name=name,
@@ -45,7 +47,8 @@ class CostCenterETL(GenericETL):
                         legacy_code=legacy_code,
                         system_prefix=LegacySystem.ADVWIN.value,
                         create_user=user,
-                        alter_user=user)
+                        alter_user=user,
+                        office=default_office)
 
                 self.debug_logger.debug("Centro de Custo, {}, {}".format(
                     instance.id, self.timestr))

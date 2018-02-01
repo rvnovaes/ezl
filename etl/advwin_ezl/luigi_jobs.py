@@ -7,7 +7,7 @@ from etl.advwin_ezl.core.person import PersonETL
 from etl.advwin_ezl.core.address import AddressETL
 from etl.advwin_ezl.core.contact_mechanism import ContactMechanismETL
 from etl.advwin_ezl.law_suit.organ import OrganETL
-from etl.advwin_ezl.factory import InvalidObjectFactory
+from etl.advwin_ezl.factory import InvalidObjectFactory, DefaultOffice
 from etl.advwin_ezl.financial.cost_center import CostCenterETL
 from etl.advwin_ezl.law_suit.court_division import CourtDivisionETL
 from etl.advwin_ezl.law_suit.folder import FolderETL
@@ -44,7 +44,7 @@ def get_target_path(task):
 def load_fixtures():
     # A ordem de inclusão das fixtures é importante, favor não alterar
     fixtures = ['country.xml', 'state.xml', 'court_district.xml', 'city.xml',
-                'type_movement.xml', 'type_task.xml']
+                'type_movement.xml']
 
     for fixture in fixtures:
         call_command(loaddata.Command(), fixture, verbosity=0)
@@ -80,6 +80,7 @@ class ConfigTask(luigi.Task):
         # sleep(5)
         InvalidObjectFactory().restart_table_id()
         InvalidObjectFactory.create()
+        DefaultOffice.create()
         load_fixtures()
         self.output().open("w").close()
 

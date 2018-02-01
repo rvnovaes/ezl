@@ -1,6 +1,6 @@
 from enum import Enum
 from django.db import models
-from core.models import Audit
+from core.models import Audit, OfficeMixin, OfficeManager
 from task.models import Task
 
 # Dicionário para retornar a solução referente à inconsistência encontrada
@@ -25,7 +25,7 @@ class Inconsistencies(Enum):
         return [(x.value, x.name) for x in cls]
 
 
-class DashboardETL(Audit):
+class DashboardETL(Audit, OfficeMixin):
     execution_date_start = models.DateTimeField(
         verbose_name='Inicio', auto_now_add=True, null=True, blank=True)
     execution_date_finish  = models.DateTimeField(
@@ -61,7 +61,7 @@ class ErrorETL(Audit):
                              blank=True, editable=False)
 
 
-class InconsistencyETL(Audit):
+class InconsistencyETL(Audit, OfficeMixin):
     """
     Classe responsável por armazenar as inconsistências ocorridas durante a execução da ETL.
     Desde que não tenham impedido a importação completa.
@@ -74,6 +74,8 @@ class InconsistencyETL(Audit):
                                      )
     solution = models.CharField(verbose_name=u'Solução',
                                 blank=True, null=True, max_length=100)
+
+    objects = OfficeManager()
 
     @property
     def inconsistency_desc(self):

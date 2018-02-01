@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('survey', '0002_auto_20171228_1808'),
-        ('task', '0059_auto_20180117_0944'),
+        ('task', '0061_dashboardviewmodel_office_id'),
     ]
 
     operations = [
@@ -46,11 +46,9 @@ class Migration(migrations.Migration):
             name='survey_type',
         ),
         migrations.AlterField(
-            model_name = 'typetask',
-            name = 'survey',
-            field = models.ForeignKey(null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                to='survey.Survey',
-                verbose_name = 'Tipo de Formulário'),
+            model_name='typetask',
+            name='survey',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='survey.Survey',
+                                    verbose_name='Tipo de Formulário'),
         ),
     ]

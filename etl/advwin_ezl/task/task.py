@@ -94,7 +94,7 @@ class TaskETL(GenericETL):
         return self._import_query.format(cliente="','".join(get_clients_to_import()))
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         from core.models import Person
         for row in rows:
             print(rows_count)
@@ -182,9 +182,23 @@ class TaskETL(GenericETL):
                     task.description = description
                     task.task_status = status_code_advwin
                     task.type_task = type_task
+                    task.alter_user = user
+                    task.person_asked_by = person_asked_by
+                    task.person_executed_by = person_executed_by
+                    task.person_distributed_by = person_distributed_by
+                    task.type_task = type_task
+                    task.refused_date = refused_date
+                    task.execution_date = execution_date
+                    task.blocked_payment_date = blocked_payment_date
+                    task.finished_date = finished_date
+                    task.requested_date = requested_date
+                    task.movement = movement
 
                     update_fields = ['requested_date', 'final_deadline_date', 'description',
-                                     'task_status', 'type_task']
+                                     'task_status', 'alter_user', 'person_asked_by',
+                                     'person_executed_by', 'person_distributed_by', 'type_task', 'refused_date',
+                                     'execution_date', 'blocked_payment_date', 'finished_date', 'requested_date',
+                                     'movement']
 
                     task.save(update_fields=update_fields)
 
@@ -205,7 +219,8 @@ class TaskETL(GenericETL):
                                                      blocked_payment_date=blocked_payment_date,
                                                      finished_date=finished_date,
                                                      task_status=status_code_advwin,
-                                                     requested_date=requested_date)
+                                                     requested_date=requested_date,
+                                                     office=default_office)
 
                 if status_code_advwin == TaskStatus.ERROR:
                     for inconsistency in inconsistencies:
@@ -214,7 +229,8 @@ class TaskETL(GenericETL):
                             inconsistency=inconsistency['inconsistency'],
                             solution=inconsistency['solution'],
                             create_user=user,
-                            alter_user=user)
+                            alter_user=user,
+                            office=default_office)
                 else:
                     InconsistencyETL.objects.filter(task=task).update(is_active=False)
 

@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import Audit, Person, State, LegacyCode
+from core.models import Audit, Person, State, LegacyCode, OfficeMixin, OfficeManager
 from sequences import get_next_value
 from django.db import transaction
 from django.core.validators import ValidationError
@@ -8,13 +8,15 @@ from django.db.models import Q
 
 
 @transaction.atomic
-def get_folder_number():
-    return get_next_value('lawsuit_folder_folder_number')
+def get_folder_number(office):
+    return get_next_value('lawsuit_office_%s_folder_folder_number' % office.pk)
 
 
-class TypeMovement(Audit, LegacyCode):
+class TypeMovement(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, blank=False, null=False, default="", unique=True, verbose_name='Nome')
     uses_wo = models.BooleanField(default=False, verbose_name='Utiliza ordem de serviço?')
+
+    objects = OfficeManager()
 
     class Meta:
         db_table = "type_movement"
@@ -26,8 +28,10 @@ class TypeMovement(Audit, LegacyCode):
         return self.name
 
 
-class Instance(Audit, LegacyCode):
+class Instance(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(verbose_name="Nome", max_length=255, null=False, blank=False, default="", unique=True)
+
+    objects = OfficeManager()
 
     class Meta:
         db_table = "instance"
@@ -39,7 +43,7 @@ class Instance(Audit, LegacyCode):
         return self.name
 
 
-class Folder(Audit, LegacyCode):
+class Folder(Audit, LegacyCode, OfficeMixin):
     folder_number = models.IntegerField(verbose_name='Número da Pasta', null=False, default=0)
     person_customer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                         verbose_name='Cliente')
@@ -49,11 +53,13 @@ class Folder(Audit, LegacyCode):
                                     null=True,
                                     verbose_name='Centro de custo')
 
+    objects = OfficeManager()
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.folder_number = get_folder_number()
+            self.folder_number = get_folder_number(self.office)
         super(Folder, self).save(*args, **kwargs)
+
     class Meta:
         db_table = "folder"
         ordering = ['-id']
@@ -64,8 +70,10 @@ class Folder(Audit, LegacyCode):
         return str(self.folder_number)
 
 
-class CourtDivision(Audit, LegacyCode):
+class CourtDivision(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Vara")
+
+    objects = OfficeManager()
 
     class Meta:
         db_table = "court_division"
@@ -92,12 +100,14 @@ class CourtDistrict(Audit, LegacyCode):
         return self.name
 
 
-class Organ(Person):
+class Organ(Person, OfficeMixin):
     """
     Classe responsavel por manter o cadastro dos tribunais.
     """
     court_district = models.ForeignKey(CourtDistrict, on_delete=models.PROTECT,
                                        verbose_name='Comarca')
+
+    objects = OfficeManager()
 
     class Meta:
         db_table = 'organ'
@@ -124,7 +134,7 @@ class Organ(Person):
         return res
 
 
-class LawSuit(Audit, LegacyCode):
+class LawSuit(Audit, LegacyCode, OfficeMixin):
     person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
                                       verbose_name='Advogado', related_name='person_lawyers')
     folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False, verbose_name="Pasta",
@@ -140,8 +150,9 @@ class LawSuit(Audit, LegacyCode):
     law_suit_number = models.CharField(max_length=255, blank=False, null=False,
                                        verbose_name='Número do Processo')
     is_current_instance = models.BooleanField(verbose_name='Instância Atual', default=False)
-    opposing_party = models.CharField(max_length=255, blank=True, null=True,
-                                      verbose_name='Parte adversa')
+    opposing_party = models.TextField(blank=True, null=True, verbose_name='Parte adversa')
+
+    objects = OfficeManager()
 
     class Meta:
         db_table = "law_suit"
@@ -155,13 +166,15 @@ class LawSuit(Audit, LegacyCode):
         return self.law_suit_number
 
 
-class Movement(Audit, LegacyCode):
+class Movement(Audit, LegacyCode, OfficeMixin):
     type_movement = models.ForeignKey(TypeMovement, on_delete=models.PROTECT, blank=False, null=False,
                                       verbose_name="Tipo de Movimentação")
     law_suit = models.ForeignKey(LawSuit, on_delete=models.PROTECT, blank=True, null=True,
                                  verbose_name="Processo", related_name='law_suits')
     folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False,
                                verbose_name="Pasta", related_name='folders_movement')
+
+    objects = OfficeManager()
 
     class Meta:
         db_table = "movement"
