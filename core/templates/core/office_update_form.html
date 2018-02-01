@@ -14,7 +14,7 @@
     <div class="white-box">
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#endereco">Endereços</a></li>
-            <li><a data-toggle="tab" href="#convites-usuarios">Convites para usuários</a>
+            <li><a data-toggle="tab" href="#invite-users">Convites para usuários</a>
             </li>
         </ul>
         <div class="tab-content">
@@ -76,44 +76,66 @@
                         <i class="fa fa-plus"></i></a>
                 </div>
             </div>
-            <div id="convites-usuarios" class="tab-pane fade">
-                <table class="table table-hover">
-                    <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Usuário</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for invite in object.invites.all %}
-                        {% if invite.status != 'A' %}
-                            <tr>
-                                <td>{{ invite.person.name }}</td>
-                                <td>{{ invite.person.auth_user.username }}</td>
-                                {% if invite.status == 'N' %}
-                                    <td>Enviado</td>
-                                {% else %}
-                                    <td>Recusado</td>
-                                {% endif %}
-                            </tr>
-                        {% endif %}
-                    {% endfor %}
-                    </tbody>
-                </table>
-                <div class="text-right" style="">
-                    <div class="fixed-btn">
-                        <button type="button" data-toggle="modal" data-target="#confirmeDelete" id="delete_buttom"
-                                class="btn btn-fab btn-warning"><i class="fa fa-trash"></i></button>
-                        <button type="button" class="btn btn-fab btn-success"
-                                data-toggle="modal" data-target="#new_invite">
-                            <i class="fa fa-plus"></i></button>
+            <div id="invite-users" class="tab-pane fade">
+                <form class="form-inline editable-form" id="form-invite-user" action="#">
+                    {% csrf_token %}
+                    <input type="text" value="{{ office.pk }}" name="office" hidden>
+                    <div class="control-group">
+                        <div class="editable-input" style="width: 80%">
+                            <input class="form-control input-sm twitter-typeahead" type="text"
+                                   placeholder="Usuário a convidar..."
+                                   style="padding-right: 24px;"
+                                   id="person" data-url="/typeahead/search/inviteuser" name="person"
+                                   value="" data-module="core.models" data-model="Person"
+                                   search-field="legal_name" required>
+                            <span class="editable-clear-x" style="display: none;"></span>
+                        </div>
+                        <div class="editable-buttons">
+                            <button type="button" class="btn btn-success btn-sm editable-submit" id="btn-invite-user"><i
+                                    class="glyphicon glyphicon-ok"> Convidar</i></button>
+                        </div>
                     </div>
+                </form>
+                <div id="invite-table">
+
                 </div>
             </div>
         </div>
     </div>
-{#    {% include 'core/new_invite.html' with office=object.pk %}#}
 {% endblock %}
+{% block extra_scripts %}
+    {{ inviteofficeform.media }}
+    {#    Convite de usuario #}
+    <script>
+        $(document).ready(function () {
+            var inviteTable = $("#invite-table");
+            inviteTable.load('/convites/table', '#invite-table');
+            $('#btn-invite-user').on('click', function (event) {
+                var data = {};
+                $('#invite-users').find('input').each(function () {
+                    if ($(this).attr('name')) {
+                        data[$(this).attr('name')] = $(this).attr('value')
+                    }
+                });
+                console.debug(data);
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url 'invite_add' %}',
+                    data: data,
+                    success: function (result, status, xhr) {
+                        inviteTable.load('/convites/table', '#invite-table');
+                        $('.twitter-typeahead').typeahead('val', '');
 
+                    },
+                    error: function (request, status, error) {
+
+                    },
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                    },
+                    dataType: 'json'
+                })
+            })
+        });
+    </script>
+{% endblock %}

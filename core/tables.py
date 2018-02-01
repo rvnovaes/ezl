@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 import django_tables2 as tables
 from django_tables2.utils import AttributeDict, A
 
-from .models import Person, Address, Office
+from .models import Person, Address, Office, Invite
 
 
 class CheckBoxMaterial(tables.CheckBoxColumn):
@@ -126,6 +126,7 @@ class UserTable(tables.Table):
             'data_href': lambda record: '/usuarios/' + str(record.pk) + '/'
         }
 
+
 class OfficeTable(tables.Table):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -141,3 +142,9 @@ class OfficeTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/escritorios/' + str(record.pk) + '/'
         }
+
+
+class InviteTable(tables.Table):
+    class Meta:
+        model = Invite
+        fields = ('person', 'person.auth_user', 'status')

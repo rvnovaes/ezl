@@ -1,3 +1,4 @@
-<input class="twitter-typeahead form-control" type="text" placeholder="{{ placeholder }}" id="{{ widget.name }}" data-url="{{ widget.url }}" name="{{ widget.name }}" value="{{ widget.value }}" data-module="{{ widget.module }}" data-model="{{ widget.model }}">
+
+<input class="twitter-typeahead form-control" type="text" placeholder="{{ placeholder }}" id="{{ widget.name }}" data-url="{{ widget.url }}" name="{{ widget.name }}" value="{{ widget.value|default_if_none:'' }}" data-module="{{ widget.module }}" data-model="{{ widget.model }}" search-field="{{ widget.field_related }}">
 
 

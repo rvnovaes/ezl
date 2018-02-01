@@ -30,7 +30,8 @@ from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 
-from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, AddressFormSet, AddressOfficeFormSet, OfficeForm
+from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, AddressFormSet, \
+    AddressOfficeFormSet, OfficeForm, InviteForm, InviteOfficeFormSet
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
@@ -39,12 +40,13 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     ADDRESS_UPDATE_SUCCESS_MESSAGE
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice
 from core.signals import create_person
-from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable
+from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable
 from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task
 from ecm.forms import AttachmentForm
+
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
     model = abstractproperty()
@@ -905,10 +907,15 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
     object_list_url = 'office_list'
 
     def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
         kwargs.update({
             'table': AddressOfficeTable(self.object.adresses.all()),
         })
-        return super().get_context_data(**kwargs)
+        if self.request.POST:
+            data['inviteofficeform'] = InviteOfficeFormSet(self.request.POST)
+        else:
+            data['inviteofficeform'] = InviteOfficeFormSet()
+        return data
 
 
 class OfficeDeleteView(LoginRequiredMixin, DeleteView):
@@ -985,9 +992,18 @@ class CustomSession(View):
 
 class InviteCreateView(AuditFormMixin, CreateView):
     model = Invite
+    form_class = InviteForm
     success_url = reverse_lazy('start_user')
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'start_user'
+
+    def post(self, request, *args, **kwargs):
+        form = InviteForm(request.POST)
+        form.instance.create_user = self.request.user
+        form.instance.person = Person.objects.get(pk=request.POST.get('person'))
+        form.instance.office = Office.objects.get(pk=request.POST.get('office'))
+        form.instance.save()
+        return JsonResponse({'status': 'ok'})
 
 
 class InviteUpdateView(UpdateView):
@@ -998,6 +1014,19 @@ class InviteUpdateView(UpdateView):
             invite.office.persons.add(request.user.person.pk)
         invite.save()
         return HttpResponse('ok')
+
+
+class InviteTableView(LoginRequiredMixin, ListView):
+    model = Invite
+    template_name = 'core/invite_table.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        office = get_office_session(self.request)
+        table = InviteTable(Invite.objects.filter(office=office))
+        RequestConfig(self.request).configure(table)
+        context['table'] = table
+        return context
 
 
 class EditableListSave(LoginRequiredMixin, View):
@@ -1029,7 +1058,9 @@ class ListUsersToInviteView(LoginRequiredMixin, View):
         return JsonResponse({'data': list(users)})
 
 
-class InviteMultipleUsersView(LoginRequiredMixin, View):
+class InviteMultipleUsersView(LoginRequiredMixin, CreateView):
+    form_class = InviteForm
+
     def post(self, request, *args, **kwargs):
         if self.request.POST.get('persons') and self.request.POST.get('office'):
             persons = self.request.POST.getlist('persons')
@@ -1051,5 +1082,23 @@ class TypeaHeadGenericSearch(View):
         module = importlib.import_module(self.request.GET.get('module'))
         model = getattr(module, self.request.GET.get('model'))
         field = request.GET.get('field')
-        f = "model.objects.filter({field}__unaccent__icontains=request.GET.get('q')).annotate(value=F('{field}')).values('id', 'value').order_by('{field}')".format(field=field)
-        return JsonResponse(list(eval(f)), safe=False)
+        q = request.GET.get('q')
+        return JsonResponse(self.get_data(module, model, field, q), safe=False)
+
+    @staticmethod
+    def get_data(module, model, field, q):
+        f = "model.objects.filter({field}__unaccent__icontains='{q}').annotate(value=F('{field}'))" \
+            ".values('id', 'value').order_by('{field}')".format(field=field, q=q)
+        return list(eval(f))
+
+
+class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
+    @staticmethod
+    def get_data(module, model, field, q):
+        params = {
+            '{}__unaccent__icontains'.format(field): q,
+            }
+        data = []
+        for person in Person.objects.filter(~Q(auth_user=None), **params):
+            data.append({'id': person.id, 'value': person.legal_name + ' ({})'.format(person.auth_user)})
+        return list(data)
