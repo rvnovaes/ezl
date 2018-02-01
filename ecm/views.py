@@ -155,8 +155,10 @@ class DefaultAttachmentRuleCreateView(AuditFormMixin, CreateView):
         if files:
             instance = form.save()
             for f in files:
+                model_name = self.model.__module__.split('.')[0].lower() + '.' + \
+                             self.model.__name__.lower()
                 attachment = Attachment(
-                    model_name='ecm.defaultattachmentrule',
+                    model_name=model_name,
                     object_id=instance.id,
                     file=f,
                     create_user_id=self.request.user.id

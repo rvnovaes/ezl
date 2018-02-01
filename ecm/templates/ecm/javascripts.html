@@ -19,8 +19,8 @@
                         '    </td>\n' +
                         '</tr>';
 
-     var tmplRowUploadCreate =  '<tr class="zoomInDown animated">\n' +
-                                '    <td style="width: 50px;">\n' +
+     var tmplRowUploadCreate =  '<tr class="zoomInDown animated file_${index}">\n' +
+                                '    <td style="width: 70px;">\n' +
                                 '       <h4><i class="fa fa-file-o"></i> ${name}</h4>' +
                                 '    </td>\n' +
                                 '    <td class="text-left">\n' +
@@ -143,7 +143,6 @@
         }
         $('#containnerUploads').html('');
         $.each($('#fileupload-create')[0].files, function( index, value ) {
-            console.log(value);
             $.tmpl(tmplRowUploadCreate, value).appendTo('#containnerUploads');
         })
     });
