@@ -28,7 +28,7 @@ class OrganETL(GenericETL):
     has_status = True
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         """
         Metodo responsavel por importar as pessoas cadastradas no advwin para o ezl
         :param rows: Pessoas lidas do advwin
@@ -68,6 +68,7 @@ class OrganETL(GenericETL):
                     instance.is_customer = is_customer
                     instance.is_supplier = is_supplier
                     instance.is_active = is_active
+                    instance.office = default_office
                     instance.save(
                         update_fields=['alter_date',
                                        'legal_name',
@@ -79,7 +80,8 @@ class OrganETL(GenericETL):
                                        'is_active',
                                        'is_customer',
                                        'is_supplier',
-                                       'court_district'])
+                                       'court_district',
+                                       'office'])
                 else:
                     obj = self.model(legal_name=legal_name,
                                      name=name,
@@ -93,7 +95,8 @@ class OrganETL(GenericETL):
                                      is_active=is_active,
                                      legacy_code=legacy_code,
                                      system_prefix=LegacySystem.ADVWIN.value,
-                                     court_district=court_district)
+                                     court_district=court_district,
+                                     office=default_office)
 
                     obj.save()
                 self.debug_logger.debug(

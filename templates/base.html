@@ -27,6 +27,11 @@
         {% block js_head %}
             <!-- Compiled and minified JavaScript -->
             <script src="{% static "libs/jquery-3.2.17/jquery.min.js" %}"></script>
+            <script src="{% static "js/session.js" %}"></script>
+            <script src="{% static "js/office.js" %}"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/survey-jquery/0.12.23/survey.jquery.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
             <script src="{% static "js/utils.js" %}"></script>
             <script src="{% static "js/modal.js" %}"></script>
             <script src="{% static "js/table-tr-link.js" %}"></script>
@@ -49,7 +54,6 @@
             <script src="{% static "libs/jquery-mask-plugin/jquery.maskMoney.min.js" %}"></script>
         {% endblock js_head %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/survey-jquery/0.12.23/survey.jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
         {% block extra_head %}{% endblock %}
     {% endblock head %}
 </head>

@@ -28,13 +28,12 @@ var chatReadMessage = function (chat_id, csrf_token) {
     })
 };
 
-setInterval(function () {
+var count_message = setInterval(function () {
     $.ajax({
         type: "GET",
         url: "/chat/count_message/",
         data: {},
         success: function (response) {
-            console.log(response.all_messages);
             if (response.all_messages > 0) {
                 $('.chat-badge.badge').text(response.all_messages)
             } else {

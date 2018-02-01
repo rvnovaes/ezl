@@ -11,7 +11,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand">EZL</a>
+                    <a class="navbar-brand" href="{% url 'dashboard' %}">EZL</a>
                 </div>
                 <div class="navbar-collapse collapse navbar-responsive-collapse">
                     <ul class="nav navbar-nav">
@@ -26,15 +26,29 @@
                                 <ul class="dropdown-menu">
                                     <li><a href="{% url 'costcenter_list' %} "target="_self">Centros de Custos</a></li>
                                     <li><a href="{% url 'courtdistrict_list' %} "target="_self">Comarcas</a></li>
+                                    <li><a href="{% url 'office_list' %} "target="_self">Escritórios</a></li>
                                     <li><a href="{% url 'instance_list' %}" target="_self">Instâncias</a></li>
                                     <li><a href="{% url 'organ_list' %}" target="_self">Órgãos</a></li>
                                     <li><a href="{% url 'folder_list' %}" target="_self">Pastas</a></li>
                                     <li><a href="{% url 'person_list' %}" target="_self">Pessoas</a></li>
                                     <li><a href="{% url 'type_movement_list' %}" target="_self">Tipos de Movimentação</a></li>
                                     <li><a href="{% url 'typetask_list' %}" target="_self">Tipos de Serviço</a>
-                                    <li><a href="{% url 'user_list' %}" target="_self">Usuários</a></li>
                                     <li><a href="{% url 'servicepricetable_list' %}" target="_self">Tabela de preços dos serviços</a></li>
                                     <li><a href="{% url 'courtdivision_list' %}" target="_self">Varas</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                        {% if perms.core.can_access_general_data %}
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle"
+                                   data-toggle="dropdown" role="button"
+                                   aria-haspopup="true" aria-expanded="false">Administração<span
+                                        class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    {% if perms.core.can_edit_surveys %}
+                                        <li><a href="{% url 'survey_list' %} "target="_self">Pesquisas</a></li>
+                                    {% endif %}
+                                    <li><a href="{% url 'user_list' %}" target="_self">Usuários</a></li>
                                 </ul>
                             </li>
                         {% endif %}
@@ -51,7 +65,6 @@
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li>
-
                             <a href="/chat" data-balloon="Clique para ver suas mensagens!"
                                data-balloon-pos="down">
                                 <i class="fa fa-1x fa-commenting" aria-hidden="true">
@@ -61,11 +74,23 @@
                         </li>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-haspopup="true" aria-expanded="false">
+                               <span id="current_office"></span>
+                               <span class="caret"></span>
+                           </a>
+                           <ul class="dropdown-menu">
+                            {% for office in request.user.person.offices.all %}
+                                <li onclick="updateSession('current_office', '{{office.pk}}', '{{csrf_token}}');"><a href="#">{{office.name}}</a></li>
+                            {% endfor %}
+                           </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
                                {# Utilizado request.user.username pelo para nao alterar o nome do usuario logado #}
                                aria-haspopup="true" aria-expanded="false">{{ request.user.username}} <span
                                     class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li><a href="/accounts/password/change/">Alterar Senha</a></li>
+                                <li><a href="{% url 'start_user' %}">Meu perfil</a></li>
                                 <li role="separator" class="divider"></li>
                                 <li><a href="#modal1" onclick="modal('logout_modal', '{% static "js/jquery-2.1.1.min.js" %}')">Sair do Sistema</a>
                                 </li>
