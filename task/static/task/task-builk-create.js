@@ -45,56 +45,72 @@ TaskForm = (function($){
         self.fillForm(params);
     };
 
+    TaskForm.prototype.eventChangeFolder = function(value, callback) {
+        self.fieldWasChanged('folder', value);
+        if (isEmpty(value)){
+            return false;
+        }
+        $.get("/v1/lawsuit/lawsuit?folder=" + value, function(data){
+            var choices;
+            if (data.data.length == 0) {
+                choices = ['<option value="">Sem registros</option>'];
+            } else {
+                choices = ['<option value="">Selecione...</option>'];
+            }
+            $(data.data).each(function(i, item){
+                choices.push('<option value="' + item.id + '">' + item.law_suit_number + ' - ' + item.person_lawyer.name + '</option>');
+            });
+            self.$lawsuit.html(choices.join(''));
+
+            if (typeof(callback) == "function"){
+                callback();
+            }
+        });
+    };
+
+    TaskForm.prototype.eventChangeLawsuit = function(value, callback) {
+        self.fieldWasChanged('lawsuit', value);
+        if(value == '' || value == undefined){
+            return false;
+        }
+
+        $.get("/v1/lawsuit/movement?lawsuit=" + value, function(data){
+            var choices = [];
+            if (data.data.length > 0) {
+                choices = ['<option value="">Selecione...</option>'];
+            } else {
+                choices = ['<option value="">Sem registros</option>'];
+            }
+            $(data.data).each(function(i, item){
+                choices.push('<option value="' + item.id + '">' + item.type_movement_name + '</option>');
+            });
+            self.$movement.html(choices.join(''));
+
+            if (typeof(callback) == "function"){
+                callback();
+            }
+        });
+    };
+
+    TaskForm.prototype.eventChangeMovement = function(value) {
+        self.fieldWasChanged('movement', value);
+        self.loadTasks(value);
+    };
+
     TaskForm.prototype.loadEvents = function() {
         self.$folder.change(function(){
             var value = $(this).val();
-            self.fieldWasChanged('folder', value);
-            if (isEmpty(value)){
-                return false;
-            }
-            $.get("/v1/lawsuit/lawsuit?folder=" + value, function(data){
-                var choices;
-                if (data.data.length == 0) {
-                    choices = ['<option value="">Sem registros</option>'];
-                } else {
-                    choices = ['<option value="">Selecione...</option>'];
-                }
-                $(data.data).each(function(i, item){
-                    choices.push('<option value="' + item.id + '">' + item.law_suit_number + ' - ' + item.person_lawyer.name + '</option>');
-                });
-                self.$lawsuit.html(choices.join(''));
-                self.fieldWasUpdated('lawsuit');
-            });
-
+            self.eventChangeFolder(value);
         });
 
         self.$lawsuit.change(function(){
             var value = $(this).val();
-            self.fieldWasChanged('lawsuit', value);
-            if(value == '' || value == undefined){
-                return false;
-            }
-
-            $.get("/v1/lawsuit/movement?lawsuit=" + value, function(data){
-                var choices = [];
-                if (data.data.length > 0) {
-                    choices = ['<option value="">Selecione...</option>'];
-                } else {
-                    choices = ['<option value="">Sem registros</option>'];
-                }
-                $(data.data).each(function(i, item){
-                    choices.push('<option value="' + item.id + '">' + item.type_movement_name + '</option>');
-                });
-                self.$movement.html(choices.join(''))
-                self.fieldWasUpdated('movement');
-            });
-
+            self.eventChangeLawsuit(value);
         });
 
         self.$movement.change(function(){
             var value = $(this).val();
-            self.fieldWasChanged('movement', value);
-            self.loadTasks(value);
+            self.eventChangeMovement(value);
         });
 
         this.$btn_add_folder.click(function(){
@@ -177,10 +193,6 @@ TaskForm = (function($){
         }
     };
 
-    TaskForm.prototype.fieldWasUpdated = function(field){
-
-    };
-
     TaskForm.prototype.openPopup = function(url){
         window.open(url +"?popup=1", "", "width=800,height=500");
     };
@@ -222,20 +234,14 @@ TaskForm = (function($){
             self.enableAdd('lawsuit');
             self.$btn_add_lawsuit.removeClass('disabled-btn');
         }
-        if (params.lawsuit != undefined && params.lawsuitLabel != undefined){
-            self.$lawsuit.html('');
-            addOption(self.$lawsuit, "Selecione...", "");
-            addOption(self.$lawsuit, decodeURI(params.lawsuitLabel), params.lawsuit);
-            self.enableAdd('movement');
+
+        self.eventChangeFolder(params.folder, function(){
             self.$lawsuit.val(params.lawsuit);
-        }
-        if (params.movement != undefined && params.movementLabel != undefined){
-            self.$movement.html('');
-            addOption(self.$movement, "Selecione...", "");
-            addOption(self.$movement, decodeURI(params.movementLabel), params.movement);
-            self.$movement.val(params.movement);
-            $('#btn_add').removeClass('hide');
-        }
+            self.eventChangeLawsuit(params.lawsuit, function(){
+                self.$movement.val(params.movement);
+                self.eventChangeMovement(params.movement);
+            });
+        });
     };
 
     self = new TaskForm();
