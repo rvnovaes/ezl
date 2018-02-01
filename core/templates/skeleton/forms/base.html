@@ -25,7 +25,9 @@
             </div>
 
             {% block attachment_form %}
-                {% include 'ecm/attachments.html' %}
+                {% if form.instance.use_upload %}
+                    {% include 'ecm/attachments.html' %}
+                {% endif %}
             {% endblock attachment_form %}
 
             <div class="panel-footer text-center">
@@ -50,22 +52,24 @@
     // Extra scripts
     </script>
     {% block upload_scripts %}
-        <!-- UPLOADS SCRIPTS  -->
-        {% include 'ecm/javascripts.html' %}
+        {% if form.instance.use_upload %}
+            <!-- UPLOADS SCRIPTS  -->
+            {% include 'ecm/javascripts.html' %}
 
-        <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
-        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
-        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
-        <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
-        <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
-             a medida que for adicionando novos arquivos -->
-        <div id="scripts">
-        </div>
+            <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+            <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+            <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+            <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+            <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
+                 a medida que for adicionando novos arquivos -->
+            <div id="scripts">
+            </div>
+        {% endif %}
     {% endblock upload_scripts %}
     {{ form.media }}
 {% endblock %}
 {% block script_window_load %}
-    {% if object %}
+    {% if object and form.instance.use_upload %}
         get_attachments('{{ object|get_modelname_from_object }}', {{form.instance.pk}})
     {% endif %}
 {% endblock %}

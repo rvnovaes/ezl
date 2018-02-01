@@ -95,6 +95,10 @@ class Audit(AuditCreate, AuditAlter):
         self.is_active = False
         self.save()
 
+    @property
+    def use_upload(self):
+        return True
+
 
 class AddressType(Audit):
     name = models.CharField(max_length=255, null=False, unique=True)

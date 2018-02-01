@@ -9,8 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db import IntegrityError
-from core.views import (AuditFormMixin, MultiDeleteViewMixin,
-                        SingleTableViewMixin)
+from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from core.messages import CREATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, \
     record_from_wrong_office, success_delete, integrity_error_delete, DELETE_EXCEPTION_MESSAGE
 from core.utils import get_office_session
@@ -47,26 +46,25 @@ def make_response(status=200, content_type='text/plain', content=None):
 ##
 # Views
 ##
-
-class AttachmentFormMixin(CreateView):
+class AttachmentFormMixin(object):
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        files = self.request.FILES.getlist('file')
-        if files:
-            instance = form.save(commit=False)
-            for f in files:
-                model_name = self.model._meta.app_label.lower() + '.' + \
-                             self.model.__name__.lower()
-                attachment = Attachment(
-                    model_name=model_name,
-                    object_id=instance.id,
-                    file=f,
-                    create_user_id=self.request.user.id
-                )
-                attachment.save()
-        form.save()
-        return response
+        if self.model.use_upload:
+            files = self.request.FILES.getlist('file')
+            if files:
+                instance = form.save(commit=False)
+                for f in files:
+                    model_name = self.model._meta.app_label.lower() + '.' + \
+                                 self.model.__name__.lower()
+                    attachment = Attachment(
+                        model_name=model_name,
+                        object_id=instance.id,
+                        file=f,
+                        create_user_id=self.request.user.id
+                    )
+                    attachment.save()
+            form.save()
+        return True
 
 
 class UploadView(View):
@@ -159,7 +157,7 @@ class DefaultAttachmentRuleListView(LoginRequiredMixin, SingleTableViewMixin):
     paginate_by = 30
 
 
-class DefaultAttachmentRuleCreateView(AuditFormMixin, AttachmentFormMixin):
+class DefaultAttachmentRuleCreateView(AuditFormMixin, CreateView):
     model = DefaultAttachmentRule
     form_class = DefaultAttachmentRuleCreateForm
     success_url = reverse_lazy('ecm:defaultattachmentrule_list')
@@ -201,10 +199,3 @@ class DefaultAttachmentRuleDeleteView(AuditFormMixin, MultiDeleteViewMixin):
         model._meta.verbose_name_plural)
     object_list_url = 'ecm:defaultattachmentrule_list'
 
-    def delete(self, request, *args, **kwargs):
-        if request.method == 'POST':
-            pks = request.POST.getlist('selection')
-            if Attachment.objects.filter(model_name='ecm.defaultattachmentrule').filter(object_id__in=pks):
-                Attachment.objects.filter(model_name='ecm.defaultattachmentrule').filter(object_id__in=pks).delete()
-
-        return MultiDeleteViewMixin.delete(self, request, *args, **kwargs)

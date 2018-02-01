@@ -2,24 +2,12 @@
 
 
 <div class="row">
-    {% bootstrap_field form.address_type form_group_class="form-group col-sm-4" %}
-    {% bootstrap_field form.street form_group_class="form-group col-sm-4" %}
-    {% bootstrap_field form.number form_group_class="form-group col-sm-4" %}
+    {% bootstrap_field form.correspondent form_group_class="form-group col-sm-4" %}
+    {% bootstrap_field form.type_task form_group_class="form-group col-sm-4" %}
+    {% bootstrap_field form.value form_group_class="form-group col-sm-4" %}
 </div>
 <div class="row">
-    {% bootstrap_field form.complement form_group_class="form-group col-sm-4" %}
-    {% bootstrap_field form.city_region form_group_class="form-group col-sm-4" %}
-    {% bootstrap_field form.city form_group_class="form-group col-sm-4" %}
-</div>
-<div class="row">
-    {% bootstrap_field form.zip_code form_group_class="form-group col-sm-6" %}
-    <div class="form-group col-sm-6">
-        <div class="checkbox checkbox-success p-t-20">
-            {{ form.is_active }}
-            {{ form.is_active.label_tag }}
-        </div>
-    </div>
-</div>
-<div class="row">
-    {% bootstrap_field form.notes form_group_class="form-group col-sm-12" %}
+    {% bootstrap_field form.client form_group_class="form-group col-sm-4" %}
+    {% bootstrap_field form.state form_group_class="form-group col-sm-4" %}
+    {% bootstrap_field form.court_district form_group_class="form-group col-sm-4" %}
 </div>

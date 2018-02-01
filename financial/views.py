@@ -16,7 +16,6 @@ from dal import autocomplete
 from core.utils import get_office_session
 from django.http import HttpResponseRedirect
 from core.messages import record_from_wrong_office
-from ecm.views import AttachmentFormMixin
 
 
 class CostCenterListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -37,7 +36,7 @@ class CostCenterListView(LoginRequiredMixin, SingleTableViewMixin):
         return context
 
 
-class CostCenterCreateView(AuditFormMixin, AttachmentFormMixin):
+class CostCenterCreateView(AuditFormMixin, CreateView):
     model = CostCenter
     form_class = CostCenterForm
     success_url = reverse_lazy('costcenter_list')
