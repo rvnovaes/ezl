@@ -61,7 +61,9 @@
             <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
 
         </form>
-        {% include 'core/widgets/generic_search_view.html' %}
-        {% include 'core/widgets/generic_form.html' with link_ex=delete link_add=create %}
+        {% if not is_popup %}
+            {% include 'core/widgets/generic_search_view.html' %}
+            {% include 'core/widgets/generic_form.html' with link_ex=delete link_add=create %}
+        {% endif %}
     </div>
 {% endblock %}

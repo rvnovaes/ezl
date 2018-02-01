@@ -1,5 +1,20 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+
+{% block css_head %}{{ block.super }}
+    {% if is_popup %}
+        <style type="text/css">
+            .navbar{
+                display: none;
+            }
+            .content-block{
+                margin-top: 1em;
+            }
+        </style>
+    {% endif %}
+{% endblock %}
+
+
 {% block body %}
     {% if user.is_authenticated %}
         <div class="navbar navbar-default navbar-fixed-top">

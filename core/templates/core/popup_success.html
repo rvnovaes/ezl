@@ -1,0 +1,10 @@
+<script type="text/javascript">
+    function getSearchParams(k){
+        var p={};
+        location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(s,k,v){p[k]=v})
+        return k?p[k]:p;
+    }
+    params = getSearchParams();
+    window.opener.successPopup(params.field, params.value, params.label);
+    window.close();
+</script>

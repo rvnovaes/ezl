@@ -402,3 +402,7 @@ i.material-icons {
 .chat-badge-item.badge{
     background-color: #A52A2A;
 }
+
+.disabled-btn{
+    background-color: #CCC !important;
+}

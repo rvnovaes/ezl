@@ -52,7 +52,7 @@
                     </div>
                     <div class="panel-body">
                         <div class="row">
-                            <div class="form-group col-sm-4">
+                            <div class="form-group col-sm-3">
                                 <label>
                                     <span>Número da pasta / Cliente*</span>
                                     <select
@@ -67,10 +67,15 @@
                                     </select>
                                 </label>
                             </div>
-                            <div class="form-group col-sm-1 hide">
-                                <button class="btn btn-sm btn-raised btn-primary pull-left"><i class="material-icons left">add</i></button>
+                            <div class="form-group col-sm-1">
+                                <button id="btn_add_folder"
+                                        type="button"
+                                        class="btn btn-sm btn-raised btn-primary pull-left"
+                                        title="Adicionar nova pasta">
+                                    <i class="material-icons left">add</i>
+                                </button>
                             </div>
-                            <div class="form-group col-sm-4">
+                            <div class="form-group col-sm-3">
                                 <label>
                                     Número do processo*
                                     <select name="lawsuit"
@@ -80,10 +85,15 @@
                                     </select>
                                 </label>
                             </div>
-                            <div class="form-group col-sm-1 hide">
-                                <button class="btn btn-sm btn-raised btn-primary pull-left"><i class="material-icons left">add</i></button>
+                            <div class="form-group col-sm-1">
+                                <button id="btn_add_lawsuit"
+                                        type="button"
+                                        class="btn btn-sm btn-raised btn-primary pull-left disabled-btn"
+                                        title="Adicionar novo processo">
+                                    <i class="material-icons left">add</i>
+                                </button>
                             </div>
-                            <div class="form-group col-sm-4">
+                            <div class="form-group col-sm-3">
                                 <label>
                                     Tipo de movimentação*
                                     <select name="movement"
@@ -94,8 +104,13 @@
                                     </select>
                                 </label>
                             </div>
-                            <div class="form-group col-sm-1 hide">
-                                <button class="btn btn-sm btn-raised btn-primary pull-left"><i class="material-icons left">add</i></button>
+                            <div class="form-group col-sm-1">
+                                <button id="btn_add_movement"
+                                        type="button"
+                                        class="btn btn-sm btn-raised btn-primary pull-left disabled-btn"
+                                        title="Adicionar nova movimentação">
+                                    <i class="material-icons left">add</i>
+                                </button>
                             </div>
                         </div>
                         {% verbatim %}

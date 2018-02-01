@@ -65,7 +65,7 @@ class Folder(Audit, LegacyCode):
         verbose_name_plural = "Pastas"
 
     def __str__(self):
-        return str(self.folder_number)
+        return "{} - {}".format(self.folder_number, self.person_customer.name)
 
 
 class CourtDivision(Audit, LegacyCode):
@@ -155,7 +155,7 @@ class LawSuit(Audit, LegacyCode):
             "law_suit_number": self.law_suit_number,
             "folder": self.folder.simple_serialize()
         }
-        return data
+        return data        
 
     class Meta:
         db_table = "law_suit"
@@ -166,7 +166,7 @@ class LawSuit(Audit, LegacyCode):
         unique_together = (('instance', 'law_suit_number'),)
 
     def __str__(self):
-        return self.law_suit_number
+        return "{} - {}".format(self.law_suit_number, self.person_lawyer.name)
 
 
 class Movement(Audit, LegacyCode):

@@ -23,7 +23,7 @@ from .models import (Instance, Movement, LawSuit, Folder, CourtDistrict,
 from .tables import (MovementTable, FolderTable, LawSuitTable,
                      CourtDistrictTable, InstanceTable, CourtDivisionTable,
                      TypeMovementTable, OrganTable, AddressOrganTable)
-from core.views import remove_invalid_registry
+from core.views import remove_invalid_registry, PopupMixin
 from django.core.cache import cache
 from dal import autocomplete
 from django.db.models import Q
@@ -269,7 +269,7 @@ class CourtDivisionDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
-class FolderLawsuitCreateView(SuccessMessageMixin, GenericFormOneToMany, CreateView):
+class FolderLawsuitCreateView(PopupMixin, SuccessMessageMixin, GenericFormOneToMany, CreateView):
     model = Folder
     related_model = LawSuit
     form_class = FolderForm
@@ -280,8 +280,17 @@ class FolderLawsuitCreateView(SuccessMessageMixin, GenericFormOneToMany, CreateV
 
     def get_context_data(self, **kwargs):
         context = super(FolderLawsuitCreateView, self).get_context_data(**kwargs)
+        context["is_popup"] = self.is_popup
         RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
+
+    def get_success_url(self):
+        if self.is_popup:
+            self.success_url = "{}?field=folder&value={}&label={}".format(
+                reverse('popup_success'),
+                self.object.id,
+                self.object,
+            )
 
 
 class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateView):
@@ -366,7 +375,7 @@ class LawSuitDeleteView(AuditFormMixin, DeleteView):
                     kwargs={'pk': parent_class}))
 
 
-class LawsuitMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
+class LawsuitMovementCreateView(PopupMixin, SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
                                 CreateView):
     model = LawSuit
     related_model = Movement
@@ -388,8 +397,15 @@ class LawsuitMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, Generic
         return context
 
     def get_success_url(self):
-        self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
-        super(LawsuitMovementCreateView, self).get_success_url()
+        if self.is_popup:
+            self.success_url = "{}?field=lawsuit&value={}&label={}".format(
+                reverse('popup_success'),
+                self.object.id,
+                self.object
+            )
+        else:
+            self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
+            super().get_success_url()
 
 
 class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
@@ -490,7 +506,7 @@ class MovementDeleteView(AuditFormMixin, MultiDeleteViewMixin):
         return super(MovementDeleteView, self).post(request, *args, **kwargs)
 
 
-class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
+class MovementTaskCreateView(PopupMixin, SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
                              CreateView):
     model = Movement
     related_model = Task
@@ -501,18 +517,26 @@ class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
 
     def get_context_data(self, **kwargs):
         context = super(MovementTaskCreateView, self).get_context_data(**kwargs)
-        context['nav_' + self.related_model._meta.verbose_name] = True
-        context['form_name'] = self.related_model._meta.verbose_name
-        context['form_name_plural'] = self.related_model._meta.verbose_name_plural
-        table = self.table_class(self.related_model.objects.none())
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
-        context['table'] = table
+        if not self.is_popup:
+            context['nav_' + self.related_model._meta.verbose_name] = True
+            context['form_name'] = self.related_model._meta.verbose_name
+            context['form_name_plural'] = self.related_model._meta.verbose_name_plural
+            table = self.table_class(self.related_model.objects.none())
+            RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+            context['table'] = table
         return context
 
     def get_success_url(self):
-        self.success_url = reverse('lawsuit_update',
-                                   kwargs={'folder': self.kwargs['folder'],
-                                           'pk': self.kwargs['lawsuit']})
+        if self.is_popup:
+            self.success_url = "{}?field=movement&value={}&label={}".format(
+                reverse('popup_success'),
+                self.object.id,
+                self.object.type_movement.name
+            )
+        else:
+            self.success_url = reverse('lawsuit_update',
+                                       kwargs={'folder': self.kwargs['folder'],
+                                               'pk': self.kwargs['lawsuit']})
 
 
 class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,

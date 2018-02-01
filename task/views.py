@@ -70,10 +70,9 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
             self.object.movement_id,
             self.object.movement.type_movement.name,
             self.object.movement.law_suit_id,
-            self.object.movement.law_suit.law_suit_number,
+            self.object.movement.law_suit,
             self.object.movement.law_suit.folder_id,
-            "{} - {}".format(self.object.movement.law_suit.folder.folder_number,
-                             self.object.movement.law_suit.folder.person_customer.name),
+            self.object.movement.law_suit.folder,
         )
 
 

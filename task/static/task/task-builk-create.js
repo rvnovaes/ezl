@@ -4,6 +4,19 @@ function getSearchParams(k){
     return k?p[k]:p;
 }
 
+function successPopup(field, value, label){
+    TaskForm.successPopup(field, value, label);
+}
+
+function isEmpty(value){
+    return value == "" || value == null || value == undefined || value == "0";
+}
+
+function addOption($el, text, value) {
+    value = value | ''; 
+    $el.append('<option value="' + value + '">'+ text +'</option>');
+}
+
 TaskForm = (function($){
     var self;
 
@@ -11,11 +24,10 @@ TaskForm = (function($){
         this.$folder = $("#id_folder");
         this.$lawsuit = $("#id_lawsuit");
         this.$movement = $("#id_movement");
-    }
-
-    function addOption($el, text, value) {
-        value = value | ''; 
-        $el.html('<option value="' + value + '">'+ text +'</option>');
+        this.$btn_add_folder = $("#btn_add_folder");
+        this.$btn_add_lawsuit = $("#btn_add_lawsuit");
+        this.$btn_add_movement = $("#btn_add_movement");
+        this.$btn_add = $('#btn_add');
     }
 
     TaskForm.prototype.init = function() {
@@ -35,17 +47,12 @@ TaskForm = (function($){
 
     TaskForm.prototype.loadEvents = function() {
         self.$folder.change(function(){
-            $('#btn_add').addClass('hide');
-            var folder = $(this).val();
-            if (folder == "" || folder == null){
-                addOption(self.$lawsuit, 'Selecione a pasta');
-                addOption(self.$movement, 'Selecione o processo');
-                return
+            var value = $(this).val();
+            self.fieldWasChanged('folder', value);
+            if (isEmpty(value)){
+                return false;
             }
-            addOption(self.$lawsuit, 'Carregando...');
-            addOption(self.$movement, 'Selecione o processo');
-
-            $.get("/v1/lawsuit/lawsuit?folder=" + folder, function(data){
+            $.get("/v1/lawsuit/lawsuit?folder=" + value, function(data){
                 var choices;
                 if (data.data.length == 0) {
                     choices = ['<option value="">Sem registros</option>'];
@@ -55,41 +62,148 @@ TaskForm = (function($){
                 $(data.data).each(function(i, item){
                     choices.push('<option value="' + item.id + '">' + item.law_suit_number + ' - ' + item.person_lawyer.name + '</option>');
                 });
-                self.$lawsuit.html(choices.join(''))
+                self.$lawsuit.html(choices.join(''));
+                self.fieldWasUpdated('lawsuit');
             });
 
         });
 
         self.$lawsuit.change(function(){
-            $('#btn_add').addClass('hide');
-            var lawsuit = $(this).val();
-            if (lawsuit == "" || lawsuit == null){
-                addOption(self.$movement, 'Selecione o processo');
-                return
+            var value = $(this).val();
+            self.fieldWasChanged('lawsuit', value);
+            if(value == '' || value == undefined){
+                return false;
             }
-            addOption(self.$movement, 'Carregando...');
 
-            $.get("/v1/lawsuit/movement?lawsuit=" + lawsuit, function(data){
-                var choices;
-                if (data.data.length == 0) {
-                    choices = ['<option value="">Sem registros</option>'];
-                } else {
+            $.get("/v1/lawsuit/movement?lawsuit=" + value, function(data){
+                var choices = [];
+                if (data.data.length > 0) {
                     choices = ['<option value="">Selecione...</option>'];
+                } else {
+                    choices = ['<option value="">Sem registros</option>'];
                 }
                 $(data.data).each(function(i, item){
                     choices.push('<option value="' + item.id + '">' + item.type_movement_name + '</option>');
                 });
                 self.$movement.html(choices.join(''))
+                self.fieldWasUpdated('movement');
             });
 
         });
 
         self.$movement.change(function(){
-            var movement = $(this).val();
-            self.loadTasks(movement);
-            $('#btn_add').removeClass('hide');
+            var value = $(this).val();
+            self.fieldWasChanged('movement', value);
+            self.loadTasks(value);
         });
 
+        this.$btn_add_folder.click(function(){
+            self.openPopup("/processos/pastas/");
+        });
+
+        this.$btn_add_lawsuit.click(function(){
+            var folder = self.$folder.value || self.$folder.val();
+            if (isEmpty(folder)) {
+                return
+            }
+            self.openPopup("/processos/processos/" + folder);
+        });
+
+        this.$btn_add_movement.click(function(){
+            var lawsuit = self.$lawsuit.val();
+            if (isEmpty(lawsuit)) {
+                return
+            }
+            self.openPopup("/processos/movimentacao/" + lawsuit);
+        });
+
+    };
+
+    TaskForm.prototype.disableAdd = function(field){
+        self['$btn_add_' + field].addClass('disabled-btn');
+    };
+
+    TaskForm.prototype.enableAdd = function(field){
+        self['$btn_add_' + field].removeClass('disabled-btn');
+    };
+
+    TaskForm.prototype.clearTaskList = function(){
+        self.task_list.$data.tasks = [];
+    };
+
+    TaskForm.prototype.removeChoices = function(field){
+        var $el = self['$' + field],
+            label;
+        $el.html('');
+
+        if (field == 'lawsuit') {
+            label = 'Selecione a pasta';
+            self.removeChoices('movement');
+        }
+        if (field == 'movement') {
+            label = 'Selecione o processo';
+        }
+        addOption($el, label);
+    };
+
+    TaskForm.prototype.fieldWasChanged = function(field, value){
+        if (field == "folder") {
+            if(isEmpty(value)){
+                self.disableAdd('lawsuit');
+                self.removeChoices('lawsuit');
+            } else {
+                self.enableAdd('lawsuit');
+            }
+            self.disableAdd('movement');
+            self.clearTaskList();
+        }
+        if (field == 'lawsuit'){
+            if(isEmpty(value)){
+                self.disableAdd('movement');
+                self.removeChoices('movement');
+            } else {
+                self.enableAdd('movement');
+            }
+            self.clearTaskList();
+        }
+        this.$btn_add.addClass('hide');
+        if (field == 'movement'){
+            if (isEmpty(value)) {
+                self.clearTaskList();
+            } else {
+                this.$btn_add.removeClass('hide');
+                self.loadTasks(value);
+            }
+        }
+    };
+
+    TaskForm.prototype.fieldWasUpdated = function(field){
+
+    };
+
+    TaskForm.prototype.openPopup = function(url){
+        window.open(url +"?popup=1", "", "width=800,height=500");
+    };
+
+    TaskForm.prototype.successPopup = function(field, value, label){
+        var $el = self["$" + field];
+        if ($el.prop('tagName').toLowerCase() == "select"){
+            addOption($el, decodeURI(label), value);
+        } else {
+            $('#select2-id_'+ field +'-container').append(decodeURI(label));
+            $('.select2-selection__placeholder').text('');
+        }
+        $el.val(value);
+        $el.value = value;
+        self.fieldWasChanged(field, value);
+        if (field == 'lawsuit' || field == 'folder') {
+            self.$movement.html('');
+            addOption(self.$movement, "Sem registros", "");
+        }
+        if (field == 'folder') {
+            self.$lawsuit.html('');
+            addOption(self.$lawsuit, "Sem registros", "");
+        }
     };
 
     TaskForm.prototype.loadTasks = function(movement){
@@ -101,15 +215,26 @@ TaskForm = (function($){
     };
 
     TaskForm.prototype.fillForm = function(params){
-        if (params.movement != undefined && params.movementLabel != undefined)
-            addOption(self.$movement, decodeURI(params.movementLabel), params.movement);
-            $('#btn_add').removeClass('hide');
-        if (params.lawsuit != undefined && params.lawsuitLabel != undefined)
-            addOption(self.$lawsuit, decodeURI(params.lawsuitLabel), params.lawsuit);
         if (params.folder != undefined && params.folderLabel != undefined){
             $('#select2-id_folder-container').append(decodeURI(params.folderLabel));
             $('.select2-selection__placeholder').text('');
-            self.$folder.val(params.folder);
+            self.$folder.value = params.folder;
+            self.enableAdd('lawsuit');
+            self.$btn_add_lawsuit.removeClass('disabled-btn');
+        }
+        if (params.lawsuit != undefined && params.lawsuitLabel != undefined){
+            self.$lawsuit.html('');
+            addOption(self.$lawsuit, "Selecione...", "");
+            addOption(self.$lawsuit, decodeURI(params.lawsuitLabel), params.lawsuit);
+            self.enableAdd('movement');
+            self.$lawsuit.val(params.lawsuit);
+        }
+        if (params.movement != undefined && params.movementLabel != undefined){
+            self.$movement.html('');
+            addOption(self.$movement, "Selecione...", "");
+            addOption(self.$movement, decodeURI(params.movementLabel), params.movement);
+            self.$movement.val(params.movement);
+            $('#btn_add').removeClass('hide');
         }
     };
 

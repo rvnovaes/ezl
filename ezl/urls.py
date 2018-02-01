@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
 from core.views import ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin, \
-    CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave
+    CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave, PopupSuccessView
 from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, TaskBulkCreateView
 
@@ -70,6 +70,9 @@ urlpatterns = [
     url(r'^editable-list/save',
         csrf_exempt(EditableListSave.as_view()),
         name='editable-list-save'),
+
+
+    url(r'^popup_success', PopupSuccessView.as_view(), name='popup_success'),
 
 ] + \
     static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static/')) + \
