@@ -2,8 +2,8 @@ from django import forms
 from task.models import TypeTask
 from material import Layout, Row
 from core.widgets import MDModelSelect2
-from core.models import Person, State
-from core.utils import filter_valid_choice_form
+from core.models import Person, State, Office
+from core.utils import filter_valid_choice_form, get_office_field
 from lawsuit.models import CourtDistrict
 from task.models import TypeTask
 from .models import CostCenter, ServicePriceTable
@@ -18,7 +18,8 @@ class BaseModelForm(forms.ModelForm):
 class CostCenterForm(BaseModelForm):
 
     layout = Layout(
-        Row('name', 'is_active'),
+        Row('office'),
+        Row('name', 'is_active')
     )
 
     legacy_code = forms.CharField(
@@ -27,12 +28,18 @@ class CostCenterForm(BaseModelForm):
 
     class Meta:
         model = CostCenter
-        fields = ['name', 'legacy_code', 'is_active']
+        fields = ['office', 'name', 'legacy_code', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
 
 
 class ServicePriceTableForm(BaseModelForm):
 
     layout = Layout(
+        Row('office'),
         Row('correspondent', 'type_task', 'value'),
         Row('client', 'state', 'court_district'),
     )
@@ -98,7 +105,7 @@ class ServicePriceTableForm(BaseModelForm):
 
     class Meta:
         model = ServicePriceTable
-        fields = ('type_task', 'court_district', 'state', 'client', 'correspondent', 'value')
+        fields = ('type_task', 'court_district', 'state', 'client', 'correspondent', 'value', 'office')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'
@@ -117,3 +124,8 @@ class ServicePriceTableForm(BaseModelForm):
         if not type_task:
             raise forms.ValidationError("Favor Selecionar um Tipo de Serviço")
         return type_task
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)

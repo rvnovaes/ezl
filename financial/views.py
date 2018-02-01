@@ -1,9 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse
+from django.contrib import messages
 
 from django.views.generic.edit import CreateView, UpdateView
 from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
                            DELETE_SUCCESS_MESSAGE)
+from core.models import Office
 from core.views import (AuditFormMixin, MultiDeleteViewMixin,
                         SingleTableViewMixin)
 from .forms import CostCenterForm, ServicePriceTableForm
@@ -11,6 +13,9 @@ from .models import CostCenter, ServicePriceTable
 from .tables import CostCenterTable, ServicePriceTableTable
 from core.views import remove_invalid_registry
 from dal import autocomplete
+from core.utils import get_office_session
+from django.http import HttpResponseRedirect
+from core.messages import record_from_wrong_office
 
 
 class CostCenterListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -38,6 +43,11 @@ class CostCenterCreateView(AuditFormMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'costcenter_list'
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class CostCenterUpdateView(AuditFormMixin, UpdateView):
     model = CostCenter
@@ -46,6 +56,19 @@ class CostCenterUpdateView(AuditFormMixin, UpdateView):
     success_message = UPDATE_SUCCESS_MESSAGE
     template_name_suffix = '_update_form'
     object_list_url = 'costcenter_list'
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request,record_from_wrong_office(),)
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class CostCenterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
@@ -81,6 +104,11 @@ class ServicePriceTableCreateView(AuditFormMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'servicepricetable_list'
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
     model = ServicePriceTable
@@ -89,6 +117,19 @@ class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
     success_message = UPDATE_SUCCESS_MESSAGE
     template_name_suffix = '_update_form'
     object_list_url = 'servicepricetable_list'
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        office_session = get_office_session(request=request)
+        if obj.office != office_session:
+            messages.error(self.request, record_from_wrong_office(), )
+            return HttpResponseRedirect(reverse('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):
