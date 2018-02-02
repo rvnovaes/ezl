@@ -50,7 +50,6 @@ from ecm.models import Attachment
 from ecm.utils import attachment_form_valid, attachments_multi_delete
 
 
-
 class AutoCompleteView(autocomplete.Select2QuerySetView):
     model = abstractproperty()
     lookups = abstractproperty()
@@ -92,7 +91,7 @@ class CityAutoCompleteView(AutoCompleteView):
         'state__name__unaccent__contains',
         'state__country__name__unaccent__contains',
     )
-    select_related = ('state__country', 'state', )
+    select_related = ('state__country', 'state',)
 
     def get_result_label(self, result):
         return '{} - {}/{} - {}'.format(result.name,
@@ -116,6 +115,7 @@ def inicial(request):
         return HttpResponseRedirect(reverse_lazy('start_user'))
     else:
         return HttpResponseRedirect('/')
+
 
 class StartUserView(View):
     template_name = 'core/start_user.html'
@@ -273,7 +273,7 @@ class AddressMixin(AuditFormMixin):
 
     def get_object_list_url(self):
         # TODO: Este método parece ser inútil, success_url pode ser usado.
-        return reverse('{}_update'.format(self.related_model_name), args=(self.object_related.pk, ))
+        return reverse('{}_update'.format(self.related_model_name), args=(self.object_related.pk,))
 
 
 class AddressCreateView(AddressMixin, CreateView):
@@ -286,7 +286,7 @@ class AddressCreateView(AddressMixin, CreateView):
                          related_field_pk='person')
 
     def get_success_url(self):
-        return reverse('person_update', args=(self.object.person.pk, ))
+        return reverse('person_update', args=(self.object.person.pk,))
 
 
 class AddressOfficeCreateView(AddressMixin, CreateView):
@@ -299,7 +299,7 @@ class AddressOfficeCreateView(AddressMixin, CreateView):
                          related_field_pk='office')
 
     def get_success_url(self):
-        return reverse('office_update', args=(self.object.office.pk, ))
+        return reverse('office_update', args=(self.object.office.pk,))
 
 
 class AddressUpdateView(AddressMixin, UpdateView):
@@ -308,7 +308,7 @@ class AddressUpdateView(AddressMixin, UpdateView):
     success_message = UPDATE_SUCCESS_MESSAGE
 
     def get_success_url(self):
-        return reverse('person_update', args=(self.object.person.pk, ))
+        return reverse('person_update', args=(self.object.person.pk,))
 
     def dispatch(self, request, *args, **kwargs):
         if self.kwargs.get('person_pk'):
@@ -416,8 +416,7 @@ def address_update(request, pk):
 class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Person
     table_class = PersonTable
-    ordering = ('legal_name', 'name', )
-
+    ordering = ('legal_name', 'name',)
 
     @remove_invalid_registry
     def get_context_data(self, **kwargs):
@@ -431,7 +430,8 @@ class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
         context = super(PersonListView, self).get_context_data(**kwargs)
         office_session = get_office_session(request=self.request)
         table = self.table_class(
-            context['table'].data.data.filter(offices=office_session).exclude(pk__in=Organ.objects.all()).order_by('-pk'))
+            context['table'].data.data.filter(offices=office_session).exclude(pk__in=Organ.objects.all()).order_by(
+                '-pk'))
         context['table'] = table
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         return context
@@ -460,7 +460,7 @@ class PersonCreateView(AuditFormMixin, CreateView):
             with transaction.atomic():
                 self.object = form.save(commit=False)
                 office_session = get_office_session(self.request)
-                if self.object.cpf_cnpj is not None and\
+                if self.object.cpf_cnpj is not None and \
                         office_session.persons.filter(cpf_cnpj=self.object.cpf_cnpj).first():
                     form._errors[forms.forms.NON_FIELD_ERRORS] = ErrorList([
                         u'Já existe uma pessoa cadastrada com este CPF/CNPJ para este escritório'
@@ -770,7 +770,7 @@ class UserListView(LoginRequiredMixin, SingleTableViewMixin):
     model = User
     table_class = UserTable
     template_name = 'auth/user_list.html'
-    ordering = ('first_name', 'last_name', 'username', 'email', )
+    ordering = ('first_name', 'last_name', 'username', 'email',)
 
 
 class UserCreateView(AuditFormMixin, CreateView):
@@ -823,8 +823,8 @@ class UserUpdateView(AuditFormMixin, UpdateView):
 
             obj = DefaultOffice.objects.filter(auth_user=form.instance).first()
             if obj:
-                obj.office=default_office
-                obj.alter_user=self.request.user
+                obj.office = default_office
+                obj.alter_user = self.request.user
                 obj.save()
             else:
                 DefaultOffice.objects.create(auth_user=form.instance, office=default_office,
@@ -1083,6 +1083,7 @@ class TypeaHeadGenericSearch(View):
     """
     Responsavel por gerar os filtros do campo typeahead
     """
+
     def get(self, request, *args, **kwargs):
         module = importlib.import_module(self.request.GET.get('module'))
         model = getattr(module, self.request.GET.get('model'))
@@ -1092,9 +1093,11 @@ class TypeaHeadGenericSearch(View):
 
     @staticmethod
     def get_data(module, model, field, q):
-        f = "model.objects.filter({field}__unaccent__icontains='{q}').annotate(value=F('{field}'))" \
-            ".values('id', 'value').order_by('{field}')".format(field=field, q=q)
-        return list(eval(f))
+        params = {
+            '{}__unaccent__icontains'.format(field): q,
+        }
+        data = model.objects.filter(**params).annotate(value=F(field)).values('id', 'value').order_by(field)
+        return list(data)
 
 
 class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
@@ -1102,7 +1105,7 @@ class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
     def get_data(module, model, field, q):
         params = {
             '{}__unaccent__icontains'.format(field): q,
-            }
+        }
         data = []
         for person in Person.objects.filter(~Q(auth_user=None), **params):
             data.append({'id': person.id, 'value': person.legal_name + ' ({})'.format(person.auth_user)})
