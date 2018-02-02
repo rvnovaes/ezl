@@ -1,4 +1,5 @@
 {% extends "skeleton/forms/base.html" %}
+{% load static   %}
 
 {% block extra_form %}
     <div class="col-sm-12">
@@ -26,6 +27,19 @@
     {% include 'core/widgets/cancel_button.html'  with link_list='person_list' %}
 {% endblock %}
 {% block extra_scripts %}
+    {% if view.model.use_upload %}
+        <!-- UPLOADS SCRIPTS  -->
+        {% include 'ecm/javascripts.html' %}
+
+        <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+        <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+        <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
+             a medida que for adicionando novos arquivos -->
+        <div id="scripts">
+        </div>
+    {% endif %}
     {{ personaddress.forms.0.media }}
 {#    <script type="text/javascript">#}
 {#        $(function () {#}

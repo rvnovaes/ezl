@@ -54,9 +54,8 @@ def attachment_form_valid(f):
         if object_instance.model.use_upload:
             files = object_instance.request.FILES.getlist('file')
             if files:
-                instance = form.save(commit=False)
+                instance = object_instance.object
                 for file in files:
-                    import pdb;pdb.set_trace()
                     model_name = get_attachment_model_name(object_instance.model)
                     attachment = Attachment(
                         model_name=model_name,
@@ -66,7 +65,6 @@ def attachment_form_valid(f):
                         create_user_id=object_instance.request.user.id
                     )
                     attachment.save()
-            form.save()
         return f(object_instance, form)
     return wrapper
 

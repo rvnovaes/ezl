@@ -302,7 +302,7 @@ class AddressOfficeCreateView(AddressMixin, CreateView):
         return reverse('office_update', args=(self.object.office.pk,))
 
 
-class AddressUpdateView(AddressMixin, UpdateView):
+class AddressUpdateView(UpdateView):
     model = Address
     form_class = AddressForm
     success_message = UPDATE_SUCCESS_MESSAGE
@@ -452,6 +452,7 @@ class PersonCreateView(AuditFormMixin, CreateView):
             data['personaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
         return data
 
+    @attachment_form_valid
     def form_valid(self, form):
 
         if AuditFormMixin.form_valid(self, form):
