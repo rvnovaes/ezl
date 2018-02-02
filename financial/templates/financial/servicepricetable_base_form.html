@@ -9,7 +9,8 @@
 </div>
 <div class="valign-wrapper layout-row row">
     <div class="col s12 m4">
-        <label for="{{ form.correspondent.id_for_label }}" style="position: relative;" id="select2_label">{{ form.correspondent.label }}</label>
+        <label for="{{ form.correspondent.id_for_label }}" style="position: relative;"
+               id="select2_label">{{ form.correspondent.label }}</label>
         {{ form.correspondent }}
     </div>
     <div class="select-field col s12 m4 required" id="{{ form.type_task.id_for_label }}_container">
@@ -25,7 +26,8 @@
 </div>
 <div class="layout-row row">
     <div class="col s12 m4">
-        <label for="{{ form.client.id_for_label }}" style="position: relative;" id="select2_label">{{ form.client.label }}</label>
+        <label for="{{ form.client.id_for_label }}" style="position: relative;"
+               id="select2_label">{{ form.client.label }}</label>
         {{ form.client }}
     </div>
     <div class="select-field col s12 m4" id="{{ form.state.id_for_label }}_container">
@@ -33,7 +35,8 @@
         {{ form.state }}
     </div>
     <div class="col s12 m4">
-        <label for="{{ form.court_district.id_for_label }}" style="position: relative;" id="select2_label">{{ form.court_district.label }}</label>
+        <label for="{{ form.court_district.id_for_label }}" style="position: relative;"
+               id="select2_label">{{ form.court_district.label }}</label>
         {{ form.court_district }}
     </div>
 </div>
@@ -41,4 +44,15 @@
 {% block extrajs %}
     {{ form.media }}
     <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            var stateSelect = $('#id_state').prop('selectedIndex');
+            $('#id_state').on('change', function () {
+                if (stateSelect !== $('#id_state').prop('selectedIndex')){
+                    $('#id_court_district').empty()
+                    stateSelect = $('#id_state').prop('selectedIndex');
+                }
+            })
+        })
+    </script>
 {% endblock %}
