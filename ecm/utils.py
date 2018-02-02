@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Author: Christian Douglas <christian.douglas.alcantara@gmail.com>
 import os
+from functools import wraps
+from .models import Attachment
 
 
 def combine_chunks(total_parts, total_size, source_folder, dest):
@@ -39,3 +41,39 @@ def save_upload(f, path):
         else:
             destination.write(f.read())
 
+
+def get_attachment_model_name(model_attachment):
+    return model_attachment._meta.app_label.lower() + '.' + \
+           model_attachment.__name__.lower()
+
+
+def attachment_form_valid(f):
+    @wraps(f)
+    def wrapper(object_instance, form):
+        f(object_instance, form)
+        if object_instance.model.use_upload:
+            files = object_instance.request.FILES.getlist('file')
+            if files:
+                instance = form.save(commit=False)
+                for file in files:
+                    import pdb;pdb.set_trace()
+                    model_name = get_attachment_model_name(object_instance.model)
+                    attachment = Attachment(
+                        model_name=model_name,
+                        object_id=instance.id,
+                        file=file,
+                        exibition_name=file.name,
+                        create_user_id=object_instance.request.user.id
+                    )
+                    attachment.save()
+            form.save()
+        return f(object_instance, form)
+    return wrapper
+
+
+def attachments_multi_delete(model_attachment, pks=[],):
+    model_name = get_attachment_model_name(model_attachment)
+    if Attachment.objects.filter(model_name=model_name) \
+            .filter(object_id__in=pks):
+        Attachment.objects.filter(model_name=model_name) \
+            .filter(object_id__in=pks).delete()

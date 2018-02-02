@@ -46,6 +46,9 @@ from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task
 from ecm.forms import AttachmentForm
+from ecm.models import Attachment
+from ecm.utils import attachment_form_valid, attachments_multi_delete
+
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -138,6 +141,7 @@ class MultiDeleteViewMixin(DeleteView):
 
             try:
                 self.model.objects.filter(pk__in=pks).delete()
+                attachments_multi_delete(self.model, pks=pks)
                 messages.success(self.request, self.success_message)
             except ProtectedError as e:
                 qs = e.protected_objects.first()
@@ -225,6 +229,7 @@ class AuditFormMixin(LoginRequiredMixin, SuccessMessageMixin):
             form.fields['is_active'].widget.attrs['disabled'] = 'disabled'
         return form
 
+    @attachment_form_valid
     def form_valid(self, form):
         instance = form.save(commit=False)
 

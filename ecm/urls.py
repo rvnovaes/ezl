@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 # Author: Christian Douglas <christian.douglas.alcantara@gmail.com>
 from django.conf.urls import url
+from django.contrib.auth.decorators import login_required
 from . import views
 
 urlpatterns = [
-    url(r'^ajax-upload(?:/(?P<qquuid>\S+))?', views.UploadView.as_view(), name='ajax-upload'),
+    url(r'^ajax-upload/$', login_required(views.UploadView.as_view()), name='ajax-upload'),
     url(r'^ajax_get_attachments', views.ajax_get_attachments, name='ajax-get-attachments'),
     url(r'^ajax-drop-attachment/(?P<pk>[0-9]+)/$', views.ajax_drop_attachment, name='ajax-drop-attachment'),
 

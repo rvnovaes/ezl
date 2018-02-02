@@ -8,7 +8,7 @@
                         '       <small class="text-muted">${data}</small>\n' +
                         '    </td>\n' +
                         '    <td class="text-left">\n' +
-                        '       <h4><i class="fa fa-file-o"></i> ${filename}</h4>\n' +
+                        '       <h4><i class="fa fa-file-o"></i> ${file}</h4>\n' +
                         '    </td>\n' +
                         '    <td class="text-right">\n' +
                         '       <button onclick="window.open(\'/media/${url}\', \'_new\')" data-toggle="tooltip" title="Baixar arquivo"  type="button" class="btn btn-info btn-outline btn-circle btn-sm m-r-5"><i class="icon-cloud-download"></i></button>\n' +
@@ -18,6 +18,18 @@
                         '       </button>\n'+
                         '    </td>\n' +
                         '</tr>';
+
+     var tmplRowUploadCreate =  '<tr class="zoomInDown animated file_${index}">\n' +
+                                '    <td style="width: 70px;">\n' +
+                                '       <h4><i class="fa fa-file-o"></i> ${name}</h4>' +
+                                '    </td>\n' +
+                                '    <td class="text-left">\n' +
+                                '       <h4> ${type}</h4>\n' +
+                                '    </td>\n' +
+                                '    <td class="text-right">\n' +
+                                '       <h4> ${size}</h4>\n' +
+                                '    </td>\n' +
+                                '</tr>';
 
     function get_attachments(model_name, object_id) {
         $.ajax({
@@ -36,7 +48,7 @@
                     $('#no-data').removeClass('show')
                 };
                 $.each(data.files, function( index, value ) {
-                    console.log("AQUI")
+                    console.log(value);
                     $.tmpl(tmplRowUpload, value).appendTo('#containnerUploads');
                 })
             }
@@ -63,7 +75,7 @@
                     if (data.is_deleted) {
                         $('#deleting').modal('hide');
                         get_attachments(model_name, object_id);
-                        swal("Sucesso", data.message, "success")
+                        swal("Sucesso!!!", data.message, "success")
                     }
                     else {
                         $('#deleting').modal('hide');
@@ -73,4 +85,66 @@
             })
         });
     }
+
+    $(function () {
+        $(".js-upload-files").click(function () {
+            $("#fileupload").click();
+        });
+
+        $("#fileupload").fileupload({
+            dataType: 'json',
+            //Envia os arquivos um-a-um
+            sequentialUploads: false,
+
+            // Mostra a janela modal com progress bar ao início do upload
+            start: function (e) {
+                $("#modal-progress").modal("show");
+            },
+
+            // Depois de enviado o(s) arquivo(s), encerra a janela modal
+            stop: function (e) {
+                $("#modal-progress").modal("hide");
+            },
+
+            // Atualiza o Progress bar de acordo com o andamento do envio do arquivo
+            progressall: function (e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                var strProgress = progress + "%";
+                $(".progress-bar").css({"width": strProgress});
+                $(".progress-bar").text(strProgress);
+            },
+            done: function (e, data) {
+                if (data.result.success) {
+                    $("#modal-progress").modal("hide");
+                    swal("Sucesso", data.result.message, "success");
+                    get_attachments(data.result.model_name, data.result.object_id);
+                } else {
+                    $("#modal-progress").modal("hide");
+                    swal('Erro', data.result.message, 'error');
+                }
+            }
+
+        });
+
+    });
+
+    $(function () {
+        $(".js-upload-files-create").click(function () {
+            $("#fileupload-create").click();
+        });
+    });
+
+    $('#fileupload-create').change(function(){
+        console.log("The text has been changed.");
+        totalFiles = $('#fileupload-create')[0].files.length;
+        if (totalFiles > 0) {
+            $('#no-data').addClass('hide');
+        }else{
+            $('#no-data').removeClass('show');
+        }
+        $('#containnerUploads').html('');
+        $.each($('#fileupload-create')[0].files, function( index, value ) {
+            $.tmpl(tmplRowUploadCreate, value).appendTo('#containnerUploads');
+        })
+    });
 </script>

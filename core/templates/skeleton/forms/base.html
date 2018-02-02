@@ -1,5 +1,6 @@
 {% extends 'skeleton/base.html' %}
 {% load static bootstrap3 form_tags %}
+{% load ecm_tags %}
 {% block content %}
     <form enctype="multipart/form-data" id="{{ object_form }}" action="{% block action %}{% endblock %}" method="{% block method %}post{% endblock %}">{% csrf_token %}
     <div class="panel panel-default">
@@ -16,12 +17,19 @@
                                         {{ field.label_tag }}
                                     </div>
                                 </div>
-                            {% else %}
+                            {% elif field_type != 'clearablefile' %}
                                 {% bootstrap_field field form_group_class="form-group col-sm-6" %}
                             {% endif %}
                         {% endfor %}
                     {% endblock %}
             </div>
+
+            {% block attachment_form %}
+                {% if form.instance.use_upload %}
+                    {% include 'ecm/attachments.html' %}
+                {% endif %}
+            {% endblock attachment_form %}
+
             <div class="panel-footer text-center">
                 {% block form_buttons %}
                     {% block button_cancel %}
@@ -32,9 +40,9 @@
                     {% endblock %}
                 {% endblock %}
             </div>
+        {% block extra_form %}{% endblock %}
         </div>
     </div>
-    {% block extra_form %}{% endblock %}
     </form>
     {% block extra_content %}{% endblock %}
 {% endblock content %}
@@ -43,5 +51,25 @@
     <script>
     // Extra scripts
     </script>
+    {% block upload_scripts %}
+        {% if form.instance.use_upload %}
+            <!-- UPLOADS SCRIPTS  -->
+            {% include 'ecm/javascripts.html' %}
+
+            <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+            <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+            <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+            <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+            <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
+                 a medida que for adicionando novos arquivos -->
+            <div id="scripts">
+            </div>
+        {% endif %}
+    {% endblock upload_scripts %}
     {{ form.media }}
+{% endblock %}
+{% block script_window_load %}
+    {% if object and form.instance.use_upload %}
+        get_attachments('{{ object|get_modelname_from_object }}', {{form.instance.pk}})
+    {% endif %}
 {% endblock %}
