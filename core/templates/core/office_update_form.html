@@ -79,7 +79,7 @@
             <div id="invite-users" class="tab-pane fade">
                 <form class="form-inline editable-form" id="form-invite-user" action="#">
                     {% csrf_token %}
-                    <input type="text" value="{{ office.pk }}" name="office" hidden>
+                    <input type="text" value="{{ object.pk }}" name="office" hidden>
                     <div class="control-group">
                         <div class="editable-input" style="width: 80%">
                             <input class="form-control input-sm twitter-typeahead" type="text"
@@ -87,7 +87,7 @@
                                    style="padding-right: 24px;"
                                    id="person" data-url="/typeahead/search/inviteuser" name="person"
                                    value="" data-module="core.models" data-model="Person"
-                                   search-field="legal_name" required>
+                                   search-field="legal_name">
                             <span class="editable-clear-x" style="display: none;"></span>
                         </div>
                         <div class="editable-buttons">
