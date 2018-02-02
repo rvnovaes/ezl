@@ -222,6 +222,11 @@ class Task(Audit, LegacyCode, OfficeMixin):
             address = organ.address_set.first()
         return address
 
+    # TODO Remover Property após modificação do ECM da Task para o ECM genérico
+    @property
+    def use_upload(self):
+        return False
+
     def save(self, *args, **kwargs):
         self._called_by_etl = kwargs.pop('called_by_etl', False)
         if not self.task_number:

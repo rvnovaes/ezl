@@ -330,7 +330,6 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             servicepricetable = ServicePriceTable.objects.get(id=servicepricetable_id)
             form.instance.person_executed_by = (servicepricetable.correspondent
                                                 if servicepricetable.correspondent else None)
-            import pdb;pdb.set_trace()
             attachmentrules = DefaultAttachmentRule.objects.filter(
                 Q(office=get_office_session(self.request)),
                 Q(Q(type_task=form.instance.type_task) | Q(type_task=None)),
@@ -343,10 +342,12 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             for rule in attachmentrules:
                 attachments = Attachment.objects.filter(model_name='ecm.defaultattachmentrule').filter(object_id=rule.id)
                 for attachment in attachments:
-                    fs = FileSystemStorage()
-                    filename = fs.save(attachment.file.name, attachment.file)
-                    obj = Attachment(model_name='task.task', object_id=form.instance.id,
-                                     file=filename, create_user_id=self.request.user.id)
+                    # fs = FileSystemStorage()
+                    # filename = fs.save(attachment.file.name, attachment.file)
+                    obj = Ecm(path=attachment.file,
+                              task=Task.objects.get(id=form.instance.id),
+                              create_user_id=self.request.user.id,
+                              create_date=timezone.now())
                     obj.save()
 
         super(TaskDetailView, self).form_valid(form)
