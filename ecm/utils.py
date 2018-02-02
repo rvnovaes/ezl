@@ -56,11 +56,13 @@ def attachment_form_valid(f):
             if files:
                 instance = form.save(commit=False)
                 for file in files:
+                    import pdb;pdb.set_trace()
                     model_name = get_attachment_model_name(object_instance.model)
                     attachment = Attachment(
                         model_name=model_name,
                         object_id=instance.id,
                         file=file,
+                        exibition_name=file.name,
                         create_user_id=object_instance.request.user.id
                     )
                     attachment.save()

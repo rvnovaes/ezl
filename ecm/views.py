@@ -84,13 +84,15 @@ class UploadView(View):
         if form.is_valid():
             data = request.POST
 
-            attachment = Attachment(
-                model_name=data.get('model_name'),
-                object_id=data.get('object_id'),
-                file=request.FILES.get('file'),
-                create_user_id=request.user.id
-            )
-            attachment.save()
+            for file in request.FILES.getlist('file'):
+                attachment = Attachment(
+                    model_name=data.get('model_name'),
+                    object_id=data.get('object_id'),
+                    file=file,
+                    exibition_name=file.name,
+                    create_user_id=request.user.id
+                )
+                attachment.save()
             return make_response(content=json.dumps({'success': True,
                                                      'model_name': data.get('model_name'),
                                                      'object_id': data.get('object_id')}))
@@ -110,7 +112,7 @@ def ajax_get_attachments(request):
     ret = []
     for attachment in attachments:
         ret.append({
-            'file': attachment.file.name,
+            'file': attachment.exibition_name,
             'object_id': attachment.object_id,
             'model_name': attachment.model_name,
             'pk': attachment.pk,
