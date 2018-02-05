@@ -452,31 +452,43 @@ class PersonCreateView(AuditFormMixin, CreateView):
             data['personaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
         return data
 
-    @attachment_form_valid
     def form_valid(self, form):
 
-        if AuditFormMixin.form_valid(self, form):
-            context = self.get_context_data()
-            personaddress = context['personaddress']
-            with transaction.atomic():
-                self.object = form.save(commit=False)
-                office_session = get_office_session(self.request)
-                if self.object.cpf_cnpj is not None and \
-                        office_session.persons.filter(cpf_cnpj=self.object.cpf_cnpj).first():
-                    form._errors[forms.forms.NON_FIELD_ERRORS] = ErrorList([
-                        u'Já existe uma pessoa cadastrada com este CPF/CNPJ para este escritório'
-                    ])
-                    return self.form_invalid(form)
+        # if AuditFormMixin.form_valid(self, form):
+        instance = form.save(commit=False)
 
-                self.object = form.save()
-                self.object.offices.add(office_session)
+        if 'is_active' in form.fields and not instance.pk:
+            instance.is_active = True
 
-                if personaddress.is_valid():
-                    address = personaddress.forms[0].save(commit=False)
-                    address.person = self.object
-                    address.create_user = self.request.user
-                    address.save()
-            return super(PersonCreateView, self).form_valid(form)
+        if form.instance.id is None:
+            form.instance.create_date = timezone.now()
+            form.instance.create_user = self.request.user
+        else:
+            form.instance.alter_date = timezone.now()
+            form.instance.alter_user = self.request.user
+            form.save()
+
+        context = self.get_context_data()
+        personaddress = context['personaddress']
+        with transaction.atomic():
+            self.object = form.save(commit=False)
+            office_session = get_office_session(self.request)
+            if self.object.cpf_cnpj is not None and \
+                    office_session.persons.filter(cpf_cnpj=self.object.cpf_cnpj).first():
+                form._errors[forms.forms.NON_FIELD_ERRORS] = ErrorList([
+                    u'Já existe uma pessoa cadastrada com este CPF/CNPJ para este escritório'
+                ])
+                return self.form_invalid(form)
+
+            self.object = form.save()
+            self.object.offices.add(office_session)
+
+            if personaddress.is_valid():
+                address = personaddress.forms[0].save(commit=False)
+                address.person = self.object
+                address.create_user = self.request.user
+                address.save()
+        return super().form_valid(form)
 
 
 class PersonUpdateView(AuditFormMixin, UpdateView):
