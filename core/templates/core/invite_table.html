@@ -29,12 +29,12 @@
                 <tbody>
                 {% for row in table.page.object_list|default:table.rows %} {# support pagination #}
                     {% block table.tbody.row %}
-                        <tr class="{% cycle "odd" "even" %}" data-href="{{ row.attrs.data_href }}">
+                        <tr class="{% cycle 'odd' 'even' %}" data-href="{{ row.attrs.data_href }}">
                             {% for column, cell in row.items %}
                                 {% if column.name == 'status' %}
-                                    {% if cell == 'NOt REVIEWED' %}
+                                    {% if cell == 'NOT REVIEWED' %}
                                         <td><span class="label label-warning label-rounded">Pendente</span></td>
-                                    {% elif cell == 'ACCEPT'%}
+                                    {% elif cell == 'ACCEPTED'%}
                                         <td><span class="label label-success label-rounded">Aceito</span></td>
                                     {% else %}
                                         <td><span class="label label-danger label-rounded">Recusado</span></td>
