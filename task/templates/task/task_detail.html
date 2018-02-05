@@ -1,14 +1,76 @@
-{% extends 'inicial.html' %}
+{% extends 'skeleton/base.html' %}
 {% load staticfiles %}
 {% load core_filters %}
-{% load material_form %}
 {% load render_table from django_tables2 %}
 {#{% load formset_tags %}#}
 {% load tz %}
+{% block right-sidebar-chat %}
+    {% include 'chat/chat-right-sidebar.html' %}
+{% endblock %}
 {% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col-md-9">
+    <form id="task_detail" action="" method="post">{% csrf_token %}
+        {% include 'questionnaire/generic_survey.html' with generic_survey=form.instance.type_task.survey_type %}
+        {% include 'task/task_detail/tab.html' %}
+        <div class="panel-group" role="tablist" aria-multiselectable="true">
+            <!-- Arquivos ECM -->
+            {% include 'task/task_detail/arq_ecm.html' %}
+            {% include 'task/task_detail/historico.html' %}
+        </div>
+        <!-- CONFIRMAR AÇÃO -->
+        <div id="confirmAction" class="modal">
+            <div class="modal-dialog">
+                <div class="modal-content ">
+                    <div id="modalHeader">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="panel-title text-center">
+                            <i id="icon" class="material-icons "></i>
+                            <b> Deseja <span id="actionText">aceitar</span> o prazo? </b></h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group" style="margin: auto">
+                            <label> {{ form.notes.label }}</label>
+                            {{ form.notes }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="form-group text-center">
+                            <button style="width: 95px!important;" onClick="this.form.reset()"
+                                    class="btn btn-sm btn-raised btn-default"
+                                    data-dismiss="modal">
+                                Cancelar
+                            </button>
+                            {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
+                                {% if form.instance.type_task.survey_type %}
+                                    <button id="actionButton"
+                                            type="submit"
+                                            onclick="beforeSubmit()"
+                                            style="width: 95px!important;"
+                                            class="btn btn-sm btn-raised btn-primary">Sim
+                                    </button>
+                                {% else %}
+                                    <button id="actionButton"
+                                            type="submit"
+                                            style="width: 95px!important;"
+                                            class="btn btn-sm btn-raised btn-primary">Sim
+                                    </button>
+                                {% endif %}
+
+                            {% else %}
+                                <button id="actionButton"
+                                        style="width: 95px!important;"
+                                        type="submit" class="btn btn-sm btn-raised btn-primary">Sim
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block contente %}
+            <div class="col-md-12">
                 <form id="task_detail" action="" method="post">{% csrf_token %}
                     {% include 'questionnaire/generic_survey.html' %}
 
@@ -407,152 +469,7 @@
                         </div>
                     </div>
 
-                    <!-- Arquivos ECM -->
-                    <div class="panel panel-primary">
-                        <div class="panel-heading " data-toggle="collapse" data-target="#attachment" id="header-attachment"
-                             onclick="toggleArrow()">
-                            <div class="panel-title"><i class="material-icons">attach_file</i>
-                                <b>Anexos</b>
-                                <i class="material-icons" style="float: right;" id="down">arrow_drop_down</i>
-                                <i class="material-icons" style="float: right; display: none;" id="up">arrow_drop_up</i>
-                            </div>
-                        </div>
-                        <div id="attachment" class="panel-collapse collapse">
-                            <div class="panel-body form-group is-focused">
-                                {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
-                                    <button type="button" class="btn btn-sm btn-primary btn-raised js-upload-files"
-                                            style="color: #fff !important;">
-                                        <i class="material-icons">cloud_upload</i> &nbsp; Enviar Arquivo(s)
-                                    </button>
 
-                                    <input id="fileupload" type="file" name="path" multiple
-                                           style="display: none;"
-                                           data-method="POST"
-                                           enctype="multipart/form-data"
-                                           data-url="{% url 'ecm_add' object.id %}"
-                                           data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
-                                    <br>
-                                    <br>
-                                {% endif %}
-                                <p class="text-center" id="no-providence">
-                                    {% if ecms|length == 0 %}
-                                        Esta providência não possui nenhum arquivo em
-                                        anexo.
-                                    {% endif %}
-                                </p>
-                                <div class="table-responsive">
-                                    <table id="files" class="table table-bordered table-responsive">
-                                        <tbody>
-                                        {% for ecm in ecms %}
-                                            <tr class="lineFile" id="row-{{ ecm.id }}">
-                                                <td id="cell-table">
-                                                    <div class="row" id="row-file">
-                                                        <div class="col-sm-2"
-                                                             style="text-align: center !important; vertical-align: middle !important;">
-                                                            <i class="material-icons">person_pin</i>
-                                                        </div>
-                                                        <div class="col-sm-8" style="text-align: left; padding-left: 0;">
-                                                            <h6 style="margin-bottom: 3px !important;">{{ ecm.user.first_name }} {{ ecm.user.last_name }}
-                                                                ({{ ecm.create_user }})
-                                                            </h6>
-
-                                                            <div style="font-size: x-small">
-                                                                {{ ecm.create_date|localtime }}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td id="cell-table" style="font-size: small; width: 70% !important;">
-                                                    <a href="/media/{{ ecm.path }}" download
-                                                       style="text-decoration: none;">{{ ecm.filename }}</a>
-                                                </td>
-                                                {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
-                                                    <td id="cell-table" style="font-size: small">
-                                                        <i class="material-icons {% if ecm.legacy_code %}text-danger{% endif %}" id=""
-                                                           style="cursor: pointer; font-size: medium;"
-                                                                {% if ecm.legacy_code %}
-                                                           data-target="#confirmDeleteNotAllowed"
-                                                                {% else %}
-                                                           data-target="#confirmDelete-{{ ecm.id }}"
-                                                                {% endif %}
-                                                           data-toggle="modal">delete</i>
-                                                    </td>
-                                                {% endif %}
-                                            </tr>
-                                            <tr class="spaceFile" id="row-space{{ ecm.id }}"></tr>
-
-                                            <!-- Janela modal para confirmação de deleção de arquivo -->
-                                            <div id="confirmDelete-{{ ecm.id }}" class="modal">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content ">
-                                                        <div class="modal-body" style="text-align: center !important;">
-                                                            Tem certeza que deseja excluir o arquivo <b>{{ ecm.filename }}</b> ?
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <div class="form-group text-center">
-                                                                <button type="button" style="width: 95px!important;"
-                                                                        class="btn btn-sm btn-raised btn-default"
-                                                                        data-dismiss="modal">
-                                                                    Não
-                                                                </button>
-                                                                <button id="delete-ecm-{{ ecm.id }}"
-                                                                        style="width: 95px!important;"
-                                                                        class="btn btn-sm btn-raised btn-primary"
-                                                                        data-dismiss="modal">Sim
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        {% endfor %}
-                                        <!-- Janela modal para arquivos que não podem ser apagados -->
-                                        <div id="confirmDeleteNotAllowed" class="modal">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content ">
-                                                    <div class="modal-body" style="text-align: center !important;">
-                                                        Arquivos de sistemas legados não podem ser apagados.
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <div class="form-group text-center">
-                                                            <button type="button" style="width: 95px!important;"
-                                                                    class="btn btn-sm btn-raised btn-default"
-                                                                    data-dismiss="modal">
-                                                                Ok
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído o conteúdo das novas janelas modais
-                                        a medida que for adicionando novos arquivos -->
-                                        <div id="modals">
-                                        </div>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <!-- Janela modal para mostrar progresso do envio de arquivos -->
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h4 class="modal-title" style="text-align: center">Enviando ...</h4>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="progress">
-                                        <div class="progress-bar" role="progressbar" style="width: 0%;">0%</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <div class="panel panel-primary">
                         <div class="panel-heading " data-toggle="collapse" data-target="#history" id="header-history"
                              onclick="toggleArrowHist()">
@@ -677,109 +594,37 @@
                     </div>
                 </form>
             </div>
-            <div class="col-md-3">
-                {% include 'chat/chat_external.html' with chat=task.chat %}
-            </div>
-        </div>
-    </div>
 
-    <!-- Janela modal para mostrar progresso de deleção do arquivo -->
-    <div id="deleting" class="modal">
-        <div class="modal-dialog">
-            <div class="modal-content ">
-                <div class="modal-body" style="text-align: center;">
-                    Excluindo arquivo ...
-                </div>
-                <div class="modal-footer">
-                    <div class="progress progress-striped active">
-                        <div class="progress-bar" style="width: 100%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Janela modal para mostrar sucesso ao enviar arquivo -->
-    <div id="sucessSent" class="modal">
-        <div class="modal-dialog">
-            <div class="modal-content ">
-                <div class="modal-body" style="text-align: center !important;">
-                    <p id="message-success-sent">
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <div class="form-group text-center">
-                        <button type="button" style="width: 95px!important;"
-                                class="btn btn-sm btn-raised btn-primary"
-                                data-dismiss="modal">
-                            OK
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Janela modal para mostrar erro ao enviar arquivo -->
-    <div id="errorSent" class="modal">
-        <div class="modal-dialog">
-            <div class="modal-content ">
-                <div class="modal-body" style="text-align: center !important;">
-                    <p id="error-message">
+{% endblock contente %}
 
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <div class="form-group text-center">
-                        <button type="button" style="width: 95px!important;"
-                                class="btn btn-sm btn-raised btn-primary"
-                                data-dismiss="modal">
-                            OK
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+{% block extra_scripts %}
+    <!-- CHAT SCRIPTS  -->
+    {% with object.chat as chat %}
+        {% include 'chat/script.html' with chat=chat%}
+    {% endwith %}
 
-{% endblock content %}
+    <!-- UPLOADS SCRIPTS  -->
+    {% include 'task/includes/upload.html' %}
+    <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
+    <!--Style Switcher -->
+    <script src="{% static 'skeleton/js/cbpFWTabs.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
 
-{% block javascript %}
     <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
     <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
     <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
     <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>
-
-    {% for ecm in ecms %}
-        <script>
-            console.log("Adicionando evento delete-ecm-{{ ecm.id }}");
-            $("#delete-ecm-{{ ecm.id }}").click(function () {
-                    $('#deleting').modal('show');
-                    $.ajax({
-                        url: '{% url 'delete_ecm' ecm.id %}',
-                        dataType: 'json',
-
-                        success: function (data) {
-                            if (data.is_deleted) {
-                                showToast('success', data.message, '', 3000, true);
-                                $('#row-{{ ecm.id }}').remove();
-                                $('#row-space{{ ecm.id }}').remove();
-                                $('#deleting').modal('hide');
-                            }
-                            else {
-                                showToast('error', data.message, '', 0, false);
-                                $('#deleting').modal('hide');
-                            }
-
-                            if (data.num_ged == 0) {
-                                document.getElementById("no-providence").innerHTML = "Esta providência não possui nenhum arquivo em anexo.";
-                            }
-                        }
-                    })
-                }
-            );
-        </script>
-    {% endfor %}
+    <script type="text/javascript">
+        (function() {
+            [].slice.call(document.querySelectorAll('.sttabs')).forEach(function(el) {
+                new CBPFWTabs(el);
+            });
+        })();
+    </script>
     <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
          a medida que for adicionando novos arquivos -->
     <div id="scripts">
@@ -819,6 +664,76 @@
                 document.getElementById("down").style.display = "none";
             }
         }
+
+    </script>
+
+    <script type="text/javascript">
+
+        $(function () {
+            $("input[name=execution_date]").attr({'required': true,
+                'placeholder': 'Data de Cumprimento'});
+        });
+
+        //Função para tratar erro ao enviar formulário com justificativa de cumprimento em branco
+        function beforeSubmit() {
+            $('#task_detail').submit(function (e) {
+                e.preventDefault();
+                $('#confirmAction').modal('hide');
+                $('#survey').modal('show');
+            });
+        }
+
+        var nextState = {
+            ACCEPTED: {text: "aceitar", icon: "assignment_ind"},
+            REFUSED: {text: "recusar", icon: "assignment"},
+            DELEGATED: {text: "delegar", icon: "assignment_returned"},
+            DONE: {text: "Cumprir", icon: "assignment_turned_in"},
+            FINISHED: {text: "Finalizar", icon: "gavel"},
+            BLOCKEDPAYMENT: {text: "Glosar", icon: "money_off"},
+            RETURN: {text: "Retornar", icon: "assignment_late"}
+        };
+
+        function getId(value) {
+            var task_status = value.id;
+
+            var $input = $("input[name=execution_date]");
+            if ($input.length > 0) {
+                var input = $input.get(0);
+                if (! input.checkValidity()) {
+                    input.reportValidity();
+                    return false
+                }
+            }
+
+            $('#confirmAction').modal('show');
+
+            // $("#confirmAction").on('shown.bs.modal', function () {
+            var actionButton = document.getElementById("actionButton");
+            var nextText = document.getElementById("actionText");
+            var icon = document.getElementById("icon");
+            var modalHeader = document.getElementById("modalHeader");
+            nextText.innerHTML = nextState[task_status]['text'];
+            icon.innerHTML = nextState[task_status]['icon'];
+
+            modalHeader.setAttribute("class", "panel-header panel-heading" + " " + task_status);
+
+            actionButton.setAttribute("name", "action");
+            actionButton.setAttribute("value", task_status);
+
+            {# Apenas estes status devem possuir notes como required, alem de nao poder #}
+            {# espacos em branco #}
+
+            var notes = $('textarea[id=notes_id]');
+            notes.removeAttr('required');
+            ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN'].forEach(function (status) {
+                if (task_status === status) {
+                    notes.attr('required', true).change(function () {
+                        notes.val(notes.val().trim())
+                    });
+                }
+            });
+            return true;
+        }
     </script>
     <script type="text/javascript">
         $("#correspondents-table tbody tr").click(function(){
@@ -837,4 +752,43 @@
             }
         });
     </script>
+{% endblock %}
+{% block script_window_load %}
+    {{ block.super }}
+    get_ecms({{form.instance.pk}});
+{% endblock %}
+
+{% block extra_modal %}
+    <!-- Janela modal para mostrar progresso de deleção do arquivo -->
+    <div id="deleting" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center;">
+                    Excluindo arquivo ...
+                </div>
+                <div class="modal-footer">
+                    <div class="progress progress-striped active">
+                        <div class="progress-bar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Janela modal para mostrar progresso do envio de arquivos -->
+    <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" style="text-align: center">Enviando ...</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="progress progress-lg">
+                        <div class="progress-bar progress-bar-info active progress-bar-striped" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" style="width: 0%" role="progressbar">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

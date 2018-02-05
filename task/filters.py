@@ -1,4 +1,5 @@
 from django_filters import FilterSet, BooleanFilter, ModelChoiceFilter, NumberFilter, CharFilter
+from django import forms
 
 from core.models import Person, State
 from core.widgets import MDCheckboxInput, MDDateTimeRangeFilter, MDModelSelect2
@@ -10,19 +11,22 @@ from .models import Task, DashboardViewModel
 
 
 class TaskFilter(FilterSet):
-    state = ModelChoiceFilter(queryset=filter_valid_choice_form(State.objects.filter(is_active=True)),
+    state = ModelChoiceFilter(queryset=filter_valid_choice_form(
+        State.objects.filter(is_active=True).order_by('name')),
                               label="UF")
     court_district = ModelChoiceFilter(queryset=CourtDistrict.objects.filter(),
+                                       name="court_district",
                                        widget=MDModelSelect2(
                                            url='courtdistrict_autocomplete',
                                            forward=['state'],
                                            attrs={
-                                               'class': 'select-with-search material-ignore form-control',
+                                               'class': '',
                                                'data-placeholder': '',
                                                'data-label': 'Comarca'
                                            }),
                                        required=False,
                                        label="Comarca")
+
     type_task = ModelChoiceFilter(queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True)),
                                   label=u"Tipo de Serviço")
     cost_center = ModelChoiceFilter(queryset=filter_valid_choice_form(CostCenter.objects.filter(is_active=True)),
@@ -39,7 +43,7 @@ class TaskFilter(FilterSet):
                                            required=False,
                                            widget=MDModelSelect2(url='correspondent_autocomplete',
                                                                  attrs={
-                                                                        'class': 'select-with-search material-ignore form-control',
+                                                                        'class': '',
                                                                         'data-placeholder': '',
                                                                         'data-label': 'Correspondente'
                                                                        })
@@ -51,7 +55,7 @@ class TaskFilter(FilterSet):
                                         required=False,
                                         widget=MDModelSelect2(url='requester_autocomplete',
                                                               attrs={
-                                                                 'class': 'select-with-search material-ignore form-control',
+                                                                 'class': '',
                                                                  'data-placeholder': '',
                                                                  'data-label': 'Solicitante'
                                                                     })
@@ -63,7 +67,7 @@ class TaskFilter(FilterSet):
                                               required=False,
                                               widget=MDModelSelect2(url='service_autocomplete',
                                                                     attrs={
-                                                                        'class': 'select-with-search material-ignore form-control',
+                                                                        'class': '',
                                                                         'data-placeholder': '',
                                                                         'data-label': 'Contratante'
                                                                           })

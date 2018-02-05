@@ -1,0 +1,34 @@
+{% load static %}
+<div id="about-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Sobre</h4>
+            </div>
+            <div class="modal-body p-l-20">
+                <div class="text-center p-b-10">
+                    <img src="{% static "img/logo_ezl.png" %}" height="30"/>
+                    <p class="text-muted font-bold">Versão: 1.0.7</p>
+                </div>
+
+                <p>Informar um problema: <a href="http://suporte.mtostes.com.br" target="_blank">http://suporte.mtostes.com.br</a></p>
+                <p>&copy; Copyright {% now "Y" %} MTTech. Todos os direitos reservados.</p>
+                <p>Compatibilidade com os navegadores:</p>
+                <ul>
+                    <li>Firefox 47.0 (ou superior)</li>
+                    <li>Google Crome 62.0 (ou superior)</li>
+                    <li>Opera 49.0 (ou superior)</li>
+                    <li>Safari 11.0 (ou superior)</li>
+                </ul>
+                <br>
+                <p>Desenvolvido por: <img onclick="window.open('http://www.mttech.com.br')"
+                    src="{% static "img/logo.png" %}" height="20" style="cursor: pointer; cursor: hand;"/>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success waves-effect" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>

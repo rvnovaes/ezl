@@ -1,4 +1,5 @@
 {% extends 'inicial.html' %}
+{{ chat.pk }}
 {% load staticfiles %}
 {% block head %}
     {% block css_head %}
@@ -7,75 +8,71 @@
     {% endblock %}
 {% endblock %}
 {% block content %}
-<div class="chat-base">
-    <button class="btn btn-primary btn-fab" id="btn-chat-toggle">
-        <i class="fa fa-commenting" aria-hidden="true"></i>
-    </button>
-    <div class="panel panel-primary chat collapse" id="chat-container">
+    <div class="panel panel-primary chat">
         <div class="panel-heading" id="{{ chat.label }}">
-        <span class="glyphicon glyphicon-comment"></span> {{ chat.title }}
+            <span class="glyphicon glyphicon-comment"></span> {{ chat.title }}
+            <div class="btn-group pull-right">
+            </div>
         </div>
-            <div class="panel-collapse" id="{{ chat.pk }}">
-                <div class="chat panel-body">
-                    <ul class="chat" data-id={{ chat.pk }}>
-                        {% for message in chat.messages.all %}
-                            {% if message.create_user == user %}
-                                <li class="right clearfix">
-                                    <span class="chat-img pull-right">
-                                            <img src="https://placehold.it/50/A52A2A/fff&text={{ message.create_user|upper|slice:":2" }}"
-                                                 alt="User Avatar"
-                                                 class="img-circle"/>
-                                    </span>
-                                    <div class="chat-body clearfix">
-                                        <div class="header">
-                                            <small class=" text-muted"><span
-                                                    class="glyphicon glyphicon-time"></span>{{ message.create_date|date:"d/m/Y H:i" }}
-                                            </small>
-                                            <strong class="chat pull-right primary-font">{{ message.create_user }}</strong>
-                                        </div>
-                                        <p>
-                                            {{ message.message }}
-                                        </p>
-                                    </div>
-                                </li>
-                            {% else %}
-                                <li class="left clearfix">
-                                    <span class="chat-img pull-left">
-                                          <img src="https://placehold.it/50/55C1E7/fff&text={{ message.create_user|upper|slice:":2" }}"
-                                               alt="User Avatar" class="img-circle"/>
-                                    </span>
-                                    <div class="chat-body clearfix">
-                                        <div class="header">
-                                            <strong class="pull-left primary-font">{{ message.create_user }}</strong>
-                                            <small class="pull-right text-muted">
-                                                <span class="glyphicon glyphicon-time"></span>{{ message.create_date| date:"d/m/Y H:i" }}
-                                            </small>
-                                        </div>
-                                        <br/>
-                                        <p>
-                                            {{ message.message }}
-                                        </p>
-                                    </div>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                </div>
-                <div class="panel-footer">
-                    <div class="input-group">
-                        <input id="btn-input" type="text" class="form-control input-sm"
-                               placeholder="Digite aqui sua mensagem..."/>
-                        <span class="input-group-btn">
-                                    <button class="btn btn-warning btn-sm" id="btn-chat"
-                                            onclick="sendMessage('{{ chat.pk }}')">
-                                        Enviar</button>
+        <div class="panel-collapse" id="{{ chat.pk }}">
+            <div class="chat panel-body">
+                <ul class="chat" data-id={{ chat.pk }}>
+                    {% for message in chat.messages.all %}
+                        {% if message.create_user == user %}
+                            <li class="right clearfix">
+                                <span class="chat-img pull-right">
+                                                <img src="https://placehold.it/50/A52A2A/fff&text={{ message.create_user|upper|slice:":2" }}"
+                                             alt="User Avatar"
+                                             class="img-circle"/>
                                 </span>
-                    </div>
+                                <div class="chat-body clearfix">
+                                    <div class="header">
+                                        <small class=" text-muted"><span
+                                                class="glyphicon glyphicon-time"></span>{{ message.create_date|date:"d/m/Y H:i" }}
+                                        </small>
+                                        <strong class="chat pull-right primary-font">{{ message.create_user }}</strong>
+                                    </div>
+                                    <p>
+                                        {{ message.message }}
+                                    </p>
+                                </div>
+                            </li>
+                        {% else %}
+                            <li class="left clearfix">
+                                <span class="chat-img pull-left">
+                                      <img src="https://placehold.it/50/55C1E7/fff&text={{ message.create_user|upper|slice:":2" }}"
+                                           alt="User Avatar" class="img-circle"/>
+                                </span>
+                                <div class="chat-body clearfix">
+                                    <div class="header">
+                                        <strong class="pull-left primary-font">{{ message.create_user }}</strong>
+                                        <small class="pull-right text-muted">
+                                            <span class="glyphicon glyphicon-time"></span>{{ message.create_date| date:"d/m/Y H:i" }}
+                                        </small>
+                                    </div>
+                                    <br/>
+                                    <p>
+                                        {{ message.message }}
+                                    </p>
+                                </div>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="panel-footer">
+                <div class="input-group">
+                    <input id="btn-input" type="text" class="form-control input-sm"
+                           placeholder="Digite aqui sua mensagem..."/>
+                    <span class="input-group-btn">
+                                <button class="btn btn-warning btn-sm" id="btn-chat"
+                                        onclick="sendMessage('{{ chat.pk }}')">
+                                    Enviar</button>
+                            </span>
                 </div>
             </div>
+        </div>
     </div>
-</div>
-
 {% endblock %}
 {% block javascript %}
     <script>
@@ -172,27 +169,6 @@
 
         $('#btn-input').enterKey(function () {
             sendMessage('{{ chat.pk }}')
-        });
-
-        $("#btn-chat-toggle").click(function() {
-            var btnChatToggle = $('#btn-chat-toggle');
-            var chatContainer = $('#chat-container');
-            if (!chatContainer.is(":hidden")) {
-                btnChatToggle.animate({
-                    bottom: "23px",
-                }, 400);
-                btnChatToggle.find("i").removeClass('fa-minus');
-                btnChatToggle.find("i").addClass('fa-commenting');
-            } else {
-                btnChatToggle.animate({
-                    bottom: '370px'
-                }, 400);
-                btnChatToggle.find("i").removeClass('fa-commenting');
-                btnChatToggle.find("i").addClass('fa-minus');
-            }
-            chatContainer.slideToggle([1000], "slow")
-        });
-
-
+        })
     </script>
 {% endblock javascript %}

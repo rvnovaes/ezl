@@ -8,6 +8,7 @@
         <div class="table-container">
     {% endif %}
     <script language="JavaScript">
+        {% comment %}
         $('#myModal').modal('show')
         var pk_list = [];
 
@@ -31,6 +32,7 @@
                 document.getElementById('delete_button').disabled = true;
             }
         }
+        {% endcomment %}
         function showDeleteButton(source) {
             if (source.checked) {
                 pk_list.push(source.id);
@@ -49,73 +51,77 @@
     <form action="{% url link_ex %}" method="post">
         {% csrf_token %}
         {% block table %}
-            <div class="panel panel-primary">
-            <div class="panel-heading">
-                <div class="panel-title form-row">{{ form_name_plural.capitalize }}</div>
-            </div>
-            <div class="panel-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        {% block table.thead %}
-                            <thead>
-                            <tr>
-                                {% for column in table.columns %}
-                                    {% if column.orderable %}
-                                        <th {{ column.attrs.th.as_html }}><a
-                                                href="{% querystring table.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header| label_capitalizer }}</a>
-                                        </th>
-                                    {% else %}
-                                        {% if not column.attrs.selectable == True %}
-                                            <th {{ column.attrs.th.as_html }}>{{ column.header }}</th>
+            <div class="panel panel-default">
+                <div class="panel-heading"> {{ form_name_plural.capitalize }}
+                    <div class="panel-action">
+                        <a href="#" data-perform="panel-collapse"><i class="ti-minus"></i></a>
+                    </div>
+                </div>
+                <div class="panel-wrapper collapse in" aria-expanded="true">
+                    <div class="panel-body">
+                        <table class="table table-striped table-hover">
+                            {% block table.thead %}
+                                <thead>
+                                <tr>
+                                    {% for column in table.columns %}
+                                        {% if column.orderable %}
+                                            <th {{ column.attrs.th.as_html }}><a
+                                                    href="{% querystring table.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header| label_capitalizer }}</a>
+                                            </th>
                                         {% else %}
-                                            <th {{ column.attrs.th.as_html }}>{{ column.header| label_capitalizer }}</th>
+                                            {% if not column.attrs.selectable == True %}
+                                                <th {{ column.attrs.th.as_html }}>{{ column.header }}</th>
+                                            {% else %}
+                                                <th {{ column.attrs.th.as_html }}>{{ column.header| label_capitalizer }}</th>
+                                            {% endif %}
                                         {% endif %}
+                                    {% endfor %}
+                                </tr>
+                                </thead>
+                            {% endblock table.thead %}
+                            {% block table.tbody %}
+                                <tbody>
+                                {% for row in table.page.object_list|default:table.rows %} {# support pagination #}
+                                    {% block table.tbody.row %}
+                                        <tr class="{% cycle "odd" "even" %}" data-href="{{ row.attrs.data_href}}">
+                                            {% for column, cell in row.items %}
+                                                <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endblock table.tbody.row %}
+                                {% empty %}
+                                    {% if table.empty_text %}
+                                        {% block table.tbody.empty_text %}
+                                            <tr>
+                                                <td colspan="{{ table.columns|length }}">{{ table.empty_text }}</td>
+                                            </tr>
+                                        {% endblock table.tbody.empty_text %}
                                     {% endif %}
                                 {% endfor %}
-                            </tr>
-                            </thead>
-                        {% endblock table.thead %}
-                        {% block table.tbody %}
-                            <tbody>
-                            {% for row in table.page.object_list|default:table.rows %} {# support pagination #}
-                                {% block table.tbody.row %}
-                                    <tr class="{% cycle "odd" "even" %}" data-href="{{ row.attrs.data_href}}">
-                                        {% for column, cell in row.items %}
-                                            <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
-                                        {% endfor %}
-                                    </tr>
-                                {% endblock table.tbody.row %}
-                            {% empty %}
-                                {% if table.empty_text %}
-                                    {% block table.tbody.empty_text %}
-                                        <tr>
-                                            <td colspan="{{ table.columns|length }}">{{ table.empty_text }}</td>
-                                        </tr>
-                                    {% endblock table.tbody.empty_text %}
-                                {% endif %}
-                            {% endfor %}
-                            </tbody>
-                        {% endblock table.tbody %}
-                        {% block table.tfoot %}
-                            <tfoot></tfoot>
-                        {% endblock table.tfoot %}
-                    </table>
-                </div>
-                {% if table.page %}
-                    {% block pagination %}
-                        {% bootstrap_pagination table.page url=request.get_full_path %}
-                    {% endblock pagination %}
-                {% endif %}
-                <div class="text-right" style="margin: auto">
-                    <input type="button" data-toggle="modal" data-target="#confirmDelete" disabled id="delete_button"
-                           class="btn btn-fab btn-warning material-icons"
-                           value="remove">
-                    {% if not view.kwargs.pk %}
-                        <a class="btn btn-fab btn-primary disabled">
-                    {% else %}
-                        <a class="btn btn-fab btn-primary" href="{% url link_add  view.kwargs.pk %}">
-                    {% endif %}
-                    <i class="material-icons">add</i></a>
+                                </tbody>
+                            {% endblock table.tbody %}
+                            {% block table.tfoot %}
+                                <tfoot></tfoot>
+                            {% endblock table.tfoot %}
+                        </table>
+                        {% if table.page %}
+                            {% block pagination %}
+                                {% bootstrap_pagination table.page url=request.get_full_path %}
+                            {% endblock pagination %}
+                        {% endif %}
+                    </div>
+
+                    <div class="panel-footer text-right">
+                        <button type="button" data-toggle="modal" data-target="#confirmDelete" disabled
+                                id="delete_button" class="btn btn-sm btn-danger material-icons">Apagar</button>
+                        {% if not view.kwargs.pk %}
+                            <a class="btn btn-sm btn-primary disabled">
+                        {% else %}
+                            <a class="btn btn-sm btn-primary" href="{% url link_add  view.kwargs.pk %}">
+                        {% endif %}
+                        Adicionar</a>
+
+                    </div>
                 </div>
             </div>
         {% endblock table %}

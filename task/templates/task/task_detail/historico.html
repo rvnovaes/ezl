@@ -1,0 +1,36 @@
+{% load bootstrap3 %}
+<div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="panelHistory">
+        <a class="panel-title collapsed" role="button"
+           data-toggle="collapse" data-parent="#accordion"
+           href="#collapseHistory" aria-expanded="false"
+           aria-controls="collapseHistory"><i class="panel-title mdi mdi-history"></i> Histórico </a> </div>
+    <div id="collapseHistory" class="panel-collapse collapse" role="tabpanel" aria-labelledby="panelHistory" aria-expanded="false" style="height: 0px;">
+        <div class="panel-body ">
+            {% if not task_history %}
+                <p style="text-align: center;"></p>
+                {% bootstrap_alert '<b>Nenhum histórico disponível</b>'%}
+            {% else %}
+                {% bootstrap_alert '<b>Nenhum histórico disponível</b>'%}
+                <table class="table table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <td>Data da Mudança</td>
+                        <td>Usuário</td>
+                        <td class="text-center">Status</td>
+                        <td>Observação</td>
+                    </tr>
+                    </thead>
+                    {% for history in task_history %}
+                        <tr>
+                            <td>{{ history.create_date|date:"d \d\e F \d\e Y \à\s H:i:s" }}</td>
+                            <td>{{ history.create_user }}</td>
+                            <td class="text-center">{{ history.status }}</td>
+                            <td>{{ history.notes }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,33 @@
+{% load core_filters tz %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <tbody>
+            <tr>
+                <th colspan="3">Serviço Solicitado</th>
+                <th colspan="3">Parte Adversa</th>
+            </tr>
+            <tr>
+                <td colspan="3">{{ form.instance.type_task|default_if_none:"---" }}</td>
+                <td colspan="3">{{ form.instance.movement.law_suit.opposing_party|default_if_none:"---" }}</td>
+            </tr>
+
+            <tr>
+                <th colspan="6">Descrição do serviço</th>
+            </tr>
+            <tr>
+                <td class="text-justify" colspan="6">{{ form.instance.description.strip|default:"---" }}</td>
+            </tr>
+
+            <tr>
+                <th colspan="3">Prazo</th>
+                <th colspan="3">Recebido em</th>
+            </tr>
+            <tr>
+                <td colspan="3">{{ form.instance.final_deadline_date|localtime|default_if_none:"---" }}</td>
+                <td colspan="3">{{ form.instance.delegation_date|localtime|default_if_none:"---" }}</td>
+            </tr>
+
+        </tbody>
+    </table>
+    <div class="hidden form-control">{{ form.survey_result }}</div>
+</div>

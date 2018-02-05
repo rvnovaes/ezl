@@ -28,6 +28,7 @@ from django.core.cache import cache
 from dal import autocomplete
 from django.db.models import Q
 from core.utils import get_office_session
+from ecm.utils import attachment_form_valid
 
 
 class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -337,7 +338,7 @@ class CourtDivisionDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
-class FolderLawsuitCreateView(SuccessMessageMixin, GenericFormOneToMany, CreateView):
+class FolderLawsuitCreateView(AuditFormMixin, SuccessMessageMixin, GenericFormOneToMany, CreateView):
     model = Folder
     related_model = LawSuit
     form_class = FolderForm
@@ -453,8 +454,7 @@ class LawSuitDeleteView(AuditFormMixin, DeleteView):
                     kwargs={'pk': parent_class}))
 
 
-class LawsuitMovementCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
-                                CreateView):
+class LawsuitMovementCreateView(AuditFormMixin, SuccessMessageMixin, GenericFormOneToMany, CreateView):
     model = LawSuit
     related_model = Movement
     form_class = LawSuitForm
@@ -644,6 +644,10 @@ class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
 
             return HttpResponseRedirect(reverse('dashboard'))
         return super().dispatch(request, *args, **kwargs)
+
+    # @attachment_form_valid
+    # def form_valid(self, form):
+    #     return super().form_valid(form)
 
 
 class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
