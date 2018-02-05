@@ -1,13 +1,31 @@
 {% extends 'skeleton/base.html' %}
-{% load staticfiles %}
+{% load static %}
 {% load core_filters %}
 {% load render_table from django_tables2 %}
 {#{% load formset_tags %}#}
 {% load tz %}
+
+{% block extra_stylesheets %}
+
+{% endblock %}
+
 {% block right-sidebar-chat %}
     {% include 'chat/chat-right-sidebar.html' %}
 {% endblock %}
 {% block content %}
+    <link href="{% static 'skeleton/css/step-bar.css' %}" rel="stylesheet">
+    <div class="white-box m-b-0 text-center">
+        {% include 'task/includes/task-detail-status-buttons.html' %}
+        {% comment %}
+        <ul class="nav nav-wizard">
+            {% for key, value in form.instance.status.choices_icons %}
+                <li class="{% if value|slugify == form.instance.status|slugify %}active{% endif %}">
+                    <a data-toggle="tooltip" title="{{ value }}" href="javascript:void(0)"><i class="{{ key }}"></i></a>
+                </li>
+            {% endfor %}
+        </ul>
+        {% endcomment %}
+    </div>
     <form id="task_detail" action="" method="post">{% csrf_token %}
         {% include 'questionnaire/generic_survey.html' with generic_survey=form.instance.type_task.survey_type %}
         {% include 'task/task_detail/tab.html' %}
@@ -22,20 +40,20 @@
                 <div class="modal-content ">
                     <div id="modalHeader">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="panel-title text-center">
-                            <i id="icon" class="material-icons "></i>
+                        <h4 class="panel-title text-center text-danger">
+                            <i id="icon" class="mdi"></i>
                             <b> Deseja <span id="actionText">aceitar</span> o prazo? </b></h4>
                     </div>
                     <div class="modal-body">
                         <div class="form-group" style="margin: auto">
-                            <label> {{ form.notes.label }}</label>
+                            <label class="text-info"> {{ form.notes.label }}</label>
                             {{ form.notes }}
                         </div>
                     </div>
                     <div class="modal-footer">
                         <div class="form-group text-center">
                             <button style="width: 95px!important;" onClick="this.form.reset()"
-                                    class="btn btn-sm btn-raised btn-default"
+                                    class="btn btn-sm btn-danger"
                                     data-dismiss="modal">
                                 Cancelar
                             </button>
@@ -45,13 +63,13 @@
                                             type="submit"
                                             onclick="beforeSubmit()"
                                             style="width: 95px!important;"
-                                            class="btn btn-sm btn-raised btn-primary">Sim
+                                            class="btn btn-sm btn-primary">Sim
                                     </button>
                                 {% else %}
                                     <button id="actionButton"
                                             type="submit"
                                             style="width: 95px!important;"
-                                            class="btn btn-sm btn-raised btn-primary">Sim
+                                            class="btn btn-sm btn-primary">Sim
                                     </button>
                                 {% endif %}
 
@@ -68,536 +86,6 @@
         </div>
     </form>
 {% endblock %}
-
-{% block contente %}
-            <div class="col-md-12">
-                <form id="task_detail" action="" method="post">{% csrf_token %}
-                    {% include 'questionnaire/generic_survey.html' %}
-
-                    <script type="text/javascript">
-
-                        $(function () {
-                            $("input[name=execution_date]").attr({'required': true,
-                                'placeholder': 'Data de Cumprimento'});
-                            $("input[name=amount]").attr({'required': true,
-                                                  'placeholder': 'Valor'});
-                        });
-
-                        //Função para tratar erro ao enviar formulário com justificativa de cumprimento em branco
-                        function beforeSubmit() {
-                            $('#task_detail').submit(function (e) {
-                                e.preventDefault();
-                                $('#confirmAction').modal('hide');
-                                $('#survey').modal('show');
-                            });
-                        }
-
-                function checkDelegated() {
-                    $('#task_detail').submit(function (e) {
-                        if ($('input[name=servicepricetable_id]').val() == "") {
-                            e.preventDefault();
-                            showToast('error', 'Favor selecionar um correspondente', '', 5000, true);
-                        }
-                        if ($('input[name=amount]').val() == "") {
-                            e.preventDefault();
-                            showToast('error', 'Favor selecionar um valor para a OS', '', 5000, true);
-                        }
-                    });
-                }
-
-                        var nextState = {
-                    ACCEPTED_SERVICE: {text: "aceitar", icon: "help_outline"},
-                    REFUSED_SERVICE: {text: "recusar", icon: "help_outline"},
-                    OPEN: {text: "delegar", icon: "help_outline"},
-                            ACCEPTED: {text: "aceitar", icon: "assignment_ind"},
-                            REFUSED: {text: "recusar", icon: "assignment"},
-                            DELEGATED: {text: "delegar", icon: "assignment_returned"},
-                            DONE: {text: "Cumprir", icon: "assignment_turned_in"},
-                            FINISHED: {text: "Finalizar", icon: "gavel"},
-                            BLOCKEDPAYMENT: {text: "Glosar", icon: "money_off"},
-                            RETURN: {text: "Retornar", icon: "assignment_late"}
-                        };
-
-                        function getId(value) {
-                            var task_status = value.id;
-
-                            var $input = $("input[name=execution_date]");
-                            if ($input.length > 0) {
-                                var input = $input.get(0);
-                                if (! input.checkValidity()) {
-                                    input.reportValidity();
-                                    return false
-                                }
-                            }
-
-                            $('#confirmAction').modal('show');
-
-                            // $("#confirmAction").on('shown.bs.modal', function () {
-                            var actionButton = document.getElementById("actionButton");
-                            var nextText = document.getElementById("actionText");
-                            var icon = document.getElementById("icon");
-                            var modalHeader = document.getElementById("modalHeader");
-                            nextText.innerHTML = nextState[task_status]['text'];
-                            icon.innerHTML = nextState[task_status]['icon'];
-
-                            modalHeader.setAttribute("class", "panel-header panel-heading" + " " + task_status);
-
-                            actionButton.setAttribute("name", "action");
-                            actionButton.setAttribute("value", task_status);
-
-                            {# Apenas estes status devem possuir notes como required, alem de nao poder #}
-                            {# espacos em branco #}
-
-                            var notes = $('textarea[id=notes_id]');
-                            notes.removeAttr('required');
-                            ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN', 'REFUSED_SERVICE'].forEach(function (status) {
-                                if (task_status === status) {
-                                    notes.attr('required', true).change(function () {
-                                        notes.val(notes.val().trim())
-                                    });
-                                }
-                            });
-
-                            {# Apenas estes status devem possuir amount como required, alem de nao poder 0 #}
-                            var amount = $('input[id=id_amount]');
-                            var servicepricetable_id = $('input[name=servicepricetable_id]');
-                            amount.removeAttr('required');
-                            ['OPEN'].forEach(function (status) {
-                                console.log(value.id)
-                                if (task_status === status) {
-                                    {#amount.attr('required', true).change()#}
-                                    servicepricetable_id.attr('required', true).change()
-                                }
-                            });
-
-                            return true;
-                        }
-                    </script>
-                    {% include 'core/widgets/messages.html' %}
-                    <div class="panel">
-                        <div class="panel-heading {{ form.instance.status.name }}">
-                            <div class="panel-title"><i class="material-icons">{{ form.instance.status.get_icon }}</i>
-                                <b>{{ form.instance.status }}
-                                    #{{ form.instance.task_number }}
-                                    - {{ form.instance.type_task }}</b>
-                            </div>
-                        </div>
-                        <div class="panel-body form-group is-focused">
-                            <div class="form-row">
-
-                                <div class="panel">
-                                    <div class="panel-heading">
-                                        <div class="panel-title">
-                                            <i class="material-icons">assignment</i>
-                                            Dados da providência
-                                        </div>
-                                    </div>
-                                    <div class="panel-body form-group is-focused">
-                                        <div class="form-row">
-                                            <table class="table table-striped">
-                                                <tbody>
-                                                <tr>
-                                                    <th>
-                                                        Serviço solicitado
-                                                    </th>
-                                                    <td>
-                                                        {{ form.instance.type_task|default_if_none:"---" }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>
-                                                        Parte adversa
-                                                    </th>
-                                                    <td>
-                                                        {{ form.instance.movement.law_suit.opposing_party|default_if_none:"---" }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>
-                                                        Descrição do serviço
-                                                    </th>
-                                                    <td>
-                                                        <p class="text-justify">{{ form.instance.description.strip|default:"---" }}</p>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>
-                                                        Prazo
-                                                    </th>
-                                                    <td>
-                                                        {{ form.instance.final_deadline_date|localtime|default_if_none:"---" }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>
-                                                        Recebida em
-                                                    </th>
-                                                    <td>
-                                                        {{ form.instance.delegation_date|localtime|default_if_none:"---" }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>
-                                                        Cliente
-                                                    </th>
-                                                    <td>
-                                                        {{ form.instance.client|default_if_none:"---" }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>
-                                                        Processo
-                                                    </th>
-                                                    <td>
-                                                        {{ form.instance.movement.law_suit.law_suit_number |default_if_none:"---" }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>
-                                                        Comarca
-                                                    </th>
-                                                    <td>
-                                                        {{ form.instance.court_district|default_if_none:"---" }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>
-                                                        UF
-                                                    </th>
-                                                    <td>
-                                                        {{ form.instance.court_district.state|default_if_none:"---" }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>
-                                                        Vara
-                                                    </th>
-                                                    <td>
-                                                        {{ form.instance.court_division|default_if_none:"---" }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>
-                                                        Órgão
-                                                    </th>
-                                                    <td>
-                                                        {{ form.instance.court|default_if_none:"---" }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>
-                                                        Endereço
-                                                    </th>
-                                                    <td>
-                                                        {{ form.instance.address|default:"---"|capfirst }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>
-                                                        N° da pasta
-                                                    </th>
-                                                    <td>
-                                                        {{ form.instance.movement.law_suit.folder.folder_number|default_if_none:'' }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>
-                                                        Centro de Custo
-                                                    </th>
-                                                    <td>
-                                                        {{ form.instance.movement.law_suit.folder.cost_center|default:"---" }}
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                            <div class="hidden form-control">{{ form.survey_result }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group text-center">
-                        {% if perms.core.can_distribute_tasks %}
-                            <button type="button" id="ACCEPTED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                               class="btn btn-sm btn-raised ACCEPTED_SERVICE {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
-                                <i class="material-icons left" style="color: white;">thumb_up</i>
-                                Aceitar Solicitação
-                            </button>
-                            <a id="REFUSED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                               class="btn btn-sm btn-raised REFUSED_SERVICE {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}"><i
-                                    class="material-icons left" style="color: white;">thumb_down</i>
-                                Recusar Solicitação
-                            </a>
-                            <button type="button" id="OPEN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                               class="btn btn-sm btn-raised OPEN {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
-                                <i class="material-icons left" style="color: white;">assignment</i>
-                                Delegar
-                            </button>
-                        {% endif %}
-                                {% if perms.core.view_delegated_tasks %}
-                                    <button type="button" id="ACCEPTED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                                            class="btn btn-sm btn-raised ACCEPTED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
-                                        <i class="material-icons left" style="color: white;">assignment_ind</i>
-                                        Aceitar
-                                    </button>
-                                    <a id="REFUSED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                                       class="btn btn-sm btn-raised REFUSED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}"><i
-                                            class="material-icons left" style="color: white;">assignment_late</i>
-                                        Recusar
-                                    </a>
-                                {% endif %}
-                                {% if perms.core.delegate_tasks %}
-                                    <button type="button" id="DELEGATE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                                            class="btn btn-sm btn-raised DELEGATE {% if not form.instance.status.name == 'DELEGATE' %}hidden{% endif %}"
-                                            href=""><i
-                                            class="material-icons left" style="color: white">assignment_return</i>
-                                        Delegar
-                                    </button>
-                                {% endif %}
-                                {% if perms.core.block_payment_tasks %}
-                                    <button type="button" id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle=""
-                                            data-target="#confirmAction"
-                                            class="btn btn-sm btn-raised BLOCKEDPAYMENT {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}"><i
-                                            class="material-icons left" style="color: white;">money_off</i>
-                                        Glosar
-                                    </button>
-                                {% endif %}
-                                {% if perms.core.validate_all_tasks %}
-                                    <button type="button" id="FINISHED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                                            class="btn btn-sm btn-raised FINISHED {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}"
-                                            href=""><i
-                                            class="material-icons left" style="color: white">gavel</i>
-                                        Finalizar
-                                    </button>
-                                {% endif %}
-                                {% if perms.core.return_all_tasks %}
-                                    <button type="button" id="RETURN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                                            class="btn btn-sm btn-raised RETURN {% if not  form.instance.status.name == 'DONE' %}hidden{% endif %}"
-                                            href=""><i
-                                            class="material-icons left" style="color: white">assignment_return</i>
-                                        Retornar
-                                    </button>
-                                {% endif %}
-                                {% if perms.core.view_delegated_tasks %}
-                                    {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                                        <div  class="col-sm-3">
-                                            <a>{{ form.execution_date }}</a>
-                                        </div>
-                                        <button type="button" onclick="getId(this)" id="DONE" type="submit" data-toggle=""
-                                                data-target="#confirmAction"
-                                                class="btn btn-sm btn-raised DONE ">
-                                            <i class="material-icons left" style="color: white">assignment_turned_in</i>
-                                            Cumprir
-                                        </button>
-                                    {% endif %}
-                                {% endif %}
-                            </div>
-
-                            <div class="panel">
-                                <div class="panel-heading">
-                                    <div class="panel-title">
-                                        <i class="material-icons">assignment</i>
-                                        Dados do correspondente
-                                    </div>
-                                </div>
-                                <div class="panel-body form-group is-focused">
-                                    <div class="form-row">
-                                        {% include 'task/person_info.html' with person=form.instance.person_executed_by %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="panel">
-                                <div class="panel-heading">
-                                    <div class="panel-title">
-                                        <i class="material-icons">assignment</i>
-                                        Dados do solicitante
-                                    </div>
-                                </div>
-                                <div class="panel-body form-group is-focused">
-                                    <div class="form-row">
-                                        {% include 'task/person_info.html' with person=form.instance.person_asked_by %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="panel">
-                                <div class="panel-heading">
-                                    <div class="panel-title">
-                                        <i class="material-icons">assignment</i>
-                                        Dados do contratante
-                                    </div>
-                                </div>
-                                <div class="panel-body form-group is-focused">
-                                    <div class="form-row">
-                                        {% include 'task/person_info.html' with person=form.instance.person_distributed_by %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="panel">
-                                <div class="panel-heading">
-                                    <div class="panel-title">
-                                        <i class="material-icons">assignment</i>
-                                        Dados do sistema legado
-                                    </div>
-                                </div>
-                                <div class="panel-body form-group is-focused">
-                                    <div class="form-row">
-                                        <table class="table table-striped">
-                                            <tbody>
-                                            <tr>
-                                                <th>
-                                                    N° da pasta
-                                                </th>
-                                                <td>
-                                                    {{ form.instance.movement.law_suit.folder.legacy_code|default_if_none:'' }}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>
-                                                    N° da OS
-                                                </th>
-                                                <td>
-                                                    {{ form.instance.legacy_code|default_if_none:'' }}
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div class="panel panel-primary">
-                        <div class="panel-heading " data-toggle="collapse" data-target="#history" id="header-history"
-                             onclick="toggleArrowHist()">
-                            <div class="panel-title"><i class="material-icons">history</i>
-                                <b>Histórico</b>
-                                <i class="material-icons" style="float: right;" id="down_hist">arrow_drop_down</i>
-                                <i class="material-icons" style="float: right; display: none;" id="up_hist">arrow_drop_up</i>
-                            </div>
-                        </div>
-
-                        <div id="history" class="panel-collapse collapse">
-                            <div class="panel-body form-group is-focused">
-
-                                {% if not task_history %}
-                                    <p style="text-align: center;">Nenhum histórico disponível</p>
-
-                                {% else %}
-                                    <table class="table table-striped table-hover">
-                                        <thead>
-                                        <tr>
-                                            <td class="col-sm-3"
-                                                style="font-size: small; font-weight: 500; text-align: center;">Data da Mudança
-                                            </td>
-                                            <td class="col-sm-2"
-                                                style="font-size: small; font-weight: 500; text-align: center;">Usuário
-                                            </td>
-                                            <td class="col-sm-1"
-                                                style="font-size: small; font-weight: 500; text-align: center;">Status
-                                            </td>
-                                            <td class="col-sm-6"
-                                                style="font-size: small; font-weight: 500; text-align: center;">Observação
-                                            </td>
-                                        </tr>
-                                        </thead>
-                                        {% for history in task_history %}
-                                            <tr>
-                                                <td class="col-sm-3"
-                                                    style="font-size: small; font-weight: 100; text-align: center;">{{ history.create_date|date:"d \d\e F \d\e Y \à\s H:i:s" }}</td>
-                                                <td class="col-sm-2"
-                                                    style="font-size: small; font-weight: 100; text-align: center;">{{ history.create_user }}</td>
-                                                <td class="col-sm-1"
-                                                    style="font-size: small; font-weight: 100; text-align: center;">{{ history.status }}</td>
-                                                <td class="col-sm-6"
-                                                    style="font-size: small; font-weight: 100; text-align: center;">{{ history.notes }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </table>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Modal -->
-                    <div id="confirmAction" class="modal">
-                        <div class="modal-dialog">
-                            <div class="modal-content ">
-                                <div id="modalHeader">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                    <h4 class="panel-title text-center">
-                                        <i id="icon" class="material-icons "></i>
-                                        <b> Deseja <span id="actionText">aceitar</span> o prazo? </b></h4>
-                                </div>
-                                <div class="modal-body">
-                            {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
-                                {{ form.servicepricetable_id }}
-                                <div class="form-group" style="margin: auto">
-                                    <label>Tipo de Serviço: </label>
-                                    {{ form.instance.type_task }}
-                                </div>
-                                <div class="table-responsive" style="margin: auto">
-                                    {% render_table correspondents_table %}
-                                </div>
-                                <div class="form-group" style="margin: auto">
-                                    <label>{{ form.amount.label }}</label>
-                                    {{ form.amount }}
-                                </div>
-                            {% endif %}
-                                    <div class="form-group" style="margin: auto">
-                                        <label> {{ form.notes.label }}</label>
-                                        {{ form.notes }}
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <div class="form-group text-center">
-                                        <button style="width: 95px!important;" onClick="this.form.reset()"
-                                                class="btn btn-sm btn-raised btn-default"
-                                                data-dismiss="modal">
-                                            Cancelar
-                                        </button>
-                                        {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                                            {% if form.instance.type_task.survey %}
-                                                <button id="actionButton"
-                                                        type="submit"
-                                                        onclick="beforeSubmit()"
-                                                        style="width: 95px!important;"
-                                                        class="btn btn-sm btn-raised btn-primary">Sim
-                                                </button>
-                                            {% else %}
-                                                <button id="actionButton"
-                                                        type="submit"
-                                                        style="width: 95px!important;"
-                                                        class="btn btn-sm btn-raised btn-primary">Sim
-                                                </button>
-                                            {% endif %}
-
-                                {% elif form.instance.status.name == 'ACCEPTED_SERVICE' %}
-                                    <button id="actionButton"
-                                            style="width: 95px!important;"
-                                            onclick="checkDelegated()"
-                                            type="submit" class="btn btn-sm btn-raised btn-primary">Sim
-                                    </button>
-                                        {% else %}
-                                            <button id="actionButton"
-                                                    style="width: 95px!important;"
-                                                    type="submit" class="btn btn-sm btn-raised btn-primary">Sim
-                                            </button>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-
-
-{% endblock contente %}
 
 {% block extra_scripts %}
     <!-- CHAT SCRIPTS  -->
@@ -684,13 +172,13 @@
         }
 
         var nextState = {
-            ACCEPTED: {text: "aceitar", icon: "assignment_ind"},
-            REFUSED: {text: "recusar", icon: "assignment"},
+            ACCEPTED: {text: "aceitar", icon: "mdi mdi-calendar-clock"},
+            REFUSED: {text: "recusar", icon: "mdi mdi-clipboard-alert"},
             DELEGATED: {text: "delegar", icon: "assignment_returned"},
-            DONE: {text: "Cumprir", icon: "assignment_turned_in"},
-            FINISHED: {text: "Finalizar", icon: "gavel"},
-            BLOCKEDPAYMENT: {text: "Glosar", icon: "money_off"},
-            RETURN: {text: "Retornar", icon: "assignment_late"}
+            DONE: {text: "Cumprir", icon: "mdi mdi-checkbox-marked-circle-outline"},
+            FINISHED: {text: "Finalizar", icon: "mdi mdi-gavel"},
+            BLOCKEDPAYMENT: {text: "Glosar", icon: "mdi mdi-currency-usd-off"},
+            RETURN: {text: "Retornar", icon: "mdi mdi-backburger"}
         };
 
         function getId(value) {
@@ -710,10 +198,9 @@
             // $("#confirmAction").on('shown.bs.modal', function () {
             var actionButton = document.getElementById("actionButton");
             var nextText = document.getElementById("actionText");
-            var icon = document.getElementById("icon");
             var modalHeader = document.getElementById("modalHeader");
             nextText.innerHTML = nextState[task_status]['text'];
-            icon.innerHTML = nextState[task_status]['icon'];
+            $('#icon').addClass(nextState[task_status]['icon'])
 
             modalHeader.setAttribute("class", "panel-header panel-heading" + " " + task_status);
 

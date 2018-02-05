@@ -31,12 +31,13 @@
             <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
                 <a {% if table.length %}href="#modal-view-task-table" data-toggle="modal"{% else %}href="javascript:swal('Não há dados para exibir.')"{% endif %} data-status="{{ table.status }}">
                 <div class="white-box">
-                    <h5 class="font-bold text-{{ table.status.get_color }}">{{ table.title }}</h5>
+                    <h5 class="font-bold ezl-text-{{ table.status.name|lower }}">{{ table.title }}</h5>
                     <div class="text-left">
                         <h1>
                             <sup>
-                                <i style="font-size: 30px" class="{{ table.status.get_icon }} text-{{ table.status.get_color }}"></i>
-                            </sup><span class="p-l-20">{{ table.length }}</span>
+                                <i class="{{ table.status.get_icon }} ezl-text-{{ table.status.name|lower }} font-30"></i>
+                            </sup>
+                            <span class="pull-right">{{ table.length }}</span>
                         </h1>
                     </div>{% get_percent table.length task_count as percent %}
                     <span class="text-success">{{ percent|stringformat:".02f" }}%</span> <div class="progress m-b-0">
