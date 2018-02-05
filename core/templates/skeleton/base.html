@@ -11,6 +11,13 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'skeleton/images/favicon.png' %}">
     <title>{{ title_page }}</title>
     <!-- ============================================================== -->
+    <!-- jQuery -->
+    <script src="{% static 'skeleton/plugins/bower_components/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment.js' %}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment-timezone.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/locale-pt-br.js' %}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment-with-locales.js' %}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js' %}"></script>
     <!-- Stylesheets block -->
     {% block extra_stylesheets %}
         {% comment %}
@@ -24,6 +31,8 @@
     {% endblock stylesheets %}
     <!-- End Stylesheets block -->
     <!-- ============================================================== -->
+    <!-- EZL CSS -->
+    <link href="{% static 'skeleton/css/ezl.css' %}" rel="stylesheet">
 
 </head>
 

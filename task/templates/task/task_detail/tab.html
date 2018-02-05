@@ -1,10 +1,10 @@
 <div class="white-box">
     <!-- Tabstyle start -->
-    <h3 class="text-{{ form.instance.status.get_color }} font-bold">
-        <i class="{{ form.instance.status.get_icon }}"></i>
+    <div class="ezl-text-{{ form.instance.status.name|lower }} panel-title font-bolder font-20">
+        <i class="{{ form.instance.status.get_icon }} font-20"></i>
         #{{ form.instance.task_number|stringformat:"05d" }} - {{ form.instance.type_task }}
-        <span class="text-white pull-right text-right bg-{{form.instance.status.get_color}} p-10 m-b-5">{{ form.instance.status }}</span>
-    </h3>
+        <span class="badge pull-right ezl-bg-{{form.instance.status.name|lower}} p-10">{{ form.instance.status }}</span>
+    </div>
     <hr>
     <section>
         <div class="sttabs tabs-style-iconbox">
@@ -14,7 +14,7 @@
                         <a href="#sec-prov" class="sticon mdi mdi-archive"><span>Providência</span></a>
                     </li>
                     <li>
-                        <a href="#sec-corres" class="sticon mdi mdi-email-outline"><span>Correspondente</span></a>
+                        <a href="#sec-corres" class="sticon mdi mdi-wallet-travel"><span>Correspondente</span></a>
                     </li>
                     <li>
                         <a href="#sec-solic" class="sticon mdi mdi-account-card-details"><span>Solicitante</span></a>
@@ -29,59 +29,6 @@
                 <section id="sec-prov" style="padding: 0 0 0 0">
                     {% include 'task/task_detail/data-prov.html' %}
                     <hr>
-                    <div class="text-center">
-                        {% if perms.core.view_delegated_tasks %}
-                            <button type="button" id="ACCEPTED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                                    class="btn btn-sm btn-success ACCEPTED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
-                                Aceitar
-                            </button>
-                            <a id="REFUSED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                               class="btn btn-sm btn-success REFUSED {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
-                                Recusar
-                            </a>
-                        {% endif %}
-                        {% if perms.core.delegate_tasks %}
-                            <button type="button" id="DELEGATE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                                    class="btn btn-sm btn-success DELEGATE {% if not form.instance.status.name == 'DELEGATE' %}hidden{% endif %}"
-                                    href="">
-                                Delegar
-                            </button>
-                        {% endif %}
-                        {% if perms.core.block_payment_tasks %}
-                            <button type="button" id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle=""
-                                    data-target="#confirmAction"
-                                    class="btn btn-sm btn-success {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}">
-                                Glosar
-                            </button>
-                        {% endif %}
-                        {% if perms.core.validate_all_tasks %}
-                            <button type="button" id="FINISHED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                                    class="btn btn-sm btn-success FINISHED {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}"
-                                    href="">
-                                Finalizar
-                            </button>
-                        {% endif %}
-                        {% if perms.core.return_all_tasks %}
-                            <button type="button" id="RETURN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                                    class="btn btn-sm btn-success RETURN {% if not  form.instance.status.name == 'DONE' %}hidden{% endif %}"
-                                    href="">
-                                Retornar
-                            </button>
-                        {% endif %}
-                        {% if perms.core.view_delegated_tasks %}
-
-                                <div  class="col-sm-3">
-                                    <a>{{ form.execution_date }}</a>
-                                </div>
-                                <button type="button" onclick="getId(this)" id="DONE" type="submit" data-toggle=""
-                                        data-target="#confirmAction"
-                                        class="btn btn-sm btn-success DONE ">
-                                    Cumprir
-                                </button>
-
-                        {% endif %}
-                    </div>
-
                 </section>
                 <section id="sec-corres" style="padding: 0 0 0 0">
                     {% include 'task/person_info.html' with person=form.instance.person_executed_by %}

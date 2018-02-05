@@ -25,18 +25,18 @@ class Permissions(Enum):
 
 # Dicionário para retornar o icone referente ao status da providencia
 icon_dict = {
-    'ACCEPTED': 'mdi mdi-timer',
+    'ACCEPTED': 'mdi mdi-calendar-clock',
     'OPEN': 'mdi mdi-lock-open-outline',
-    'RETURN': 'mdi mdi-undo-variant',
+    'RETURN': 'mdi mdi-backburger',
     'DONE': 'mdi mdi-checkbox-marked-circle-outline',
-    'REFUSED': 'mdi mdi-delete',
+    'REFUSED': 'mdi mdi-clipboard-alert',
     'INVALID': 'mdi mdi-exclamation',
     'FINISHED': 'mdi mdi-gavel',
-    'BLOCKEDPAYMENT':'mdi mdi-grease-pencil',
-    'ERROR': 'mdi mdi-skull',
-    'REQUESTED': 'playlist_play',
-    'ACCEPTED_SERVICE': 'thumb_up',
-    'REFUSED_SERVICE': 'thumb_down',
+    'BLOCKEDPAYMENT':'mdi mdi-currency-usd-off',
+    'ERROR': 'mdi mdi-close-circle-outline',
+    'REQUESTED': 'mdi mdi-playlist-play',
+    'ACCEPTED_SERVICE': 'mdi mdi-thumb-up-outline',
+    'REFUSED_SERVICE': 'mdi mdi-thumb-down-outline',
 }
 
 color_dict = {
@@ -73,6 +73,7 @@ class TaskStatus(Enum):
     INVALID = 'Inválida'
     ERROR = 'Erro no sistema de origem'
 
+    @property
     def get_icon(self):
         return icon_dict[self.name]
 
@@ -91,6 +92,10 @@ class TaskStatus(Enum):
         # retornadas ao correspondente por pendencias
         # (2, 'Recusada'),  # providencias recusadas pelo correposndente
         # (3, 'Cumprida'),  # providencias executadas sem nenhuma pendencia
+
+    @classmethod
+    def choices_icons(cls):
+        return [(x.get_icon, x.value) for x in cls]
 
 
 class SurveyType(Enum):
