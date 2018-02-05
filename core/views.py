@@ -308,11 +308,16 @@ class AddressUpdateView(UpdateView):
     success_message = UPDATE_SUCCESS_MESSAGE
 
     def get_success_url(self):
-        return reverse('person_update', args=(self.object.person.pk,))
+        return reverse('person_update', args=(self.kwargs.get('person_pk'),))
+
+    def get_object_list_url(self):
+        # TODO: Este método parece ser inútil, success_url pode ser usado.
+        return reverse('person_update', args=(self.kwargs.get('person_pk'),))
 
     def dispatch(self, request, *args, **kwargs):
         if self.kwargs.get('person_pk'):
             obj = Person.objects.get(id=self.kwargs.get('person_pk'))
+        self.success_url = self.get_success_url()
         office_session = get_office_session(request=request)
         if obj.offices.filter(pk=office_session.pk).first() != office_session:
             messages.error(self.request, record_from_wrong_office(), )
@@ -320,7 +325,7 @@ class AddressUpdateView(UpdateView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class AddressDeleteView(AddressMixin, MultiDeleteViewMixin):
+class AddressDeleteView(MultiDeleteViewMixin):
     model = Address
     form_class = AddressForm
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
