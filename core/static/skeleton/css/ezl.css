@@ -1,3 +1,4 @@
+
 .select2-container--default .select2-selection--single {
     border: 2px solid #e4e7ea !important;
     border-radius: 1px !important;
@@ -522,3 +523,8 @@ fieldset[disabled] .btn-ezl-error.active {
     background-color: #CD6155;
     border-color: #CD6155;
 }
+/* OUTROS */
+.ezl-required:before {
+    content: "\2217\20";
+    color: red;
+};

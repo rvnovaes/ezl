@@ -49,6 +49,14 @@
     }
 
     {% for message in messages %}
-        message_toast('{{ message.tags }}', '{{ message.tags }}', '{{ message }}');
+        {% if message.tags == 'info' %}
+            message_toast('{{ message.tags }}', 'Informação', '{{ message }}');
+        {% elif message.tags == 'success' %}
+            message_toast('{{ message.tags }}', 'Sucesso', '{{ message }}'), 5000;
+        {% elif message.tags == 'error' %}
+            message_toast('{{ message.tags }}', 'Erro', '{{ message }}');
+        {% elif message.tags == 'warning' %}
+            message_toast('{{ message.tags }}', 'AvisoErro', '{{ message }}');
+        {% endif %}
     {% endfor %}
 </script>

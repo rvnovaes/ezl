@@ -66,6 +66,7 @@
                 {% block containner %}
                     <!-- Block Page Title -->
                     {% block page_title %}
+                        {% comment %}
                         <div class="row bg-title">
                             <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
                                 <h4 class="page-title">{{ form_name_plural }}</h4>
@@ -83,6 +84,8 @@
                                 </ol>
                             </div>
                         </div>
+                        {% endcomment %}
+                        <div class="p-10"></div>
                     {% endblock page_title %}
                     <!-- End Block Page Title -->
                         <!-- Block Content  -->
@@ -134,7 +137,7 @@
                     todayHighlight: true,
                     format: 'dd/mm/yyyy'
                 });
-                jQuery('select').data('style', 'form-control').selectpicker()
+
                 {% block script_document_ready %}
                     {% comment %}
                         A page can't be manipulated safely until the document is "ready." jQuery detects this state

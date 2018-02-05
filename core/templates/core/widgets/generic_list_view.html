@@ -18,7 +18,7 @@
         <div class="table-container">
     {% endif %}
 {% include 'core/widgets/generic_search_view.html' %}
-<form action="{% url link_ex %}" method="post">
+<form action="{% url link_ex %}" method="post" id="formTable">
     {% csrf_token %}
     {% block table %}
         <div class="panel panel-default">
@@ -82,7 +82,7 @@
             </div>
             <div class="text-right" style="margin: auto">
                 <div class="fixed-btn">
-                    <button type="button" data-toggle="modal" data-target="#confirmDelete" disabled id="delete_button"
+                    <button type="button" data-toggle="modal" disabled id="delete_button"
                            class="btn btn-danger"
                             value="remove">Remover</button>
                 </div>
@@ -95,7 +95,7 @@
             <div class="modal-content ">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h4 class="modal-title"><i class="material-icons">warning</i></h4>
+                    <h4 class="modal-title"><i class="fa fa-trash"></i></h4>
                     <h4 class="modal-title">Atenção!</h4>
                 </div>
                 <div class="modal-body">
@@ -156,6 +156,29 @@
                 document.getElementById('delete_button').disabled = true;
 
         }
+
+        $('#delete_button').click(function(){
+            {% if on_delete == 'CASCADE' %}
+                var text = "Ao excluir excluir o(s) registro(s) selecionado(s), todos os seus " +
+                    "vínculos também serão excluídos! Essa ação é irreversível";
+            {% else %}
+                var text = "Tem certeza que deseja excluir o(s) registro(s) selecionado(s)? " +
+                    "Essa ação é irreversível.";
+            {% endif %}
+
+            swal({
+                title: "Excluir?",
+                text: text,
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Sim, Desejo excluir!",
+                closeOnConfirm: false,
+                cancelButtonText: "Cancelar."
+            }, function(){
+                $('#formTable').submit()
+            });
+        });
     </script>
 {% endblock %}
 {% block bar_buttons %}

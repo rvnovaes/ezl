@@ -55,7 +55,7 @@ class ChatGetMessages(LoginRequiredMixin, View):
         messages = map(
             lambda x: {
                 'text': x.message,
-                'message_create_date': x.create_date.strftime("%d-%m-%Y às %H:%M:%S"),
+                'message_create_date': x.create_date.strftime("%d/%m/%Y às %H:%M:%S"),
                 'user': x.create_user.username
                 },
             qry_message
@@ -69,5 +69,4 @@ class ChatGetMessages(LoginRequiredMixin, View):
                 'title': qry_chat.title
             }
         }
-        print('*****', data)
         return JsonResponse(data)
