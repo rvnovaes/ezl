@@ -87,7 +87,7 @@
             <div class="modal-content ">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h4 class="modal-title"><i class="material-icons">warning</i></h4>
+                    <h4 class="modal-title"><i class="fa fa-trash"></i></h4>
                     <h4 class="modal-title">Atenção!</h4>
                 </div>
                 <div class="modal-body">
@@ -129,10 +129,10 @@
         $('#delete_button').click(function(){
             {% if on_delete == 'CASCADE' %}
                 var text = "Ao excluir excluir o(s) registro(s) selecionado(s), todos os seus " +
-                    "vínculos também serão excluídos! Essa ação é irreversível"
+                    "vínculos também serão excluídos! Essa ação é irreversível";
             {% else %}
                 var text = "Tem certeza que deseja excluir o(s) registro(s) selecionado(s)? " +
-                    "Essa ação é irreversível."
+                    "Essa ação é irreversível.";
             {% endif %}
 
             swal({

@@ -17,7 +17,7 @@ function getCookie(name) {
 
 function message_toast(tag, title, message, time) {
     if (!time) {
-        time = 5000;
+        time = false;
     }
     $.toast({
             heading: title,
