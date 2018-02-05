@@ -1,6 +1,5 @@
-<div class="checkbox">
-    <label>
-        <input type="{{ widget.type }}" name="{{ widget.name }}"{% if widget.value != None %}
-               value="{{ widget.value }}"{% endif %}{% include "django/forms/widgets/attrs.html" %} />{{ widget.label }}
-    </label>
+<div class="checkbox checkbox-success">
+    <input type="{{ widget.type }}" name="{{ widget.name }}" id="id_{{ widget.name|slugify }}"
+                 {% if widget.value != None %} value="{{ widget.value }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
+    <label for="id_{{ widget.name|slugify }}"></label>
 </div>

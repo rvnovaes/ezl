@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     'sequences.apps.SequencesConfig',
     'channels',
     'chat',
+    'ecm'
 ]
 
 MIDDLEWARE = [
@@ -129,9 +130,12 @@ SITE_ID = 1
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'),
-                 os.path.join(BASE_DIR, 'core/templates'),
-                 os.path.join(BASE_DIR, 'core/templates/core/http_errors')],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'core/templates'),
+            os.path.join(BASE_DIR, 'core/templates/core/http_errors'),
+            os.path.join(BASE_DIR, 'ecm/templates')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -363,3 +367,5 @@ LOGGING = {
         },
     }
 }
+
+UPLOAD_DIRECTORY = 'uploads'

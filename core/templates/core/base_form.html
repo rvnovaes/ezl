@@ -1,8 +1,6 @@
 {% extends "inicial.html" %}
 
-{% load core_filters %}
-{% load material_form %}
-{% load staticfiles %}
+{% load core_filters material_form staticfiles ecm_tags %}
 
 {% block css_head %}
     {% include 'material/includes/material_css.html' %}
@@ -15,6 +13,8 @@
     {{ block.super }}
 {% endblock js_head %}
 {% block extrajs%}
+    {{ block.super }}
+
     <script src="{% static "js/jquery-2.1.1.min.js" %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/survey-jquery/0.12.23/survey.jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
@@ -107,15 +107,15 @@
                             {{ personaddress.management_form }}
                             {% for form in personaddress.forms %}
                                 {% if forloop.first %}
-        <div class="row">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h1 class="panel-title">
-                        Endereço
-                    </h1>
-                </div>
+                                <div class="row">
+                                    <div class="panel panel-primary">
+                                        <div class="panel-heading">
+                                            <h1 class="panel-title">
+                                                Endereço
+                                            </h1>
+                                        </div>
                                 {% endif %}
-                <div class="panel-body">
+                                <div class="panel-body">
                                 {% include 'core/address_base_form.html' %}
                             {% endfor %}
                         {% endif %}
@@ -139,7 +139,5 @@
             {% endblock %}
 
         </div>
-
     </form>
-
 {% endblock content %}

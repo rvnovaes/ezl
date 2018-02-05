@@ -1,311 +1,176 @@
-{% extends "core/base_form.html" %}
-{% load material_form %}
-{% load django_tables2 %}
-{% load staticfiles %}
+{% extends "skeleton/forms/base.html" %}
+{% load render_table from django_tables2 %}
+{% load static %}
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
 
-{% block extrahead %}
-    {{ block.super }}
-{% endblock %}
-
-{% block js_head %}
-    <!-- Compiled and minified JavaScript -->
-            <script src="{% static "libs/jquery-3.2.17/jquery.min.js" %}"></script>
-            <script src="{% static "js/utils.js" %}"></script>
-            <script src="{% static "js/modal.js" %}"></script>
-            <script src="{% static "js/table-tr-link.js" %}"></script>
-            <script src="{% static "js/pagination-fixed.js" %}"></script>
-            <script src="{% static "chat/js/chat.js" %}"></script>
-            <script src="{% static "js/masks.js" %}"></script>
-            <script src="{% static "libs/bootstrap-3.3.7/js/bootstrap.min.js" %}"></script>
-            <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
-    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.js" %}"></script>
-            <script src="{% static "libs/bootstrap-material-design-0.5.10/js/ripples.min.js" %}"></script>
-            <script src="{% static "libs/bootstrap-ajax-typeahead/js/bootstrap-typeahead.min.js" %}"></script>
-            <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
-            <script src="{% static "js/dashboard.js" %}"></script>
-            <script src="{% static "js/widget_toast.js" %}"></script>
-            <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
-{% endblock js_head %}
-
 {% block content %}
-{% load core_filters %}
-    {% include 'core/widgets/messages.html' %}
-
-
-
-    <div class="panel panel-primary">
-        <div class="panel-heading " data-toggle="collapse" data-target="#filterCollapse">
-            <h3 class="panel-title"><i class="material-icons">filter_list</i> Filtrar
-                providências
-            </h3>
-        </div>
-        <form method="get" class="filter-form">
-            {% csrf_token %}
-            <div id="filterCollapse" class="panel-body panel-collapse collapse">
-                <fieldset>
-                    <div class="layout-row row">
-                        <div class="col s12 m6">
-                            <div class="row">
-                                <div class="select-field col s12" id="{{ filter.form.state.id_for_label }}_container">
-                                    <label for="{{ filter.form.state.id_for_label }}">{{ filter.form.state.label }}</label>
-                                    {{ filter.form.state }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col s12 m6">
-                            <label for="{{ filter.form.court_district.id_for_label }}" style="position: relative;top: 0px;" id="city_label">
-                                {{ filter.form.court_district.label }}</label>
-                            {{ filter.form.court_district }}
-                        </div>
-                    </div>
-                    <div class="layout-row row">
-                         <div class="col s12 m4">
-                            <div class="row">
-                                <div class="select-field col s12" id="{{ filter.form.type_task.id_for_label }}_container">
-                                    <label for="{{ filter.form.type_task.id_for_label }}">{{ filter.form.type_task.label }}</label>
-                                    {{ filter.form.type_task }}
-                                </div>
-                            </div>
-                         </div>
-                        <div class="col s12 m4">
-                            <div class="row">
-                                <div class="select-field col s12" id="{{ filter.form.cost_center.id_for_label }}_container">
-                                    <label for="{{ filter.form.cost_center.id_for_label }}">{{ filter.form.cost_center.label }}</label>
-                                    {{ filter.form.cost_center }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col s12 m4">
-                            <div class="row">
-                                <div class="select-field col s12" id="{{ filter.form.court.id_for_label }}_container">
-                                    <label for="{{ filter.form.court.id_for_label }}">{{ filter.form.court.label }}</label>
-                                    {{ filter.form.court }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="layout-row row">
-                        <div class="col s12 m4">
-                            <div class="row">
-                                <div class="input-field col s12 required" id="{{ filter.form.folder_number.id_for_label }}_container">
-                                    <label for="{{ filter.form.folder_number.id_for_label }}">{{ filter.form.folder_number.label }}</label>
-                                    {{ filter.form.folder_number }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col s12 m4">
-                            <div class="row">
-                                <div class="input-field col s12 required" id="{{ filter.form.law_suit_number.id_for_label }}_container">
-                                    <label for="{{ filter.form.law_suit_number.id_for_label }}">{{ filter.form.law_suit_number.label }}</label>
-                                    {{ filter.form.law_suit_number }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col s12 m4">
-                            <div class="row">
-                                <div class="input-field col s12 required" id="{{ filter.form.task_number.id_for_label }}_container">
-                                    <label for="{{ filter.form.task_number.id_for_label }}">{{ filter.form.task_number.label }}</label>
-                                    {{ filter.form.task_number }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="layout-row row">
-                        <div class="col s12 m4">
-                            <label for="{{ filter.form.person_executed_by.id_for_label }}" style="position: relative;top: 0px;" id="person_executed_by_label">
-                                {{ filter.form.person_executed_by.label }}</label>
-                            {{ filter.form.person_executed_by }}
-                        </div>
-                        <div class="col s12 m4">
-                            <label for="{{ filter.form.person_asked_by.id_for_label }}" style="position: relative;top: 0px;" id="person_asked_by_label">
-                                {{ filter.form.person_asked_by.label }}</label>
-                            {{ filter.form.person_asked_by }}
-                        </div>
-                        <div class="col s12 m4">
-                            <label for="{{ filter.form.person_distributed_by.id_for_label }}" style="position: relative;top: 0px;" id="person_distributed_by_label">
-                                {{ filter.form.person_distributed_by.label }}</label>
-                            {{ filter.form.person_distributed_by }}
-                        </div>
-                    </div>
-                    <div class="layout-row row">
-                        <div class="input-field col s12 m6">
-                            <div class="form-group">
-                                <span class="row s12 m12">
-                                   <label>Solicitadas entre:</label><br />
-                                </span>
-                                {{ filter.form.requested_in }}
-                            </div>
-                        </div>
-                        <div class="input-field col s12 m6">
-                            <div class="form-group">
-                                <span class="row s12 m12">
-                                   <label>Aceitas pelo Service entre:</label><br />
-                                </span>
-                                {{ filter.form.accepted_service_in }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="layout-row row">
-                        <div class="input-field col s12 m6">
-                            <div class="form-group">
-                                <span class="row s12 m12">
-                                   <label>Recusadas pelo Service entre:</label><br />
-                                </span>
-                                {{ filter.form.refused_service_in }}
-                            </div>
-                        </div>
-                        <div class="input-field col s12 m6">
-                            <div class="form-group">
-                                <span class="row s12 m12">
-                                   <label>Abertas entre:</label><br />
-                                </span>
-                                {{ filter.form.open_in }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="layout-row row">
-                        <div class="input-field col s12 m6">
-                            <div class="form-group">
-                                <span class="row s12 m12">
-                                   <label>Aceitas entre:</label><br />
-                                </span>
-                                {{ filter.form.accepted_in }}
-                            </div>
-                        </div>
-                        <div class="input-field col s12 m6">
-                            <div class="form-group">
-                                <span class="row s12 m12">
-                                   <label>Recusadas entre:</label><br />
-                                </span>
-                                {{ filter.form.refused_in }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="layout-row row">
-                        <div class="input-field col s12 m6">
-                            <div class="form-group">
-                                <span class="row s12 m12">
-                                   <label>Retornadas entre:</label><br />
-                                </span>
-                                {{ filter.form.return_in }}
-                            </div>
-                        </div>
-                        <div class="input-field col s12 m6">
-                            <div class="form-group">
-                                <span class="row s12 m12">
-                                   <label>Cumpridas entre:</label><br />
-                                </span>
-                                {{ filter.form.done_in }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="layout-row row">
-                        <div class="input-field col s12 m6">
-                            <div class="form-group">
-                                <span class="row s12 m12">
-                                   <label>Glosadas entre:</label><br />
-                                </span>
-                                {{ filter.form.blocked_payment_in }}
-                            </div>
-                        </div>
-                        <div class="input-field col s12 m6">
-                            <div class="form-group">
-                                <span class="row s12 m12">
-                                   <label>Finalizadas entre:</label><br />
-                                </span>
-                                {{ filter.form.finished_in }}
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-                <br>
-                <br>
-                <div class="footer text-right">
-                    {% if perms.core.can_view_survey_results %}
-                    <button type="submit" class="btn btn-sm btn-primary btn-raised" name="export_answers" value="true">
-                        <i class="material-icons">file_download</i>Exportar respostas dos formulários
-                    </button>
-                    {% endif %}
-                    <button type="submit" class="btn btn-sm btn-primary btn-raised">
-                        <i class="material-icons">search</i>Filtrar
-                    </button>
-                </div>
+    <div class="panel panel-default">
+        <div class="panel-heading ">
+            <i class="ti-filter"></i>Filtrar providências
+            <div class="panel-action">
+                <a href="#" data-perform="panel-collapse"><i class="ti-plus"></i></a>
             </div>
-        </form>
+        </div>
+        <div id="filter_content" class="panel-wrapper collapse" aria-expanded="false">
+            <form method="get">
+                {% csrf_token %}
+                <div class="panel-body">
+                    <fieldset>
+                        <div class="row">
+                            {% bootstrap_field filter.form.state form_group_class="form-group col-sm-6" bound_css_class='' %}
+                            {% bootstrap_field filter.form.court_district form_group_class="form-group col-sm-6" bound_css_class='' %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field filter.form.type_task form_group_class="form-group col-sm-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.cost_center form_group_class="form-group col-sm-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.court form_group_class="form-group col-sm-4" bound_css_class='' %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field filter.form.folder_number form_group_class="form-group col-sm-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.law_suit_number form_group_class="form-group col-sm-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.task_number form_group_class="form-group col-sm-4" bound_css_class='' %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field filter.form.person_executed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.person_asked_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.person_distributed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Solicitadas entre: " %}
+                                {% bootstrap_field filter.form.requested_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Aceitas pelo service entre: " %}
+                                {% bootstrap_field filter.form.accepted_service_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Recusadas pelo service entre: " %}
+                                {% bootstrap_field filter.form.refused_service_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Abertas entre: " %}
+                                {% bootstrap_field filter.form.open_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Aceitas entre: " %}
+                                {% bootstrap_field filter.form.accepted_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Recusadas entre: " %}
+                                {% bootstrap_field filter.form.refused_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Retornadas entre: " %}
+                                {% bootstrap_field filter.form.return_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Cumpridas entre: " %}
+                                {% bootstrap_field filter.form.done_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Glosadas entre: " %}
+                                {% bootstrap_field filter.form.blocked_payment_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Finalizadas entre: " %}
+                                {% bootstrap_field filter.form.finished_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                        </div>
+                    </fieldset>
+                     <div class="panel-footer">
+                        <button class="btn btn-success waves-effect waves-light" type="submit">
+                            <span class="btn-label"><i class="fa fa-filter"></i></span>Filtar
+                        </button>
+                         <button class="btn btn-info waves-effect waves-light" type="button"
+                                onclick="javascript:window.open('{{ request.META.PATH_INFO }}', '_self')">
+                            <span class="btn-label"><i class="fa fa-trash-o"></i></span>Limpar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
-    {{ filter.form.media }}
-    {% block table %}
-        <div class="panel panel-primary">
+
+    {% block extra_content %}
+    <div class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title form-row">Listagem de providências ({{ table.length }})</h3>
+            <div class="panel-title form-row">Listagem de providências ({{ table.length }})</div>
         </div>
         <div class="panel-body">
-        {% if table.page %}
-            <div class="table-container">
-        {% endif %}
-    <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            {% block table.thead %}
-                <thead>
-                <tr>
-                    {% for column in table.columns %}
-                        {% if column.orderable %}
-                            <th {{ column.attrs.th.as_html }}><a
-                                    href="{% querystring table.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header|title }}</a>
-                            </th>
-                        {% else %}
-                            <th {{ column.attrs.th.as_html }}>{{ column.header|title }}</th>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-                </thead>
-            {% endblock table.thead %}
-            {% block table.tbody %}
-                <tbody>
-                {% for row in table.page.object_list|default:table.rows %} {# support pagination #}
-                    {% block table.tbody.row %}
-                        <tr class="{% cycle "odd" "even" %}" data-new-href="{{ row.attrs.data_new_href }}">
-                            {% for column, cell in row.items %}
-                                <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" paginate-fixed>
+                    {% block table.thead %}
+                        <thead>
+                        <tr>
+                            {% for column in table.columns %}
+                                {% if column.orderable %}
+                                    <th {{ column.attrs.th.as_html }}><a
+                                            href="{% querystring table.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header|title }}</a>
+                                    </th>
+                                {% else %}
+                                    <th {{ column.attrs.th.as_html }}>{{ column.header|title }}</th>
+                                {% endif %}
                             {% endfor %}
                         </tr>
-                    {% endblock table.tbody.row %}
-                {% empty %}
-                    {% if table.empty_text %}
-                        {% block table.tbody.empty_text %}
-                            <tr>
-                                <td colspan="{{ table.columns|length }}">{{ table.empty_text }}</td>
-                            </tr>
-                        {% endblock table.tbody.empty_text %}
-                    {% endif %}
-                {% endfor %}
-                </tbody>
-            {% endblock table.tbody %}
-            {% block table.tfoot %}
-                <tfoot></tfoot>
-            {% endblock table.tfoot %}
-        </table>
+                        </thead>
+                    {% endblock table.thead %}
+                    {% block table.tbody %}
+                        <tbody>
+                        {% for row in table.page.object_list|default:table.rows %} {# support pagination #}
+                            {% block table.tbody.row %}
+                                <tr class="{% cycle "odd" "even" %}" data-new-href="{{ row.attrs.data_new_href }}">
+                                    {% for column, cell in row.items %}
+                                        <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endblock table.tbody.row %}
+                        {% empty %}
+                            {% if table.empty_text %}
+                                {% block table.tbody.empty_text %}
+                                    <tr>
+                                        <td colspan="{{ table.columns|length }}">{{ table.empty_text }}</td>
+                                    </tr>
+                                {% endblock table.tbody.empty_text %}
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    {% endblock table.tbody %}
+                    {% block table.tfoot %}
+                        <tfoot></tfoot>
+                    {% endblock table.tfoot %}
+                </table>
+            </div>
+            <div class="pagination-fixed">
+                {% if table.page %}
+                    {% block pagination %}
+                        {% bootstrap_pagination table.page url=request.get_full_path %}
+                    {% endblock pagination %}
+                {% endif %}
+            </div>
+        </div>
     </div>
-    {% if table.page %}
-        {% block pagination %}
-            {% bootstrap_pagination table.page url=request.get_full_path %}
-        {% endblock pagination %}
-    {% endif %}
-    </div>
-    {% endblock table %}
-</div>
-</div>
-{% endblock content %}
-{% block extrajs %}
-    <script src="{% static "js/jquery-2.1.1.min.js" %}"></script>
-    {% include 'material/includes/material_js.html' %}
-    <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
-{#    Apesar de repetidos, os scripts a seguir são necessário para renderização do form #}
-    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
-    <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>
-    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
-    {{ form.media }}
-    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
+    {% endblock extra_content %}
+    {% endblock content %}
+
+
+{% block extra_scripts %}
+    {{ filter.form.media }}
+{% endblock %}
+
+{% block extra_stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'skeleton/plugins/bower_components/bootstrap-daterangepicker/daterangepicker.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static '/select2.css' %}" />
+{% endblock extra_stylesheets %}
+
+{% block script_window_load %}
 {% endblock %}

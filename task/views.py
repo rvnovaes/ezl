@@ -4,11 +4,13 @@ from urllib.parse import urlparse
 import json
 from chat.models import UserByChat
 from django.core.cache import cache
+from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
@@ -17,6 +19,7 @@ from django.utils import timezone
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
+from chat.models import UserByChat
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
@@ -31,11 +34,13 @@ from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable
+
 from financial.models import ServicePriceTable
 from chat.models import Chat
 from survey.models import SurveyPermissions
 from financial.tables import ServicePriceTableTaskTable
 from core.utils import get_office_session
+from ecm.models import DefaultAttachmentRule, Attachment
 
 
 class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -168,6 +173,10 @@ class DashboardView(MultiTableMixin, TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+
+        person = Person.objects.get(auth_user=self.request.user)
+        context['task_count'] = DashboardViewModel.objects.all().count()
+
         if not self.request.user.get_all_permissions():
             context['messages'] = [
                 {'tags': 'error', 'message': NO_PERMISSIONS_DEFINED}
@@ -334,6 +343,26 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             servicepricetable = ServicePriceTable.objects.get(id=servicepricetable_id)
             form.instance.person_executed_by = (servicepricetable.correspondent
                                                 if servicepricetable.correspondent else None)
+            attachmentrules = DefaultAttachmentRule.objects.filter(
+                Q(office=get_office_session(self.request)),
+                Q(Q(type_task=form.instance.type_task) | Q(type_task=None)),
+                Q(Q(person_customer=form.instance.client) | Q(person_customer=None)),
+                Q(Q(state=form.instance.court_district.state) | Q(state=None)),
+                Q(Q(court_district=form.instance.court_district) | Q(court_district=None)),
+                Q(Q(city=(form.instance.movement.law_suit.organ.address_set.first().city if
+                          form.instance.movement.law_suit.organ.address_set.first() else None)) | Q(city=None)))
+
+            for rule in attachmentrules:
+                attachments = Attachment.objects.filter(model_name='ecm.defaultattachmentrule').filter(object_id=rule.id)
+                for attachment in attachments:
+                    # fs = FileSystemStorage()
+                    # filename = fs.save(attachment.file.name, attachment.file)
+                    obj = Ecm(path=attachment.file,
+                              task=Task.objects.get(id=form.instance.id),
+                              create_user_id=self.request.user.id,
+                              create_date=timezone.now())
+                    obj.save()
+
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
@@ -400,9 +429,6 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
         data = {'success': False,
                 'message': exception_create()}
 
-        data = {'success': False,
-                'message': exception_create()
-                }
         for file in files:
 
             ecm = Ecm(path=file,
@@ -705,7 +731,7 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         return context
 
 
-    def get(self, request):        
+    def get(self, request):
         if (self.request.GET.get('export_answers') and
                 self.request.user.has_perm(SurveyPermissions.can_view_survey_results)):
             return self._export_answers(request)
@@ -740,7 +766,7 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         base_fields = [task.id, task.legacy_code]
         answers = ['' for x in range(len(columns))]
         for question, answer in task.survey_result.items():
-            question_index = columns.index(question) 
+            question_index = columns.index(question)
             answers[question_index] = answer
 
         writer.writerow(base_fields + answers)
@@ -775,3 +801,55 @@ class DashboardStatusCheckView(LoginRequiredMixin, View):
         # Comparamos as tasks que foram enviadas com as que estão no banco para saber se houve mudanças
         has_changed = tuple(db_tasks) != tasks
         return JsonResponse({"has_changed": has_changed})
+
+
+@login_required
+def ajax_get_task_data_table(request):
+    status = request.GET.get('status')
+    query = DashboardViewModel.objects.filter(task_status=status)
+    xdata = []
+    xdata.append(
+        list(
+            map(lambda x: [
+                x.pk,
+                x.task_number,
+                x.final_deadline_date.strftime('%d/%m/%Y %H:%M') if x.final_deadline_date else '',
+                x.type_service,
+                x.lawsuit_number,
+                x.client,
+                x.opposing_party,
+                x.delegation_date.strftime('%d/%m/%Y %H:%M'),
+                x.legacy_code,
+                'Movimentação sem processo',
+                'Preencher o processo na movimentação',
+            ], query)
+        )
+    )
+
+
+    data = {
+        "data": xdata[0]
+    }
+    return JsonResponse(data)
+
+
+def ajax_get_ecms(request):
+    task_id = request.GET.get('task_id')
+    data_list = []
+    ecms = Ecm.objects.filter(task_id=task_id)
+    for ecm in ecms:
+        data_list.append({
+            'task_id': ecm.task_id,
+            'pk': ecm.pk,
+            'url': ecm.path.name,
+            'filename': ecm.filename,
+            'user': ecm.create_user.username,
+            'data': ecm.create_date.strftime('%d/%m/%Y %H:%M'),
+            'state': ecm.task.get_task_status_display(),
+        })
+    data = {
+        'task_id': task_id,
+        'total_ecms': ecms.count(),
+        'ecms': data_list
+    }
+    return JsonResponse(data)

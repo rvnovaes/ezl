@@ -1,0 +1,58 @@
+{% load tz %}
+<div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="panelECM">
+        <a class="panel-title collapsed" role="button"
+           data-toggle="collapse" data-parent="#accordion"
+           href="#collapseECM" aria-expanded="false"
+           aria-controls="collapseECM"><i class="panel-title mdi mdi-paperclip"></i> Anexos </a> </div>
+    <div id="collapseECM" class="panel-collapse collapse" role="tabpanel" aria-labelledby="panelECM" aria-expanded="false" style="height: 0px;">
+        <div class="panel-body">
+            <div id="no-providence" class="">
+                <div class="alert alert-warning font-bold m-0">
+                    Esta providência não possui nenhum arquivo em
+                    anexo.
+                </div>
+            </div>
+            <!-- TABELA USADA PARA EXIBIR OS ARQUIVOS -->
+            <div class="inbox-center table-responsive">
+                <table class="table table-hover" id="files">
+                    <tbody id="containnerUploads"></tbody>
+                </table>
+            </div>
+
+            <!-- Janela modal para arquivos que não podem ser apagados -->
+            <div id="confirmDeleteNotAllowed" class="modal">
+                <div class="modal-dialog">
+                    <div class="modal-content ">
+                        <div class="modal-body" style="text-align: center !important;">
+                            Arquivos de sistemas legados não podem ser apagados.
+                        </div>
+                        <div class="modal-footer">
+                            <div class="form-group text-center">
+                                <button type="button" style="width: 95px!important;"
+                                        class="btn btn-sm btn-raised btn-default"
+                                        data-dismiss="modal">
+                                    Ok
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{#        {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}#}
+            <div class="panel-footer">
+                <button type="button" class="btn btn-sm btn-info js-upload-files">
+                    <i class="icon-cloud-upload"></i> Enviar Arquivo(s)
+                </button>
+
+                <input id="fileupload" type="file" name="path" multiple
+                       style="display: none;"
+                       data-method="POST"
+                       enctype="multipart/form-data"
+                       data-url="{% url 'ecm_add' object.id %}"
+                       data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+            </div>
+{#        {% endif %}#}
+    </div>
+</div>

@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 import django_tables2 as tables
 from django_tables2.utils import AttributeDict, A
 
-from .models import Person, Address, Office
+from .models import Person, Address, Office, Invite
 
 
 class CheckBoxMaterial(tables.CheckBoxColumn):
@@ -25,9 +25,7 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         attrs = AttributeDict(default, **(specific or general or {}))
         attrs['selectable'] = True
         return mark_safe(
-            ('<div class="checkbox"><label>'
-             '<input %s id="selection_header"  onclick="toggle(this)"/>'
-             '</label></div>')
+            ('<input %s id="selection_header"  onclick="toggle(this)"/>')
             % attrs.as_html())
 
     def render(self, value, bound_column, record):
@@ -45,9 +43,9 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         specific = self.attrs.get('td__input')
         attrs = AttributeDict(default, **(specific or general or {}))
         attrs['id'] = record.id
-        return mark_safe('<div class="checkbox"><label><input name="selection"'
-                         ' type="checkbox" %s onclick="showDeleteButton(this)"/>'
-                         '</label></div>' % attrs.as_html())
+        return mark_safe(
+            '<input name="selection" type="checkbox" %s onclick="showDeleteButton(this)"/>'% attrs.as_html()
+        )
 
 
 class AddressTable(tables.Table):
@@ -128,6 +126,7 @@ class UserTable(tables.Table):
             'data_href': lambda record: '/usuarios/' + str(record.pk) + '/'
         }
 
+
 class OfficeTable(tables.Table):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -143,3 +142,9 @@ class OfficeTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/escritorios/' + str(record.pk) + '/'
         }
+
+
+class InviteTable(tables.Table):
+    class Meta:
+        model = Invite
+        fields = ('person', 'person.auth_user', 'status')

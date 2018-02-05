@@ -1,0 +1,11 @@
+{% with form.get_title as form_title %}
+    {% if form_title %}
+        <i class="ti-agenda"></i> {{ form_title }}
+    {% else %}
+        {% if object %}
+            <i class="ti-pencil-alt"></i> Editando <small class="text-muted">{{ object }}</small>
+        {% else %}
+            <i class="ti-plus"></i> Novo <small class="text-muted">{{ form.get_model_verbose_name }}</small>
+        {% endif %}
+    {% endif %}
+{% endwith %}

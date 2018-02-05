@@ -1,38 +1,19 @@
-{% extends 'inicial.html' %}
-{#{% load staticfiles %}#}
-{#{% load formset_tags %}#}
-{% load core_filters %}
+{% extends 'skeleton/forms/base.html' %}
+{% load bootstrap3 static %}
 
-{% block content %}
-    {% include 'core/widgets/messages.html' %}
+{% block extra_stylesheets %}
+    <link href="{% static 'skeleton/plugins/bower_components/multiselect/css/multi-select.css' %}" rel="stylesheet" type="text/css" />
+{% endblock %}
 
-    <form action="" method="post">{% csrf_token %}
-            <fieldset>
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h1 class="panel-title">Usuário</h1>
-                    </div>
-                    <div class="panel-body">
-                        {% for field in form %}
-                            <div class="form-group col-sm-3">
-                                <label>
-                                    {{ field | append_ast_if_req  | capfirst }}{{ field }}
-                                </label>
-                            </div>
-                        {% endfor %}
 
-                    </div>
-                    <div class="form-row  text-center">
-                        {% include 'core/widgets/cancel_button.html' with link_list='user_list'%}
-                        <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
-                                class="material-icons left">done</i>
-                            Salvar
-                        </button>
-                    </div>
-                </div>
-            </fieldset>
-        </div>
+{% block button_cancel %}
+    {% include 'core/widgets/cancel_button.html'  with link_list='user_list' %}
+{% endblock %}
 
-    </form>
 
-{% endblock content %}
+{% block extra_scripts %}
+    <script type="text/javascript" src="{% static 'skeleton/plugins/bower_components/multiselect/js/jquery.multi-select.js' %}"></script>
+{% endblock %}
+{% block script_document_ready %}
+    $('#id_groups').multiSelect();
+{% endblock %}

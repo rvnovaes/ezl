@@ -6,7 +6,6 @@ from django.views.generic import RedirectView
 from . import views
 
 urlpatterns = [
-
     url(r'city/autocomplete/$',
         login_required(views.CityAutoCompleteView.as_view()),
         name='city_autocomplete'),
@@ -72,5 +71,9 @@ urlpatterns = [
     url(r'^escritorios/criar$', login_required(views.OfficeCreateView.as_view()), name='office_add'),
     url(r'^convites/criar$', login_required(views.InviteCreateView.as_view()), name='invite_add'),
     url(r'^convites/invite_update/$', login_required(views.InviteUpdateView.as_view()), name='invite_update'),
-    url(r'^convites/convidar$', login_required(views.InviteMultipleUsersView.as_view()), name='invite_multiple_users')
+    url(r'^convites/convidar$', login_required(views.InviteMultipleUsersView.as_view()), name='invite_multiple_users'),
+    url(r'^convites/table$', login_required(views.InviteTableView.as_view()), name='invite_table'),
+    url(r'^typeahead/search$', login_required(views.TypeaHeadGenericSearch.as_view()), name='typeahead_search'),
+    url(r'^typeahead/search/inviteuser$', login_required(views.TypeaHeadInviteUserSearch.as_view()),
+        name='typeahead_invite_user')
 ]

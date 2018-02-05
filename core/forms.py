@@ -19,10 +19,11 @@ from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, 
 from allauth.utils import build_absolute_uri
 
 from core.fields import CustomBooleanField
-from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType, Office
+from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType, Office, Invite
 from core.utils import filter_valid_choice_form, get_office_field
 from core.widgets import MDModelSelect2
 from lawsuit.forms import BaseForm
+from core.widgets import TypeaHeadForeignKeyWidget
 
 
 class BaseModelForm(forms.ModelForm):
@@ -373,18 +374,10 @@ class ResetPasswordFormMixin(forms.Form):
             self.context = context
         return self.context
 
+from core.widgets import TypeaHeadWidget
+
 
 class OfficeForm(BaseModelForm):
-    legal_type = forms.ChoiceField(
-            label='Tipo',
-            choices=((x.value, x.format(x.value)) for x in LegalType),
-            required=True,
-        )
-
-    layout = Layout(
-            Row('legal_name', 'name'),
-            Row('legal_type', 'cpf_cnpj'),            
-        )
 
     class Meta:
         model = Office
@@ -420,3 +413,16 @@ class AddressOfficeForm(ModelForm):
 
 AddressOfficeFormSet = inlineformset_factory(Office, Address, form=AddressForm, extra=1,
                                              max_num=1)
+
+
+class InviteForm(forms.ModelForm):
+    person = forms.CharField(widget=TypeaHeadForeignKeyWidget(model=Person,
+                                                              field_related='legal_name', name='person'))
+
+    class Meta:
+        model = Invite
+        fields = ['office', 'person']
+        exclude = ['is_active']
+
+
+InviteOfficeFormSet = inlineformset_factory(Office, Invite, form=InviteForm, extra=1, max_num=1)

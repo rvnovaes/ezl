@@ -1,0 +1,7 @@
+.select2-container {
+    min-width: 100% !important;
+}
+
+.select2 span.select2-selection--single {
+    border-radius: 0;
+}
