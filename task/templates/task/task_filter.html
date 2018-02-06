@@ -4,16 +4,39 @@
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
 
+{% block js_head %}
+    <!-- Compiled and minified JavaScript -->
+    <script src="{% static "libs/jquery-3.2.17/jquery.min.js" %}"></script>
+    <script src="{% static "js/utils.js" %}"></script>
+    <script src="{% static "js/modal.js" %}"></script>
+    <script src="{% static "js/table-tr-link.js" %}"></script>
+    <script src="{% static "js/pagination-fixed.js" %}"></script>
+    <script src="{% static "chat/js/chat.js" %}"></script>
+    <script src="{% static "js/masks.js" %}"></script>
+    <script src="{% static "libs/bootstrap-3.3.7/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
+    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.js" %}"></script>
+    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/ripples.min.js" %}"></script>
+    <script src="{% static "libs/bootstrap-ajax-typeahead/js/bootstrap-typeahead.min.js" %}"></script>
+    <script src="{% static "libs/toastr/build/toastr.min.js" %}"></script>
+    <script src="{% static "js/dashboard.js" %}"></script>
+    <script src="{% static "js/widget_toast.js" %}"></script>
+    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
+{% endblock js_head %}
+
 {% block content %}
+    {% load core_filters %}
     <div class="panel panel-default">
-        <div class="panel-heading ">
-            <i class="ti-filter"></i>Filtrar providências
-            <div class="panel-action">
-                <a href="#" data-perform="panel-collapse"><i class="ti-plus"></i></a>
+        <form method="get">
+            <div class="panel-heading ">
+                <i class="ti-filter"></i>Filtrar providências
+                <label for="{{ filter.form.custom_filter.id_for_label }}">{{ filter.form.custom_filter.label }}</label>
+                    {{ filter.form.custom_filter }}
+                <div class="panel-action">
+                    <a href="#" data-perform="panel-collapse"><i class="ti-plus"></i></a>
+                </div>
             </div>
-        </div>
-        <div id="filter_content" class="panel-wrapper collapse" aria-expanded="false">
-            <form method="get">
+            <div id="filter_content" class="panel-wrapper collapse" aria-expanded="false">
                 {% csrf_token %}
                 <div class="panel-body">
                     <fieldset>
@@ -95,10 +118,40 @@
                                 onclick="javascript:window.open('{{ request.META.PATH_INFO }}', '_self')">
                             <span class="btn-label"><i class="fa fa-trash-o"></i></span>Limpar
                         </button>
+                         <button type="button" data-toggle="modal" data-target="#saveFilter" class="btn btn-primary waves-effect waves-light">
+                             <span class="btn-label"><i class="fa fa-save"></i></span>Salvar
+                         </button>
                     </div>
                 </div>
-            </form>
-        </div>
+                <!-- Modal Save Filter-->
+                <div id="saveFilter" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                    <div class="modal-dialog">
+                        <div class="modal-content ">
+                            <div id="modalHeader">
+                                <h4 class="panel-header panel-heading" style="padding-top: 15px;padding-bottom: 15px;">
+                                    <i class="fa fa-save"></i>
+                                    <b> Novo Filtro </b></h4>
+                            </div>
+                            <div class="modal-body">
+                                    {% bootstrap_field filter.form.custom_filter_name form_group_class="form-group" bound_css_class='' %}
+                                    {% bootstrap_field filter.form.custom_filter_description form_group_class="form-group" bound_css_class='' %}
+                            </div>
+                            <div class="modal-footer">
+                                <div class="form-group text-center">
+                                    <button type="button" class="btn btn-sm btn-default waves-effect"
+                                            data-dismiss="modal">
+                                        <span class="btn-label"><i class="fa fa-close"></i></span> Cancelar</button>
+                                    <button name="save_filter"
+                                           type="submit"
+                                           class="btn btn-sm btn-raised btn-success waves-effect">
+                                        <span class="btn-label"><i class="fa fa-save"></i></span> Salvar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
 
     {% block extra_content %}

@@ -1,22 +1,22 @@
 from datetime import datetime
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django.utils import timezone
-
 from django_file_form.forms import FileFormMixin, MultipleUploadedFileField
 
 from core.models import Person
 from core.utils import filter_valid_choice_form, get_office_field
 from core.widgets import MDDateTimepicker, MDDatePicker
 from lawsuit.forms import BaseForm
-from task.models import Task, TypeTask
+from task.models import Task, TypeTask, Filter
 
 
 class TaskForm(BaseForm):
     task_number = forms.CharField(disabled=True, required=False,
                                   widget=forms.TextInput(attrs={
-                                    'placeholder': 'Gerado automaticamente'}))
+                                      'placeholder': 'Gerado automaticamente'}))
 
     class Meta:
         model = Task
@@ -31,7 +31,7 @@ class TaskForm(BaseForm):
     person_asked_by = forms.ModelChoiceField(
         empty_label='Selecione...',
         queryset=filter_valid_choice_form(
-          Person.objects.active().requesters().order_by('name')))
+            Person.objects.active().requesters().order_by('name')))
 
     person_executed_by = forms.ModelChoiceField(
         empty_label='Selecione...',
@@ -64,8 +64,8 @@ class TaskForm(BaseForm):
 
     final_deadline_date = forms.DateTimeField(required=True,
                                               widget=MDDateTimepicker(attrs={
-                                                                        'class': 'form-control'},
-                                                                      format='DD/MM/YYYY HH:mm'))
+                                                  'class': 'form-control'},
+                                                  format='DD/MM/YYYY HH:mm'))
 
     execution_date = forms.DateTimeField(required=False,
                                          widget=MDDatePicker(attrs={'class': 'form-control'},
@@ -123,9 +123,9 @@ class TaskDetailForm(ModelForm):
                                          initial=timezone.now(),
                                          label='Data de Cumprimento',
                                          widget=MDDateTimepicker(attrs={
-                                                                    'class': 'form-control',
-                                                                 },
-                                                                 format='DD/MM/YYYY HH:mm'))
+                                             'class': 'form-control',
+                                         },
+                                             format='DD/MM/YYYY HH:mm'))
     notes = forms.CharField(
         required=False,
         initial='',
@@ -171,3 +171,15 @@ class TypeTaskForm(BaseForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
+
+
+class FilterForm(BaseForm):
+    name = forms.CharField(label=u"Nome", required=True,
+                                  widget=forms.Textarea(
+                                      attrs={'rows': '1'}))
+    description = forms.CharField(label=u"Descrição", required=False,
+                                           widget=forms.Textarea(
+                                               attrs={'rows': '3'}))
+    class Meta:
+        model = Filter
+        fields = ['name', 'description']

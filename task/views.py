@@ -1,8 +1,10 @@
+import json
 import csv
 import os
 from urllib.parse import urlparse
-import json
-from chat.models import UserByChat
+import pickle
+from django.contrib import messages
+from chat.models import Chat, UserByChat
 from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
@@ -30,11 +32,10 @@ from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
 from task.filters import TaskFilter
-from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
-from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
+from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm, FilterForm
+from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter
 from task.signals import send_notes_execution_date
-from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable
-
+from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable, FilterTable
 from financial.models import ServicePriceTable
 from chat.models import Chat
 from survey.models import SurveyPermissions
@@ -385,15 +386,15 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         Parte adversa: {opposing_party}, Cliente: {client},
         {court_district} - {state}, Prazo: {final_deadline_date}
         """.format(opposing_party=opposing_party, client=self.object.client,
-        court_district=self.object.court_district, state=state,
-        final_deadline_date=self.object.final_deadline_date.strftime('%d/%m/%Y %H:%M'))
+                   court_district=self.object.court_district, state=state,
+                   final_deadline_date=self.object.final_deadline_date.strftime('%d/%m/%Y %H:%M'))
         if self.object.chat:
             self.object.chat.description = description
             self.object.chat.save()
         else:
             label = 'task-{}'.format(self.object.pk)
             title = """#{task_number} - {type_task}""".format(
-            task_number=self.object.task_number, type_task=self.object.type_task)
+                task_number=self.object.task_number, type_task=self.object.type_task)
             self.object.chat = Chat.objects.create(
                 create_user=self.request.user, label=label, title=title,
                 description=description, back_url='/dashboard/{}'.format(self.object.pk))
@@ -571,148 +572,168 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
     table_class = DashboardStatusTable
 
     def query_builder(self):
-        office_session = get_office_session(self.request)
-        if office_session:
-            query_set = DashboardViewModel.objects.filter(office_id=office_session.id)
-        else:
-            query_set = DashboardViewModel.objects.filter(office_id=0)
+        query_set = {}
+        person_dynamic_query = Q()
         person = Person.objects.get(auth_user=self.request.user)
 
-        request = self.request.GET
-        task_filter = TaskFilter(request)
+        filters = self.request.GET
+        task_filter = TaskFilter(data=filters,request=self.request)
         task_form = task_filter.form
 
         if task_form.is_valid():
             data = task_form.cleaned_data
-            task_dynamic_query = Q()
-            person_dynamic_query = Q()
-            client_query = Q()
-            requested_dynamic_query = Q()
-            accepted_service_dynamic_query = Q()
-            refused_service_query = Q()
-            open_dynamic_query = Q()
-            accepted_dynamic_query = Q()
-            refused_dynamic_query = Q()
-            return_dynamic_query = Q()
-            done_dynamic_query = Q()
-            blocked_payment_dynamic_query = Q()
-            finished_dynamic_query = Q()
 
-            if not self.request.user.has_perm('core.view_all_tasks'):
-                if self.request.user.has_perm('core.view_delegated_tasks'):
-                    person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-                elif self.request.user.has_perm('core.view_requested_tasks'):
-                    person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+            if data['custom_filter']:
+                q = pickle.loads(data['custom_filter'].query)
+                query_set = DashboardViewModel.objects.filter(q)
 
-            if data['state']:
-                task_dynamic_query.add(Q(movement__law_suit__court_district__state=data['state']), Q.AND)
-            if data['court_district']:
-                task_dynamic_query.add(Q(movement__law_suit__court_district=data['court_district']), Q.AND)
-            if data['type_task']:
-                task_dynamic_query.add(Q(type_task=data['type_task']), Q.AND)
-            if data['court']:
-                task_dynamic_query.add(Q(movement__law_suit__organ=data['court']), Q.AND)
-            if data['cost_center']:
-                task_dynamic_query.add(Q(movement__law_suit__folder__cost_center=data['cost_center']), Q.AND)
-            if data['folder_number']:
-                task_dynamic_query.add(Q(movement__law_suit__folder__folder_number=data['folder_number']), Q.AND)
-            if data['law_suit_number']:
-                task_dynamic_query.add(Q(movement__law_suit__law_suit_number=data['law_suit_number']), Q.AND)
-            if data['task_number']:
-                task_dynamic_query.add(Q(task_number=data['task_number']), Q.AND)
-            if data['person_executed_by']:
-                task_dynamic_query.add(Q(person_executed_by=data['person_executed_by']), Q.AND)
-            if data['person_asked_by']:
-                task_dynamic_query.add(Q(person_asked_by=data['person_asked_by']), Q.AND)
-            if data['person_distributed_by']:
-                task_dynamic_query.add(Q(person_distributed_by=data['person_distributed_by']), Q.AND)
-            if data['requested_in']:
-                if data['requested_in'].start:
-                    requested_dynamic_query.add(
-                        Q(requested_date__gte=data['requested_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['requested_in'].stop:
-                    requested_dynamic_query.add(
-                        Q(requested_date__lte=data['requested_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['accepted_service_in']:
-                if data['accepted_service_in'].start:
-                    accepted_service_dynamic_query.add(
-                        Q(acceptance_service_date__gte=data['accepted_service_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['accepted_service_in'].stop:
-                    accepted_service_dynamic_query.add(
-                        Q(acceptance_service_date__lte=data['accepted_service_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['refused_service_in']:
-                if data['refused_service_in'].start:
-                    refused_service_query.add(
-                        Q(refused_service_date__gte=data['refused_service_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['refused_service_in'].stop:
-                    refused_service_query.add(
-                        Q(refused_service_date__lte=data['refused_service_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['open_in']:
-                if data['open_in'].start:
-                    open_dynamic_query.add(
-                        Q(delegation_date__gte=data['open_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['open_in'].stop:
-                    open_dynamic_query.add(
-                        Q(delegation_date__lte=data['open_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['accepted_in']:
-                if data['accepted_in'].start:
-                    accepted_dynamic_query.add(
-                        Q(acceptance_date__gte=data['accepted_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['accepted_in'].stop:
-                    accepted_dynamic_query.add(
-                        Q(acceptance_date__lte=data['accepted_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['refused_in']:
-                if data['refused_in'].start:
-                    refused_dynamic_query.add(
-                        Q(refused_date__gte=data['refused_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['refused_in'].stop:
-                    refused_dynamic_query.add(
-                        Q(refused_date__lte=data['refused_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['return_in']:
-                if data['return_in'].start:
-                    return_dynamic_query.add(
-                        Q(return_date__gte=data['return_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['return_in'].stop:
-                    return_dynamic_query.add(
-                        Q(return_date__lte=data['return_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['done_in']:
-                if data['done_in'].start:
-                    done_dynamic_query.add(
-                        Q(execution_date__gte=data['done_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['done_in'].stop:
-                    done_dynamic_query.add(
-                        Q(execution_date__lte=data['done_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['blocked_payment_in']:
-                if data['blocked_payment_in'].start:
-                    blocked_payment_dynamic_query.add(
-                        Q(blocked_payment_date__gte=data['blocked_payment_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['blocked_payment_in'].stop:
-                    blocked_payment_dynamic_query.add(
-                        Q(blocked_payment_date__lte=data['blocked_payment_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['finished_in']:
-                if data['finished_in'].start:
-                    finished_dynamic_query.add(
-                        Q(finished_date__gte=data['finished_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['finished_in'].stop:
-                    finished_dynamic_query.add(
-                        Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
+            else:
+                task_dynamic_query = Q()
+                client_query = Q()
+                requested_dynamic_query = Q()
+                accepted_service_dynamic_query = Q()
+                refused_service_query = Q()
+                open_dynamic_query = Q()
+                accepted_dynamic_query = Q()
+                refused_dynamic_query = Q()
+                return_dynamic_query = Q()
+                done_dynamic_query = Q()
+                blocked_payment_dynamic_query = Q()
+                finished_dynamic_query = Q()
 
-            person_dynamic_query.add(Q(client_query), Q.AND)\
-                .add(Q(task_dynamic_query), Q.AND)\
-                .add(Q(requested_dynamic_query), Q.AND)\
-                .add(Q(accepted_service_dynamic_query), Q.AND)\
-                .add(Q(refused_service_query), Q.AND)\
-                .add(Q(open_dynamic_query), Q.AND)\
-                .add(Q(accepted_dynamic_query), Q.AND)\
-                .add(Q(refused_dynamic_query), Q.AND)\
-                .add(Q(return_dynamic_query), Q.AND)\
-                .add(Q(done_dynamic_query), Q.AND)\
-                .add(Q(blocked_payment_dynamic_query), Q.AND)\
-                .add(Q(finished_dynamic_query), Q.AND)
+                if not self.request.user.has_perm('core.view_all_tasks'):
+                    if self.request.user.has_perm('core.view_delegated_tasks'):
+                        person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+                    elif self.request.user.has_perm('core.view_requested_tasks'):
+                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
-            # office_session = get_office_session(self.request)
-            query_set = query_set.filter(person_dynamic_query)
+                if data['state']:
+                    task_dynamic_query.add(Q(movement__law_suit__court_district__state=data['state']), Q.AND)
+                if data['court_district']:
+                    task_dynamic_query.add(Q(movement__law_suit__court_district=data['court_district']), Q.AND)
+                if data['type_task']:
+                    task_dynamic_query.add(Q(type_task=data['type_task']), Q.AND)
+                if data['court']:
+                    task_dynamic_query.add(Q(movement__law_suit__organ=data['court']), Q.AND)
+                if data['cost_center']:
+                    task_dynamic_query.add(Q(movement__law_suit__folder__cost_center=data['cost_center']), Q.AND)
+                if data['folder_number']:
+                    task_dynamic_query.add(Q(movement__law_suit__folder__folder_number=data['folder_number']), Q.AND)
+                if data['law_suit_number']:
+                    task_dynamic_query.add(Q(movement__law_suit__law_suit_number=data['law_suit_number']), Q.AND)
+                if data['task_number']:
+                    task_dynamic_query.add(Q(task_number=data['task_number']), Q.AND)
+                if data['person_executed_by']:
+                    task_dynamic_query.add(Q(person_executed_by=data['person_executed_by']), Q.AND)
+                if data['person_asked_by']:
+                    task_dynamic_query.add(Q(person_asked_by=data['person_asked_by']), Q.AND)
+                if data['person_distributed_by']:
+                    task_dynamic_query.add(Q(person_distributed_by=data['person_distributed_by']), Q.AND)
+                if data['requested_in']:
+                    if data['requested_in'].start:
+                        requested_dynamic_query.add(
+                            Q(requested_date__gte=data['requested_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['requested_in'].stop:
+                        requested_dynamic_query.add(
+                            Q(requested_date__lte=data['requested_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['accepted_service_in']:
+                    if data['accepted_service_in'].start:
+                        accepted_service_dynamic_query.add(
+                            Q(acceptance_service_date__gte=data['accepted_service_in'].start.replace(hour=0, minute=0)),
+                            Q.AND)
+                    if data['accepted_service_in'].stop:
+                        accepted_service_dynamic_query.add(
+                            Q(acceptance_service_date__lte=data['accepted_service_in'].stop.replace(hour=23,
+                                                                                                    minute=59)), Q.AND)
+                if data['refused_service_in']:
+                    if data['refused_service_in'].start:
+                        refused_service_query.add(
+                            Q(refused_service_date__gte=data['refused_service_in'].start.replace(hour=0, minute=0)),
+                            Q.AND)
+                    if data['refused_service_in'].stop:
+                        refused_service_query.add(
+                            Q(refused_service_date__lte=data['refused_service_in'].stop.replace(hour=23, minute=59)),
+                            Q.AND)
+                if data['open_in']:
+                    if data['open_in'].start:
+                        open_dynamic_query.add(
+                            Q(delegation_date__gte=data['open_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['open_in'].stop:
+                        open_dynamic_query.add(
+                            Q(delegation_date__lte=data['open_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['accepted_in']:
+                    if data['accepted_in'].start:
+                        accepted_dynamic_query.add(
+                            Q(acceptance_date__gte=data['accepted_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['accepted_in'].stop:
+                        accepted_dynamic_query.add(
+                            Q(acceptance_date__lte=data['accepted_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['refused_in']:
+                    if data['refused_in'].start:
+                        refused_dynamic_query.add(
+                            Q(refused_date__gte=data['refused_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['refused_in'].stop:
+                        refused_dynamic_query.add(
+                            Q(refused_date__lte=data['refused_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['return_in']:
+                    if data['return_in'].start:
+                        return_dynamic_query.add(
+                            Q(return_date__gte=data['return_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['return_in'].stop:
+                        return_dynamic_query.add(
+                            Q(return_date__lte=data['return_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['done_in']:
+                    if data['done_in'].start:
+                        done_dynamic_query.add(
+                            Q(execution_date__gte=data['done_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['done_in'].stop:
+                        done_dynamic_query.add(
+                            Q(execution_date__lte=data['done_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['blocked_payment_in']:
+                    if data['blocked_payment_in'].start:
+                        blocked_payment_dynamic_query.add(
+                            Q(blocked_payment_date__gte=data['blocked_payment_in'].start.replace(hour=0, minute=0)),
+                            Q.AND)
+                    if data['blocked_payment_in'].stop:
+                        blocked_payment_dynamic_query.add(
+                            Q(blocked_payment_date__lte=data['blocked_payment_in'].stop.replace(hour=23, minute=59)),
+                            Q.AND)
+                if data['finished_in']:
+                    if data['finished_in'].start:
+                        finished_dynamic_query.add(
+                            Q(finished_date__gte=data['finished_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['finished_in'].stop:
+                        finished_dynamic_query.add(
+                            Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
 
+                person_dynamic_query.add(Q(client_query), Q.AND) \
+                    .add(Q(task_dynamic_query), Q.AND) \
+                    .add(Q(requested_dynamic_query), Q.AND) \
+                    .add(Q(accepted_service_dynamic_query), Q.AND) \
+                    .add(Q(refused_service_query), Q.AND) \
+                    .add(Q(open_dynamic_query), Q.AND) \
+                    .add(Q(accepted_dynamic_query), Q.AND) \
+                    .add(Q(refused_dynamic_query), Q.AND) \
+                    .add(Q(return_dynamic_query), Q.AND) \
+                    .add(Q(done_dynamic_query), Q.AND) \
+                    .add(Q(blocked_payment_dynamic_query), Q.AND) \
+                    .add(Q(finished_dynamic_query), Q.AND)
+
+                office_id = (get_office_session(self.request).id if get_office_session(self.request) else 0)
+                query_set = DashboardViewModel.objects.filter(office_id=office_id).filter(person_dynamic_query)
+
+            try:
+                if filters.get('save_filter', None) is not None:
+                    filter_name = data['custom_filter_name']
+                    filter_description = data['custom_filter_description']
+                    q = pickle.dumps(person_dynamic_query)
+                    new_filter = Filter(name=filter_name, query=q, description=filter_description,
+                                        create_user=self.request.user, create_date=timezone.now())
+                    new_filter.save()
+            except IntegrityError:
+                messages.add_message(self.request, messages.ERROR, 'Já existe filtro com este nome.')
+        else:
+            messages.add_message(self.request, messages.ERROR, 'Formulário inválido.')
         return query_set, task_filter
 
     def get_queryset(self, **kwargs):
@@ -853,3 +874,63 @@ def ajax_get_ecms(request):
         'ecms': data_list
     }
     return JsonResponse(data)
+
+class FilterListView(LoginRequiredMixin, SingleTableViewMixin):
+    model = Filter
+    table_class = FilterTable
+
+    def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data para retornar apenas filtros criados pelo usuário logado
+        :param kwargs:
+        :return: Retorna o contexto contendo a listatem
+        :rtype: dict
+        """
+        context = super(FilterListView, self).get_context_data(**kwargs)
+        if self.request.user.is_superuser:
+            table = self.table_class(Filter.objects.filter())
+        else:
+            table = self.table_class(Filter.objects.filter(create_user=self.request.user))
+        context['table'] = table
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        return context
+
+
+class FilterUpdateView(AuditFormMixin, UpdateView):
+    model = Filter
+    form_class = FilterForm
+    success_url = reverse_lazy('filter_list')
+    success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data e seta a ultima url acessada no cache
+        Isso e necessario para que ao salvar uma alteracao, o metodo post consiga verificar
+        a pagina da paginacao onde o usuario fez a alteracao
+        :param kwargs:
+        :return: super
+        """
+        context = super().get_context_data(**kwargs)
+        cache.set('filter_page', self.request.META.get('HTTP_REFERER'))
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Sobrescreve o metodo post e verifica se existe cache da ultima url
+        Isso e necessario pelo fato da necessidade de retornar pra mesma paginacao
+        Que o usuario se encontrava ao fazer a alteracao
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: super
+        """
+        if cache.get('filter_page'):
+            self.success_url = cache.get('filter_page')
+
+        return super().post(request, *args, **kwargs)
+
+
+class FilterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
+    model = Filter
+    success_url = reverse_lazy('filter_list')
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)

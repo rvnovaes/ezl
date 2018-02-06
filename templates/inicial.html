@@ -93,13 +93,17 @@
                         </li>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                               {# Utilizado request.user.username pelo para nao alterar o nome do usuario logado #}
-                               aria-haspopup="true" aria-expanded="false">{{ request.user.username}} <span
+                                    {# Utilizado request.user.username pelo para nao alterar o nome do usuario logado #}
+                               aria-haspopup="true" aria-expanded="false">{{ request.user.username }} <span
                                     class="caret"></span></a>
                             <ul class="dropdown-menu">
+                                <li><a href="{% url 'filter_list' %}">Gerenciar Filtros</a></li>
+                                <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'start_user' %}">Meu perfil</a></li>
                                 <li role="separator" class="divider"></li>
-                                <li><a href="#modal1" onclick="modal('logout_modal', '{% static "js/jquery-2.1.1.min.js" %}')">Sair do Sistema</a>
+                                <li><a href="#modal1"
+                                       onclick="modal('logout_modal', '{% static "js/jquery-2.1.1.min.js" %}')">Sair do
+                                    Sistema</a>
                                 </li>
                             </ul>
                         </li>

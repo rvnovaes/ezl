@@ -1,6 +1,6 @@
 import django_tables2 as tables
 from core.tables import CheckBoxMaterial
-from .models import TypeTask, DashboardViewModel
+from .models import TypeTask, DashboardViewModel, Filter
 
 
 class TaskTable(tables.Table):
@@ -81,3 +81,17 @@ class TypeTaskTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/providencias/tipo_servico/' + str(record.pk) + '/'
         }
+
+
+class FilterTable(tables.Table):
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
+
+    class Meta:
+        sequence = ('selection', 'create_user', 'name', 'description')
+        model = Filter
+        fields = ['selection', 'create_user', 'name', 'description']
+        empty_text = "Não existem filtros cadastrados"
+        row_attrs = {
+            'data_href': lambda record: '/providencias/filtros/' + str(record.pk) + '/'
+        }
+        order_by = ('create_user', 'name',)

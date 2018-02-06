@@ -1,13 +1,14 @@
-from django_filters import FilterSet, BooleanFilter, ModelChoiceFilter, NumberFilter, CharFilter
+from django.forms import Select, Textarea
+from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter
 from django import forms
 
 from core.models import Person, State
-from core.widgets import MDCheckboxInput, MDDateTimeRangeFilter, MDModelSelect2
 from core.utils import filter_valid_choice_form
+from core.widgets import MDDateTimeRangeFilter, MDModelSelect2
 from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ
-from task.models import TypeTask
-from .models import Task, DashboardViewModel
+from task.models import TypeTask, Filter
+from .models import DashboardViewModel
 
 
 class TaskFilter(FilterSet):
@@ -26,13 +27,12 @@ class TaskFilter(FilterSet):
                                            }),
                                        required=False,
                                        label="Comarca")
-
     type_task = ModelChoiceFilter(queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True)),
                                   label=u"Tipo de Serviço")
     cost_center = ModelChoiceFilter(queryset=filter_valid_choice_form(CostCenter.objects.filter(is_active=True)),
                                     label="Setor")
     court = ModelChoiceFilter(queryset=filter_valid_choice_form(Organ.objects.filter(is_active=True)),
-                                    label="Órgão")
+                              label="Órgão")
     folder_number = NumberFilter(label=u"Número da Pasta")
     law_suit_number = CharFilter(label=u"Número do processo")
     task_number = NumberFilter(label=u"Nº da OS")
@@ -70,7 +70,7 @@ class TaskFilter(FilterSet):
                                                                         'class': '',
                                                                         'data-placeholder': '',
                                                                         'data-label': 'Contratante'
-                                                                          })
+                                                                    })
                                               )
 
     requested_in = MDDateTimeRangeFilter(name='requested_in', label=u"Solicitadas entre:")
@@ -83,6 +83,20 @@ class TaskFilter(FilterSet):
     done_in = MDDateTimeRangeFilter(name='done_in', label="Cumpridas entre:")
     blocked_payment_in = MDDateTimeRangeFilter(name='blocked_payment_in', label="Glosadas entre:")
     finished_in = MDDateTimeRangeFilter(name='finished_in', label="Finalizadas entre:")
+
+    custom_filter = ModelChoiceFilter(queryset=filter_valid_choice_form(Filter.objects.all()),
+                                      label=" / Escolher filtro salvo",
+                                      required=False,
+                                      widget=Select(attrs={'onchange': 'this.form.submit()'}))
+    custom_filter_name = CharFilter(label=u"Nome do Filtro", required=False)
+
+    custom_filter_description = CharFilter(label=u"Descrição", required=False,
+                                           widget=Textarea(attrs={'class': 'form-control',
+                                                                  'rows': '3'}))
+
+    def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
+        super(TaskFilter, self).__init__(data, queryset, prefix, strict, request)
+        self.filters['custom_filter'].queryset = Filter.objects.filter(create_user=self.request.user).order_by('name')
 
     class Meta:
         model = DashboardViewModel

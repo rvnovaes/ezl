@@ -41,4 +41,15 @@ urlpatterns = [
     url(r'^ajax_get_ecms/$', login_required(views.ajax_get_ecms),
         name='ajax_get_ecms'),
 
+    # Filtros
+    url(r'^filtros/listar/$',
+        login_required(views.FilterListView.as_view()),
+        name='filter_list'),
+
+    url(r'^filtros/(?P<pk>[0-9]+)/$', login_required(views.FilterUpdateView.as_view()),
+        name='filter_update'),
+
+    url(r'^filtros/excluir$', login_required(views.FilterDeleteView.as_view()),
+        name='filter_delete'),
+
 ]
