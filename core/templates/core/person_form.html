@@ -46,10 +46,10 @@
         $(function () {
             $('#id_legal_type').change(function () {
                 if (this.value == 'F') {
-                    $("#id_cpf_cnpj").attr('data-mask','000.000.000-00');
+                    $("#id_cpf_cnpj").attr('data-mask','999.999.999-99');
                 }
                 else {
-                    $('#id_cpf_cnpj').attr('data-mask','00.000.000/0000-00');
+                    $('#id_cpf_cnpj').attr('data-mask','99.999.999/9999-99');
                 }
             }).change();
         })
