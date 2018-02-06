@@ -85,11 +85,14 @@ class TaskFilter(FilterSet):
     finished_in = MDDateTimeRangeFilter(name='finished_in', label="Finalizadas entre:")
 
     custom_filter = ModelChoiceFilter(queryset=filter_valid_choice_form(Filter.objects.all()),
-                                      label="", required=False, widget=Select(attrs={'onchange': 'this.form.submit()'}))
+                                      label=" / Escolher filtro salvo",
+                                      required=False,
+                                      widget=Select(attrs={'onchange': 'this.form.submit()'}))
     custom_filter_name = CharFilter(label=u"Nome do Filtro", required=False)
 
     custom_filter_description = CharFilter(label=u"Descrição", required=False,
-                                           widget=Textarea(attrs={'class': 'form-control input-sm'}))
+                                           widget=Textarea(attrs={'class': 'form-control',
+                                                                  'rows': '3'}))
 
     def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
         super(TaskFilter, self).__init__(data, queryset, prefix, strict, request)

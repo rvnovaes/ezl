@@ -1,48 +1,17 @@
-{% extends 'inicial.html' %}
-{% load core_filters %}
-{% block js_head %}
+{% extends 'skeleton/forms/base.html' %}
+{#{% load core_filters %}#}
+{% load bootstrap3 %}
+{% block extra_scripts %}
     {{ block.super }}
     <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
-{% endblock js_head %}
-{% block content %}
-    {% include 'core/widgets/messages.html' %}
-    <form action="" method="post">{% csrf_token %}
-        <div class="col-lg-12">
-            <fieldset>
-                <div class="form-row">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h1 class="panel-title">{{ form.title }}</h1>
-                        </div>
-                        <div class="panel-body">
-                            {% for field in form %}
-                                {% if field.name != 'query' and field.name != 'is_active' %}
-                                <div class="form-group col-sm-6">
-                                    <label>
-                                        {{ field | append_ast_if_req  | label_capitalizer }}{{ field }}
-                                    </label>
-                                </div>
-                                {% endif %}
-                            {% endfor %}
-                            {% if request.user.is_superuser %}
-                            <div class="col-sm-12">
-                                <label for="query_sql">SQL</label><br />
-                                <code class="prettyprint lang-sql">{{ form.instance.query_sql }}</code>
-                            </div>
-                            {% endif %}
-
-                        </div>
-                        <div class="form-row  text-center">
-                            {% include 'core/widgets/cancel_button.html'  with link_list='filter_list' %}
-                            <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
-                                    class="material-icons left">done</i>
-                                Salvar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </fieldset>
+{% endblock extra_scripts %}
+{% block form %}
+    {% bootstrap_field form.name form_group_class="form-group col-sm-6" bound_css_class='' %}
+    {% bootstrap_field form.description form_group_class="form-group col-sm-6" bound_css_class='' %}
+    {% if request.user.is_superuser %}
+        <div class="col-sm-12">
+            <label for="query_sql">SQL</label><br />
+            <code class="prettyprint lang-sql">{{ form.instance.query_sql }}</code>
         </div>
-
-    </form>
-{% endblock content %}
+    {% endif %}
+{% endblock form %}

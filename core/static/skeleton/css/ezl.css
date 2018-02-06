@@ -1,4 +1,14 @@
 
+.btn-success, .btn-success.disabled {
+    background: #52BE80 !important;
+    border: 1px solid #52BE80 !important;
+}
+
+.btn-danger, .btn-danger.disabled {
+    background: rgb(221, 107, 85);
+    border: 1px solid rgb(221, 107, 85);
+}
+
 .select2-container--default .select2-selection--single {
     border: 2px solid #e4e7ea !important;
     border-radius: 1px !important;
