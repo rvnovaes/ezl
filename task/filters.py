@@ -35,7 +35,7 @@ class TaskFilter(FilterSet):
                                     label="Órgão")
     folder_number = NumberFilter(label=u"Número da Pasta")
     law_suit_number = CharFilter(label=u"Número do processo")
-    task_number = NumberFilter(label=u"Número da OS")
+    task_number = NumberFilter(label=u"Nº da OS")
 
     person_executed_by = ModelChoiceFilter(queryset=Person.objects.filter(),
                                            label="Correspondente",

@@ -131,13 +131,15 @@ class OfficeTable(tables.Table):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # self.exclude = ('pk', 'name', 'legal_name')
+
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
+
     class Meta:
         exclude = ('id', 'create_date', 'create_user', 'auth_user',
-        'alter_user', 'is_customer', 'is_supplier', 'alter_date', 'legacy_code',
-        'system_prefix', 'is_lawyer')
+                   'alter_user', 'is_customer', 'is_supplier', 'alter_date', 'legacy_code',
+                   'system_prefix', 'is_lawyer', 'import_from_legacy')
         sequence = ('selection', 'legal_name', 'name', 'legal_type',
-        'cpf_cnpj')
+                    'cpf_cnpj')
         model = Office
         row_attrs = {
             'data_href': lambda record: '/escritorios/' + str(record.pk) + '/'
