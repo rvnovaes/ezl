@@ -41,18 +41,19 @@
         </div>
     {% endif %}
     {{ personaddress.forms.0.media }}
-{#    <script type="text/javascript">#}
-{#        $(function () {#}
-{#            $('#id_legal_type').change(function () {#}
-{#                if (this.value == 'F') {#}
-{#                    $("#id_cpf_cnpj").mask('000.000.000-00', {reverse: true});#}
-{#                }#}
-{#                else {#}
-{#                    $('#id_cpf_cnpj').mask('00.000.000/0000-00', {reverse: true});#}
-{#                }#}
-{#            }).change();#}
-{#        })#}
-{#    </script>#}
+    <script src="{% static 'skeleton/js/mask.js' %}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('#id_legal_type').change(function () {
+                if (this.value == 'F') {
+                    $("#id_cpf_cnpj").attr('data-mask','000.000.000-00');
+                }
+                else {
+                    $('#id_cpf_cnpj').attr('data-mask','00.000.000/0000-00');
+                }
+            }).change();
+        })
+    </script>
 {#    {{ form.media }}#}
 {#    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>#}
 {% endblock %}
