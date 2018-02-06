@@ -1,12 +1,14 @@
 {% extends 'skeleton/forms/base.html' %}
 
 {% block extra_content %}
+    {% if object %}
     <div class="col-sm-12">
         {% include 'core/widgets/generic_search_view.html' %}
     </div>
     <div class="col-sm-12">
         {% include 'core/widgets/generic_form.html' with link_ex=delete link_add=create %}
     </div>
+    {% endif %}
 {% endblock %}
 {% block button_cancel %}
 {% if param1 and param2 %}

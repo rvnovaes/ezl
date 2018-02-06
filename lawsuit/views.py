@@ -338,7 +338,7 @@ class CourtDivisionDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
-class FolderLawsuitCreateView(AuditFormMixin, SuccessMessageMixin, GenericFormOneToMany, CreateView):
+class FolderLawsuitCreateView(AuditFormMixin, SuccessMessageMixin, CreateView):
     model = Folder
     related_model = LawSuit
     form_class = FolderForm
@@ -347,10 +347,11 @@ class FolderLawsuitCreateView(AuditFormMixin, SuccessMessageMixin, GenericFormOn
     success_url = reverse_lazy('folder_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
-    def get_context_data(self, **kwargs):
-        context = super(FolderLawsuitCreateView, self).get_context_data(**kwargs)
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
-        return context
+    # TODO - verificar opção de cadastro de processos ao incluir pasta
+    # def get_context_data(self, **kwargs):
+    #     context = super(FolderLawsuitCreateView, self).get_context_data(**kwargs)
+    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
+    #     return context
 
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
