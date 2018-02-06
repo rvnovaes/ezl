@@ -8,7 +8,8 @@ from core.managers import PersonManager
 from core.utils import LegacySystem
 
 
-INVITE_STATUS = (('A', 'ACCEPT'), ('R', 'REFUSED'), ('N', 'NOt REVIEWED'))
+INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'))
+
 
 class LegalType(Enum):
     FISICA = 'F'
@@ -94,6 +95,10 @@ class Audit(AuditCreate, AuditAlter):
     def deactivate(self):
         self.is_active = False
         self.save()
+
+    @property
+    def use_upload(self):
+        return True
 
 
 class AddressType(Audit):
@@ -269,14 +274,17 @@ class DefaultOffice(OfficeMixin, Audit):
 
 
 class Invite(Audit):
-    person = models.ForeignKey(Person, blank=False, null=False,
-        related_name='invites')
-    office = models.ForeignKey(Office, blank=False, null=False,
-    related_name='invites')
-    status = models.CharField(choices=INVITE_STATUS, default='N', max_length=1)
+    person = models.ForeignKey(Person, blank=False, null=False, on_delete=models.PROTECT,
+                               related_name='invites', verbose_name='Pessoa')
+    office = models.ForeignKey(Office, blank=False, null=False, on_delete=models.PROTECT,
+                               related_name='invites', verbose_name='Escritório')
+    status = models.CharField(choices=INVITE_STATUS, default='N', max_length=1, verbose_name='Status')
 
     class Meta:
         verbose_name = 'Convite'
+
+    def __unicode__(self):
+        return self.person
 
 
 class Address(Audit):

@@ -50,11 +50,16 @@ def get_default_office(apps, schema_editor):
             record.office_id = default_office.id
             record.save()
 
+        Sequence = apps.get_model('sequences', 'sequence')
+        record = Sequence.objects.filter(name='lawsuit_folder_folder_number').first()
+        record.name = 'lawsuit_office_'+str(default_office.id)+'_folder_folder_number'
+        record.save()
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0053_office'),
+        ('core', '0057_office'),
         ('lawsuit', '0042_auto_20180125_1248'),
     ]
 

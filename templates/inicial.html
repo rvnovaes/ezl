@@ -1,5 +1,11 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% block css_head %}
+    {{ block.super }}
+    {% if object %}
+        {% include 'ecm/styles.html' %}
+    {% endif %}
+{% endblock %}
 {% block body %}
     {% if user.is_authenticated %}
         <div class="navbar navbar-default navbar-fixed-top">
@@ -48,6 +54,7 @@
                                     {% if perms.core.can_edit_surveys %}
                                         <li><a href="{% url 'survey_list' %} "target="_self">Pesquisas</a></li>
                                     {% endif %}
+                                    <li><a href="{% url 'ecm:defaultattachmentrule_list' %}" target="_self">Regras de Anexos</a></li>
                                     <li><a href="{% url 'user_list' %}" target="_self">Usuários</a></li>
                                 </ul>
                             </li>
@@ -109,6 +116,11 @@
             {% block content %}
                 {% include 'core/widgets/messages.html' %}
             {% endblock content %}
+            {% block attachment %}
+                {% if object %}
+                    {% include 'ecm/attachments.html' %}
+                {% endif %}
+            {% endblock attachment %}
         </div>
 
         <!-- Janela modal de logout -->
@@ -144,7 +156,7 @@
                     </div>
                     <div class="modal-body">
                         <p><img src="{% static "img/logo_ezl.png" %}" height="30"/></p>
-                        <p>Versão: 1.0.7</p>
+                        <p>Versão: 1.0.8</p>
                         <p>Informar um problema: <a href="http://suporte.mtostes.com.br" target="_blank">
                             http://suporte.mtostes.com.br</a></p>
                         <p>&copy; Copyright {% now "Y" %} MTTech. Todos os direitos reservados.</p>
@@ -164,9 +176,12 @@
             </div>
         </div>
     {% else %}
-
-
+        <!-- TODO: Se não for usar quando não tiver usuário logado, remover o else  -->.
     {% endif %}
+{% endblock %}
 
-
+{% block extrajs %}
+    {% if object %}
+        {% include 'ecm/javascripts.html' %}
+    {% endif %}
 {% endblock %}

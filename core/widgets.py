@@ -5,6 +5,9 @@ from django.utils import six, translation
 from django.utils import timezone
 from django.utils.encoding import force_text
 from django_filters import RangeFilter
+from django.forms.widgets import Widget
+from django.template import loader
+from django.utils.safestring import mark_safe
 
 from django.conf import settings
 
@@ -242,8 +245,8 @@ class MDSelect(ChoiceWidget):
         """Return True if the choice's value is empty string or None."""
         value, _ = choice
         return (
-            (isinstance(value, six.string_types) and not bool(value)) or
-            value is None
+                (isinstance(value, six.string_types) and not bool(value)) or
+                value is None
         )
 
     def use_required_attribute(self, initial):
@@ -266,3 +269,47 @@ class MDModelSelect2(QuerySetSelectMixin,
                      MDSelect2WidgetMixin,
                      MDSelect):
     """Select widget for QuerySet choices and Select2."""
+
+
+class TypeaHeadWidget(Widget):
+    template_name = 'skeleton/componentes/fields/typeahead.html'
+
+    def __init__(self, model, url=False, name=False, *args, **kwargs):
+        self.model = model
+        self.url = url if url else '/typeahead/search'
+        self.name = name
+        super().__init__(*args, **kwargs)
+
+    class Media:
+        js = ('skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js',
+              'core/js/typeahead.js')
+
+    def get_context_data(self, name, value, attrs=None):
+        return {'widget': {
+            'name': self.name or name,
+            'value': value,
+            'url': self.url,
+            'module': self.model.__module__,
+            'model': self.model.__name__
+        }}
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context_data(name, value, attrs)
+        template = loader.get_template(self.template_name).render(context)
+        return mark_safe(template)
+
+
+class TypeaHeadForeignKeyWidget(TypeaHeadWidget):
+    def __init__(self, model, field_related, url=False, name=False, *args, **kwargs):
+        super().__init__(model, url, name, *args, **kwargs)
+        self.field_related = field_related
+
+    def get_context_data(self, name, value, attrs=None):
+        return {'widget': {
+            'name': self.name or name,
+            'value': value,
+            'url': self.url,
+            'module': self.model.__module__,
+            'model': self.model.__name__,
+            'field_related': self.field_related
+        }}

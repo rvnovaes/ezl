@@ -25,7 +25,6 @@ var EditableList = (function(){
             var tr = $(this);
 
             removeLinkFromRows();
-            loadInputsMask();
 
             tr.find('td[editable-list-enabled]').each(function(){
                 var td = $(this),
@@ -39,6 +38,7 @@ var EditableList = (function(){
                     input.css('color', '#006900');
                     input.css('font-weight', 'bold');
                 });
+                loadInputsMask();
             });
         });
     };

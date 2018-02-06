@@ -50,7 +50,7 @@ class DashboardStatusTable(tables.Table):
         self.base_columns['lawsuit_number'].verbose_name = lawsuit_number
         self.base_columns['type_service'].verbose_name = type_service
         self.base_columns['opposing_party'].verbose_name = opposing_party
-        self.base_columns['task_number'].verbose_name = 'Número da OS'
+        self.base_columns['task_number'].verbose_name = 'Nº da OS'
         self.title = title
         self.status = status
 

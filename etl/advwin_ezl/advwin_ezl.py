@@ -126,7 +126,7 @@ class GenericETL(object):
     advwin_table = None
     has_status = None
     advwin_model = None
-    debug_logger = logging.getLogger('debug_logger')
+    debug_logger = logging.getLogger('''''')
     error_logger = logging.getLogger('error_logger')
     timestr = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 

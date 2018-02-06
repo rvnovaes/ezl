@@ -36,6 +36,11 @@ urlpatterns = [
     url(r'^tipo_servico/excluir$', login_required(views.TypeTaskDeleteView.as_view()),
         name='typetask_delete'),
 
+    url(r'^ajax_get_task_data_table/$', login_required(views.ajax_get_task_data_table),
+        name='ajax_get_task_data_table'),
+    url(r'^ajax_get_ecms/$', login_required(views.ajax_get_ecms),
+        name='ajax_get_ecms'),
+
     # Filtros
     url(r'^filtros/listar/$',
         login_required(views.FilterListView.as_view()),

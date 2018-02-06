@@ -1,4 +1,5 @@
 <script>
+$(document).on('ready', function() {
         $(function () {
         $('#{{ widget.name }}').datetimepicker({
             {#            locale: 'pt-br',#}
@@ -23,7 +24,7 @@
         })
         ;
     });
-
+})
 </script>
 <span>
     <span>

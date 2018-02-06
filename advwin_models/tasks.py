@@ -58,7 +58,7 @@ def export_ecm(ecm_id, ecm=None, execute=True):
                 id_doc = row['ID_doc']
                 export_ecm_related_folter_to_task(ecm, id_doc)
         except Exception as exc:
-            LOGGER.warning('Não foi possíve exportar ECM: %d-%s\n%s',
+            LOGGER.warning('Não foi possível exportar ECM: %d-%s\n%s',
                            ecm.id,
                            ecm,
                            exc,

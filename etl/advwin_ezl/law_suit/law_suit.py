@@ -116,8 +116,11 @@ class LawsuitETL(GenericETL):
                 if not court_division:
                     court_division = InvalidObjectFactory.get_invalid_model(CourtDivision)
 
-                lawsuit = self.model.objects.filter(instance=instance,
-                                                    law_suit_number=law_suit_number).first()
+                lawsuit = self.model.objects.filter(legacy_code=legacy_code,
+                                                    system_prefix=LegacySystem.ADVWIN.value).first()
+                if not lawsuit:
+                    lawsuit = self.model.objects.filter(instance=instance,
+                                                        law_suit_number=law_suit_number).first()
 
                 if lawsuit:
                     lawsuit.folder = folder

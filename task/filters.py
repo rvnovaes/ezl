@@ -1,5 +1,6 @@
 from django.forms import Select, Textarea
 from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter
+from django import forms
 
 from core.models import Person, State
 from core.utils import filter_valid_choice_form
@@ -11,20 +12,22 @@ from .models import DashboardViewModel
 
 
 class TaskFilter(FilterSet):
-    state = ModelChoiceFilter(queryset=filter_valid_choice_form(State.objects.filter(is_active=True)).order_by('name'),
+    state = ModelChoiceFilter(queryset=filter_valid_choice_form(
+        State.objects.filter(is_active=True).order_by('name')),
                               label="UF")
     court_district = ModelChoiceFilter(queryset=CourtDistrict.objects.filter(),
+                                       name="court_district",
                                        widget=MDModelSelect2(
                                            url='courtdistrict_autocomplete',
                                            forward=['state'],
                                            attrs={
-                                               'class': 'select-with-search material-ignore form-control',
+                                               'class': '',
                                                'data-placeholder': '',
                                                'data-label': 'Comarca'
                                            }),
                                        required=False,
                                        label="Comarca")
-    type_task = ModelChoiceFilter(queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True).order_by('name')),
+    type_task = ModelChoiceFilter(queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True)),
                                   label=u"Tipo de Serviço")
     cost_center = ModelChoiceFilter(queryset=filter_valid_choice_form(CostCenter.objects.filter(is_active=True)),
                                     label="Setor")
@@ -32,7 +35,7 @@ class TaskFilter(FilterSet):
                               label="Órgão")
     folder_number = NumberFilter(label=u"Número da Pasta")
     law_suit_number = CharFilter(label=u"Número do processo")
-    task_number = NumberFilter(label=u"Número da OS")
+    task_number = NumberFilter(label=u"Nº da OS")
 
     person_executed_by = ModelChoiceFilter(queryset=Person.objects.filter(),
                                            label="Correspondente",
@@ -40,10 +43,10 @@ class TaskFilter(FilterSet):
                                            required=False,
                                            widget=MDModelSelect2(url='correspondent_autocomplete',
                                                                  attrs={
-                                                                     'class': 'select-with-search material-ignore form-control',
-                                                                     'data-placeholder': '',
-                                                                     'data-label': 'Correspondente'
-                                                                 })
+                                                                        'class': '',
+                                                                        'data-placeholder': '',
+                                                                        'data-label': 'Correspondente'
+                                                                       })
                                            )
 
     person_asked_by = ModelChoiceFilter(queryset=Person.objects.filter(),
@@ -52,10 +55,10 @@ class TaskFilter(FilterSet):
                                         required=False,
                                         widget=MDModelSelect2(url='requester_autocomplete',
                                                               attrs={
-                                                                  'class': 'select-with-search material-ignore form-control',
-                                                                  'data-placeholder': '',
-                                                                  'data-label': 'Solicitante'
-                                                              })
+                                                                 'class': '',
+                                                                 'data-placeholder': '',
+                                                                 'data-label': 'Solicitante'
+                                                                    })
                                         )
 
     person_distributed_by = ModelChoiceFilter(queryset=Person.objects.filter(),
@@ -64,7 +67,7 @@ class TaskFilter(FilterSet):
                                               required=False,
                                               widget=MDModelSelect2(url='service_autocomplete',
                                                                     attrs={
-                                                                        'class': 'select-with-search material-ignore form-control',
+                                                                        'class': '',
                                                                         'data-placeholder': '',
                                                                         'data-label': 'Contratante'
                                                                     })

@@ -1,18 +1,16 @@
 
-{% extends "core/person_form.html" %}
+{% extends "skeleton/forms/base.html" %}
 
 {% load render_table from django_tables2 %}
 {% load static %}
 {% load querystring from django_tables2 %}
 
-{% block content %}
-
-    {{ block.super }}
-
-    <form action="{% url 'address_delete' person_pk=object.pk %}" method="post">
-    {% csrf_token %}
+{% block extra_content %}
+<div class="col-sm-12">
+    <form action="{% url 'address_delete' person_pk=object.pk %}" method="post" id="addressForm">
+        {% csrf_token %}
     <div class="row">
-        <div class="panel panel-primary">
+        <div class="panel panel-default">
             <div class="panel-heading">
                 <h1 class="panel-title">Endereços</h1>
             </div>
@@ -69,16 +67,16 @@
 
 
                 <div class="text-right" style="">
+                <div class="text-right" style="">
                     <div class="fixed-btn">
-                        <input type="button" data-toggle="modal" data-target="#confirmDelete" id="delete_button"
-                               class="btn btn-fab btn-warning material-icons"
-                               value="remove" disabled>
-                        <a class="btn btn-fab btn-primary" href="{% url 'address_create' object.pk %}">
+                        <button type="button" id="delete_button" class="btn btn-danger" disabled>Remover</button>
+                        <a class="btn btn-success" href="{% url 'address_create' object.pk %}">
                            <!-- style="height: 30px !important; width: 30px !important; min-width: 30px !important;"> -->
-                            <i class="material-icons">add</i></a>
+                            Adicionar</a>
                     </div>
                 </div>
 
+            </div>
             </div>
         </div>
     </div>
@@ -89,7 +87,7 @@
             <div class="modal-content ">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h4 class="modal-title"><i class="material-icons">warning</i></h4>
+                    <h4 class="modal-title"><i class="fa fa-trash"></i></h4>
                     <h4 class="modal-title">Atenção!</h4>
                 </div>
                 <div class="modal-body">
@@ -108,6 +106,85 @@
             </div>
         </div>
     </div>
-    </form>
 
+    </form>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+    {% if view.model.use_upload %}
+        <!-- UPLOADS SCRIPTS  -->
+        {% include 'ecm/javascripts.html' %}
+
+        <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+        <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+        <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
+             a medida que for adicionando novos arquivos -->
+        <div id="scripts">
+        </div>
+    {% endif %}
+    <script language="JavaScript">
+        // Warning Delete Message
+        $('#delete_button').click(function(){
+            {% if on_delete == 'CASCADE' %}
+                var text = "Ao excluir excluir o(s) registro(s) selecionado(s), todos os seus " +
+                    "vínculos também serão excluídos! Essa ação é irreversível";
+            {% else %}
+                var text = "Tem certeza que deseja excluir o(s) registro(s) selecionado(s)? " +
+                    "Essa ação é irreversível.";
+            {% endif %}
+
+            swal({
+                title: "Excluir?",
+                text: text,
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Sim, Desejo excluir!",
+                closeOnConfirm: false,
+                cancelButtonText: "Cancelar."
+            }, function(){
+                $('#addressForm').submit()
+            });
+        });
+
+        var pk_list = [];
+
+        function toggle(source) {
+
+
+            checkboxes = document.getElementsByName('selection');
+            for (var i in checkboxes) {
+
+                if (checkboxes.hasOwnProperty(i)) {
+                    checkboxes[i].checked = source.checked;
+                    if (source.checked)
+                        pk_list.push(checkboxes[i].id);
+                    else
+                        pk_list = []
+                }
+            }
+            if (pk_list.length > 0) {
+                document.getElementById('delete_button').disabled = false;
+            } else {
+                document.getElementById('delete_button').disabled = true;
+            }
+        }
+
+        function showDeleteButton(source) {
+            if (source.checked) {
+                pk_list.push(source.id);
+            } else {
+                pk_list.pop();
+                document.getElementById("selection_header").checked = false;
+            }
+
+            if (pk_list.length > 0)
+                document.getElementById('delete_button').disabled = false;
+            else
+                document.getElementById('delete_button').disabled = true;
+
+        }
+    </script>
 {% endblock %}

@@ -25,3 +25,5 @@ def modelchoicefield_init(func):
 
 django.forms.models.ModelChoiceField.__init__ = \
     modelchoicefield_init(django.forms.models.ModelChoiceField.__init__)
+
+

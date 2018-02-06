@@ -78,6 +78,9 @@ class CostCenterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
         model._meta.verbose_name_plural)
     object_list_url = 'costcenter_list'
 
+    def post(self, request, *args, **kwargs):
+        ret = super().post(request, *args, **kwargs)
+        return ret
 
 class CostCenterAutocomplete(LoginRequiredMixin,
                              autocomplete.Select2QuerySetView):

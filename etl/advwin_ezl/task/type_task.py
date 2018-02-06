@@ -41,7 +41,7 @@ class TypeTaskETL(GenericETL):
                 survey_key = row['formulario_id']
                 survey_id = survey_map[survey_key]
 
-                survey = Survey.objects.filter(id=survey_id)
+                survey = Survey.objects.filter(id=survey_id).first()
 
                 # tem que verificar se é novo antes para não salvar o create_user ao fazer update
                 instance = self.model.objects.filter(legacy_code=code,
