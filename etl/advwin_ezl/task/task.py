@@ -68,7 +68,9 @@ class TaskETL(GenericETL):
                 a.Advogado_or AS person_distributed_by_legacy_code,
                 a.OBS AS description,
                 a.Data AS requested_date,
-                a.prazo_fatal AS final_deadline_date,
+                CASE WHEN (a.prazo_fatal IS NULL)
+                    THEN a.Data_Prazo
+                  ELSE a.prazo_fatal END AS final_deadline_date,
                 p.Codigo_Comp AS folder_legacy_code,
                 p.Cliente
                 FROM Jurid_agenda_table AS a

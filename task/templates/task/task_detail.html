@@ -45,6 +45,20 @@
                             <b> Deseja <span id="actionText">aceitar</span> o prazo? </b></h4>
                     </div>
                     <div class="modal-body">
+                        {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
+                            {{ form.servicepricetable_id }}
+                            <div class="form-group" style="margin: auto">
+                                <label>Tipo de Serviço: </label>
+                                {{ form.instance.type_task }}
+                            </div>
+                            <div class="table-responsive" style="margin: auto">
+                                {% render_table correspondents_table %}
+                            </div>
+                            <div class="form-group" style="margin: auto">
+                                <label>{{ form.amount.label }}</label>
+                                {{ form.amount }}
+                            </div>
+                        {% endif %}
                         <div class="form-group" style="margin: auto">
                             <label class="text-info"> {{ form.notes.label }}</label>
                             {{ form.notes }}
@@ -172,6 +186,9 @@
         }
 
         var nextState = {
+            ACCEPTED_SERVICE: {text: "aceitar", icon: "mdi mdi-calendar-clock"},
+            REFUSED_SERVICE: {text: "recusar", icon: "mdi mdi-calendar-clock"},
+            OPEN: {text: "delegar", icon: "mdi assignment"},
             ACCEPTED: {text: "aceitar", icon: "mdi mdi-calendar-clock"},
             REFUSED: {text: "recusar", icon: "mdi mdi-clipboard-alert"},
             DELEGATED: {text: "delegar", icon: "assignment_returned"},
@@ -212,11 +229,22 @@
 
             var notes = $('textarea[id=notes_id]');
             notes.removeAttr('required');
-            ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN'].forEach(function (status) {
+            ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN', 'REFUSED_SERVICE'].forEach(function (status) {
                 if (task_status === status) {
                     notes.attr('required', true).change(function () {
                         notes.val(notes.val().trim())
                     });
+                }
+            });
+
+            {# Apenas estes status devem possuir amount como required, alem de nao poder 0 #}
+            var amount = $('input[id=id_amount]');
+            var servicepricetable_id = $('input[name=servicepricetable_id]');
+            amount.removeAttr('required');
+            ['OPEN'].forEach(function (status) {
+                if (task_status === status) {
+                    {#amount.attr('required', true).change()#}
+                    servicepricetable_id.attr('required', true).change()
                 }
             });
             return true;
@@ -224,12 +252,13 @@
     </script>
     <script type="text/javascript">
         $("#correspondents-table tbody tr").click(function(){
+            debugger
             id = $(this).data('id');
             amount = $(this).data('value');
             $('input[name=servicepricetable_id]').val(id);
             $('input[name=amount]').val(parseFloat(amount));
-            $(this).addClass("OPEN");
-            $(this).siblings().removeClass("OPEN");
+            $(this).addClass("ezl-bg-open");
+            $(this).siblings().removeClass("ezl-bg-open");
             $('input[name=amount]').focus();
         });
 
