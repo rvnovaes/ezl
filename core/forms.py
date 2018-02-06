@@ -409,14 +409,14 @@ class OfficeForm(BaseModelForm):
         return cleaned_data
 
 
-class AddressOfficeForm(ModelForm):
+class AddressOfficeForm(AddressForm):
     class Meta:
         model = Address
         fields = ['zip_code', 'city_region', 'address_type', 'state', 'city', 'street', 'number',
                   'notes', 'is_active']
 
 
-AddressOfficeFormSet = inlineformset_factory(Office, Address, form=AddressForm, extra=1,
+AddressOfficeFormSet = inlineformset_factory(Office, Address, form=AddressOfficeForm, extra=1,
                                              max_num=1)
 
 

@@ -20,18 +20,13 @@ from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
-from django.views.generic.base import View
 from django.views import View
 from django.views.generic import ListView
-from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
-
 from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
-
 from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, AddressFormSet, \
-    AddressOfficeFormSet, OfficeForm, InviteForm, InviteOfficeFormSet
+    OfficeForm, InviteForm, InviteOfficeFormSet, AddressOfficeForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
@@ -301,6 +296,10 @@ class AddressOfficeCreateView(AddressMixin, CreateView):
     def get_success_url(self):
         return reverse('office_update', args=(self.object.office.pk,))
 
+    def form_valid(self, form):
+        res = super().form_valid(form)
+        return res
+
 
 class AddressUpdateView(UpdateView):
     model = Address
@@ -315,6 +314,12 @@ class AddressUpdateView(UpdateView):
         return reverse('person_update', args=(self.kwargs.get('person_pk'),))
 
     def dispatch(self, request, *args, **kwargs):
+        #  Quando nao se quer alterar a estrutura basica do metodo dispatch em  em django.views.generic.base
+        no_override = kwargs.pop('no_override')
+        if no_override:
+            return super().dispatch(request, *args, **kwargs)
+
+        obj = None
         if self.kwargs.get('person_pk'):
             obj = Person.objects.get(id=self.kwargs.get('person_pk'))
         self.success_url = self.get_success_url()
@@ -325,6 +330,13 @@ class AddressUpdateView(UpdateView):
         return super().dispatch(request, *args, **kwargs)
 
 
+class AddressOfficeUpdateView(AddressUpdateView):
+    def get_success_url(self):
+        return reverse('office_update', args=(self.kwargs.get('office_pk'),))
+
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, no_override=True, *args, **kwargs)
+
 class AddressDeleteView(MultiDeleteViewMixin):
     model = Address
     form_class = AddressForm
@@ -332,6 +344,15 @@ class AddressDeleteView(MultiDeleteViewMixin):
 
     def get_success_url(self):
         return reverse('person_update', kwargs={'pk': self.kwargs['person_pk']})
+
+
+class AddressOfficeDeleteView(AddressDeleteView):
+    model = Address
+    form_class = AddressForm
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+
+    def get_success_url(self):
+        return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})
 
 
 class SingleTableViewMixin(SingleTableView):
@@ -931,10 +952,10 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
     object_list_url = 'office_list'
 
     def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
         kwargs.update({
             'table': AddressOfficeTable(self.object.adresses.all()),
         })
+        data = super().get_context_data(**kwargs)
         if self.request.POST:
             data['inviteofficeform'] = InviteOfficeFormSet(self.request.POST)
         else:
