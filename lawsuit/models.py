@@ -125,12 +125,16 @@ class Organ(Person, OfficeMixin):
         sejam validados
         :type exclude: ValidationError
         """
+        from django.core.exceptions import ObjectDoesNotExist
         res = super(Organ, self).validate_unique(exclude)
-        if Organ.objects.filter(~Q(pk=self.pk), legal_name__iexact=self.legal_name,
-                                court_district=self.court_district):
-            raise ValidationError({
-                NON_FIELD_ERRORS: ['Órgão deve ser único para a comarca']
-            })
+        try:
+            if Organ.objects.filter(~Q(pk=self.pk), legal_name__iexact=self.legal_name,
+                                    court_district=self.court_district):
+                raise ValidationError({
+                    NON_FIELD_ERRORS: ['Órgão deve ser único para a comarca']
+                })
+        except ObjectDoesNotExist:
+            """Tratado exceção para quando estiver inserindo um novo registro e o `court_district` não for preenchido"""
         return res
 
 
