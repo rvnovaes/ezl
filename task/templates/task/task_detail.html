@@ -215,7 +215,6 @@
             // $("#confirmAction").on('shown.bs.modal', function () {
             var actionButton = document.getElementById("actionButton");
             var nextText = document.getElementById("actionText");
-            debugger
             var modalHeader = document.getElementById("modalHeader");
             nextText.innerHTML = nextState[task_status]['text'];
             $('#icon').addClass(nextState[task_status]['icon'])
@@ -253,12 +252,13 @@
     </script>
     <script type="text/javascript">
         $("#correspondents-table tbody tr").click(function(){
+            debugger
             id = $(this).data('id');
             amount = $(this).data('value');
             $('input[name=servicepricetable_id]').val(id);
             $('input[name=amount]').val(parseFloat(amount));
-            $(this).addClass("OPEN");
-            $(this).siblings().removeClass("OPEN");
+            $(this).addClass("ezl-bg-open");
+            $(this).siblings().removeClass("ezl-bg-open");
             $('input[name=amount]').focus();
         });
 
