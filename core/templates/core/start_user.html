@@ -59,8 +59,8 @@
                                 <tbody>
                                 {% for office in request.user.person.offices.all %}
                                     <tr>
-                                        <td>{{ office.name }}</td>
-                                        <td>{{ office.cpf_cnpj }}</td>
+                                        <td>{{ office.legal_name }}</td>
+                                        <td>{{ office.cpf_cnpj | default_if_none:'' }}</td>
                                         <td><a href="/escritorios/{{ office.pk }}">
                                             <i class="fa fa-edit" aria-hidden="true"></i></a></td>
                                     </tr>

@@ -18,8 +18,8 @@
             </li>
         </ul>
         <div class="tab-content">
-            <form action="{% url 'address_office_delete' office_pk=object.pk %}" method="post" id="addressForm">
-                <div id="endereco" class="tab-pane fade in active">
+            <div id="endereco" class="tab-pane fade in active">
+                <form action="{% url 'address_office_delete' office_pk=object.pk %}" method="post" id="addressForm">{% csrf_token %}
                     <div class="table-responsive">
                         <table class="table table-striped table-hover" paginate-fixed>
                             {% block table.thead %}
@@ -78,64 +78,63 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div id="invite-users" class="tab-pane fade">
-                    <form class="form-inline editable-form" id="form-invite-user" action="#">
-                        {% csrf_token %}
-                        <input type="text" value="{{ object.pk }}" name="office" hidden>
-                        <div class="control-group">
-                            <div class="editable-input" style="width: 80%">
-                                <input class="form-control input-sm twitter-typeahead" type="text"
-                                       placeholder="Usuário a convidar..."
-                                       style="padding-right: 24px;"
-                                       id="person" data-url="/typeahead/search/inviteuser" name="person"
-                                       value="" data-module="core.models" data-model="Person"
-                                       search-field="legal_name">
-                                <span class="editable-clear-x" style="display: none;"></span>
-                            </div>
-                            <div class="editable-buttons">
-                                <button type="button" class="btn btn-success btn-sm editable-submit"
-                                        id="btn-invite-user"><i
-                                        class="glyphicon glyphicon-ok"> Convidar</i></button>
-                            </div>
-                        </div>
-                        <!-- Modal -->
-                        <div id="confirmDelete" class="modal">
-                            <div class="modal-dialog">
-                                <div class="modal-content ">
-                                    <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
-                                        </button>
-                                        <h4 class="modal-title"><i class="fa fa-trash"></i></h4>
-                                        <h4 class="modal-title">Atenção!</h4>
-                                    </div>
-                                    <div class="modal-body">
-                                        {% if on_delete == 'CASCADE' %}
-                                            <p>Ao excluir excluir o(s) registro(s) selecionado(s), todos os seus
-                                                vínculos também
-                                                serão excluídos! Essa ação é irreversível. Deseja continuar?</p>
-                                        {% else %}
-                                            <p>Tem certeza que deseja excluir o(s) registro(s) selecionado(s)? Essa ação
-                                                é
-                                                irreversível.
-                                                Deseja continuar?</p>
-                                        {% endif %}
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar
-                                        </button>
-                                        <button type="submit" class="btn btn-primary">Sim</button>
-                                    </div>
+                    <!-- Modal -->
+                    <div id="confirmDelete" class="modal">
+                        <div class="modal-dialog">
+                            <div class="modal-content ">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                                    </button>
+                                    <h4 class="modal-title"><i class="fa fa-trash"></i></h4>
+                                    <h4 class="modal-title">Atenção!</h4>
+                                </div>
+                                <div class="modal-body">
+                                    {% if on_delete == 'CASCADE' %}
+                                        <p>Ao excluir excluir o(s) registro(s) selecionado(s), todos os seus
+                                            vínculos também
+                                            serão excluídos! Essa ação é irreversível. Deseja continuar?</p>
+                                    {% else %}
+                                        <p>Tem certeza que deseja excluir o(s) registro(s) selecionado(s)? Essa ação
+                                            é
+                                            irreversível.
+                                            Deseja continuar?</p>
+                                    {% endif %}
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">Sim</button>
                                 </div>
                             </div>
                         </div>
-
-                    </form>
-                    <div id="invite-table">
-
                     </div>
+                </form>
+            </div>
+            <div id="invite-users" class="tab-pane fade">
+                <form class="form-inline editable-form" id="form-invite-user" action="#">
+                    {% csrf_token %}
+                    <input type="text" value="{{ object.pk }}" name="office" hidden>
+                    <div class="control-group">
+                        <div class="editable-input" style="width: 85%">
+                            <input class="form-control input-sm twitter-typeahead" type="text"
+                                   placeholder="Usuário a convidar..."
+                                   style="padding-right: 24px; width: 100%"
+                                   id="person" data-url="/typeahead/search/inviteuser" name="person"
+                                   value="" data-module="core.models" data-model="Person"
+                                   search-field="legal_name">
+                            <span class="editable-clear-x" style="display: none;"></span>
+                        </div>
+                        <div class="editable-buttons">
+                            <button type="button" class="btn btn-success btn-sm editable-submit"
+                                    id="btn-invite-user"><i
+                                    class="glyphicon glyphicon-ok"> Convidar</i></button>
+                        </div>
+                    </div>
+                </form>
+                <div id="invite-table">
+
                 </div>
-            </form>
+            </div>
         </div>
     </div>
     {% include 'core/cpf_cnpj_mask.html' %}
@@ -159,7 +158,7 @@
     <script>
         $(document).ready(function () {
             var inviteTable = $("#invite-table");
-            inviteTable.load('/convites/table', '#invite-table');
+            inviteTable.load('/convites/table/' + '{{ object.pk }}' + '/', '#invite-table');
             $('#btn-invite-user').on('click', function (event) {
                 var data = {};
                 $('#invite-users').find('input').each(function () {
@@ -173,7 +172,7 @@
                     url: '{% url 'invite_add' %}',
                     data: data,
                     success: function (result, status, xhr) {
-                        inviteTable.load('/convites/table', '#invite-table');
+                        inviteTable.load('/convites/table/' + '{{ object.pk }}' + '/', '#invite-table');
                         $('.twitter-typeahead').typeahead('val', '');
 
                     },
@@ -217,8 +216,6 @@
         var pk_list = [];
 
         function toggle(source) {
-
-
             checkboxes = document.getElementsByName('selection');
             for (var i in checkboxes) {
 

@@ -296,10 +296,6 @@ class AddressOfficeCreateView(AddressMixin, CreateView):
     def get_success_url(self):
         return reverse('office_update', args=(self.object.office.pk,))
 
-    def form_valid(self, form):
-        res = super().form_valid(form)
-        return res
-
 
 class AddressUpdateView(UpdateView):
     model = Address
@@ -336,6 +332,7 @@ class AddressOfficeUpdateView(AddressUpdateView):
 
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, no_override=True, *args, **kwargs)
+
 
 class AddressDeleteView(MultiDeleteViewMixin):
     model = Address
@@ -1047,9 +1044,12 @@ class InviteCreateView(AuditFormMixin, CreateView):
     def post(self, request, *args, **kwargs):
         form = InviteForm(request.POST)
         form.instance.create_user = self.request.user
-        form.instance.person = Person.objects.get(pk=request.POST.get('person'))
-        form.instance.office = Office.objects.get(pk=request.POST.get('office'))
-        form.instance.save()
+        person = request.POST.get('person')
+        office = request.POST.get('office')
+        if not Invite.objects.filter(person__pk=person, office__pk=office, status='N'):
+            form.instance.person = Person.objects.get(pk=request.POST.get('person'))
+            form.instance.office = Office.objects.get(pk=request.POST.get('office'))
+            form.instance.save()
         return JsonResponse({'status': 'ok'})
 
 
@@ -1069,8 +1069,7 @@ class InviteTableView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        office = get_office_session(self.request)
-        table = InviteTable(Invite.objects.filter(office=office))
+        table = InviteTable(Invite.objects.filter(office__id=self.kwargs.get('office_pk')).order_by('-pk'))
         RequestConfig(self.request).configure(table)
         context['table'] = table
         return context
