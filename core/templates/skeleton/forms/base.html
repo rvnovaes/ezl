@@ -2,7 +2,8 @@
 {% load static bootstrap3 form_tags %}
 {% load ecm_tags %}
 {% block content %}
-    <form enctype="multipart/form-data" id="{{ object_form }}" action="{% block action %}{% endblock %}" method="{% block method %}post{% endblock %}">{% csrf_token %}
+    <form enctype="multipart/form-data" id="{{ object_form }}" action="{% block action %}{% endblock %}" method="{% block method %}post{% endblock %}" novalidate>
+        {% csrf_token %}
     <div class="panel panel-default">
         <div class="panel-heading">{% include 'skeleton/forms/form-title.html' with form=form %}</div>
         <div class="panel-wrapper collapse in">
@@ -18,7 +19,7 @@
                                     </div>
                                 </div>
                             {% elif field_type != 'clearablefile' %}
-                                {% bootstrap_field field form_group_class="form-group col-sm-6" %}
+                                {% bootstrap_field field form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
                             {% endif %}
                         {% endfor %}
                     {% endblock %}

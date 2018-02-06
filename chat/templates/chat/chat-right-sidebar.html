@@ -29,7 +29,7 @@
 {% with object.chat as chat %}
 <div class="right-sidebar">
     <div>
-        <div class="rpanel-title bg-info"> Chat: {{ chat }}
+        <div class="rpanel-title ezl-bg-{{ task.status.name|lower }} font-bold"><i class="{{ task.status.get_icon }}"></i> {{ chat.title }}
             <span> <i class="ti-close right-side-toggle"></i></span>
         </div>
         <div class="r-panel-body">
