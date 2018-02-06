@@ -220,7 +220,9 @@ class OrganForm(BaseModelForm):
             if field_name is 'cnpj':
                 field.initial = self.instance.cpf_cnpj
 
-    cpf_cnpj = BRCNPJField(label="CNPJ")
+    cpf_cnpj = BRCNPJField(label="CNPJ", widget=forms.TextInput(
+        attrs = {'data-mask': '99.999.999/9999-99'}
+    ))
 
     class Meta:
         model = Organ

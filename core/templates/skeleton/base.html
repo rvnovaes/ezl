@@ -68,19 +68,28 @@
                     {% block page_title %}
                         <div class="row bg-title">
                             <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
-                                <h4 class="page-title">{{ form_name_plural }}</h4>
+                                <h4 class="page-title">
+                                {% if form_name_plural %}
+                                    {{ form_name_plural }}
+                                {% elif object %}
+                                    {{ object }}
+                                {% endif %}
+                                </h4>
                             </div>
                             <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
-                                <button class="right-side-toggle waves-effect waves-light btn-info btn-circle pull-right m-l-20"><i class="ti-settings text-white"></i></button>
                                 {% block bar_buttons %}
                                 {% endblock %}
                                 <ol class="breadcrumb">
                                     <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                                    {% if page_title %}
                                     <li class="active">{{ page_title }}</li>
+                                    {% endif %}
+                                    {% if object %}
+                                        <li class="active">{{ object }}</li>
+                                    {% endif %}
                                 </ol>
                             </div>
                         </div>
-                        <div class="p-10"></div>
                     {% endblock page_title %}
                     <!-- End Block Page Title -->
                         <!-- Block Content  -->
