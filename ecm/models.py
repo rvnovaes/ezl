@@ -26,6 +26,9 @@ class Attachment(AuditCreate, LegacyCode):
     file = models.FileField(
         verbose_name="Arquivo", upload_to=get_uploda_to
     )
+    exibition_name = models.CharField(
+        verbose_name="Nome de Exibição", max_length=255
+    )
 
     class Meta:
         ordering = ['-id']

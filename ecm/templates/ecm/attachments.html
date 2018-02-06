@@ -1,47 +1,101 @@
 {% load ecm_tags %}
-<br><br>
-<div class="container-fluid" style="margin-top: 20px; display: flow-root">
-    <div class="panel panel-primary">
-        <div class="panel-heading " data-toggle="collapse" data-target="#attachment" id="header-attachment">
-            <div class="panel-title"><i class="material-icons">attach_file</i>
-                <b>Anexos</b>
-                <i class="material-icons" style="float: right;" id="down">arrow_drop_down</i>
-                <i class="material-icons" style="float: right; display: none;" id="up">arrow_drop_up</i>
+{% load tz %}
+<div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="panelECM">
+        <a class="panel-title collapsed" role="button"
+           data-toggle="collapse" data-parent="#accordion"
+           href="#collapseECM" aria-expanded="false"
+           aria-controls="collapseECM"><i class="panel-title mdi mdi-paperclip"></i> Anexos </a> </div>
+    <div id="collapseECM" class="panel-collapse collapse" role="tabpanel" aria-labelledby="panelECM" aria-expanded="false" style="height: 0px;">
+        <div class="panel-body">
+            <div id="no-data" class="">
+                <div class="alert alert-warning font-bold m-0">
+                    Este registro não possui anexo.
+                </div>
+            </div>
+            <!-- TABELA USADA PARA EXIBIR OS ARQUIVOS -->
+            <div class="inbox-center table-responsive">
+                <table class="table table-hover" id="files">
+                    <tbody id="containnerUploads"></tbody>
+                </table>
+            </div>
+
+            <!-- Janela modal para arquivos que não podem ser apagados -->
+            <div id="confirmDeleteNotAllowed" class="modal">
+                <div class="modal-dialog">
+                    <div class="modal-content ">
+                        <div class="modal-body" style="text-align: center !important;">
+                            Arquivos de sistemas legados não podem ser apagados.
+                        </div>
+                        <div class="modal-footer">
+                            <div class="form-group text-center">
+                                <button type="button" style="width: 95px!important;"
+                                        class="btn btn-sm btn-raised btn-default"
+                                        data-dismiss="modal">
+                                    Ok
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div id="attachment" class="panel-collapse collapse">
-            <div class="panel-body form-group is-focused">
-                <a href="#attachment-modal" data-toggle="modal"
-                   class="btn btn-sm btn-primary btn-raised js-upload-files"
-                   style="color: #fff !important;">
-                    <i class="material-icons">cloud_upload</i> &nbsp; Enviar Arquivo
-                </a>
-                <div class="row" id="render-attachments">
+        <div class="panel-footer">
+            {% if object %}
+                <button type="button" class="btn btn-sm btn-info js-upload-files">
+            {% else %}
+                <button type="button" class="btn btn-sm btn-info js-upload-files-create">
+            {% endif %}
+                <i class="icon-cloud-upload"></i> Enviar Arquivo(s)
+            </button>
+
+            {% if object %}
+                <input id="fileupload" type="file" name="file" multiple
+                       style="display: none;"
+                       data-method="POST"
+                       enctype="multipart/form-data"
+                       data-url="{% url 'ecm:ajax-upload' %}"
+                       data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}",
+                                        "model_name": "{{ object|get_modelname_from_object }}",
+                                        "object_id": "{{ object.id }}"}'>
+            {% else %}
+                <input id="fileupload-create" type="file" name="file" multiple
+                       style="display: none;">
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% block extra_modal %}
+    <!-- Janela modal para mostrar progresso de deleção do arquivo -->
+    <div id="deleting" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center;">
+                    Excluindo arquivo ...
+                </div>
+                <div class="modal-footer">
+                    <div class="progress progress-striped active">
+                        <div class="progress-bar" style="width: 100%"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<!-- MODAL ANEXO -->
-<div class="modal" id="attachment-modal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <a href="" class="close" data-dismiss="modal" aria-hidden="true">×</a>
-                <h4 class="modal-title">Anexar Arquivo</h4>
+    <!-- Janela modal para mostrar progresso do envio de arquivos -->
+    <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" style="text-align: center">Enviando ...</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="progress progress-lg">
+                        <div class="progress-bar progress-bar-info active progress-bar-striped" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" style="width: 0%" role="progressbar">
+                            0
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="modal-body">
-                <!-- Fine Uploader DOM Element
-                ====================================================================== -->
-                <div id="fine-uploader-manual-trigger"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="trigger-upload" class="btn btn-primary">
-                <i class="icon-upload icon-white"></i> Enviar
-            </button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Fechar</button>
-            </div>
-
         </div>
     </div>
-</div>
+{% endblock %}

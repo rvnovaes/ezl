@@ -1,90 +1,150 @@
-{% load static ecm_tags %}
-<script src="{% static "ecm/fine-uploader/fine-uploader.js" %}"></script>
-<script src="{% static "js/sweetalert.min.js" %}"></script>
-{% include 'ecm/fineuploader-template.html' %}
 <script>
-    var manualUploader = new qq.FineUploader({
-        element: document.getElementById('fine-uploader-manual-trigger'),
-        template: 'qq-template-manual-trigger',
-        request: {
-            endpoint: '{% url 'ecm:ajax-upload' %}'
-        },
-        thumbnails: {
-            placeholders: {
-                waitingPath: "{% static 'ecm/fine-uploader/placeholders/waiting-generic.png' %}",
-                notAvailablePath: "{% static 'ecm/fine-uploader/placeholders/not_available-generic.png' %}"
-            }
-        },
-        autoUpload: false,
-        debug: true,
-        multiple: false,
-        callbacks: {
-            onComplete: function (id, name, object, xhr) {
-                get_attachments();
-                $('.qq-upload-cancel').click();
-                $('#attachment-modal').modal().hide();
-                $('.modal-backdrop').hide();
-            }
-        }
-    });
-    manualUploader.setParams({
-        model_name: '{{ object|get_modelname_from_object }}',
-        object_id: {{ object.pk }}
-    });
-    qq(document.getElementById("trigger-upload")).attach("click", function () {
-        manualUploader.uploadStoredFiles();
-    });
+    var tmplRowUpload = '<tr class="zoomInDown animated">\n' +
+                        '    <td style="width: 50px;">\n' +
+                        '       <div class="circle circle-sm bg-info di"> <i class="fa fa-user"></i></div>\n' +
+                        '    </td>\n' +
+                        '    <td>\n' +
+                        '       <span class="font-bold">${user}</span><br>\n' +
+                        '       <small class="text-muted">${data}</small>\n' +
+                        '    </td>\n' +
+                        '    <td class="text-left">\n' +
+                        '       <h4><i class="fa fa-file-o"></i> ${file}</h4>\n' +
+                        '    </td>\n' +
+                        '    <td class="text-right">\n' +
+                        '       <button onclick="window.open(\'/media/${url}\', \'_new\')" data-toggle="tooltip" title="Baixar arquivo"  type="button" class="btn btn-info btn-outline btn-circle btn-sm m-r-5"><i class="icon-cloud-download"></i></button>\n' +
+                        '       <button onclick="deleteFile(\'${model_name}\', ${object_id},  ${pk}, \'${filename}\')" data-toggle="modal" type="button" class="btn btn-danger btn-outline btn-circle btn-sm m-r-5"\n' +
+                        '               data-type="deleteFile" data-pk="${pk}" data-filename="${filename}">\n' +
+                        '           <i class="icon-trash"></i>\n' +
+                        '       </button>\n'+
+                        '    </td>\n' +
+                        '</tr>';
 
-    function get_attachments() {
-        var data = {
-            model_name: '{{ object|get_modelname_from_object }}',
-            object_id: {{ object.pk }}
-        }
-        $.getJSON("{% url 'ecm:ajax-get-attachments' %}", data)
-            .done(function (json) {
-                console.log("Sucesso", json);
-                var items = [];
-                $.each(json, function (key, val) {
-                    var elm = '<div class="col-sm-4"><div class="alert alert-info fade in alert-dismissable">' +
-                        '  <a href="javascript:dropAttachment(' + val.id + ')" class="close" title="Apagar" data-id="' + val.id + '">×</a>' +
-                        '  <strong><a href="/media/' + val.file + '" target="_blank">' + val.filename + '</a></strong>' +
-                        '</div></div>';
-                    items.push(elm);
-                });
-                $('#render-attachments').html(
-                    items.join("")
-                );
+     var tmplRowUploadCreate =  '<tr class="zoomInDown animated file_${index}">\n' +
+                                '    <td style="width: 70px;">\n' +
+                                '       <h4><i class="fa fa-file-o"></i> ${name}</h4>' +
+                                '    </td>\n' +
+                                '    <td class="text-left">\n' +
+                                '       <h4> ${type}</h4>\n' +
+                                '    </td>\n' +
+                                '    <td class="text-right">\n' +
+                                '       <h4> ${size}</h4>\n' +
+                                '    </td>\n' +
+                                '</tr>';
 
-            })
-            .fail(function (jqxhr, textStatus, error) {
-                var err = textStatus + ", " + error;
-                console.log("Request Failed: " + err);
-            });
-    }
-
-    $('#attachment-modal').on('shown.bs.modal', function () {
-      console.log('modal show')
-    });
-    get_attachments();
-
-    function dropAttachment(id) {
-        swal({
-            title: "Ops...",
-            text: "Você deseja excluir o anexo",
-            icon: "warning",
-            buttons: ['Cancelar', 'Excluir'],
-            dangerMode: true,
-        }).then((willDelete) => {
-            if (willDelete) {
-                $.getJSON("{% url 'ecm:ajax-drop-attachment' %}", {attachment_pk: id})
-                    .done(function (json) {
-                        get_attachments()
-                    })
-                    .fail(function (jqxhr, textStatus, error) {
-                        swal("Request Failed: " + error);
-                    });
+    function get_attachments(model_name, object_id) {
+        $.ajax({
+            url: "/ecm/ajax_get_attachments/",
+            data: {
+                'object_id': object_id,
+                'model_name': model_name
+            },
+            dataType: 'json',
+            success: function (data) {
+                $('#containnerUploads').html('');
+                $('#totalAttachments').html('(' + data.total_records + ')')
+                if (data.total_records) {
+                    $('#no-data').addClass('hide')
+                } else {
+                    $('#no-data').removeClass('show')
+                };
+                $.each(data.files, function( index, value ) {
+                    console.log(value);
+                    $.tmpl(tmplRowUpload, value).appendTo('#containnerUploads');
+                })
             }
         });
     }
 
+    function deleteFile(model_name, object_id, pk, file) {
+        swal({
+            title: file,
+            text: "Deseja excluir o Arquivo?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Sim, Excluir Arquivo!",
+            cancelButtonText: "Cancelar",
+            closeOnConfirm: false
+        }, function(){
+            $('#deleting').modal('show');
+            $.ajax({
+                url: '/ecm/ajax-drop-attachment/' + pk,
+                dataType: 'json',
+
+                success: function (data) {
+                    if (data.is_deleted) {
+                        $('#deleting').modal('hide');
+                        get_attachments(model_name, object_id);
+                        swal("Sucesso!!!", data.message, "success")
+                    }
+                    else {
+                        $('#deleting').modal('hide');
+                        swal("Erro", data.message, "error")
+                    }
+                }
+            })
+        });
+    }
+
+    $(function () {
+        $(".js-upload-files").click(function () {
+            $("#fileupload").click();
+        });
+
+        $("#fileupload").fileupload({
+            dataType: 'json',
+            //Envia os arquivos um-a-um
+            sequentialUploads: false,
+
+            // Mostra a janela modal com progress bar ao início do upload
+            start: function (e) {
+                $("#modal-progress").modal("show");
+            },
+
+            // Depois de enviado o(s) arquivo(s), encerra a janela modal
+            stop: function (e) {
+                $("#modal-progress").modal("hide");
+            },
+
+            // Atualiza o Progress bar de acordo com o andamento do envio do arquivo
+            progressall: function (e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                var strProgress = progress + "%";
+                $(".progress-bar").css({"width": strProgress});
+                $(".progress-bar").text(strProgress);
+            },
+            done: function (e, data) {
+                if (data.result.success) {
+                    $("#modal-progress").modal("hide");
+                    swal("Sucesso", data.result.message, "success");
+                    get_attachments(data.result.model_name, data.result.object_id);
+                } else {
+                    $("#modal-progress").modal("hide");
+                    swal('Erro', data.result.message, 'error');
+                }
+            }
+
+        });
+
+    });
+
+    $(function () {
+        $(".js-upload-files-create").click(function () {
+            $("#fileupload-create").click();
+        });
+    });
+
+    $('#fileupload-create').change(function(){
+        console.log("The text has been changed.");
+        totalFiles = $('#fileupload-create')[0].files.length;
+        if (totalFiles > 0) {
+            $('#no-data').addClass('hide');
+        }else{
+            $('#no-data').removeClass('show');
+        }
+        $('#containnerUploads').html('');
+        $.each($('#fileupload-create')[0].files, function( index, value ) {
+            $.tmpl(tmplRowUploadCreate, value).appendTo('#containnerUploads');
+        })
+    });
 </script>

@@ -22,8 +22,8 @@ $(document).ready(function(){
 });
 
 var updateSession = function(key, value, csrf_token){
-    var data = {}
-    data[key] = value
+    var data = {};
+    data[key] = value;
     $.ajax({
         type: 'POST',
         url: '/session/',

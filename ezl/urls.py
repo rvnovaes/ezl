@@ -26,7 +26,7 @@ urlpatterns = [
     url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),
     url(r'^providencias/', include('task.urls'), name='task'),
     url(r'^dashboard/$', login_required(DashboardView.as_view()), name='dashboard'),
-    url(r'^chat/', include('chat.urls'), name='chat'), 
+    url(r'^chat/', include('chat.urls'), name='chat'),
     url(r'^ecm/', include('ecm.urls', namespace='ecm')),
 
     url(r'^dashboard/(?P<pk>[0-9]+)/$',

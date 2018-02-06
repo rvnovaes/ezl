@@ -1,173 +1,225 @@
-{% extends 'inicial.html' %}
+{% extends 'skeleton/base.html' %}
 {% load staticfiles %}
-{% block head %}
-    {{ block.super }}
-    {% block css_head %}
-        {{ block.super }}
-        <link rel="stylesheet" href="{% static "chat/css/chat.css" %}">
-    {% endblock %}
-{% endblock %}
+
+
 {% block content %}
-    <div class="app">
-        <div class="row app-one">
-            <div class="col-sm-4 side">
-                <div class="side-one">
-                    <!-- Heading -->
-                    <div class="row heading">
-                        <div class="col-sm-3 col-xs-3 heading-avatar">
-                            <div class="heading-avatar-icon">
-                                <img src="https://placehold.it/50/A52A2A/fff&text={{ user|upper|slice:":2" }}"
-                                     alt="User Avatar" class="img-circle"/>
-                            </div>
-                        </div>
-{#                        <div class="col-sm-1 col-xs-1  heading-dot  pull-right">#}
-{#                            <i class="fa fa-ellipsis-v fa-2x  pull-right" aria-hidden="true"></i>#}
-{#                        </div>#}
-{#                        <div class="col-sm-2 col-xs-2 heading-compose  pull-right">#}
-{#                            <i class="fa fa-comments fa-2x  pull-right" aria-hidden="true"></i>#}
-{#                        </div>#}
-                    </div>
-                    <!-- Heading End -->
-
-                    <!-- SearchBox -->
-{#                Necessário implementar#}
-{#                    <div class="row searchBox">#}
-{#                        <div class="col-sm-12 searchBox-inner">#}
-{#                            <div class="form-group has-feedback">#}
-{#                                <input id="searchText" type="text" class="form-control"#}
-{#                                       name="searchText" placeholder="Pesquisar...">#}
-{#                                <span class="glyphicon glyphicon-search form-control-feedback"></span>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-
-                    <!-- Search Box End -->
-                    <!-- sideBar -->
-                    <div class="row sideBar">
-                        {% for chat in chats|dictsortreversed:'alter_date' %}
-                            {% if chat.messages.all|length > 0 %}
-                                <div class="row sideBar-body"
-                                     onclick="setBoxMessage('chat-{{ chat.pk }}', '{{ chat.label }}', '{{ chat.pk }}')">
-                                    <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                                        <div class="avatar-icon">
-                                            <img src="https://placehold.it/50/55C1E7/fff&text=OS"
-                                                 alt="User Avatar" class="img-circle"/></div>
-                                    </div>
-                                    <div class="col-sm-9 col-xs-9 sideBar-main" data-balloon-length="fit" data-balloon="{{ chat.description|default_if_none:'' }}"
-                                       data-balloon-pos="botton">
-                                        <div class="row">
-                                            <div class="col-sm-8 col-xs-8 sideBar-name">
-                                                <span class="name-meta" >{{ chat.title }}</span>
-                                                <br/>
-                                            </div>
-                                            <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                                                <span class="time-meta pull-right">{{ chat.alter_date|time }}</span>
-                                                <span class="chat-badge-item badge" badge-id="{{ chat.pk }}"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                    <!-- Sidebar End -->
+    <div class="chat-main-box">
+        <!-- .chat-left-panel -->
+        <div class="chat-left-aside">
+            <div class="open-panel"><i class="ti-angle-right"></i></div>
+            <div class="chat-left-inner">
+                <div class="chat-main-header">
+                <div class="p-20 b-b">
+                    <h3 class="box-title">Conversas</h3>
                 </div>
             </div>
-            {% for chat in chats %}
-                {% if chat.messages.all|length > 0 %}
-                    {% include 'chat/chat_detail.html' %}
-                {% endif %}
-            {% endfor %}
-        </div>
-        <!-- App One End -->
-    </div>
-{% endblock %}
-{% block javascript %}
-    <script>
-        $(".heading-compose").click(function () {
-            $(".side-two").css({
-                "left": "0"
-            });
-        });
+                <ul class="chatonline style-none ">
+                    {% for chat in chats|dictsortreversed:'alter_date' %}
+                        {% if chat.messages.all|length > 0 %}
+                        <li>
+                            <a href="javascript:chatGetMessages('{{ chat.pk }}', '{{ chat.label }}')" class="mytooltip" data-chat-label="{{ chat.label }}">
+                                <div class="circle circle-sm bg-info di">OS
+                                    <div class="notify hide" id="notify-{{ chat.pk }}">
+                                        <span class="heartbit"></span>
+                                        <span class="point"></span>
+                                    </div>
+                                </div>
+                                <span>{{ chat.title }}</span>
+                                <p class="text-muted pull-right"><i class="fa fa-clock-o"></i> {{ chat.alter_date|time }}</p>
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
 
-        $(".newMessage-back").click(function () {
-            $(".side-two").css({
-                "left": "-100%"
-            });
+                    <li class="p-20"></li>
+                </ul>
+            </div>
+        </div>
+        <!-- .chat-left-panel -->
+        <!-- .chat-right-panel -->
+        <div class="chat-right-aside">
+            <div class="chat-main-header">
+                <div class="p-20 b-b" id="chatMessageTitle">
+                    <h3 class="box-title">Mensagens</h3>
+                    <p class="box-title">Selecione um bate papo ao lado</p>
+                </div>
+            </div>
+            <div class="chat-box">
+                <ul class="chat-list slimscroll p-t-30" id="messageList">
+                </ul>
+                <div class="send-chat-box">
+                    <div class="col-sm-12 p-b-10">
+                        <input class="form-control" placeholder="Digite sua mensagem" id="inputMsg" disabled/>
+                        <div class="custom-send p-r-10 p-b-10">
+                            <button class="btn btn-success btn-lg btn-circle" type="button" onclick="sendMessage()"
+                                    id="btnSend" disabled>
+                                <i class="fa fa-paper-plane-o"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- .chat-right-panel -->
+    </div>
+    </div>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+    <script src="{% static 'skeleton/js/chat.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/ion.sound-3.0.7/ion.sound.min.js' %}"></script>
+
+    <script>
+    // init bunch of sounds
+        ion.sound({
+            sounds: [
+                {name: "beer_can_opening"},
+                {name: "bell_ring"},
+                {name: "branch_break"},
+                {name: "water_droplet_3"},
+                {name: "button_click"}
+            ],
+
+            // main config
+            path: "{% static 'skeleton/plugins/ion.sound-3.0.7/sounds/' %}",
+            preload: true,
+            multiplay: true,
+            volume: 0.9
         });
+        window.chat_id = false;
+        window.socket_open = [];
+        window.chat_label = false;
+
+        var tmplMsgLi = '<li class="${odd}">\n' +
+            '  <div class="chat-image">\n' +
+            '    <div class="circle circle-sm bg-info di"> <i class="fa fa-user"></i></div>\n' +
+            '  </div>\n' +
+            '  <div class="chat-body">\n' +
+            '    <div class="chat-text">\n' +
+            '        <h4>${user}</h4>\n' +
+            '        <p>${text}</p> <b>${message_create_date}</b> ' +
+            '    </div>\n' +
+            '  </div>\n' +
+            '</li>\n';
+
+        var tmplChatMessageTitle = '<h4 class="box-title"><a href="${back_url}">${title}</a></h4>\n' +
+                                   '<p>${description}</p>';
+
+        function to_listen(label) {
+            if (window.socket_open.indexOf(label) == -1) {
+                window.socket_open.push(label)
+                var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+                socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + label);
+                {# Ao chegar uma mensagem#}
+                console.log('escutando: ' + label);
+                socket.onmessage = function (e) {
+                    data = JSON.parse(e.data);
+                    console.log('DATA CHAT', data, window.chat_id);
+                    if (data.chat == window.chat_id) {
+                        ion.sound.play("water_droplet_3");
+                        desktopNotify(data.text);
+                        if ('{{user}}' === data.user) {
+                            data.odd = "odd bounceInRight animated";
+                            $.tmpl(tmplMsgLi, data).appendTo("#messageList")
+                        } else {
+                            data.odd = "bounceInLeft animated";
+                            $.tmpl(tmplMsgLi, data).appendTo("#messageList")
+                        }
+                        var bottomCoord = $('#messageList')[0].scrollHeight;
+                        $('#messageList').slimScroll({scrollTo: bottomCoord});
+                    } else {
+                        $('#notify-' + data.chat).removeClass('hide');
+                        ion.sound.play("bell_ring");
+                    }
+                };
+            }
+        }
+
+
+
+        function sendMessage() {
+            var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+            var socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + window.chat_label);
+
+            var el = $('#inputMsg');
+            if (el.val().trim()) {
+                data = JSON.stringify({
+                    'text': el.val(),
+                    'chat': window.chat_id,
+                    'label': window.chat_label
+                });
+                el.val(null);
+                socket.onopen = function() {
+                    socket.send(data);
+                }
+                // Call onopen directly if socket is already open
+                if (socket.readyState == WebSocket.OPEN) socket.onopen();
+            } else {
+                $('#inputMsg').notify(
+                    "Digite uma mensagem!",
+                    {position: "top"}
+                );
+            }
+        }
+
+        function chatGetMessages(chat_id, label) {
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'chat_get_message' %}',
+                data: {
+                    chat_id: chat_id
+                },
+                success: function (response) {
+                    window.chat_id = chat_id;
+                    window.chat_label = label;
+                    $('#notify-' + chat_id).addClass('hide')
+                    $("#messageList").html('');
+                    $("#chatMessageTitle").html('');
+                    $.tmpl(tmplChatMessageTitle, response.chat).appendTo($("#chatMessageTitle"));
+                    $.each(response.messages, function( index, value ) {
+                        console.log('get message', value)
+                        if ('{{user}}' === value.user) {
+                            value.odd =  "odd bounceInRight animated";
+                            $.tmpl(tmplMsgLi, value).appendTo("#messageList");
+                        }else {
+                            value.odd =  "bounceInLeft animated";
+                            $.tmpl(tmplMsgLi, value).appendTo("#messageList");
+                        }
+
+                    });
+                    var bottomCoord = $('#messageList')[0].scrollHeight;
+                    $('#messageList').slimScroll({scrollTo: bottomCoord});
+                    to_listen(label);  // Verificar mensagens para a conversa atual
+                    $('#inputMsg').prop('disabled', false);
+                    $('#btnSend').prop('disabled', false);
+                },
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                },
+                dataType: 'json'
+            })
+        };
 
         socket = null;
 
         var setLastMessage = function (chat_id) {
             $("[chat-id=" + chat_id + "]").animate({scrollTop: 9999}, 1000);
         };
-        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-        var setBoxMessage = function (box_id, chat_label, chat_id) {
-            chatReadMessage(chat_id, '{{ csrf_token }}');
-            setLastMessage(chat_id);
-            $('.conversation').hide();
-            var elBox = $('#' + box_id);
-            elBox.show();
-            elBox.find('#comment').val(null);
-            socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + chat_label);
-            socket.onopen = function (data) {
-                socket.send(data);
-            };
-            socket.onmessage = function (e) {
-                var data = JSON.parse(e.data);
-                setLastMessage(chat_id);
-                var messagePosition = 'receiver ';
-                if ('{{user}}' == data.user) {
-                    messagePosition = 'sender';
-                }
-                var chatContent = $('[chat-id=' + chat_id + ']').find('.message-body').last();
-                var blockMessage = "" +
-                    "<div class='col-sm-12 message-main-" + messagePosition + "'>" +
-                    "<div class='" + messagePosition + "'>" +
-                    "<strong class='pull-left primary-font'>" + data.user + "</strong>" +
-                    "<div class='message-text'>" + data.text + "</div>" +
-                    "<span class='message-time pull-right'>" + formatDate(data.message_create_date) + "</span>" +
-                    "</div>" +
-                    "</div>";
-                chatContent.append(blockMessage);
-            };
 
-            sendMessage = function () {
-                setLastMessage();"<div class='col-sm-12 message-main-" + messagePosition + "'>" +
-                    "<div class='" + messagePosition + "'>" +
-                    "<strong class='pull-left primary-font'>" + data.user + "</strong>" +
-                    "<div class='message-text'>" + data.text + "</div>" +
-                    "<span class='message-time pull-right'>" + formatDate(data.message_create_date) + "</span>" +
-                    "</div>" +
-                    "</div>";
-                var el = $("#" + box_id).find('#comment');
-                if (el.val().trim()) {
-                    var data = JSON.stringify({
-                        'text': el.val(),
-                        'chat': chat_id,
-                        'label': chat_label
-                    });
-                    socket.onopen(data);
-                    el.val(null);
-                }else {
-                    el.val(null)
-                }
-            };
-
-            $.fn.enterKey = function (fnc) {
-                return this.each(function () {
-                    $(this).keypress(function (ev) {
-                        var keycode = (ev.keyCode ? ev.keyCode : ev.which);
-                        if (keycode == '13') {
-                            fnc.call(this, ev);
-                        }
-                    })
+        $.fn.enterKey = function (fnc) {
+            return this.each(function () {
+                $(this).keypress(function (ev) {
+                    var keycode = (ev.keyCode ? ev.keyCode : ev.which);
+                    if (keycode == '13') {
+                        fnc.call(this, ev);
+                    }
                 })
-            };
-            elBox.find('#comment').enterKey(function () {
-                sendMessage();
             })
-        }
-
+        };
+        $('#inputMsg').enterKey(function () {
+            sendMessage();
+        })
     </script>
 {% endblock %}

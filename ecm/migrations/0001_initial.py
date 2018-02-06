@@ -13,10 +13,10 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('core', '0063_office_import_from_legacy'),
-        ('task', '0060_typetask_survey'),
+        ('core', '0066_office_import_from_legacy'),
+        ('task', '0061_typetask_survey'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('lawsuit', '0042_auto_20180105_1749'),
+        ('lawsuit', '0043_auto_20180105_1749'),
     ]
 
     operations = [

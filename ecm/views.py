@@ -6,11 +6,12 @@ import logging
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse_lazy, reverse
-from core.views import (AuditFormMixin, MultiDeleteViewMixin,
-                        SingleTableViewMixin)
+from django.db import IntegrityError
+from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from core.messages import CREATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, \
-    record_from_wrong_office
+    record_from_wrong_office, success_delete, integrity_error_delete, DELETE_EXCEPTION_MESSAGE
 from core.utils import get_office_session
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
@@ -45,10 +46,30 @@ def make_response(status=200, content_type='text/plain', content=None):
 ##
 # Views
 ##
+class AttachmentFormMixin(object):
+
+    def form_valid(self, form):
+        if self.model.use_upload:
+            files = self.request.FILES.getlist('file')
+            if files:
+                instance = form.save(commit=False)
+                for f in files:
+                    model_name = self.model._meta.app_label.lower() + '.' + \
+                                 self.model.__name__.lower()
+                    attachment = Attachment(
+                        model_name=model_name,
+                        object_id=instance.id,
+                        file=f,
+                        create_user_id=self.request.user.id
+                    )
+                    attachment.save()
+            form.save()
+        return True
+
+
 class UploadView(View):
-    """ View which will handle all upload requests sent by Fine Uploader.
-    See: https://docs.djangoproject.com/en/dev/topics/security/#user-uploaded-content-security
-    Handles POST and DELETE requests.
+    """
+    View which will handle all upload requests sent by Uploader.
     """
 
     @csrf_exempt
@@ -63,14 +84,18 @@ class UploadView(View):
         if form.is_valid():
             data = request.POST
 
-            attachment = Attachment(
-                model_name=data.get('model_name'),
-                object_id=data.get('object_id'),
-                file=request.FILES.get('qqfile'),
-                create_user_id=request.user.id
-            )
-            attachment.save()
-            return make_response(content=json.dumps({'success': True}))
+            for file in request.FILES.getlist('file'):
+                attachment = Attachment(
+                    model_name=data.get('model_name'),
+                    object_id=data.get('object_id'),
+                    file=file,
+                    exibition_name=file.name,
+                    create_user_id=request.user.id
+                )
+                attachment.save()
+            return make_response(content=json.dumps({'success': True,
+                                                     'model_name': data.get('model_name'),
+                                                     'object_id': data.get('object_id')}))
         else:
             return make_response(status=400,
                                  content=json.dumps({
@@ -87,18 +112,44 @@ def ajax_get_attachments(request):
     ret = []
     for attachment in attachments:
         ret.append({
-            'file': attachment.file.name,
+            'file': attachment.exibition_name,
+            'object_id': attachment.object_id,
+            'model_name': attachment.model_name,
+            'pk': attachment.pk,
+            'url': attachment.file.name,
             'filename': attachment.filename,
-            'id': attachment.id
+            'user': attachment.create_user.username,
+            'data': attachment.create_date.strftime('%d/%m/%Y %H:%M'),
         })
 
-    return JsonResponse(ret, safe=False)
+    data = {
+        'total_records': attachments.count(),
+        'files': ret
+    }
 
-def ajax_dsrop_attachment(request):
-    Attachment.objects.get(
-        pk=request.GET.get('attachment_pk'),
-    ).delete()
-    return JsonResponse({'success': True})
+    return JsonResponse(data, safe=False)
+
+
+@login_required
+def ajax_drop_attachment(request, pk):
+    attachment = Attachment.objects.get(pk=pk)
+
+    try:
+        attachment.delete()
+        data = {'is_deleted': True,
+                'message': success_delete()
+                }
+
+    except IntegrityError:
+        data = {'is_deleted': False,
+                'message': integrity_error_delete()
+                }
+    except Exception:
+        data = {'is_deleted': False,
+                'message': DELETE_EXCEPTION_MESSAGE,
+                }
+
+    return JsonResponse(data, safe=False)
 
 
 class DefaultAttachmentRuleListView(LoginRequiredMixin, SingleTableViewMixin):
@@ -114,25 +165,12 @@ class DefaultAttachmentRuleCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('ecm:defaultattachmentrule_list')
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'ecm:defaultattachmentrule_list'
-    template_name_suffix = '_create_form'
 
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
 
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        if form.cleaned_data['documents']:
-            instance = form.save()
-            attachment = Attachment(
-                model_name='ecm.defaultattachmentrule',
-                object_id=instance.id,
-                file=self.request.FILES.get('documents'),
-                create_user_id=self.request.user.id
-            )
-            attachment.save()
-        return response
 
 class DefaultAttachmentRuleUpdateView(AuditFormMixin, UpdateView):
     model = DefaultAttachmentRule
@@ -163,10 +201,3 @@ class DefaultAttachmentRuleDeleteView(AuditFormMixin, MultiDeleteViewMixin):
         model._meta.verbose_name_plural)
     object_list_url = 'ecm:defaultattachmentrule_list'
 
-    def delete(self, request, *args, **kwargs):
-        if request.method == 'POST':
-            pks = request.POST.getlist('selection')
-            if Attachment.objects.filter(model_name='ecm.defaultattachmentrule').filter(object_id__in=pks):
-                Attachment.objects.filter(model_name='ecm.defaultattachmentrule').filter(object_id__in=pks).delete()
-
-        return MultiDeleteViewMixin.delete(self, request, *args, **kwargs)
