@@ -923,6 +923,13 @@ class OfficeListView(LoginRequiredMixin, SingleTableViewMixin):
     model = Office
     table_class = OfficeTable
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        table = self.table_class(self.request.user.person.offices.all())
+        context['table'] = table
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        return context
+
 
 class OfficeCreateView(AuditFormMixin, CreateView):
     model = Office
