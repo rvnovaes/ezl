@@ -21,6 +21,7 @@
         {% endfor %}
     {% endif %}
     </div>
+{% include 'core/cpf_cnpj_mask.html' %}
 {% endblock %}
 
 {% block button_cancel %}
@@ -41,19 +42,4 @@
         </div>
     {% endif %}
     {{ personaddress.forms.0.media }}
-    <script src="{% static 'skeleton/js/mask.js' %}"></script>
-    <script type="text/javascript">
-        $(function () {
-            $('#id_legal_type').change(function () {
-                if (this.value == 'F') {
-                    $("#id_cpf_cnpj").attr('data-mask','999.999.999-99');
-                }
-                else {
-                    $('#id_cpf_cnpj').attr('data-mask','99.999.999/9999-99');
-                }
-            }).change();
-        })
-    </script>
-{#    {{ form.media }}#}
-{#    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>#}
 {% endblock %}
