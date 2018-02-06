@@ -49,9 +49,7 @@
 {% endblock content %}
 
 {% block extra_scripts %}
-    <script>
-    // Extra scripts
-    </script>
+    <script src="{% static 'skeleton/js/mask.js' %}"></script>
     {% block upload_scripts %}
         {% if view.model.use_upload %}
             <!-- UPLOADS SCRIPTS  -->
