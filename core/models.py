@@ -8,7 +8,8 @@ from core.managers import PersonManager
 from core.utils import LegacySystem
 
 
-INVITE_STATUS = (('A', 'ACCEPT'), ('R', 'REFUSED'), ('N', 'NOt REVIEWED'))
+INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'))
+
 
 class LegalType(Enum):
     FISICA = 'F'

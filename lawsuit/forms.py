@@ -12,6 +12,7 @@ from dal import autocomplete
 from localflavor.br.forms import BRCNPJField
 from material import Layout, Row
 from django.forms.models import inlineformset_factory
+from core.widgets import TypeaHeadForeignKeyWidget
 
 
 class BaseModelForm(forms.ModelForm):

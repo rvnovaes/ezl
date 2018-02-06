@@ -1,8 +1,10 @@
 {# Botao de cancelar utilizada nos formularios #}
 {# Ao clicar ele retorna a listagem respeitando a pagina se encontrava#}
 <button class="btn btn-danger waves-effect waves-light" type="button"
-        {% if link_list %}
+        {% if link_list and link_list != '' %}
             onclick="javascript:window.open('{% url link_list %}', '_self')">
+        {% elif view.success_url %}
+            onclick="javascript:window.open('{{ view.success_url }}', '_self')">
         {% else %}
             onclick="javascript:window.open('{{ object_list_url }}', '_self')">
         {% endif %}
