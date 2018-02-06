@@ -218,24 +218,9 @@ class OrganForm(BaseModelForm):
         for field_name, field in self.fields.items():
             if field_name is 'cnpj':
                 field.initial = self.instance.cpf_cnpj
-    layout = Layout(
-        Row('office'),
-        Row('legal_name', 'cpf_cnpj'),
-        Row('court_district', 'is_active')
-    )
+
+    cpf_cnpj = BRCNPJField(label="CNPJ")
 
     class Meta:
         model = Organ
         fields = ['office', 'legal_name', 'cpf_cnpj', 'court_district', 'is_active']
-
-    def clean(self):
-        cleaned_data = super(OrganForm, self).clean()
-        document = cleaned_data.get('cpf_cnpj')
-        if document:
-            try:
-                BRCNPJField().clean(document)
-            except forms.ValidationError as exc:
-                self._errors['cpf_cnpj'] = \
-                    self.error_class(exc.messages)
-                del cleaned_data['cpf_cnpj']
-        return cleaned_data
