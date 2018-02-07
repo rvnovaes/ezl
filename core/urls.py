@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^logout/', views.logout_user, name='logout'),
     url(r'^inicial/', login_required(views.inicial), name='inicial'),
     url(r'^start/$', login_required(views.StartUserView.as_view()), name='start_user'),
+    url(r'^office_instance/$', login_required(views.OfficeInstanceView.as_view()), name='office_instance'),
     url(r'^session/$', login_required(views.CustomSession.as_view()),
     name='session'),
     url(r'^users_to_invite/$', login_required(views.ListUsersToInviteView.as_view()),

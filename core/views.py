@@ -106,6 +106,8 @@ def login(request):
 def inicial(request):
     if request.user.is_authenticated:
         if request.user.person.offices.all().exists():
+            if not get_office_session(request):
+                return HttpResponseRedirect(reverse_lazy('office_instance'))
             return HttpResponseRedirect(reverse_lazy('dashboard'))
         return HttpResponseRedirect(reverse_lazy('start_user'))
     else:
@@ -118,6 +120,12 @@ class StartUserView(View):
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
 
+
+class OfficeInstanceView(View):
+    template_name = 'core/office_instance.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
 
 @logout_log
 def logout_user(request):
