@@ -965,10 +965,8 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
             'table': AddressOfficeTable(self.object.adresses.all()),
         })
         data = super().get_context_data(**kwargs)
-        if self.request.POST:
-            data['inviteofficeform'] = InviteOfficeFormSet(self.request.POST)
-        else:
-            data['inviteofficeform'] = InviteOfficeFormSet()
+        data['inviteofficeform'] = InviteForm(self.request.POST) \
+            if InviteForm(self.request.POST).is_valid() else InviteForm()
         return data
 
 
