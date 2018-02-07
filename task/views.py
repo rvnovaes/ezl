@@ -9,7 +9,7 @@ from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from core.views import CustomLoginRequiredView
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
@@ -44,7 +44,7 @@ from core.utils import get_office_session
 from ecm.models import DefaultAttachmentRule, Attachment
 
 
-class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
+class TaskListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Task
     table_class = TaskTable
 
@@ -157,7 +157,7 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
         return context
 
 
-class TaskDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
+class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteViewMixin):
     model = Task
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
@@ -312,7 +312,7 @@ class DashboardView(MultiTableMixin, TemplateView):
         return dynamic_query
 
 
-class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
+class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
     model = Task
     form_class = TaskDetailForm
     success_url = reverse_lazy('dashboard')
@@ -422,7 +422,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
                 })
 
 
-class EcmCreateView(LoginRequiredMixin, CreateView):
+class EcmCreateView(CustomLoginRequiredView, CreateView):
     def post(self, request, *args, **kwargs):
 
         files = request.FILES.getlist('path')
@@ -466,7 +466,7 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
         return JsonResponse(data)
 
 
-class TypeTaskListView(LoginRequiredMixin, SingleTableViewMixin):
+class TypeTaskListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = TypeTask
     table_class = TypeTaskTable
 
@@ -562,7 +562,7 @@ def delete_ecm(request, pk):
     return JsonResponse(data)
 
 
-class DashboardSearchView(LoginRequiredMixin, SingleTableView):
+class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
     model = DashboardViewModel
     filter_class = TaskFilter
     template_name = 'task/task_filter.html'
@@ -803,7 +803,7 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         return columns
 
 
-class DashboardStatusCheckView(LoginRequiredMixin, View):
+class DashboardStatusCheckView(CustomLoginRequiredView, View):
 
     def post(self, request, *args, **kwargs):
         tasks_payload = request.POST.get('tasks')
@@ -875,7 +875,7 @@ def ajax_get_ecms(request):
     }
     return JsonResponse(data)
 
-class FilterListView(LoginRequiredMixin, SingleTableViewMixin):
+class FilterListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Filter
     table_class = FilterTable
 

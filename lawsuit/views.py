@@ -1,7 +1,7 @@
 from urllib.parse import urlparse
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from core.views import CustomLoginRequiredView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy, reverse
 # project imports
@@ -30,8 +30,10 @@ from django.db.models import Q
 from core.utils import get_office_session
 from ecm.utils import attachment_form_valid
 
+from core.views import CustomLoginRequiredView
 
-class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
+
+class InstanceListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Instance
     table_class = InstanceTable
 
@@ -88,23 +90,14 @@ class InstanceUpdateView(AuditFormMixin, UpdateView):
         kw['request'] = self.request
         return kw
 
-    def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
-        office_session = get_office_session(request=request)
-        if obj.office != office_session:
-            messages.error(self.request, record_from_wrong_office(), )
 
-            return HttpResponseRedirect(reverse('dashboard'))
-        return super().dispatch(request, *args, **kwargs)
-
-
-class InstanceDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
+class InstanceDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteViewMixin):
     model = Instance
     success_url = reverse_lazy('instance_list')
     success_message = DELETE_SUCCESS_MESSAGE.format('instâncias')
 
 
-class TypeMovementListView(LoginRequiredMixin, SingleTableViewMixin):
+class TypeMovementListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = TypeMovement
     table_class = TypeMovementTable
 
@@ -168,13 +161,13 @@ class TypeMovementUpdateView(AuditFormMixin, UpdateView):
         return super(TypeMovementUpdateView, self).post(request, *args, **kwargs)
 
 
-class TypeMovementDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
+class TypeMovementDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
     model = TypeMovement
     success_url = reverse_lazy('type_movement_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
-class FolderListView(LoginRequiredMixin, SingleTableViewMixin):
+class FolderListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Folder
     table_class = FolderTable
 
@@ -221,7 +214,7 @@ class FolderDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
-class CourtDistrictListView(LoginRequiredMixin, SingleTableViewMixin):
+class CourtDistrictListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = CourtDistrict
     table_class = CourtDistrictTable
 
@@ -283,7 +276,7 @@ class CourtDistrictDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
-class CourtDivisionListView(LoginRequiredMixin, SingleTableViewMixin):
+class CourtDivisionListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = CourtDivision
     table_class = CourtDivisionTable
 
@@ -410,7 +403,7 @@ class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateV
         return super().dispatch(request, *args, **kwargs)
 
 
-class LawSuitListView(LoginRequiredMixin, SingleTableViewMixin):
+class LawSuitListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = LawSuit
     table_class = LawSuitTable
 
@@ -495,7 +488,7 @@ class LawsuitMovementCreateView(AuditFormMixin, SuccessMessageMixin, GenericForm
         return super().dispatch(request, *args, **kwargs)
 
 
-class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
+class LawsuitMovementUpdateView(SuccessMessageMixin, CustomLoginRequiredView, GenericFormOneToMany,
                                 UpdateView):
     model = LawSuit
     related_model = Movement
@@ -540,7 +533,7 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
         return super().dispatch(request, *args, **kwargs)
 
 
-class MovementListView(LoginRequiredMixin, SingleTableViewMixin):
+class MovementListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Movement
     table_class = MovementTable
 
@@ -607,7 +600,7 @@ class MovementDeleteView(AuditFormMixin, MultiDeleteViewMixin):
         return super(MovementDeleteView, self).post(request, *args, **kwargs)
 
 
-class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
+class MovementTaskCreateView(SuccessMessageMixin, CustomLoginRequiredView, GenericFormOneToMany,
                              CreateView):
     model = Movement
     related_model = Task
@@ -651,7 +644,7 @@ class MovementTaskCreateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
     #     return super().form_valid(form)
 
 
-class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
+class MovementTaskUpdateView(SuccessMessageMixin, CustomLoginRequiredView, GenericFormOneToMany,
                              UpdateView):
     model = Movement
     related_model = Task
@@ -724,7 +717,7 @@ class OrganUpdateView(AuditFormMixin, UpdateView):
         return kw
 
 
-class OrganDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
+class OrganDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
     """
     Classe responsavel por forncer a regra de exclusao dos Orgaos
     """

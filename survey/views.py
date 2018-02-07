@@ -1,4 +1,5 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from core.views import CustomLoginRequiredView
 from django.core.urlresolvers import reverse_lazy
 
 from django.views.generic import TemplateView
@@ -12,7 +13,7 @@ from .models import Survey, SurveyPermissions
 from .tables import SurveyTable
 
 
-class SurveyListView(LoginRequiredMixin, PermissionRequiredMixin, SingleTableViewMixin):
+class SurveyListView(CustomLoginRequiredView, PermissionRequiredMixin, SingleTableViewMixin):
     model = Survey
     table_class = SurveyTable
     ordering = ('id', )

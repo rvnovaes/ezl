@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from core.views import CustomLoginRequiredView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.contrib import messages
 
@@ -18,7 +18,7 @@ from django.http import HttpResponseRedirect
 from core.messages import record_from_wrong_office
 
 
-class CostCenterListView(LoginRequiredMixin, SingleTableViewMixin):
+class CostCenterListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = CostCenter
     table_class = CostCenterTable
     ordering = ('name', )
@@ -82,7 +82,7 @@ class CostCenterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
         ret = super().post(request, *args, **kwargs)
         return ret
 
-class CostCenterAutocomplete(LoginRequiredMixin,
+class CostCenterAutocomplete(CustomLoginRequiredView,
                              autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = CostCenter.objects.none()
@@ -93,7 +93,7 @@ class CostCenterAutocomplete(LoginRequiredMixin,
         return qs
 
 
-class ServicePriceTableListView(LoginRequiredMixin, SingleTableViewMixin):
+class ServicePriceTableListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = ServicePriceTable
     table_class = ServicePriceTableTable
     ordering = ('correspondent', )

@@ -1,6 +1,6 @@
 from django.views.generic import ListView
 from chat.models import Chat, UnreadMessage, Message
-from django.contrib.auth.mixins import LoginRequiredMixin
+from core.views import CustomLoginRequiredView
 from django.http import JsonResponse
 from django.views.generic import View
 from django.db.models import Count
@@ -20,7 +20,7 @@ class ChatListView(ListView):
         return context
 
 
-class ChatCountMessages(LoginRequiredMixin, View):
+class ChatCountMessages(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
         return JsonResponse(
             {'all_messages': UnreadMessage.objects.filter(
@@ -33,7 +33,7 @@ class ChatCountMessages(LoginRequiredMixin, View):
         )
 
 
-class ChatReadMessages(LoginRequiredMixin, View):
+class ChatReadMessages(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):
         chat_id = request.POST.get('chat_id')
         chat = Chat.objects.filter(pk=int(chat_id)).first()
@@ -43,7 +43,7 @@ class ChatReadMessages(LoginRequiredMixin, View):
         return JsonResponse({'status': 'ok'})
 
 
-class ChatGetMessages(LoginRequiredMixin, View):
+class ChatGetMessages(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):
         chat_id = request.POST.get('chat_id')
         qry_message = Message.objects.filter(

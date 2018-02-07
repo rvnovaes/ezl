@@ -5,7 +5,7 @@ import json
 import logging
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from core.views import CustomLoginRequiredView
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db import IntegrityError
@@ -152,7 +152,7 @@ def ajax_drop_attachment(request, pk):
     return JsonResponse(data, safe=False)
 
 
-class DefaultAttachmentRuleListView(LoginRequiredMixin, SingleTableViewMixin):
+class DefaultAttachmentRuleListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = DefaultAttachmentRule
     table_class = DefaulAttachmentRuleTable
     ordering = ('correspondent', )

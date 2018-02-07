@@ -106,8 +106,6 @@ def login(request):
 def inicial(request):
     if request.user.is_authenticated:
         if request.user.person.offices.all().exists():
-            if not get_office_session(request):
-                return HttpResponseRedirect(reverse_lazy('office_instance'))
             return HttpResponseRedirect(reverse_lazy('dashboard'))
         return HttpResponseRedirect(reverse_lazy('start_user'))
     else:
@@ -204,7 +202,28 @@ class LoginCustomView(LoginView):
         return super(LoginCustomView, self).form_valid(form)
 
 
-class AuditFormMixin(LoginRequiredMixin, SuccessMessageMixin):
+class CustomLoginRequiredView(LoginRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        """
+        A view que herdar desta classe ira identificar se existe um escritorio na sessao, se nao tentar buscar os
+        escritorio default do usuario se nenhuma das opcoes estiverem setadas ira redirecionar para tela de escolha de
+        um escritorio
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        res = super().dispatch(request, *args, **kwargs)
+        if not get_office_session(request=request):
+            if not hasattr(request.user, 'defaultoffice'):
+                return HttpResponseRedirect(reverse('office_instance'))
+            request.session['custom_session_user'] = {
+                request.user.pk: {'current_office': request.user.defaultoffice.office.pk}
+            }
+        return res
+
+
+class AuditFormMixin(CustomLoginRequiredView, SuccessMessageMixin):
     """
     Implementa a alteração da data e usuários para operação de update e new
     Lógica que verifica se a requisição é para Create ou Update.
@@ -444,7 +463,7 @@ def address_update(request, pk):
     return JsonResponse(data)
 
 
-class PersonListView(LoginRequiredMixin, SingleTableViewMixin):
+class PersonListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Person
     table_class = PersonTable
     ordering = ('legal_name', 'name',)
@@ -810,7 +829,7 @@ def recover_database(request):
                   )
 
 
-class UserListView(LoginRequiredMixin, SingleTableViewMixin):
+class UserListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = User
     table_class = UserTable
     template_name = 'auth/user_list.html'
@@ -910,7 +929,7 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         return kw
 
 
-class UserDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
+class UserDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
     model = User
     success_url = reverse_lazy('user_list')
     success_message = DELETE_SUCCESS_MESSAGE.format('usuários')
@@ -927,7 +946,7 @@ class PasswordResetViewMixin(PasswordResetView, FormView):
         return render(self.request, 'account/password_reset_done.html', context)
 
 
-class OfficeListView(LoginRequiredMixin, SingleTableViewMixin):
+class OfficeListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Office
     table_class = OfficeTable
 
@@ -975,7 +994,7 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
         return data
 
 
-class OfficeDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
+class OfficeDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
     model = Office
     form_class = OfficeForm
     success_url = reverse_lazy('office_list')
@@ -1078,7 +1097,7 @@ class InviteUpdateView(UpdateView):
         return HttpResponse('ok')
 
 
-class InviteTableView(LoginRequiredMixin, ListView):
+class InviteTableView(CustomLoginRequiredView, ListView):
     model = Invite
     template_name = 'core/invite_table.html'
 
@@ -1090,7 +1109,7 @@ class InviteTableView(LoginRequiredMixin, ListView):
         return context
 
 
-class EditableListSave(LoginRequiredMixin, View):
+class EditableListSave(CustomLoginRequiredView, View):
     """
     O nome da classe ficou generico pelo fato desta view poder ser utilizada
     em outras classes.
@@ -1112,14 +1131,14 @@ class EditableListSave(LoginRequiredMixin, View):
         return JsonResponse({"ok": True})
 
 
-class ListUsersToInviteView(LoginRequiredMixin, View):
+class ListUsersToInviteView(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
         users = User.objects.all().values(
             'pk', 'username', 'email', 'person__name', 'person__pk')
         return JsonResponse({'data': list(users)})
 
 
-class InviteMultipleUsersView(LoginRequiredMixin, CreateView):
+class InviteMultipleUsersView(CustomLoginRequiredView, CreateView):
     form_class = InviteForm
 
     def post(self, request, *args, **kwargs):
