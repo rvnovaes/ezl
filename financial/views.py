@@ -62,14 +62,6 @@ class CostCenterUpdateView(AuditFormMixin, UpdateView):
         kw['request'] = self.request
         return kw
 
-    def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
-        office_session = get_office_session(request=request)
-        if obj.office != office_session:
-            messages.error(self.request,record_from_wrong_office(),)
-            return HttpResponseRedirect(reverse('dashboard'))
-        return super().dispatch(request, *args, **kwargs)
-
 
 class CostCenterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = CostCenter
@@ -125,14 +117,6 @@ class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
-
-    def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
-        office_session = get_office_session(request=request)
-        if obj.office != office_session:
-            messages.error(self.request, record_from_wrong_office(), )
-            return HttpResponseRedirect(reverse('dashboard'))
-        return super().dispatch(request, *args, **kwargs)
 
 
 class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):

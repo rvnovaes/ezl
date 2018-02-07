@@ -75,16 +75,6 @@ class TaskCreateView(AuditFormMixin, CreateView):
         kw['request'] = self.request
         return kw
 
-    def dispatch(self, request, *args, **kwargs):
-        if self.kwargs.get('movement'):
-            obj = Movement.objects.get(id=self.kwargs.get('movement'))
-        office_session = get_office_session(request=request)
-        if obj.office != office_session:
-            messages.error(self.request, record_from_wrong_office(), )
-
-            return HttpResponseRedirect(reverse('dashboard'))
-        return super().dispatch(request, *args, **kwargs)
-
     def form_valid(self, form):
         task = form.instance
         form.instance.movement_id = self.kwargs.get('movement')
@@ -130,14 +120,6 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
         kw['request'] = self.request
         return kw
 
-    def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
-        office_session = get_office_session(request=request)
-        if obj.office != office_session:
-            messages.error(self.request, record_from_wrong_office(), )
-            return HttpResponseRedirect(reverse('dashboard'))
-        return super().dispatch(request, *args, **kwargs)
-
     def form_valid(self, form):
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
         form.instance.__server = self.request.META['HTTP_HOST']
@@ -166,7 +148,7 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteVi
         return super(TaskDeleteView, self).post(request, *args, **kwargs)
 
 
-class DashboardView(MultiTableMixin, TemplateView):
+class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
     template_name = 'task/task_dashboard.html'
     table_pagination = {
         'per_page': 5
@@ -505,15 +487,6 @@ class TypeTaskUpdateView(AuditFormMixin, UpdateView):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
-
-    def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
-        office_session = get_office_session(request=request)
-        if obj.office != office_session:
-            messages.error(self.request, record_from_wrong_office(), )
-
-            return HttpResponseRedirect(reverse('dashboard'))
-        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """

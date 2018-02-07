@@ -186,7 +186,7 @@
     </script>
 {% endblock %}
 {% block bar_buttons %}
-    {% if link_add_url %}
+    {% if link_add %}
         <a class="btn btn-success pull-right m-l-20 hidden-xs hidden-sm waves-effect waves-light" href="{% if link_add_url %}{{ link_add_url }}{% elif link_add %}{% url link_add %}{% endif %}">
             Adicionar
         </a>

@@ -336,29 +336,10 @@ class AddressUpdateView(UpdateView):
         # TODO: Este método parece ser inútil, success_url pode ser usado.
         return reverse('person_update', args=(self.kwargs.get('person_pk'),))
 
-    def dispatch(self, request, *args, **kwargs):
-        #  Quando nao se quer alterar a estrutura basica do metodo dispatch em  em django.views.generic.base
-        no_override = kwargs.pop('no_override')
-        if no_override:
-            return super().dispatch(request, *args, **kwargs)
-
-        obj = None
-        if self.kwargs.get('person_pk'):
-            obj = Person.objects.get(id=self.kwargs.get('person_pk'))
-        self.success_url = self.get_success_url()
-        office_session = get_office_session(request=request)
-        if obj.offices.filter(pk=office_session.pk).first() != office_session:
-            messages.error(self.request, record_from_wrong_office(), )
-            return HttpResponseRedirect(reverse('dashboard'))
-        return super().dispatch(request, *args, **kwargs)
-
 
 class AddressOfficeUpdateView(AddressUpdateView):
     def get_success_url(self):
         return reverse('office_update', args=(self.kwargs.get('office_pk'),))
-
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, no_override=True, *args, **kwargs)
 
 
 class AddressDeleteView(MultiDeleteViewMixin):
@@ -562,15 +543,6 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('person_update', args=(self.object.id,))
-
-    def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
-        office_session = get_office_session(request=request)
-        if obj.offices.filter(pk=office_session.pk).first() != office_session:
-            messages.error(self.request, record_from_wrong_office(), )
-
-            return HttpResponseRedirect(reverse('dashboard'))
-        return super().dispatch(request, *args, **kwargs)
 
 
 class PersonDeleteView(AuditFormMixin, MultiDeleteViewMixin):
@@ -1178,10 +1150,7 @@ class TypeaHeadGenericSearch(View):
 class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q):
-        params = {
-            '{}__unaccent__icontains'.format(field): q,
-        }
         data = []
-        for person in Person.objects.filter(~Q(auth_user=None), **params):
-            data.append({'id': person.id, 'value': person.legal_name + ' ({})'.format(person.auth_user)})
+        for user in User.objects.filter(Q(person__legal_name__unaccent__icontains=q) | Q(username__unaccent__icontains=q)):
+            data.append({'id': user.person.id, 'value': user.person.legal_name + ' ({})'.format(user.username)})
         return list(data)
