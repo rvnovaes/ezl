@@ -107,6 +107,8 @@ def inicial(request):
     if request.user.is_authenticated:
         if request.user.person.offices.all().exists():
             set_office_session(request)
+            if not get_office_session(request):
+                return HttpResponseRedirect(reverse_lazy('office_instance'))
             return HttpResponseRedirect(reverse_lazy('dashboard'))
         return HttpResponseRedirect(reverse_lazy('start_user'))
     else:
