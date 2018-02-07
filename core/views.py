@@ -852,8 +852,6 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         self.form_class.declared_fields['username'].disabled = True
         return self.initial.copy()
 
-    def get_success_url(self):
-        return reverse_lazy('user_list')
 
     def form_valid(self, form):
         form.save()
