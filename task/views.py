@@ -153,12 +153,12 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
     table_pagination = {
         'per_page': 5
     }
+    count_task = 0
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-
         person = Person.objects.get(auth_user=self.request.user)
-        context['task_count'] = DashboardViewModel.objects.all().count()
+        context['task_count'] = self.count_task
 
         if not self.request.user.get_all_permissions():
             context['messages'] = [
@@ -168,29 +168,33 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
 
     def get_tables(self):
         person = Person.objects.get(auth_user=self.request.user)
+        data, data_error = self.get_data(person)
+        self.set_count_task(data, data_error)
+        tables = self.get_list_tables(data, data_error, person) if person else []
+        return tables
+
+    def set_count_task(self, data, data_error):
+        self.count_task = len(data) + len(data_error)
+
+    def get_data(self, person):
         dynamic_query = self.get_dynamic_query(person)
         data = []
         data_error = []
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
-        if dynamic_query or person.auth_user.is_superuser:
+        if dynamic_query or list(filter(lambda i: i == 'core.view_all_tasks', person.auth_user.get_all_permissions())):
             # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
             office_session = get_office_session(self.request)
             if office_session:
                 data = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query)
                 data_error = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query, task_status=TaskStatus.ERROR)
-            else:
-                data = DashboardViewModel.objects.filter(office_id=0).filter(dynamic_query)
-                data_error = DashboardViewModel.objects.filter(office_id=0).filter(dynamic_query,
-                                                                                   task_status=TaskStatus.ERROR)
-
-        # nao mostra as OSs dos status de "erro" e "solicitadas" para pessoas que forem correspondente ou solicitante
-        if person.auth_user.groups.filter(~Q(name__in=['Correspondente', 'Solicitante'])).exists():
-            data = data | DashboardViewModel.objects.filter(task_status=TaskStatus.REQUESTED)
-            data_error = data_error | DashboardViewModel.objects.filter(task_status=TaskStatus.ERROR)
-        tables = self.get_list_tables(data, data_error, person) if person else []
-        if not dynamic_query:
-            return tables
-        return tables
+            # nao mostra as OSs dos status de "erro" e "solicitadas" para pessoas que forem correspondente ou solicitante
+            if person.auth_user.groups.filter(~Q(name__in=['Correspondente', 'Solicitante'])).exists():
+                if office_session:
+                    requested = DashboardViewModel.objects.filter(task_status=TaskStatus.REQUESTED, office_id=office_session.id)
+                    errors = DashboardViewModel.objects.filter(task_status=TaskStatus.ERROR, office_id=office_session.id)
+                    data = data | requested if data else requested
+                    data_error = data_error | errors if data else errors
+        return data, data_error
 
     @staticmethod
     def get_list_tables(data, data_error, person):
@@ -279,7 +283,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         return Q(person_distributed_by=person.id)
 
     def get_dynamic_query(self, person):
-        if person.auth_user.is_superuser:
+        if list(filter(lambda i: i == 'core.view_all_tasks', person.auth_user.get_all_permissions())):
             return self.get_query_all_tasks(person)
         dynamic_query = Q()
         permissions_to_check = {

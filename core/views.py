@@ -106,6 +106,7 @@ def login(request):
 def inicial(request):
     if request.user.is_authenticated:
         if request.user.person.offices.all().exists():
+            set_office_session(request)
             return HttpResponseRedirect(reverse_lazy('dashboard'))
         return HttpResponseRedirect(reverse_lazy('start_user'))
     else:
@@ -202,6 +203,15 @@ class LoginCustomView(LoginView):
         return super(LoginCustomView, self).form_valid(form)
 
 
+def set_office_session(request):
+    if not get_office_session(request=request):
+        if not hasattr(request.user, 'defaultoffice'):
+            return HttpResponseRedirect(reverse('office_instance'))
+        request.session['custom_session_user'] = {
+            request.user.pk: {'current_office': request.user.defaultoffice.office.pk}
+        }
+
+
 class CustomLoginRequiredView(LoginRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
         """
@@ -214,12 +224,7 @@ class CustomLoginRequiredView(LoginRequiredMixin):
         :return:
         """
         res = super().dispatch(request, *args, **kwargs)
-        if not get_office_session(request=request):
-            if not hasattr(request.user, 'defaultoffice'):
-                return HttpResponseRedirect(reverse('office_instance'))
-            request.session['custom_session_user'] = {
-                request.user.pk: {'current_office': request.user.defaultoffice.office.pk}
-            }
+        set_office_session(request)
         return res
 
 
