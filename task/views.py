@@ -272,11 +272,11 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     template_name = 'task/task_detail.html'
 
     def form_valid(self, form):
-        execution_date = None
+        execution_date = form.initial['execution_date']
         form.instance.task_status = TaskStatus[self.request.POST['action']] or TaskStatus.INVALID
         form.instance.alter_user = User.objects.get(id=self.request.user.id)
         notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None
-        if form.cleaned_data['execution_date'] and not form.instance.execution_date:
+        if form.cleaned_data['execution_date']:
             execution_date = form.cleaned_data['execution_date']
         survey_result = (form.cleaned_data['survey_result']
                          if form.cleaned_data['survey_result'] else None)
