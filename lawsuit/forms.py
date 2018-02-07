@@ -40,7 +40,8 @@ class BaseForm(ModelForm):
                     field.widget.attrs['style'] = 'width: 100%; display: table-cell; '
                 # Preenche o o label de cada field do form de acordo com o verbose_name preenchido no modelo
                 try:
-                    field.label = self._meta.model._meta.get_field(field_name).verbose_name
+                    field.label = (self._meta.model._meta.get_field(field_name).verbose_name
+                                   if not field.label else field.label)
                 except FieldDoesNotExist:
                     pass
             except AttributeError:
@@ -129,7 +130,6 @@ class FolderForm(BaseForm):
         if not self.instance.pk:
             # Since the pk is set this is not a new instance
             self.fields.pop('folder_number')
-
 
 
 class LawSuitForm(BaseForm):
@@ -221,7 +221,7 @@ class OrganForm(BaseModelForm):
                 field.initial = self.instance.cpf_cnpj
 
     cpf_cnpj = BRCNPJField(label="CNPJ", widget=forms.TextInput(
-        attrs = {'data-mask': '99.999.999/9999-99'}
+        attrs={'data-mask': '99.999.999/9999-99'}
     ))
 
     class Meta:

@@ -261,11 +261,6 @@ class UserCreateForm(BaseForm, UserCreationForm):
         fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2',
                   'groups', 'is_active']
 
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super().__init__(*args, **kwargs)
-        self.fields['office'] = get_office_field(self.request, profile=kwargs['instance'])
-
 
 class UserUpdateForm(UserChangeForm):
     first_name = forms.CharField(

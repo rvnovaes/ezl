@@ -828,6 +828,7 @@ class UserCreateView(AuditFormMixin, CreateView):
 
     def form_valid(self, form):
         form.save()
+        form.instance.person.offices.add(get_office_session(self.request))
         if form.is_valid:
             groups = form.cleaned_data['groups']
             ids = list(group.id for group in groups)
