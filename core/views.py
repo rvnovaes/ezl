@@ -962,7 +962,7 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         kwargs.update({
-            'table': AddressOfficeTable(self.object.adresses.all()),
+            'table': AddressOfficeTable(self.object.get_address()),
         })
         data = super().get_context_data(**kwargs)
         data['inviteofficeform'] = InviteForm(self.request.POST) \

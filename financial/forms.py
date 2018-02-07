@@ -40,21 +40,8 @@ class ServicePriceTableForm(BaseModelForm):
 
     layout = Layout(
         Row('office'),
-        Row('correspondent', 'type_task', 'value'),
-        Row('client', 'state', 'court_district'),
-    )
-
-    correspondent = forms.ModelChoiceField(
-        label="Correspondente",
-        queryset=Person.objects.filter(auth_user__groups__name=Person.CORRESPONDENT_GROUP),
-        widget=MDModelSelect2(
-            url='correspondent_autocomplete',
-            attrs={
-                'class': 'select-with-search material-ignore form-control',
-                'data-placeholder': '',
-                'data-label': 'Cidade'
-            }),
-        required=False,
+        Row('office_correspondent', 'type_task', 'value'),
+        Row('client', 'state', 'court_district')
     )
 
     client = forms.ModelChoiceField(
@@ -105,7 +92,7 @@ class ServicePriceTableForm(BaseModelForm):
 
     class Meta:
         model = ServicePriceTable
-        fields = ('type_task', 'court_district', 'state', 'client', 'correspondent', 'value', 'office')
+        fields = ('type_task', 'court_district', 'state', 'client', 'value', 'office', 'office_correspondent')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'
@@ -113,11 +100,17 @@ class ServicePriceTableForm(BaseModelForm):
         value = value.replace(',', '.')
         return Decimal(value)
 
-    def clean_correspondent(self):
-        correspondent = self.cleaned_data['correspondent']
-        if not correspondent:
-            raise forms.ValidationError("Favor Selecionar um correspondente")
-        return correspondent
+    def clean_office_correspondent(self):
+        office = self.cleaned_data['office_correspondent']
+        if not office:
+            raise forms.ValidationError("Favor Selecionar um escritório correspondente")
+        return office
+
+    def clean_office(self):
+        office = self.cleaned_data['office']
+        if not office:
+            raise forms.ValidationError("Favor Selecionar um escritório")
+        return office
 
     def clean_type_task(self):
         type_task = self.cleaned_data['type_task']
@@ -139,3 +132,7 @@ class ServicePriceTableForm(BaseModelForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
+        self.fields['office_correspondent'] = get_office_field(self.request, profile=self.request.user)
+        self.fields['office_correspondent'].label = u"Escritório Correspondente"
+        self.fields['office_correspondent'].required = False
+        self.fields['office'].required = False

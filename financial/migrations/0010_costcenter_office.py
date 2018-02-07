@@ -24,7 +24,7 @@ def get_default_office(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('financial', '0008_auto_20180108_1806'),
+        ('financial', '0009_remove_servicepricetable_correspondent'),
     ]
 
     operations = [

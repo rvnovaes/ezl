@@ -191,6 +191,14 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
     box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
+.OUTSOURCE {
+    color: white !important;
+    background-color: #46b8da !important;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+
+
 .material-icons {
     vertical-align: middle !important;
 }
