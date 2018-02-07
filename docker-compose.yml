@@ -89,10 +89,11 @@ services:
       POSTGRES_USER: ezl
       POSTGRES_PASSWORD: ezl
     ports:
-      - "127.0.0.1:57002:5432"
+      - "57002:5432"
     volumes:
       - "db-data:/var/lib/postgresql/data"
       - "./containers/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
+      - "./containers/db/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf"
     logging:
       driver: "json-file"
       options:
