@@ -837,7 +837,7 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
 @login_required
 def ajax_get_task_data_table(request):
     status = request.GET.get('status')
-    query = DashboardViewModel.objects.filter(task_status=status)
+    query = DashboardViewModel.objects.filter(task_status=status, office=get_office_session(request))
     xdata = []
     xdata.append(
         list(

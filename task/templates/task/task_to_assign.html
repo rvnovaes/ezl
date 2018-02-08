@@ -28,19 +28,9 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Fechar
                     </button>
-                    <input type="submit" id="btn-to-assign" class="btn btn-primary" value='Salvar decisão'>
+                    <input type="submit" id="btn-to-assign" class="btn btn-success" value='Atribuir'>
                 </div>
             </form>
         </div>
     </div>
 </div>
-<script>
-    $(document).ready(function () {
-        var elPersonToAssign = $('.person-to-assign');
-        elPersonToAssign.select2();
-
-        $('#btn-to-assign').addEventListener('click', function (event) {
-            event.preventDefault()
-        })
-    });
-</script>
