@@ -13,7 +13,7 @@ def get_folder_number(office):
 
 
 class TypeMovement(Audit, LegacyCode, OfficeMixin):
-    name = models.CharField(max_length=255, blank=False, null=False, default="", unique=True, verbose_name='Nome')
+    name = models.CharField(max_length=255, blank=False, null=False, default="", verbose_name='Nome')
     uses_wo = models.BooleanField(default=False, verbose_name='Utiliza ordem de serviço?')
 
     objects = OfficeManager()
@@ -23,13 +23,14 @@ class TypeMovement(Audit, LegacyCode, OfficeMixin):
         ordering = ['-id']
         verbose_name = "Tipo de Movimentação"
         verbose_name_plural = "Tipos de Movimentação"
+        unique_together = (('name', 'office'),)
 
     def __str__(self):
         return self.name
 
 
 class Instance(Audit, LegacyCode, OfficeMixin):
-    name = models.CharField(verbose_name="Nome", max_length=255, null=False, blank=False, default="", unique=True)
+    name = models.CharField(verbose_name="Nome", max_length=255, null=False, blank=False, default="")
 
     objects = OfficeManager()
 
@@ -38,6 +39,7 @@ class Instance(Audit, LegacyCode, OfficeMixin):
         ordering = ['-id']
         verbose_name = "Instância"
         verbose_name_plural = "Instâncias"
+        unique_together = (('name', 'office'),)
 
     def __str__(self):
         return self.name
@@ -65,13 +67,14 @@ class Folder(Audit, LegacyCode, OfficeMixin):
         ordering = ['-id']
         verbose_name = "Pasta"
         verbose_name_plural = "Pastas"
+        unique_together = (('folder_number', 'person_customer', 'office'),)
 
     def __str__(self):
         return str(self.folder_number)
 
 
 class CourtDivision(Audit, LegacyCode, OfficeMixin):
-    name = models.CharField(max_length=255, null=False, unique=True, verbose_name="Vara")
+    name = models.CharField(max_length=255, null=False, verbose_name="Vara")
 
     objects = OfficeManager()
 
@@ -79,6 +82,7 @@ class CourtDivision(Audit, LegacyCode, OfficeMixin):
         db_table = "court_division"
         verbose_name = "Vara"
         verbose_name_plural = "Varas"
+        unique_together = (('name', 'office'),)
 
     def __str__(self):
         return self.name
@@ -129,7 +133,8 @@ class Organ(Person, OfficeMixin):
         res = super(Organ, self).validate_unique(exclude)
         try:
             if Organ.objects.filter(~Q(pk=self.pk), legal_name__iexact=self.legal_name,
-                                    court_district=self.court_district):
+                                    court_district=self.court_district,
+                                    office=self.office):
                 raise ValidationError({
                     NON_FIELD_ERRORS: ['Órgão deve ser único para a comarca']
                 })
@@ -164,7 +169,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
         verbose_name = "Processo"
         verbose_name_plural = "Processos"
         # cria constraint unique para a combinação de instancia e nr processo
-        unique_together = (('instance', 'law_suit_number'),)
+        unique_together = (('instance', 'law_suit_number', 'office'),)
 
     def __str__(self):
         return self.law_suit_number
@@ -185,7 +190,6 @@ class Movement(Audit, LegacyCode, OfficeMixin):
         ordering = ['-id']
         verbose_name = "Movimentação"
         verbose_name_plural = "Movimentações"
-        # unique_together = (('law_suit'),)
 
     def __str__(self):
         return self.type_movement.name  # TODO verificar novos campos e refatorar o toString

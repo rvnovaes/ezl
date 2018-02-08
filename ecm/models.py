@@ -46,7 +46,7 @@ class Attachment(AuditCreate, LegacyCode):
 
 
 class DefaultAttachmentRule (Audit, OfficeMixin):
-    name = models.CharField(max_length=255, null=False)
+    name = models.CharField(max_length=255, blank=False, null=False)
     description = models.TextField(blank=True, verbose_name='Descrição')
     type_task = models.ForeignKey('task.TypeTask', on_delete=models.PROTECT, blank=True, null=True,
                                   verbose_name='Tipo de Serviço')
@@ -65,6 +65,7 @@ class DefaultAttachmentRule (Audit, OfficeMixin):
         ordering = ['-id']
         verbose_name = "Regra de Anexo Padrão"
         verbose_name_plural = "Regras de Anexo Padrão"
+        unique_together = (('name', 'office'),)
 
     def __str__(self):
         return '{}:{}'.format(

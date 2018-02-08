@@ -9,8 +9,7 @@ class CostCenter(Audit, LegacyCode, OfficeMixin):
         max_length=255,
         null=False,
         blank=False,
-        default="",
-        unique=True
+        default=""
     )
 
     objects = OfficeManager()
@@ -23,6 +22,7 @@ class CostCenter(Audit, LegacyCode, OfficeMixin):
         ordering = ['name']
         verbose_name = 'Centro de custo'
         verbose_name_plural = 'Centros de custos'
+        unique_together = (('name', 'office'),)
 
 
 class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
@@ -77,4 +77,4 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         ordering = ['value']
         verbose_name = 'Tabela de preço de serviços'
         verbose_name_plural = 'Tabelas de preço de serviços'
-        unique_together = (("office", "type_task", "client", "court_district", "state"),)
+        unique_together = (("office", "office_correspondent", "type_task", "client", "court_district", "state"),)
