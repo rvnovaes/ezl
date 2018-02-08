@@ -121,7 +121,7 @@
                         </a>
                         <ul class="dropdown-menu">
                         {% for office in request.user.person.offices.all %}
-                           <li onclick="updateSession('current_office', '{{office.pk}}', '{{csrf_token}}');"><a href="#">{{office.name}}</a></li>
+                           <li onclick="updateSession('current_office', '{{office.pk}}', '{{csrf_token}}');"><a href="#">{{office.legal_name}}</a></li>
                         {% endfor %}
                         </ul>
                     </li>
