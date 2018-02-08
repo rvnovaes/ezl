@@ -31,18 +31,14 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('survey', '0002_auto_20171228_1808'),
-        ('task', '0061_task_parent'),
+        ('task', '0065_auto_20180206_1414'),
     ]
 
     operations = [
-        migrations.AddField(
+        migrations.AlterField(
             model_name='typetask',
             name='survey',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='survey.Survey'),
-        ),
-        migrations.RunPython(populate_surveys, remove_surveys),
-        migrations.RemoveField(
-            model_name='typetask',
-            name='survey_type',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='survey.Survey',
+                                    verbose_name='Tipo de Formulário'),
         ),
     ]

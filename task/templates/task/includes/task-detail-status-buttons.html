@@ -9,6 +9,11 @@
         <span class="btn-label"><i class="mdi mdi-thumb-down-outline"></i></span> Recusar Solicitação
     </button>
 
+    <button type="button" data-toggle="modal" data-target="#to-assign"
+            class="text-white btn btn-sm btn-info {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
+        <span class="btn-label"><i class="mdi mdi-lock-open-outline"></i></span> Atribuir
+    </button>
+
     <button id="OPEN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
             class="text-white btn btn-sm btn-ezl-open {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
         <span class="btn-label"><i class="mdi mdi-lock-open-outline"></i></span> Delegar
@@ -50,7 +55,7 @@
 {% endif %}
 {% if perms.core.view_delegated_tasks %}
     {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-        <div  class="col-sm-3">
+        <div class="col-sm-3">
             <a>{{ form.execution_date }}</a>
         </div>
         <button onclick="getId(this)" id="DONE" type="submit" data-toggle="" data-target="#confirmAction"

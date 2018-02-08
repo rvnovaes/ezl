@@ -25,29 +25,28 @@ class ServicePriceTableTable(tables.Table):
     value = tables.Column(attrs={"editable": True, "mask": "money"})
 
     class Meta:
-        sequence = ('selection', 'correspondent', 'type_task', 'court_district', 'state', 'client', 'value')
+        sequence = ('selection', 'office', 'office_correspondent', 'type_task', 'court_district', 'state', 'client', 'value')
         model = ServicePriceTable
-        fields = ('selection', 'correspondent', 'type_task', 'court_district', 'state', 'client', 'value')
+        fields = ('selection', 'office', 'office_correspondent', 'type_task', 'court_district', 'state', 'client', 'value')
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existe tabela de preços cadastrada."
         row_attrs = {
             'data_href': lambda record: reverse_lazy('servicepricetable_update', args=(record.pk,))
         }
-        order_by = 'correspondent'
+        order_by = 'office'
 
 
 class ServicePriceTableTaskTable(tables.Table):
-
-    correspondent = tables.Column(orderable=False)
+    office_correspondent = tables.Column(orderable=False)
     court_district = tables.Column(orderable=False)
     state = tables.Column(orderable=False)
     client = tables.Column(orderable=False)
     value = tables.Column(orderable=False)
 
     class Meta:
-        sequence = ('correspondent', 'court_district', 'state', 'client', 'value')
+        sequence = ('office_correspondent', 'court_district', 'state', 'client', 'value')
         model = ServicePriceTable
-        fields = ('correspondent', 'court_district', 'state', 'client', 'value')
+        fields = ('office_correspondent', 'court_district', 'state', 'client', 'value')
         attrs = {"class": "table stable-striped table-bordered correspondents-table", "id": "correspondents-table"}
         empty_text = "Não existe tabela de preços cadastrada."
         order_by = ("value",)

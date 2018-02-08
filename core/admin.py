@@ -21,6 +21,12 @@ class OfficeAdmin(admin.ModelAdmin):
     list_display = ['name', 'auth_user']
 
 
+
+class InviteUserAdmin(admin.ModelAdmin):
+    list_display = ['pk', 'create_user', 'person', 'office', 'status']
+    fields = ['create_user', 'person', 'office', 'status']
+
+
 admin.site.register(AddressType)
 admin.site.register(ContactMechanism)
-admin.site.register(Invite)
+admin.site.register(Invite, InviteUserAdmin)

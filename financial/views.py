@@ -88,7 +88,7 @@ class CostCenterAutocomplete(CustomLoginRequiredView,
 class ServicePriceTableListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = ServicePriceTable
     table_class = ServicePriceTableTable
-    ordering = ('correspondent', )
+    ordering = ('office', )
     paginate_by = 30
 
 

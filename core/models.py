@@ -226,7 +226,7 @@ class AbstractPerson(Audit, LegacyCode):
         abstract = True
 
     def __str__(self):
-        return self.legal_name
+        return self.legal_name or ''
 
 
 class Person(AbstractPerson):
@@ -243,6 +243,7 @@ class Person(AbstractPerson):
 
 
 class Office(AbstractPerson):
+    objects = PersonManager()
 
     persons = models.ManyToManyField(Person, blank=True, related_name='offices')
     offices = models.ManyToManyField('self', blank=True)
@@ -274,16 +275,16 @@ class DefaultOffice(OfficeMixin, Audit):
 
 
 class Invite(Audit):
-    person = models.ForeignKey(Person, blank=False, null=False, on_delete=models.PROTECT,
-                               related_name='invites', verbose_name='Pessoa')
-    office = models.ForeignKey(Office, blank=False, null=False, on_delete=models.PROTECT,
-                               related_name='invites', verbose_name='Escritório')
+    person = models.ForeignKey(Person, blank=False, null=False,
+       on_delete=models.PROTECT, related_name='invites', verbose_name='Pessoa')
+    office = models.ForeignKey(Office, blank=False, null=False,
+   on_delete=models.PROTECT, related_name='invites', verbose_name='Escritório')
     status = models.CharField(choices=INVITE_STATUS, default='N', max_length=1, verbose_name='Status')
 
     class Meta:
         verbose_name = 'Convite'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.person
 
 
@@ -306,7 +307,7 @@ class Address(Audit):
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False,
                              verbose_name='País')
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True)
-    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True, related_name='adresses')
+    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'address'
@@ -338,7 +339,8 @@ class ContactMechanism(Audit):
         ContactMechanismType, on_delete=models.PROTECT, blank=False, null=False)
     description = models.CharField(max_length=255, null=False, unique=True)
     notes = models.CharField(max_length=400, blank=True)
-    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False)
+    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True)
+    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'contact_mechanism'

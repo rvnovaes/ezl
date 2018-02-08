@@ -16,25 +16,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='Filter',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('create_date', models.DateTimeField(auto_now_add=True, verbose_name='Criado em')),
-                ('alter_date', models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('name', models.TextField(max_length=255, verbose_name='Nome')),
-                ('description', models.TextField(blank=True, null=True, verbose_name='Descrição')),
-                ('query', models.TextField(verbose_name='query')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='filter_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por')),
-                ('auth_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL, verbose_name='Usuário')),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='filter_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por')),
-            ],
-            options={
-                'verbose_name': 'Filtro',
-                'verbose_name_plural': 'Filtros',
-            },
-        ),
         migrations.AlterField(
             model_name='task',
             name='chat',
@@ -44,10 +25,6 @@ class Migration(migrations.Migration):
             model_name='taskhistory',
             name='status',
             field=models.CharField(choices=[('A Cumprir', 'ACCEPTED'), ('Em Aberto', 'OPEN'), ('Retorno', 'RETURN'), ('Cumprida', 'DONE'), ('Recusada', 'REFUSED'), ('Glosada', 'BLOCKEDPAYMENT'), ('Finalizada', 'FINISHED'), ('Inválida', 'INVALID'), ('Erro no sistema de origem', 'ERROR')], max_length=30),
-        ),
-        migrations.AlterUniqueTogether(
-            name='filter',
-            unique_together=set([('auth_user', 'name')]),
         ),
         migrations.AlterField(
             model_name='task',
