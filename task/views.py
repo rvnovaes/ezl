@@ -897,12 +897,9 @@ class FilterListView(CustomLoginRequiredView, SingleTableViewMixin):
         :rtype: dict
         """
         context = super(FilterListView, self).get_context_data(**kwargs)
-        if self.request.user.is_superuser:
-            table = self.table_class(Filter.objects.filter())
-        else:
-            table = self.table_class(Filter.objects.filter(create_user=self.request.user))
-        context['table'] = table
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        if not self.request.user.is_superuser:
+            context['table'] = self.table_class(context['table'].data.data.filter(create_user=self.request.user))
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
 
 
