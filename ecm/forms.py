@@ -105,7 +105,7 @@ class DefaultAttachmentRuleForm(BaseModelForm):
 
     class Meta:
         model = DefaultAttachmentRule
-        fields = ('name', 'description', 'type_task', 'person_customer', 'state', 'court_district', 'city', 'office')
+        fields = ('office', 'name', 'description', 'type_task', 'person_customer', 'state', 'court_district', 'city')
 
     def clean(self):
         cleaned_data = super().clean()
