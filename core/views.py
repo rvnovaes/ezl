@@ -792,8 +792,6 @@ class GenericFormOneToMany(FormView, SingleTableView):
 
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
-        # table = self.table_class(self.related_model.objects.none())
-        # context['table'] = table
         return context
 
     success_message = None

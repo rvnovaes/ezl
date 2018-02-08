@@ -33,9 +33,23 @@ class TaskFilter(FilterSet):
                                     label="Setor")
     court = ModelChoiceFilter(queryset=filter_valid_choice_form(Organ.objects.filter(is_active=True)),
                               label="Órgão")
-    folder_number = NumberFilter(label=u"Número da Pasta")
-    law_suit_number = CharFilter(label=u"Número do processo")
+    folder_number = NumberFilter(label=u"Nº da pasta")
+    folder_legacy_code = CharFilter(label=u"Nº da pasta de origem")
+    law_suit_number = CharFilter(label=u"Nº do processo")
     task_number = NumberFilter(label=u"Nº da OS")
+    task_legacy_code = CharFilter(label=u"Nº da OS de origem")
+
+    client = ModelChoiceFilter(queryset=Person.objects.filter(),
+                               label="Cliente",
+                               name='client',
+                               required=False,
+                               widget=MDModelSelect2(url='client_autocomplete',
+                                                     attrs={
+                                                         'class': 'select-with-search material-ignore form-control',
+                                                         'data-placeholder': '',
+                                                         'data-label': 'Cliente'
+                                                     })
+                               )
 
     person_executed_by = ModelChoiceFilter(queryset=Person.objects.filter(),
                                            label="Correspondente",
