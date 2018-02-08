@@ -119,7 +119,6 @@
                     console.log('DATA CHAT', data, window.chat_id);
                     if (data.chat == window.chat_id) {
                         ion.sound.play("water_droplet_3");
-                        desktopNotify(data.text);
                         if ('{{user}}' === data.user) {
                             data.odd = "odd bounceInRight animated";
                             $.tmpl(tmplMsgLi, data).appendTo("#messageList")

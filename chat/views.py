@@ -22,15 +22,17 @@ class ChatListView(ListView):
 
 class ChatCountMessages(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
-        return JsonResponse(
+        data = JsonResponse(
             {'all_messages': UnreadMessage.objects.filter(
                 user_by_message__user_by_chat=self.request.user).count(),
              'grouped_messages': list(UnreadMessage.objects.filter(
                  user_by_message__user_by_chat=self.request.user).values(
-                 'message__chat__pk').annotate(
+                 'message__chat__pk', 'message__chat__title').annotate(
                  quantity=Count('id')).order_by())
              }
         )
+        print('CHAT MSG', data.content)
+        return data
 
 
 class ChatReadMessages(CustomLoginRequiredView, View):
