@@ -1,39 +1,71 @@
-{% extends 'inicial.html' %}
+{% extends 'skeleton/forms/base.html' %}
+{% load static %}
 {% load core_filters %}
-{% block content %}
-    {% include 'core/widgets/messages.html' %}
-    <form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
-        <div class="col-lg-12">
-            <fieldset>
-                <div class="form-row">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h1 class="panel-title">{{ form.title }}</h1>
-                        </div>
-                        <div class="panel-body">
-                            {% for field in form %}
-                                <div class="form-group col-sm-3">
-                                    <label>
-                                        {{ field | append_ast_if_req | label_capitalizer}}{{ field }}
-                                    </label>
-                                </div>
-                            {% endfor %}
-                        </div>
-                        <div class="form-row  text-center">
-                            <a class="btn btn-sm btn-raised btn-default"
-                               href="{% url 'movement_update' view.kwargs.lawsuit view.kwargs.movement %}"><i
-                                    class="material-icons left">clear</i>
-                                Cancelar
-                            </a>
-                            <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
-                                    class="material-icons left">done</i>
-                                Salvar
-                            </button>
+{% load render_table from django_tables2 %}
+{% load tz %}
+{% block attachment_form %}
+    <div class="panel-group" role="tablist" aria-multiselectable="true">
+            <!-- Arquivos ECM -->
+            {% include 'task/task_detail/arq_ecm.html' %}
+    </div>
+{% endblock attachment_form %}
+{% block extra_scripts %}
+    <!-- UPLOADS SCRIPTS  -->
+    {% include 'task/includes/upload.html' %}
+    <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
+    <!--Style Switcher -->
+    <script src="{% static 'skeleton/js/cbpFWTabs.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+
+    <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>
+    <script type="text/javascript">
+        (function() {
+            [].slice.call(document.querySelectorAll('.sttabs')).forEach(function(el) {
+                new CBPFWTabs(el);
+            });
+        })();
+    </script>
+{% endblock extra_scripts %}
+{% block script_window_load %}
+    {{ block.super }}
+    get_ecms({{form.instance.pk}});
+{% endblock %}
+{% block extra_modal %}
+    <!-- Janela modal para mostrar progresso de deleção do arquivo -->
+    <div id="deleting" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center;">
+                    Excluindo arquivo ...
+                </div>
+                <div class="modal-footer">
+                    <div class="progress progress-striped active">
+                        <div class="progress-bar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Janela modal para mostrar progresso do envio de arquivos -->
+    <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" style="text-align: center">Enviando ...</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="progress progress-lg">
+                        <div class="progress-bar progress-bar-info active progress-bar-striped" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" style="width: 0%" role="progressbar">
+                            0
                         </div>
                     </div>
                 </div>
-            </fieldset>
+            </div>
         </div>
-    </form>
-
-{% endblock content %}
+    </div>
+{% endblock %}

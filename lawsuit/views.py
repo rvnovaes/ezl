@@ -428,7 +428,6 @@ class LawsuitMovementCreateView(AuditFormMixin, SuccessMessageMixin, GenericForm
     form_class = LawSuitForm
     table_class = MovementTable
     template_name = 'lawsuit/lawsuit_movement_form.html'
-    # success_url = reverse_lazy('lawsuit_list')
     success_message = CREATE_SUCCESS_MESSAGE
     object_list = []
 
@@ -583,10 +582,6 @@ class MovementTaskCreateView(SuccessMessageMixin, CustomLoginRequiredView, Gener
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
-
-    # @attachment_form_valid
-    # def form_valid(self, form):
-    #     return super().form_valid(form)
 
 
 class MovementTaskUpdateView(SuccessMessageMixin, CustomLoginRequiredView, GenericFormOneToMany,
