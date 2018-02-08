@@ -51,12 +51,13 @@ def attachment_form_valid(f):
     @wraps(f)
     def wrapper(object_instance, form):
         # usermodel: O atributo use_upload está na classe Audit e o user não herda dessa classe
-        # por isso é feita a verificação do mdel
+        # por isso é feita a verificação do model
         usermodel = object_instance.model._meta.app_label == 'auth'
         if usermodel:
             use_upload = False
         else:
             use_upload = object_instance.model.use_upload
+        ret = f(object_instance, form)
         if use_upload:
             files = object_instance.request.FILES.getlist('file')
             if files:
@@ -71,7 +72,7 @@ def attachment_form_valid(f):
                         create_user_id=object_instance.request.user.id
                     )
                     attachment.save()
-        return f(object_instance, form)
+        return ret
     return wrapper
 
 
