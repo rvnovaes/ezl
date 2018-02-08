@@ -100,13 +100,14 @@ class TaskCreateView(AuditFormMixin, CreateView):
 class TaskUpdateView(AuditFormMixin, UpdateView):
     model = Task
     form_class = TaskForm
-    success_url = reverse_lazy('task_list')
     success_message = UPDATE_SUCCESS_MESSAGE
 
     def get_initial(self):
         if self.kwargs.get('movement'):
             lawsuit_id = Movement.objects.get(id=self.kwargs.get('movement')).law_suit_id
             self.kwargs['lawsuit'] = lawsuit_id
+            self.success_url = reverse('movement_update', kwargs={'lawsuit': self.kwargs['lawsuit'],
+                                                                  'pk': self.kwargs['movement']})
         if isinstance(self, CreateView):
             self.form_class.declared_fields['is_active'].initial = True
             self.form_class.declared_fields['is_active'].disabled = True
@@ -125,12 +126,6 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
         form.instance.__server = self.request.META['HTTP_HOST']
         super(TaskUpdateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
-
-    def get_success_url(self):
-        self.success_url = reverse('movement_update',
-                                   kwargs={'lawsuit': self.kwargs['lawsuit'],
-                                           'pk': self.kwargs['movement']})
-        super(TaskUpdateView, self).get_success_url()
 
     def get_context_data(self, **kwargs):
         context = super(TaskUpdateView, self).get_context_data(**kwargs)
@@ -727,7 +722,6 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         return context
-
 
     def get(self, request):
         if (self.request.GET.get('export_answers') and

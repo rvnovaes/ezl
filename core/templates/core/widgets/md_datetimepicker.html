@@ -24,9 +24,8 @@ $(window).on('load', function(){
 })
 </script>
 
-{#    <span class="form-group is-empty">#}
 <div class="input-group">
-    <input type="text" class="form-control" id="{{ widget.name }}"
+    <input type="text" class="form-control" id="{{ widget.name }}" name="{{ widget.name }}"
            {% if widget.value != None %} value="{{ widget.value }}" {% endif %}>
     <span class="input-group-addon">
         <i class="icon-calender"></i>
