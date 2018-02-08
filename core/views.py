@@ -814,6 +814,14 @@ class UserListView(CustomLoginRequiredView, SingleTableViewMixin):
     template_name = 'auth/user_list.html'
     ordering = ('first_name', 'last_name', 'username', 'email',)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        table_data = context['table'].data.data
+        context['table'] = self.table_class(
+            list(map(lambda i: i.auth_user, get_office_session(self.request).persons.filter(auth_user__in=table_data))))
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
+        return context
+
 
 class UserCreateView(AuditFormMixin, CreateView):
     model = User
