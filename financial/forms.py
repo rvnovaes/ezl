@@ -124,7 +124,7 @@ class ServicePriceTableForm(BaseModelForm):
                                             court_district=cleaned_data["court_district"],
                                             state=cleaned_data["state"],
                                             client=cleaned_data["client"],
-                                            correspondent=cleaned_data["correspondent"]).first():
+                                            office_correspondent=cleaned_data["office_correspondent"]).first():
             raise forms.ValidationError("Já existe um registro com os dados selecionados")
         return cleaned_data
 
