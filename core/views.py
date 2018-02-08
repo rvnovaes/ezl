@@ -1014,7 +1014,7 @@ class CustomSession(View):
             office = Office.objects.filter(pk=int(current_office)).first()
             if office:
                 data['current_office_pk'] = office.pk
-                data['current_office_name'] = office.name
+                data['current_office_name'] = office.legal_name
             else:
                 request.session.modified = True
                 del request.session['custom_session_user']
@@ -1035,12 +1035,12 @@ class CustomSession(View):
                 'current_office'))).first()
             if office:
                 data['current_office_pk'] = office.pk
-                data['current_office_name'] = office.name
+                data['current_office_name'] = office.legal_name
         else:
             default_office = DefaultOffice.objects.filter(auth_user=request.user).first()
             if default_office:
                 data['current_office_pk'] = default_office.office.pk
-                data['current_office_name'] = default_office.office.name
+                data['current_office_name'] = default_office.office.legal_name
         return JsonResponse(data)
 
 
