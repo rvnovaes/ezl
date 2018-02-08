@@ -7,7 +7,6 @@ class TaskTable(tables.Table):
 
     def __init__(self, *args, _overriden_value="Estado", **kwargs):
         super().__init__(*args, **kwargs)
-
         self.base_columns['status'].verbose_name = _overriden_value
         self.length = self.rows.__len__()
 

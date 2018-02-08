@@ -47,49 +47,56 @@ class TaskForm(BaseForm):
             TypeTask.objects.filter(is_active=True)).order_by('name'),
         empty_label='Selecione...',
         label='Tipo de Serviço')
-    # TODO verificar como aplicar os formulários com dateTimeField
 
-    delegation_date = forms.DateTimeField(show_hidden_initial=True, initial=datetime.now(),
-                                          required=False,
-                                          widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                              format='DD/MM/YYYY'
-                                                              )
-                                          )
+    delegation_date = forms.DateTimeField(initial=datetime.now(),
+                                          required=True,
+                                          label='Data de Delegação',
+                                          widget=MDDateTimepicker(attrs={
+                                              'class': 'form-control'
+                                          },
+                                              format='DD/MM/YYYY'))
 
     acceptance_date = forms.DateTimeField(required=False,
-                                          widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                              format='DD/MM/YYYY'
-                                                              )
-                                          )
+                                          widget=MDDateTimepicker(attrs={
+                                              'class': 'form-control'
+                                          },
+                                              format='DD/MM/YYYY'))
 
     final_deadline_date = forms.DateTimeField(required=True,
                                               widget=MDDateTimepicker(attrs={
-                                                  'class': 'form-control'},
+                                                  'class': 'form-control'
+                                              },
                                                   format='DD/MM/YYYY HH:mm'))
 
     execution_date = forms.DateTimeField(required=False,
-                                         widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                             format='DD/MM/YYYY')
-                                         )
+                                         widget=MDDateTimepicker(attrs={
+                                             'class': 'form-control'
+                                         },
+                                             format='DD/MM/YYYY'))
 
     return_date = forms.DateTimeField(required=False,
-                                      widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                          format='DD/MM/YYYY')
-                                      )
+                                      widget=MDDateTimepicker(attrs={
+                                          'class': 'form-control'
+                                      },
+                                          format='DD/MM/YYYY'))
+
     refused_date = forms.DateTimeField(required=False,
-                                       widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                           format='DD/MM/YYYY')
-                                       )
+                                       widget=MDDateTimepicker(attrs={
+                                           'class': 'form-control'
+                                       },
+                                           format='DD/MM/YYYY'))
 
     blocked_payment_date = forms.DateTimeField(required=False,
-                                               widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                                   format='DD/MM/YYYY')
-                                               )
+                                               widget=MDDateTimepicker(attrs={
+                                                   'class': 'form-control'
+                                               },format='DD/MM/YYYY'))
 
     finished_date = forms.DateTimeField(required=False,
-                                        widget=MDDatePicker(attrs={'class': 'form-control'},
-                                                            format='DD/MM/YYYY')
-                                        )
+                                        widget=MDDateTimepicker(attrs={
+                                            'class': 'form-control'
+                                        },
+                                            format='DD/MM/YYYY'))
+
     description = forms.CharField(required=False, initial='', label='Descrição',
                                   widget=forms.Textarea(
                                       attrs={'class': 'form-control', 'rows': '5',
@@ -102,7 +109,11 @@ class TaskForm(BaseForm):
 
 
 class TaskCreateForm(FileFormMixin, TaskForm):
-    documents = MultipleUploadedFileField(required=False)
+    documents = forms.FileField(widget=forms.ClearableFileInput(
+                                attrs={'multiple': True,
+                                       "id": "fileupload-create"}),
+                                required=False)
+
 
     class Meta(TaskForm.Meta):
         fields = TaskForm.Meta.fields + ['documents']
