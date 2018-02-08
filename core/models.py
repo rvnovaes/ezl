@@ -285,7 +285,7 @@ class Invite(Audit):
         verbose_name = 'Convite'
 
     def __str__(self):
-        return self.person
+        return self.person.legal_name
 
 
 class Address(Audit):
