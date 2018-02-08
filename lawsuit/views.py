@@ -366,6 +366,7 @@ class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateV
         :param kwargs:
         :return: super
         """
+        self.object_list = []
         if cache.get('folder_lawsuit_page'):
             self.success_url = cache.get('folder_lawsuit_page')
         return super(FolderLawsuitUpdateView, self).post(request, *args, **kwargs)
