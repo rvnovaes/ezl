@@ -166,6 +166,8 @@ class Task(Audit, LegacyCode, OfficeMixin):
     execution_date = models.DateTimeField(null=True, verbose_name='Data de Cumprimento')
 
     requested_date = models.DateTimeField(null=True, verbose_name='Data de Solicitação')
+    acceptance_service_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação pelo Contratante')
+    refused_service_date = models.DateTimeField(null=True, verbose_name='Data de Recusa pelo Contratante')
     return_date = models.DateTimeField(null=True, verbose_name='Data de Retorno')
     refused_date = models.DateTimeField(null=True, verbose_name='Data de Recusa')
 
