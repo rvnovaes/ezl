@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^anexos-padrao/criar/$', views.DefaultAttachmentRuleCreateView.as_view(), name='defaultattachmentrule_add'),
     url(r'^anexos-padrao/(?P<pk>[0-9]+)/$', views.DefaultAttachmentRuleUpdateView.as_view(), name='defaultattachmentrule_update'),
     url(r'^anexos-padrao/excluir$', views.DefaultAttachmentRuleDeleteView.as_view(), name='defaultattachmentrule_delete'),
+    url(r'^anexos-padrao/verificar$', login_required(views.AjaxVerifyForm.as_view()), name='ajax-upload'),
 ]

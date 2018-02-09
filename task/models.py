@@ -276,7 +276,7 @@ class EcmManager(models.Manager):
 
 
 class Ecm(Audit, LegacyCode):
-    path = models.FileField(upload_to=get_dir_name, max_length=255, unique=True, null=False)
+    path = models.FileField(upload_to=get_dir_name, max_length=255, null=False)
     task = models.ForeignKey(Task, blank=False, null=False, on_delete=models.PROTECT)
     updated = models.BooleanField(default=True, null=False)
 

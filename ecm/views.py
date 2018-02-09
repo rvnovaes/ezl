@@ -67,6 +67,25 @@ class AttachmentFormMixin(object):
         return True
 
 
+class AjaxVerifyForm(View):
+
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(AjaxVerifyForm, self).dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        print(request)
+        form = DefaultAttachmentRuleCreateForm(request.POST, request.FILES)
+        if form.is_valid():
+            return make_response(content=json.dumps({'success': True}))
+        else:
+            return make_response(status=400,
+                                 content=json.dumps({
+                                     'success': False,
+                                     'error': '%s' % repr(form.errors)
+                                 }))
+
+
 class UploadView(View):
     """
     View which will handle all upload requests sent by Uploader.
