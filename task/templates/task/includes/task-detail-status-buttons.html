@@ -43,7 +43,7 @@
 {% endif %}
 {% if perms.core.validate_all_tasks %}
     <button type="button" id="FINISHED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-raised FINISHED {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}">
+            class="text-white btn btn-raised btn-ezl-finished FINISHED {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}">
         <span class="btn-label"><i class="mdi mdi-gavel"></i></span> Finalizar
     </button>
 {% endif %}

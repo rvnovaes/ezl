@@ -53,7 +53,7 @@ class TypeTaskETL(GenericETL):
                     instance.is_active = True
                     instance.office = default_office
                     instance.legacy_code = code
-                    instance.save(update_fields=['is_active', 'name', 'alter_user', 'alter_date', 'survey'
+                    instance.save(update_fields=['is_active', 'name', 'alter_user', 'alter_date', 'survey',
                                                  'office', 'legacy_code'])
                 else:
                     self.model.objects.create(name=name,
