@@ -17,8 +17,8 @@ urlpatterns = [
         name='courtdistrict_autocomplete'),
 
     # Varas
-    url(r'^varas/listar/$', login_required(views.CourtDivisionListView.as_view()), name='courtdivision_list'),
-    url(r'^varas/$', login_required(views.CourtDivisionCreateView.as_view()), name='courtdivision_add'),
+    url(r'^varas/$', login_required(views.CourtDivisionListView.as_view()), name='courtdivision_list'),
+    url(r'^varas/criar/$', login_required(views.CourtDivisionCreateView.as_view()), name='courtdivision_add'),
     url(r'^varas/(?P<pk>[0-9]+)/$', login_required(views.CourtDivisionUpdateView.as_view()),
         name='courtdivision_update'),
     url(r'^varas/excluir$', login_required(views.CourtDivisionDeleteView.as_view()),
@@ -43,32 +43,32 @@ urlpatterns = [
         name='movement_delete'),
 
     # Tipo de movimentacao
-    url(r'^tipo-movimentacao/listar/$', login_required(views.TypeMovementListView.as_view()),
+    url(r'^tipo-movimentacao/$', login_required(views.TypeMovementListView.as_view()),
         name='type_movement_list'),
-    url(r'^tipo-movimentacao/$', login_required(views.TypeMovementCreateView.as_view()), name='type_movement_add'),
+    url(r'^tipo-movimentacao/criar/$', login_required(views.TypeMovementCreateView.as_view()), name='type_movement_add'),
     url(r'^tipo-movimentacao/(?P<pk>[0-9]+)/$', login_required(views.TypeMovementUpdateView.as_view()),
         name='type_movement_update'),
     url(r'^tipo-movimentacao/excluir$', login_required(views.TypeMovementDeleteView.as_view()),
         name='type_movement_delete'),
 
     # Intancias
-    url(r'^instancias/listar/$', login_required(views.InstanceListView.as_view()), name='instance_list'),
-    url(r'instancias/$', login_required(views.InstanceCreateView.as_view()), name='instance_create'),
+    url(r'^instancias/$', login_required(views.InstanceListView.as_view()), name='instance_list'),
+    url(r'instancias/criar/', login_required(views.InstanceCreateView.as_view()), name='instance_create'),
     url(r'instancias/(?P<pk>[0-9]+)/$', login_required(views.InstanceUpdateView.as_view()), name='instance_update'),
     url(r'instancias/excluir$', login_required(views.InstanceDeleteView.as_view()),
         name='instance_delete'),
 
     # PastasSolicitante
-    url(r'^pastas/listar/$', login_required(login_required(views.FolderListView.as_view())), name='folder_list'),
-    url(r'^pastas/$', login_required(login_required(views.FolderLawsuitCreateView.as_view())), name='folder_add'),
+    url(r'^pastas/$', login_required(login_required(views.FolderListView.as_view())), name='folder_list'),
+    url(r'^pastas/criar/$', login_required(login_required(views.FolderLawsuitCreateView.as_view())), name='folder_add'),
     url(r'^pastas/(?P<pk>[0-9]+)/$', login_required(login_required(views.FolderLawsuitUpdateView.as_view())),
         name='folder_update'),
     url(r'^pastas/excluir$', login_required(login_required(views.FolderDeleteView.as_view())),
         name='folder_delete'),
 
     # Orgao
-    url(r'^orgaos/listar/$', login_required(views.OrganListView.as_view()), name='organ_list'),
-    url(r'^orgaos/$', login_required(views.OrganCreateView.as_view()), name='organ_add'),
+    url(r'^orgaos/$', login_required(views.OrganListView.as_view()), name='organ_list'),
+    url(r'^orgaos/criar/', login_required(views.OrganCreateView.as_view()), name='organ_add'),
     url(r'^orgaos/(?P<pk>[0-9]+)/$', login_required(views.OrganUpdateView.as_view()),
         name='organ_update'),
     url(r'orgaos/excluir$', login_required(views.OrganDeleteView.as_view()), name='organ_delete'),
