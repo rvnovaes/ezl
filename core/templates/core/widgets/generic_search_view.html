@@ -6,178 +6,175 @@
 {% block search %}
     <div class="panel panel-default">
         <div class="panel-heading">
-            <a href="#" data-perform="panel-collapse"><i class="ti-filter"></i> Filtrar {{ form_name_plural|capfirst  }}</a>
+            <a href="#" data-perform="panel-collapse"><i class="ti-filter"></i> Filtrar {{ form_name_plural|capfirst }}
+            </a>
             <div class="panel-action">
                 <a href="#" data-perform="panel-collapse"><i class="ti-plus"></i></a>
             </div>
         </div>
         <div class="panel-wrapper collapse" aria-expanded="true">
             <form>
-            <div class="panel-body">
-                <input type="hidden" name="generic_search" value="true">
-                <fieldset>
-                    {# Bloco para campos textos#}
-                    <div class="row">
-                        {% for search_field in search_model_fields.text %}
-                            {% if not search_field.choices %}
+                <div class="panel-body">
+                    <input type="hidden" name="generic_search" value="true">
+                    <fieldset>
+                        {# Bloco para campos textos#}
+                        <div class="row">
+                            {% for search_field in search_model_fields.text %}
+                                {% if not search_field.choices %}
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label for="{{ search_field.name }}">{{ search_field.verbose_name | label_capitalizer }}</label>
+                                            <input type="text" class="form-control input-field"
+                                                   id="{{ search_field.name }}"
+                                                   name="{{ search_field.name }}"
+                                                   value="{{ view.request.GET | get_item:search_field.name }}">
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {#Campos com choice#}
+                        <div class="row">
+                            {% for search_field in search_model_fields.checkbox %}
+                                {% if search_field.name == 'is_active' %}
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label for="{{ search_field.name }}">Situação</label>
+                                            <select class="form-control selected" name="{{ search_field.name }}">
+                                                <option value="T" {{ view.request.GET | get_is_active_selected:'T' }}>
+                                                    Todos
+                                                    usuários
+                                                </option>
+                                                <option value="A" {{ view.request.GET | get_is_active_selected:'A' }}>
+                                                    Apenas
+                                                    usuários ativos
+                                                </option>
+                                                <option value="I" {{ view.request.GET | get_is_active_selected:'I' }}>
+                                                    Apenas
+                                                    usuários inativos
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            {% for search_field in search_model_fields.number %}
                                 <div class="col-sm-3">
                                     <div class="form-group">
-                                        <label for="{{ search_field.name }}">{{ search_field.verbose_name | label_capitalizer }}</label>
-                                        <input type="text" class="form-control input-field"
-                                               id="{{ search_field.name }}"
+                                        <label for="{{ search_field.name }}">{{ search_field.verbose_name |label_capitalizer }}</label>
+                                        <input type="number" name="{{ search_field.name }}" class="form-control"
+                                               value="{{ view.request.GET | get_item:search_field.name }}"/>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            {% for search_field in search_model_fields.text %}
+                                {% if search_field.choices %}
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label for="{{ search_field.name }}">{{ search_field.verbose_name | label_capitalizer }}</label>
+                                            <select name="{{ search_field.name }}" class="form-control">
+                                                <option value=""></option>
+                                                {% for choice in search_field.choices %}
+                                                    <option value="{{ choice | get_choice_format_value }}" {{ view.request.GET | get_item:search_field.name | get_choice_choice_selected:choice }}>{{ choice | get_choice_format_text }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {#Campos de data#}
+                        <div class="row">
+                            {% for search_field in search_model_fields.date %}
+                                <div class='col-sm-3'>
+                                    <div class="form-group">
+                                        <label for="{{ search_field.name }}_ini">{{ search_field.verbose_name |label_capitalizer }}</label>
+                                        <div class='input-group date' id='{{ search_field.name }}_ini'>
+                                            <input type="text" class="form-control datepicker-autoclose"
+                                                   name="{{ search_field.name }}_ini" placeholder="Data inicial"
+                                                   value="{{ view.request.GET | get_item_data_ini:search_field.name }}">
+                                            <span class="input-group-addon"><i class="icon-calender"></i></span>
+
+                                            {#                                            <input type='text' class="form-control" name="{{ search_field.name }}_ini"#}
+                                            {#                                                   placeholder="Data inicial"#}
+                                            {#                                                   value="{{ view.request.GET | get_item_data_ini:search_field.name }}"/>#}
+                                            {#                                            <span class="input-group-addon">#}
+                                            {#                                                <span class="material-icons event" style="color: #009688">event</span>#}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class='col-sm-3'>
+                                    <div class="form-group">
+                                        <label for="{{ search_field.name }}_ini">&nbsp;</label>
+                                        <div class='input-group date' id='{{ search_field.name }}_fim'>
+                                            <input type="text" class="form-control datepicker-autoclose"
+                                                   name="{{ search_field.name }}_ini" placeholder="Data final"
+                                                   value="{{ view.request.GET | get_item_data_fim:search_field.name }}">
+                                            <span class="input-group-addon"><i class="icon-calender"></i></span>
+                                            {#                                            <input type='text' class="form-control" name="{{ search_field.name }}_fim"#}
+                                            {#                                                   placeholder="Data final"#}
+                                            {#                                                   value="{{ view.request.GET | get_item_data_fim:search_field.name }}"/>#}
+                                            {#                                            <span class="input-group-addon">#}
+                                            {#                                                <span class="material-icons event" style="color: #009688">event</span>#}
+                                            {#                                            </span>#}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="row">
+                            {% if search_model_fields.checkbox|length > 1 %}
+                            {% endif %}
+                            {% for search_field in search_model_fields.checkbox %}
+                                {% if search_field.name != 'is_active' %}
+                                    <div class="col-sm-3">
+                                        <input type="checkbox" name="{{ search_field.name }}"
+                                                {{ view.request.GET | get_check_box_format:search_field.name }}/>
+                                        <strong>{{ search_field.verbose_name |label_capitalizer }}</strong>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="row">
+                            {% for search_field in search_model_fields.foreignkey %}
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>{{ search_field.verbose_name | label_capitalizer }}</label>
+                                        <input type="text" data-provide="typeahead"
+                                               class="form-control"
+                                               value="{{ view.request.GET | get_item:search_field.name }}"
+                                               module="{{ module }}"
+                                               model="{{ model }}"
+                                               name="{{ search_field.name }}"
+                                               autocomplete="off">
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="row">
+                            {% for search_field in search_model_fields.old %}
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>{{ search_field.verbose_name | label_capitalizer }}</label>
+                                        <input type="text" class="form-control"
                                                name="{{ search_field.name }}"
                                                value="{{ view.request.GET | get_item:search_field.name }}">
                                     </div>
                                 </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                    {#Campos com choice#}
-                    <div class="row">
-                        {% for search_field in search_model_fields.checkbox %}
-                            {% if search_field.name == 'is_active' %}
-                                <div class="col-sm-3">
-                                    <div class="form-group">
-                                        <label for="{{ search_field.name }}">Situação</label>
-                                        <select class="form-control selected" name="{{ search_field.name }}">
-                                            <option value="T" {{ view.request.GET | get_is_active_selected:'T' }}>
-                                                Todos
-                                                usuários
-                                            </option>
-                                            <option value="A" {{ view.request.GET | get_is_active_selected:'A' }}>
-                                                Apenas
-                                                usuários ativos
-                                            </option>
-                                            <option value="I" {{ view.request.GET | get_is_active_selected:'I' }}>
-                                                Apenas
-                                                usuários inativos
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                        {% for search_field in search_model_fields.number %}
-                            <div class="col-sm-3">
-                                <div class="form-group">
-                                    <label for="{{ search_field.name }}">{{ search_field.verbose_name |label_capitalizer }}</label>
-                                    <input type="number" name="{{ search_field.name }}" class="form-control"
-                                           value="{{ view.request.GET | get_item:search_field.name }}"/>
-                                </div>
-                            </div>
-                        {% endfor %}
-                        {% for search_field in search_model_fields.text %}
-                            {% if search_field.choices %}
-                                <div class="col-sm-3">
-                                    <div class="form-group">
-                                        <label for="{{ search_field.name }}">{{ search_field.verbose_name | label_capitalizer }}</label>
-                                        <select name="{{ search_field.name }}" class="form-control">
-                                            <option value=""></option>
-                                            {% for choice in search_field.choices %}
-                                                <option value="{{ choice | get_choice_format_value }}" {{ view.request.GET | get_item:search_field.name | get_choice_choice_selected:choice }}>{{ choice | get_choice_format_text }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                    {#Campos de data#}
-                    <div class="row">
-                        {% for search_field in search_model_fields.date %}
-                            <div class='col-sm-3'>
-                                <div class="form-group">
-                                    <label for="{{ search_field.name }}_ini">{{ search_field.verbose_name |label_capitalizer }}</label>
-                                    <div class='input-group date' id='{{ search_field.name }}_ini'>
-                                        <input type="text" class="form-control datepicker-autoclose"
-                                               name="{{ search_field.name }}_ini" placeholder="Data inicial"
-                                               value="{{ view.request.GET | get_item_data_ini:search_field.name }}">
-                                        <span class="input-group-addon"><i class="icon-calender"></i></span>
-
-{#                                            <input type='text' class="form-control" name="{{ search_field.name }}_ini"#}
-{#                                                   placeholder="Data inicial"#}
-{#                                                   value="{{ view.request.GET | get_item_data_ini:search_field.name }}"/>#}
-{#                                            <span class="input-group-addon">#}
-{#                                                <span class="material-icons event" style="color: #009688">event</span>#}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class='col-sm-3'>
-                                <div class="form-group">
-                                    <label for="{{ search_field.name }}_ini">&nbsp;</label>
-                                    <div class='input-group date' id='{{ search_field.name }}_fim'>
-                                        <input type="text" class="form-control datepicker-autoclose"
-                                               name="{{ search_field.name }}_ini" placeholder="Data final"
-                                               value="{{ view.request.GET | get_item_data_fim:search_field.name }}">
-                                        <span class="input-group-addon"><i class="icon-calender"></i></span>
-{#                                            <input type='text' class="form-control" name="{{ search_field.name }}_fim"#}
-{#                                                   placeholder="Data final"#}
-{#                                                   value="{{ view.request.GET | get_item_data_fim:search_field.name }}"/>#}
-{#                                            <span class="input-group-addon">#}
-{#                                                <span class="material-icons event" style="color: #009688">event</span>#}
-{#                                            </span>#}
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <div class="row">
-                        {% if search_model_fields.checkbox|length > 1 %}
-                        {% endif %}
-                        {% for search_field in search_model_fields.checkbox %}
-                            {% if search_field.name != 'is_active' %}
-                                <div class="col-sm-3">
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" name="{{ search_field.name }}"
-                                                    {{ view.request.GET | get_check_box_format:search_field.name }}/>
-                                            {{ search_field.verbose_name |label_capitalizer }}
-                                        </label>
-                                    </div>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                    <div class="row">
-                        {% for search_field in search_model_fields.foreignkey %}
-                            <div class="col-sm-3">
-                                <div class="form-group">
-                                    <label>{{ search_field.verbose_name | label_capitalizer}}</label>
-                                    <input type="text" data-provide="typeahead"
-                                           class="form-control"
-                                           value="{{ view.request.GET | get_item:search_field.name }}"
-                                           module="{{ module }}"
-                                           model="{{ model }}"
-                                           name="{{ search_field.name }}"
-                                           autocomplete="off">
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <div class="row">
-                        {% for search_field in search_model_fields.old %}
-                            <div class="col-sm-3">
-                                <div class="form-group">
-                                    <label>{{ search_field.verbose_name | label_capitalizer}}</label>
-                                    <input type="text" class="form-control"
-                                           name="{{ search_field.name }}"
-                                           value="{{ view.request.GET | get_item:search_field.name }}">
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </fieldset>
-            </div>
-            <div class="panel-footer">
-                <button class="btn btn-success waves-effect waves-light" type="submit">
-                    <span class="btn-label"><i class="fa fa-filter"></i></span>Filtar
-                </button>
-                <button class="btn btn-info waves-effect waves-light" type="button"
-                        onclick="javascript:window.open('{{ request.META.PATH_INFO }}', '_self')">
-                    <span class="btn-label"><i class="fa fa-trash-o"></i></span>Limpar
-                </button>
-            </div>
+                            {% endfor %}
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-success waves-effect waves-light" type="submit">
+                        <span class="btn-label"><i class="fa fa-filter"></i></span>Filtar
+                    </button>
+                    <button class="btn btn-info waves-effect waves-light" type="button"
+                            onclick="javascript:window.open('{{ request.META.PATH_INFO }}', '_self')">
+                        <span class="btn-label"><i class="fa fa-trash-o"></i></span>Limpar
+                    </button>
+                </div>
             </form>
         </div>
     </div>
