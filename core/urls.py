@@ -68,8 +68,8 @@ urlpatterns = [
         name='addresses_types'),
     url(r'^recover_database', views.recover_database, name='recover_database'),
 
-    url(r'^usuarios/listar/$', login_required(views.UserListView.as_view()), name='user_list'),
-    url(r'^usuarios/$', login_required(views.UserCreateView.as_view()), name='user_add'),
+    url(r'^usuarios/$', login_required(views.UserListView.as_view()), name='user_list'),
+    url(r'^usuarios/criar/$', login_required(views.UserCreateView.as_view()), name='user_add'),
     url(r'^usuarios/(?P<pk>[0-9]+)/$', login_required(views.UserUpdateView.as_view()),
         name='user_update'),
     url(r'^usuarios/excluir$', login_required(views.UserDeleteView.as_view()),
