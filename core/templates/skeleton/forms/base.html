@@ -1,0 +1,73 @@
+{% extends 'skeleton/base.html' %}
+{% load static bootstrap3 form_tags %}
+{% load ecm_tags %}
+{% block content %}
+    <form enctype="multipart/form-data" id="{{ object_form }}" action="{% block action %}{% endblock %}" method="{% block method %}post{% endblock %}" novalidate>
+        {% csrf_token %}
+    <div class="panel panel-default">
+        <div class="panel-heading">{% include 'skeleton/forms/form-title.html' with form=form %}</div>
+        <div class="panel-wrapper collapse in">
+            <div class="panel-body">
+                    {% block form %}
+                        {% for field in form %}
+                            {% field_type field as field_type %}
+                            {% if field_type == 'checkbox' %}
+                                <div class="form-group col-sm-6">
+                                    <div class="checkbox checkbox-success">
+                                        {{ field }}
+                                        {{ field.label_tag }}
+                                    </div>
+                                </div>
+                            {% elif field_type != 'clearablefile' %}
+                                {% bootstrap_field field form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endblock %}
+            </div>
+
+            {% block attachment_form %}
+                {% if view.model.use_upload  %}
+                    {% include 'ecm/attachments.html' %}
+                {% endif %}
+            {% endblock attachment_form %}
+
+            <div class="panel-footer text-center">
+                {% block form_buttons %}
+                    {% block button_cancel %}
+                        {% include 'core/widgets/cancel_button.html'  with link_list=link_list %}
+                    {% endblock %}
+                    {% block button_save %}
+                        {% include 'skeleton/componentes/buttons/submit_save.html' %}
+                    {% endblock %}
+                {% endblock %}
+            </div>
+        {% block extra_form %}{% endblock %}
+        </div>
+    </div>
+    </form>
+    {% block extra_content %}{% endblock %}
+{% endblock content %}
+
+{% block extra_scripts %}
+    <script src="{% static 'skeleton/js/mask.js' %}"></script>
+    {% block upload_scripts %}
+        {% if view.model.use_upload %}
+            <!-- UPLOADS SCRIPTS  -->
+            {% include 'ecm/javascripts.html' %}
+
+            <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+            <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+            <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+            <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
+                 a medida que for adicionando novos arquivos -->
+            <div id="scripts">
+            </div>
+        {% endif %}
+    {% endblock upload_scripts %}
+    {{ form.media }}
+{% endblock %}
+{% block script_window_load %}
+    {% if object and view.model.use_upload %}
+        get_attachments('{{ object|get_modelname_from_object }}', {{object.pk}})
+    {% endif %}
+{% endblock %}

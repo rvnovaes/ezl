@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 import django_tables2 as tables
 from django_tables2.utils import AttributeDict, A
 
-from .models import Person, Address
+from .models import Person, Address, Office, Invite
 
 
 class CheckBoxMaterial(tables.CheckBoxColumn):
@@ -25,9 +25,7 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         attrs = AttributeDict(default, **(specific or general or {}))
         attrs['selectable'] = True
         return mark_safe(
-            ('<div class="checkbox"><label>'
-             '<input %s id="selection_header"  onclick="toggle(this)"/>'
-             '</label></div>')
+            ('<input %s id="selection_header"  onclick="toggle(this)"/>')
             % attrs.as_html())
 
     def render(self, value, bound_column, record):
@@ -45,9 +43,10 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         specific = self.attrs.get('td__input')
         attrs = AttributeDict(default, **(specific or general or {}))
         attrs['id'] = record.id
-        return mark_safe('<div class="checkbox"><label><input name="selection"'
-                         ' type="checkbox" %s onclick="showDeleteButton(this)"/>'
-                         '</label></div>' % attrs.as_html())
+        return mark_safe(
+            '<input name="selection" type="checkbox" %s onclick="showDeleteButton(this)"/>'% attrs.as_html()
+        )
+
 
 class AddressTable(tables.Table):
 
@@ -66,8 +65,15 @@ class AddressTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/pessoas/' + str(record.person.pk) + '/enderecos/' + str(record.pk) + '/'
         }
-
 # Logradouro, N, COmplemento, Bairro, Cidade, Estado, Cep, Pais, Observacao, Tipo, Ativo
+
+
+class AddressOfficeTable(AddressTable):
+    class Meta:
+        row_attrs = {
+            'data_href': lambda record: '/escritorios/' + str(record.office.pk) + '/enderecos/' + str(record.pk) + '/'
+        }
+
 
 class PersonTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
@@ -119,3 +125,28 @@ class UserTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/usuarios/' + str(record.pk) + '/'
         }
+
+
+class OfficeTable(tables.Table):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # self.exclude = ('pk', 'name', 'legal_name')
+
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
+
+    class Meta:
+        exclude = ('id', 'create_date', 'create_user', 'auth_user',
+                   'alter_user', 'is_customer', 'is_supplier', 'alter_date', 'legacy_code',
+                   'system_prefix', 'is_lawyer', 'import_from_legacy')
+        sequence = ('selection', 'legal_name', 'name', 'legal_type',
+                    'cpf_cnpj')
+        model = Office
+        row_attrs = {
+            'data_href': lambda record: '/escritorios/' + str(record.pk) + '/'
+        }
+
+
+class InviteTable(tables.Table):
+    class Meta:
+        model = Invite
+        fields = ('person', 'person.auth_user', 'status')

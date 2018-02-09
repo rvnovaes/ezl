@@ -1,9 +1,11 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.urlresolvers import reverse_lazy
+from core.views import CustomLoginRequiredView
+from django.core.urlresolvers import reverse_lazy, reverse
+from django.contrib import messages
 
 from django.views.generic.edit import CreateView, UpdateView
 from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
                            DELETE_SUCCESS_MESSAGE)
+from core.models import Office
 from core.views import (AuditFormMixin, MultiDeleteViewMixin,
                         SingleTableViewMixin)
 from .forms import CostCenterForm, ServicePriceTableForm
@@ -11,9 +13,12 @@ from .models import CostCenter, ServicePriceTable
 from .tables import CostCenterTable, ServicePriceTableTable
 from core.views import remove_invalid_registry
 from dal import autocomplete
+from core.utils import get_office_session
+from django.http import HttpResponseRedirect
+from core.messages import record_from_wrong_office
 
 
-class CostCenterListView(LoginRequiredMixin, SingleTableViewMixin):
+class CostCenterListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = CostCenter
     table_class = CostCenterTable
     ordering = ('name', )
@@ -38,6 +43,11 @@ class CostCenterCreateView(AuditFormMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'costcenter_list'
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class CostCenterUpdateView(AuditFormMixin, UpdateView):
     model = CostCenter
@@ -47,6 +57,11 @@ class CostCenterUpdateView(AuditFormMixin, UpdateView):
     template_name_suffix = '_update_form'
     object_list_url = 'costcenter_list'
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class CostCenterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = CostCenter
@@ -55,22 +70,25 @@ class CostCenterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
         model._meta.verbose_name_plural)
     object_list_url = 'costcenter_list'
 
+    def post(self, request, *args, **kwargs):
+        ret = super().post(request, *args, **kwargs)
+        return ret
 
-class CostCenterAutocomplete(LoginRequiredMixin,
+class CostCenterAutocomplete(CustomLoginRequiredView,
                              autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = CostCenter.objects.none()
 
         if self.q:
             qs = CostCenter.objects.filter(name__unaccent__istartswith=self.q,
-                                           is_active=True)
+                                           is_active=True, office=get_office_session(self.request))
         return qs
 
 
-class ServicePriceTableListView(LoginRequiredMixin, SingleTableViewMixin):
+class ServicePriceTableListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = ServicePriceTable
     table_class = ServicePriceTableTable
-    ordering = ('correspondent', )
+    ordering = ('office', )
     paginate_by = 30
 
 
@@ -81,6 +99,11 @@ class ServicePriceTableCreateView(AuditFormMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'servicepricetable_list'
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
     model = ServicePriceTable
@@ -89,6 +112,11 @@ class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
     success_message = UPDATE_SUCCESS_MESSAGE
     template_name_suffix = '_update_form'
     object_list_url = 'servicepricetable_list'
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):

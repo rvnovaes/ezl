@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('survey', '0002_auto_20171228_1808'),
-        ('task', '0059_auto_20180117_0944'),
+        ('task', '0061_task_parent'),
     ]
 
     operations = [

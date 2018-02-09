@@ -24,9 +24,11 @@ from functools import wraps, reduce
 from sqlalchemy import text
 from connections.db_connection import connect_db, get_advwin_engine
 from core.utils import LegacySystem
+from core.models import Office
 from config.config import get_parser
 from etl.models import DashboardETL
 from django.utils import timezone
+from etl.utils import get_default_office
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -124,7 +126,7 @@ class GenericETL(object):
     advwin_table = None
     has_status = None
     advwin_model = None
-    debug_logger = logging.getLogger('debug_logger')
+    debug_logger = logging.getLogger('''''')
     error_logger = logging.getLogger('error_logger')
     timestr = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -145,17 +147,18 @@ class GenericETL(object):
         if not truncate_all_tables:
             self.model.objects.all().update(is_active=False)
 
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         raise NotImplementedError()
 
     def import_data(self):
         from django.contrib.auth import get_user_model
         User = get_user_model()
         user = User.objects.get(pk=create_alter_user)
+        default_office = get_default_office()
         dashboard_log = DashboardETL.objects.create(
             name=self.model._meta.verbose_name.upper(), status=False,
             executed_query=self.import_query, create_user=user,
-            db_name_source=db_name_source, db_host_source=db_host_source)
+            db_name_source=db_name_source, db_host_source=db_host_source, office=default_office)
         if self.has_status:
             self.deactivate_all()
 
@@ -166,13 +169,14 @@ class GenericETL(object):
                 rows = cursor.fetchall()
                 rows_count = len(rows)
                 user = User.objects.get(pk=create_alter_user)
-                self.config_import(rows, user, rows_count, log=dashboard_log)
+                self.config_import(rows, user, rows_count, default_office=default_office, log=dashboard_log)
                 dashboard_log.execution_date_finish = timezone.now()
                 dashboard_log.read_quantity = rows_count
                 dashboard_log.status = True
                 dashboard_log.save()
                 connection.close()
-            except:
+            except Exception as e:
+                print(e)
                 self.error_logger.error("Erro de conexão. Nova tentativa de conexão em 5s. Tentativa: " + str(attempt + 1))
                 time.sleep(5)
             else:

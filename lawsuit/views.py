@@ -1,7 +1,7 @@
 from urllib.parse import urlparse
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from core.views import CustomLoginRequiredView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy, reverse
 # project imports
@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
-    delete_error_protected
+    delete_error_protected, record_from_wrong_office
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin, \
     GenericFormOneToMany, AddressCreateView, AddressUpdateView, AddressDeleteView
 from task.models import Task
@@ -27,9 +27,13 @@ from core.views import remove_invalid_registry, PopupMixin
 from django.core.cache import cache
 from dal import autocomplete
 from django.db.models import Q
+from core.utils import get_office_session
+from ecm.utils import attachment_form_valid
+
+from core.views import CustomLoginRequiredView
 
 
-class InstanceListView(LoginRequiredMixin, SingleTableViewMixin):
+class InstanceListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Instance
     table_class = InstanceTable
 
@@ -43,6 +47,11 @@ class InstanceCreateView(AuditFormMixin, CreateView):
     model = Instance
     form_class = InstanceForm
     success_url = reverse_lazy('instance_list')
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class InstanceUpdateView(AuditFormMixin, UpdateView):
@@ -76,14 +85,19 @@ class InstanceUpdateView(AuditFormMixin, UpdateView):
             self.success_url = cache.get('instance_page')
         return super(InstanceUpdateView, self).post(request, *args, **kwargs)
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
-class InstanceDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
+
+class InstanceDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteViewMixin):
     model = Instance
     success_url = reverse_lazy('instance_list')
     success_message = DELETE_SUCCESS_MESSAGE.format('instâncias')
 
 
-class TypeMovementListView(LoginRequiredMixin, SingleTableViewMixin):
+class TypeMovementListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = TypeMovement
     table_class = TypeMovementTable
 
@@ -93,6 +107,11 @@ class TypeMovementCreateView(AuditFormMixin, CreateView):
     form_class = TypeMovementForm
     success_url = reverse_lazy('type_movement_list')
     success_message = CREATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class TypeMovementUpdateView(AuditFormMixin, UpdateView):
@@ -113,6 +132,11 @@ class TypeMovementUpdateView(AuditFormMixin, UpdateView):
         cache.set('type_movement_page', self.request.META.get('HTTP_REFERER'))
         return context
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
     def post(self, request, *args, **kwargs):
         """
         Sobrescreve o metodo post e verifica se existe cache da ultima url
@@ -128,13 +152,13 @@ class TypeMovementUpdateView(AuditFormMixin, UpdateView):
         return super(TypeMovementUpdateView, self).post(request, *args, **kwargs)
 
 
-class TypeMovementDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
+class TypeMovementDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
     model = TypeMovement
     success_url = reverse_lazy('type_movement_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
-class FolderListView(LoginRequiredMixin, SingleTableViewMixin):
+class FolderListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Folder
     table_class = FolderTable
 
@@ -157,12 +181,22 @@ class FolderCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('folder_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class FolderUpdateView(AuditFormMixin, UpdateView):
     model = Folder
     form_class = FolderForm
     success_url = reverse_lazy('folder_list')
     success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class FolderDeleteView(AuditFormMixin, MultiDeleteViewMixin):
@@ -171,7 +205,7 @@ class FolderDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
-class CourtDistrictListView(LoginRequiredMixin, SingleTableViewMixin):
+class CourtDistrictListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = CourtDistrict
     table_class = CourtDistrictTable
 
@@ -233,7 +267,7 @@ class CourtDistrictDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
-class CourtDivisionListView(LoginRequiredMixin, SingleTableViewMixin):
+class CourtDivisionListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = CourtDivision
     table_class = CourtDivisionTable
 
@@ -255,12 +289,22 @@ class CourtDivisionCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('courtdivision_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class CourtDivisionUpdateView(AuditFormMixin, UpdateView):
     model = CourtDivision
     form_class = CourtDivisionForm
     success_url = reverse_lazy('courtdivision_list')
     success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class CourtDivisionDeleteView(AuditFormMixin, MultiDeleteViewMixin):
@@ -269,7 +313,8 @@ class CourtDivisionDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
-class FolderLawsuitCreateView(PopupMixin, SuccessMessageMixin, GenericFormOneToMany, CreateView):
+
+class FolderLawsuitCreateView(PopupMixin, AuditFormMixin, SuccessMessageMixin, CreateView):
     model = Folder
     related_model = LawSuit
     form_class = FolderForm
@@ -283,6 +328,17 @@ class FolderLawsuitCreateView(PopupMixin, SuccessMessageMixin, GenericFormOneToM
         context["is_popup"] = self.is_popup
         RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
+
+    # TODO - verificar opção de cadastro de processos ao incluir pasta
+    # def get_context_data(self, **kwargs):
+    #     context = super(FolderLawsuitCreateView, self).get_context_data(**kwargs)
+    #     RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
+    #     return context
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
     def get_success_url(self):
         if self.is_popup:
@@ -325,12 +381,18 @@ class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateV
         :param kwargs:
         :return: super
         """
+        self.object_list = []
         if cache.get('folder_lawsuit_page'):
             self.success_url = cache.get('folder_lawsuit_page')
         return super(FolderLawsuitUpdateView, self).post(request, *args, **kwargs)
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
-class LawSuitListView(LoginRequiredMixin, SingleTableViewMixin):
+
+class LawSuitListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = LawSuit
     table_class = LawSuitTable
 
@@ -375,14 +437,12 @@ class LawSuitDeleteView(AuditFormMixin, DeleteView):
                     kwargs={'pk': parent_class}))
 
 
-class LawsuitMovementCreateView(PopupMixin, SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
-                                CreateView):
+class LawsuitMovementCreateView(PopupMixin, AuditFormMixin, SuccessMessageMixin, GenericFormOneToMany, CreateView):
     model = LawSuit
     related_model = Movement
     form_class = LawSuitForm
     table_class = MovementTable
     template_name = 'lawsuit/lawsuit_movement_form.html'
-    # success_url = reverse_lazy('lawsuit_list')
     success_message = CREATE_SUCCESS_MESSAGE
     object_list = []
 
@@ -407,8 +467,13 @@ class LawsuitMovementCreateView(PopupMixin, SuccessMessageMixin, LoginRequiredMi
             self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
             super().get_success_url()
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
-class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
+
+class LawsuitMovementUpdateView(SuccessMessageMixin, CustomLoginRequiredView, GenericFormOneToMany,
                                 UpdateView):
     model = LawSuit
     related_model = Movement
@@ -438,8 +503,13 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, LoginRequiredMixin, Generic
             self.success_url = cache.get('lawsuit_movement_page')
         return super(LawsuitMovementUpdateView, self).post(request, *args, **kwargs)
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
-class MovementListView(LoginRequiredMixin, SingleTableViewMixin):
+
+class MovementListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Movement
     table_class = MovementTable
 
@@ -506,7 +576,7 @@ class MovementDeleteView(AuditFormMixin, MultiDeleteViewMixin):
         return super(MovementDeleteView, self).post(request, *args, **kwargs)
 
 
-class MovementTaskCreateView(PopupMixin, SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
+class MovementTaskCreateView(PopupMixin, SuccessMessageMixin, CustomLoginRequiredView, GenericFormOneToMany,
                              CreateView):
     model = Movement
     related_model = Task
@@ -538,8 +608,13 @@ class MovementTaskCreateView(PopupMixin, SuccessMessageMixin, LoginRequiredMixin
                                        kwargs={'folder': self.kwargs['folder'],
                                                'pk': self.kwargs['lawsuit']})
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
-class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFormOneToMany,
+
+class MovementTaskUpdateView(SuccessMessageMixin, CustomLoginRequiredView, GenericFormOneToMany,
                              UpdateView):
     model = Movement
     related_model = Task
@@ -558,6 +633,11 @@ class MovementTaskUpdateView(SuccessMessageMixin, LoginRequiredMixin, GenericFor
                                    kwargs={'folder': self.kwargs['folder'],
                                            'pk': self.kwargs['lawsuit']})
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class OrganCreateView(AuditFormMixin, CreateView):
     """
@@ -568,6 +648,11 @@ class OrganCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('organ_list')
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'organ_list'
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class OrganUpdateView(AuditFormMixin, UpdateView):
@@ -587,8 +672,13 @@ class OrganUpdateView(AuditFormMixin, UpdateView):
         })
         return super().get_context_data(**kwargs)
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
-class OrganDeleteView(LoginRequiredMixin, MultiDeleteViewMixin):
+
+class OrganDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
     """
     Classe responsavel por forncer a regra de exclusao dos Orgaos
     """
@@ -612,7 +702,7 @@ class OrganAutocompleteView(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated():
             return Organ.objects.none()
 
-        qs = Organ.objects.all()
+        qs = Organ.objects.filter(office=get_office_session(self.request), is_active=True)
         continent = self.forwarded.get('continent', None)
 
         if continent:
@@ -624,7 +714,7 @@ class OrganAutocompleteView(autocomplete.Select2QuerySetView):
             for arg in args_filter:
                 q_objects &= Q(legal_name__unaccent__icontains=arg) | Q(
                     court_district__name__icontains=arg)
-            qs = qs.filter(q_objects)
+            qs = qs.filter(q_objects, office=get_office_session(self.request), is_active=True)
 
         return qs
 

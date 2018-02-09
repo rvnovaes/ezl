@@ -1,13 +1,12 @@
 import django_tables2 as tables
 from core.tables import CheckBoxMaterial
-from .models import TypeTask, DashboardViewModel
+from .models import TypeTask, DashboardViewModel, Filter
 
 
 class TaskTable(tables.Table):
 
     def __init__(self, *args, _overriden_value="Estado", **kwargs):
         super().__init__(*args, **kwargs)
-
         self.base_columns['status'].verbose_name = _overriden_value
         self.length = self.rows.__len__()
 
@@ -50,7 +49,7 @@ class DashboardStatusTable(tables.Table):
         self.base_columns['lawsuit_number'].verbose_name = lawsuit_number
         self.base_columns['type_service'].verbose_name = type_service
         self.base_columns['opposing_party'].verbose_name = opposing_party
-        self.base_columns['task_number'].verbose_name = 'Número da OS'
+        self.base_columns['task_number'].verbose_name = 'Nº da OS'
         self.title = title
         self.status = status
 
@@ -81,3 +80,17 @@ class TypeTaskTable(tables.Table):
         row_attrs = {
             'data_href': lambda record: '/providencias/tipo_servico/' + str(record.pk) + '/'
         }
+
+
+class FilterTable(tables.Table):
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
+
+    class Meta:
+        sequence = ('selection', 'create_user', 'name', 'description')
+        model = Filter
+        fields = ['selection', 'create_user', 'name', 'description']
+        empty_text = "Não existem filtros cadastrados"
+        row_attrs = {
+            'data_href': lambda record: '/providencias/filtros/' + str(record.pk) + '/'
+        }
+        order_by = ('create_user', 'name',)

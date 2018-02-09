@@ -1,77 +1,40 @@
-{% extends 'inicial.html' %}
-{% load core_filters %}
-{% load staticfiles %}
-{% block content %}
-    {% include 'core/widgets/messages.html' %}
-    <div>
-        {#            {% if form.title == 'Pasta' %}#}
-        <form action="" method="post">
-            {% csrf_token %}
-            <div class="panel panel-primary">
+{% extends 'skeleton/forms/base.html' %}
 
-                <div class="panel-heading ">
-                    <div class="panel-title form-row"><i class="material-icons">folder</i>
-                        <b>{{ form.title }}</b>
-                    </div>
-                </div>
-                <br/>
-                <div class="panel-body form-group">
-                    <div class="row">
-                        {% for field in form %}
-                            <div class="form-group col-sm-4">
-                                {% if  field.field.widget.input_type != 'hidden'%}
-                                    <label>
-                                        {{ field | append_ast_if_req | label_capitalizer}}{{ field }}
-                                    </label>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <div class="">
-                        <br>
-                        <div class="form-group  text-center">
-                            {% if is_popup %}
-                                <a class="btn btn-sm btn-raised btn-default"
-                                   href="javascript: window.close();">
-                                    <i class="material-icons left">clear</i>
-                                    Cancelar
-                                </a>
-                            {% else %}
-                                {% if param1 and param2 %}
-                                    <a class="btn btn-sm btn-raised btn-default"
-                                       href="{% url previous_page param1 param2 %}">
-                                        <i class="material-icons left">clear</i>
-                                        Cancelar
-                                    </a>
-                                {% elif param1 %}
-                                    <a class="btn btn-sm btn-raised btn-default"
-                                       href="{% url previous_page param1 %}">
-                                        <i class="material-icons left">clear</i>
-                                        Cancelar
-                                    </a>
-                                {% else %}
-                                    <a class="btn btn-sm btn-raised btn-default"
-                                       href="{% url previous_page %}">
-                                        <i class="material-icons left">clear</i>
-                                        Cancelar
-                                    </a>
-                                {% endif %}
-                            {% endif %}
-                            <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
-                                    class="material-icons left">done</i>
-                                Salvar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {{ form.media }}
-            <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
-
-        </form>
-        {% if not is_popup %}
-            {% include 'core/widgets/generic_search_view.html' %}
-            {% include 'core/widgets/generic_form.html' with link_ex=delete link_add=create %}
-        {% endif %}
+{% block extra_content %}
+    {% if object %}
+    <div class="col-sm-12">
+        {% include 'core/widgets/generic_search_view.html' %}
     </div>
+    <div class="col-sm-12">
+        {% include 'core/widgets/generic_form.html' with link_ex=delete link_add=create %}
+    </div>
+    {% endif %}
+{% endblock %}
+{% block button_cancel %}
+    {% if is_popup %}
+        <button class="btn btn-danger waves-effect waves-light" type="button"
+                    onclick="javascript:window.close()">
+            <span class="btn-label"><i class="fa fa-close"></i></span>Cancelar
+            </button>
+    {% else %}
+        {% if param1 and param2 %}
+            {% url previous_page param1 param2 as link %}
+            <button class="btn btn-danger waves-effect waves-light" type="button"
+                    onclick="javascript:window.open('{{ link }}', '_self')">
+            <span class="btn-label"><i class="fa fa-close"></i></span>Cancelar
+            </button>
+        {% elif param1 %}
+            {% url previous_page param1 as link %}
+            <button class="btn btn-danger waves-effect waves-light" type="button"
+                    onclick="javascript:window.open('{{ link }}', '_self')">
+            <span class="btn-label"><i class="fa fa-close"></i></span>Cancelar
+            </button>
+        {% else %}
+            {% url previous_page as link %}
+            <button class="btn btn-danger waves-effect waves-light" type="button"
+                    onclick="javascript:window.open('{{ link }}', '_self')">
+            <span class="btn-label"><i class="fa fa-close"></i></span>Cancelar
+            </button>
+        {% endif %}
+    {% endif %}
 {% endblock %}

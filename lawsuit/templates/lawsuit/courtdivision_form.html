@@ -1,36 +1,5 @@
-{% extends 'inicial.html' %}
-{% load core_filters %}
+{% extends 'skeleton/forms/base.html' %}
 
-{% block content %}
-    {% include 'core/widgets/messages.html' %}
-
-    <form action="" method="post">{% csrf_token %}
-        <div class="col-lg-12 ">
-            <fieldset>
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h1 class="panel-title">{{ form.title }}</h1>
-                    </div>
-                    <div class="panel-body">
-                        {% for field in form %}
-                            <div class="form-group col-sm-6">
-                                <label>
-                                    {{ field | append_ast_if_req  | label_capitalizer }}{{ field }}
-                                </label>
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <div class="form-row  text-center">
-                        {% include 'core/widgets/cancel_button.html' with link_list='courtdivision_list' %}
-                        <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
-                                class="material-icons left">done</i>
-                            Salvar
-                        </button>
-                    </div>
-                </div>
-            </fieldset>
-        </div>
-
-    </form>
-
-{% endblock content %}
+{% block button_cancel %}
+    {% include 'core/widgets/cancel_button.html'  with link_list='courtdivision_list' %}
+{% endblock %}

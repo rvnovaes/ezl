@@ -64,6 +64,9 @@ services:
       - letsencrypt-etc:/etc/letsencrypt
 
   tasks:
+    environment:
+      ENV: production
+      PYTHONPATH: /app
     depends_on:
       - builder
       - db

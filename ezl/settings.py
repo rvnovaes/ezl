@@ -112,6 +112,7 @@ INSTALLED_APPS = [
     'sequences.apps.SequencesConfig',
     'channels',
     'chat',
+    'ecm'
 ]
 
 MIDDLEWARE = [
@@ -131,9 +132,12 @@ SITE_ID = 1
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'),
-                 os.path.join(BASE_DIR, 'core/templates'),
-                 os.path.join(BASE_DIR, 'core/templates/core/http_errors')],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'core/templates'),
+            os.path.join(BASE_DIR, 'core/templates/core/http_errors'),
+            os.path.join(BASE_DIR, 'ecm/templates')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -234,7 +238,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
+LOGIN_REDIRECT_URL = reverse_lazy('inicial')
 
 AUTHENTICATION_BACKENDS = (
 
@@ -365,3 +369,5 @@ LOGGING = {
         },
     }
 }
+
+UPLOAD_DIRECTORY = 'uploads'

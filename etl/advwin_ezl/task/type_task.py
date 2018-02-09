@@ -32,7 +32,7 @@ class TypeTaskETL(GenericETL):
     has_status = True
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         for row in rows:
 
             try:
@@ -41,7 +41,7 @@ class TypeTaskETL(GenericETL):
                 survey_key = row['formulario_id']
                 survey_id = survey_map[survey_key]
 
-                survey = Survey.objects.filter(id=survey_id)
+                survey = Survey.objects.filter(id=survey_id).first()
 
                 # tem que verificar se é novo antes para não salvar o create_user ao fazer update
                 instance = self.model.objects.filter(legacy_code=code,
@@ -51,9 +51,10 @@ class TypeTaskETL(GenericETL):
                     instance.survey = survey
                     instance.alter_user = user
                     instance.is_active = True
+                    instance.office = default_office
                     instance.legacy_code = code
-                    instance.save(update_fields=['is_active', 'name', 'alter_user', 'alter_date', 'survey',
-                                                 'legacy_code'])
+                    instance.save(update_fields=['is_active', 'name', 'alter_user', 'alter_date', 'survey'
+                                                 'office', 'legacy_code'])
                 else:
                     self.model.objects.create(name=name,
                                               is_active=True,
@@ -61,7 +62,8 @@ class TypeTaskETL(GenericETL):
                                               survey=survey,
                                               system_prefix=LegacySystem.ADVWIN.value,
                                               create_user=user,
-                                              alter_user=user)
+                                              alter_user=user,
+                                              office=default_office)
 
                 self.debug_logger.debug(
                     "Type Task,%s,%s,%s,%s,%s,%s,%s,%s" % (str(name), str(True), str(code), str(survey_id),

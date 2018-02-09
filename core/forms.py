@@ -9,7 +9,7 @@ from django.forms import CheckboxInput, formset_factory
 from django.forms.models import inlineformset_factory
 from django.utils.translation import ugettext_lazy as _
 from django.urls.base import reverse
-
+from django.core.exceptions import FieldDoesNotExist
 from dal import autocomplete
 from localflavor.br.forms import BRCPFField, BRCNPJField
 from material import Layout, Row
@@ -19,16 +19,67 @@ from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, 
 from allauth.utils import build_absolute_uri
 
 from core.fields import CustomBooleanField
-from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType
-from core.utils import filter_valid_choice_form
+from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType, Office, Invite
+from core.utils import filter_valid_choice_form, get_office_field, get_office_session
 from core.widgets import MDModelSelect2
-from lawsuit.forms import BaseForm
+from core.widgets import TypeaHeadForeignKeyWidget
+from core.models import OfficeMixin
 
 
 class BaseModelForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        if self.request:
+            self.set_office_queryset()
 
     def get_model_verbose_name(self):
         return self._meta.model._meta.verbose_name
+
+    def set_office_queryset(self):
+        if get_office_session(self.request) and self.request.method == 'GET':
+            for field in self.fields:
+                if hasattr(self.fields[field], 'queryset'):
+                    if issubclass(self.fields[field].queryset.model, OfficeMixin):
+                        try:
+                            self.fields[field].queryset = self.fields[field].queryset.filter(
+                                office=get_office_session(request=self.request))
+                        except:
+                            pass
+                    if hasattr(self.fields[field].queryset.model, 'offices'):
+                        try:
+                            self.fields[field].queryset = self.fields[field].queryset.filter(
+                                offices=get_office_session(self.request)
+                            )
+                        except:
+                            pass
+
+
+class BaseForm(BaseModelForm):
+    """
+    Cria uma Form referência e adiciona o mesmo style a todos os widgets
+    """
+    is_active = CustomBooleanField(
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title = self._meta.model._meta.verbose_name
+        for field_name, field in self.fields.items():
+            try:
+                if field.widget.input_type != 'checkbox':
+                    field.widget.attrs['class'] = 'form-control'
+                if field.widget.input_type == 'text':
+                    field.widget.attrs['style'] = 'width: 100%; display: table-cell; '
+                # Preenche o o label de cada field do form de acordo com o verbose_name preenchido no modelo
+                try:
+                    field.label = (self._meta.model._meta.get_field(field_name).verbose_name
+                                   if not field.label else field.label)
+                except FieldDoesNotExist:
+                    pass
+            except AttributeError:
+                pass
 
 
 class ContactForm(ModelForm):
@@ -312,6 +363,11 @@ class UserUpdateForm(UserChangeForm):
         fields = ['first_name', 'last_name', 'username', 'email', 'password',
                   'groups', 'is_active']
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request, profile=kwargs['instance'])
+
 
 class ResetPasswordFormMixin(forms.Form):
     username = forms.CharField(
@@ -367,3 +423,56 @@ class ResetPasswordFormMixin(forms.Form):
                 context)
             self.context = context
         return self.context
+
+from core.widgets import TypeaHeadWidget
+
+
+class OfficeForm(BaseModelForm):
+
+    class Meta:
+        model = Office
+        fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_active']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        document_type = cleaned_data.get('legal_type')
+        document = cleaned_data.get('cpf_cnpj')
+        if document_type == 'F' and document:
+            try:
+                BRCPFField().clean(document)
+            except forms.ValidationError as exc:
+                self._errors['cpf_cnpj'] = \
+                    self.error_class(exc.messages)
+                del cleaned_data['cpf_cnpj']
+        elif document_type == 'J' and document:
+            try:
+                BRCNPJField().clean(document)
+            except forms.ValidationError as exc:
+                self._errors['cpf_cnpj'] = \
+                    self.error_class(exc.messages)
+                del cleaned_data['cpf_cnpj']
+        return cleaned_data
+
+
+class AddressOfficeForm(AddressForm):
+    class Meta:
+        model = Address
+        fields = ['zip_code', 'city_region', 'address_type', 'state', 'city', 'street', 'number',
+                  'notes', 'is_active']
+
+
+AddressOfficeFormSet = inlineformset_factory(Office, Address, form=AddressOfficeForm, extra=1,
+                                             max_num=1)
+
+
+class InviteForm(forms.ModelForm):
+    person = forms.CharField(widget=TypeaHeadForeignKeyWidget(model=Person,
+                                                              field_related='legal_name', name='person'))
+
+    class Meta:
+        model = Invite
+        fields = ['office', 'person']
+        exclude = ['is_active']
+
+
+InviteOfficeFormSet = inlineformset_factory(Office, Invite, form=InviteForm, extra=1, max_num=1)

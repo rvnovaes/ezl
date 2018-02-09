@@ -4,13 +4,17 @@
 {% load bootstrap3 %}
 {% load core_filters %}
 {% block search %}
-    <div class="panel panel-primary">
-        <div class="panel-heading " data-toggle="collapse" data-target="#filterCollapse">
-            <h3 class="panel-title"><i class="material-icons">filter_list</i> Filtrar {{ form_name_plural  | lower  }}</h3>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <a href="#" data-perform="panel-collapse"><i class="ti-filter"></i> Filtrar {{ form_name_plural|capfirst  }}</a>
+            <div class="panel-action">
+                <a href="#" data-perform="panel-collapse"><i class="ti-plus"></i></a>
+            </div>
         </div>
-        <form>
-            <input type="hidden" name="generic_search" value="true">
-            <div id="filterCollapse" class="panel-body panel-collapse collapse">
+        <div class="panel-wrapper collapse" aria-expanded="true">
+            <form>
+            <div class="panel-body">
+                <input type="hidden" name="generic_search" value="true">
                 <fieldset>
                     {# Bloco para campos textos#}
                     <div class="row">
@@ -85,11 +89,16 @@
                                 <div class="form-group">
                                     <label for="{{ search_field.name }}_ini">{{ search_field.verbose_name |label_capitalizer }}</label>
                                     <div class='input-group date' id='{{ search_field.name }}_ini'>
-                                        <input type='text' class="form-control" name="{{ search_field.name }}_ini"
-                                               placeholder="Data inicial"
-                                               value="{{ view.request.GET | get_item_data_ini:search_field.name }}"/>
-                                        <span class="input-group-addon">
-                                            <span class="material-icons event" style="color: #009688">event</span>
+                                        <input type="text" class="form-control datepicker-autoclose"
+                                               name="{{ search_field.name }}_ini" placeholder="Data inicial"
+                                               value="{{ view.request.GET | get_item_data_ini:search_field.name }}">
+                                        <span class="input-group-addon"><i class="icon-calender"></i></span>
+
+{#                                            <input type='text' class="form-control" name="{{ search_field.name }}_ini"#}
+{#                                                   placeholder="Data inicial"#}
+{#                                                   value="{{ view.request.GET | get_item_data_ini:search_field.name }}"/>#}
+{#                                            <span class="input-group-addon">#}
+{#                                                <span class="material-icons event" style="color: #009688">event</span>#}
                                         </span>
                                     </div>
                                 </div>
@@ -98,27 +107,19 @@
                                 <div class="form-group">
                                     <label for="{{ search_field.name }}_ini">&nbsp;</label>
                                     <div class='input-group date' id='{{ search_field.name }}_fim'>
-                                        <input type='text' class="form-control" name="{{ search_field.name }}_fim"
-                                               placeholder="Data final"
-                                               value="{{ view.request.GET | get_item_data_fim:search_field.name }}"/>
-                                        <span class="input-group-addon">
-                                            <span class="material-icons event" style="color: #009688">event</span>
-                                        </span>
+                                        <input type="text" class="form-control datepicker-autoclose"
+                                               name="{{ search_field.name }}_ini" placeholder="Data final"
+                                               value="{{ view.request.GET | get_item_data_fim:search_field.name }}">
+                                        <span class="input-group-addon"><i class="icon-calender"></i></span>
+{#                                            <input type='text' class="form-control" name="{{ search_field.name }}_fim"#}
+{#                                                   placeholder="Data final"#}
+{#                                                   value="{{ view.request.GET | get_item_data_fim:search_field.name }}"/>#}
+{#                                            <span class="input-group-addon">#}
+{#                                                <span class="material-icons event" style="color: #009688">event</span>#}
+{#                                            </span>#}
                                     </div>
                                 </div>
                             </div>
-                            <script type="text/javascript">
-                                $(function () {
-                                    $({{ search_field.name }}_ini).datetimepicker({
-                                        defaultDate: "",
-                                        format: 'DD/MM/YYYY'
-                                    });
-                                    $({{ search_field.name }}_fim).datetimepicker({
-                                        defaultDate: "",
-                                        format: 'DD/MM/YYYY'
-                                    });
-                                });
-                            </script>
                         {% endfor %}
                     </div>
                     <div class="row">
@@ -167,16 +168,17 @@
                         {% endfor %}
                     </div>
                 </fieldset>
-                <div class="footer text-right">
-                    <button type="submit" class="btn btn-sm btn-primary btn-raised">
-                        <i class="material-icons">search</i>Filtrar
-                    </button>
-                    <a href="{{ request.META.PATH_INFO }}" class="btn btn-sm btn-primary btn-raised">
-                        <i class="material-icons">clear</i>Limpar
-                    </a>
-                </div>
             </div>
-        </form>
+            <div class="panel-footer">
+                <button class="btn btn-success waves-effect waves-light" type="submit">
+                    <span class="btn-label"><i class="fa fa-filter"></i></span>Filtar
+                </button>
+                <button class="btn btn-info waves-effect waves-light" type="button"
+                        onclick="javascript:window.open('{{ request.META.PATH_INFO }}', '_self')">
+                    <span class="btn-label"><i class="fa fa-trash-o"></i></span>Limpar
+                </button>
+            </div>
+            </form>
+        </div>
     </div>
-    <script src="{% static "js/autocomplete.js" %}"></script>
 {% endblock %}

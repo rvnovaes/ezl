@@ -1,6 +1,6 @@
 from django.views.generic import ListView
-from chat.models import Chat, UnreadMessage
-from django.contrib.auth.mixins import LoginRequiredMixin
+from chat.models import Chat, UnreadMessage, Message
+from core.views import CustomLoginRequiredView
 from django.http import JsonResponse
 from django.views.generic import View
 from django.db.models import Count
@@ -20,20 +20,22 @@ class ChatListView(ListView):
         return context
 
 
-class ChatCountMessages(LoginRequiredMixin, View):
+class ChatCountMessages(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
-        return JsonResponse(
+        data = JsonResponse(
             {'all_messages': UnreadMessage.objects.filter(
                 user_by_message__user_by_chat=self.request.user).count(),
              'grouped_messages': list(UnreadMessage.objects.filter(
                  user_by_message__user_by_chat=self.request.user).values(
-                 'message__chat__pk').annotate(
+                 'message__chat__pk', 'message__chat__title').annotate(
                  quantity=Count('id')).order_by())
              }
         )
+        print('CHAT MSG', data.content)
+        return data
 
 
-class ChatReadMessages(LoginRequiredMixin, View):
+class ChatReadMessages(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):
         chat_id = request.POST.get('chat_id')
         chat = Chat.objects.filter(pk=int(chat_id)).first()
@@ -41,3 +43,32 @@ class ChatReadMessages(LoginRequiredMixin, View):
             UnreadMessage.objects.filter(user_by_message__user_by_chat=self.request.user,
                                          message__chat=chat).delete()
         return JsonResponse({'status': 'ok'})
+
+
+class ChatGetMessages(CustomLoginRequiredView, View):
+    def post(self, request, *args, **kwargs):
+        chat_id = request.POST.get('chat_id')
+        qry_message = Message.objects.filter(
+            chat_id=chat_id
+        )
+        qry_chat = Chat.objects.get(
+            id=chat_id
+        )
+        messages = map(
+            lambda x: {
+                'text': x.message,
+                'message_create_date': x.create_date.strftime("%d/%m/%Y às %H:%M:%S"),
+                'user': x.create_user.username
+                },
+            qry_message
+        )
+        data = {
+            'messages': list(messages),
+            'chat': {
+                'pk': qry_chat.pk,
+                'description': qry_chat.description,
+                'back_url': qry_chat.back_url,
+                'title': qry_chat.title
+            }
+        }
+        return JsonResponse(data)
