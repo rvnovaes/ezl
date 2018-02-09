@@ -1,4 +1,6 @@
-
+.panel-heading a {
+    color: #263238;
+}
 .btn-success, .btn-success.disabled {
     background: #52BE80 !important;
     border: 1px solid #52BE80 !important;

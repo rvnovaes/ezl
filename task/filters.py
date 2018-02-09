@@ -99,7 +99,7 @@ class TaskFilter(FilterSet):
     finished_in = MDDateTimeRangeFilter(name='finished_in', label="Finalizadas entre:")
 
     custom_filter = ModelChoiceFilter(queryset=filter_valid_choice_form(Filter.objects.all()),
-                                      label=" / Escolher filtro salvo",
+                                      label="Escolher filtro salvo",
                                       required=False,
                                       widget=Select(attrs={'onchange': 'this.form.submit()'}))
     custom_filter_name = CharFilter(label=u"Nome do Filtro", required=False)
