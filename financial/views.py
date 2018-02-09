@@ -81,7 +81,7 @@ class CostCenterAutocomplete(CustomLoginRequiredView,
 
         if self.q:
             qs = CostCenter.objects.filter(name__unaccent__istartswith=self.q,
-                                           is_active=True, office=get_office_session(request))
+                                           is_active=True, office=get_office_session(self.request))
         return qs
 
 

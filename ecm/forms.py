@@ -125,7 +125,6 @@ class DefaultAttachmentRuleForm(BaseModelForm):
         return cleaned_data
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 

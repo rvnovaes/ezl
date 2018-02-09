@@ -672,7 +672,7 @@ class OrganAutocompleteView(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated():
             return Organ.objects.none()
 
-        qs = Organ.objects.all()
+        qs = Organ.objects.filter(office=get_office_session(self.request), is_active=True)
         continent = self.forwarded.get('continent', None)
 
         if continent:
@@ -684,7 +684,7 @@ class OrganAutocompleteView(autocomplete.Select2QuerySetView):
             for arg in args_filter:
                 q_objects &= Q(legal_name__unaccent__icontains=arg) | Q(
                     court_district__name__icontains=arg)
-            qs = qs.filter(q_objects)
+            qs = qs.filter(q_objects, office=get_office_session(self.request), is_active=True)
 
         return qs
 

@@ -1,5 +1,4 @@
 from django import forms
-from django.core.exceptions import FieldDoesNotExist
 from django.forms import ModelForm
 from core.fields import CustomBooleanField
 from core.models import Person, State, Address, Office
@@ -7,45 +6,13 @@ from financial.models import CostCenter
 from core.widgets import MDModelSelect2
 from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict,
                      LawSuit, CourtDivision, Organ)
-from core.utils import filter_valid_choice_form, get_office_field
+from core.utils import filter_valid_choice_form, get_office_field, get_office_session
 from dal import autocomplete
 from localflavor.br.forms import BRCNPJField
 from material import Layout, Row
 from django.forms.models import inlineformset_factory
 from core.widgets import TypeaHeadForeignKeyWidget
-
-
-class BaseModelForm(forms.ModelForm):
-    def get_model_verbose_name(self):
-        return self._meta.model._meta.verbose_name
-
-
-# TODO: Por ser uma implementacao base que esta sendo utilizada por outros apps, talvez compensa levar esta implementacao para o app core.
-class BaseForm(ModelForm):
-    """
-    Cria uma Form referência e adiciona o mesmo style a todos os widgets
-    """
-    is_active = CustomBooleanField(
-        required=False,
-    )
-
-    def __init__(self, *args, **kwargs):
-        super(BaseForm, self).__init__(*args, **kwargs)
-        self.title = self._meta.model._meta.verbose_name
-        for field_name, field in self.fields.items():
-            try:
-                if field.widget.input_type != 'checkbox':
-                    field.widget.attrs['class'] = 'form-control'
-                if field.widget.input_type == 'text':
-                    field.widget.attrs['style'] = 'width: 100%; display: table-cell; '
-                # Preenche o o label de cada field do form de acordo com o verbose_name preenchido no modelo
-                try:
-                    field.label = (self._meta.model._meta.get_field(field_name).verbose_name
-                                   if not field.label else field.label)
-                except FieldDoesNotExist:
-                    pass
-            except AttributeError:
-                pass
+from core.forms import BaseForm, BaseModelForm
 
 
 class TypeMovementForm(BaseForm):
@@ -60,7 +27,6 @@ class TypeMovementForm(BaseForm):
     )
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 
@@ -77,7 +43,6 @@ class InstanceForm(BaseForm):
     )
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 
@@ -94,7 +59,6 @@ class MovementForm(BaseForm):
     )
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 
@@ -122,7 +86,6 @@ class FolderForm(BaseForm):
     )
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super(FolderForm, self).__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
         self.order_fields(['office', 'folder_number', 'person_customer', 'is_active'])
@@ -134,14 +97,14 @@ class FolderForm(BaseForm):
 
 class LawSuitForm(BaseForm):
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super(LawSuitForm, self).__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 
         def get_option(o):
             return '{}/{}'.format(o.court_district.name, o.legal_name)
 
-        choices = [(organ.pk, get_option(organ)) for organ in Organ.objects.all()]
+        choices = [(organ.pk, get_option(organ)) for organ in
+                   Organ.objects.filter(office=get_office_session(self.request))]
         self.fields['organ'].choices = choices
 
     class Meta:
@@ -186,8 +149,11 @@ class LawSuitForm(BaseForm):
         res['court_district'] = None
         if res.get('organ'):
             res['court_district'] = res.get('organ').court_district
+        elif self.data.get('organ'):
+            res['organ'] = Organ.objects.filter(pk=self.data.get('organ')).first()
+            if res['organ']:
+                res['court_district'] = res['organ'].court_district
         return res
-
 
 class CourtDivisionForm(BaseForm):
     class Meta:
@@ -195,7 +161,6 @@ class CourtDivisionForm(BaseForm):
         fields = ['office', 'name', 'is_active']
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 
@@ -213,7 +178,6 @@ class CourtDistrictForm(BaseForm):
 
 class OrganForm(BaseModelForm):
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super(OrganForm, self).__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
         for field_name, field in self.fields.items():

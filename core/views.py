@@ -240,6 +240,11 @@ class AuditFormMixin(CustomLoginRequiredView, SuccessMessageMixin):
 
     object_list_url = None
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
     def get_context_data(self, **kwargs):
         kwargs.update({'form_attachment': AttachmentForm})
         return super().get_context_data(object_list_url=self.get_object_list_url(), **kwargs)
@@ -857,7 +862,6 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         self.form_class.declared_fields['password'].disabled = True
         self.form_class.declared_fields['username'].disabled = True
         return self.initial.copy()
-
 
     def form_valid(self, form):
         form.save()

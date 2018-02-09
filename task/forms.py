@@ -9,7 +9,7 @@ from django_file_form.forms import FileFormMixin, MultipleUploadedFileField
 from core.models import Person
 from core.utils import filter_valid_choice_form, get_office_field
 from core.widgets import MDDateTimepicker, MDDatePicker
-from lawsuit.forms import BaseForm
+from core.forms import BaseForm
 from task.models import Task, TypeTask, Filter
 
 
@@ -103,7 +103,6 @@ class TaskForm(BaseForm):
                                              'id': 'details_id'}))
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 
@@ -179,7 +178,6 @@ class TypeTaskForm(BaseForm):
         fields = ['office', 'name', 'survey', 'is_active']
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 

@@ -8,11 +8,7 @@ from lawsuit.models import CourtDistrict
 from task.models import TypeTask
 from .models import CostCenter, ServicePriceTable
 from decimal import Decimal
-
-
-class BaseModelForm(forms.ModelForm):
-    def get_model_verbose_name(self):
-        return self._meta.model._meta.verbose_name
+from core.forms import BaseModelForm
 
 
 class CostCenterForm(BaseModelForm):
@@ -31,7 +27,6 @@ class CostCenterForm(BaseModelForm):
         fields = ['office', 'name', 'legacy_code', 'is_active']
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 
@@ -129,7 +124,6 @@ class ServicePriceTableForm(BaseModelForm):
         return cleaned_data
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
         self.fields['office_correspondent'] = get_office_field(self.request, profile=self.request.user)
