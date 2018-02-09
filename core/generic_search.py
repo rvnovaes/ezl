@@ -127,7 +127,7 @@ class GenericSearch(object):
         pass
 
     def dict_to_filter(self, param, value):
-        return "Q({}__unaccent__icontains='{}')".format(param, value)
+        return "Q({}__icontains='{}')".format(param, value)
 
 
 class GenericSearchString(GenericSearch):
