@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import AuditCreate, LegacyCode, Audit, OfficeMixin
+from core.models import AuditCreate, LegacyCode, Audit, OfficeMixin, OfficeManager
 from task.models import TypeTask
 import os
 
@@ -60,6 +60,8 @@ class DefaultAttachmentRule (Audit, OfficeMixin):
                               verbose_name="Estado")
     city = models.ForeignKey('core.City', on_delete=models.PROTECT, blank=True, null=True,
                               verbose_name="Cidade")
+
+    objects = OfficeManager()
 
     class Meta:
         ordering = ['-id']
