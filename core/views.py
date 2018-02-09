@@ -940,9 +940,9 @@ class OfficeListView(CustomLoginRequiredView, SingleTableViewMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        table = self.table_class(self.request.user.person.offices.all())
-        context['table'] = table
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        context['table'] = self.table_class(
+            context['table'].data.data.filter(pk__in=self.request.user.person.offices.all()))
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
 
 
