@@ -13,9 +13,6 @@
 {% endblock %}
 {% block content %}
     <link href="{% static 'skeleton/css/step-bar.css' %}" rel="stylesheet">
-    <div class="white-box m-b-0 text-center">
-        {% include 'task/includes/task-detail-status-buttons.html' %}
-    </div>
     {% include 'task/task_to_assign.html' with task=task %}
     <form id="task_detail" action="" method="post">{% csrf_token %}
         {% include 'questionnaire/generic_survey.html' with generic_survey=form.instance.type_task.survey_type %}

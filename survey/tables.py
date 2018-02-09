@@ -10,7 +10,7 @@ class SurveyTable(tables.Table):
         model = Survey
         fields = ['name']
         attrs = {"class": "table stable-striped table-bordered"}
-        empty_text = "Não existem pesquisas cadastradas"
+        empty_text = "Não existem questionários cadastrados"
         row_attrs = {
             'data_href': lambda record: '/pesquisa/pesquisas/' + str(record.pk) + '/'
         }

@@ -88,10 +88,10 @@
         </a>
         <ul class="nav nav-second-level">
             {% if perms.core.can_edit_surveys %}
-                <li> <!-- PESQUISAS -->
+                <li> <!-- QUESTIONARIOS -->
                     <a href="{% url 'survey_list' %}" target="_self">
-                        <i class="fa fa-search fa-fw"></i>
-                        <span class="hide-menu">Pesquisas</span>
+                        <i class="fa fa-check-square-o fa-fw"></i>
+                        <span class="hide-menu">Questionários</span>
                     </a>
                 </li>
             {% endif %}

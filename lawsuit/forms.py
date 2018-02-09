@@ -127,7 +127,7 @@ class LawSuitForm(BaseForm):
         widget=autocomplete.ListSelect2(url='organ_autocomplete',
                                         attrs={
                                             'class': 'select-with-search',
-                                            'data-placeholder': 'Comarca/Tribunal'
+                                            'data-placeholder': 'Comarca/Órgão'
                                         }))
 
     instance = forms.ModelChoiceField(

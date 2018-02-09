@@ -153,7 +153,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
     court_district = models.ForeignKey(CourtDistrict, on_delete=models.PROTECT, blank=False, null=False,
                                        verbose_name='Comarca', related_name='court_districts')
     organ = models.ForeignKey(Organ, on_delete=models.PROTECT, blank=False, null=True,
-                              related_name='organs', verbose_name=u'Tribunal')
+                              related_name='organs', verbose_name=u'Órgão')
     court_division = models.ForeignKey(CourtDivision, on_delete=models.PROTECT, blank=False, null=False,
                                        verbose_name='Vara', related_name='court_divisions')
     law_suit_number = models.CharField(max_length=255, blank=False, null=False,

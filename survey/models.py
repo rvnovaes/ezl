@@ -42,4 +42,4 @@ class Survey(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = 'Pesquisa'
+        verbose_name = 'Questionário'

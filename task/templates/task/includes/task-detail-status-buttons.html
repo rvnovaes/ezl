@@ -1,55 +1,55 @@
 {% if perms.core.can_distribute_tasks %}
-    <button id="ACCEPTED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-sm btn-ezl-accepted_service {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
-        <span class="btn-label"><i class="mdi mdi-thumb-up-outline"></i></span> Aceitar Solicitação
+    <button type="button" id="ACCEPTED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+            class="text-white btn btn-ezl-accepted_service align-middle {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
+        <span class="btn-label align-middle"><i class="mdi mdi-thumb-up-outline"></i></span> Aceitar Solicitação
     </button>
 
-    <button id="REFUSED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-sm btn-ezl-refused_service {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
+    <button type="button" id="REFUSED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+            class="text-white btn btn-ezl-refused_service {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
         <span class="btn-label"><i class="mdi mdi-thumb-down-outline"></i></span> Recusar Solicitação
     </button>
 
     <button type="button" data-toggle="modal" data-target="#to-assign"
-            class="text-white btn btn-sm btn-info {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
+            class="text-white btn btn-info {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
         <span class="btn-label"><i class="mdi mdi-lock-open-outline"></i></span> Atribuir
     </button>
 
-    <button id="OPEN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-sm btn-ezl-open {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
+    <button type="button" id="OPEN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+            class="text-white btn btn-ezl-open {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
         <span class="btn-label"><i class="mdi mdi-lock-open-outline"></i></span> Delegar
     </button>
 {% endif %}
 {% if perms.core.view_delegated_tasks %}
-    <button id="ACCEPTED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-sm btn-ezl-accepted {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
+    <button type="button" id="ACCEPTED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+            class="text-white btn btn-ezl-accepted {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
         <span class="btn-label"><i class="mdi mdi-calendar-clock"></i></span> Aceitar
     </button>
-    <button id="REFUSED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white    btn btn-sm btn-ezl-refused {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
+    <button type="button" id="REFUSED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+            class="text-white btn btn-ezl-refused {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
         <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Recusar
     </button>
 {% endif %}
 {% if perms.core.delegate_tasks %}
-    <button id="DELEGATE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-sm btn-ezl-delegate {% if not form.instance.status.name == 'DELEGATE' %}hidden{% endif %}">
+    <button type="button" id="DELEGATE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+            class="text-white btn btn-ezl-delegate {% if not form.instance.status.name == 'DELEGATE' %}hidden{% endif %}">
         <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Delegar
     </button>
 {% endif %}
 {% if perms.core.block_payment_tasks %}
-    <button id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-sm btn-ezl-blockedpayment {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}">
+    <button type="button" id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+            class="text-white btn btn-ezl-blockedpayment {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}">
         <span class="btn-label"><i class="mdi mdi-currency-usd-off"></i></span> Glosar
     </button>
 {% endif %}
 {% if perms.core.validate_all_tasks %}
-    <button id="FINISHED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-sm btn-raised FINISHED {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}">
+    <button type="button" id="FINISHED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+            class="text-white btn btn-raised FINISHED {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}">
         <span class="btn-label"><i class="mdi mdi-gavel"></i></span> Finalizar
     </button>
 {% endif %}
 {% if perms.core.return_all_tasks %}
-    <button id="RETURN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-sm btn-ezl-return {% if not  form.instance.status.name == 'DONE' %}hidden{% endif %}">
+    <button type="button" id="RETURN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+            class="text-white btn btn-ezl-return {% if not  form.instance.status.name == 'DONE' %}hidden{% endif %}">
         <span class="btn-label"><i class="mdi mdi-backburger"></i></span> Retornar
     </button>
 {% endif %}
@@ -58,8 +58,8 @@
         <div class="col-sm-3">
             <a>{{ form.execution_date }}</a>
         </div>
-        <button onclick="getId(this)" id="DONE" type="submit" data-toggle="" data-target="#confirmAction"
-                class="text-white  btn btn-sm btn-ezl-done">
+        <button type="button" onclick="getId(this)" id="DONE" type="submit" data-toggle="" data-target="#confirmAction"
+                class="text-white btn btn-ezl-done">
             <span class="btn-label"><i class="mdi mdi-checkbox-marked-circle-outline"></i></span> Cumprir
         </button>
     {% endif %}
