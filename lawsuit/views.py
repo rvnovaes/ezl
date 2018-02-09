@@ -676,7 +676,7 @@ class OrganAutocompleteView(autocomplete.Select2QuerySetView):
         continent = self.forwarded.get('continent', None)
 
         if continent:
-            qs = qs.filter(continent=continent)
+            qs = qs.filter(continent=continent, office=get_office_session(self.request), is_active=True)
 
         if self.q:
             q_objects = Q()
