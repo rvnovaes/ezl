@@ -43,6 +43,7 @@ from survey.models import SurveyPermissions
 from financial.tables import ServicePriceTableTaskTable
 from core.utils import get_office_session
 from ecm.models import DefaultAttachmentRule, Attachment
+from task.utils import get_task_attachment
 
 
 class TaskListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -108,6 +109,8 @@ class TaskToAssignView(AuditFormMixin, UpdateView):
         super().form_valid(form)
         if form.is_valid():
             form.instance.task_status = TaskStatus.OPEN
+            # TODO: rever processo de anexo, quando for trocar para o ECM Generico
+            get_task_attachment(self, form)
             form.save()
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
@@ -335,31 +338,13 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             form.instance.refused_service_date = timezone.now()
             form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.OPEN:
-            form.instance.amount = form.cleaned_data['amount']
-            servicepricetable_id = self.request.POST['servicepricetable_id']
-            servicepricetable = ServicePriceTable.objects.get(id=servicepricetable_id)
+            form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else None)
+            servicepricetable_id = (self.request.POST['servicepricetable_id'] if self.request.POST['servicepricetable_id'] else None)
+            servicepricetable = ServicePriceTable.objects.filter(id=servicepricetable_id).first()
             if servicepricetable:
                 self.delegate_child_task(form.instance, servicepricetable.office_correspondent)
                 form.instance.person_executed_by = None
-            attachmentrules = DefaultAttachmentRule.objects.filter(
-                Q(office=get_office_session(self.request)),
-                Q(Q(type_task=form.instance.type_task) | Q(type_task=None)),
-                Q(Q(person_customer=form.instance.client) | Q(person_customer=None)),
-                Q(Q(state=form.instance.court_district.state) | Q(state=None)),
-                Q(Q(court_district=form.instance.court_district) | Q(court_district=None)),
-                Q(Q(city=(form.instance.movement.law_suit.organ.address_set.first().city if
-                          form.instance.movement.law_suit.organ.address_set.first() else None)) | Q(city=None)))
-
-            for rule in attachmentrules:
-                attachments = Attachment.objects.filter(model_name='ecm.defaultattachmentrule').filter(object_id=rule.id)
-                for attachment in attachments:
-                    # fs = FileSystemStorage()
-                    # filename = fs.save(attachment.file.name, attachment.file)
-                    obj = Ecm(path=attachment.file,
-                              task=Task.objects.get(id=form.instance.id),
-                              create_user_id=self.request.user.id,
-                              create_date=timezone.now())
-                    obj.save()
+            get_task_attachment(self, form)
 
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))

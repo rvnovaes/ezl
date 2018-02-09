@@ -2,7 +2,6 @@
 {% load static %}
 {% load core_filters %}
 {% load render_table from django_tables2 %}
-{#{% load formset_tags %}#}
 {% load tz %}
 
 {% block extra_stylesheets %}
@@ -16,15 +15,6 @@
     <link href="{% static 'skeleton/css/step-bar.css' %}" rel="stylesheet">
     <div class="white-box m-b-0 text-center">
         {% include 'task/includes/task-detail-status-buttons.html' %}
-        {% comment %}
-        <ul class="nav nav-wizard">
-            {% for key, value in form.instance.status.choices_icons %}
-                <li class="{% if value|slugify == form.instance.status|slugify %}active{% endif %}">
-                    <a data-toggle="tooltip" title="{{ value }}" href="javascript:void(0)"><i class="{{ key }}"></i></a>
-                </li>
-            {% endfor %}
-        </ul>
-        {% endcomment %}
     </div>
     {% include 'task/task_to_assign.html' with task=task %}
     <form id="task_detail" action="" method="post">{% csrf_token %}

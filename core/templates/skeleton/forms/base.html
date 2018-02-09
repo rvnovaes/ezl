@@ -2,7 +2,9 @@
 {% load static bootstrap3 form_tags %}
 {% load ecm_tags %}
 {% block content %}
-    <form enctype="multipart/form-data" id="{{ object_form }}" action="{% block action %}{% endblock %}" method="{% block method %}post{% endblock %}" novalidate>
+    <form enctype="multipart/form-data" id="object_form" action="{% block action %}{% endblock %}"
+          method="{% block method %}post{% endblock %}"
+          onsubmit="{% block onsubmit %}{% endblock %}" novalidate>
         {% csrf_token %}
     <div class="panel panel-default">
         <div class="panel-heading">{% include 'skeleton/forms/form-title.html' with form=form %}</div>
