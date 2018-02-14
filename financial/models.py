@@ -32,6 +32,8 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
                                              verbose_name='Escritório Correspondente')
     type_task = models.ForeignKey(
         'task.TypeTask',
+        null=True,
+        blank=True,
         on_delete=models.PROTECT,
         related_name='%(class)s_type_task',
         verbose_name='Tipo de Serviço'

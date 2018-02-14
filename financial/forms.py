@@ -107,20 +107,15 @@ class ServicePriceTableForm(BaseModelForm):
             raise forms.ValidationError("Favor Selecionar um escritório")
         return office
 
-    def clean_type_task(self):
-        type_task = self.cleaned_data['type_task']
-        if not type_task:
-            raise forms.ValidationError("Favor Selecionar um Tipo de Serviço")
-        return type_task
-
     def clean(self):
         cleaned_data = super().clean()
-        if ServicePriceTable.objects.filter(type_task=cleaned_data["type_task"],
-                                            court_district=cleaned_data["court_district"],
-                                            state=cleaned_data["state"],
-                                            client=cleaned_data["client"],
-                                            office_correspondent=cleaned_data["office_correspondent"]).first():
-            raise forms.ValidationError("Já existe um registro com os dados selecionados")
+        if not self._errors.__len__():
+            if ServicePriceTable.objects.filter(type_task=cleaned_data["type_task"],
+                                                court_district=cleaned_data["court_district"],
+                                                state=cleaned_data["state"],
+                                                client=cleaned_data["client"],
+                                                office_correspondent=cleaned_data["office_correspondent"]).first():
+                raise forms.ValidationError("Já existe um registro com os dados selecionados")
         return cleaned_data
 
     def __init__(self, *args, **kwargs):
