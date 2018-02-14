@@ -16,7 +16,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='delegation_date',
-            field=models.DateTimeField(default=django.utils.timezone.now, verbose_name='Data de Delegação'),
+            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, null=True,
+                                       verbose_name='Data de Delegação'),
         ),
         migrations.AlterField(
             model_name='task',

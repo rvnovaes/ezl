@@ -34,10 +34,12 @@ class TaskForm(BaseForm):
             Person.objects.active().requesters().order_by('name')))
 
     person_executed_by = forms.ModelChoiceField(
+        required=False,
         empty_label='Selecione...',
         queryset=Person.objects.active().correspondents().order_by('name'))
 
     person_distributed_by = forms.ModelChoiceField(
+        required=False,
         empty_label='Selecione...',
         queryset=Person.objects.active().services().order_by('name'),
         label='Contratante')
@@ -49,7 +51,7 @@ class TaskForm(BaseForm):
         label='Tipo de Serviço')
 
     delegation_date = forms.DateTimeField(initial=datetime.now(),
-                                          required=True,
+                                          required=False,
                                           label='Data de Delegação',
                                           widget=MDDateTimepicker(attrs={
                                               'class': 'form-control'

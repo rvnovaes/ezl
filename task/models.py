@@ -161,7 +161,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                               verbose_name='Contratante')
     type_task = models.ForeignKey(TypeTask, on_delete=models.PROTECT, blank=False, null=False,
                                   verbose_name='Tipo de Serviço')
-    delegation_date = models.DateTimeField(default=timezone.now, verbose_name='Data de Delegação')
+    delegation_date = models.DateTimeField(null=True, default=timezone.now, blank=True, verbose_name='Data de Delegação')
     acceptance_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação')
     final_deadline_date = models.DateTimeField(null=False, blank=False, default=timezone.now, verbose_name='Prazo')
     execution_date = models.DateTimeField(null=True, verbose_name='Data de Cumprimento')
@@ -179,7 +179,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     task_status = models.CharField(null=False, verbose_name=u'', max_length=30,
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
-                                   default=TaskStatus.OPEN)
+                                   default=TaskStatus.REQUESTED)
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
     amount = models.DecimalField(null=False, blank=False, verbose_name='Valor',
                                  max_digits=9, decimal_places=2, default=Decimal('0.00'))
