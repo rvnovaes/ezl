@@ -141,6 +141,7 @@ SurveyEditor = (function($){
     return new Editor();
 })(jQuery);
 
+
 $(document).ready(function(){
     var $input = $('#id_data'),
         data = $input.val();

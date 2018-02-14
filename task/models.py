@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls.base import reverse
 from django.utils import timezone
 from sequences import get_next_value
 from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office
@@ -231,6 +232,34 @@ class Task(Audit, LegacyCode, OfficeMixin):
         if organ:
             address = organ.address_set.first()
         return address
+
+    def get_absolute_url(self):
+        return reverse("task_detail",
+                       kwargs={"pk": self.id})
+
+    @property
+    def opposing_party(self):
+        return self.movement.law_suit.opposing_party
+
+    @property
+    def lawsuit_number(self):
+        return self.movement.law_suit.law_suit_number
+
+    def serialize(self):
+        """JSON representation of object"""
+        data = {
+            "id": self.id,
+            "url": self.get_absolute_url(),
+            "task_number": self.task_number,
+            "lawsuit_number": self.lawsuit_number,
+            "client": self.client.simple_serialize(),
+            "opposing_party": self.opposing_party,
+            "status": str(self.status),
+            "type_task": {"name": self.type_task.name, "id": self.type_task.id},
+            "final_deadline_date": self.final_deadline_date.strftime(settings.DATETIME_FORMAT) if self.final_deadline_date else "",
+            "delegation_date": self.delegation_date.strftime(settings.DATETIME_FORMAT) if self.delegation_date else ""
+        }
+        return data
 
     # TODO Remover Property após modificação do ECM da Task para o ECM genérico
     @property

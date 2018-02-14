@@ -33,6 +33,16 @@
     <!-- ============================================================== -->
     <!-- EZL CSS -->
     <link href="{% static 'skeleton/css/ezl.css' %}" rel="stylesheet">
+    {% if is_popup %}
+    <style type="text/css">
+        .navbar, .bg-title, .sidebar-head, .sidebar{
+            display: none;
+        }
+        #page-wrapper{
+            margin-top: 0!important;
+        }
+    </style>
+    {% endif %}
 
 </head>
 

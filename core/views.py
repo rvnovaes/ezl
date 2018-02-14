@@ -21,7 +21,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.views import View
-from django.views.generic import ListView
+from django.views.generic import ListView, TemplateView
 from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
@@ -1115,6 +1115,23 @@ class EditableListSave(CustomLoginRequiredView, View):
             instance.save()
 
         return JsonResponse({"ok": True})
+
+
+class PopupSuccessView(LoginRequiredMixin, TemplateView):
+
+    template_name = "core/popup_success.html"
+
+
+class PopupMixin:
+
+    @property
+    def is_popup(self):
+        return self.request.GET.get('popup', False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["is_popup"] = self.is_popup
+        return context
 
 
 class ListUsersToInviteView(CustomLoginRequiredView, View):

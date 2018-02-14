@@ -62,4 +62,15 @@
             message_toast('{{ message.tags }}', 'AvisoErro', '{{ message }}');
         {% endif %}
     {% endfor %}
+
+    {% if is_popup %}
+    $(document).ready(function(){
+        var set = function(){
+            $("#page-wrapper").css('min-height', '0px').css('margin', '10px 0 0 0');
+        };
+
+        $(window).ready(set);
+        $(window).bind("resize", set);
+    });
+    {% endif %}
 </script>

@@ -17,6 +17,8 @@ CELERY_TASK_ALWAYS_EAGER = False
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 USER_MANUAL_URL = '/static/downloads/manual-correspondentes.pdf'
 
+DATETIME_FORMAT = '%d/%m/%Y %H:%M'
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 parser = get_parser()
 try:

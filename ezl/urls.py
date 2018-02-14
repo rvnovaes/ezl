@@ -8,9 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
 from core.views import ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin, \
-    CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave
+    CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave, PopupSuccessView
 from django.conf import settings
-from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView
+from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, TaskBulkCreateView
 
 urlpatterns = [
 
@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^financeiro/', include('financial.urls'), name='financial'),
     url(r'^pesquisa/', include('survey.urls'), name='survey'),
     url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),
+    url(r'^v1/lawsuit/', include('lawsuit.urls_api'), name='lawsuit_api'),
     url(r'^providencias/', include('task.urls'), name='task'),
     url(r'^dashboard/$', login_required(DashboardView.as_view()), name='dashboard'),
     url(r'^chat/', include('chat.urls'), name='chat'),
@@ -41,6 +42,9 @@ urlpatterns = [
         login_required(DashboardStatusCheckView.as_view()),
         name='task_status_check'),
 
+    url(r'^dashboard/cadastrar/$',
+        login_required(TaskBulkCreateView.as_view()),
+        name='task_add'),
 
     url(r'^client_form',
         login_required(ClientAutocomplete.as_view()),
@@ -67,6 +71,9 @@ urlpatterns = [
     url(r'^editable-list/save',
         csrf_exempt(EditableListSave.as_view()),
         name='editable-list-save'),
+
+
+    url(r'^popup_success', PopupSuccessView.as_view(), name='popup_success'),
 
 ] + \
     static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static/')) + \

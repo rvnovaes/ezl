@@ -411,6 +411,10 @@ i.material-icons {
     background-color: #A52A2A;
 }
 
+.disabled-btn{
+    background-color: #CCC !important;
+}
+
 .a_button {
     line-height: 40px !important;
 }

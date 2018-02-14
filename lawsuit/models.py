@@ -62,6 +62,9 @@ class Folder(Audit, LegacyCode, OfficeMixin):
             self.folder_number = get_folder_number(self.office)
         super(Folder, self).save(*args, **kwargs)
 
+    def simple_serialize(self):
+        return {"id": self.id}
+
     class Meta:
         db_table = "folder"
         ordering = ['-id']
@@ -70,7 +73,7 @@ class Folder(Audit, LegacyCode, OfficeMixin):
         unique_together = (('folder_number', 'person_customer', 'office'),)
 
     def __str__(self):
-        return str(self.folder_number)
+        return "{} - {}".format(self.folder_number, self.person_customer.name)
 
 
 class CourtDivision(Audit, LegacyCode, OfficeMixin):
@@ -163,6 +166,16 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
 
     objects = OfficeManager()
 
+    def serialize(self):
+        """JSON representation of instance"""
+        data = {
+            "id": self.id,
+            "person_lawyer": self.person_lawyer.simple_serialize(),
+            "law_suit_number": self.law_suit_number,
+            "folder": self.folder.simple_serialize()
+        }
+        return data        
+
     class Meta:
         db_table = "law_suit"
         ordering = ['-id']
@@ -172,7 +185,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
         unique_together = (('instance', 'law_suit_number', 'office'),)
 
     def __str__(self):
-        return self.law_suit_number
+        return "{} - {}".format(self.law_suit_number, self.person_lawyer.name)
 
 
 class Movement(Audit, LegacyCode, OfficeMixin):
@@ -182,6 +195,14 @@ class Movement(Audit, LegacyCode, OfficeMixin):
                                  verbose_name="Processo", related_name='law_suits')
     folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False,
                                verbose_name="Pasta", related_name='folders_movement')
+
+    def serialize(self):
+        """JSON representation of instance"""
+        data = {
+            "id": self.id,
+            "type_movement_name": self.type_movement.name
+        }
+        return data
 
     objects = OfficeManager()
 
