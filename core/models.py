@@ -241,6 +241,10 @@ class Person(AbstractPerson):
         verbose_name = 'Pessoa'
         verbose_name_plural = 'Pessoas'
 
+    def simple_serialize(self):
+        """Simple JSON representation of instance"""
+        return {"id": self.id, "legal_name": self.legal_name, "name": self.name}
+
 
 class Office(AbstractPerson):
     objects = PersonManager()

@@ -127,7 +127,7 @@ class TaskDetailForm(ModelForm):
         model = Task
         fields = ['execution_date', 'survey_result']
 
-    survey_result = forms.CharField(required=False, initial=None)
+    survey_result = forms.CharField(required=False, initial=None, widget=forms.HiddenInput())
 
     execution_date = forms.DateTimeField(required=False,
                                          initial=timezone.now(),

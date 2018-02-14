@@ -51,6 +51,41 @@ class TaskListView(CustomLoginRequiredView, SingleTableViewMixin):
     table_class = TaskTable
 
 
+class TaskBulkCreateView(AuditFormMixin, CreateView):
+    model = Task
+    form_class = TaskCreateForm
+    success_url = reverse_lazy('task_list')
+    success_message = CREATE_SUCCESS_MESSAGE
+    template_name_suffix = '_bulk_create_form'
+
+    def form_valid(self, form):
+        task = form.instance
+        form.instance.movement_id = self.request.POST['movement']
+        self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
+        form.instance.__server = self.request.META['HTTP_HOST']
+        response = super(TaskBulkCreateView, self).form_valid(form)
+
+        if form.cleaned_data['documents']:
+            for document in form.cleaned_data['documents']:
+                task.ecm_set.create(path=document,
+                                    create_user=task.create_user)
+
+        form.delete_temporary_files()
+
+        return response
+
+    def get_success_url(self):
+        return "{}?movement={}&movementLabel={}&lawsuit={}&lawsuitLabel={}&folder={}&folderLabel={}".format(
+            reverse('task_add'),
+            self.object.movement_id,
+            self.object.movement.type_movement.name,
+            self.object.movement.law_suit_id,
+            self.object.movement.law_suit,
+            self.object.movement.law_suit.folder_id,
+            self.object.movement.law_suit.folder,
+        )
+
+
 class TaskCreateView(AuditFormMixin, CreateView):
     model = Task
     form_class = TaskCreateForm

@@ -141,13 +141,14 @@ SurveyEditor = (function($){
     return new Editor();
 })(jQuery);
 
+
 $(document).ready(function(){
     var $input = $('#id_data'),
         data = $input.val();
 
     // Colocamos o HTML do formulário logo após o campo de dados da pesquisa (que fica oculto por CSS)
     // $input.parent().append($('[survey-template]').html());
-    $($('[survey-template]').html()).insertAfter('#object_form');
+    $($('[survey-template]').html()).insertBefore('.panel-footer');
 
 
     SurveyEditor.init();

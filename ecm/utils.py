@@ -56,7 +56,7 @@ def attachment_form_valid(f):
         if usermodel:
             use_upload = False
         else:
-            use_upload = object_instance.model.use_upload
+            use_upload = getattr(object_instance.model, "use_upload", False)
         ret = f(object_instance, form)
         if use_upload:
             files = object_instance.request.FILES.getlist('file')

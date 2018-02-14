@@ -1,11 +1,24 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+
 {% block css_head %}
     {{ block.super }}
     {% if object %}
         {% include 'ecm/styles.html' %}
     {% endif %}
+    {% if is_popup %}
+        <style type="text/css">
+            .navbar{
+                display: none;
+            }
+            .content-block{
+                margin-top: 1em;
+            }
+        </style>
+    {% endif %}
+
 {% endblock %}
+
 {% block body %}
     {% if user.is_authenticated %}
         <div class="navbar navbar-default navbar-fixed-top">
@@ -69,6 +82,7 @@
                                 <li><a href="#modal1"  onclick="modal('about_modal', '{% static "js/jquery-2.1.1.min.js" %}')">Sobre</a></li>
                             </ul>
                         </li>
+                        <li class="open"><a href="{% url 'task_add' %}">Criar OS</a></li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li>
@@ -107,6 +121,7 @@
                                 </li>
                             </ul>
                         </li>
+
                     </ul>
                 </div>
             </div>

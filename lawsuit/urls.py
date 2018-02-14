@@ -15,6 +15,12 @@ urlpatterns = [
         name='courtdistrict_delete'),
     url(r'courtdistrict_autocomplete$', login_required(views.CourtDistrictAutocomplete.as_view()),
         name='courtdistrict_autocomplete'),
+    url(r'folder_autocomplete$', login_required(views.FolderAutocomplete.as_view()),
+        name='folder_autocomplete'),
+    url(r'lawsuit_autocomplete$', login_required(views.LawsuitAutocomplete.as_view()),
+        name='lawsuit_autocomplete'),
+    url(r'movement_autocomplete$', login_required(views.MovementAutocomplete.as_view()),
+        name='movement_autocomplete'),
 
     # Varas
     url(r'^varas/$', login_required(views.CourtDivisionListView.as_view()), name='courtdivision_list'),

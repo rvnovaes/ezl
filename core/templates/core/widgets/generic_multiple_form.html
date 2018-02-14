@@ -11,23 +11,30 @@
     {% endif %}
 {% endblock %}
 {% block button_cancel %}
-{% if param1 and param2 %}
-    {% url previous_page param1 param2 as link %}
-    <button class="btn btn-danger waves-effect waves-light" type="button"
-            onclick="javascript:window.open('{{ link }}', '_self')">
-    <span class="btn-label"><i class="fa fa-close"></i></span>Cancelar
-    </button>
-{% elif param1 %}
-    {% url previous_page param1 as link %}
-    <button class="btn btn-danger waves-effect waves-light" type="button"
-            onclick="javascript:window.open('{{ link }}', '_self')">
-    <span class="btn-label"><i class="fa fa-close"></i></span>Cancelar
-    </button>
-{% else %}
-    {% url previous_page as link %}
-    <button class="btn btn-danger waves-effect waves-light" type="button"
-            onclick="javascript:window.open('{{ link }}', '_self')">
-    <span class="btn-label"><i class="fa fa-close"></i></span>Cancelar
-    </button>
-{% endif %}
+    {% if is_popup %}
+        <button class="btn btn-danger waves-effect waves-light" type="button"
+                    onclick="javascript:window.close()">
+            <span class="btn-label"><i class="fa fa-close"></i></span>Cancelar
+            </button>
+    {% else %}
+        {% if param1 and param2 %}
+            {% url previous_page param1 param2 as link %}
+            <button class="btn btn-danger waves-effect waves-light" type="button"
+                    onclick="javascript:window.open('{{ link }}', '_self')">
+            <span class="btn-label"><i class="fa fa-close"></i></span>Cancelar
+            </button>
+        {% elif param1 %}
+            {% url previous_page param1 as link %}
+            <button class="btn btn-danger waves-effect waves-light" type="button"
+                    onclick="javascript:window.open('{{ link }}', '_self')">
+            <span class="btn-label"><i class="fa fa-close"></i></span>Cancelar
+            </button>
+        {% else %}
+            {% url previous_page as link %}
+            <button class="btn btn-danger waves-effect waves-light" type="button"
+                    onclick="javascript:window.open('{{ link }}', '_self')">
+            <span class="btn-label"><i class="fa fa-close"></i></span>Cancelar
+            </button>
+        {% endif %}
+    {% endif %}
 {% endblock %}

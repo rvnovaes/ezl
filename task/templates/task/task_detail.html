@@ -15,7 +15,6 @@
     <link href="{% static 'skeleton/css/step-bar.css' %}" rel="stylesheet">
     {% include 'task/task_to_assign.html' with task=task %}
     <form id="task_detail" action="" method="post">{% csrf_token %}
-        {% include 'questionnaire/generic_survey.html' with generic_survey=form.instance.type_task.survey_type %}
         {% include 'task/task_detail/tab.html' %}
         <div class="panel-group" role="tablist" aria-multiselectable="true">
             <!-- Arquivos ECM -->
@@ -60,7 +59,7 @@
                                 Cancelar
                             </button>
                             {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                                {% if form.instance.type_task.survey_type %}
+                                {% if form.instance.type_task.survey %}
                                     <button id="actionButton"
                                             type="submit"
                                             onclick="beforeSubmit()"
@@ -115,6 +114,8 @@
             });
         })();
     </script>
+    {% include 'questionnaire/generic_survey.html' %}
+
     <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
          a medida que for adicionando novos arquivos -->
     <div id="scripts">

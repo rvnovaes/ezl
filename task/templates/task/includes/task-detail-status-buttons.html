@@ -56,6 +56,7 @@
 {% if perms.core.view_delegated_tasks %}
     {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
         <div class="col-sm-3">
+            {{ form.survey_result }}
             <a>{{ form.execution_date }}</a>
         </div>
         <button type="button" onclick="getId(this)" id="DONE" type="submit" data-toggle="" data-target="#confirmAction"
