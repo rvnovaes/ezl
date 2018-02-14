@@ -87,7 +87,7 @@ class ServicePriceTableForm(BaseModelForm):
 
     class Meta:
         model = ServicePriceTable
-        fields = ('type_task', 'court_district', 'state', 'client', 'value', 'office', 'office_correspondent')
+        fields = ('office', 'office_correspondent', 'type_task', 'court_district', 'state', 'client', 'value')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'

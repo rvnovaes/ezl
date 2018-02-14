@@ -13,7 +13,13 @@
                         <a href="#sec-prov" class="sticon mdi mdi-archive"><span>Providência</span></a>
                     </li>
                     <li>
-                        <a href="#sec-corres" class="sticon mdi mdi-wallet-travel"><span>Correspondente</span></a>
+                        <a href="#sec-corres" class="sticon mdi mdi-wallet-travel"><span>
+                            {% if form.instance.get_child %}
+                                Escritório Contratado
+                            {% else %}
+                                Correspondente
+                            {% endif %}
+                        </span></a>
                     </li>
                     <li>
                         <a href="#sec-solic" class="sticon mdi mdi-account-card-details"><span>Solicitante</span></a>
@@ -30,10 +36,18 @@
                     <hr>
                 </section>
                 <section id="sec-corres" style="padding: 0 0 0 0">
-                    {% include 'task/person_info.html' with person=form.instance.person_executed_by %}
+                    {% if form.instance.get_child %}
+                        {% include 'task/office_info.html' with office=form.instance.child.office %}
+                    {% else %}
+                        {% include 'task/person_info.html' with person=form.instance.person_executed_by %}
+                    {% endif %}
                 </section>
                 <section id="sec-solic" style="padding: 0 0 0 0">
-                    {% include 'task/person_info.html' with person=form.instance.person_asked_by %}
+                    {% if form.instance.parent %}
+                        {% include 'task/office_info.html' with office=form.instance.parent.office %}
+                    {% else %}
+                        {% include 'task/person_info.html' with person=form.instance.person_asked_by %}
+                    {% endif %}
                 </section>
                 <section id="sec-contr" style="padding: 0 0 0 0">
                     {% include 'task/person_info.html' with person=form.instance.person_distributed_by %}

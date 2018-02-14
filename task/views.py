@@ -354,23 +354,20 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
     template_name = 'task/task_detail.html'
 
     def form_valid(self, form):
-        execution_date = None
         form.instance.task_status = TaskStatus[self.request.POST['action']] or TaskStatus.INVALID
         form.instance.alter_user = User.objects.get(id=self.request.user.id)
         notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None
-        if form.cleaned_data['execution_date'] and not form.instance.execution_date:
-            execution_date = form.cleaned_data['execution_date']
+        execution_date = (form.cleaned_data['execution_date']
+                          if form.cleaned_data['execution_date'] else form.initial['execution_date'])
         survey_result = (form.cleaned_data['survey_result']
-                         if form.cleaned_data['survey_result'] else None)
+                         if form.cleaned_data['survey_result'] else form.initial['survey_result'])
 
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
                                        execution_date=execution_date, survey_result=survey_result)
         form.instance.__server = self.request.META['HTTP_HOST']
         if form.instance.task_status == TaskStatus.ACCEPTED_SERVICE:
-            form.instance.acceptance_service_date = timezone.now()
             form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.REFUSED_SERVICE:
-            form.instance.refused_service_date = timezone.now()
             form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.OPEN:
             form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else None)

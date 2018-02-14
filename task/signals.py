@@ -141,12 +141,15 @@ def change_status(sender, instance, **kwargs):
         elif new_status is TaskStatus.DONE:
             instance.return_date = None
         elif new_status is TaskStatus.RETURN:
-            instance.execution = None
+            instance.execution_date = None
             instance.return_date = now_date
         elif new_status is TaskStatus.BLOCKEDPAYMENT:
             instance.blocked_payment_date = now_date
         elif new_status is TaskStatus.FINISHED:
             instance.finished_date = now_date
+
+        if new_status is TaskStatus.DONE and previous_status is TaskStatus.OPEN and instance.get_child:
+            instance.execution_date = now_date
 
         instance.alter_date = now_date
 
