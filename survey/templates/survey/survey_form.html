@@ -1,5 +1,5 @@
-{% extends "core/base_form.html" %}
+{% extends 'skeleton/forms/base.html' %}
 
-{% block head %}{{ block.super }}
+{% block extra_scripts %}{{ block.super }}
     {% include "survey/survey_form_js.html" %}
-{% endblock head %}
+{% endblock extra_scripts %}

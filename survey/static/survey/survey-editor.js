@@ -148,7 +148,7 @@ $(document).ready(function(){
 
     // Colocamos o HTML do formulário logo após o campo de dados da pesquisa (que fica oculto por CSS)
     // $input.parent().append($('[survey-template]').html());
-    $($('[survey-template]').html()).insertAfter('#object_form');
+    $($('[survey-template]').html()).insertBefore('.panel-footer');
 
 
     SurveyEditor.init();

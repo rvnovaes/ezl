@@ -2,15 +2,16 @@
 
 {% block content %}
     {% load bootstrap3 %}
-    <script>
+    <script id="inline-script">
         window.survey = new Survey.Model({{ survey_data|safe }});
+        window.survey2 = new Survey.Model({{ survey_data|safe }});
     </script>
         <div id="survey" class="modal">
         <div class="modal-dialog">
             <div class="modal-content ">
                 <div id=" modal modalHeader">
                     <h4 style="text-align: center" class="panel-header panel-title panel-heading DONE">
-                        <i class="material-icons ">question_answer</i>
+                        <i class="fa fa-align-justify"></i>
                         Formulário de Cumprimento </h4>
                 </div>
                 <div class="modal-body">
@@ -30,7 +31,7 @@
             $('#survey input[type=file]').each(function(){
                 var $el = $(this),
                     id = $el.attr('id').replace('i', ''),
-                    $button = $('<button type="button" class="btn btn-sm btn-primary btn-raised" style="color: #fff !important;"><i class="material-icons">cloud_upload</i> &nbsp; Enviar Arquivo(s)<div class="ripple-container"></div></button>'),
+                    $button = $('<button type="button" class="btn btn-sm btn-primary btn-raised" style="color: #fff !important;"><i class="icon-cloud-upload"></i> &nbsp; Enviar Arquivo(s)<div class="ripple-container"></div></button>'),
                     $parent = $el.parent();
 
                 if ($parent.find('button').length == 0){
@@ -66,7 +67,6 @@
 
         Survey.Survey.cssType = "bootstrapmaterial";
         Survey.defaultBootstrapMaterialCss.navigationButton = "btn btn-sm btn-raised btn-primary";
-        $.material.init();
 
         survey.onComplete.add(function (result) {
             var surveyResponse = JSON.stringify(getSurveyResult(result));

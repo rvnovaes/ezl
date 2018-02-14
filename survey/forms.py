@@ -14,6 +14,7 @@ class SurveyForm(BaseModelForm):
 
     data = forms.CharField(
         label=_('Conteúdo'),
+        widget=forms.HiddenInput()
     )
 
     class Meta:

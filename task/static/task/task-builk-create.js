@@ -116,7 +116,7 @@ TaskForm = (function($){
         });
 
         this.$btn_add_folder.click(function(){
-            self.openPopup("/processos/pastas/");
+            self.openPopup("/processos/pastas/criar/");
         });
 
         this.$btn_add_lawsuit.click(function(){
