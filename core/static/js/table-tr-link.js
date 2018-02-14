@@ -1,6 +1,8 @@
 // Responsavel por gerar a linha da listagem como um link para o formulario de edicao
 function addLinkOnRows(){
     $('tr[data-href]').each(function () {
+        var target = $(this).attr('data-href-target') || "_self";
+
         $(this).find('a').removeAttr('target').removeAttr('href');
         var $url = $(this).attr('data-href');
         $(this).find('td').each(function () {
@@ -8,10 +10,12 @@ function addLinkOnRows(){
                 if ($(this).attr('class') !== 'selection') {
                     if ($url.length > 0) {
                         $(this).on('click', function () {
-                            window.location.href = $url;
+                            if(target === "_self"){
+                                window.location.href = $url;
+                            }
                             window.open(
                                 $url,
-                                '_self'
+                                target
                             )
                         })
                     }

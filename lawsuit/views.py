@@ -326,7 +326,8 @@ class FolderLawsuitCreateView(PopupMixin, AuditFormMixin, SuccessMessageMixin, C
     def get_context_data(self, **kwargs):
         context = super(FolderLawsuitCreateView, self).get_context_data(**kwargs)
         context["is_popup"] = self.is_popup
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
+        if "context" in context:
+            RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
 
     # TODO - verificar opção de cadastro de processos ao incluir pasta
@@ -342,11 +343,16 @@ class FolderLawsuitCreateView(PopupMixin, AuditFormMixin, SuccessMessageMixin, C
 
     def get_success_url(self):
         if self.is_popup:
-            self.success_url = "{}?field=folder&value={}&label={}".format(
+            success_url = "{}?field=folder&value={}&label={}".format(
                 reverse('popup_success'),
                 self.object.id,
                 self.object,
             )
+        else:
+            success_url = reverse('folder_update', kwargs={"pk": self.object.id})
+
+        self.success_url = success_url
+        return success_url
 
 
 class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany, UpdateView):

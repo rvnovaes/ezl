@@ -65,6 +65,7 @@ TaskForm = (function($){
             if (typeof(callback) == "function"){
                 callback();
             }
+            self.$lawsuit.focus();
         });
     };
 
@@ -89,6 +90,7 @@ TaskForm = (function($){
             if (typeof(callback) == "function"){
                 callback();
             }
+            self.$movement.focus();
         });
     };
 
@@ -131,6 +133,13 @@ TaskForm = (function($){
                 return
             }
             self.openPopup("/processos/movimentacao/" + lawsuit);
+        });
+
+        this.$btn_add.click(function(){
+            if(self.$btn_add.hasClass('disabled-btn')){
+                return false;
+            }
+            $('#form-content').modal('show');
         });
 
     };
@@ -182,12 +191,12 @@ TaskForm = (function($){
             }
             self.clearTaskList();
         }
-        this.$btn_add.addClass('hide');
+        this.$btn_add.addClass('disabled-btn');
         if (field == 'movement'){
             if (isEmpty(value)) {
                 self.clearTaskList();
             } else {
-                this.$btn_add.removeClass('hide');
+                this.$btn_add.removeClass('disabled-btn');
                 self.loadTasks(value);
             }
         }
@@ -216,6 +225,7 @@ TaskForm = (function($){
             self.$lawsuit.html('');
             addOption(self.$lawsuit, "Sem registros", "");
         }
+        $("html, body").animate({ scrollTop: 0 }, "slow");
     };
 
     TaskForm.prototype.loadTasks = function(movement){

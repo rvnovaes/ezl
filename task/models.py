@@ -234,8 +234,16 @@ class Task(Audit, LegacyCode, OfficeMixin):
         return address
 
     def get_absolute_url(self):
-        return reverse("task_update",
-                       kwargs={"movement": self.movement_id, "pk": self.id})
+        return reverse("task_detail",
+                       kwargs={"pk": self.id})
+
+    @property
+    def opposing_party(self):
+        return self.movement.law_suit.opposing_party
+
+    @property
+    def lawsuit_number(self):
+        return self.movement.law_suit.law_suit_number
 
     def serialize(self):
         """JSON representation of object"""
@@ -243,12 +251,13 @@ class Task(Audit, LegacyCode, OfficeMixin):
             "id": self.id,
             "url": self.get_absolute_url(),
             "task_number": self.task_number,
+            "lawsuit_number": self.lawsuit_number,
+            "client": self.client.simple_serialize(),
+            "opposing_party": self.opposing_party,
             "status": str(self.status),
             "type_task": {"name": self.type_task.name, "id": self.type_task.id},
             "final_deadline_date": self.final_deadline_date.strftime(settings.DATETIME_FORMAT) if self.final_deadline_date else "",
-            "delegation_date": self.delegation_date.strftime(settings.DATETIME_FORMAT) if self.delegation_date else "",
-            "person_asked_by": self.person_asked_by.simple_serialize(),
-            "person_executed_by": self.person_executed_by.simple_serialize(),
+            "delegation_date": self.delegation_date.strftime(settings.DATETIME_FORMAT) if self.delegation_date else ""
         }
         return data
 

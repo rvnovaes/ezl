@@ -536,6 +536,39 @@ fieldset[disabled] .btn-ezl-error.active {
     background-color: #CD6155;
     border-color: #CD6155;
 }
+
+
+/* Pagina de criar OS */
+
+.create-os-active{
+    background-color: #ff9900!important;
+}
+
+.create-os-active:hover{
+    background-color: #e68a00!important;
+}
+
+#page-wrapper{
+    min-height: 254px;
+}
+
+.btn-sm-custom{
+    padding: 0px 4px;
+    margin-bottom: 5px;
+}
+
+#task_form .select2{
+    margin-top: 0!important;
+}
+
+.disabled-btn,
+.disabled-btn:hover,
+.disabled-btn:active,
+.disabled-btn:focus,
+.disabled-btn.active{
+    background-color: #CCC!important;
+    border: #CCC!important;
+}
 /* OUTROS */
 .ezl-required:before {
     content: "\2217\20";
