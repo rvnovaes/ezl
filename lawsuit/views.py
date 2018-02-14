@@ -749,11 +749,12 @@ class CourtDistrictAutocomplete(autocomplete.Select2QuerySetView):
 class FolderAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = Folder.objects.none()
+        office = get_office_session(self.request)
 
         if self.q:
             filters = Q(person_customer__name__unaccent__istartswith=self.q)
             filters |= Q(folder_number__startswith=self.q)
-            qs = Folder.objects.filter(is_active=True).filter(filters)
+            qs = Folder.objects.filter(is_active=True, office=office).filter(filters)
         return qs
 
     def get_result_label(self, result):
