@@ -134,7 +134,6 @@
         {% include 'skeleton/includes/scripts.html' %}
         <script>
             $(document).on('ready', function() {
-                console.log('ready!');
                 jQuery('.datepicker-autoclose').datepicker({
                     autoclose: true,
                     todayHighlight: true,
@@ -151,7 +150,6 @@
                     {% endcomment %}
                 {% endblock script_document_ready %}
                 $(window).on('load', function(){
-                    console.log('load!');
                     {% block script_window_load%}
                         {% comment %}
                             The load event is sent to an element when it and all sub-elements have been completely

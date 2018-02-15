@@ -10,7 +10,6 @@ $(document).ready(function(){
         url: '/session/',
         data: {},
         success: function(response) {
-            console.log(response);
             localStorage.setItem('custom_session_user', response);
             if (response.current_office_name){                
                 $('#current_office').text(response.current_office_name);
