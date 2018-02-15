@@ -33,12 +33,6 @@ class CostCenterForm(BaseModelForm):
 
 class ServicePriceTableForm(BaseModelForm):
 
-    layout = Layout(
-        Row('office'),
-        Row('office_correspondent', 'type_task', 'value'),
-        Row('client', 'state', 'court_district')
-    )
-
     client = forms.ModelChoiceField(
         queryset=Person.objects.filter(is_customer=True),
         widget=MDModelSelect2(
@@ -87,7 +81,7 @@ class ServicePriceTableForm(BaseModelForm):
 
     class Meta:
         model = ServicePriceTable
-        fields = ('office', 'office_correspondent', 'type_task', 'court_district', 'state', 'client', 'value')
+        fields = ('office', 'office_correspondent', 'client', 'type_task', 'state', 'court_district', 'value')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'

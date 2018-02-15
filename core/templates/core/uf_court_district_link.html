@@ -1,0 +1,11 @@
+<script>
+    $(document).ready(function () {
+        var stateSelect = $('#id_state').prop('selectedIndex');
+        $('#id_state').on('change', function () {
+            if (stateSelect !== $('#id_state').prop('selectedIndex')){
+                $('#id_court_district').empty()
+                stateSelect = $('#id_state').prop('selectedIndex');
+            }
+        })
+    })
+</script>
