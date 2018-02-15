@@ -866,7 +866,7 @@ def ajax_get_task_data_table(request):
                 x.lawsuit_number,
                 x.client,
                 x.opposing_party,
-                x.delegation_date.strftime('%d/%m/%Y %H:%M'),
+                x.delegation_date.strftime('%d/%m/%Y %H:%M') if x.delegation_date else '',
                 x.legacy_code,
                 'Movimentação sem processo',
                 'Preencher o processo na movimentação',
