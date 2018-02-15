@@ -993,12 +993,21 @@ class RegisterNewUser(CreateView):
     fields = ('username', 'password')
 
     def post(self, request, *args, **kwargs):
+        name = str(request.POST.get('name')).split(' ')
+        first_name = ''
+        last_name = ''
+        if name:
+            first_name = name[0]
+            last_name = ' '.join(name[1:])
         username = request.POST.get('username')
         password = request.POST.get('password')
         email = request.POST.get('email')
-        User.objects.create_user(username=username, email=email, password=password)
-        # Todo: Nao esta redirecionando para o dashboard ao se cadastrar
-        return login(request)
+        User.objects.create_user(username=username, email=email, password=password, first_name=first_name,
+                                 last_name=last_name)
+        return HttpResponseRedirect(reverse_lazy('start_user'))
+
+    def get(self, request, *args, **kwargs):
+        return render(request, 'account/register.html', {})
 
 
 class CustomSession(View):
