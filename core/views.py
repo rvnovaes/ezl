@@ -7,6 +7,7 @@ from django.forms.utils import ErrorList
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User, Group
@@ -25,7 +26,8 @@ from django.views.generic import ListView, TemplateView
 from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
-from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, AddressFormSet, \
+from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
+    ResetPasswordFormMixin, AddressFormSet, \
     OfficeForm, InviteForm, InviteOfficeFormSet, AddressOfficeForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
@@ -1002,9 +1004,14 @@ class RegisterNewUser(CreateView):
         username = request.POST.get('username')
         password = request.POST.get('password')
         email = request.POST.get('email')
-        User.objects.create_user(username=username, email=email, password=password, first_name=first_name,
-                                 last_name=last_name)
-        return HttpResponseRedirect(reverse_lazy('start_user'))
+        form = RegisterNewUserForm(
+            {'username': username, 'first_name': first_name, 'last_name': last_name, 'email': email,
+             'password1': password, 'password2': password})
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse_lazy('start_user'))
+        return render(request, 'account/register.html', {'form': form})
+
 
     def get(self, request, *args, **kwargs):
         return render(request, 'account/register.html', {})

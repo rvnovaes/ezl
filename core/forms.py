@@ -274,7 +274,7 @@ class UserCreateForm(BaseForm, UserCreationForm):
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
-    email = forms.CharField(
+    email = forms.EmailField(
         label='E-mail',
         required=True,
         max_length=255,
@@ -424,7 +424,65 @@ class ResetPasswordFormMixin(forms.Form):
             self.context = context
         return self.context
 
-from core.widgets import TypeaHeadWidget
+
+class RegisterNewUserForm(UserCreationForm):
+    first_name = forms.CharField(
+        label='Nome',
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'autofocus': ''})
+    )
+
+    last_name = forms.CharField(
+        label='Sobrenome',
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    email = forms.EmailField(
+        label='E-mail',
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    username = forms.CharField(
+        label='Nome de usuário (login)',
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    password1 = forms.CharField(
+        label=_('Senha'),
+        strip=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'type': 'password'}),
+        help_text=password_validation.password_validators_help_text_html(),
+    )
+    password2 = forms.CharField(
+        label=_('Confirmação de Senha'),
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'type': 'password'}),
+        strip=False,
+        help_text=_('Enter the same password as before, for verification.'),
+    )
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2']
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        username = self.cleaned_data.get('username')
+        if email and User.objects.filter(email=email).exclude(username=username).exists():
+            raise forms.ValidationError('Já existe usuário cadastrado com este e-mail.')
+        return email
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError('O valor informado no campo usuário não está disponível')
+        return username
 
 
 class OfficeForm(BaseModelForm):
