@@ -320,7 +320,7 @@ class AddressCreateView(AddressMixin, CreateView):
                          related_field_pk='person')
 
     def get_success_url(self):
-        return reverse('person_update', args=(self.object.person.pk,))
+        return reverse('person_update', args=(self.kwargs.get('person_pk'),))
 
 
 class AddressOfficeCreateView(AddressMixin, CreateView):
@@ -333,7 +333,7 @@ class AddressOfficeCreateView(AddressMixin, CreateView):
                          related_field_pk='office')
 
     def get_success_url(self):
-        return reverse('office_update', args=(self.object.office.pk,))
+        return reverse('office_update', args=(self.kwargs.get('office_pk'),))
 
 
 class AddressUpdateView(UpdateView):

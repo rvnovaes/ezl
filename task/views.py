@@ -89,7 +89,6 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
 class TaskCreateView(AuditFormMixin, CreateView):
     model = Task
     form_class = TaskCreateForm
-    success_url = reverse_lazy('task_list')
     success_message = CREATE_SUCCESS_MESSAGE
     template_name_suffix = '_create_form'
 
