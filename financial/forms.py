@@ -95,33 +95,19 @@ class ServicePriceTableForm(BaseModelForm):
         value = value.replace(',', '.')
         return Decimal(value)
 
-    def clean_office_correspondent(self):
-        office = self.cleaned_data['office_correspondent']
-        if not office:
-            raise forms.ValidationError("Favor Selecionar um escritório correspondente")
-        return office
-
-    def clean_office(self):
-        office = self.cleaned_data['office']
-        if not office:
-            raise forms.ValidationError("Favor Selecionar um escritório")
-        return office
-
-    def clean(self):
-        cleaned_data = super().clean()
-        if not self._errors.__len__():
-            if ServicePriceTable.objects.filter(type_task=cleaned_data["type_task"],
-                                                court_district=cleaned_data["court_district"],
-                                                state=cleaned_data["state"],
-                                                client=cleaned_data["client"],
-                                                office_correspondent=cleaned_data["office_correspondent"]).first():
-                raise forms.ValidationError("Já existe um registro com os dados selecionados")
-        return cleaned_data
+    def form_valid(self, form):
+        if ServicePriceTable.objects.filter(type_task=self.cleaned_data["type_task"],
+                                            court_district=self.cleaned_data["court_district"],
+                                            state=self.cleaned_data["state"],
+                                            client=self.cleaned_data["client"],
+                                            office_correspondent=self.cleaned_data["office_correspondent"]).first():
+            raise forms.ValidationError('Já existe um registro com os dados selecionados')
+        return super().form_valid(form)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
         self.fields['office_correspondent'] = get_office_field(self.request, profile=self.request.user)
         self.fields['office_correspondent'].label = u"Escritório Correspondente"
-        self.fields['office_correspondent'].required = False
-        self.fields['office'].required = False
+        self.fields['office_correspondent'].required = True
+        self.fields['office'].required = True
