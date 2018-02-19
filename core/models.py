@@ -106,6 +106,7 @@ class AddressType(Audit):
 
     class Meta:
         db_table = 'address_type'
+        ordering = ['name']
 
     def __str__(self):
         return self.name
@@ -149,7 +150,7 @@ class City(Audit):
         unique_together = (('name', 'state'),)
 
     def __str__(self):
-        return self.name
+        return '{} - {} - {}'.format(self.name, self.state.initials, self.state.country.name)
 
 
 class AbstractPerson(Audit, LegacyCode):

@@ -41,7 +41,6 @@ from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task
 from ecm.forms import AttachmentForm
-from ecm.models import Attachment
 from ecm.utils import attachment_form_valid, attachments_multi_delete
 
 
@@ -76,23 +75,6 @@ class AutoCompleteView(autocomplete.Select2QuerySetView):
             qs = qs[:10]
 
         return qs
-
-
-class CityAutoCompleteView(AutoCompleteView):
-    model = City
-    lookups = (
-        'name__unaccent__icontains',
-        'state__initials__exact',
-        'state__name__unaccent__contains',
-        'state__country__name__unaccent__contains',
-    )
-    select_related = ('state__country', 'state',)
-
-    def get_result_label(self, result):
-        return '{} - {}/{} - {}'.format(result.name,
-                                        result.state.initials,
-                                        result.state.name,
-                                        result.state.country.name)
 
 
 def login(request):
@@ -1194,4 +1176,32 @@ class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
         for user in User.objects.filter(Q(person__legal_name__unaccent__icontains=q) | Q(username__unaccent__icontains=q)):
             data.append({'id': user.person.id, 'value': user.person.legal_name + ' ({})'.format(user.username),
                         'data-value-txt': user.person.legal_name + ' ({})'.format(user.username)})
+        return list(data)
+
+
+# class CityAutoCompleteView(AutoCompleteView):
+#     model = City
+#     lookups = (
+#         'name__unaccent__icontains',
+#         'state__initials__exact',
+#         'state__name__unaccent__contains',
+#         'state__country__name__unaccent__contains',
+#     )
+#     select_related = ('state__country', 'state',)
+#
+#     def get_result_label(self, result):
+#         return '{} - {}/{} - {}'.format(result.name,
+#                                         result.state.initials,
+#                                         result.state.name,
+#                                         result.state.country.name)
+
+
+class CityAutoCompleteView(TypeaHeadGenericSearch):
+    @staticmethod
+    def get_data(module, model, field, q):
+        data = []
+        for city in City.objects.filter(Q(name__unaccent__icontains=q) |
+                                        Q(state__initials__exact=q) |
+                                        Q(state__country__name__unaccent__contains=q)):
+            data.append({'id': city.id, 'data-value-txt': city.__str__()})
         return list(data)

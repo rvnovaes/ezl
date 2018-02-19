@@ -95,7 +95,6 @@ class BaseForm(BaseModelForm):
 
 
 class ContactForm(ModelForm):
-
     class Meta:
         model = ContactUs
         fields = ['name', 'email', 'phone_number', 'message', 'is_active']
@@ -157,30 +156,23 @@ class ContactMechanismForm(ModelForm):
 
 
 class AddressForm(BaseModelForm):
-    city = forms.ModelChoiceField(
-            queryset=filter_valid_choice_form(City.objects.filter(is_active=True)).order_by('name'),
-            required=True,
-            label='Cidade',
-            widget=MDModelSelect2(url='city_autocomplete',
-                                            attrs={
-                                                'data-container-css': 'id_city_container',
-                                                'class': 'select-with-search material-ignore',
-                                                'data-minimum-input-length': 3,
-                                                'data-placeholder': '',
-                                                'data-label': 'Cidade',
-                                                'data-autocomplete-light-language': 'pt-BR',}
-                                            ))
+    city = forms.CharField(label="Cidade",
+                           required=True,
+                           widget=TypeaHeadForeignKeyWidget(model=City,
+                                                            field_related='name',
+                                                            name='city',
+                                                            url='/city/autocomplete/'))
     address_type = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(AddressType.objects.all().order_by('name')),
+        queryset=filter_valid_choice_form(AddressType.objects.all()),
         empty_label='',
         required=True,
         label='Tipo',
-        )
+    )
 
     is_active = CustomBooleanField(
         required=True,
         label='Ativo',
-        widget=CheckboxInput(attrs={'class': 'filled-in',})
+        widget=CheckboxInput(attrs={'class': 'filled-in', })
     )
 
     layout = Layout(
@@ -213,17 +205,17 @@ class AddressForm(BaseModelForm):
 
 class PersonForm(BaseModelForm):
     legal_type = forms.ChoiceField(
-            label='Tipo',
-            choices=((x.value, x.format(x.value)) for x in LegalType),
-            required=True,
-        )
+        label='Tipo',
+        choices=((x.value, x.format(x.value)) for x in LegalType),
+        required=True,
+    )
 
     auth_user = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(User.objects.all().order_by('username')),
         empty_label='',
         required=False,
         label='Usuário do sistema',
-        )
+    )
 
     class Meta:
         model = Person
@@ -260,7 +252,7 @@ class PersonForm(BaseModelForm):
                 Row('legal_type', 'cpf_cnpj'),
                 Row('auth_user', 'import_from_legacy'),
                 Row('is_lawyer', 'is_customer', 'is_supplier', 'is_active'),
-                )
+            )
         else:
             self.layout = Layout(
                 Row('legal_name', 'name'),
@@ -412,7 +404,6 @@ class ResetPasswordFormMixin(forms.Form):
 
         self.context = {}
         for user in self.users:
-
             temp_key = token_generator.make_token(user)
 
             # send the password reset email
@@ -436,11 +427,11 @@ class ResetPasswordFormMixin(forms.Form):
             self.context = context
         return self.context
 
+
 from core.widgets import TypeaHeadWidget
 
 
 class OfficeForm(BaseModelForm):
-
     class Meta:
         model = Office
         fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_active']

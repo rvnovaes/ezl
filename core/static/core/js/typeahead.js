@@ -42,12 +42,23 @@ $(document).ready(function () {
             $(this).attr('value', data.id);
             $(this).attr('data-value', data.id);
             $(this).attr('data-value-txt', data['data-value-txt']);
+        }).on('typeahead:close', function (el) {
+            debugger;
+            if (!$(this).val()){
+                $(this).attr('value', '');
+                $(this).attr('data-value', '');
+                $(this).attr('data-value-txt', '');
+            }
         });
     });
 
     $("form").submit(function( event ) {
       $("[data-typeahead=true]").each(function () {
-          $(this).val($(this).attr('data-value'))
+          if($(this).val() && $(this).getAttribute('data-value')){
+              $(this).val($(this).attr('data-value'))
+          }else{
+              $(this).typeahead('val','');
+          }
       });
     });
     $("[data-typeahead=true]").each(function () {
