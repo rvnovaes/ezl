@@ -3,7 +3,7 @@ from task.models import TypeTask
 from material import Layout, Row
 from core.widgets import MDModelSelect2
 from core.models import Person, State, Office
-from core.utils import filter_valid_choice_form, get_office_field
+from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field
 from lawsuit.models import CourtDistrict
 from task.models import TypeTask
 from .models import CostCenter, ServicePriceTable
@@ -101,7 +101,7 @@ class ServicePriceTableForm(BaseModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
-        self.fields['office_correspondent'] = get_office_field(self.request, profile=self.request.user)
+        self.fields['office_correspondent'] = get_office_related_office_field(self.request)
         self.fields['office_correspondent'].label = u"Escritório Correspondente"
         self.fields['office_correspondent'].required = True
         self.fields['office'].required = True

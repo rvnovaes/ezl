@@ -79,7 +79,6 @@ def get_office_field(request, profile=None):
     :param profile:
     :return: forms.ModelChoiceField
     """
-
     from core.models import Office, DefaultOffice
     from django import forms
     try:
@@ -106,6 +105,23 @@ def get_office_field(request, profile=None):
         initial=initial
     )
 
+
+def get_office_related_office_field(request):
+    from core.models import Office, DefaultOffice
+    from django import forms
+    queryset = Office.objects.none()
+    initial = None
+    office = get_office_session(request)
+    if office:
+        queryset = office.offices.all()
+
+    return forms.ModelChoiceField(
+        queryset=queryset,
+        empty_label='',
+        required=True,
+        label=u'Escritório',
+        initial=initial
+    )
 
 def get_office_session(request):
     """
