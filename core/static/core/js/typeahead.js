@@ -31,11 +31,28 @@ $(document).ready(function () {
         }, {
             name: $(this).attr('id'),
             value: 'id',
-            display: 'value',
+            display: 'data-value-txt',
             limit: 10,
             source: getTypeaheadData
         }).on('typeahead:selected', function (el, data) {
             $(this).attr('value', data.id);
+            $(this).attr('data-value', data.id);
+            $(this).attr('data-value-txt', data['data-value-txt']);
+        }).on('typeahead:autocomplete', function (el, data) {
+            $(this).attr('value', data.id);
+            $(this).attr('data-value', data.id);
+            $(this).attr('data-value-txt', data['data-value-txt']);
         });
+    });
+
+    $("form").submit(function( event ) {
+      $("[data-typeahead=true]").each(function () {
+          $(this).val($(this).attr('data-value'))
+      });
+    });
+    $("[data-typeahead=true]").each(function () {
+        if ($(this).attr('data-value-txt') !== 'None') {
+            $(this).val($(this).attr('data-value-txt'))
+        }
     });
 });

@@ -80,6 +80,8 @@ urlpatterns = [
     url(r'orgaos/excluir$', login_required(views.OrganDeleteView.as_view()), name='organ_delete'),
     url(r'organ_autocomplete$', login_required(views.OrganAutocompleteView.as_view()),
         name='organ_autocomplete'),
+    url(r'^typeahead/search/comarca$', login_required(views.TypeaHeadCourtDistrictSearch.as_view()),
+        name='typeahead_comarca'),
 
     # Address views
     url(r'^orgaos/(?P<person_pk>[0-9]+)/enderecoes/criar/$', views.AddressOrganCreateView.as_view(),

@@ -1192,5 +1192,6 @@ class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
     def get_data(module, model, field, q):
         data = []
         for user in User.objects.filter(Q(person__legal_name__unaccent__icontains=q) | Q(username__unaccent__icontains=q)):
-            data.append({'id': user.person.id, 'value': user.person.legal_name + ' ({})'.format(user.username)})
+            data.append({'id': user.person.id, 'value': user.person.legal_name + ' ({})'.format(user.username),
+                        'data-value-txt': user.person.legal_name + ' ({})'.format(user.username)})
         return list(data)

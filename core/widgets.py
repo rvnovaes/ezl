@@ -308,6 +308,7 @@ class TypeaHeadForeignKeyWidget(TypeaHeadWidget):
         return {'widget': {
             'name': self.name or name,
             'value': value,
+            'value_txt': self.model.objects.filter(pk=value).first() if value else '',
             'url': self.url,
             'module': self.model.__module__,
             'model': self.model.__name__,

@@ -1,7 +1,6 @@
 from urllib.parse import urlparse
 
 from django.contrib import messages
-from core.views import CustomLoginRequiredView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy, reverse
 # project imports
@@ -30,7 +29,7 @@ from django.db.models import Q
 from core.utils import get_office_session
 from ecm.utils import attachment_form_valid
 
-from core.views import CustomLoginRequiredView
+from core.views import CustomLoginRequiredView, TypeaHeadGenericSearch
 
 
 class InstanceListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -311,7 +310,6 @@ class CourtDivisionDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = CourtDivision
     success_url = reverse_lazy('courtdivision_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
-
 
 
 class FolderLawsuitCreateView(PopupMixin, AuditFormMixin, SuccessMessageMixin, CreateView):
@@ -626,7 +624,7 @@ class MovementTaskUpdateView(SuccessMessageMixin, CustomLoginRequiredView, Gener
     related_model = Task
     form_class = MovementForm
     table_class = TaskTable
-    related_ordering = ('-final_deadline_date', )
+    related_ordering = ('-final_deadline_date',)
     template_name = 'lawsuit/movement_task_form.html'
     success_message = CREATE_SUCCESS_MESSAGE
 
@@ -653,7 +651,6 @@ class OrganCreateView(AuditFormMixin, CreateView):
     form_class = OrganForm
     success_url = reverse_lazy('organ_list')
     success_message = CREATE_SUCCESS_MESSAGE
-    object_list_url = 'organ_list'
 
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
@@ -789,14 +786,24 @@ class MovementAutocomplete(autocomplete.Select2QuerySetView):
 
 class AddressOrganCreateView(AddressCreateView):
     def get_success_url(self):
-        return reverse('organ_update', args=(self.object.person.pk, ))
+        return reverse('organ_update', args=(self.object.person.pk,))
 
 
 class AddressOrganUpdateView(AddressUpdateView):
     def get_success_url(self):
-        return reverse('organ_update', args=(self.object.person.pk, ))
+        return reverse('organ_update', args=(self.object.person.pk,))
 
 
 class AddressOrganDeleteView(AddressDeleteView):
     def get_success_url(self):
-        return reverse('organ_update', args=(self.object.person.pk, ))
+        return reverse('organ_update', args=(self.object.person.pk,))
+
+
+class TypeaHeadCourtDistrictSearch(TypeaHeadGenericSearch):
+    @staticmethod
+    def get_data(module, model, field, q):
+        data = []
+        for court_district in CourtDistrict.objects.filter(Q(name__unaccent__icontains=q) |
+                                                          Q(state__initials__unaccent__icontains=q)):
+            data.append({'id': court_district.id, 'data-value-txt': court_district.__str__()})
+        return list(data)

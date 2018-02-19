@@ -22,12 +22,14 @@
             {% include 'task/task_detail/historico.html' %}
         </div>
         <!-- CONFIRMAR AÇÃO -->
-        <div id="confirmAction" class="modal">
-            <div class="modal-dialog">
+        <div id="confirmAction" class="modal fade"
+            tabindex="-1" role="alert" aria-labelledby="modalTitle"
+            aria-hidden="true">
+            <div class="modal-dialog ">
                 <div class="modal-content ">
                     <div id="modalHeader">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="panel-title text-center text-danger">
+                        <h4 id="modalTitle" class="panel-title text-center text-danger">
                             <i id="icon" class="mdi"></i>
                             <b> Deseja <span id="actionText">aceitar</span> o prazo? </b></h4>
                     </div>
@@ -86,6 +88,7 @@
             </div>
         </div>
     </form>
+    {% include 'core/mask_selector.html' %}
 {% endblock %}
 
 {% block extra_scripts %}

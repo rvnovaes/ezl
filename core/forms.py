@@ -54,6 +54,18 @@ class BaseModelForm(forms.ModelForm):
                         except:
                             pass
 
+    def clean(self):
+        """
+        Sobrescrevemos o método clean para ajustar o valor retornado pelos campos que
+        utilizam o widget 'TypeaHeadForeignKeyWidget'
+        :return:
+        """
+        res = super().clean()
+        for field, obj in self.base_fields.items():
+            if isinstance(obj.widget, TypeaHeadForeignKeyWidget):
+                res[field] = obj.widget.model.objects.filter(pk=res.get(field)).first()
+        return res
+
 
 class BaseForm(BaseModelForm):
     """

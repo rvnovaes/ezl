@@ -104,7 +104,7 @@ class CourtDistrict(Audit, LegacyCode):
         unique_together = (('state', 'name'),)
 
     def __str__(self):
-        return self.name
+        return '{} ({})'.format(self.name, self.state.initials)
 
 
 class Organ(Person, OfficeMixin):

@@ -176,7 +176,7 @@ class CourtDistrictForm(BaseForm):
     )
 
 
-class OrganForm(BaseModelForm):
+class OrganForm(BaseForm):
     def __init__(self, *args, **kwargs):
         super(OrganForm, self).__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
@@ -184,9 +184,17 @@ class OrganForm(BaseModelForm):
             if field_name is 'cnpj':
                 field.initial = self.instance.cpf_cnpj
 
-    cpf_cnpj = BRCNPJField(label="CNPJ", widget=forms.TextInput(
-        attrs={'data-mask': '99.999.999/9999-99'}
-    ))
+    cpf_cnpj = BRCNPJField(label="CNPJ",
+                           widget=forms.TextInput(
+                               attrs={'data-mask': '99.999.999/9999-99'}
+                           ),
+                           required=False,)
+
+    court_district = forms.CharField(label="Comarca",
+                                     widget=TypeaHeadForeignKeyWidget(model=CourtDistrict,
+                                                                      field_related='name',
+                                                                      name='court_district',
+                                                                      url='/processos/typeahead/search/comarca'))
 
     class Meta:
         model = Organ

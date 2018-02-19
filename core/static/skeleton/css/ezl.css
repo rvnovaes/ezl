@@ -1,3 +1,7 @@
+select option {
+    background: #FFF;
+    color: #000000;
+}
 .panel-heading a {
     color: #263238;
 }
@@ -36,6 +40,7 @@
     --ezl-blockedpayment-color: #17202A;
     --ezl-invalid-color: #8a6d3b;;
     --ezl-error-color: #CD6155;
+    -moz-ComboboxText: #FFF;
 }
 
 /* Background Colors */
