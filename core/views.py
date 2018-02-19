@@ -28,16 +28,17 @@ from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
     ResetPasswordFormMixin, AddressFormSet, \
-    OfficeForm, InviteForm, InviteOfficeFormSet, AddressOfficeForm
+    OfficeForm, InviteForm, InviteOfficeFormSet, AddressOfficeForm, InviteOfficeForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
     record_from_wrong_office, DELETE_SUCCESS_MESSAGE, \
     ADDRESS_UPDATE_ERROR_MESSAGE, \
     ADDRESS_UPDATE_SUCCESS_MESSAGE
-from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice
+from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, InviteOffice
 from core.signals import create_person
-from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable
+from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
+    InviteOfficeTable
 from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
@@ -1092,6 +1093,25 @@ class InviteCreateView(AuditFormMixin, CreateView):
         return JsonResponse({'status': 'ok'})
 
 
+class InviteOfficeCreateView(AuditFormMixin, CreateView):
+    model = InviteOffice
+    form_class = InviteOfficeForm
+    success_url = reverse_lazy('start_user')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'start_user'
+
+    def post(self, request, *args, **kwargs):
+        form = InviteOfficeForm(request.POST)
+        form.instance.create_user = self.request.user
+        office_invite = request.POST.get('office_invite')
+        office = request.POST.get('office')
+        if not InviteOffice.objects.filter(office_invite__pk=office_invite, office__pk=office, status='N'):
+            form.instance.office = Office.objects.get(pk=request.POST.get('office'))
+            form.instance.office_invite = Office.objects.get(pk=request.POST.get('office_invite'))
+            form.instance.save()
+        return JsonResponse({'status': 'ok'})
+
+
 class InviteUpdateView(UpdateView):
     def post(self, request, *args, **kargs):
         invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
@@ -1109,6 +1129,18 @@ class InviteTableView(CustomLoginRequiredView, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         table = InviteTable(Invite.objects.filter(office__id=self.kwargs.get('office_pk')).order_by('-pk'))
+        RequestConfig(self.request).configure(table)
+        context['table'] = table
+        return context
+
+
+class InviteOfficeTableView(CustomLoginRequiredView, ListView):
+    model = InviteOffice
+    template_name = 'core/invite_table.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        table = InviteOfficeTable(InviteOffice.objects.filter(office__id=self.kwargs.get('office_pk')).order_by('-pk'))
         RequestConfig(self.request).configure(table)
         context['table'] = table
         return context
@@ -1203,4 +1235,13 @@ class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
         data = []
         for user in User.objects.filter(Q(person__legal_name__unaccent__icontains=q) | Q(username__unaccent__icontains=q)):
             data.append({'id': user.person.id, 'value': user.person.legal_name + ' ({})'.format(user.username)})
+        return list(data)
+
+
+class TypeaHeadInviteOfficeSearch(TypeaHeadGenericSearch):
+    @staticmethod
+    def get_data(module, model, field, q):
+        data = []
+        for office in Office.objects.filter(Q(legal_name__unaccent__icontains=q)):
+            data.append({'id': office.id, 'value': office.legal_name})
         return list(data)
