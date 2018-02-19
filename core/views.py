@@ -935,6 +935,9 @@ class PasswordResetViewMixin(PasswordResetView, FormView):
         context = form.save(self.request)
         return render(self.request, 'account/password_reset_done.html', context)
 
+    def form_invalid(self, form):
+        return render(self.request, 'account/password_reset_done_error.html', {})
+
 
 class OfficeListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Office
