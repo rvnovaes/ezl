@@ -3,7 +3,9 @@
         var stateSelect = $('#id_state').prop('selectedIndex');
         $('#id_state').on('change', function () {
             if (stateSelect !== $('#id_state').prop('selectedIndex')){
-                $('#id_court_district').empty()
+                $('[name=court_district]').val('');
+                $('[name=court_district]').attr('data-value-txt', '');
+                $('[name=court_district]').attr('data-value', '');
                 stateSelect = $('#id_state').prop('selectedIndex');
             }
         })

@@ -33,7 +33,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     record_from_wrong_office, DELETE_SUCCESS_MESSAGE, \
     ADDRESS_UPDATE_ERROR_MESSAGE, \
     ADDRESS_UPDATE_SUCCESS_MESSAGE
-from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice
+from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, OfficeMixin
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable
 from core.utils import login_log, logout_log, get_office_session
@@ -544,22 +544,6 @@ class PersonDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_url = reverse_lazy('person_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
     object_list_url = 'person_list'
-
-
-class ClientAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        # Don't forget to filter out results depending on the visitor !
-        # if not self.request.user.is_authenticated():
-        #     return Person.objects.none()
-
-        qs = Person.objects.none()
-        office = self.forwarded.get('office', get_office_session(self.request))
-
-        if self.q:
-            qs = Person.objects.active().filter(legal_name__unaccent__istartswith=self.q,
-                                                is_customer=True,
-                                                offices=office)
-        return qs
 
 
 class CorrespondentAutocomplete(autocomplete.Select2QuerySetView):
@@ -1158,20 +1142,31 @@ class TypeaHeadGenericSearch(View):
         model = getattr(module, self.request.GET.get('model'))
         field = request.GET.get('field')
         q = request.GET.get('q')
-        return JsonResponse(self.get_data(module, model, field, q), safe=False)
+        office = get_office_session(self.request)
+        forward = request.GET.get('forward')
+        forward_value = request.GET.get('forwardValue')
+        if forward and model._meta.get_field(forward).get_internal_type() == 'ForeignKey':
+            forward = '{}__id'.format(forward)
+        forward_params = {
+            '{}'.format(forward): forward_value,
+        }
+        data = self.get_data(module, model, field, q, office, forward_params)
+        return JsonResponse(data, safe=False)
 
     @staticmethod
-    def get_data(module, model, field, q):
+    def get_data(module, model, field, q, office, forward_params):
         params = {
             '{}__unaccent__icontains'.format(field): q,
         }
         data = model.objects.filter(**params).annotate(value=F(field)).values('id', 'value').order_by(field)
+        if issubclass(model, OfficeMixin) or hasattr(model, 'offices'):
+            data.filter(office=office)
         return list(data)
 
 
 class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
     @staticmethod
-    def get_data(module, model, field, q):
+    def get_data(module, model, field, q, office, forward_params):
         data = []
         for user in User.objects.filter(Q(person__legal_name__unaccent__icontains=q) | Q(username__unaccent__icontains=q)):
             data.append({'id': user.person.id, 'value': user.person.legal_name + ' ({})'.format(user.username),
@@ -1179,29 +1174,25 @@ class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
         return list(data)
 
 
-# class CityAutoCompleteView(AutoCompleteView):
-#     model = City
-#     lookups = (
-#         'name__unaccent__icontains',
-#         'state__initials__exact',
-#         'state__name__unaccent__contains',
-#         'state__country__name__unaccent__contains',
-#     )
-#     select_related = ('state__country', 'state',)
-#
-#     def get_result_label(self, result):
-#         return '{} - {}/{} - {}'.format(result.name,
-#                                         result.state.initials,
-#                                         result.state.name,
-#                                         result.state.country.name)
-
-
 class CityAutoCompleteView(TypeaHeadGenericSearch):
     @staticmethod
-    def get_data(module, model, field, q):
+    def get_data(module, model, field, q, office, forward_params):
         data = []
         for city in City.objects.filter(Q(name__unaccent__icontains=q) |
                                         Q(state__initials__exact=q) |
                                         Q(state__country__name__unaccent__contains=q)):
             data.append({'id': city.id, 'data-value-txt': city.__str__()})
         return list(data)
+
+
+class ClientAutocomplete(TypeaHeadGenericSearch):
+
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params):
+        data = []
+        for city in Person.objects.filter(Q(legal_name__unaccent__icontains=q),
+                                          Q(is_customer=True,),
+                                          Q(offices=office)):
+            data.append({'id': city.id, 'data-value-txt': city.__str__()})
+        return list(data)
+

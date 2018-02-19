@@ -274,10 +274,11 @@ class MDModelSelect2(QuerySetSelectMixin,
 class TypeaHeadWidget(Widget):
     template_name = 'skeleton/componentes/fields/typeahead.html'
 
-    def __init__(self, model, url=False, name=False, *args, **kwargs):
+    def __init__(self, model, url=False, name=False, forward=None,  *args, **kwargs):
         self.model = model
         self.url = url if url else '/typeahead/search'
         self.name = name
+        self.forward = forward or None
         super().__init__(*args, **kwargs)
 
     class Media:
@@ -290,7 +291,8 @@ class TypeaHeadWidget(Widget):
             'value': value,
             'url': self.url,
             'module': self.model.__module__,
-            'model': self.model.__name__
+            'model': self.model.__name__,
+            'forward': self.forward
         }}
 
     def render(self, name, value, attrs=None, renderer=None):
@@ -300,9 +302,10 @@ class TypeaHeadWidget(Widget):
 
 
 class TypeaHeadForeignKeyWidget(TypeaHeadWidget):
-    def __init__(self, model, field_related, url=False, name=False, *args, **kwargs):
+    def __init__(self, model, field_related, url=False, name=False, forward=None, *args, **kwargs):
         super().__init__(model, url, name, *args, **kwargs)
         self.field_related = field_related
+        self.forward = forward or None
 
     def get_context_data(self, name, value, attrs=None):
         return {'widget': {
@@ -312,5 +315,6 @@ class TypeaHeadForeignKeyWidget(TypeaHeadWidget):
             'url': self.url,
             'module': self.model.__module__,
             'model': self.model.__name__,
-            'field_related': self.field_related
+            'field_related': self.field_related,
+            'forward': self.forward
         }}

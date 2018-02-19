@@ -801,9 +801,11 @@ class AddressOrganDeleteView(AddressDeleteView):
 
 class TypeaHeadCourtDistrictSearch(TypeaHeadGenericSearch):
     @staticmethod
-    def get_data(module, model, field, q):
+    def get_data(module, model, field, q, office, forward_params):
         data = []
-        for court_district in CourtDistrict.objects.filter(Q(name__unaccent__icontains=q) |
-                                                          Q(state__initials__unaccent__icontains=q)):
+        court_districts = CourtDistrict.objects.filter(**forward_params).filter(
+            Q(name__unaccent__icontains=q) |
+            Q(state__initials__unaccent__icontains=q))
+        for court_district in court_districts:
             data.append({'id': court_district.id, 'data-value-txt': court_district.__str__()})
         return list(data)

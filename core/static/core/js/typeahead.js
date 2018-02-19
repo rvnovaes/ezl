@@ -4,6 +4,8 @@ $(document).ready(function () {
         var module = $(this).attr('data-module');
         var model = $(this).attr('data-model');
         var field = $(this).attr('name');
+        var forward = $(this).attr('data-forward');
+        var forwardValue = '';
         if ($(this).attr('search-field')){
             field = $(this).attr('search-field');
         }
@@ -18,7 +20,10 @@ $(document).ready(function () {
                     return data;
                 },
                 replace: function (url, query) {
-                    var params = '?module=' + module + '&model=' + model + '&field=' + field + '&q=' + query;
+                    if (forward && forward !== 'None'){
+                        forwardValue = $("[name=" + forward + "]").val();
+                    }
+                    var params = '?module=' + module + '&model=' + model + '&field=' + field + '&forward=' + forward + '&forwardValue=' + forwardValue + '&q=' + query;
                     return url + params;
                 }
             }
@@ -43,7 +48,6 @@ $(document).ready(function () {
             $(this).attr('data-value', data.id);
             $(this).attr('data-value-txt', data['data-value-txt']);
         }).on('typeahead:close', function (el) {
-            debugger;
             if (!$(this).val()){
                 $(this).attr('value', '');
                 $(this).attr('data-value', '');
@@ -54,7 +58,7 @@ $(document).ready(function () {
 
     $("form").submit(function( event ) {
       $("[data-typeahead=true]").each(function () {
-          if($(this).val() && $(this).getAttribute('data-value')){
+          if($(this).val() && $(this).attr('data-value')){
               $(this).val($(this).attr('data-value'))
           }else{
               $(this).typeahead('val','');

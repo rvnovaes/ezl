@@ -63,7 +63,8 @@ class BaseModelForm(forms.ModelForm):
         res = super().clean()
         for field, obj in self.base_fields.items():
             if isinstance(obj.widget, TypeaHeadForeignKeyWidget):
-                res[field] = obj.widget.model.objects.filter(pk=res.get(field)).first()
+                record_id = res.get(field) if res.get(field) else 0
+                res[field] = obj.widget.model.objects.filter(pk=record_id).first()
         return res
 
 
