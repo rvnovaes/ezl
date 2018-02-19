@@ -1122,6 +1122,16 @@ class InviteUpdateView(UpdateView):
         return HttpResponse('ok')
 
 
+class InviteOfficeUpdateView(UpdateView):
+    def post(self, request, *args, **kargs):
+        invite = InviteOffice.objects.get(pk=int(request.POST.get('invite_pk')))
+        invite.status = request.POST.get('status')
+        if invite.status == 'A':
+            invite.office.offices.add(invite.office_invite)
+        invite.save()
+        return HttpResponse('ok')
+
+
 class InviteTableView(CustomLoginRequiredView, ListView):
     model = Invite
     template_name = 'core/invite_table.html'

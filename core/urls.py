@@ -81,6 +81,7 @@ urlpatterns = [
     url(r'^convites/criar$', login_required(views.InviteCreateView.as_view()), name='invite_add'),
     url(r'^convites/office/criar$', login_required(views.InviteOfficeCreateView.as_view()), name='invite_office_add'),
     url(r'^convites/invite_update/$', login_required(views.InviteUpdateView.as_view()), name='invite_update'),
+    url(r'^convites/invite_office_update/$', login_required(views.InviteOfficeUpdateView.as_view()), name='invite_office_update'),
     url(r'^convites/convidar$', login_required(views.InviteMultipleUsersView.as_view()), name='invite_multiple_users'),
     url(r'^convites/table/(?P<office_pk>[0-9]+)/$', login_required(views.InviteTableView.as_view()), name='invite_table'),
     url(r'^convites/office/table/(?P<office_pk>[0-9]+)/$', login_required(views.InviteOfficeTableView.as_view()), name='invite_office_table'),
