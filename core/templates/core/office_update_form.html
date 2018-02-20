@@ -278,6 +278,9 @@
                         url: invite.url,
                         data: data,
                         success: function (result, status, xhr) {
+                            if (result.error){
+                                showToast('error', 'Atenção', result.error, 0, false);
+                            }
                             inviteTable.load(invite.table_url + '{{ object.pk }}' + '/', invite.table_id);
                             $(invite.el + ' .twitter-typeahead').typeahead('val', '');
 

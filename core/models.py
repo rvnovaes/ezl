@@ -302,6 +302,9 @@ class InviteOffice(Audit, OfficeMixin):
     def __str__(self):
         return self.office_invite.legal_name
 
+    class Meta:
+        verbose_name = 'Convites para escritórios'
+
 
 
 class Address(Audit):

@@ -1019,7 +1019,10 @@ class InviteOfficeCreateView(AuditFormMixin, CreateView):
         form.instance.create_user = self.request.user
         office_invite = request.POST.get('office_invite')
         office = request.POST.get('office')
-        if not InviteOffice.objects.filter(office_invite__pk=office_invite, office__pk=office, status='N'):
+        if office == office_invite:
+            return JsonResponse({'error': 'Não é possível convidar o mesmo escritório!'})
+        if not InviteOffice.objects.filter(office_invite__pk=office_invite, office__pk=office,
+                                           status='N'):
             form.instance.office = Office.objects.get(pk=request.POST.get('office'))
             form.instance.office_invite = Office.objects.get(pk=request.POST.get('office_invite'))
             form.instance.save()
