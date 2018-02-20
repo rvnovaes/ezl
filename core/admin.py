@@ -45,4 +45,3 @@ class InviteOfficeAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AddressType)
-admin.site.register(ContactMechanism)
