@@ -38,10 +38,11 @@ def receive_notes_execution_date(notes, instance, execution_date, survey_result,
 def new_task(sender, instance, created, **kwargs):
     notes = 'Nova providência' if created else getattr(instance, '__notes', '')
     user = instance.alter_user if instance.alter_user else instance.create_user
-    TaskHistory.objects.create(task=instance,
-                               create_user=user,
-                               status=instance.task_status,
-                               create_date=instance.create_date, notes=notes)
+    if not getattr(instance, '_called_by_etl'):
+        TaskHistory.objects.create(task=instance,
+                                   create_user=user,
+                                   status=instance.task_status,
+                                   create_date=instance.create_date, notes=notes)
     contact_mechanism_type = ContactMechanismType.objects.filter(name__iexact='email')
     if not contact_mechanism_type:
         return
