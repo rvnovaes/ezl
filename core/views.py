@@ -1235,8 +1235,8 @@ class ServiceAutocomplete(TypeaHeadGenericSearch):
 
 class TypeaHeadInviteOfficeSearch(TypeaHeadGenericSearch):
     @staticmethod
-    def get_data(module, model, field, q):
+    def get_data(module, model, field, q, office, forward_params):
         data = []
         for office in Office.objects.filter(Q(legal_name__unaccent__icontains=q)):
-            data.append({'id': office.id, 'value': office.legal_name})
+            data.append({'id': office.id, 'data-value-txt': office.legal_name})
         return list(data)
