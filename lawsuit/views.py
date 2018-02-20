@@ -698,49 +698,32 @@ class OrganListView(SuccessMessageMixin, SingleTableViewMixin):
     table_class = OrganTable
 
 
-class OrganAutocompleteView(autocomplete.Select2QuerySetView):
+class OrganAutocompleteView(TypeaHeadGenericSearch):
 
-    def get_queryset(self):
-
-        if not self.request.user.is_authenticated():
-            return Organ.objects.none()
-
-        qs = Organ.objects.filter(office=get_office_session(self.request), is_active=True)
-        continent = self.forwarded.get('continent', None)
-
-        if continent:
-            qs = qs.filter(continent=continent, office=get_office_session(self.request), is_active=True)
-
-        if self.q:
-            q_objects = Q()
-            args_filter = self.q.split(' ')
-            for arg in args_filter:
-                q_objects &= Q(legal_name__unaccent__icontains=arg) | Q(
-                    court_district__name__icontains=arg)
-            qs = qs.filter(q_objects, office=get_office_session(self.request), is_active=True)
-
-        return qs
-
-    def get_result_label(self, result):
-        res = result.court_district.name + ' / ' + result.legal_name
-        return res
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params):
+        data = []
+        for organ in Organ.objects.filter((Q(legal_name__unaccent__icontains=q) |
+                                           Q(court_district__name__icontains=q)),
+                                          Q(is_active=True),
+                                          Q(office=office)):
+            data.append({'id': organ.id, 'data-value-txt': organ.__str__()})
+        return list(data)
 
 
-class CourtDistrictAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = CourtDistrict.objects.none()
+class CourtDistrictAutocomplete(TypeaHeadGenericSearch):
 
-        state = self.forwarded.get('state', None)
-
-        if self.q:
-            qs = CourtDistrict.objects.filter(name__unaccent__istartswith=self.q,
-                                              is_active=True)
-        if self.q and state:
-            qs = CourtDistrict.objects.filter(name__unaccent__istartswith=self.q,
-                                              is_active=True,
-                                              state=state)
-
-        return qs
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params):
+        data = []
+        court_districts = CourtDistrict.objects.filter(
+            **forward_params) if forward_params else CourtDistrict.objects.all()
+        court_districts = court_districts.filter(
+            Q(name__unaccent__icontains=q) |
+            Q(state__initials__unaccent__icontains=q))
+        for court_district in court_districts:
+            data.append({'id': court_district.id, 'data-value-txt': court_district.__str__()})
+        return list(data)
 
 
 class FolderAutocomplete(autocomplete.Select2QuerySetView):
@@ -803,7 +786,8 @@ class TypeaHeadCourtDistrictSearch(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params):
         data = []
-        court_districts = CourtDistrict.objects.filter(**forward_params).filter(
+        court_districts = CourtDistrict.objects.filter(**forward_params) if forward_params else CourtDistrict.objects.all()
+        court_districts = court_districts.filter(
             Q(name__unaccent__icontains=q) |
             Q(state__initials__unaccent__icontains=q))
         for court_district in court_districts:

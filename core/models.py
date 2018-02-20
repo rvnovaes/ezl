@@ -131,6 +131,7 @@ class State(Audit):
     class Meta:
         db_table = 'state'
         verbose_name = 'Estado'
+        ordering = ['name']
 
     def __str__(self):
         return self.name

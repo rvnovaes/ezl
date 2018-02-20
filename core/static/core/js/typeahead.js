@@ -22,6 +22,9 @@ $(document).ready(function () {
                 replace: function (url, query) {
                     if (forward && forward !== 'None'){
                         forwardValue = $("[name=" + forward + "]").val();
+                        if (forwardValue == ''){
+                            forwardValue = 0;
+                        }
                     }
                     var params = '?module=' + module + '&model=' + model + '&field=' + field + '&forward=' + forward + '&forwardValue=' + forwardValue + '&q=' + query;
                     return url + params;

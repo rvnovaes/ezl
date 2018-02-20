@@ -278,7 +278,7 @@ class TypeaHeadWidget(Widget):
         self.model = model
         self.url = url if url else '/typeahead/search'
         self.name = name
-        self.forward = forward or None
+        self.forward = forward or ''
         super().__init__(*args, **kwargs)
 
     class Media:
@@ -305,7 +305,7 @@ class TypeaHeadForeignKeyWidget(TypeaHeadWidget):
     def __init__(self, model, field_related, url=False, name=False, forward=None, *args, **kwargs):
         super().__init__(model, url, name, *args, **kwargs)
         self.field_related = field_related
-        self.forward = forward or None
+        self.forward = forward or ''
 
     def get_context_data(self, name, value, attrs=None):
         return {'widget': {

@@ -50,8 +50,7 @@ class TaskForm(BaseForm):
         empty_label='Selecione...',
         label='Tipo de Serviço')
 
-    delegation_date = forms.DateTimeField(initial=datetime.now(),
-                                          required=False,
+    delegation_date = forms.DateTimeField(required=False,
                                           label='Data de Delegação',
                                           widget=MDDateTimepicker(attrs={
                                               'class': 'form-control'

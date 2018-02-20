@@ -69,21 +69,18 @@ class FolderForm(BaseForm):
         fields = ['office', 'folder_number', 'person_customer', 'cost_center', 'is_active']
 
     folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
-
-    person_customer = forms.ModelChoiceField(
-        queryset=Person.objects.filter(is_active=True, is_customer=True),
-        empty_label=u"Selecione...",
-        widget=MDModelSelect2(url='client_autocomplete',
-                              forward=['office'],
-                              attrs={'class': 'form-control'})
-    )
-
-    cost_center = forms.ModelChoiceField(
-        queryset=CostCenter.objects.filter(is_active=True),
-        empty_label=u"Selecione...",
-        widget=MDModelSelect2(url='costcenter_autocomplete', attrs={'class': 'form-control'}),
-        required=False,
-    )
+    person_customer = forms.CharField(label="Cliente",
+                                      required=True,
+                                      widget=TypeaHeadForeignKeyWidget(model=Person,
+                                                                       field_related='legal_name',
+                                                                       name='person_customer',
+                                                                       url='/client_form'))
+    cost_center = forms.CharField(required=False,
+                                  label="Centro de Custos",
+                                  widget=TypeaHeadForeignKeyWidget(model=CostCenter,
+                                                                   field_related='name',
+                                                                   name='cost_center',
+                                                                   url='/financeiro/centros-de-custos/autocomplete'))
 
     def __init__(self, *args, **kwargs):
         super(FolderForm, self).__init__(*args, **kwargs)
@@ -119,16 +116,12 @@ class LawSuitForm(BaseForm):
             Person.objects.filter(is_active=True, is_lawyer=True)).only('legal_name').order_by(
             'name'), required=True
     )
-    organ = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(Organ.objects.filter(is_active=True)).order_by('name'),
-        empty_label=u"Selecione",
-        required=True,
-        initial=None,
-        widget=autocomplete.ListSelect2(url='organ_autocomplete',
-                                        attrs={
-                                            'class': 'select-with-search',
-                                            'data-placeholder': 'Comarca/Órgão'
-                                        }))
+    organ = forms.CharField(label='Comarca/Órgão',
+                            required=True,
+                            widget=TypeaHeadForeignKeyWidget(model=Organ,
+                                                             field_related='legal_name',
+                                                             name='organ',
+                                                             url='/processos/organ_autocomplete'))
 
     instance = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(Instance.objects.filter(is_active=True)).order_by('name'),

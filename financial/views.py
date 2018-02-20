@@ -1,6 +1,7 @@
 from core.views import CustomLoginRequiredView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.contrib import messages
+from django.db.models import Q
 
 from django.views.generic.edit import CreateView, UpdateView
 from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
@@ -11,11 +12,8 @@ from core.views import (AuditFormMixin, MultiDeleteViewMixin,
 from .forms import CostCenterForm, ServicePriceTableForm
 from .models import CostCenter, ServicePriceTable
 from .tables import CostCenterTable, ServicePriceTableTable
-from core.views import remove_invalid_registry
-from dal import autocomplete
+from core.views import remove_invalid_registry, TypeaHeadGenericSearch
 from core.utils import get_office_session
-from django.http import HttpResponseRedirect
-from core.messages import record_from_wrong_office
 
 
 class CostCenterListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -74,15 +72,17 @@ class CostCenterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
         ret = super().post(request, *args, **kwargs)
         return ret
 
-class CostCenterAutocomplete(CustomLoginRequiredView,
-                             autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = CostCenter.objects.none()
 
-        if self.q:
-            qs = CostCenter.objects.filter(name__unaccent__istartswith=self.q,
-                                           is_active=True, office=get_office_session(self.request))
-        return qs
+class CostCenterAutocomplete(TypeaHeadGenericSearch):
+
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params):
+        data = []
+        for cost_center in CostCenter.objects.filter(Q(name__unaccent__icontains=q),
+                                                     Q(is_active=True),
+                                                     Q(office=office)):
+            data.append({'id': cost_center.id, 'data-value-txt': cost_center.__str__()})
+        return list(data)
 
 
 class ServicePriceTableListView(CustomLoginRequiredView, SingleTableViewMixin):

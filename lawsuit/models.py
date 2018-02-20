@@ -145,6 +145,9 @@ class Organ(Person, OfficeMixin):
             """Tratado exceção para quando estiver inserindo um novo registro e o `court_district` não for preenchido"""
         return res
 
+    def __str__(self):
+        return self.court_district.name + ' / ' + self.legal_name
+
 
 class LawSuit(Audit, LegacyCode, OfficeMixin):
     person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,

@@ -546,58 +546,6 @@ class PersonDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     object_list_url = 'person_list'
 
 
-class CorrespondentAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = Person.objects.none()
-
-        if self.q:
-            Person.objects.filter()
-            qs = Person.objects.filter(
-                legal_name__unaccent__istartswith=self.q,
-                auth_user__groups__name=Person.CORRESPONDENT_GROUP
-            )
-        return qs
-
-
-class CorrespondentAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        # Don't forget to filter out results depending on the visitor !
-        # if not self.request.user.is_authenticated():
-        #     return Person.objects.none()
-
-        qs = Person.objects.none()
-
-        if self.q:
-            qs = Person.objects.active().correspondents().filter(legal_name__unaccent__istartswith=self.q)
-        return qs
-
-
-class RequesterAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        # Don't forget to filter out results depending on the visitor !
-        # if not self.request.user.is_authenticated():
-        #     return Person.objects.none()
-
-        qs = Person.objects.none()
-
-        if self.q:
-            qs = Person.objects.active().requesters().filter(legal_name__unaccent__istartswith=self.q)
-        return qs
-
-
-class ServiceAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        # Don't forget to filter out results depending on the visitor !
-        # if not self.request.user.is_authenticated():
-        #     return Person.objects.none()
-
-        qs = Person.objects.none()
-
-        if self.q:
-            qs = Person.objects.active().services().filter(legal_name__unaccent__istartswith=self.q)
-        return qs
-
-
 class GenericAutocompleteForeignKey(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         try:
@@ -1143,13 +1091,16 @@ class TypeaHeadGenericSearch(View):
         field = request.GET.get('field')
         q = request.GET.get('q')
         office = get_office_session(self.request)
-        forward = request.GET.get('forward')
+        forward = request.GET.get('forward') if request.GET.get('forward') != 'undefined' else None
         forward_value = request.GET.get('forwardValue')
-        if forward and model._meta.get_field(forward).get_internal_type() == 'ForeignKey':
-            forward = '{}__id'.format(forward)
-        forward_params = {
-            '{}'.format(forward): forward_value,
-        }
+        forward_params = ''
+        if forward:
+            if model._meta.get_field(forward).get_internal_type() == 'ForeignKey':
+                forward = '{}__id'.format(forward)
+        if forward and int(forward_value):
+            forward_params = {
+                '{}'.format(forward): forward_value,
+            }
         data = self.get_data(module, model, field, q, office, forward_params)
         return JsonResponse(data, safe=False)
 
@@ -1190,9 +1141,41 @@ class ClientAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params):
         data = []
-        for city in Person.objects.filter(Q(legal_name__unaccent__icontains=q),
+        for client in Person.objects.filter(Q(legal_name__unaccent__icontains=q),
                                           Q(is_customer=True,),
                                           Q(offices=office)):
-            data.append({'id': city.id, 'data-value-txt': city.__str__()})
+            data.append({'id': client.id, 'data-value-txt': client.__str__()})
         return list(data)
 
+
+class CorrespondentAutocomplete(TypeaHeadGenericSearch):
+
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params):
+        data = []
+        for correspondent in Person.objects.active().correspondents().filter(Q(legal_name__unaccent__icontains=q),
+                                          Q(offices=office)):
+            data.append({'id': correspondent.id, 'data-value-txt': correspondent.__str__()})
+        return list(data)
+
+
+class RequesterAutocomplete(TypeaHeadGenericSearch):
+
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params):
+        data = []
+        for requester in Person.objects.active().requesters().filter(Q(legal_name__unaccent__icontains=q),
+                                                                             Q(offices=office)):
+            data.append({'id': requester.id, 'data-value-txt': requester.__str__()})
+        return list(data)
+
+
+class ServiceAutocomplete(TypeaHeadGenericSearch):
+
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params):
+        data = []
+        for service in Person.objects.active().services().filter(Q(legal_name__unaccent__icontains=q),
+                                                                     Q(offices=office)):
+            data.append({'id': service.id, 'data-value-txt': service.__str__()})
+        return list(data)
