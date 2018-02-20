@@ -15,6 +15,17 @@ class ContactMechanismTypeAdmin(admin.ModelAdmin):
         verbose_name_plural = 'Tipos de Contato'
 
 
+@admin.register(ContactMechanism)
+class ContactMechanism(admin.ModelAdmin):
+    list_display = ['person', 'contact_mechanism_type', 'description']
+    search_fields = ['person__legal_name', 'description']
+    list_filter = ['contact_mechanism_type']
+
+    class Meta:
+        verbose_name = 'Mecanismo de Contato'
+        verbose_name_plural = 'Mecanismos de Contato'
+
+
 @admin.register(Office)
 class OfficeAdmin(admin.ModelAdmin):
     filter_horizontal = ['persons', 'offices']
@@ -34,4 +45,3 @@ class InviteOfficeAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AddressType)
-admin.site.register(ContactMechanism)
