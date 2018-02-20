@@ -115,11 +115,11 @@
 
                     <div class="panel-footer text-right">
                         <button type="button" data-toggle="modal" data-target="#confirmDelete" disabled
-                                id="delete_button" class="btn btn-sm btn-danger material-icons">Apagar</button>
+                                id="delete_button" class="btn btn-danger material-icons">Apagar</button>
                         {% if not view.kwargs.pk %}
-                            <a class="btn btn-sm btn-success disabled">
+                            <a class="btn btn-success disabled">
                         {% else %}
-                            <a class="btn btn-sm btn-success" href="{% url link_add  view.kwargs.pk %}">
+                            <a class="btn btn-success" href="{% url link_add  view.kwargs.pk %}">
                         {% endif %}
                         Adicionar</a>
 
