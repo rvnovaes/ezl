@@ -178,54 +178,6 @@ class MDDateTimeRangeFilter(RangeFilter):
         super(MDDateTimeRangeFilter, self).__init__(*args, **kwargs)
 
 
-class MDSelect2WidgetMixin(object):
-    """Mixin for Select2 widgets."""
-
-    def build_attrs(self, *args, **kwargs):
-        attrs = super().build_attrs(*args, **kwargs)
-        lang_code = self._get_language_code()
-        if lang_code:
-            attrs.setdefault('data-autocomplete-light-language', lang_code)
-        # search min length
-        attrs.setdefault('data-minimum-input-length', 3)
-        return attrs
-
-    def _get_language_code(self):
-        lang_code = translation.get_language()
-        if lang_code:
-            lang_code = translation.to_locale(lang_code).replace('_', '-')
-        return lang_code
-
-    def _media(self):
-        """Automatically include static files for the admin."""
-        _min = '' if settings.DEBUG else 'min.'
-        i18n_file = ()
-        lang_code = self._get_language_code()
-
-        if lang_code:
-            i18n_file = (
-                'autocomplete_light/vendor/select2/dist/js/i18n/{}.js'.format(
-                    lang_code),
-            )
-        css = (
-            'autocomplete_light/vendor/select2/dist/css/select2.{}css'.format(
-                _min),
-            'autocomplete_light/select2.css',
-        )
-        js = ('autocomplete_light/jquery.init.js',
-              'autocomplete_light/autocomplete.init.js',
-              'autocomplete_light/vendor/select2/dist/js/select2.full.{}js'.format(
-                  _min),
-              ) + i18n_file + (
-                 'libs/django-autocomplete-light-3.2.9/select2.js',
-             )
-
-        return forms.Media(css={'all': css}, js=js)
-
-    media = property(_media)
-    autocomplete_function = 'select2'
-
-
 class MDSelect(ChoiceWidget):
     input_type = 'select'
     template_name = 'core/widgets/md_select.html'
@@ -263,12 +215,6 @@ class MDSelect(ChoiceWidget):
         return (use_required_attribute and
                 first_choice is not None and
                 self._choice_has_empty_value(first_choice))
-
-
-class MDModelSelect2(QuerySetSelectMixin,
-                     MDSelect2WidgetMixin,
-                     MDSelect):
-    """Select widget for QuerySet choices and Select2."""
 
 
 class TypeaHeadWidget(Widget):

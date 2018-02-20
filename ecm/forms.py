@@ -8,7 +8,7 @@ from .models import Attachment, DefaultAttachmentRule
 from core.forms import BaseModelForm
 from core.utils import filter_valid_choice_form, get_office_field
 from core.models import City, State, Person
-from core.widgets import MDModelSelect2
+from core.widgets import TypeaHeadForeignKeyWidget
 from lawsuit.models import CourtDistrict
 from task.models import TypeTask
 
@@ -37,9 +37,8 @@ class AttachmentForm(forms.ModelForm):
 
 
 class DefaultAttachmentRuleForm(BaseModelForm):
-
     name = forms.CharField(label="Nome",
-                            required=True)
+                           required=True)
 
     description = forms.CharField(
         label=u'Descrição',
@@ -55,53 +54,34 @@ class DefaultAttachmentRuleForm(BaseModelForm):
         label='Tipo de Serviço',
     )
 
-    person_customer = forms.ModelChoiceField(
-        queryset=Person.objects.filter(is_customer=True),
-        widget=MDModelSelect2(
-            url='client_autocomplete',
-            attrs={
-                'class': 'select-with-search material-ignore form-control',
-                'data-placeholder': '',
-                'data-label': 'Cliente'
-            }),
-        required=False,
-        label="Cliente"
-    )
+    person_customer = forms.CharField(label="Cliente",
+                                      required=False,
+                                      widget=TypeaHeadForeignKeyWidget(model=Person,
+                                                                       field_related='legal_name',
+                                                                       name='person_customer',
+                                                                       url='/client_form'))
 
     state = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(State.objects.all()).order_by('initials'),
+        queryset=filter_valid_choice_form(State.objects.all()),
         empty_label='',
         required=False,
         label='UF',
     )
 
-    court_district = forms.ModelChoiceField(
-        queryset=CourtDistrict.objects.filter(),
-        widget=MDModelSelect2(
-            url='courtdistrict_autocomplete',
-            forward=['state'],
-            attrs={
-                'class': 'select-with-search material-ignore form-control',
-                'data-placeholder': '',
-                'data-label': 'Comarca'
-            }),
-        required=False,
-        label="Comarca"
-    )
+    court_district = forms.CharField(label="Comarca",
+                                     required=False,
+                                     widget=TypeaHeadForeignKeyWidget(model=CourtDistrict,
+                                                                      field_related='name',
+                                                                      forward='state',
+                                                                      name='court_district',
+                                                                      url='/processos/typeahead/search/comarca'))
 
-    city = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(City.objects.filter(is_active=True)).order_by('name'),
-        required=False,
-        label='Cidade',
-        widget=MDModelSelect2(url='city_autocomplete',
-                              attrs={
-                                  'data-container-css': 'id_city_container',
-                                  'class': 'select-with-search material-ignore',
-                                  'data-minimum-input-length': 3,
-                                  'data-placeholder': '',
-                                  'data-label': 'Cidade',
-                                  'data-autocomplete-light-language': 'pt-BR', }
-                              ))
+    city = forms.CharField(label="Cidade",
+                           required=False,
+                           widget=TypeaHeadForeignKeyWidget(model=City,
+                                                            field_related='name',
+                                                            name='city',
+                                                            url='/city/autocomplete/'))
 
     class Meta:
         model = DefaultAttachmentRule
@@ -117,7 +97,7 @@ class DefaultAttachmentRuleForm(BaseModelForm):
 
         if not type_task and not person_customer and not state and not court_district and not city:
             raise forms.ValidationError(_(u"Deve ser informado pelo menos um dos seguintes campos:"
-                                          u" Tipo de Serviço,"+ chr(12) +
+                                          u" Tipo de Serviço," + chr(12) +
                                           u" Cliente,"
                                           u" UF,"
                                           u" Comarca"
@@ -131,9 +111,9 @@ class DefaultAttachmentRuleForm(BaseModelForm):
 
 class DefaultAttachmentRuleCreateForm(FileFormMixin, DefaultAttachmentRuleForm):
     file = forms.FileField(widget=forms.ClearableFileInput(
-                                attrs={'multiple': True,
-                                       "id": "fileupload-create"}),
-                           required=True)
+        attrs={'multiple': True,
+               "id": "fileupload-create"}),
+        required=True)
 
     class Meta(DefaultAttachmentRuleForm.Meta):
         fields = DefaultAttachmentRuleForm.Meta.fields + ('file',)

@@ -4,7 +4,7 @@ from django import forms
 
 from core.models import Person, State
 from core.utils import filter_valid_choice_form
-from core.widgets import MDDateTimeRangeFilter, MDModelSelect2, TypeaHeadForeignKeyWidget
+from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
 from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ
 from task.models import TypeTask, Filter

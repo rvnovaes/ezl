@@ -1,7 +1,6 @@
 from django import forms
 from task.models import TypeTask
 from material import Layout, Row
-from core.widgets import MDModelSelect2
 from core.models import Person, State, Office
 from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field
 from lawsuit.models import CourtDistrict

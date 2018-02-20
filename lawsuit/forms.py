@@ -3,7 +3,6 @@ from django.forms import ModelForm
 from core.fields import CustomBooleanField
 from core.models import Person, State, Address, Office
 from financial.models import CostCenter
-from core.widgets import MDModelSelect2
 from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict,
                      LawSuit, CourtDivision, Organ)
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
