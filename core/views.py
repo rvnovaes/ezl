@@ -7,6 +7,7 @@ from django.forms.utils import ErrorList
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User, Group
@@ -25,17 +26,19 @@ from django.views.generic import ListView, TemplateView
 from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
-from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, AddressFormSet, \
-    OfficeForm, InviteForm, InviteOfficeFormSet, AddressOfficeForm
+from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
+    ResetPasswordFormMixin, AddressFormSet, \
+    OfficeForm, InviteForm, InviteOfficeFormSet, AddressOfficeForm, InviteOfficeForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
     record_from_wrong_office, DELETE_SUCCESS_MESSAGE, \
     ADDRESS_UPDATE_ERROR_MESSAGE, \
     ADDRESS_UPDATE_SUCCESS_MESSAGE
-from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, OfficeMixin
+from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, OfficeMixin, InviteOffice
 from core.signals import create_person
-from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable
+from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
+    InviteOfficeTable
 from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
@@ -847,6 +850,9 @@ class PasswordResetViewMixin(PasswordResetView, FormView):
         context = form.save(self.request)
         return render(self.request, 'account/password_reset_done.html', context)
 
+    def form_invalid(self, form):
+        return render(self.request, 'account/password_reset_done_error.html', {})
+
 
 class OfficeListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Office
@@ -916,9 +922,14 @@ class RegisterNewUser(CreateView):
         username = request.POST.get('username')
         password = request.POST.get('password')
         email = request.POST.get('email')
-        User.objects.create_user(username=username, email=email, password=password, first_name=first_name,
-                                 last_name=last_name)
-        return HttpResponseRedirect(reverse_lazy('start_user'))
+        form = RegisterNewUserForm(
+            {'username': username, 'first_name': first_name, 'last_name': last_name, 'email': email,
+             'password1': password, 'password2': password})
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse_lazy('start_user'))
+        return render(request, 'account/register.html', {'form': form})
+
 
     def get(self, request, *args, **kwargs):
         return render(request, 'account/register.html', {})
@@ -996,12 +1007,41 @@ class InviteCreateView(AuditFormMixin, CreateView):
         return JsonResponse({'status': 'ok'})
 
 
+class InviteOfficeCreateView(AuditFormMixin, CreateView):
+    model = InviteOffice
+    form_class = InviteOfficeForm
+    success_url = reverse_lazy('start_user')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'start_user'
+
+    def post(self, request, *args, **kwargs):
+        form = InviteOfficeForm(request.POST)
+        form.instance.create_user = self.request.user
+        office_invite = request.POST.get('office_invite')
+        office = request.POST.get('office')
+        if not InviteOffice.objects.filter(office_invite__pk=office_invite, office__pk=office, status='N'):
+            form.instance.office = Office.objects.get(pk=request.POST.get('office'))
+            form.instance.office_invite = Office.objects.get(pk=request.POST.get('office_invite'))
+            form.instance.save()
+        return JsonResponse({'status': 'ok'})
+
+
 class InviteUpdateView(UpdateView):
     def post(self, request, *args, **kargs):
         invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
         invite.status = request.POST.get('status')
         if invite.status == 'A':
             invite.office.persons.add(request.user.person.pk)
+        invite.save()
+        return HttpResponse('ok')
+
+
+class InviteOfficeUpdateView(UpdateView):
+    def post(self, request, *args, **kargs):
+        invite = InviteOffice.objects.get(pk=int(request.POST.get('invite_pk')))
+        invite.status = request.POST.get('status')
+        if invite.status == 'A':
+            invite.office.offices.add(invite.office_invite)
         invite.save()
         return HttpResponse('ok')
 
@@ -1013,6 +1053,18 @@ class InviteTableView(CustomLoginRequiredView, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         table = InviteTable(Invite.objects.filter(office__id=self.kwargs.get('office_pk')).order_by('-pk'))
+        RequestConfig(self.request).configure(table)
+        context['table'] = table
+        return context
+
+
+class InviteOfficeTableView(CustomLoginRequiredView, ListView):
+    model = InviteOffice
+    template_name = 'core/invite_table.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        table = InviteOfficeTable(InviteOffice.objects.filter(office__id=self.kwargs.get('office_pk')).order_by('-pk'))
         RequestConfig(self.request).configure(table)
         context['table'] = table
         return context
@@ -1178,4 +1230,13 @@ class ServiceAutocomplete(TypeaHeadGenericSearch):
         for service in Person.objects.active().services().filter(Q(legal_name__unaccent__icontains=q),
                                                                      Q(offices=office)):
             data.append({'id': service.id, 'data-value-txt': service.__str__()})
+        return list(data)
+
+
+class TypeaHeadInviteOfficeSearch(TypeaHeadGenericSearch):
+    @staticmethod
+    def get_data(module, model, field, q):
+        data = []
+        for office in Office.objects.filter(Q(legal_name__unaccent__icontains=q)):
+            data.append({'id': office.id, 'value': office.legal_name})
         return list(data)

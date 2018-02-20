@@ -150,3 +150,9 @@ class InviteTable(tables.Table):
     class Meta:
         model = Invite
         fields = ('person', 'person.auth_user', 'status')
+
+
+class InviteOfficeTable(tables.Table):
+    class Meta:
+        model = Invite
+        fields = ('office_invite', 'status')

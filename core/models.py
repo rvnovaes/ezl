@@ -294,6 +294,16 @@ class Invite(Audit):
         return self.person.legal_name
 
 
+class InviteOffice(Audit, OfficeMixin):
+    office_invite = models.ForeignKey(Office, blank=False, null=False, related_name='invites_offices',
+                                      verbose_name='Escritório convidado')
+    status = models.CharField(choices=INVITE_STATUS, default='N', max_length=1, verbose_name='Status')
+
+    def __str__(self):
+        return self.office_invite.legal_name
+
+
+
 class Address(Audit):
     address_type = models.ForeignKey(
         AddressType, on_delete=models.PROTECT, blank=False, null=False,

@@ -19,9 +19,10 @@ from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, 
 from allauth.utils import build_absolute_uri
 
 from core.fields import CustomBooleanField
-from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType, Office, Invite
+from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType, Office, Invite, \
+    InviteOffice
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
-from core.widgets import MDModelSelect2
+from core.widgets import TypeaHeadWidget
 from core.widgets import TypeaHeadForeignKeyWidget
 from core.models import OfficeMixin
 
@@ -279,7 +280,7 @@ class UserCreateForm(BaseForm, UserCreationForm):
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
-    email = forms.CharField(
+    email = forms.EmailField(
         label='E-mail',
         required=True,
         max_length=255,
@@ -429,7 +430,64 @@ class ResetPasswordFormMixin(forms.Form):
         return self.context
 
 
-from core.widgets import TypeaHeadWidget
+class RegisterNewUserForm(UserCreationForm):
+    first_name = forms.CharField(
+        label='Nome',
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'autofocus': ''})
+    )
+
+    last_name = forms.CharField(
+        label='Sobrenome',
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    email = forms.EmailField(
+        label='E-mail',
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    username = forms.CharField(
+        label='Nome de usuário (login)',
+        required=True,
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    password1 = forms.CharField(
+        label=_('Senha'),
+        strip=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'type': 'password'}),
+        help_text=password_validation.password_validators_help_text_html(),
+    )
+    password2 = forms.CharField(
+        label=_('Confirmação de Senha'),
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'type': 'password'}),
+        strip=False,
+        help_text=_('Enter the same password as before, for verification.'),
+    )
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2']
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        username = self.cleaned_data.get('username')
+        if email and User.objects.filter(email=email).exclude(username=username).exists():
+            raise forms.ValidationError('Já existe usuário cadastrado com este e-mail.')
+        return email
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError('O valor informado no campo usuário não está disponível')
+        return username
 
 
 class OfficeForm(BaseModelForm):
@@ -480,3 +538,13 @@ class InviteForm(forms.ModelForm):
 
 
 InviteOfficeFormSet = inlineformset_factory(Office, Invite, form=InviteForm, extra=1, max_num=1)
+
+
+class InviteOfficeForm(BaseForm):
+    office_invite = forms.CharField(
+        widget=TypeaHeadForeignKeyWidget(model=Office, field_related='legal_name', name='office_invite'))
+
+    class Meta:
+        model = InviteOffice
+        fields = ['office', 'office_invite']
+        exclude = ['is_active']
