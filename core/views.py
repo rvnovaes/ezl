@@ -39,7 +39,7 @@ from core.models import Person, Address, City, State, Country, AddressType, Offi
     OfficeMixin, InviteOffice, OfficeMembership
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
-    InviteOfficeTable
+    InviteOfficeTable, OfficeMembershipTable
 from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
@@ -897,10 +897,12 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
     def get_context_data(self, **kwargs):
         kwargs.update({
             'table': AddressOfficeTable(self.object.get_address()),
+            'table_members': OfficeMembershipTable(self.object.officemembership_set.filter(is_active=True)),
         })
         data = super().get_context_data(**kwargs)
         data['inviteofficeform'] = InviteForm(self.request.POST) \
             if InviteForm(self.request.POST).is_valid() else InviteForm()
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(kwargs.get('table_members'))
         return data
 
 
@@ -1250,3 +1252,32 @@ class TypeaHeadInviteOfficeSearch(TypeaHeadGenericSearch):
         for office in Office.objects.filter(Q(legal_name__unaccent__icontains=q)):
             data.append({'id': office.id, 'data-value-txt': office.legal_name})
         return list(data)
+
+
+class OfficeMembershipInactiveView(UpdateView):
+    model = OfficeMembership
+    success_message = "Usuário desvinculado com sucesso!"
+
+    def post(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            pks = request.POST.getlist('selection')
+
+            try:
+                for record in self.model.objects.filter(pk__in=pks):
+                    record.is_active = False
+                    record.save()
+                messages.success(self.request, self.success_message)
+            except ProtectedError as e:
+                qs = e.protected_objects.first()
+                messages.error(self.request,
+                               delete_error_protected(str(self.model._meta.verbose_name),
+                                                      qs.__str__()))
+
+        # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
+        if self.success_url:
+            return HttpResponseRedirect(self.success_url)
+        else:
+            return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})
