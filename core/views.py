@@ -35,7 +35,8 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     record_from_wrong_office, DELETE_SUCCESS_MESSAGE, \
     ADDRESS_UPDATE_ERROR_MESSAGE, \
     ADDRESS_UPDATE_SUCCESS_MESSAGE
-from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, OfficeMixin, InviteOffice
+from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
+    OfficeMixin, InviteOffice, OfficeMembership
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable
@@ -875,7 +876,10 @@ class OfficeCreateView(AuditFormMixin, CreateView):
     def form_valid(self, form):
         form.instance.create_user = self.request.user
         form.instance.save()
-        form.instance.persons.add(form.instance.create_user.person)
+        OfficeMembership.objects.create(person=form.instance.create_user.person,
+                                        office=form.instance,
+                                        create_user=form.instance.create_user,
+                                        is_active=True)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -1034,7 +1038,10 @@ class InviteUpdateView(UpdateView):
         invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
         invite.status = request.POST.get('status')
         if invite.status == 'A':
-            invite.office.persons.add(request.user.person.pk)
+            OfficeMembership.objects.create(person=request.user.person,
+                                            office=invite.office,
+                                            create_user=self.request.user,
+                                            is_active=True)
         invite.save()
         return HttpResponse('ok')
 

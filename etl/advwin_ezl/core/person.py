@@ -1,5 +1,5 @@
 from django.contrib.auth.models import Group
-from core.models import Person
+from core.models import Person, OfficeMembership
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.utils import get_message_log_default, save_error_log
@@ -126,7 +126,10 @@ class PersonETL(GenericETL):
                                        'is_customer',
                                        'is_supplier'])
                     if not default_office.persons.filter(cpf_cnpj=instance.cpf_cnpj):
-                        default_office.persons.add(instance)
+                        OfficeMembership.objects.create(person=instance,
+                                                        office=default_office,
+                                                        create_user=user,
+                                                        is_active=True)
 
                 else:
                     obj = self.model(legal_name=legal_name,
@@ -144,7 +147,10 @@ class PersonETL(GenericETL):
 
                     obj.save()
                     if not default_office.persons.filter(cpf_cnpj=obj.cpf_cnpj):
-                        default_office.persons.add(obj)
+                        OfficeMembership.objects.create(person=obj,
+                                                        office=default_office,
+                                                        create_user=user,
+                                                        is_active=True)
 
                 self.debug_logger.debug(
                     'Pessoa,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (

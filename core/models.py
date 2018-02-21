@@ -251,7 +251,7 @@ class Person(AbstractPerson):
 class Office(AbstractPerson):
     objects = PersonManager()
 
-    persons = models.ManyToManyField(Person, blank=True, related_name='offices')
+    persons = models.ManyToManyField(Person, blank=True, related_name='offices', through='OfficeMembership')
     offices = models.ManyToManyField('self', blank=True)
 
     class Meta:
@@ -266,6 +266,11 @@ class OfficeMixin(models.Model):
 
     class Meta:
         abstract = True
+
+
+class OfficeMembership(Audit):
+    person = models.ForeignKey(Person, on_delete=models.CASCADE)
+    office = models.ForeignKey(Office, on_delete=models.CASCADE)
 
 
 class DefaultOffice(OfficeMixin, Audit):
