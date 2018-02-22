@@ -16,7 +16,7 @@
                             <select class="person-to-assign form-control" style='width: 100%;'
                                     name="person_executed_by">
                                 <option value="" selected></option>
-                                {% for person in task.office.persons.all %}
+                                {% for person in task.office.persons.active_offices %}
                                     {% for group in person.auth_user.groups.all %}
                                         {% if group.name == 'Correspondente' %}
                                             <option value="{{ person.pk }}">{{ person.name }}</option>
