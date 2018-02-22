@@ -91,7 +91,7 @@ def login(request):
 @login_required
 def inicial(request):
     if request.user.is_authenticated:
-        if request.user.person.offices.all().exists():
+        if request.user.person.offices.active_offices().exists():
             set_office_session(request)
             if not get_office_session(request):
                 return HttpResponseRedirect(reverse_lazy('office_instance'))
@@ -897,7 +897,8 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
     def get_context_data(self, **kwargs):
         kwargs.update({
             'table': AddressOfficeTable(self.object.get_address()),
-            'table_members': OfficeMembershipTable(self.object.officemembership_set.filter(is_active=True)),
+            'table_members': OfficeMembershipTable(
+                self.object.officemembership_set.filter(is_active=True, person__auth_user__isnull=False)),
         })
         data = super().get_context_data(**kwargs)
         data['inviteofficeform'] = InviteForm(self.request.POST) \
@@ -1040,10 +1041,10 @@ class InviteUpdateView(UpdateView):
         invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
         invite.status = request.POST.get('status')
         if invite.status == 'A':
-            OfficeMembership.objects.create(person=request.user.person,
-                                            office=invite.office,
-                                            create_user=self.request.user,
-                                            is_active=True)
+            OfficeMembership.objects.update_or_create(person=request.user.person,
+                                                      office=invite.office,
+                                                      defaults={'create_user': self.request.user,
+                                                                'is_active': True})
         invite.save()
         return HttpResponse('ok')
 
@@ -1266,6 +1267,10 @@ class OfficeMembershipInactiveView(UpdateView):
                 for record in self.model.objects.filter(pk__in=pks):
                     record.is_active = False
                     record.save()
+                    try:
+                        DefaultOffice.objects.filter(auth_user=record.person.auth_user, office=record.office).delete()
+                    except:
+                        pass
                 messages.success(self.request, self.success_message)
             except ProtectedError as e:
                 qs = e.protected_objects.first()

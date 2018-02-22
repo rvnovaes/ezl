@@ -17,6 +17,9 @@ class PersonManager(Manager):
     def services(self, *ar, **kw):
         return self.get_queryset().services(*ar, **kw)
 
+    def active_offices(self, *ar, **kw):
+        return self.get_queryset().active_offices(*ar, **kw)
+
 
 class PersonManagerQuerySet(QuerySet):
     def active(self):
@@ -30,3 +33,6 @@ class PersonManagerQuerySet(QuerySet):
 
     def services(self):
         return self.filter(auth_user__groups__name=self.model.SERVICE_GROUP)
+
+    def active_offices(self):
+        return self.filter(officemembership__is_active=True)
