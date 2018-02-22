@@ -459,8 +459,8 @@ class PersonListView(CustomLoginRequiredView, SingleTableViewMixin):
         context = super(PersonListView, self).get_context_data(**kwargs)
         office_session = get_office_session(request=self.request)
         table = self.table_class(
-            context['table'].data.data.filter(offices=office_session).exclude(pk__in=Organ.objects.all()).order_by(
-                '-pk'))
+            context['table'].data.data.filter(offices=office_session, officemembership__is_active=True).exclude(
+                pk__in=Organ.objects.all()).order_by('-pk'))
         context['table'] = table
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         return context
