@@ -83,7 +83,7 @@ def get_office_field(request, profile=None):
     from django import forms
     try:
         if profile:
-            queryset = profile.person.offices.all()
+            queryset = profile.person.offices.active_offices()
             initial = DefaultOffice.objects.filter(auth_user=profile).first().office if \
                 DefaultOffice.objects.filter(auth_user=profile).first() else None
         elif request.session.get('custom_session_user'):
@@ -91,7 +91,7 @@ def get_office_field(request, profile=None):
             queryset = Office.objects.filter(pk=custom_session_user[0]['current_office'])
             initial = queryset.first().id
         else:
-            queryset = request.user.person.offices.all()
+            queryset = request.user.person.offices.active_offices()
             initial = None
     except Exception as e:
         queryset = Office.objects.none()

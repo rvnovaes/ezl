@@ -20,6 +20,9 @@ class PersonManager(Manager):
     def active_offices(self, *ar, **kw):
         return self.get_queryset().active_offices(*ar, **kw)
 
+    def inactive_offices(self, *ar, **kw):
+        return self.get_queryset().inactive_offices(*ar, **kw)
+
 
 class PersonManagerQuerySet(QuerySet):
     def active(self):
@@ -36,3 +39,6 @@ class PersonManagerQuerySet(QuerySet):
 
     def active_offices(self):
         return self.filter(officemembership__is_active=True)
+
+    def inactive_offices(self):
+        return self.filter(officemembership__is_active=False)

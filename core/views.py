@@ -389,7 +389,7 @@ class SingleTableViewMixin(SingleTableView):
             office = Office.objects.filter(pk=int(current_office_session.get(
                 'current_office'))).values_list('id', flat=True)
         if not office:
-            office = self.request.user.person.offices.all().values_list('id', flat=True)
+            office = self.request.user.person.offices.active_offices().values_list('id', flat=True)
 
         generic_search = GenericSearchFormat(self.request, self.model, self.model._meta.fields)
         args = generic_search.despatch(office=office)
@@ -510,7 +510,10 @@ class PersonCreateView(AuditFormMixin, CreateView):
                 return self.form_invalid(form)
 
             self.object = form.save()
-            self.object.offices.add(office_session)
+            OfficeMembership.objects.create(person=self.object,
+                                            office=get_office_session(self.request),
+                                            create_user=self.request.user,
+                                            is_active=True)
 
             if personaddress.is_valid():
                 address = personaddress.forms[0].save(commit=False)
@@ -757,7 +760,10 @@ class UserCreateView(AuditFormMixin, CreateView):
 
     def form_valid(self, form):
         form.save()
-        form.instance.person.offices.add(get_office_session(self.request))
+        OfficeMembership.objects.create(person=form.instance.person,
+                                        office=get_office_session(self.request),
+                                        create_user=self.request.user,
+                                        is_active=True)
         if form.is_valid:
             groups = form.cleaned_data['groups']
             ids = list(group.id for group in groups)
@@ -862,7 +868,7 @@ class OfficeListView(CustomLoginRequiredView, SingleTableViewMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['table'] = self.table_class(
-            context['table'].data.data.filter(pk__in=self.request.user.person.offices.all()))
+            context['table'].data.data.filter(pk__in=self.request.user.person.offices.active_offices()))
         RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
 
