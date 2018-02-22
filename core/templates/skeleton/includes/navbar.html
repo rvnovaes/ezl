@@ -66,7 +66,7 @@
                           <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
-                        {% for office in request.user.person.offices.all %}
+                        {% for office in request.user.person.offices.active_offices %}
                            <li onclick="updateSession('current_office', '{{office.pk}}', '{{csrf_token}}');"><a href="#">{{office.legal_name}}</a></li>
                         {% endfor %}
                         </ul>

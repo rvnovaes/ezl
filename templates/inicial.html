@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+<!-- TODO: verificar se este arquivo pode ser excluido com novo template -->
 {% load staticfiles %}
 
 {% block css_head %}
@@ -100,7 +101,7 @@
                                <span class="caret"></span>
                            </a>
                            <ul class="dropdown-menu">
-                            {% for office in request.user.person.offices.all %}
+                            {% for office in request.user.person.offices.active_offices %}
                                 <li onclick="updateSession('current_office', '{{office.pk}}', '{{csrf_token}}');"><a href="#">{{office.name}}</a></li>
                             {% endfor %}
                            </ul>

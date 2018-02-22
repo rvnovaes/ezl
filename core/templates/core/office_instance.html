@@ -111,7 +111,7 @@
                         <strong>Selecione um escritório para trabalhar!</strong>
                     </p>
                 </div>
-                {% for office in request.user.person.offices.all %}
+                {% for office in request.user.person.offices.active_offices %}
                     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
                         <div class="panel panel-default">
                             <div class="panel-wrapper collapse in">

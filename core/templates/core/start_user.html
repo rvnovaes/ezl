@@ -39,7 +39,7 @@
         </div>
         <div class="col-lg-6 col-sm-6">
             <div class="panel panel-theme">
-                <div class="panel-heading"> Meus escritórios
+                <div class="panel-heading"> Meus escritórios vinculados
                     <div class="pull-right">
                         <a href="#" data-perform="panel-collapse"><i class="ti-minus"></i></a>
                         <a href="{% url 'office_add' %}"><i class="fa fa-plus"></i></a>
@@ -47,7 +47,7 @@
                 </div>
                 <div class="panel-wrapper collapse in" aria-expanded="true">
                     <div class="panel-body">
-                        {% if request.user.person.offices.all %}
+                        {% if request.user.person.offices.active_offices %}
                             <table class="table table-hover">
                                 <thead>
                                 <tr>
@@ -57,7 +57,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for office in request.user.person.offices.all %}
+                                {% for office in request.user.person.offices.active_offices %}
                                     <tr>
                                         <td>{{ office.legal_name }}</td>
                                         <td>{{ office.cpf_cnpj | default_if_none:'' }}</td>

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from core.models import AddressType, ContactMechanismType, ContactMechanism
 #Todo: Remover office
-from core.models import Office, Invite, InviteOffice
+from core.models import Office, Invite, InviteOffice, OfficeMembership
 
 
 @admin.register(ContactMechanismType)
@@ -45,3 +45,4 @@ class InviteOfficeAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AddressType)
+admin.site.register(OfficeMembership)
