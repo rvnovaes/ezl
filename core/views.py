@@ -904,7 +904,8 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
         kwargs.update({
             'table': AddressOfficeTable(self.object.get_address()),
             'table_members': OfficeMembershipTable(
-                self.object.officemembership_set.filter(is_active=True, person__auth_user__isnull=False)),
+                self.object.officemembership_set.filter(is_active=True, person__auth_user__isnull=False)
+                    .exclude(person__auth_user=self.request.user)),
         })
         data = super().get_context_data(**kwargs)
         data['inviteofficeform'] = InviteForm(self.request.POST) \
