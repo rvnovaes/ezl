@@ -31,7 +31,7 @@ class Permissions(Enum):
 # Dicionário para retornar o icone referente ao status da providencia
 icon_dict = {
     'ACCEPTED': 'mdi mdi-calendar-clock',
-    'OPEN': 'mdi mdi-lock-open-outline',
+    'OPEN': 'mdi mdi-account-location',
     'RETURN': 'mdi mdi-backburger',
     'DONE': 'mdi mdi-checkbox-marked-circle-outline',
     'REFUSED': 'mdi mdi-clipboard-alert',

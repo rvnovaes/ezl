@@ -1,3 +1,10 @@
+.modal label{
+    font-weight: normal;
+}
+.modal-header{
+    background-color: #f1f1f1;
+    border-bottom: #313131;"
+}
 select option {
     background: #FFF;
     color: #000000;
