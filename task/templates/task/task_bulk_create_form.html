@@ -12,6 +12,8 @@
     </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
     <script src="{% static 'task/task-builk-create.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js' %}"></script>
+    <script src="{% static 'core/js/typeahead.js' %}"></script>
 {% endblock %}
 
 {% block extra_stylesheets %}
@@ -70,21 +72,24 @@
                                     <button id="btn_add_folder"
                                             type="button"
                                             class="btn btn-sm-custom btn-raised btn-primary pull-right"
-                                            title="Adicionar novo processo">
+                                            title="Adicionar nova Pasta">
                                         <i class="mdi mdi-plus"></i>
                                     </button>
                                     <span style="font-weight: 500;">Número da pasta / Cliente*</span>
-                                    <select
-                                        name="folder"
-                                        class="form-control"
-                                        id="id_folder"
-                                        data-autocomplete-light-language="pt-BR"
-                                        data-minimum-input-length="3"
-                                        data-autocomplete-light-url="{% url 'folder_autocomplete' %}"
-                                        data-autocomplete-light-function="select2">
-                                            <option value="">Selecione...</option>
-                                    </select>
-                                
+                                    <input class="twitter-typeahead form-control"
+                                           type="text"
+                                           placeholder="Selecione..."
+                                           id="id_folder"
+                                           data-url="{% url 'folder_autocomplete' %}"
+                                           name="folder"
+                                           data-value=""
+                                           value=""
+                                           data-module="lawsuit.models"
+                                           data-model="Folder"
+                                           search-field="person_customer"
+                                           data-typeahead="true"
+                                           data-value-txt=""
+                                           data-forward="">
                             </div>
                             <div class="form-group col-sm-4">
                                 <label>

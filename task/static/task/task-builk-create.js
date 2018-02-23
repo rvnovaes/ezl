@@ -101,7 +101,7 @@ TaskForm = (function($){
 
     TaskForm.prototype.loadEvents = function() {
         self.$folder.change(function(){
-            var value = $(this).val();
+            var value = $(this).data('value');
             self.eventChangeFolder(value);
         });
 
@@ -120,7 +120,7 @@ TaskForm = (function($){
         });
 
         this.$btn_add_lawsuit.click(function(){
-            var folder = self.$folder.value || self.$folder.val();
+            var folder = self.$folder.data('value');
             if (isEmpty(folder)) {
                 return
             }
@@ -260,5 +260,6 @@ TaskForm = (function($){
 
 
 $(document).ready(function(){
+    debugger;
     TaskForm.init();
 });
