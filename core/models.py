@@ -2,7 +2,7 @@ from enum import Enum
 
 from django.conf import settings
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 from core.managers import PersonManager
 from core.utils import LegacySystem
@@ -266,6 +266,14 @@ class OfficeMixin(models.Model):
 
     class Meta:
         abstract = True
+
+
+class OfficeRelGroup(models.Model):
+    office = models.ForeignKey(Office, on_delete=models.CASCADE, related_name='office_groups')
+    group = models.OneToOneField(Group, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Groupos por escritório'
 
 
 class DefaultOffice(OfficeMixin, Audit):

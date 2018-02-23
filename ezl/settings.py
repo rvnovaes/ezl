@@ -112,7 +112,8 @@ INSTALLED_APPS = [
     'sequences.apps.SequencesConfig',
     'channels',
     'chat',
-    'ecm'
+    'ecm',
+    'guardian'
 ]
 
 MIDDLEWARE = [
@@ -247,6 +248,7 @@ AUTHENTICATION_BACKENDS = (
 
     # `allauth` specific authentication methods, such as login by e-mail
     'allauth.account.auth_backends.AuthenticationBackend',
+    'guardian.backends.ObjectPermissionBackend',
 )
 
 # Host configuration to send email

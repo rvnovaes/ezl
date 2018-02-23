@@ -2,25 +2,20 @@
 {% load bootstrap3 static %}
 
 {% block extra_stylesheets %}
-    <link href="{% static 'skeleton/plugins/bower_components/multiselect/css/multi-select.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'skeleton/plugins/bower_components/multiselect/css/multi-select.css' %}" rel="stylesheet"
+          type="text/css"/>
 {% endblock %}
 
 {% block form %}
     <div class="row">
-        {% bootstrap_field form.first_name form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
-        {% bootstrap_field form.last_name form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
+        {% bootstrap_field form.first_name form_group_class="form-group col-sm-4" required_css_class="ezl-required" %}
+        {% bootstrap_field form.last_name form_group_class="form-group col-sm-4" required_css_class="ezl-required" %}
+        {% bootstrap_field form.email form_group_class="form-group col-sm-4" required_css_class="ezl-required" %}
     </div>
     <div class="row">
-        {% bootstrap_field form.email form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
-        {% bootstrap_field form.office form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
-    </div>
-    <div class="row">
-        {% bootstrap_field form.username form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
-        {% bootstrap_field form.password form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
-    </div>
-    <div class="row">
-        {% bootstrap_field form.groups form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
-        {% bootstrap_field form.is_active form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
+        {% bootstrap_field form.office form_group_class="form-group col-sm-4" required_css_class="ezl-required" %}
+        {% bootstrap_field form.username form_group_class="form-group col-sm-4" required_css_class="ezl-required" %}
+        {% bootstrap_field form.password form_group_class="form-group col-sm-4" required_css_class="ezl-required" %}
     </div>
 {% endblock %}
 
@@ -29,9 +24,60 @@
     {% include 'core/widgets/cancel_button.html'  with link_list='user_list' %}
 {% endblock %}
 
+{% block extra_content %}
+    <div class="white-box">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#endereco">Escritórios</a></li>
+        </ul>
+        <div class="tab-content">
+            <div id="endereco" class="tab-pane fade in active">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" paginate-fixed>
+                        <thead>
+                        <tr>
+                            <th>Escritório</th>
+                            <th>Permissões</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for office in object.person.offices.all %}
+                            <tr class="{% cycle 'odd' 'even' %}">
+                                <td>{{ office.legal_name }}</td>
+                                <td>
+                                    {% if object.groups.all.exists %}
+                                        {% for office_group in office.office_groups.all %}
+                                            {% for group in object.groups.all %}
+                                                {% if group == office_group.group %}
+                                                    <span class="label label-success" style="padding: 1px 12px 3px;  !important;"><i
+                                                            class="fa fa-warning"></i> {{ group.name }}</span>
+                                                    <br/>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="label label-danger"><i class="fa fa-warning"></i> Sem permissões cadastradas</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="invite-users" class="tab-pane fade">
+            </div>
+            <div id="invite-offices" class="tab-pane fade">
+            </div>
+            <div id="my-invite-offices" class="tab-pane fade">
+            </div>
+        </div>
+    </div>
+    {% include 'core/mask_selector.html' %}
+{% endblock %}
 
 {% block extra_scripts %}
-    <script type="text/javascript" src="{% static 'skeleton/plugins/bower_components/multiselect/js/jquery.multi-select.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'skeleton/plugins/bower_components/multiselect/js/jquery.multi-select.js' %}"></script>
 {% endblock %}
 {% block script_document_ready %}
     $('#id_groups').multiSelect();

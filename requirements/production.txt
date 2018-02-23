@@ -37,3 +37,4 @@ raven==6.2.1
 six==1.10.0
 SQLAlchemy==1.2.0b2
 uwsgi==2.0.15
+django-guardian==1.4.9
