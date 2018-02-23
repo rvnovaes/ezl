@@ -202,7 +202,7 @@ class TaskETL(GenericETL):
                                      'execution_date', 'blocked_payment_date', 'finished_date', 'requested_date',
                                      'movement']
 
-                    task.save(update_fields=update_fields, called_by_etl=True)
+                    task.save(update_fields=update_fields, skip_signal=True)
 
                 else:
                     task = self.model.objects.create(movement=movement,

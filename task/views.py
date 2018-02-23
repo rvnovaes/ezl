@@ -411,7 +411,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             self.object.chat = Chat.objects.create(
                 create_user=self.request.user, label=label, title=title,
                 description=description, back_url='/dashboard/{}'.format(self.object.pk))
-            self.object.save()
+            self.object.save(skip_signal=True)
         self.create_user_by_chat(self.object, ['person_asked_by', 'person_executed_by',
                                                'person_distributed_by'])
         type_task = self.object.type_task

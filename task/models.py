@@ -267,7 +267,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
         return False
 
     def save(self, *args, **kwargs):
-        self._called_by_etl = kwargs.pop('called_by_etl', False)
+        self._skip_signal = kwargs.pop('skip_signal', False)
         if not self.task_number:
             self.task_number = self.get_task_number()
         return super().save(*args, **kwargs)
@@ -336,7 +336,7 @@ class TaskHistory(AuditCreate):
         verbose_name_plural = 'Histórico das Providências'
 
     def save(self, *args, **kwargs):
-        self._called_by_etl = kwargs.pop('called_by_etl', False)
+        self._skip_signal = kwargs.pop('skip_signal', False)
         return super(TaskHistory, self).save(*args, **kwargs)
 
 

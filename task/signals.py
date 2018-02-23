@@ -38,7 +38,7 @@ def receive_notes_execution_date(notes, instance, execution_date, survey_result,
 def new_task(sender, instance, created, **kwargs):
     notes = 'Nova providência' if created else getattr(instance, '__notes', '')
     user = instance.alter_user if instance.alter_user else instance.create_user
-    if not getattr(instance, '_called_by_etl'):
+    if not getattr(instance, '_skip_signal'):
         TaskHistory.objects.create(task=instance,
                                    create_user=user,
                                    status=instance.task_status,
@@ -159,13 +159,13 @@ def change_status(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Task)
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
-    if not getattr(instance, '_called_by_etl'):
+    if not getattr(instance, '_skip_signal'):
         export_task.delay(instance.pk)
 
 
 @receiver(post_save, sender=TaskHistory)
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
-    if not getattr(instance, '_called_by_etl'):
+    if not getattr(instance, '_skip_signal'):
         export_task_history.delay(instance.pk)
 
 
