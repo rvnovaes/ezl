@@ -59,11 +59,11 @@ def attachment_form_valid(f):
             use_upload = getattr(object_instance.model, "use_upload", False)
         ret = f(object_instance, form)
         if use_upload:
+            instance = object_instance.object
+            model_name = get_attachment_model_name(object_instance.model)
             files = object_instance.request.FILES.getlist('file')
             if files:
-                instance = object_instance.object
                 for file in files:
-                    model_name = get_attachment_model_name(object_instance.model)
                     attachment = Attachment(
                         model_name=model_name,
                         object_id=instance.id,
@@ -72,6 +72,18 @@ def attachment_form_valid(f):
                         create_user_id=object_instance.request.user.id
                     )
                     attachment.save()
+            elif form.cleaned_data['documents']:
+                for document in form.cleaned_data['documents']:
+                    attachment = Attachment(
+                        model_name=model_name,
+                        object_id=instance.id,
+                        file=document,
+                        exibition_name=document.name,
+                        create_user_id=object_instance.request.user.id
+                    )
+                    attachment.save()
+
+            form.delete_temporary_files()
         return ret
     return wrapper
 

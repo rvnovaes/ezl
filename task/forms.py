@@ -109,11 +109,7 @@ class TaskForm(BaseForm):
 
 
 class TaskCreateForm(FileFormMixin, TaskForm):
-    documents = forms.FileField(widget=forms.ClearableFileInput(
-                                attrs={'multiple': True,
-                                       "id": "fileupload-create"}),
-                                required=False)
-
+    documents = MultipleUploadedFileField(required=False)
 
     class Meta(TaskForm.Meta):
         fields = TaskForm.Meta.fields + ['documents']

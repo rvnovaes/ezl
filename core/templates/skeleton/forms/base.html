@@ -20,7 +20,7 @@
                                         {{ field.label_tag }}
                                     </div>
                                 </div>
-                            {% elif field_type != 'clearablefile' %}
+                            {% elif field_type != 'clearablefile' and field.name != 'documents' %}
                                 {% bootstrap_field field form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
                             {% endif %}
                         {% endfor %}

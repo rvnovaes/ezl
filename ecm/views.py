@@ -103,15 +103,28 @@ class UploadView(View):
         if form.is_valid():
             data = request.POST
 
-            for file in request.FILES.getlist('file'):
-                attachment = Attachment(
-                    model_name=data.get('model_name'),
-                    object_id=data.get('object_id'),
-                    file=file,
-                    exibition_name=file.name,
-                    create_user_id=request.user.id
-                )
-                attachment.save()
+            if form.fields.get('documents'):
+                for document in form.cleaned_data['documents']:
+                    attachment = Attachment(
+                        model_name=data.get('model_name'),
+                        object_id=data.get('object_id'),
+                        file=document,
+                        exibition_name=document.name,
+                        create_user_id=request.user.id
+                    )
+                    attachment.save()
+
+                form.delete_temporary_files()
+            else:
+                for file in request.FILES.getlist('file'):
+                    attachment = Attachment(
+                        model_name=data.get('model_name'),
+                        object_id=data.get('object_id'),
+                        file=file,
+                        exibition_name=file.name,
+                        create_user_id=request.user.id
+                    )
+                    attachment.save()
             return make_response(content=json.dumps({'success': True,
                                                      'model_name': data.get('model_name'),
                                                      'object_id': data.get('object_id')}))
@@ -189,6 +202,12 @@ class DefaultAttachmentRuleCreateView(AuditFormMixin, CreateView):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
+
+    def form_valid(self, form):
+        form.instance.__server = self.request.META['HTTP_HOST']
+        response = super().form_valid(form)
+
+        return response
 
 
 class DefaultAttachmentRuleUpdateView(AuditFormMixin, UpdateView):
