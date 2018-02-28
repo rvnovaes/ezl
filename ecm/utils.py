@@ -83,7 +83,7 @@ def attachment_form_valid(f):
                     )
                     attachment.save()
 
-            form.delete_temporary_files()
+                form.delete_temporary_files()
         return ret
     return wrapper
 

@@ -2,7 +2,6 @@
 # Author: Christian Douglas <christian.douglas.alcantara@gmail.com>
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from django_file_form.forms import FileFormMixin, MultipleUploadedFileField
 
 from .models import Attachment, DefaultAttachmentRule
 from core.forms import BaseModelForm
@@ -109,8 +108,8 @@ class DefaultAttachmentRuleForm(BaseModelForm):
         self.fields['office'] = get_office_field(self.request)
 
 
-class DefaultAttachmentRuleCreateForm(FileFormMixin, DefaultAttachmentRuleForm):
-    documents = MultipleUploadedFileField(required=True)
+class DefaultAttachmentRuleCreateForm(DefaultAttachmentRuleForm):
 
-    class Meta(DefaultAttachmentRuleForm.Meta):
-        fields = DefaultAttachmentRuleForm.Meta.fields + ('documents',)
+    def __init__(self, *args, **kwargs):
+        self.documents_required = True
+        super().__init__(*args, **kwargs)

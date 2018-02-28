@@ -25,14 +25,25 @@ from core.utils import filter_valid_choice_form, get_office_field, get_office_se
 from core.widgets import TypeaHeadWidget
 from core.widgets import TypeaHeadForeignKeyWidget
 from core.models import OfficeMixin
+from django_file_form.forms import MultipleUploadedFileField, FileFormMixin
 
 
-class BaseModelForm(forms.ModelForm):
+class BaseModelForm(FileFormMixin, forms.ModelForm):
+
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         if self.request:
             self.set_office_queryset()
+        usermodel = self._meta.model._meta.app_label == 'auth'
+        if usermodel:
+            use_upload = False
+        else:
+            use_upload = getattr(self._meta.model, "use_upload", False)
+        if self.initial.__len__() == 0 and use_upload:
+            required = getattr(self, "documents_required", False)
+            documents = MultipleUploadedFileField(required=required)
+            self.fields.update({'documents': documents})
 
     def get_model_verbose_name(self):
         return self._meta.model._meta.verbose_name

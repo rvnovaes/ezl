@@ -67,25 +67,6 @@ class AttachmentFormMixin(object):
         return True
 
 
-class AjaxVerifyForm(View):
-
-    @csrf_exempt
-    def dispatch(self, *args, **kwargs):
-        return super(AjaxVerifyForm, self).dispatch(*args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        print(request)
-        form = DefaultAttachmentRuleCreateForm(request.POST, request.FILES)
-        if form.is_valid():
-            return make_response(content=json.dumps({'success': True}))
-        else:
-            return make_response(status=400,
-                                 content=json.dumps({
-                                     'success': False,
-                                     'error': '%s' % repr(form.errors)
-                                 }))
-
-
 class UploadView(View):
     """
     View which will handle all upload requests sent by Uploader.
@@ -103,20 +84,7 @@ class UploadView(View):
         if form.is_valid():
             data = request.POST
 
-            if form.fields.get('documents'):
-                for document in form.cleaned_data['documents']:
-                    attachment = Attachment(
-                        model_name=data.get('model_name'),
-                        object_id=data.get('object_id'),
-                        file=document,
-                        exibition_name=document.name,
-                        create_user_id=request.user.id
-                    )
-                    attachment.save()
-
-                form.delete_temporary_files()
-            else:
-                for file in request.FILES.getlist('file'):
+            for file in request.FILES.getlist('file'):
                     attachment = Attachment(
                         model_name=data.get('model_name'),
                         object_id=data.get('object_id'),
@@ -144,7 +112,7 @@ def ajax_get_attachments(request):
     ret = []
     for attachment in attachments:
         ret.append({
-            'file': attachment.exibition_name,
+            'exibition_name': attachment.exibition_name,
             'object_id': attachment.object_id,
             'model_name': attachment.model_name,
             'pk': attachment.pk,
@@ -202,12 +170,6 @@ class DefaultAttachmentRuleCreateView(AuditFormMixin, CreateView):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
-
-    def form_valid(self, form):
-        form.instance.__server = self.request.META['HTTP_HOST']
-        response = super().form_valid(form)
-
-        return response
 
 
 class DefaultAttachmentRuleUpdateView(AuditFormMixin, UpdateView):

@@ -108,7 +108,7 @@ class TaskForm(BaseForm):
         self.fields['office'] = get_office_field(self.request)
 
 
-class TaskCreateForm(FileFormMixin, TaskForm):
+class TaskCreateForm(TaskForm):
     documents = MultipleUploadedFileField(required=False)
 
     class Meta(TaskForm.Meta):
