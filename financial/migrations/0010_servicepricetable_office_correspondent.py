@@ -10,16 +10,15 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0067_auto_20180119_1226'),
-        ('financial', '0010_costcenter_office'),
+        ('financial', '0009_costcenter_office'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='servicepricetable',
             name='office_correspondent',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT,
-                                    related_name='office_correspondent', to='core.Office',
+            field=models.ForeignKey(blank=True, on_delete=django.db.models.deletion.PROTECT,
+                                    null=True, related_name='office_correspondent', to='core.Office',
                                     verbose_name='Escritório Correspondente'),
-            preserve_default=False,
         ),
     ]
