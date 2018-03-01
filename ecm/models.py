@@ -5,10 +5,10 @@ import os
 
 
 def get_uploda_to(instance, filename):
-    path = os.path.join('media', 'ECM', 'attachment')
+    path = os.path.join('media', 'ECM', str(instance.model_name), str(instance.object_id))
     if not os.path.exists(path):
         os.makedirs(path)
-    return f'ECM/attachment/{filename}'
+    return 'ECM/{0}/{1}/{2}'.format(instance.model_name, instance.object_id, filename)
 
 
 class Attachment(AuditCreate, LegacyCode):
