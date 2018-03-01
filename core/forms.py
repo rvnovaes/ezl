@@ -544,7 +544,7 @@ class InviteForm(forms.ModelForm):
 
     class Meta:
         model = Invite
-        fields = ['office', 'person']
+        fields = ['office', 'person', 'invite_code', 'email']
         exclude = ['is_active']
 
 

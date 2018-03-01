@@ -7,8 +7,7 @@ from django.contrib.auth.models import User
 from core.managers import PersonManager
 from core.utils import LegacySystem
 
-
-INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'))
+INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'), ('E', 'EXTERNAL'))
 
 
 class LegalType(Enum):
@@ -180,7 +179,7 @@ class AbstractPerson(Audit, LegacyCode):
     is_customer = models.BooleanField(null=False, default=False, verbose_name='É Cliente?')
     is_supplier = models.BooleanField(null=False, default=False, verbose_name='É Fornecedor?')
     import_from_legacy = models.BooleanField(null=False, default=False,
-                                             verbose_name='Importar OSs do sistema de origem para esse cliente',)
+                                             verbose_name='Importar OSs do sistema de origem para esse cliente', )
 
     @property
     def cpf(self):
@@ -285,17 +284,22 @@ class DefaultOffice(OfficeMixin, Audit):
 
 
 class Invite(Audit):
-    person = models.ForeignKey(Person, blank=False, null=False,
+    person = models.ForeignKey(Person, blank=True, null=True,
                                on_delete=models.PROTECT, related_name='invites', verbose_name='Pessoa')
     office = models.ForeignKey(Office, blank=False, null=False,
                                on_delete=models.PROTECT, related_name='invites', verbose_name='Escritório')
     status = models.CharField(choices=INVITE_STATUS, default='N', max_length=1, verbose_name='Status')
+    email = models.EmailField(verbose_name='E-mail',
+                              blank=True, null=True,
+                              max_length=255,
+                              )
+    invite_code = models.CharField(blank=True, null=True, verbose_name='Código do convite', max_length=8)
 
     class Meta:
         verbose_name = 'Convite'
 
     def __str__(self):
-        return self.person.legal_name
+        return self.person.legal_name if self.person else self.email
 
 
 class InviteOffice(Audit, OfficeMixin):
@@ -308,7 +312,6 @@ class InviteOffice(Audit, OfficeMixin):
 
     class Meta:
         verbose_name = 'Convites para escritórios'
-
 
 
 class Address(Audit):
@@ -326,9 +329,9 @@ class Address(Audit):
     city = models.ForeignKey(City, on_delete=models.PROTECT, blank=False, null=False,
                              verbose_name='Cidade')
     state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False,
-                             verbose_name='Estado')
+                              verbose_name='Estado')
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False,
-                             verbose_name='País')
+                                verbose_name='País')
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True)
     office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)
 

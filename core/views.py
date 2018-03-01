@@ -1,5 +1,7 @@
 import importlib
 import json
+import string
+import random
 from abc import abstractproperty
 from functools import wraps
 from django import forms
@@ -35,7 +37,8 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     record_from_wrong_office, DELETE_SUCCESS_MESSAGE, \
     ADDRESS_UPDATE_ERROR_MESSAGE, \
     ADDRESS_UPDATE_SUCCESS_MESSAGE
-from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, OfficeMixin, InviteOffice
+from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, OfficeMixin, \
+    InviteOffice
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable
@@ -45,6 +48,7 @@ from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task
 from ecm.forms import AttachmentForm
 from ecm.utils import attachment_form_valid, attachments_multi_delete
+from django.core.validators import validate_email
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -112,6 +116,7 @@ class OfficeInstanceView(View):
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
+
 
 @logout_log
 def logout_user(request):
@@ -930,7 +935,6 @@ class RegisterNewUser(CreateView):
             return HttpResponseRedirect(reverse_lazy('start_user'))
         return render(request, 'account/register.html', {'form': form})
 
-
     def get(self, request, *args, **kwargs):
         return render(request, 'account/register.html', {})
 
@@ -995,14 +999,29 @@ class InviteCreateView(AuditFormMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'start_user'
 
+    @staticmethod
+    def invite_code(size=8, chars=string.ascii_uppercase + string.digits):
+        return ''.join(random.choice(chars) for _ in range(size))
+
     def post(self, request, *args, **kwargs):
         form = InviteForm(request.POST)
         form.instance.create_user = self.request.user
         person = request.POST.get('person')
         office = request.POST.get('office')
-        if not Invite.objects.filter(person__pk=person, office__pk=office, status='N'):
-            form.instance.person = Person.objects.get(pk=request.POST.get('person'))
-            form.instance.office = Office.objects.get(pk=request.POST.get('office'))
+        try:
+            validate_email(person)
+            external_user = True
+            email = person
+            person = None
+        except:
+            external_user = False
+            email = None
+        if not Invite.objects.filter(person__pk=person, office__pk=office, email=email, status='N'):
+            invite_code = self.invite_code() if external_user else None
+            form.instance.person = Person.objects.get(pk=person) if person else None
+            form.instance.office = Office.objects.get(pk=office)
+            form.instance.invite_code = invite_code
+            form.instance.email = email
             form.instance.save()
         return JsonResponse({'status': 'ok'})
 
@@ -1096,7 +1115,6 @@ class EditableListSave(CustomLoginRequiredView, View):
 
 
 class PopupSuccessView(LoginRequiredMixin, TemplateView):
-
     template_name = "core/popup_success.html"
 
 
@@ -1174,9 +1192,11 @@ class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params):
         data = []
-        for user in User.objects.filter(Q(person__legal_name__unaccent__icontains=q) | Q(username__unaccent__icontains=q)):
+        for user in User.objects.filter(
+                Q(person__legal_name__unaccent__icontains=q) | Q(username__unaccent__icontains=q)
+                | Q(email__unaccent__icontains=q)):
             data.append({'id': user.person.id, 'value': user.person.legal_name + ' ({})'.format(user.username),
-                        'data-value-txt': user.person.legal_name + ' ({})'.format(user.username)})
+                         'data-value-txt': user.person.legal_name + ' ({} - {})'.format(user.username, user.email)})
         return list(data)
 
 
@@ -1197,8 +1217,8 @@ class ClientAutocomplete(TypeaHeadGenericSearch):
     def get_data(module, model, field, q, office, forward_params):
         data = []
         for client in Person.objects.filter(Q(legal_name__unaccent__icontains=q),
-                                          Q(is_customer=True,),
-                                          Q(offices=office)):
+                                            Q(is_customer=True, ),
+                                            Q(offices=office)):
             data.append({'id': client.id, 'data-value-txt': client.__str__()})
         return list(data)
 
@@ -1209,7 +1229,7 @@ class CorrespondentAutocomplete(TypeaHeadGenericSearch):
     def get_data(module, model, field, q, office, forward_params):
         data = []
         for correspondent in Person.objects.active().correspondents().filter(Q(legal_name__unaccent__icontains=q),
-                                          Q(offices=office)):
+                                                                             Q(offices=office)):
             data.append({'id': correspondent.id, 'data-value-txt': correspondent.__str__()})
         return list(data)
 
@@ -1220,7 +1240,7 @@ class RequesterAutocomplete(TypeaHeadGenericSearch):
     def get_data(module, model, field, q, office, forward_params):
         data = []
         for requester in Person.objects.active().requesters().filter(Q(legal_name__unaccent__icontains=q),
-                                                                             Q(offices=office)):
+                                                                     Q(offices=office)):
             data.append({'id': requester.id, 'data-value-txt': requester.__str__()})
         return list(data)
 
@@ -1231,7 +1251,7 @@ class ServiceAutocomplete(TypeaHeadGenericSearch):
     def get_data(module, model, field, q, office, forward_params):
         data = []
         for service in Person.objects.active().services().filter(Q(legal_name__unaccent__icontains=q),
-                                                                     Q(offices=office)):
+                                                                 Q(offices=office)):
             data.append({'id': service.id, 'data-value-txt': service.__str__()})
         return list(data)
 
