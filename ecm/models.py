@@ -73,3 +73,7 @@ class DefaultAttachmentRule (Audit, OfficeMixin):
         return '{}:{}'.format(
             self.name, self.description
         )
+
+    @property
+    def upload_required(self):
+        return True

@@ -39,9 +39,9 @@ class BaseModelForm(FileFormMixin, forms.ModelForm):
         if usermodel:
             use_upload = False
         else:
-            use_upload = getattr(self._meta.model, "use_upload", False)
+            use_upload = getattr(self.instance, "use_upload", False)
         if self.initial.__len__() == 0 and use_upload:
-            required = getattr(self, "documents_required", False)
+            required = getattr(self.instance, "upload_required", False)
             documents = MultipleUploadedFileField(required=required)
             self.fields.update({'documents': documents})
 

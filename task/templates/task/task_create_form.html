@@ -18,24 +18,5 @@
     <link rel="stylesheet" href="{% static "fileuploader.css" %}">
 {% endblock %}
 {% block attachment_form %}
-    <div class="col-lg-12">
-        <fieldset>
-            <div class="form-row">
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h1 class="panel-title"><i class="panel-title mdi mdi-paperclip"></i> Anexos </h1>
-                    </div>
-                    <div class="panel-body">
-                        <fieldset>
-
-                            {{ form.documents }}
-
-                            {% include 'ecm/attachments_create.html' %}
-
-                        </fieldset>
-                    </div>
-                </div>
-            </div>
-        </fieldset>
-    </div>
+    {% include 'ecm/attachments_create.html' %}
 {% endblock attachment_form %}
