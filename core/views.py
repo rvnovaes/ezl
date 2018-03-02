@@ -918,6 +918,7 @@ class RegisterNewUser(CreateView):
     fields = ('username', 'password')
 
     def post(self, request, *args, **kwargs):
+        invite_code = request.POST.get('invite_code')
         name = str(request.POST.get('name')).split(' ')
         first_name = ''
         last_name = ''
@@ -931,12 +932,22 @@ class RegisterNewUser(CreateView):
             {'username': username, 'first_name': first_name, 'last_name': last_name, 'email': email,
              'password1': password, 'password2': password})
         if form.is_valid():
-            form.save()
+            instance = form.save()
+            if invite_code:
+                invite = Invite.objects.filter(invite_code=invite_code).first()
+                invite.person = Person.objects.filter(auth_user=instance).first()
+                invite.status = 'N'
+                invite.save()
             return HttpResponseRedirect(reverse_lazy('start_user'))
-        return render(request, 'account/register.html', {'form': form})
+        return render(request, 'account/register.html', {'form': form, 'invite_code': invite_code, })
 
     def get(self, request, *args, **kwargs):
-        return render(request, 'account/register.html', {})
+        context = {}
+        if request.GET.get('invite_code'):
+            invite = Invite.objects.filter(invite_code=request.GET['invite_code']).first()
+            context['email'] = invite.email
+            context['invite_code'] = request.GET['invite_code']
+        return render(request, 'account/register.html', context)
 
 
 class CustomSession(View):
