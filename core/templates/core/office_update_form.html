@@ -272,6 +272,7 @@
                 var inviteTable = $(invite.table_id);
                 inviteTable.load(invite.table_url + '{{ object.pk }}' + '/', invite.table_id);
                 $(invite.btn).on('click', function (event) {
+                    $('#inviting').modal('show');
                     var data = {};
                     $(invite.el).find('input').each(function () {
                         var person = $('#person');
@@ -292,7 +293,7 @@
                             }
                             inviteTable.load(invite.table_url + '{{ object.pk }}' + '/', invite.table_id);
                             $(invite.el + ' .twitter-typeahead').typeahead('val', '');
-
+                            $('#inviting').modal('hide');
                         },
                         error: function (request, status, error) {
 
@@ -369,3 +370,18 @@
         }
     </script>
 {% endblock %}
+{% block extra_modal %}
+    <!-- Janela modal para mostrar progresso de deleção do arquivo -->
+    <div id="inviting" class="modal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center;">
+                    <h1>Aguarde...</h1>
+                    <p class="h1"><i class="fa fa-spin fa-circle-o-notch"></i></p>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock extra_modal %}

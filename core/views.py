@@ -1023,11 +1023,15 @@ class InviteCreateView(AuditFormMixin, CreateView):
             validate_email(person)
             external_user = True
             email = person
-            person = None
+            if Person.objects.filter(auth_user__email=email):
+                person = Person.objects.filter(auth_user__email=email).first().pk
+            else:
+                form.instance.status = 'E'
         except:
             external_user = False
             email = None
-        if not Invite.objects.filter(person__pk=person, office__pk=office, email=email, status='N'):
+        if not Invite.objects.filter(person__pk=person, office__pk=office, email=email, status='N') and \
+                not Invite.objects.filter(person__pk=person, office__pk=office, email=email, status='E'):
             invite_code = self.invite_code() if external_user else None
             form.instance.person = Person.objects.filter(pk=person).first() if person else None
             form.instance.office = Office.objects.get(pk=office)
