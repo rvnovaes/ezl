@@ -62,6 +62,7 @@ def attachment_form_valid(f):
             instance = object_instance.object
             model_name = get_attachment_model_name(object_instance.model)
             files = object_instance.request.FILES.getlist('file')
+            documents = form.cleaned_data['documents'] if form.fields.get('documents') else False
             if files:
                 for file in files:
                     attachment = Attachment(
@@ -72,8 +73,8 @@ def attachment_form_valid(f):
                         create_user_id=object_instance.request.user.id
                     )
                     attachment.save()
-            elif form.cleaned_data['documents']:
-                for document in form.cleaned_data['documents']:
+            elif documents:
+                for document in documents:
                     attachment = Attachment(
                         model_name=model_name,
                         object_id=instance.id,
