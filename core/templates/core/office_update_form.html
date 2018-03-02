@@ -263,12 +263,21 @@
                 }
             ];
 
+            function isEmail(email) {
+              var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+              return regex.test(email);
+            }
+
             invites.forEach(function (invite) {
                 var inviteTable = $(invite.table_id);
                 inviteTable.load(invite.table_url + '{{ object.pk }}' + '/', invite.table_id);
                 $(invite.btn).on('click', function (event) {
                     var data = {};
                     $(invite.el).find('input').each(function () {
+                        var person = $('#person');
+                        if (person.attr('value') === "" && isEmail(person.val())){
+                            person.attr('value', person.val())
+                        }
                         if ($(this).attr('name')) {
                             data[$(this).attr('name')] = $(this).attr('value')
                         }

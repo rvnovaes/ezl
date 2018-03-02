@@ -1018,7 +1018,7 @@ class InviteCreateView(AuditFormMixin, CreateView):
             email = None
         if not Invite.objects.filter(person__pk=person, office__pk=office, email=email, status='N'):
             invite_code = self.invite_code() if external_user else None
-            form.instance.person = Person.objects.get(pk=person) if person else None
+            form.instance.person = Person.objects.filter(pk=person).first() if person else None
             form.instance.office = Office.objects.get(pk=office)
             form.instance.invite_code = invite_code
             form.instance.email = email

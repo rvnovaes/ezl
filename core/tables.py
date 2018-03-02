@@ -149,7 +149,7 @@ class OfficeTable(tables.Table):
 class InviteTable(tables.Table):
     class Meta:
         model = Invite
-        fields = ('person', 'person.auth_user', 'status')
+        fields = ('person', 'email', 'person.auth_user', 'status')
 
 
 class InviteOfficeTable(tables.Table):
