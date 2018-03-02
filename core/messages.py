@@ -2,6 +2,8 @@
 
 CREATE_SUCCESS_MESSAGE = 'Registro criado com sucesso'
 
+USER_CREATE_SUCCESS_MESSAGE = 'Registro criado com sucesso'
+
 UPDATE_SUCCESS_MESSAGE = 'Registro atualizado com sucesso'
 
 ADDRESS_UPDATE_SUCCESS_MESSAGE = 'Endereço atualizado com sucesso.'

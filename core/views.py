@@ -34,9 +34,8 @@ from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, 
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
-    record_from_wrong_office, DELETE_SUCCESS_MESSAGE, \
-    ADDRESS_UPDATE_ERROR_MESSAGE, \
-    ADDRESS_UPDATE_SUCCESS_MESSAGE
+    record_from_wrong_office, DELETE_SUCCESS_MESSAGE, ADDRESS_UPDATE_ERROR_MESSAGE, ADDRESS_UPDATE_SUCCESS_MESSAGE, \
+    USER_CREATE_SUCCESS_MESSAGE
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, OfficeMixin, \
     InviteOffice
 from core.signals import create_person
@@ -916,6 +915,7 @@ class OfficeDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
 class RegisterNewUser(CreateView):
     model = User
     fields = ('username', 'password')
+    success_message = USER_CREATE_SUCCESS_MESSAGE
 
     def post(self, request, *args, **kwargs):
         invite_code = request.POST.get('invite_code')
@@ -938,6 +938,11 @@ class RegisterNewUser(CreateView):
                 invite.person = Person.objects.filter(auth_user=instance).first()
                 invite.status = 'N'
                 invite.save()
+            elif Invite.objects.filter(email=instance.email):
+                for invite in Invite.objects.filter(email=instance.email):
+                    invite.person = Person.objects.get(auth_user=instance)
+                    invite.status = 'N'
+                    invite.save()
             return HttpResponseRedirect(reverse_lazy('start_user'))
         return render(request, 'account/register.html', {'form': form, 'invite_code': invite_code, })
 
@@ -1026,6 +1031,7 @@ class InviteCreateView(AuditFormMixin, CreateView):
             if Person.objects.filter(auth_user__email=email):
                 person = Person.objects.filter(auth_user__email=email).first().pk
             else:
+                person = None
                 form.instance.status = 'E'
         except:
             external_user = False
