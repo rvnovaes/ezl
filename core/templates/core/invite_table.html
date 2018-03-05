@@ -34,6 +34,8 @@
                                 {% if column.name == 'status' %}
                                     {% if cell == 'NOT REVIEWED' %}
                                         <td><span class="label label-warning label-rounded"><i class="fa fa-warning"></i> Pendente</span></td>
+                                    {% elif cell == 'EXTERNAL'%}
+                                        <td style="width: 100px !important;"><span class="label label-primary label-rounded"><i class="fa fa-external-link"></i> Pendente Externo</span></td>
                                     {% elif cell == 'ACCEPTED'%}
                                         <td style="width: 100px !important;"><span class="label label-success label-rounded"><i class="fa fa-check"></i> Aceito</span></td>
                                     {% else %}
