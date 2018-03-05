@@ -1,4 +1,6 @@
 from enum import Enum
+import hashlib
+import time
 
 from django.conf import settings
 from django.db import models
@@ -33,6 +35,13 @@ class LegalType(Enum):
         """
         label = {'F': 'Física', 'J': 'Jurídica'}
         return label.get(value)
+
+
+def _create_hash(size=10):
+    hash = hashlib.sha1()
+    hash_str = str(time.time()).encode('utf-8')
+    hash.update(hash_str)
+    return hash.hexdigest()[:size]
 
 
 class AuditCreate(models.Model):
@@ -293,7 +302,8 @@ class Invite(Audit):
                               blank=True, null=True,
                               max_length=255,
                               )
-    invite_code = models.CharField(blank=True, null=True, verbose_name='Código do convite', max_length=8)
+    invite_code = models.CharField(blank=True, null=True, verbose_name='Código do convite', max_length=10
+                                   , default=_create_hash, unique=True)
 
     class Meta:
         verbose_name = 'Convite'

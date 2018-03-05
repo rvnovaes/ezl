@@ -1,7 +1,6 @@
 import importlib
 import json
 import string
-import random
 from abc import abstractproperty
 from functools import wraps
 from django import forms
@@ -933,14 +932,10 @@ class RegisterNewUser(CreateView):
              'password1': password, 'password2': password})
         if form.is_valid():
             instance = form.save()
-            if invite_code:
-                invite = Invite.objects.filter(invite_code=invite_code).first()
-                invite.person = Person.objects.filter(auth_user=instance).first()
-                invite.status = 'N'
-                invite.save()
-            elif Invite.objects.filter(email=instance.email):
-                for invite in Invite.objects.filter(email=instance.email):
-                    invite.person = Person.objects.get(auth_user=instance)
+            if invite_code or Invite.objects.filter(email=instance.email):
+                for invite in Invite.objects.filter(Q(Q(status='N') | Q(status='E')),
+                                                    Q(email=instance.email) | Q(invite_code=invite_code)):
+                    invite.person = Person.objects.filter(auth_user=instance).first()
                     invite.status = 'N'
                     invite.save()
             return HttpResponseRedirect(reverse_lazy('start_user'))
@@ -1015,10 +1010,6 @@ class InviteCreateView(AuditFormMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'start_user'
 
-    @staticmethod
-    def invite_code(size=8, chars=string.ascii_uppercase + string.digits):
-        return ''.join(random.choice(chars) for _ in range(size))
-
     def post(self, request, *args, **kwargs):
         form = InviteForm(request.POST)
         form.instance.create_user = self.request.user
@@ -1038,10 +1029,8 @@ class InviteCreateView(AuditFormMixin, CreateView):
             email = None
         if not Invite.objects.filter(person__pk=person, office__pk=office, email=email, status='N') and \
                 not Invite.objects.filter(person__pk=person, office__pk=office, email=email, status='E'):
-            invite_code = self.invite_code() if external_user else None
             form.instance.person = Person.objects.filter(pk=person).first() if person else None
             form.instance.office = Office.objects.get(pk=office)
-            form.instance.invite_code = invite_code
             form.instance.email = email
             form.instance.save()
         return JsonResponse({'status': 'ok'})

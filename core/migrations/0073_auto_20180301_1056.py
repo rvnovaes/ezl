@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.db.models.deletion
+import core.models
 
 
 class Migration(migrations.Migration):
@@ -21,7 +22,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invite',
             name='invite_code',
-            field=models.CharField(blank=True, max_length=8, null=True, verbose_name='Código do convite'),
+            field=models.CharField(blank=True, default=core.models._create_hash, max_length=10, null=True, unique=True,
+                                   verbose_name='Código do convite'),
         ),
         migrations.AlterField(
             model_name='invite',
