@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
         ('core', '0068_office_import_from_legacy'),
         ('lawsuit', '0043_auto_20180105_1749'),
         ('task', '0064_auto_20180201_0911'),
-        ('financial', '0011_servicepricetable_office_correspondent'),
+        ('financial', '0010_servicepricetable_office_correspondent'),
     ]
 
     operations = [

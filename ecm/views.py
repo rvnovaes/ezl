@@ -67,25 +67,6 @@ class AttachmentFormMixin(object):
         return True
 
 
-class AjaxVerifyForm(View):
-
-    @csrf_exempt
-    def dispatch(self, *args, **kwargs):
-        return super(AjaxVerifyForm, self).dispatch(*args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        print(request)
-        form = DefaultAttachmentRuleCreateForm(request.POST, request.FILES)
-        if form.is_valid():
-            return make_response(content=json.dumps({'success': True}))
-        else:
-            return make_response(status=400,
-                                 content=json.dumps({
-                                     'success': False,
-                                     'error': '%s' % repr(form.errors)
-                                 }))
-
-
 class UploadView(View):
     """
     View which will handle all upload requests sent by Uploader.
@@ -104,14 +85,14 @@ class UploadView(View):
             data = request.POST
 
             for file in request.FILES.getlist('file'):
-                attachment = Attachment(
-                    model_name=data.get('model_name'),
-                    object_id=data.get('object_id'),
-                    file=file,
-                    exibition_name=file.name,
-                    create_user_id=request.user.id
-                )
-                attachment.save()
+                    attachment = Attachment(
+                        model_name=data.get('model_name'),
+                        object_id=data.get('object_id'),
+                        file=file,
+                        exibition_name=file.name,
+                        create_user_id=request.user.id
+                    )
+                    attachment.save()
             return make_response(content=json.dumps({'success': True,
                                                      'model_name': data.get('model_name'),
                                                      'object_id': data.get('object_id')}))
@@ -131,7 +112,7 @@ def ajax_get_attachments(request):
     ret = []
     for attachment in attachments:
         ret.append({
-            'file': attachment.exibition_name,
+            'exibition_name': attachment.exibition_name,
             'object_id': attachment.object_id,
             'model_name': attachment.model_name,
             'pk': attachment.pk,

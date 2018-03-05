@@ -1,27 +1,9 @@
 {% extends "skeleton/forms/base.html" %}
 {% load static %}
-{% block extra_scripts %}
+{% load core_filters %}
+{% load staticfiles %}
+
+{% block extra_stylesheets %}
     {{ block.super }}
-    {% include 'core/uf_court_district_link.html' %}
+    <link rel="stylesheet" href="{% static "fileuploader.css" %}">
 {% endblock %}
-{#{% block onsubmit %}#}
-{#    return validateForm()#}
-{#{% endblock %}#}
-{#{% block extra_scripts %}#}
-{#    {{ block.super }}#}
-{#    <script>#}
-{#        $('#object_form').submit( function(event) {#}
-{#          var form = $('#object_form');#}
-{#          $.ajax({#}
-{#              type: "POST",#}
-{#              url: '/ecm/anexos-padrao/verificar',#}
-{#              data: form.serialize(),#}
-{#              success: function (response) {#}
-{#                  debugger;#}
-{#                  console.log(response);#}
-{#              }#}
-{#          });#}
-{##}
-{#        });#}
-{#    </script>#}
-{#{% endblock extra_scripts %}#}

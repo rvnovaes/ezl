@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
         ('lawsuit', '0044_auto_20180208_1532'),
         ('core', '0070_auto_20180208_1532'),
         ('task', '0070_auto_20180208_1532'),
-        ('financial', '0012_auto_20180201_1448'),
+        ('financial', '0011_auto_20180201_1448'),
     ]
 
     operations = [

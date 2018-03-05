@@ -726,19 +726,14 @@ class CourtDistrictAutocomplete(TypeaHeadGenericSearch):
         return list(data)
 
 
-class FolderAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = Folder.objects.none()
-        office = get_office_session(self.request)
-
-        if self.q:
-            filters = Q(person_customer__name__unaccent__istartswith=self.q)
-            filters |= Q(folder_number__startswith=self.q)
-            qs = Folder.objects.filter(is_active=True, office=office).filter(filters)
-        return qs
-
-    def get_result_label(self, result):
-        return "{} - {}".format(result.folder_number, result.person_customer.name)
+class FolderAutocomplete(TypeaHeadGenericSearch):
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params):
+        data = []
+        for folder in Folder.objects.filter(Q(person_customer__name__unaccent__istartswith=q) |
+                                            Q(folder_number__startswith=q)):
+            data.append({'id': folder.id, 'data-value-txt': folder.__str__()})
+        return list(data)
 
 
 class LawsuitAutocomplete(autocomplete.Select2QuerySetView):

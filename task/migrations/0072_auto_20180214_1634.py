@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import task.models
+import django.utils.timezone
 
 
 class Migration(migrations.Migration):

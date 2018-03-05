@@ -31,7 +31,7 @@ class Permissions(Enum):
 # Dicionário para retornar o icone referente ao status da providencia
 icon_dict = {
     'ACCEPTED': 'mdi mdi-calendar-clock',
-    'OPEN': 'mdi mdi-lock-open-outline',
+    'OPEN': 'mdi mdi-account-location',
     'RETURN': 'mdi mdi-backburger',
     'DONE': 'mdi mdi-checkbox-marked-circle-outline',
     'REFUSED': 'mdi mdi-clipboard-alert',
@@ -267,7 +267,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
         return False
 
     def save(self, *args, **kwargs):
-        self._called_by_etl = kwargs.pop('called_by_etl', False)
+        self._skip_signal = kwargs.pop('skip_signal', False)
         if not self.task_number:
             self.task_number = self.get_task_number()
         return super().save(*args, **kwargs)
@@ -336,7 +336,7 @@ class TaskHistory(AuditCreate):
         verbose_name_plural = 'Histórico das Providências'
 
     def save(self, *args, **kwargs):
-        self._called_by_etl = kwargs.pop('called_by_etl', False)
+        self._skip_signal = kwargs.pop('skip_signal', False)
         return super(TaskHistory, self).save(*args, **kwargs)
 
 

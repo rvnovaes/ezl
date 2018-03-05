@@ -22,18 +22,18 @@
             {% include 'task/task_detail/historico.html' %}
         </div>
         <!-- CONFIRMAR AÇÃO -->
-        <div id="confirmAction" class="modal fade"
+        <div id="confirmAction" class="modal fade "
             tabindex="-1" role="alert" aria-labelledby="modalTitle"
             aria-hidden="true">
-            <div class="modal-dialog ">
-                <div class="modal-content ">
-                    <div id="modalHeader">
+            <div class="modal-dialog modal-lg ">
+                <div class="modal-content">
+                    <div id="modalHeader" class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 id="modalTitle" class="panel-title text-center text-danger">
-                            <i id="icon" class="mdi"></i>
-                            <b> Deseja <span id="actionText">aceitar</span> o prazo? </b></h4>
+                        <h4 id="modalTitle" class="modal-title">
+                            <i id="icon" class="mdi-24px"></i>
+                             Deseja <span id="actionText">aceitar</span> o prazo? </h4>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body p-30">
                         {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
                             {{ form.servicepricetable_id }}
                             <div class="form-group" style="margin: auto">
@@ -49,40 +49,38 @@
                             </div>
                         {% endif %}
                         <div class="form-group" style="margin: auto">
-                            <label class="text-info"> {{ form.notes.label }}</label>
+                            <label> {{ form.notes.label }}</label>
                             {{ form.notes }}
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <div class="form-group text-center">
-                            <button style="width: 95px!important;" onClick="this.form.reset()"
-                                    class="btn btn-danger"
-                                    data-dismiss="modal">
-                                Cancelar
-                            </button>
-                            {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                                {% if form.instance.type_task.survey %}
-                                    <button id="actionButton"
-                                            type="submit"
-                                            onclick="beforeSubmit()"
-                                            style="width: 95px!important;"
-                                            class="btn btn-success">Sim
-                                    </button>
-                                {% else %}
-                                    <button id="actionButton"
-                                            type="submit"
-                                            style="width: 95px!important;"
-                                            class="btn btn-success">Sim
-                                    </button>
-                                {% endif %}
-
+                        <button style="width: 100px!important;" onClick="this.form.reset()"
+                                class="btn btn-default"
+                                data-dismiss="modal">
+                            <i class="mdi mdi-close"></i> Cancelar
+                        </button>
+                        {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
+                            {% if form.instance.type_task.survey %}
+                                <button id="actionButton"
+                                        type="submit"
+                                        onclick="beforeSubmit()"
+                                        style="width: 100px!important;"
+                                        class="btn btn-success">Sim
+                                </button>
                             {% else %}
                                 <button id="actionButton"
-                                        style="width: 95px!important;"
-                                        type="submit" class="btn btn-raised btn-success">Sim
+                                        type="submit"
+                                        style="width: 100px!important;"
+                                        class="btn btn-success">Sim
                                 </button>
                             {% endif %}
-                        </div>
+
+                        {% else %}
+                            <button id="actionButton"
+                                    style="width: 100px!important;"
+                                    type="submit" class="btn btn-raised btn-success">Sim
+                            </button>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -178,9 +176,9 @@
         }
 
         var nextState = {
-            ACCEPTED_SERVICE: {text: "aceitar", icon: "mdi mdi-calendar-clock"},
-            REFUSED_SERVICE: {text: "recusar", icon: "mdi mdi-calendar-clock"},
-            OPEN: {text: "delegar", icon: "mdi assignment"},
+            ACCEPTED_SERVICE: {text: "aceitar", icon: "mdi mdi-thumb-up-outline"},
+            REFUSED_SERVICE: {text: "recusar", icon: "mdi mdi-thumb-down-outline"},
+            OPEN: {text: "delegar", icon: "mdi mdi-account-location"},
             ACCEPTED: {text: "aceitar", icon: "mdi mdi-calendar-clock"},
             REFUSED: {text: "recusar", icon: "mdi mdi-clipboard-alert"},
             DELEGATED: {text: "delegar", icon: "assignment_returned"},
@@ -209,9 +207,10 @@
             var nextText = document.getElementById("actionText");
             var modalHeader = document.getElementById("modalHeader");
             nextText.innerHTML = nextState[task_status]['text'];
-            $('#icon').addClass(nextState[task_status]['icon'])
-
-            modalHeader.setAttribute("class", "panel-header panel-heading" + " " + task_status);
+            $('#icon').addClass(nextState[task_status]['icon']);
+            actionButton.innerHTML = "<i class='"+nextState[task_status]['icon']+"'></i> "+
+                nextState[task_status]['text'].replace(nextState[task_status]['text'][0],
+                    nextState[task_status]['text'][0].toUpperCase());
 
             actionButton.setAttribute("name", "action");
             actionButton.setAttribute("value", task_status);
@@ -244,11 +243,10 @@
     </script>
     <script type="text/javascript">
         $("#correspondents-table tbody tr").click(function(){
-            debugger
             id = $(this).data('id');
-            amount = $(this).data('value');
+            amount = $(this).data('value').toString();
             $('input[name=servicepricetable_id]').val(id);
-            $('input[name=amount]').val(parseFloat(amount));
+            $('input[name=amount]').val(amount.replace(".", ","));
             $(this).addClass("ezl-bg-open");
             $(this).siblings().removeClass("ezl-bg-open");
             $('input[name=amount]').focus();

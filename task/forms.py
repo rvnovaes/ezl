@@ -108,12 +108,8 @@ class TaskForm(BaseForm):
         self.fields['office'] = get_office_field(self.request)
 
 
-class TaskCreateForm(FileFormMixin, TaskForm):
-    documents = forms.FileField(widget=forms.ClearableFileInput(
-                                attrs={'multiple': True,
-                                       "id": "fileupload-create"}),
-                                required=False)
-
+class TaskCreateForm(TaskForm):
+    documents = MultipleUploadedFileField(required=False)
 
     class Meta(TaskForm.Meta):
         fields = TaskForm.Meta.fields + ['documents']
