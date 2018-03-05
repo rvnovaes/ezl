@@ -2,14 +2,6 @@
 {% load core_filters form_tags staticfiles bootstrap3 %}
 
 {% block extra_scripts %}
-    {{ block.super }}
-    <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
-    <script src="{% static "file_form/file_form.js" %}"></script>
-    <script>
-       $(function() {
-           initUploadFields($('#task_form'));
-       });
-    </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
     <script src="{% static 'task/task-builk-create.js' %}"></script>
     <script src="{% static 'skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js' %}"></script>

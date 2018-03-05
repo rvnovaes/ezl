@@ -260,6 +260,5 @@ TaskForm = (function($){
 
 
 $(document).ready(function(){
-    debugger;
     TaskForm.init();
 });
