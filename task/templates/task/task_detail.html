@@ -244,9 +244,9 @@
     <script type="text/javascript">
         $("#correspondents-table tbody tr").click(function(){
             id = $(this).data('id');
-            amount = $(this).data('value');
+            amount = $(this).data('value').toString();
             $('input[name=servicepricetable_id]').val(id);
-            $('input[name=amount]').val(parseFloat(amount));
+            $('input[name=amount]').val(amount.replace(".", ","));
             $(this).addClass("ezl-bg-open");
             $(this).siblings().removeClass("ezl-bg-open");
             $('input[name=amount]').focus();
