@@ -11,13 +11,17 @@ def person_office(apps, schema_editor):
     admin = User.objects.filter(username='admin').first()
     ServicePriceTable = apps.get_model('financial', 'ServicePriceTable')
     Office = apps.get_model('core', 'Office')
+    OfficeMembership = apps.get_model('core', 'officemembership')
     for record in ServicePriceTable.objects.order_by('correspondent__id').all():
         person = record.correspondent
         person_office, created = Office.objects.get_or_create(create_user=admin,
                                                               cpf_cnpj=person.cpf_cnpj,
                                                               name=person.name,
                                                               legal_name=person.legal_name)
-        person.offices.add(person_office)
+        OfficeMembership.objects.create(person=person,
+                                        office=person_office,
+                                        create_user=admin,
+                                        is_active=True)
         record.office_correspondent = person_office
         record.save()
 

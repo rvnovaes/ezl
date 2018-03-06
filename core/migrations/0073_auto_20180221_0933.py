@@ -13,13 +13,14 @@ def remove_persons_from_office(apps, schema_editor):
     admin = User.objects.filter(username='admin').first()
     if admin:
         Office = apps.get_model('core', 'Office')
-        default_office = Office.objects.filter(create_user=admin,
-                                               cpf_cnpj='03.482.042/0001-02',
-                                               name='Marcelo Tostes Advogados Associados',
-                                               legal_name='Marcelo Tostes Advogados Associados').first()
+        default_office, created = Office.objects.get_or_create(create_user=admin,
+                                                               cpf_cnpj='03.482.042/0001-02',
+                                                               name='Marcelo Tostes Advogados Associados',
+                                                               legal_name='Marcelo Tostes Advogados Associados')
 
         for record in default_office.persons.all():
             default_office.persons.remove(record)
+
 
 def populate_office_persons(apps, schema_editor):
     User = apps.get_model('auth', 'User')
@@ -47,7 +48,6 @@ def populate_office_persons(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('core', '0072_auto_20180220_1457'),
@@ -61,8 +61,12 @@ class Migration(migrations.Migration):
                 ('create_date', models.DateTimeField(auto_now_add=True, verbose_name='Criado em')),
                 ('alter_date', models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em')),
                 ('is_active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='officemembership_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por')),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='officemembership_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por')),
+                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
+                                                 related_name='officemembership_alter_user',
+                                                 to=settings.AUTH_USER_MODEL, verbose_name='Alterado por')),
+                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
+                                                  related_name='officemembership_create_user',
+                                                  to=settings.AUTH_USER_MODEL, verbose_name='Criado por')),
             ],
             options={
                 'abstract': False,
@@ -76,7 +80,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='office',
             name='persons',
-            field=models.ManyToManyField(blank=True, related_name='offices', through='core.OfficeMembership', to='core.Person'),
+            field=models.ManyToManyField(blank=True, related_name='offices', through='core.OfficeMembership',
+                                         to='core.Person'),
         ),
         migrations.AddField(
             model_name='officemembership',
