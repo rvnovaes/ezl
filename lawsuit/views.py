@@ -730,7 +730,7 @@ class FolderAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params):
         data = []
-        for folder in Folder.objects.filter(Q(person_customer__name__unaccent__istartswith=q) |
+        for folder in Folder.objects.filter(Q(person_customer__legal_name__unaccent__istartswith=q) |
                                             Q(folder_number__startswith=q)):
             data.append({'id': folder.id, 'data-value-txt': folder.__str__()})
         return list(data)
