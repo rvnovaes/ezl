@@ -37,11 +37,11 @@ class LegalType(Enum):
         return label.get(value)
 
 
-def _create_hash(size=10):
+def _create_hash(size=False):
     hash = hashlib.sha1()
     hash_str = str(time.time()).encode('utf-8')
     hash.update(hash_str)
-    return hash.hexdigest()[:size]
+    return hash.hexdigest()[:size] if size else hash.hexdigest()
 
 
 class AuditCreate(models.Model):
@@ -302,8 +302,8 @@ class Invite(Audit):
                               blank=True, null=True,
                               max_length=255,
                               )
-    invite_code = models.CharField(blank=True, null=True, verbose_name='Código do convite', max_length=10
-                                   , default=_create_hash, unique=True)
+    invite_code = models.CharField(blank=True, null=True, verbose_name='Código do convite', max_length=50,
+                                   default=_create_hash, unique=True)
 
     class Meta:
         verbose_name = 'Convite'
