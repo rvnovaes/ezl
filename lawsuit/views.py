@@ -503,6 +503,7 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, CustomLoginRequiredView, Ge
         :param kwargs:
         :return: super
         """
+        self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
         if cache.get('lawsuit_movement_page'):
             self.success_url = cache.get('lawsuit_movement_page')
         return super(LawsuitMovementUpdateView, self).post(request, *args, **kwargs)
