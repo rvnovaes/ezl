@@ -191,7 +191,7 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteVi
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
     def post(self, request, *args, **kwargs):
-        self.success_url = urlparse(request.environ.get('HTTP_REFERER')).path
+        self.success_url = urlparse(request.META.get('HTTP_REFERER')).path
         return super(TaskDeleteView, self).post(request, *args, **kwargs)
 
 
