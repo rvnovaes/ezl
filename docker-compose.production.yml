@@ -1,4 +1,6 @@
 version: "3"
+networks:
+  default:
 services:
   builder:
     build:
@@ -11,6 +13,13 @@ services:
     environment:
       ENV: production
 
+  db:
+    ports:
+      - "57002:5432"
+    volumes:
+      - "db-data:/var/lib/postgresql/data"
+      - "./containers/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
+      - "./containers/db/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf"
   nginx:
     ports:
       - "80:80"
@@ -18,6 +27,9 @@ services:
     depends_on:
       - web
       - certbot
+    labels:
+      - "traefik.backend=ezl-production"
+      - "traefik.frontend.rule=Host:mtostes.ezlawyer.com.br"
 
   web:
     build:
@@ -71,3 +83,11 @@ services:
       - builder
       - db
       - queues
+
+  pgweb:
+    build:
+      context: .
+      dockerfile: containers/pgweb/Dockerfile
+    command: pgweb --url postgres://ezl:ezl@db:5432/ezl?sslmode=disable --bind 0.0.0.0 --auth-user=admin --auth-pass=dev@2016
+    ports:
+    - "9002:8081"

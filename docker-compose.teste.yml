@@ -12,9 +12,9 @@ services:
       ENV: development
 
   nginx:
-    ports:
-      - "801:80"
-      - "4431:443"
+    labels:
+      - "traefik.backend=ezl-teste"
+      - "traefik.frontend.rule=Host:teste.ezlawyer.com.br"
     volumes:
       - ./containers/nginx/conf.d/ezl_teste.conf:/etc/nginx/conf.d/default.conf
       - web-static:/usr/share/nginx/html/static
@@ -34,8 +34,6 @@ services:
     volumes:
       - .:/app
       - ezl-logs:/var/log/ezl
-    ports:
-      - '8002:8002'
     command: daphne -b 0.0.0.0 -p 8002 --ws-protocol "graphql-ws" --proxy-headers ezl.asgi:channel_layer
   ws-worker:
     image: ezl:latest
@@ -61,8 +59,6 @@ services:
   tunnel:
     image: ezl:latest
     command: python -m sshtunnel -U dev -P dev@2016 -L 0.0.0.0:2000 -R 172.27.155.22:1433 -p 22 201.86.113.86
-    ports:
-      - "2000:2000"
     volumes:
       - .:/app
 
