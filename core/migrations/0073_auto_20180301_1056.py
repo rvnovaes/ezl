@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invite',
             name='invite_code',
-            field=models.CharField(blank=True, default=core.models._create_hash, max_length=50, null=True, unique=True,
+            field=models.CharField(blank=True, max_length=50, null=True, unique=True,
                                    verbose_name='Código do convite'),
         ),
         migrations.AlterField(
@@ -43,5 +43,11 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 choices=[('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'), ('E', 'EXTERNAL')], default='N',
                 max_length=1, verbose_name='Status'),
+        ),
+        migrations.AlterField(
+            model_name='invite',
+            name='invite_code',
+            field=models.CharField(blank=True, default=core.models._create_hash, max_length=50, null=True, unique=True,
+                                   verbose_name='Código do convite'),
         ),
     ]

@@ -73,7 +73,7 @@ class Folder(Audit, LegacyCode, OfficeMixin):
         unique_together = (('folder_number', 'person_customer', 'office'),)
 
     def __str__(self):
-        return "{} - {}".format(self.folder_number, self.person_customer.name)
+        return "{} - {}".format(self.folder_number, self.person_customer.legal_name)
 
 
 class CourtDivision(Audit, LegacyCode, OfficeMixin):
@@ -177,7 +177,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
             "law_suit_number": self.law_suit_number,
             "folder": self.folder.simple_serialize()
         }
-        return data        
+        return data
 
     class Meta:
         db_table = "law_suit"
