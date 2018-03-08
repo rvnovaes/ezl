@@ -20,29 +20,13 @@ class TaskForm(BaseForm):
 
     class Meta:
         model = Task
-        fields = ['office',
-                  'task_number', 'type_task',
-                  'person_executed_by', 'person_asked_by', 'person_distributed_by',
-                  'final_deadline_date',
-                  'delegation_date', 'acceptance_date', 'refused_date', 'execution_date',
-                  'return_date', 'blocked_payment_date', 'finished_date', 'description',
-                  'is_active']
+        fields = ['office', 'task_number', 'person_asked_by', 'type_task',
+                  'final_deadline_date', 'description', 'is_active']
 
     person_asked_by = forms.ModelChoiceField(
         empty_label='Selecione...',
         queryset=filter_valid_choice_form(
             Person.objects.active().requesters().order_by('name')))
-
-    person_executed_by = forms.ModelChoiceField(
-        required=False,
-        empty_label='Selecione...',
-        queryset=Person.objects.active().correspondents().order_by('name'))
-
-    person_distributed_by = forms.ModelChoiceField(
-        required=False,
-        empty_label='Selecione...',
-        queryset=Person.objects.active().services().order_by('name'),
-        label='Contratante')
 
     type_task = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(
@@ -50,53 +34,12 @@ class TaskForm(BaseForm):
         empty_label='Selecione...',
         label='Tipo de Serviço')
 
-    delegation_date = forms.DateTimeField(required=False,
-                                          label='Data de Delegação',
-                                          widget=MDDateTimepicker(attrs={
-                                              'class': 'form-control'
-                                          },
-                                              format='DD/MM/YYYY'))
-
-    acceptance_date = forms.DateTimeField(required=False,
-                                          widget=MDDateTimepicker(attrs={
-                                              'class': 'form-control'
-                                          },
-                                              format='DD/MM/YYYY'))
-
     final_deadline_date = forms.DateTimeField(required=True,
+                                              label="Prazo Fatal",
                                               widget=MDDateTimepicker(attrs={
                                                   'class': 'form-control'
                                               },
                                                   format='DD/MM/YYYY HH:mm'))
-
-    execution_date = forms.DateTimeField(required=False,
-                                         widget=MDDateTimepicker(attrs={
-                                             'class': 'form-control'
-                                         },
-                                             format='DD/MM/YYYY'))
-
-    return_date = forms.DateTimeField(required=False,
-                                      widget=MDDateTimepicker(attrs={
-                                          'class': 'form-control'
-                                      },
-                                          format='DD/MM/YYYY'))
-
-    refused_date = forms.DateTimeField(required=False,
-                                       widget=MDDateTimepicker(attrs={
-                                           'class': 'form-control'
-                                       },
-                                           format='DD/MM/YYYY'))
-
-    blocked_payment_date = forms.DateTimeField(required=False,
-                                               widget=MDDateTimepicker(attrs={
-                                                   'class': 'form-control'
-                                               },format='DD/MM/YYYY'))
-
-    finished_date = forms.DateTimeField(required=False,
-                                        widget=MDDateTimepicker(attrs={
-                                            'class': 'form-control'
-                                        },
-                                            format='DD/MM/YYYY'))
 
     description = forms.CharField(required=False, initial='', label='Descrição',
                                   widget=forms.Textarea(
@@ -106,6 +49,8 @@ class TaskForm(BaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
+        if Person.objects.requesters().filter(auth_user=self.request.user):
+            self.fields['person_asked_by'].initial = self.request.user.person
 
 
 class TaskCreateForm(TaskForm):
