@@ -90,3 +90,10 @@ def get_class_name(value):
 @register.filter
 def get_permission_label(value):
     return value.split('-')[0]
+
+
+@register.filter
+def get_selected_state_group(user, group):
+    if user.groups.filter(id=group.id).first():
+        return 'selected'
+    return ''

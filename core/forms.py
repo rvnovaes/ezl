@@ -347,11 +347,6 @@ class UserUpdateForm(UserChangeForm):
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
-    groups = forms.ModelMultipleChoiceField(label='Perfis', required=True,
-                                            queryset=Group.objects.all().order_by('name'),
-                                            widget=forms.SelectMultiple(
-                                                attrs={'class': 'form-control profile-selector'}))
-
     is_active = CustomBooleanField(
         required=False,
         label='Ativo'
@@ -367,7 +362,7 @@ class UserUpdateForm(UserChangeForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'username', 'email', 'password',
-                  'groups', 'is_active']
+                  'is_active']
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)

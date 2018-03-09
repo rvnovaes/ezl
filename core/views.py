@@ -781,13 +781,22 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         return self.initial.copy()
 
     def form_valid(self, form):
-        form.save()
+        form.save(commit=False)
         if form.is_valid:
-            groups = form.cleaned_data['groups']
-            ids = list(group.id for group in groups)
+            have_group = False
+            for office in form.instance.person.offices.all():
+                groups = self.request.POST.getlist('office_' + str(office.id), '')
+                for group_office in office.office_groups.all():
+                    if str(group_office.group.id) in groups:
+                        group_office.group.user_set.add(form.instance)
+                        have_group = True
+                    else:
+                        group_office.group.user_set.remove(form.instance)
+            if not have_group:
+                form.add_error(None, "O usuário deve pertencer a pelo menos um grupo")
+                return self.form_invalid(form)
 
-            for group in Group.objects.filter(id__in=ids):
-                group.user_set.add(form.instance)
+            form.save()
             default_office = form.cleaned_data['office']
 
             obj = DefaultOffice.objects.filter(auth_user=form.instance).first()
