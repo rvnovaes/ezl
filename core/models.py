@@ -272,6 +272,13 @@ class OfficeRelGroup(models.Model):
     office = models.ForeignKey(Office, on_delete=models.CASCADE, related_name='office_groups')
     group = models.OneToOneField(Group, on_delete=models.CASCADE)
 
+    @property
+    def label_group(self):
+        try:
+            return self.group.name.split('-')[0]
+        except:
+            return self.group.name
+
     class Meta:
         verbose_name = 'Groupos por escritório'
 

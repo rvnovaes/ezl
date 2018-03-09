@@ -1243,3 +1243,15 @@ class TypeaHeadInviteOfficeSearch(TypeaHeadGenericSearch):
         for office in Office.objects.filter(Q(legal_name__unaccent__icontains=q)):
             data.append({'id': office.id, 'data-value-txt': office.legal_name})
         return list(data)
+
+
+class TagsInputPermissionsView(View):
+    def get(self, request, office_pk, *args, **kwargs):
+        groups = Office.objects.get(pk=office_pk).office_groups.all()
+        data = []
+        for group in groups:
+            data.append({
+                'value': group.group.pk,
+                'text': group.label_group
+            })
+        return JsonResponse(data, safe=False)

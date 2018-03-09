@@ -1,8 +1,12 @@
 {% extends 'skeleton/forms/base.html' %}
 {% load bootstrap3 static %}
+{% load core_filters %}
 
 {% block extra_stylesheets %}
     <link href="{% static 'skeleton/plugins/bower_components/multiselect/css/multi-select.css' %}" rel="stylesheet"
+          type="text/css"/>
+    <link href="{% static 'skeleton/plugins/bower_components/bootstrap-tagsinput/dist/bootstrap-tagsinput.css' %}"
+          rel="stylesheet"
           type="text/css"/>
 {% endblock %}
 
@@ -27,48 +31,28 @@
 {% block extra_content %}
     <div class="white-box">
         <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#endereco">Escritórios</a></li>
+            <li class="active"><a data-toggle="tab" href="#endereco">Permissões</a></li>
         </ul>
         <div class="tab-content">
             <div id="endereco" class="tab-pane fade in active">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover" paginate-fixed>
-                        <thead>
-                        <tr>
-                            <th>Escritório</th>
-                            <th>Permissões</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for office in object.person.offices.all %}
-                            <tr class="{% cycle 'odd' 'even' %}">
-                                <td>{{ office.legal_name }}</td>
-                                <td>
-                                    {% if object.groups.all.exists %}
-                                        {% for office_group in office.office_groups.all %}
-                                            {% for group in object.groups.all %}
-                                                {% if group == office_group.group %}
-                                                    <span class="label label-success" style="padding: 1px 12px 3px;  !important;"><i
-                                                            class="fa fa-warning"></i> {{ group.name }}</span>
-                                                    <br/>
-                                                {% endif %}
-                                            {% endfor %}
-                                        {% endfor %}
-                                    {% else %}
-                                        <span class="label label-danger"><i class="fa fa-warning"></i> Sem permissões cadastradas</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="row">
+                    {% for office in object.person.offices.all %}
+                        <div class="col-md-6">
+                            <div class="panel full-panel-purple">
+                                <div class="panel-heading"> <i class="fa fa-building-o fa-fw"></i>{{ office.name }}
+                                </div>
+                                <div class="panel-wrapper collapse in" aria-expanded="true">
+                                    <div class="panel-body">
+                                        <input type="text" class="form-control"
+                                               id="office-group-{{ office.pk }}"
+                                               data-toggle="tagsinput"
+                                               office="{{ office.pk }}" placeholder="Digite a permissão!"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
-            </div>
-            <div id="invite-users" class="tab-pane fade">
-            </div>
-            <div id="invite-offices" class="tab-pane fade">
-            </div>
-            <div id="my-invite-offices" class="tab-pane fade">
             </div>
         </div>
     </div>
@@ -77,8 +61,14 @@
 
 {% block extra_scripts %}
     <script type="text/javascript"
+            src="{% static 'skeleton/plugins/bower_components/bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js' %}"></script>
+    <script type="text/javascript"
             src="{% static 'skeleton/plugins/bower_components/multiselect/js/jquery.multi-select.js' %}"></script>
+
 {% endblock %}
 {% block script_document_ready %}
-    $('#id_groups').multiSelect();
+    $.getScript( "{% static 'core/js/input_tags_permissions.js' %}", function( data, textStatus, jqxhr ) {
+
+    });
+
 {% endblock %}
