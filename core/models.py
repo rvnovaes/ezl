@@ -6,6 +6,7 @@ from django.contrib.auth.models import User, Group
 
 from core.managers import PersonManager
 from core.utils import LegacySystem
+from guardian.shortcuts import get_perms
 
 
 INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'))
@@ -53,9 +54,6 @@ class OfficeManager(models.Manager):
         if office:
             res = super().get_queryset().filter(office__id__in=office)
         return res
-
-    def get_by_natural_key(self, cpf_cnpj):
-        return self.get(persons__cpf_cnpj=cpf_cnpj)
 
 
 class AuditAlter(models.Model):
@@ -246,6 +244,16 @@ class Person(AbstractPerson):
     def simple_serialize(self):
         """Simple JSON representation of instance"""
         return {"id": self.id, "legal_name": self.legal_name, "name": self.name}
+
+    @property
+    def get_person_permissions(self):
+        permissions = dict()
+        for group in self.auth_user.groups.all():
+            if hasattr(group, 'officerelgroup'):
+                if group.officerelgroup.office not in permissions:
+                    permissions[group.officerelgroup.office] = []
+                permissions[group.officerelgroup.office].extend(get_perms(group, group.officerelgroup.office))
+        return permissions
 
 
 class Office(AbstractPerson):
