@@ -755,14 +755,29 @@ class UserCreateView(AuditFormMixin, CreateView):
         return reverse_lazy('user_list')
 
     def form_valid(self, form):
-        form.save()
-        form.instance.person.offices.add(get_office_session(self.request))
+        form.save(commit=False)
+        offices_user = []
         if form.is_valid:
-            groups = form.cleaned_data['groups']
-            ids = list(group.id for group in groups)
+            have_group = False
+            for office in self.request.user.person.offices.all():
+                groups = self.request.POST.getlist('office_' + str(office.id), '')
+                if groups and not form.instance.id:
+                    form.save()
+                for group_office in office.office_groups.all():
+                    if str(group_office.group.id) in groups:
+                        if office not in offices_user:
+                            offices_user.append(office)
+                        offices_user.append(office)
+                        group_office.group.user_set.add(form.instance)
+                        have_group = True
+                    else:
+                        group_office.group.user_set.remove(form.instance)
+            if not have_group:
+                form.add_error(None, "O usuário deve pertencer a pelo menos um grupo")
+                return self.form_invalid(form)
 
-            for group in Group.objects.filter(id__in=ids):
-                group.user_set.add(form.instance)
+            for office in offices_user:
+                form.instance.person.offices.add(office)
 
         super(UserCreateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)

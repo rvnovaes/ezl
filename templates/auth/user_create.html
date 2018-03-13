@@ -1,8 +1,10 @@
 {% extends 'skeleton/forms/base.html' %}
 {% load bootstrap3 static %}
+{% load core_filters %}
 
 {% block extra_stylesheets %}
-    <link href="{% static 'skeleton/plugins/bower_components/multiselect/css/multi-select.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'skeleton/plugins/bower_components/custom-select/custom-select.css' %}" rel="stylesheet"
+          type="text/css"/>
 {% endblock %}
 
 {% block form %}
@@ -19,8 +21,44 @@
         {% bootstrap_field form.password2 form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
     </div>
     <div class="row">
-        {% bootstrap_field form.groups form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
         {% bootstrap_field form.is_active form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">Permissões</div>
+        <div class="panel-wrapper collapse in">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Escritório</th>
+                        <th>Permissões</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for office in request.user.person.offices.all %}
+                        <tr>
+                            <td style="vertical-align: middle;">
+                                {{ office.name }}
+                            </td>
+                            <td>
+                                <select class="select2 m-b-10 select2-multiple"
+                                        multiple="multiple"
+                                        name="office_{{ office.id }}"
+                                        id="office-group-{{ office.pk }}"
+                                        office="{{ office.pk }}"
+                                        data-placeholder="Selecione...">
+                                    {% for office_group in office.office_groups.all %}
+                                        <option value="{{ office_group.group.id }}"
+                                            {{ request.user|get_selected_state_group:office_group.group }}>
+                                            {{ office_group.group.name|get_permission_label }}
+                                        </option>
+                                    {% endfor %}
+                               </select>
+                           </td>
+                       </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 {% endblock %}
 
@@ -31,8 +69,9 @@
 
 
 {% block extra_scripts %}
-    <script type="text/javascript" src="{% static 'skeleton/plugins/bower_components/multiselect/js/jquery.multi-select.js' %}"></script>
+    <script type="text/javascript"
+        src="{% static 'skeleton/plugins/bower_components/custom-select/custom-select.min.js' %}"></script>
 {% endblock %}
 {% block script_document_ready %}
-    $('#id_groups').multiSelect();
+    $(".select2").select2()
 {% endblock %}

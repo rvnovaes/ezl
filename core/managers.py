@@ -23,10 +23,13 @@ class PersonManagerQuerySet(QuerySet):
         return self.filter(is_active=True)
 
     def correspondents(self):
-        return self.filter(auth_user__groups__name=self.model.CORRESPONDENT_GROUP)
+        return self.filter(auth_user__groups__name__startswith=self.model.CORRESPONDENT_GROUP + '-').order_by(
+            'name', 'auth_user').distinct('name', 'auth_user')
 
     def requesters(self):
-        return self.filter(auth_user__groups__name=self.model.REQUESTER_GROUP)
+        return self.filter(auth_user__groups__name__startswith=self.model.REQUESTER_GROUP + '-').order_by(
+            'name', 'auth_user').distinct('name', 'auth_user')
 
     def services(self):
-        return self.filter(auth_user__groups__name=self.model.SERVICE_GROUP)
+        return self.filter(auth_user__groups__name__startswith=self.model.SERVICE_GROUP + '-').order_by(
+            'name', 'auth_user').distinct('name', 'auth_user')

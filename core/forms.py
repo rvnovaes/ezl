@@ -307,11 +307,6 @@ class UserCreateForm(BaseForm, UserCreationForm):
         help_text=_('Enter the same password as before, for verification.'),
     )
 
-    groups = forms.ModelMultipleChoiceField(label='Perfis', required=True,
-                                            queryset=Group.objects.all().order_by('name'),
-                                            widget=forms.SelectMultiple(
-                                                attrs={'class': 'form-control profile-selector'}))
-
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2',
