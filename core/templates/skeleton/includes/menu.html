@@ -1,3 +1,6 @@
+{% load guardian_tags %}
+{% load core_filters %}
+
 <ul class="nav" id="side-menu">
     <li> <!-- DASHBOARD -->
         <a href="{% url 'dashboard' %}" class="waves-effect">
@@ -93,7 +96,7 @@
                     <span class="hide-menu">Escritórios</span>
                 </a>
             </li>
-            {% if perms.core.can_edit_surveys %}
+            {% if 'can_edit_surveys' in request|get_permissions_by_session %}
                 <li> <!-- QUESTIONARIOS -->
                     <a href="{% url 'survey_list' %}" target="_self">
                         <i class="fa fa-check-square-o fa-fw"></i>

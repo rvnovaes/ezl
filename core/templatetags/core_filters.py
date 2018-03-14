@@ -1,5 +1,6 @@
 from django import template
 from django.conf import settings
+from core.models import Office
 
 register = template.Library()
 
@@ -97,3 +98,8 @@ def get_selected_state_group(user, group):
     if user.groups.filter(id=group.id).first():
         return 'selected'
     return ''
+
+
+@register.filter
+def get_permissions_by_session(request):
+    return request.session.get('custom_session_user').get(str(request.user.id)).get('user_permissions')

@@ -45,6 +45,7 @@ from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task
 from ecm.forms import AttachmentForm
 from ecm.utils import attachment_form_valid, attachments_multi_delete
+from guardian.core import ObjectPermissionChecker
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -976,10 +977,13 @@ class CustomSession(View):
                     != request.POST.get('current_office'):
                 data['modified'] = True
             current_office = request.POST.get('current_office')
-            request.session['custom_session_user'] = {
-                self.request.user.pk: {'current_office': current_office}
-            }
             office = Office.objects.filter(pk=int(current_office)).first()
+            checker = ObjectPermissionChecker(self.request.user)
+            user_permissions = checker.get_perms(office)
+            request.session['custom_session_user'] = {
+                self.request.user.pk: {'current_office': current_office,
+                                       'user_permissions': user_permissions}
+            }
             if office:
                 data['current_office_pk'] = office.pk
                 data['current_office_name'] = office.legal_name
