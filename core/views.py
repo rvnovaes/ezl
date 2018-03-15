@@ -977,13 +977,10 @@ class CustomSession(View):
                     != request.POST.get('current_office'):
                 data['modified'] = True
             current_office = request.POST.get('current_office')
-            office = Office.objects.filter(pk=int(current_office)).first()
-            checker = ObjectPermissionChecker(self.request.user)
-            user_permissions = checker.get_perms(office)
             request.session['custom_session_user'] = {
-                self.request.user.pk: {'current_office': current_office,
-                                       'user_permissions': user_permissions}
+                self.request.user.pk: {'current_office': current_office}
             }
+            office = Office.objects.filter(pk=int(current_office)).first()
             if office:
                 data['current_office_pk'] = office.pk
                 data['current_office_name'] = office.legal_name

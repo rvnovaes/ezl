@@ -18,6 +18,9 @@
         {% bootstrap_field form.username form_group_class="form-group col-sm-4" required_css_class="ezl-required" %}
         {% bootstrap_field form.password form_group_class="form-group col-sm-4" required_css_class="ezl-required" %}
     </div>
+    <div class="row">
+        {% bootstrap_field form.is_active form_group_class="form-group col-sm-12" required_css_class="ezl-required" %}
+    </div>
     <div class="panel panel-default">
         <div class="panel-heading">Permissões</div>
         <div class="panel-wrapper collapse in">

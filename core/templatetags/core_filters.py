@@ -2,6 +2,7 @@ from django import template
 from django.conf import settings
 from core.models import Office
 
+
 register = template.Library()
 
 
@@ -101,5 +102,8 @@ def get_selected_state_group(user, group):
 
 
 @register.filter
-def get_permissions_by_session(request):
-    return request.session.get('custom_session_user').get(str(request.user.id)).get('user_permissions')
+def get_office_session_pk(request):
+    if request.session.get('custom_session_user') and request.user.pk:
+        return int(request.session.get('custom_session_user').get(
+            str(request.user.pk)).get('current_office'))
+    return None
