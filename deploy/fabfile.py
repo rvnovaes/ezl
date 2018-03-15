@@ -46,7 +46,7 @@ def deploy(revision=None, rsync=False):
     print("{} Deploy em {} {}".format("=" * 40, env["NAME"], "=" *40))
     confirm = raw_input(
         "Tem certeza que deseja fazer deploy do branch '{}' no ambiente '{}'? (S/N)".format(revision, env["NAME"]))
-    if confirm.trim().lower() != "s":
+    if confirm.strip().lower() != "s":
         return
 
     setup_ssh()
