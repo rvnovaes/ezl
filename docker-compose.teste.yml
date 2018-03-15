@@ -15,6 +15,7 @@ services:
     labels:
       - "traefik.backend=ezl-teste"
       - "traefik.frontend.rule=Host:teste.ezlawyer.com.br"
+      - "traefik.docker.network=traefik_webgateway"
     volumes:
       - ./containers/nginx/conf.d/ezl_teste.conf:/etc/nginx/conf.d/default.conf
       - web-static:/usr/share/nginx/html/static
