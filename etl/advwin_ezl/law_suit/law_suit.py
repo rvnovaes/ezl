@@ -13,8 +13,8 @@ class LawsuitETL(GenericETL):
     advwin_table = 'Jurid_Pastas'
 
     _import_query = """
-                    SELECT 
-                          p.OutraParte                             AS opposing_party, 
+                    SELECT
+                          p.OutraParte                             AS opposing_party,
                           p.Codigo_Comp                            AS folder_legacy_code,
                           CASE WHEN (d.D_Atual IS NULL)
                             THEN 'False'
@@ -58,9 +58,9 @@ class LawsuitETL(GenericETL):
                           cm.UsarOS = 1 AND
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
                           a.SubStatus = 10 AND
-                          p.Cliente IN ('{cliente}') AND 
+                          p.Cliente IN ('{cliente}') AND
                           a.Status = '0' -- STATUS ATIVO
-                          AND 
+                          AND
                           ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
                            (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
                           ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
@@ -123,6 +123,7 @@ class LawsuitETL(GenericETL):
                                                         law_suit_number=law_suit_number).first()
 
                 if lawsuit:
+                    lawsuit.legacy_code = legacy_code
                     lawsuit.folder = folder
                     lawsuit.person_lawyer = person_lawyer
                     lawsuit.instance = instance
@@ -132,10 +133,12 @@ class LawsuitETL(GenericETL):
                     lawsuit.law_suit_number = law_suit_number
                     lawsuit.is_active = True
                     lawsuit.opposing_party = opposing_party
+                    lawsuit.alter_user = user
                     # use update_fields to specify which fields to save
                     # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
                     lawsuit.save(
                         update_fields=[
+                            'legacy_code',
                             'is_active',
                             'folder',
                             'person_lawyer',
