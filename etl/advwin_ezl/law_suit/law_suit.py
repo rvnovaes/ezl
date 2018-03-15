@@ -118,9 +118,6 @@ class LawsuitETL(GenericETL):
 
                 lawsuit = self.model.objects.filter(legacy_code=legacy_code,
                                                     system_prefix=LegacySystem.ADVWIN.value).first()
-                if not lawsuit:
-                    lawsuit = self.model.objects.filter(instance=instance,
-                                                        law_suit_number=law_suit_number).first()
 
                 if lawsuit:
                     lawsuit.legacy_code = legacy_code
