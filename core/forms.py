@@ -363,6 +363,7 @@ class UserUpdateForm(UserChangeForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request, profile=kwargs['instance'])
+        self.fields['office'].label = 'Escritório padrão'
 
 
 class ResetPasswordFormMixin(forms.Form):

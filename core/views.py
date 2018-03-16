@@ -758,21 +758,20 @@ class UserCreateView(AuditFormMixin, CreateView):
     def form_valid(self, form):
         form.save(commit=False)
         offices_user = []
+        import pdb; pdb.set_trace()
         if form.is_valid:
             have_group = False
             for office in self.request.user.person.offices.all():
                 groups = self.request.POST.getlist('office_' + str(office.id), '')
                 if groups and not form.instance.id:
                     form.save()
-                for group_office in office.office_groups.all():
-                    if str(group_office.group.id) in groups:
-                        if office not in offices_user:
+                    for group_office in office.office_groups.all():
+                        if str(group_office.group.id) in groups:
+                            if office not in offices_user:
+                                offices_user.append(office)
                             offices_user.append(office)
-                        offices_user.append(office)
-                        group_office.group.user_set.add(form.instance)
-                        have_group = True
-                    else:
-                        group_office.group.user_set.remove(form.instance)
+                            group_office.group.user_set.add(form.instance)
+                            have_group = True
             if not have_group:
                 form.add_error(None, "O usuário deve pertencer a pelo menos um grupo")
                 return self.form_invalid(form)
@@ -798,23 +797,25 @@ class UserUpdateView(AuditFormMixin, UpdateView):
 
     def form_valid(self, form):
         form.save(commit=False)
+        checker = ObjectPermissionChecker(self.request.user)
         if form.is_valid:
-            have_group = False
+            have_group = True
             for office in form.instance.person.offices.all():
-                groups = self.request.POST.getlist('office_' + str(office.id), '')
-                for group_office in office.office_groups.all():
-                    if str(group_office.group.id) in groups:
-                        group_office.group.user_set.add(form.instance)
-                        have_group = True
-                    else:
-                        group_office.group.user_set.remove(form.instance)
+                if checker.has_perm('can_access_general_data', office):
+                    have_group = False
+                    groups = self.request.POST.getlist('office_' + str(office.id), '')
+                    for group_office in office.office_groups.all():
+                        if str(group_office.group.id) in groups:
+                            group_office.group.user_set.add(form.instance)
+                            have_group = True
+                        else:
+                            group_office.group.user_set.remove(form.instance)
             if not have_group:
                 form.add_error(None, "O usuário deve pertencer a pelo menos um grupo")
                 return self.form_invalid(form)
 
             form.save()
             default_office = form.cleaned_data['office']
-
             obj = DefaultOffice.objects.filter(auth_user=form.instance).first()
             if obj:
                 obj.office = default_office
@@ -901,6 +902,9 @@ class OfficeCreateView(AuditFormMixin, CreateView):
         form.instance.create_user = self.request.user
         form.instance.save()
         form.instance.persons.add(form.instance.create_user.person)
+        for group_office in form.instance.office_groups.filter(
+            group__permissions__codename='group_admin'):
+            group_office.group.user_set.add(form.instance.create_user)
         return super().form_valid(form)
 
     def get_success_url(self):

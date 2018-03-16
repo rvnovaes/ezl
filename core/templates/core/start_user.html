@@ -1,4 +1,6 @@
 {% extends 'skeleton/base.html' %}
+{% load guardian_tags %}
+{% load core_filters %}
 {% block content %}
     <div class="row">
         <div class="col-lg-12 col-sm-12">
@@ -22,7 +24,7 @@
                                     <strong>Permissões:</strong>
                                 </p>
                                 {% if request.user.groups.all.exists %}
-                                    {% for permission in  request.user.groups.all %}
+                                    {% for permission in  request.user.groups.all|order_groups_by_office_name %}
                                         <span class="label label-success">{{ permission.name }}</span>
                                     {% endfor %}
                                 {% else %}
@@ -58,12 +60,17 @@
                                 </thead>
                                 <tbody>
                                 {% for office in request.user.person.offices.all %}
-                                    <tr>
-                                        <td>{{ office.legal_name }}</td>
-                                        <td>{{ office.cpf_cnpj | default_if_none:'' }}</td>
-                                        <td><a href="/escritorios/{{ office.pk }}">
-                                            <i class="fa fa-edit" aria-hidden="true"></i></a></td>
-                                    </tr>
+                                    {% get_obj_perms request.user for office as "office_perms" %}
+                                        <tr>
+                                            <td>{{ office.legal_name }}</td>
+                                            <td>{{ office.cpf_cnpj | default_if_none:'' }}</td>
+                                            {% if 'can_access_general_data' in office_perms %}
+                                                <td><a href="/escritorios/{{ office.pk }}">
+                                                    <i class="fa fa-edit" aria-hidden="true"></i></a></td>
+                                            {% else %}
+                                                <td>&nbsp;</td>
+                                            {% endif %}
+                                        </tr>
                                 {% endfor %}
                                 </tbody>
                             </table>

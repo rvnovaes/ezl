@@ -3,6 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from core.models import Person, OfficeRelGroup
 from task.models import Permissions
 from survey.models import SurveyPermissions
+from core.models import CorePermissions
 from guardian.shortcuts import assign_perm
 
 
@@ -16,7 +17,8 @@ GROUP_PERMISSIONS = {
         Permissions.can_access_general_data,
         SurveyPermissions.can_edit_surveys,
         SurveyPermissions.can_view_survey_results,
-        Permissions.can_distribute_tasks
+        Permissions.can_distribute_tasks,
+        CorePermissions.group_admin
     ),
 
     Person.SUPERVISOR_GROUP: (
@@ -72,4 +74,3 @@ def create_permission(office):
             assign_perm(codename.name, group, office)
             group.permissions.add(permission)
             OfficeRelGroup.objects.get_or_create(office=office, group=group)
-

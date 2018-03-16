@@ -12,6 +12,10 @@ from guardian.shortcuts import get_perms
 INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'))
 
 
+class CorePermissions(Enum):
+    group_admin = 'Group Administrator'
+
+
 class LegalType(Enum):
     FISICA = 'F'
     JURIDICA = 'J'

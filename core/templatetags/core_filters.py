@@ -107,3 +107,8 @@ def get_office_session_pk(request):
         return int(request.session.get('custom_session_user').get(
             str(request.user.pk)).get('current_office'))
     return None
+
+
+@register.filter
+def order_groups_by_office_name(request):
+    return request.order_by('officerelgroup__office__name')
