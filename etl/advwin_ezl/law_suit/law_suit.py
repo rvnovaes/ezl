@@ -1,4 +1,4 @@
-from core.models import Person
+from core.models import Person, State
 from core.utils import LegacySystem
 from lawsuit.models import Organ
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
@@ -32,6 +32,7 @@ class LawsuitETL(GenericETL):
                             THEN
                               p.Comarca
                           ELSE d.D_Comarca END                     AS court_district_legacy_code,
+                          d.D_UF                                   AS state_court_district_legacy_code,
                           CASE WHEN (rtrim(ltrim(d.D_Tribunal)) LIKE '') OR (d.D_Tribunal IS NULL)
                             THEN
                               p.Tribunal
@@ -88,6 +89,7 @@ class LawsuitETL(GenericETL):
                 legacy_code = row['legacy_code']
                 instance_legacy_code = row['instance_legacy_code']
                 court_district_legacy_code = row['court_district_legacy_code']
+                state_court_district_legacy_code = row['state_court_district_legacy_code']
                 person_court_legacy_code = row['person_court_legacy_code']
                 court_division_legacy_code = row['court_division_legacy_code']
                 law_suit_number = row['law_suit_number']
@@ -96,9 +98,11 @@ class LawsuitETL(GenericETL):
                 folder = Folder.objects.filter(legacy_code=folder_legacy_code).first()
                 person_lawyer = Person.objects.filter(legacy_code=person_legacy_code).first()
                 instance = Instance.objects.filter(legacy_code=instance_legacy_code).first()
+                state = State.objects.filter(initials=state_court_district_legacy_code).first()
                 # __iexact - Case-insensitive exact match.
                 # https://docs.djangoproject.com/en/1.11/ref/models/querysets/#std:fieldlookup-iexact
-                court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_legacy_code).first()
+                court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_legacy_code,
+                                                              state=state).first()
                 organ = Organ.objects.filter(legacy_code=person_court_legacy_code).first()
                 court_division = CourtDivision.objects.filter(legacy_code=court_division_legacy_code).first()
 
