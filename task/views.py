@@ -853,25 +853,49 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
 @login_required
 def ajax_get_task_data_table(request):
     status = request.GET.get('status')
-    query = DashboardViewModel.objects.filter(task_status=status, office=get_office_session(request))
     xdata = []
-    xdata.append(
-        list(
-            map(lambda x: [
-                x.pk,
-                x.task_number,
-                x.final_deadline_date.strftime('%d/%m/%Y %H:%M') if x.final_deadline_date else '',
-                x.type_service,
-                x.lawsuit_number,
-                x.client,
-                x.opposing_party,
-                x.delegation_date.strftime('%d/%m/%Y %H:%M') if x.delegation_date else '',
-                x.legacy_code,
-                'Movimentação sem processo',
-                'Preencher o processo na movimentação',
-            ], query)
+    if status == str(TaskStatus.ERROR):
+        query = InconsistencyETL.objects.filter(is_active=True, office=get_office_session(request))
+        xdata.append(
+            list(
+                map(lambda x: [
+                    x.pk,
+                    x.task.task_number,
+                    x.task.final_deadline_date.strftime('%d/%m/%Y %H:%M') if x.task.final_deadline_date else '',
+                    x.task.type_task.name,
+                    x.task.lawsuit_number,
+                    x.task.court_district.name,
+                    x.task.court_district.state.initials,
+                    x.task.client.name,
+                    x.task.opposing_party,
+                    x.task.delegation_date.strftime('%d/%m/%Y %H:%M') if x.task.delegation_date else '',
+                    x.task.legacy_code,
+                    x.inconsistency,
+                    x.solution,
+                ], query)
+            )
         )
-    )
+    else:
+        query = DashboardViewModel.objects.filter(task_status=status, office=get_office_session(request))
+        xdata.append(
+            list(
+                map(lambda x: [
+                    x.pk,
+                    x.task_number,
+                    x.final_deadline_date.strftime('%d/%m/%Y %H:%M') if x.final_deadline_date else '',
+                    x.type_service,
+                    x.lawsuit_number,
+                    x.court_district.name,
+                    x.court_district.state.initials,
+                    x.client,
+                    x.opposing_party,
+                    x.delegation_date.strftime('%d/%m/%Y %H:%M') if x.delegation_date else '',
+                    x.legacy_code,
+                    '',
+                    '',
+                ], query)
+            )
+        )
 
 
     data = {
