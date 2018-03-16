@@ -1,4 +1,4 @@
-from core.models import Person
+from core.models import Person, State
 from core.utils import LegacySystem
 from lawsuit.models import Organ
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
@@ -13,8 +13,8 @@ class LawsuitETL(GenericETL):
     advwin_table = 'Jurid_Pastas'
 
     _import_query = """
-                    SELECT 
-                          p.OutraParte                             AS opposing_party, 
+                    SELECT
+                          p.OutraParte                             AS opposing_party,
                           p.Codigo_Comp                            AS folder_legacy_code,
                           CASE WHEN (d.D_Atual IS NULL)
                             THEN 'False'
@@ -32,6 +32,7 @@ class LawsuitETL(GenericETL):
                             THEN
                               p.Comarca
                           ELSE d.D_Comarca END                     AS court_district_legacy_code,
+                          d.D_UF                                   AS state_court_district_legacy_code,
                           CASE WHEN (rtrim(ltrim(d.D_Tribunal)) LIKE '') OR (d.D_Tribunal IS NULL)
                             THEN
                               p.Tribunal
@@ -58,9 +59,9 @@ class LawsuitETL(GenericETL):
                           cm.UsarOS = 1 AND
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
                           a.SubStatus = 10 AND
-                          p.Cliente IN ('{cliente}') AND 
+                          p.Cliente IN ('{cliente}') AND
                           a.Status = '0' -- STATUS ATIVO
-                          AND 
+                          AND
                           ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
                            (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
                           ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
@@ -88,6 +89,7 @@ class LawsuitETL(GenericETL):
                 legacy_code = row['legacy_code']
                 instance_legacy_code = row['instance_legacy_code']
                 court_district_legacy_code = row['court_district_legacy_code']
+                state_court_district_legacy_code = row['state_court_district_legacy_code']
                 person_court_legacy_code = row['person_court_legacy_code']
                 court_division_legacy_code = row['court_division_legacy_code']
                 law_suit_number = row['law_suit_number']
@@ -96,9 +98,11 @@ class LawsuitETL(GenericETL):
                 folder = Folder.objects.filter(legacy_code=folder_legacy_code).first()
                 person_lawyer = Person.objects.filter(legacy_code=person_legacy_code).first()
                 instance = Instance.objects.filter(legacy_code=instance_legacy_code).first()
+                state = State.objects.filter(initials=state_court_district_legacy_code).first()
                 # __iexact - Case-insensitive exact match.
                 # https://docs.djangoproject.com/en/1.11/ref/models/querysets/#std:fieldlookup-iexact
-                court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_legacy_code).first()
+                court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_legacy_code,
+                                                              state=state).first()
                 organ = Organ.objects.filter(legacy_code=person_court_legacy_code).first()
                 court_division = CourtDivision.objects.filter(legacy_code=court_division_legacy_code).first()
 
@@ -118,11 +122,9 @@ class LawsuitETL(GenericETL):
 
                 lawsuit = self.model.objects.filter(legacy_code=legacy_code,
                                                     system_prefix=LegacySystem.ADVWIN.value).first()
-                if not lawsuit:
-                    lawsuit = self.model.objects.filter(instance=instance,
-                                                        law_suit_number=law_suit_number).first()
 
                 if lawsuit:
+                    lawsuit.legacy_code = legacy_code
                     lawsuit.folder = folder
                     lawsuit.person_lawyer = person_lawyer
                     lawsuit.instance = instance
@@ -133,10 +135,12 @@ class LawsuitETL(GenericETL):
                     lawsuit.is_active = True
                     lawsuit.opposing_party = opposing_party
                     lawsuit.office = default_office
+                    lawsuit.alter_user = user
                     # use update_fields to specify which fields to save
                     # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
                     lawsuit.save(
                         update_fields=[
+                            'legacy_code',
                             'is_active',
                             'folder',
                             'person_lawyer',

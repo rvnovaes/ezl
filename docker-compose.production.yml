@@ -29,7 +29,7 @@ services:
       - certbot
     labels:
       - "traefik.backend=ezl-production"
-      - "traefik.frontend.rule=Host:mtostes.ezlawyer.com.br"]
+      - "traefik.frontend.rule=Host:mtostes.ezlawyer.com.br"
       - "traefik.docker.network=traefik_webgateway"
   web:
     build:
@@ -65,7 +65,8 @@ services:
   luigi:
     environment:
       ENV: production
-
+    ports:
+      - "8082:8082"
   certbot:
     build:
       context: .

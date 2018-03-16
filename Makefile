@@ -45,12 +45,6 @@ run: check_compose_override
 restart:
 	docker-compose restart web nginx luigi tasks
 
-reset_db:
-	docker-compose stop
-	docker-compose up -d db
-	docker-compose run db bash -c "PGPASSWORD=ezl dropdb -hdb -Uezl ezl"
-	docker-compose run db bash -c "PGPASSWORD=ezl createdb -hdb -Uezl ezl"
-
 set_env_development:
 	@rm docker-compose.override.yml || true
 	ln -s docker-compose.development.yml docker-compose.override.yml

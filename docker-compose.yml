@@ -9,7 +9,6 @@ volumes:
   letsencrypt-etc:
   ezl-logs:
 
-
 networks:
   gateway:
     external:
@@ -109,3 +108,11 @@ services:
     image: redis:4.0.6
     volumes:
       - ".containers/redis/redis.conf:/etc/redis/redis.conf"
+
+#  db_advwin:
+#    image: microsoft/mssql-server-linux:2017-latest
+#    environment:
+#      ACCEPT_EULA: Y
+#      MSSQL_SA_PASSWORD: DB@advwinOn1Tw2Thre3
+#    volumes:
+#      - "db-advwin-data:/var/opt/mssql"
