@@ -36,6 +36,12 @@ def teste():
 
 
 @task
+def demo():
+    env.hosts = env.roledefs["teste"]["hosts"]
+    env["NAME"] = "demo"
+
+
+@task
 def psql(revision=None, rsync=False):
     with cd(get_repo_path()):
         run("make psql")
