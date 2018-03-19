@@ -345,7 +345,9 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
     def create_user_by_chat(self, task, fields):
         for field in fields:
-            user = getattr(task, field).auth_user
+            user = None
+            if getattr(task, field):
+                user = getattr(getattr(task, field), 'auth_user')
             if user:
                 UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
                     'create_user': user, 'user_by_chat': user, 'chat': task.chat

@@ -72,7 +72,6 @@ class TaskETL(GenericETL):
                 a.Advogado_sol AS person_asked_by_legacy_code,
                 a.Advogado AS person_executed_by_legacy_code,
                 a.CodMov AS type_task_legacy_code,
-                a.Advogado_or AS person_distributed_by_legacy_code,
                 a.OBS AS description,
                 a.Data_confirmacao AS blocked_or_finished_date,
                 a.Data AS requested_date,
@@ -88,9 +87,9 @@ class TaskETL(GenericETL):
                     cm.UsarOS = 1 AND
                     (p.Status = 'Ativa' OR p.Status = 'Especial') AND
                     a.SubStatus = 10 AND
-                    p.Cliente IN ('{cliente}') AND 
+                    p.Cliente IN ('{cliente}') AND
                     a.Status = '0' -- STATUS ATIVO
-                    
+
     """
     model = Task
     advwin_table = 'Jurid_agenda_table'
@@ -112,7 +111,6 @@ class TaskETL(GenericETL):
                 movement_legacy_code = row['movement_legacy_code']
                 person_asked_by_legacy_code = row['person_asked_by_legacy_code']
                 person_executed_by_legacy_code = row['person_executed_by_legacy_code']
-                person_distributed_by_legacy_code = row['person_distributed_by_legacy_code']
                 type_task_legacy_code = row['type_task_legacy_code']
 
                 status_code_advwin = get_status_by_substatus(row['status_code_advwin'])
@@ -143,9 +141,6 @@ class TaskETL(GenericETL):
                     ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
                 person_executed_by = Person.objects.filter(
                     Q(legacy_code=person_executed_by_legacy_code), ~Q(legacy_code=None),
-                    ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
-                person_distributed_by = Person.objects.filter(Q(
-                    legacy_code=person_distributed_by_legacy_code), ~Q(legacy_code=None),
                     ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
                 type_task = TypeTask.objects.filter(
                     legacy_code=type_task_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
@@ -193,7 +188,6 @@ class TaskETL(GenericETL):
                     task.alter_user = user
                     task.person_asked_by = person_asked_by
                     task.person_executed_by = person_executed_by
-                    task.person_distributed_by = person_distributed_by
                     task.type_task = type_task
                     task.refused_date = refused_date
                     task.execution_date = execution_date
@@ -204,7 +198,7 @@ class TaskETL(GenericETL):
 
                     update_fields = ['requested_date', 'final_deadline_date', 'description',
                                      'task_status', 'task_status', 'alter_user', 'person_asked_by',
-                                     'person_executed_by', 'person_distributed_by', 'type_task', 'refused_date',
+                                     'person_executed_by', 'type_task', 'refused_date',
                                      'execution_date', 'blocked_payment_date', 'finished_date', 'requested_date',
                                      'movement']
 
@@ -218,7 +212,6 @@ class TaskETL(GenericETL):
                                                      alter_user=user,
                                                      person_asked_by=person_asked_by,
                                                      person_executed_by=person_executed_by,
-                                                     person_distributed_by=person_distributed_by,
                                                      type_task=type_task,
                                                      final_deadline_date=final_deadline_date,
                                                      description=description,
@@ -244,7 +237,7 @@ class TaskETL(GenericETL):
                     "Task,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
                         str(movement.id), str(legacy_code), str(LegacySystem.ADVWIN.value),
                         str(user.id), str(user.id), str(person_asked_by.id),
-                        str(person_executed_by.id), str(person_distributed_by.id),
+                        str(person_executed_by.id),
                         str(type_task.id), str(final_deadline_date),
                         str(description), str(refused_date), str(execution_date),
                         str(blocked_payment_date), str(finished_date),
