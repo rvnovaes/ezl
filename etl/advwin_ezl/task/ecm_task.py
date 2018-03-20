@@ -25,7 +25,7 @@ class EcmEtl(GenericETL):
                           AND G.Link IS NOT NULL
                           AND cm.UsarOS = 1
                           AND (P.Status = 'Ativa' OR P.Status = 'Especial' OR p.Dt_Saida IS NULL)
-                          AND a.SubStatus = 10 AND
+                          AND (a.SubStatus = 10 OR a.SubStatus = 11) AND
                           p.Cliente IN ('{cliente}') AND
                           a.Status = '0' -- STATUS ATIVO
                     UNION
@@ -47,7 +47,7 @@ class EcmEtl(GenericETL):
                           AND G.Link <> ''
                           AND G.Link IS NOT NULL
                           AND cm.UsarOS = 1
-                          AND a.SubStatus = 10 AND
+                          AND (a.SubStatus = 10 OR a.SubStatus = 11) AND
                           p.Cliente IN ('{cliente}') AND
                           a.Status = '0' -- STATUS ATIVO
                           """

@@ -86,7 +86,7 @@ class TaskETL(GenericETL):
                 WHERE
                     cm.UsarOS = 1 AND
                     (p.Status = 'Ativa' OR p.Status = 'Especial') AND
-                    a.SubStatus = 10 AND
+                    (a.SubStatus = 10 OR a.SubStatus = 11) AND
                     p.Cliente IN ('{cliente}') AND
                     a.Status = '0' -- STATUS ATIVO
 
@@ -234,7 +234,7 @@ class TaskETL(GenericETL):
                     InconsistencyETL.objects.filter(task=task).update(is_active=False)
 
                 self.debug_logger.debug(
-                    "Task,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+                    "Task,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
                         str(movement.id), str(legacy_code), str(LegacySystem.ADVWIN.value),
                         str(user.id), str(user.id), str(person_asked_by.id),
                         str(person_executed_by.id),

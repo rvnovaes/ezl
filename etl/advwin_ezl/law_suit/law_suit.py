@@ -58,7 +58,7 @@ class LawsuitETL(GenericETL):
                           (p.Status = 'Ativa' OR p.Status = 'Especial') AND
                           cm.UsarOS = 1 AND
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
-                          a.SubStatus = 10 AND
+                          (a.SubStatus = 10 OR a.SubStatus = 11) AND
                           p.Cliente IN ('{cliente}') AND
                           a.Status = '0' -- STATUS ATIVO
                           AND

@@ -5,7 +5,7 @@ from chat.models import UserByChat
 from django.core.cache import cache
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import IntegrityError, OperationalError
 from django.db.models import Q
@@ -182,7 +182,8 @@ class DashboardView(MultiTableMixin, TemplateView):
 
         return_list = []
 
-        if not person.auth_user.has_perm('core.view_delegated_tasks') or person.auth_user.is_superuser:
+        group_correspondents = Group.objects.filter(name='Correspondente').first()
+        if not (person.auth_user.groups.count() == 1 and person.auth_user.groups.first() == group_correspondents) or person.auth_user.is_superuser:
             return_list.append(DashboardErrorStatusTable(error,
                                                          title='Erro no sistema de origem',
                                                          status=TaskStatus.ERROR))

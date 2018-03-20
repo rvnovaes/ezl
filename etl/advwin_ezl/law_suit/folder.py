@@ -28,7 +28,7 @@ class FolderETL(GenericETL):
               (p.Status = 'Ativa' OR p.Status = 'Especial') AND
               p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '' AND
               p.Cliente IS NOT NULL AND p.Cliente <> '' AND
-              a.SubStatus = 10 AND
+              (a.SubStatus = 10 OR a.SubStatus = 11) AND
               p.Cliente IN ('{cliente}') AND
               a.Status = '0' -- STATUS ATIVO
                   """
