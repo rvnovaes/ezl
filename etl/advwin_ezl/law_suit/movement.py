@@ -27,7 +27,7 @@ class MovementETL(GenericETL):
                   cm.UsarOS = 1 and
                   (p.Status = 'Ativa' OR p.Status = 'Especial') AND
                   a.SubStatus = 10 AND
-                  p.Cliente IN ('{cliente}') AND 
+                  p.Cliente IN ('{cliente}') AND
                   a.Status = '0' -- STATUS ATIVO
                   """
 

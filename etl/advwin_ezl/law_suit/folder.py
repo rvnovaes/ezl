@@ -29,7 +29,7 @@ class FolderETL(GenericETL):
               p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '' AND
               p.Cliente IS NOT NULL AND p.Cliente <> '' AND
               a.SubStatus = 10 AND
-              p.Cliente IN ('{cliente}') AND 
+              p.Cliente IN ('{cliente}') AND
               a.Status = '0' -- STATUS ATIVO
                   """
     has_status = True
