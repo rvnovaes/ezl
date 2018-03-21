@@ -148,7 +148,7 @@ class DashboardView(MultiTableMixin, TemplateView):
         data = []
         data_error = []
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
-        if dynamic_query or person.auth_user.is_superuser:
+        if dynamic_query or person.is_admin:
             # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
             data = DashboardViewModel.objects.filter(dynamic_query)
             data_error = DashboardViewModel.objects.filter(dynamic_query, task_status=TaskStatus.ERROR)
@@ -182,8 +182,9 @@ class DashboardView(MultiTableMixin, TemplateView):
 
         return_list = []
 
-        group_correspondents = Group.objects.filter(name='Correspondente').first()
-        if not (person.auth_user.groups.count() == 1 and person.auth_user.groups.first() == group_correspondents) or person.auth_user.is_superuser:
+        if not (person.auth_user.groups.count() == 1 and
+            person.auth_user.groups.filter(name=Person.CORRESPONDENT_GROUP)) \
+            or person.auth_user.groups.filter(name=Person.ADMINISTRATOR_GROUP):
             return_list.append(DashboardErrorStatusTable(error,
                                                          title='Erro no sistema de origem',
                                                          status=TaskStatus.ERROR))
@@ -250,7 +251,7 @@ class DashboardView(MultiTableMixin, TemplateView):
         return Q(person_distributed_by=person.id)
 
     def get_dynamic_query(self, person):
-        if person.auth_user.is_superuser:
+        if person.is_admin:
             return self.get_query_all_tasks(person)
         dynamic_query = Q()
         permissions_to_check = {
