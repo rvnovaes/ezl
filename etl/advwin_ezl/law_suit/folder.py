@@ -30,7 +30,8 @@ class FolderETL(GenericETL):
               p.Cliente IS NOT NULL AND p.Cliente <> '' AND
               (a.SubStatus = 10 OR a.SubStatus = 11) AND
               p.Cliente IN ('{cliente}') AND
-              a.Status = '0' -- STATUS ATIVO
+              a.Status = '0' AND -- STATUS ATIVO
+              p.Unidade IN ('11') -- Unidade BH-Centro
                   """
     has_status = True
 
