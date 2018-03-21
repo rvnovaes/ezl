@@ -23,15 +23,22 @@
             <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">
             <link rel="stylesheet" type="text/css"
                   href="{% static "libs/bootstrap3-datetimepicker-4.17.47/css/bootstrap-datetimepicker.css" %}">
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css"
+                  rel="stylesheet"/>
         {% endblock css_head %}
         {% block js_head %}
             <!-- Compiled and minified JavaScript -->
             <script src="{% static "libs/jquery-3.2.17/jquery.min.js" %}"></script>
+            <script src="{% static "js/session.js" %}"></script>
+            <script src="{% static "js/office.js" %}"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/survey-jquery/0.12.23/survey.jquery.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
             <script src="{% static "js/utils.js" %}"></script>
             <script src="{% static "js/modal.js" %}"></script>
             <script src="{% static "js/table-tr-link.js" %}"></script>
             <script src="{% static "js/pagination-fixed.js" %}"></script>
-            <script src="{% static "chat/js/chat.js" %}"></script>
+            <script src="{% static "chat/js/chat.js" %}"></script>'
             <script src="{% static "js/masks.js" %}"></script>
             <script src="{% static "libs/bootstrap-3.3.7/js/bootstrap.min.js" %}"></script>
             <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
@@ -47,9 +54,9 @@
             <script src="{% static "js/widget_toast.js" %}"></script>
             <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
             <script src="{% static "libs/jquery-mask-plugin/jquery.maskMoney.min.js" %}"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
         {% endblock js_head %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/survey-jquery/0.12.23/survey.jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
         {% block extra_head %}{% endblock %}
     {% endblock head %}
 </head>
@@ -60,11 +67,4 @@
         {% block extrajs %}{% endblock %}
     {% endblock %}
 </body>
-    <script>
-        $(document).ready(function() {
-            $.material.options.autofill = true;
-            $.material.init();
-
-        });
-    </script>
 </html>

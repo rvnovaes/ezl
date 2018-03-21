@@ -1,0 +1,65 @@
+<script>
+    // language=Html
+    var msgli = '<li class="${odd}">\n' +
+        '  <div class="chat-image">\n' +
+        '    <div class="circle circle-sm bg-info di"> <i class="fa fa-user"></i></div>\n' +
+        '  </div>\n' +
+        '  <div class="chat-body">\n' +
+        '    <div class="chat-text">\n' +
+        '        <h4>${user}</h4>\n' +
+        '        <p>${text}</p> <b>${message_create_date}</b> ' +
+        '    </div>\n' +
+        '  </div>\n' +
+        '</li>\n';
+    var data = '';
+
+    var edata = '';
+    var label = "{{ chat.label }}";
+    var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + label);
+    $('.chat.panel-body').animate({scrollTop: 9999}, 1000);
+    sendMessage = function (chatId) {
+        var el = $('#inputMsg');
+        if (el.val().trim()) {
+            data = JSON.stringify({
+                'text': el.val(),
+                'chat': chatId,
+                'label': label
+            });
+            el.val(null);
+            socket.onopen(data)
+        }
+    };
+
+    {# Ao chegar uma mensagem#}
+    socket.onmessage = function (e) {
+        data = JSON.parse(e.data);
+        if ('{{user}}' === data.user) {
+            data.odd =  "odd bounceInRight animated";
+            $.tmpl(msgli, data).appendTo("#messageList")
+        }else {
+            data.odd =  "bounceInLeft animated";
+            $.tmpl(msgli, data).appendTo("#messageList")
+        }
+        var bottomCoord = $('#messageList')[0].scrollHeight;
+        $('#messageList').slimScroll({scrollTo: bottomCoord});
+    };
+    socket.onopen = function (data) {
+        socket.send(data);
+    };
+
+    $.fn.enterKey = function (fnc) {
+        return this.each(function () {
+            $(this).keypress(function (ev) {
+                var keycode = (ev.keyCode ? ev.keyCode : ev.which);
+                if (keycode == '13') {
+                    fnc.call(this, ev);
+                }
+            })
+        })
+    };
+
+    $('#inputMsg').enterKey(function () {
+        sendMessage('{{ chat.pk }}')
+    })
+</script>

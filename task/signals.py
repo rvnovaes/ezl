@@ -9,7 +9,7 @@ from core.models import ContactMechanism, ContactMechanismType, Person
 from django.conf import settings
 from task.mail import SendMail
 from task.models import Task, TaskStatus, TaskHistory, Ecm
-
+from task.workflow import get_parent_status, get_child_status
 
 send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'execution_date'])
 
@@ -38,10 +38,11 @@ def receive_notes_execution_date(notes, instance, execution_date, survey_result,
 def new_task(sender, instance, created, **kwargs):
     notes = 'Nova providência' if created else getattr(instance, '__notes', '')
     user = instance.alter_user if instance.alter_user else instance.create_user
-    TaskHistory.objects.create(task=instance,
-                               create_user=user,
-                               status=instance.task_status,
-                               create_date=instance.create_date, notes=notes)
+    if not getattr(instance, '_skip_signal'):
+        TaskHistory.objects.create(task=instance,
+                                   create_user=user,
+                                   status=instance.task_status,
+                                   create_date=instance.create_date, notes=notes)
     contact_mechanism_type = ContactMechanismType.objects.filter(name__iexact='email')
     if not contact_mechanism_type:
         return
@@ -148,6 +149,9 @@ def change_status(sender, instance, **kwargs):
         elif new_status is TaskStatus.FINISHED:
             instance.finished_date = now_date
 
+        if new_status is TaskStatus.DONE and previous_status is TaskStatus.OPEN and instance.get_child:
+            instance.execution_date = now_date
+
         instance.alter_date = now_date
 
         # instance.__previous_status = instance.task_status
@@ -155,11 +159,41 @@ def change_status(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Task)
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
-    if not getattr(instance, '_called_by_etl'):
+    if not getattr(instance, '_skip_signal'):
         export_task.delay(instance.pk)
 
 
 @receiver(post_save, sender=TaskHistory)
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
-    if not getattr(instance, '_called_by_etl'):
+    if not getattr(instance, '_skip_signal'):
         export_task_history.delay(instance.pk)
+
+
+# update parent task
+@receiver(pre_save, sender=Task)
+def update_status_parent_task(sender, instance, **kwargs):
+    """
+    Responsavel por alterar o status da OS pai, quando o status da OS filha e modificado
+    :param sender:
+    :param instance:
+    :param kwargs:
+    :return:
+    """
+    if instance.parent:
+        instance.parent.task_status = get_parent_status(instance.status)
+        instance.parent.save()
+
+
+@receiver(pre_save, sender=Task)
+def update_status_child_task(sender, instance, **kwargs):
+    """
+    Responsavel por atualizar o status da os filha se a o estatus da OS pai e modificado
+    :param sender:
+    :param instance:
+    :param kwargs:
+    :return:
+    """
+    status = get_child_status(instance.status)
+    if instance.get_child and status:
+        instance.child.task_status = status
+        instance.child.save()

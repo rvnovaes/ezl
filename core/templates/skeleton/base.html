@@ -1,0 +1,186 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'skeleton/images/favicon.png' %}">
+    <title>{{ title_page }}</title>
+    <!-- ============================================================== -->
+    <!-- jQuery -->
+    <script src="{% static 'skeleton/plugins/bower_components/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment.js' %}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment-timezone.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/locale-pt-br.js' %}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment-with-locales.js' %}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js' %}"></script>
+    <!-- Stylesheets block -->
+    {% block extra_stylesheets %}
+        {% comment %}
+            Utilize esse bloco para adicionar estilos/css em páginas
+            específicas que extendem esse template
+        {% endcomment %}
+    {% endblock %}
+
+    {% block stylesheets %}
+        {% include 'skeleton/includes/stylesheets.html' %}
+    {% endblock stylesheets %}
+    <!-- End Stylesheets block -->
+    <!-- ============================================================== -->
+    <!-- EZL CSS -->
+    <link href="{% static 'skeleton/css/ezl.css' %}" rel="stylesheet">
+    {% if is_popup %}
+    <style type="text/css">
+        .navbar, .bg-title, .sidebar-head, .sidebar{
+            display: none;
+        }
+        #page-wrapper{
+            margin-top: 0!important;
+        }
+    </style>
+    {% endif %}
+
+</head>
+
+<body class="fix-header">
+    <!-- ============================================================== -->
+    <!-- Preloader -->
+    <!-- ============================================================== -->
+    <div class="preloader">
+        <svg class="circular" viewBox="25 25 50 50">
+            <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" />
+        </svg>
+    </div>
+    <!-- ============================================================== -->
+    <!-- Wrapper -->
+    <!-- ============================================================== -->
+    <div id="wrapper" >
+        <!-- Topbar header - style you can find in pages.scss -->
+        {% include 'skeleton/includes/navbar.html' %}
+        <!-- End Top Navigation -->
+
+        <!-- Left Sidebar - style you can find in sidebar.scss  -->
+        {% include 'skeleton/includes/sidebar.html' %}
+        <!-- End Left Sidebar -->
+
+        <!-- ============================================================== -->
+        <!-- Page Content -->
+        <!-- ============================================================== -->
+        <div id="page-wrapper" style="min-height: 551px;">
+            <div class="container-fluid">
+                <!-- Block Containner -->
+                {% block containner %}
+                    <!-- Block Page Title -->
+                    {% block page_title %}
+                        <div class="row bg-title">
+                            <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                                <h4 class="page-title">
+                                {% if form_name_plural %}
+                                    {{ form_name_plural }}
+                                {% elif object %}
+                                    {{ object }}
+                                {% endif %}
+                                </h4>
+                            </div>
+                            <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
+                                {% block bar_buttons %}
+                                {% endblock %}
+                                <ol class="breadcrumb">
+                                    <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                                    {% if page_title %}
+                                        <li class="active">{{ page_title }}</li>
+                                    {% endif %}
+                                    {% if object %}
+                                        <li class="active">{{ object }}</li>
+                                    {% endif %}
+                                </ol>
+                            </div>
+                        </div>
+                    {% endblock page_title %}
+                    <!-- End Block Page Title -->
+                        <!-- Block Content  -->
+                        {% block content %}
+                            <div class="col-md-12">
+                                <div class="white-box">
+                                    <h3 class="box-title">Blank Starter page</h3> </div>
+                            </div>
+                        {% endblock %}
+                        <!-- End Block Content  -->
+                {% endblock containner %}
+                <!-- End Block Containner  -->
+
+                <!-- ============================================================== -->
+                <!-- Right sidebar -->
+                <!-- ============================================================== -->
+                <!-- .right-sidebar -->
+                {% block right-sidebar-chat %}
+                {% endblock right-sidebar-chat %}
+                <!-- ============================================================== -->
+                <!-- End Right sidebar -->
+                <!-- ============================================================== -->
+            </div>
+            <!-- /.container-fluid -->
+            <!--footer class="footer text-center"> 2017 &copy; Ample Admin brought to you by themedesigner.in </footer-->
+        </div>
+        <!-- ============================================================== -->
+        <!-- End Page Content -->
+        <!-- ============================================================== -->
+        <!-- MODALS -->
+        {% block modal %}
+            {% include 'skeleton/modal/about.html' %}
+        {% endblock modal %}
+        {% block extra_modal %}
+
+        {% endblock extra_modal %}
+        <!-- END MODALS -->
+    </div>
+    <!-- /#wrapper -->
+    <!-- ============================================================== -->
+    <!-- Javascript Block  -->
+    {% block scripts %}
+        {% include 'skeleton/includes/scripts.html' %}
+        <script>
+            $(document).on('ready', function() {
+                jQuery('.datepicker-autoclose').datepicker({
+                    autoclose: true,
+                    todayHighlight: true,
+                    format: 'dd/mm/yyyy'
+                });
+
+                {% block script_document_ready %}
+                    {% comment %}
+                        A page can't be manipulated safely until the document is "ready." jQuery detects this state
+                        of readiness for you. Code included inside $( document ).ready() will only run once the page
+                        Document Object Model (DOM) is ready for JavaScript code to execute. Code included inside
+                        $( window ).on( "load", function() { ... }) will run once the entire page (images or iframes),
+                        not just the DOM, is ready.
+                    {% endcomment %}
+                {% endblock script_document_ready %}
+                $(window).on('load', function(){
+                    {% block script_window_load%}
+                        {% comment %}
+                            The load event is sent to an element when it and all sub-elements have been completely
+                            loaded. This event can be sent to any element associated with a URL: images, scripts,
+                            frames, iframes, and the window object.
+                        {% endcomment %}
+                    {% endblock script_window_load %}
+                });
+            })
+
+        </script>
+    {% endblock scripts %}
+    {% block extra_scripts %}
+        {% comment %}
+            Utilize esse bloco para adicionar scripts em páginas
+            específicas que extendem esse template
+        {% endcomment %}
+    {% endblock extra_scripts %}
+    <!-- End Javascript Block  -->
+    <!-- ============================================================== -->
+</body>
+
+</html>

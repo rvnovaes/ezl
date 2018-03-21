@@ -7,6 +7,13 @@ volumes:
   web-static:
   letsencrypt-www:
   letsencrypt-etc:
+  ezl-logs:
+
+
+networks:
+  gateway:
+    external:
+      name: traefik_webgateway
 
 services:
   web:
@@ -15,25 +22,37 @@ services:
       - .:/app
       - web-static:/app/staticfiles
       - web-media:/app/media
+      - ezl-logs:/var/log/ezl
       - /mnt/windows_ecm/Agenda:/app/media/ECM
     logging:
       driver: "json-file"
       options:
         max-size: "100m"
-
-  luigi:
+  ws:
     image: ezl:latest
+    volumes:
+      - .:/app
+      - ezl-logs:/var/log/ezl
+    command: daphne -b 0.0.0.0 -p 8002 --ws-protocol "graphql-ws" --proxy-headers ezl.asgi:channel_layer
+  ws-worker:
+    image: ezl:latest
+    volumes:
+      - .:/app
+      - ezl-logs:/var/log/ezl
+    command: python manage.py runworker
+  luigi:
+    build:
+      context: .
+      dockerfile: containers/luigi/Dockerfile
     command: bash -c "cron && crontab /etc/cron.d/luigi && luigid"
     volumes:
       - .:/app
       - ./containers/luigi/cron:/etc/cron.d/luigi
-      - /var/log/ezl/etl:/var/log/ezl/etl
+      - ezl-logs:/var/log/ezl
     logging:
       driver: "json-file"
       options:
         max-size: "100m"
-    ports:
-      - "8082:8082"
     depends_on:
       - builder
       - db
@@ -41,11 +60,9 @@ services:
   tasks:
     image: ezl:latest
     command: celery -A ezl worker -l debug --concurrency 10 -P eventlet
-    environment:
-      ENV: development
-      PYTHONPATH: /app
     volumes:
       - .:/app
+      - ezl-logs:/var/log/ezl
     depends_on:
       - builder
       - db
@@ -57,6 +74,10 @@ services:
 
   nginx:
     image: nginx:1.13
+    labels:
+      - "traefik.backend=ezl"
+      - "traefik.frontend.rule=Host:ezl.local"
+      - "traefik.docker.network=traefik_webgateway"
     volumes:
       - ./containers/nginx/conf.d/ezl.conf:/etc/nginx/conf.d/default.conf
       - web-static:/usr/share/nginx/html/static
@@ -66,6 +87,9 @@ services:
       - /mnt/windows_ecm/Agenda:/usr/share/nginx/html/media/ECM
     depends_on:
       - web
+    networks:
+      - gateway
+      - default
 
   db:
     image: postgres:9.6
@@ -73,8 +97,6 @@ services:
       POSTGRES_DB: ezl
       POSTGRES_USER: ezl
       POSTGRES_PASSWORD: ezl
-    ports:
-      - "127.0.0.1:57002:5432"
     volumes:
       - "db-data:/var/lib/postgresql/data"
       - "./containers/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
@@ -83,10 +105,7 @@ services:
       options:
         max-size: "100m"
 
-#  db_advwin:
-#    image: microsoft/mssql-server-linux:2017-latest
-#    environment:
-#      ACCEPT_EULA: Y
-#      MSSQL_SA_PASSWORD: DB@advwinOn1Tw2Thre3
-#    volumes:
-#      - "db-advwin-data:/var/opt/mssql"
+  redis:
+    image: redis:4.0.6
+    volumes:
+      - ".containers/redis/redis.conf:/etc/redis/redis.conf"

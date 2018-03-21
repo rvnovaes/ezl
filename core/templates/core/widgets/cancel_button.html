@@ -1,14 +1,14 @@
 {# Botao de cancelar utilizada nos formularios #}
 {# Ao clicar ele retorna a listagem respeitando a pagina se encontrava#}
-
-{% if link_list %}
-    <a href="{% url link_list %}" class="btn btn-sm btn-raised btn-default"><i class="material-icons left">clear</i>
-        Cancelar
-    </a>
-{% else %}
-    {% if object_list_url %}
-        <a href="{{ object_list_url }}" class="btn btn-sm btn-raised btn-default"><i class="material-icons left">clear</i>
-            Cancelar
-        </a>
-    {% endif %}
-{% endif %}
+<button class="btn btn-danger waves-effect waves-light" type="button"
+        {% if link_list and link_list != ''%}
+            onclick="javascript:window.open('{% url link_list %}', '_self')">
+        {% elif object_list_url %}
+            onclick="javascript:window.open('{{ object_list_url }}', '_self')">
+        {% elif view.success_url %}
+            onclick="javascript:window.open('{{ view.success_url }}', '_self')">
+        {% elif view.get_success_url %}
+            onclick="javascript:window.open('{{ view.get_success_url }}', '_self')">
+        {% endif %}
+    <span class="btn-label"><i class="fa fa-close"></i></span>Cancelar
+</button>

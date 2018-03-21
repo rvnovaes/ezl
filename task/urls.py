@@ -13,7 +13,8 @@ urlpatterns = [
     url(r'^providencias/(?P<movement>[0-9]+)/(?P<pk>[0-9]+)/$',
         login_required(views.TaskUpdateView.as_view()),
         name='task_update'),
-
+    url(r'^(?P<pk>[0-9]+)/atribuir$',
+        login_required(views.TaskToAssignView.as_view()), name='task_to_assign'),
     url(r'^providencias/excluir$', login_required(views.TaskDeleteView.as_view()),
         name='task_delete'),
 
@@ -22,11 +23,11 @@ urlpatterns = [
     url(r'^ecm/(?P<pk>[0-9]+)/excluir$', views.delete_ecm, name='delete_ecm'),
 
     # TipoServico
-    url(r'^tipo_servico/listar/$',
+    url(r'^tipo_servico/$',
         login_required(views.TypeTaskListView.as_view()),
         name='typetask_list'),
 
-    url(r'^tipo_servico/$',
+    url(r'^tipo_servico/criar/$',
         login_required(views.TypeTaskCreateView.as_view()),
         name='typetask_add'),
 
@@ -35,5 +36,21 @@ urlpatterns = [
 
     url(r'^tipo_servico/excluir$', login_required(views.TypeTaskDeleteView.as_view()),
         name='typetask_delete'),
+
+    url(r'^ajax_get_task_data_table/$', login_required(views.ajax_get_task_data_table),
+        name='ajax_get_task_data_table'),
+    url(r'^ajax_get_ecms/$', login_required(views.ajax_get_ecms),
+        name='ajax_get_ecms'),
+
+    # Filtros
+    url(r'^filtros/listar/$',
+        login_required(views.FilterListView.as_view()),
+        name='filter_list'),
+
+    url(r'^filtros/(?P<pk>[0-9]+)/$', login_required(views.FilterUpdateView.as_view()),
+        name='filter_update'),
+
+    url(r'^filtros/excluir$', login_required(views.FilterDeleteView.as_view()),
+        name='filter_delete'),
 
 ]

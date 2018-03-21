@@ -31,7 +31,7 @@ def ws_message(message):
             UnreadMessage.objects.create(create_user=message.user, user_by_message=user,
                                          message=chat_message)
         data['user'] = message.user.username
-        data['message_create_date'] = timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M')
+        data['message_create_date'] = timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M')
         Group(data.get('label')).send({
                 'text': json.dumps(data),
                 })

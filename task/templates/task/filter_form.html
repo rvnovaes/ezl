@@ -1,0 +1,17 @@
+{% extends 'skeleton/forms/base.html' %}
+{#{% load core_filters %}#}
+{% load bootstrap3 %}
+{% block extra_scripts %}
+    {{ block.super }}
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+{% endblock extra_scripts %}
+{% block form %}
+    {% bootstrap_field form.name form_group_class="form-group col-sm-6" bound_css_class='' %}
+    {% bootstrap_field form.description form_group_class="form-group col-sm-6" bound_css_class='' %}
+    {% if request.user.is_superuser %}
+        <div class="col-sm-12">
+            <label for="query_sql">SQL</label><br />
+            <code class="prettyprint lang-sql">{{ form.instance.query_sql }}</code>
+        </div>
+    {% endif %}
+{% endblock form %}

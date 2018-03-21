@@ -1,4 +1,4 @@
-{% extends 'inicial.html' %}
+{% extends 'skeleton/base.htmll' %}
 {% load core_filters %}
 {% block content %}
     {% include 'core/widgets/messages.html' %}
@@ -18,12 +18,12 @@
                     </div>
                 </div>
                 <div class="form-row  text-center">
-                    <a class="btn btn-sm btn-raised btn-default"
+                    <a class="btn btn-raised btn-default"
                        href="{% url 'folder_list' %}"><i
                             class="material-icons left">clear</i>
                         Cancelar
                     </a>
-                    <button type="submit" class="btn btn-sm btn-raised btn-primary"><i
+                    <button type="submit" class="btn btn-raised btn-primary"><i
                             class="material-icons left">done</i>
                         Salvar
                     </button>

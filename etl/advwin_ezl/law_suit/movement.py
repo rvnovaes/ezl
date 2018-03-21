@@ -40,7 +40,7 @@ class MovementETL(GenericETL):
         return self._import_query.format(cliente="','".join(get_clients_to_import()))
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         for row in rows:
             rows_count -= 1
 
@@ -82,12 +82,14 @@ class MovementETL(GenericETL):
                     movement.type_movement = type_movement
                     movement.alter_user = create_user
                     movement.is_active = True
+                    movement.office = default_office
                     movement.save(update_fields=['is_active',
                                                  'law_suit',
                                                  'folder',
                                                  'type_movement',
                                                  'alter_user',
                                                  'alter_date',
+                                                 'office',
                                                  ])
                 else:
                     self.model.objects.create(legacy_code=legacy_code,
@@ -98,6 +100,7 @@ class MovementETL(GenericETL):
                                               law_suit=lawsuit,
                                               folder=folder,
                                               type_movement=type_movement,
+                                              office=default_office
                                               )
                 self.debug_logger.debug(
                     "Movimentacao,%s,%s,%s,%s,%s,%s,%s,%s" % (

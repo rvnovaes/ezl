@@ -1,0 +1,106 @@
+{% load static %}
+<nav class="navbar navbar-default navbar-static-top m-b-0">
+            <div class="navbar-header">
+                <div class="top-left-part">
+                    <!-- Logo -->
+                    <a class="logo" href="{% url 'dashboard' %}">
+                        <!-- Logo icon image, you can use font-icon also --><b>
+                        <!--This is dark logo icon-->
+                        <img src="{% static '/skeleton/images/admin-logo.png' %}" alt="home" class="dark-logo" />
+                        <!--This is light logo icon-->
+                        <img src="{% static '/skeleton/images/admin-logo-dark.png' %}" alt="home" class="light-logo" />
+                     </b>
+                        <!-- Logo text image you can use text also -->
+                        <span class="hidden-xs">
+                            <!--This is dark logo text-->
+                            <img src="{% static 'img/logo_ezl.png' %}" alt="home" class="dark-logo" width="140"/>
+                            <!--This is light logo text-->
+                            <img src="{% static 'img/logo_ezl.png' %}" alt="home" class="light-logo"  width="140"/>
+                     </span> </a>
+                </div>
+                <!-- /Logo -->
+                <!-- Search input and Toggle icon -->
+                <ul class="nav navbar-top-links navbar-left">
+                    <li>
+                        <a href="javascript:void(0)" class="open-close waves-effect waves-light">
+                        <i class="ti-menu"></i>
+                        </a>
+                    </li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle waves-effect waves-light" data-toggle="dropdown" href="#">
+                            <i class="mdi mdi-comment-text-outline"></i>
+                            <div class="notify hide" id="chat-notify">
+                                <span class="heartbit"></span>
+                                <span class="point"></span>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu animated bounceInDown">
+                            <li>
+                                <div class="drop-title" id="drop-title">0 mensagens</div>
+                            </li>
+
+                            <li id="li-message-center">
+                                <div class="message-center" id="message-center">
+                                </div>
+                            </li>
+
+                            <li>
+                                <a class="text-center" href="{% url 'chat_list' %}">
+                                    <strong>Ir para o Chat</strong> <i class="fa fa-angle-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- /.dropdown-messages -->
+                    </li>
+                    <li class="open" data-toggle="tooltip" data-original-title="Criar OS" data-placement="bottom">
+                        <a href="{% url 'task_add' %}" class="waves-effect waves-lightact create-os-active">
+                            <i class="mdi mdi-plus-circle-outline"></i><span class="hidden-sm hidden-xs"> Criar OS</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-top-links navbar-right pull-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                          aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-building-o">&nbsp;</i>
+                            <span id="current_office" class="hidden-sm hidden-xs"></span>
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-right animated flipInY">
+                        {% for office in request.user.person.offices.all %}
+                           <li onclick="updateSession('current_office', '{{office.pk}}', '{{csrf_token}}');"><a href="#">{{office.legal_name}}</a></li>
+                        {% endfor %}
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#">
+                            <img src="{% static 'skeleton/no-profile.jpeg' %}" alt="user-img" width="36" class="img-circle">
+                            <b class="hidden-xs">{{ request.user }}</b>
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-user animated flipInX">
+                            <li><!-- Gerenciar filtros -->
+                                <a href="{% url 'filter_list' %}">
+                                    <i class="mdi mdi-filter"></i> Gerenciar Filtros
+                                </a>
+                            </li>
+                            <li> <!-- Meu perfil -->
+                                <a href="{% url 'start_user' %}">
+                                    <i class="mdi mdi-account"></i> Meu perfil
+                                </a>
+                            </li>
+                            <li> <!-- LOGOUT -->
+                                <a href="javascript:logout()">
+                                    <i class="mdi mdi-logout"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- /.dropdown-user -->
+                    </li>
+                    <!-- /.dropdown -->
+                </ul>
+            </div>
+            <!-- /.navbar-header -->
+            <!-- /.navbar-top-links -->
+            <!-- /.navbar-static-side -->
+        </nav>
