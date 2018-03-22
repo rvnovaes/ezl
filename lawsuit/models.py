@@ -12,6 +12,11 @@ def get_folder_number():
     return get_next_value('lawsuit_folder_folder_number')
 
 
+@transaction.atomic
+def get_lawsuit_number():
+    return get_next_value('lawsuit_lawsuit_lawsuit_number')
+
+
 class TypeMovement(Audit, LegacyCode):
     name = models.CharField(max_length=255, blank=False, null=False, default="", unique=True, verbose_name='Nome')
     uses_wo = models.BooleanField(default=False, verbose_name='Utiliza ordem de serviço?')
@@ -49,11 +54,11 @@ class Folder(Audit, LegacyCode):
                                     null=True,
                                     verbose_name='Centro de custo')
 
-
     def save(self, *args, **kwargs):
         if not self.pk:
             self.folder_number = get_folder_number()
         super(Folder, self).save(*args, **kwargs)
+
     class Meta:
         db_table = "folder"
         ordering = ['-id']
@@ -152,6 +157,11 @@ class LawSuit(Audit, LegacyCode):
 
     def __str__(self):
         return self.law_suit_number
+
+    def save(self, *args, **kwargs):
+        if not self.law_suit_number:
+            self.law_suit_number = get_lawsuit_number()
+        super().save(*args, **kwargs)
 
 
 class Movement(Audit, LegacyCode):

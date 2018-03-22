@@ -63,8 +63,6 @@ class LawsuitETL(GenericETL):
                           a.Status = '0' AND -- STATUS ATIVO
                           p.Unidade IN ('11') -- Unidade BH-Centro
                           AND
-                          ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
-                           (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
                           ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
                            (d.Codigo_Comp IS NOT NULL AND d.Codigo_Comp <> '')) AND
                           ((p.Instancia IS NOT NULL AND p.Instancia <> '') OR
@@ -132,7 +130,8 @@ class LawsuitETL(GenericETL):
                     lawsuit.court_district = court_district
                     lawsuit.court_division = court_division
                     lawsuit.organ = organ
-                    lawsuit.law_suit_number = law_suit_number
+                    if law_suit_number:
+                        lawsuit.law_suit_number = law_suit_number
                     lawsuit.is_active = True
                     lawsuit.opposing_party = opposing_party
                     lawsuit.alter_user = user
@@ -183,6 +182,7 @@ class LawsuitETL(GenericETL):
                                               rows_count, e, self.timestr)
                 self.error_logger.error(msg)
                 save_error_log(log, user, msg)
+
 
 if __name__ == "__main__":
     LawsuitETL().import_data()
