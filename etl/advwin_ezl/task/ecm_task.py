@@ -27,7 +27,8 @@ class EcmEtl(GenericETL):
                           AND (P.Status = 'Ativa' OR P.Status = 'Especial' OR p.Dt_Saida IS NULL)
                           AND (a.SubStatus = 10 OR a.SubStatus = 11) AND
                           p.Cliente IN ('{cliente}') AND
-                          a.Status = '0' -- STATUS ATIVO
+                          a.Status = '0' AND -- STATUS ATIVO
+                          p.Unidade IN ('11') -- Unidade BH-Centro
                     UNION
                     SELECT DISTINCT
                       G.ID_doc AS ecm_legacy_code,
@@ -49,7 +50,8 @@ class EcmEtl(GenericETL):
                           AND cm.UsarOS = 1
                           AND (a.SubStatus = 10 OR a.SubStatus = 11) AND
                           p.Cliente IN ('{cliente}') AND
-                          a.Status = '0' -- STATUS ATIVO
+                          a.Status = '0' AND -- STATUS ATIVO
+                          p.Unidade IN ('11') -- Unidade BH-Centro
                           """
     model = Ecm
     field_check = 'ecm_legacy_code'

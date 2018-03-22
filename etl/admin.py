@@ -32,7 +32,7 @@ class DashboardETLAdmin(admin.ModelAdmin):
         return obj.execution_date_finish.strftime("%d-%m-%Y às %H:%M:%S")
 
     def code_executed_query(self, instance):
-        return '<pre>{}</pre>'.format(instance.executed_query)
+        return '<pre><code  class="prettyprint lang-sql">{}</code></pre>'.format(instance.executed_query)
 
     quantity_errors.short_description = 'Total de erros'
     time_seconds_start.short_description = 'Inicio'
