@@ -961,3 +961,20 @@ class FilterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = Filter
     success_url = reverse_lazy('filter_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+
+
+class GeolocationTaskSave(CustomLoginRequiredView, View):
+
+    def post(self, request):
+        print(self)
+        # items = json.loads(request.POST['items'])
+        # for item in items:
+        #     model_class = self.models.get(item['model'])
+        #     if model_class is None:
+        #         continue
+        #     instance = model_class.objects.get(id=item['id'])
+        #     for field_item in item['fields']:
+        #         setattr(instance, field_item['field'], field_item['value'])
+        #     instance.save()
+
+        return JsonResponse({"ok": True})

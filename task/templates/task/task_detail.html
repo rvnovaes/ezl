@@ -244,6 +244,7 @@
     <script>
         function getLocation() {
             if (navigator.geolocation) {
+                $('#locating').modal('show');
                 navigator.geolocation.getCurrentPosition(showPosition, showError);
             } else {
                 console.log("Geolocation is not supported by this browser.");
@@ -251,22 +252,46 @@
         }
         function showPosition(position) {
             console.log(position.coords.latitude +"," + position.coords.longitude);
+            var data = {}
+            data['latitude'] = position.coords.latitude
+            data['longitude'] = position.coords.longitude
+            $.ajax({
+                type: 'POST',
+                url: '/providencias/providencias/geolocation/criar',
+                data: data,
+                success: function (result, status, xhr) {
+                    if (result.error){
+                        showToast('error', 'Atenção', result.error, 0, false);
+                    }
+                    $('#locating').modal('hide');
+                },
+                error: function (request, status, error) {
+
+                },
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                },
+                dataType: 'json'
+            })
         }
         function showError(error) {
+            $('#locating').modal('hide');
+            var msg = ''
             switch(error.code) {
                 case error.PERMISSION_DENIED:
-                    console.log("User denied the request for Geolocation.")
+                    msg = "User denied the request for Geolocation."
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    console.log("Location information is unavailable.")
+                    msg = "Location information is unavailable.";
                     break;
                 case error.TIMEOUT:
-                    console.log("The request to get user location timed out.")
+                    msg = "The request to get user location timed out.";
                     break;
                 case error.UNKNOWN_ERROR:
-                    console.log("An unknown error occurred.")
+                    msg = "An unknown error occurred.";
                     break;
             }
+            showToast('error', 'Atenção', msg, 0, false);
         }
         </script>
     <script type="text/javascript">
@@ -321,6 +346,19 @@
                             0
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Janela modal para mostrar enquanto processa a geolocalização -->
+    <div id="locating" class="modal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center;">
+                    <h1>Aguarde...</h1>
+                    <p class="h1"><i class="fa fa-spin fa-map-marker"></i></p>
+                </div>
+                <div class="modal-footer">
                 </div>
             </div>
         </div>

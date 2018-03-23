@@ -59,10 +59,9 @@ class LawsuitETL(GenericETL):
                           cm.UsarOS = 1 AND
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
                           (a.SubStatus = 10 OR a.SubStatus = 11) AND
-                          --p.Cliente IN ('{cliente}') AND
+                          p.Cliente IN ('{cliente}') AND
                           a.Status = '0' AND -- STATUS ATIVO
                           p.Unidade IN ('11') -- Unidade BH-Centro
-                          AND a.Ident='2937458'
                           AND
                           ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
                            (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
