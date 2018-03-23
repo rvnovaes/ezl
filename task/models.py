@@ -340,6 +340,25 @@ class TaskHistory(AuditCreate):
         return super(TaskHistory, self).save(*args, **kwargs)
 
 
+class TaskGeolocation(Audit):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, blank=False, null=False,
+                            related_name='geolocation')
+    started_date = models.DateTimeField(null=True, verbose_name='Data de Início')
+    finished_date = models.DateTimeField(null=True, verbose_name='Data de Finalização')
+    latitude = models.DecimalField(null=True, blank=True, verbose_name='Latitude',
+                                   max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(null=True, blank=True, verbose_name='Longitude',
+                                   max_digits=9, decimal_places=6)
+
+    class Meta:
+        verbose_name = 'Geolocalização da Providência'
+        verbose_name_plural = 'Geolocalização das Providências'
+
+    @property
+    def position(self):
+        return "{},{}".format(self.latitude, self.longitude)
+
+
 class DashboardViewModel(Audit, OfficeMixin):
     legacy_code = models.CharField(max_length=255, blank=True, null=True,
                                    verbose_name='Código legado')
