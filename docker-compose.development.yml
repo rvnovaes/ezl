@@ -41,6 +41,9 @@ services:
     command: luigid
     environment:
       ENV: development
+    ports:
+      - "8082:8082"
+
 
   tasks:
     environment:
