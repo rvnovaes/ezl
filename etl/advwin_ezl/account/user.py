@@ -4,7 +4,7 @@ from django.contrib.auth.models import User, Group
 from django.db import models
 from django.utils import timezone
 
-from core.models import Person
+from core.models import Person, DefaultOffice
 from core.signals import create_person
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
@@ -45,7 +45,7 @@ class UserETL(GenericETL):
     # todo: fazer model de usuario pra ter herança com LegacyCode e Audit
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         correspondent_group, nil = Group.objects.get_or_create(name=Person.CORRESPONDENT_GROUP)
 
         assert len(rows) == rows_count
@@ -180,6 +180,11 @@ class UserETL(GenericETL):
                             person.auth_user = instance
 
                         person.save()
+
+                obj = DefaultOffice.objects.filter(auth_user=instance).first()
+                if not obj:
+                    DefaultOffice.objects.create(auth_user=instance, office=default_office,
+                                                 create_user=user)
 
                 self.debug_logger.debug(
                     'Usuario,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (

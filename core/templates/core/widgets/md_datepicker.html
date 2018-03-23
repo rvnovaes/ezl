@@ -1,4 +1,5 @@
 <script>
+$(document).on('ready', function() {
         $(function () {
         $('#{{ widget.name }}').datetimepicker({
             {#            locale: 'pt-br',#}
@@ -23,19 +24,12 @@
         })
         ;
     });
-
+})
 </script>
-<span>
-    <span>
-        <span class="input-group date" id="{{ widget.name }}">
-                <input class="form-control text-center date placeholder" type="text"
-                       name="{{ widget.name }}" data-toggle="tooltip" data-placement="top"
-                       title="Clique no ícone ao lado"
-                        {% if widget.value != None %}
-                       value="{{ widget.value }}" {% endif %}{% include "django/forms/widgets/attrs.html" %} />
-            <span class="input-group-addon">
-                <span class="material-icons event" style="color: #009688">event</span>
-                    </span>
-        </span>
+<div class="input-group">
+    <input type="text" class="form-control" id="{{ widget.name }}"
+           {% if widget.value != None %} value="{{ widget.value }}" {% endif %}>
+    <span class="input-group-addon">
+        <i class="icon-calender"></i>
     </span>
-</span>
+</div>

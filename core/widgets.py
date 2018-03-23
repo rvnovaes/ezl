@@ -5,6 +5,9 @@ from django.utils import six, translation
 from django.utils import timezone
 from django.utils.encoding import force_text
 from django_filters import RangeFilter
+from django.forms.widgets import Widget
+from django.template import loader
+from django.utils.safestring import mark_safe
 
 from django.conf import settings
 
@@ -175,54 +178,6 @@ class MDDateTimeRangeFilter(RangeFilter):
         super(MDDateTimeRangeFilter, self).__init__(*args, **kwargs)
 
 
-class MDSelect2WidgetMixin(object):
-    """Mixin for Select2 widgets."""
-
-    def build_attrs(self, *args, **kwargs):
-        attrs = super().build_attrs(*args, **kwargs)
-        lang_code = self._get_language_code()
-        if lang_code:
-            attrs.setdefault('data-autocomplete-light-language', lang_code)
-        # search min length
-        attrs.setdefault('data-minimum-input-length', 3)
-        return attrs
-
-    def _get_language_code(self):
-        lang_code = translation.get_language()
-        if lang_code:
-            lang_code = translation.to_locale(lang_code).replace('_', '-')
-        return lang_code
-
-    def _media(self):
-        """Automatically include static files for the admin."""
-        _min = '' if settings.DEBUG else 'min.'
-        i18n_file = ()
-        lang_code = self._get_language_code()
-
-        if lang_code:
-            i18n_file = (
-                'autocomplete_light/vendor/select2/dist/js/i18n/{}.js'.format(
-                    lang_code),
-            )
-        css = (
-            'autocomplete_light/vendor/select2/dist/css/select2.{}css'.format(
-                _min),
-            'autocomplete_light/select2.css',
-        )
-        js = ('autocomplete_light/jquery.init.js',
-              'autocomplete_light/autocomplete.init.js',
-              'autocomplete_light/vendor/select2/dist/js/select2.full.{}js'.format(
-                  _min),
-              ) + i18n_file + (
-                 'libs/django-autocomplete-light-3.2.9/select2.js',
-             )
-
-        return forms.Media(css={'all': css}, js=js)
-
-    media = property(_media)
-    autocomplete_function = 'select2'
-
-
 class MDSelect(ChoiceWidget):
     input_type = 'select'
     template_name = 'core/widgets/md_select.html'
@@ -242,8 +197,8 @@ class MDSelect(ChoiceWidget):
         """Return True if the choice's value is empty string or None."""
         value, _ = choice
         return (
-            (isinstance(value, six.string_types) and not bool(value)) or
-            value is None
+                (isinstance(value, six.string_types) and not bool(value)) or
+                value is None
         )
 
     def use_required_attribute(self, initial):
@@ -262,7 +217,50 @@ class MDSelect(ChoiceWidget):
                 self._choice_has_empty_value(first_choice))
 
 
-class MDModelSelect2(QuerySetSelectMixin,
-                     MDSelect2WidgetMixin,
-                     MDSelect):
-    """Select widget for QuerySet choices and Select2."""
+class TypeaHeadWidget(Widget):
+    template_name = 'skeleton/componentes/fields/typeahead.html'
+
+    def __init__(self, model, url=False, name=False, forward=None,  *args, **kwargs):
+        self.model = model
+        self.url = url if url else '/typeahead/search'
+        self.name = name
+        self.forward = forward or ''
+        super().__init__(*args, **kwargs)
+
+    class Media:
+        js = ('skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js',
+              'core/js/typeahead.js')
+
+    def get_context_data(self, name, value, attrs=None):
+        return {'widget': {
+            'name': self.name or name,
+            'value': value,
+            'url': self.url,
+            'module': self.model.__module__,
+            'model': self.model.__name__,
+            'forward': self.forward
+        }}
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context_data(name, value, attrs)
+        template = loader.get_template(self.template_name).render(context)
+        return mark_safe(template)
+
+
+class TypeaHeadForeignKeyWidget(TypeaHeadWidget):
+    def __init__(self, model, field_related, url=False, name=False, forward=None, *args, **kwargs):
+        super().__init__(model, url, name, *args, **kwargs)
+        self.field_related = field_related
+        self.forward = forward or ''
+
+    def get_context_data(self, name, value, attrs=None):
+        return {'widget': {
+            'name': self.name or name,
+            'value': value,
+            'value_txt': self.model.objects.filter(pk=value).first() if value else '',
+            'url': self.url,
+            'module': self.model.__module__,
+            'model': self.model.__name__,
+            'field_related': self.field_related,
+            'forward': self.forward
+        }}

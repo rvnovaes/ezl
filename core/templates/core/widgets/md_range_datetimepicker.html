@@ -1,44 +1,7 @@
-<script>
-    $(function () {
-        $('#{{ widget.name }}_0').datetimepicker({
-            scrollInput: false,
-            lang: 'pt',
-            closeOnDateSelect: true,
-            timepicker: false,
-            format: 'd/m/Y',
-            onShow:function( ct ){
-                var maxDate = jQuery('#{{ widget.name }}_1').val()?getDate(jQuery('#{{ widget.name }}_1').val()):false;
-                this.setOptions({
-                    maxDate:maxDate
-                });
-            }
-        });
-        $('#{{ widget.name }}_1').datetimepicker({
-            scrollInput: false,
-            lang: 'pt',
-            closeOnDateSelect: true,
-            timepicker: false,
-            format: 'd/m/Y',
-            onShow:function( ct ){
-                var minDate = jQuery('#{{ widget.name }}_0').val()?getDate(jQuery('#{{ widget.name }}_0').val()):false;
-                this.setOptions({
-                    minDate:minDate
-                });
-            }
-        });
-        function getDate(datum){
-            fn = datum.split("/");
-            year = fn[2].split(" ");
-            year = year[0]
-            return year+'/'+fn[1]+'/'+fn[0];
-        }
-    });
-</script>
-
     {% for widget in widget.subwidgets %}
-        <span class="col s12 m5">
-            <span class="input-group date">
-                <input id="{{ widget.name }}" class="form-control text-center" type="text"
+        <div class="col-sm-12 col-md-5">
+            <div class="input-group date">
+                <input id="{{ widget.name }}" class="form-control datepicker-autoclose" type="text"
                        name="{{ widget.name }}" data-toggle="tooltip" data-placement="top"
                        title="Clique no ícone ao lado"
                         {% if widget.value != None %}
@@ -51,9 +14,7 @@
                             print placeholder="Data final"
                         {% endif %}
                 />
-                <span class="input-group-addon" style="color: #009688;cursor: default;">
-                    <i class="material-icons event">event</i>
-                </span>
-            </span>
-        </span>
+                <span class="input-group-addon"><i class="icon-calender"></i></span>
+            </div>
+        </div>
     {% endfor %}

@@ -1,0 +1,44 @@
+<div id="to-assign" class="modal fade"
+    tabindex="-1" role="alert" aria-labelledby="modalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg ">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'task_to_assign' task.pk %}">{% csrf_token %}
+                <div class="modal-header ">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 id="modalTitle" class="modal-title">
+                        <i id="iconAtribuir" class="mdi-24px mdi mdi-account-location"></i>
+                        Deseja atribuir o prazo?
+                    </h4>
+                </div>
+                <div class="modal-body p-30">
+                    <div class="row">
+                        <div class="col col-md-12">
+                            <input type='hidden' name='office' value='{{ task.office }}'>
+                            <label>Selecione o correspondente que irá executar esta OS.</label>
+                            <select class="person-to-assign form-control" style='width: 100%;'
+                                    name="person_executed_by">
+                                <option value="" selected></option>
+                                {% for person in task.office.persons.all %}
+                                    {% for group in person.auth_user.groups.all %}
+                                        {% if group.name == 'Correspondente' %}
+                                            <option value="{{ person.pk }}">{{ person.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" style="width: 100px!important;">
+                        <i class="mdi mdi-close"></i> Fechar
+                    </button>
+                    <button type="submit" id="btn-to-assign" class="btn btn-success" style="width: 100px!important;">
+                        <i class="mdi mdi-account-location"></i> Atribuir
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

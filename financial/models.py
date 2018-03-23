@@ -1,17 +1,18 @@
 from django.db import models
-from core.models import Audit, LegacyCode
+from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager, Office
 from decimal import Decimal
 
 
-class CostCenter(Audit, LegacyCode):
+class CostCenter(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(
         verbose_name="Nome",
         max_length=255,
         null=False,
         blank=False,
-        default="",
-        unique=True
+        default=""
     )
+
+    objects = OfficeManager()
 
     def __str__(self):
         return self.name
@@ -21,11 +22,18 @@ class CostCenter(Audit, LegacyCode):
         ordering = ['name']
         verbose_name = 'Centro de custo'
         verbose_name_plural = 'Centros de custos'
+        unique_together = (('name', 'office'),)
 
 
-class ServicePriceTable(models.Model):
+class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
+    office_correspondent = models.ForeignKey(Office, on_delete=models.PROTECT, blank=False,
+                                             null=False,
+                                             related_name='office_correspondent',
+                                             verbose_name='Escritório Correspondente')
     type_task = models.ForeignKey(
         'task.TypeTask',
+        null=True,
+        blank=True,
         on_delete=models.PROTECT,
         related_name='%(class)s_type_task',
         verbose_name='Tipo de Serviço'
@@ -54,14 +62,6 @@ class ServicePriceTable(models.Model):
         related_name='%(class)s_client',
         verbose_name='Cliente'
     )
-    correspondent = models.ForeignKey(
-        'core.Person',
-        null=False,
-        blank=False,
-        on_delete=models.PROTECT,
-        related_name='%(class)s_correspondent',
-        verbose_name='Correspondente'
-    )
     value = models.DecimalField(
         max_digits=9,
         decimal_places=2,
@@ -69,12 +69,23 @@ class ServicePriceTable(models.Model):
         default=Decimal('0.00')
     )
 
+    correspondent = models.ForeignKey(
+        'core.Person',
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name='%(class)s_correspondent',
+        verbose_name='Correspondente'
+    )
+
+    objects = OfficeManager()
+
     def __str__(self):
-        return self.correspondent.name if self.correspondent else ""
+        return self.office.name if self.office else ""
 
     class Meta:
         db_table = 'service_price_table'
         ordering = ['value']
         verbose_name = 'Tabela de preço de serviços'
         verbose_name_plural = 'Tabelas de preço de serviços'
-
+        unique_together = (("office", "office_correspondent", "type_task", "client", "court_district", "state"),)

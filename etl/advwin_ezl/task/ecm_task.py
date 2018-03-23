@@ -61,7 +61,7 @@ class EcmEtl(GenericETL):
         return self._import_query.format(cliente="','".join(get_clients_to_import()))
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         """
         A importacao do ECM aramazena apenas o caminho com o nome do arquivo.
         Para que as duas aplicacacoes tenham acesso ao arquivo, e necessario que

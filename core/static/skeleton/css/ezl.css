@@ -1,0 +1,588 @@
+.modal label{
+    font-weight: normal;
+}
+.modal-header{
+    background-color: #f1f1f1;
+    border-bottom: #313131;"
+}
+select option {
+    background: #FFF;
+    color: #000000;
+}
+.panel-heading a {
+    color: #263238;
+}
+.btn-success, .btn-success.disabled {
+    background: #52BE80 !important;
+    border: 1px solid #52BE80 !important;
+}
+
+.btn-danger, .btn-danger.disabled {
+    background: rgb(221, 107, 85);
+    border: 1px solid rgb(221, 107, 85);
+}
+
+.select2-container--default .select2-selection--single {
+    border: 2px solid #e4e7ea !important;
+    border-radius: 1px !important;
+    height: 38px !important;
+    transition: all 300ms linear 0s;
+}
+
+.select2-container--default .select2-selection--single {
+    padding-top: 4px;
+}
+
+/* Main Colors */
+:root {
+    --ezl-requested-color: #C39BD3;
+    --ezl-accepted-service-color: #884EA0;
+    --ezl-accepted-color: #EB984E;
+    --ezl-open-color: #F4D03F;
+    --ezl-done-color: #48C9B0;
+    --ezl-return-color: #2471A3;
+    --ezl-finished-color: #52BE80;
+    --ezl-refused-service-color: #7FB3D5;
+    --ezl-refused-color: #566573;
+    --ezl-blockedpayment-color: #17202A;
+    --ezl-invalid-color: #8a6d3b;;
+    --ezl-error-color: #CD6155;
+    -moz-ComboboxText: #FFF;
+}
+
+/* Background Colors */
+.ezl-bg-requested {
+    color: #FFFFFF;
+    background-color: var(--ezl-requested-color) !important;
+}
+
+.ezl-bg-accepted_service {
+    color: #FFFFFF;
+    background-color: var(--ezl-accepted-service-color) !important;
+}
+
+.ezl-bg-accepted {
+    color: #FFFFFF;
+    background-color: var(--ezl-accepted-color) !important;
+}
+
+.ezl-bg-open {
+    color: #FFFFFF;
+    font-weight: bolder;
+    background-color: var(--ezl-open-color) !important;
+}
+
+.ezl-bg-done {
+    color: #FFFFFF;
+    background-color: var(--ezl-done-color) !important;
+}
+
+.ezl-bg-return {
+    color: #FFFFFF;
+    background-color: var(--ezl-return-color) !important;
+}
+
+.ezl-bg-finished {
+    color: #FFFFFF;
+    background-color: var(--ezl-finished-color) !important;
+}
+
+.ezl-bg-refused_service {
+    color: #FFFFFF;
+    background-color: var(--ezl-refused-service-color) !important;
+}
+
+.ezl-bg-refused {
+    color: #FFFFFF;
+    background-color: var(--ezl-refused-color) !important;
+}
+
+.ezl-bg-blockedpayment {
+    color: #FFFFFF;
+    background-color: var(--ezl-blockedpayment-color) !important;
+}
+
+.ezl-bg-invalid {
+    color: #FFFFFF;
+    background-color: var(--ezl-invalid-color) !important;
+}
+
+.ezl-bg-error {
+    color: #FFFFFF;
+    background-color: var(--ezl-error-color) !important;
+}
+
+/* Text Colors */
+.ezl-text-requested {
+    color: var(--ezl-requested-color);
+}
+
+.ezl-text-accepted_service {
+    color: var(--ezl-accepted-service-color);
+}
+
+.ezl-text-accepted {
+    color: var(--ezl-accepted-color);
+}
+
+.ezl-text-open {
+    color: var(--ezl-open-color);
+}
+
+.ezl-text-done {
+    color: var(--ezl-done-color);
+}
+
+.ezl-text-return {
+    color: var(--ezl-return-color);
+}
+
+.ezl-text-finished {
+    color: var(--ezl-finished-color);
+}
+
+.ezl-text-refused_service {
+    color: var(--ezl-refused-service-color);
+}
+
+.ezl-text-refused {
+    color: var(--ezl-refused-color);
+}
+
+.ezl-text-blockedpayment {
+    color: var(--ezl-blockedpayment-color);
+}
+
+.ezl-text-invalid {
+    color: var(--ezl-invalid-color);
+
+}
+
+.ezl-text-error {
+    color: var(--ezl-error-color);
+}
+
+/* Fonts */
+.font-bolder {
+    font-weight: bolder;
+}
+
+.font-10 {
+    font-size: 10px
+}
+
+.font-15 {
+    font-size: 15px
+}
+
+.font-20 {
+    font-size: 20px
+}
+
+.font-25 {
+    font-size: 25px
+}
+
+.font-30 {
+    font-size: 30px
+}
+
+/* --------------------- BUTONS ---------------------  */
+/* REQUESTED*/
+.btn-ezl-requested {
+    background-color: #C39BD3;
+    border-color: #C39BD3;
+}
+
+.btn-ezl-requested:hover,
+.btn-ezl-requested:focus,
+.btn-ezl-requested:active,
+.btn-ezl-requested.active {
+    background-color: #b889cb;
+    border-color: #ae78c3;
+}
+
+.btn-ezl-requested.disabled:hover,
+.btn-ezl-requested.disabled:focus,
+.btn-ezl-requested.disabled:active,
+.btn-ezl-requested.disabled.active,
+.btn-ezl-requested[disabled]:hover,
+.btn-ezl-requested[disabled]:focus,
+.btn-ezl-requested[disabled]:active,
+.btn-ezl-requested[disabled].active,
+fieldset[disabled] .btn-ezl-requested:hover,
+fieldset[disabled] .btn-ezl-requested:focus,
+fieldset[disabled] .btn-ezl-requested:active,
+fieldset[disabled] .btn-ezl-requested.active {
+    background-color: #C39BD3;
+    border-color: #C39BD3;
+}
+
+/* ACCEPTED SERVICE */
+.btn-ezl-accepted_service {
+    background-color: #884EA0;
+    border-color: #884EA0;
+}
+
+.btn-ezl-accepted_service:hover,
+.btn-ezl-accepted_service:focus,
+.btn-ezl-accepted_service:active,
+.btn-ezl-accepted_service.active {
+    background-color: #79468f;
+    border-color: #6b3d7e;
+}
+
+.btn-ezl-accepted_service.disabled:hover,
+.btn-ezl-accepted_service.disabled:focus,
+.btn-ezl-accepted_service.disabled:active,
+.btn-ezl-accepted_service.disabled.active,
+.btn-ezl-accepted_service[disabled]:hover,
+.btn-ezl-accepted_service[disabled]:focus,
+.btn-ezl-accepted_service[disabled]:active,
+.btn-ezl-accepted_service[disabled].active,
+fieldset[disabled] .btn-ezl-accepted_service:hover,
+fieldset[disabled] .btn-ezl-accepted_service:focus,
+fieldset[disabled] .btn-ezl-accepted_service:active,
+fieldset[disabled] .btn-ezl-accepted_service.active {
+    background-color: #884EA0;
+    border-color: #884EA0;
+}
+
+/* ACCEPTED */
+.btn-ezl-accepted {
+    background-color: #EB984E;
+    border-color: #EB984E;
+}
+
+.btn-ezl-accepted:hover,
+.btn-ezl-accepted:focus,
+.btn-ezl-accepted:active,
+.btn-ezl-accepted.active {
+    background-color: #e88b37;
+    border-color: #e67d20;
+}
+
+.btn-ezl-accepted.disabled:hover,
+.btn-ezl-accepted.disabled:focus,
+.btn-ezl-accepted.disabled:active,
+.btn-ezl-accepted.disabled.active,
+.btn-ezl-accepted[disabled]:hover,
+.btn-ezl-accepted[disabled]:focus,
+.btn-ezl-accepted[disabled]:active,
+.btn-ezl-accepted[disabled].active,
+fieldset[disabled] .btn-ezl-accepted:hover,
+fieldset[disabled] .btn-ezl-accepted:focus,
+fieldset[disabled] .btn-ezl-accepted:active,
+fieldset[disabled] .btn-ezl-accepted.active {
+    background-color: #EB984E;
+    border-color: #EB984E;
+}
+
+/* OPEN */
+.btn-ezl-open {
+    background-color: #F4D03F;
+    border-color: #F4D03F;
+}
+
+.btn-ezl-open:hover,
+.btn-ezl-open:focus,
+.btn-ezl-open:active,
+.btn-ezl-open.active {
+    background-color: #f3ca27;
+    border-color: #f1c40f;
+}
+
+.btn-ezl-open.disabled:focus,
+.btn-ezl-open.disabled:hover,
+.btn-ezl-open.disabled:active,
+.btn-ezl-open.disabled.active,
+.btn-ezl-open[disabled]:hover,
+.btn-ezl-open[disabled]:focus,
+.btn-ezl-open[disabled]:active,
+.btn-ezl-open[disabled].active,
+fieldset[disabled] .btn-ezl-open:hover,
+fieldset[disabled] .btn-ezl-open:focus,
+fieldset[disabled] .btn-ezl-open:active,
+fieldset[disabled] .btn-ezl-open.active {
+    background-color: #F4D03F;
+    border-color: #F4D03F;
+}
+
+/*DONE*/
+.btn-ezl-done {
+    background-color: #48C9B0;
+    border-color: #48C9B0;
+}
+
+.btn-ezl-done:hover,
+.btn-ezl-done:focus,
+.btn-ezl-done:active,
+.btn-ezl-done.active {
+    background-color: #38bfa5;
+    border-color: #33ab94;
+}
+
+.btn-ezl-done.disabled:hover,
+.btn-ezl-done.disabled:focus,
+.btn-ezl-done.disabled:active,
+.btn-ezl-done.disabled.active,
+.btn-ezl-done[disabled]:hover,
+.btn-ezl-done[disabled]:focus,
+.btn-ezl-done[disabled]:active,
+.btn-ezl-done[disabled].active,
+fieldset[disabled] .btn-ezl-done:hover,
+fieldset[disabled] .btn-ezl-done:focus,
+fieldset[disabled] .btn-ezl-done:active,
+fieldset[disabled] .btn-ezl-done.active {
+    background-color: #48C9B0;
+    border-color: #48C9B0;
+}
+
+/*RETURN*/
+.btn-ezl-return {
+    background-color: #2471A3;
+    border-color: #2471A3;
+}
+
+.btn-ezl-return:hover,
+.btn-ezl-return:focus,
+.btn-ezl-return:active,
+.btn-ezl-return.active {
+    background-color: #1f638e;
+    border-color: #1b5479;
+}
+
+.btn-ezl-return.disabled:hover,
+.btn-ezl-return.disabled:focus,
+.btn-ezl-return.disabled:active,
+.btn-ezl-return.disabled.active,
+.btn-ezl-return[disabled]:hover,
+.btn-ezl-return[disabled]:focus,
+.btn-ezl-return[disabled]:active,
+.btn-ezl-return[disabled].active,
+fieldset[disabled] .btn-ezl-return:hover,
+fieldset[disabled] .btn-ezl-return:focus,
+fieldset[disabled] .btn-ezl-return:active,
+fieldset[disabled] .btn-ezl-return.active {
+    background-color: #2471A3;
+    border-color: #2471A3;
+}
+
+/*FINISHED*/
+.btn-ezl-finished {
+    background-color: #52BE80;
+    border-color: #52BE80;
+}
+
+.btn-ezl-finished:hover,
+.btn-ezl-finished:focus,
+.btn-ezl-finished:active,
+.btn-ezl-finished.active {
+    background-color: #43b373;
+    border-color: #3ca167;
+}
+
+.btn-ezl-finished.disabled:hover,
+.btn-ezl-finished.disabled:focus,
+.btn-ezl-finished.disabled:active,
+.btn-ezl-finished.disabled.active,
+.btn-ezl-finished[disabled]:hover,
+.btn-ezl-finished[disabled]:focus,
+.btn-ezl-finished[disabled]:active,
+.btn-ezl-finished[disabled].active,
+fieldset[disabled] .btn-ezl-finished:hover,
+fieldset[disabled] .btn-ezl-finished:focus,
+fieldset[disabled] .btn-ezl-finished:active,
+fieldset[disabled] .btn-ezl-finished.active {
+    background-color: #52BE80;
+    border-color: #52BE80;
+}
+
+/*REFUSED SERVICE*/
+.btn-ezl-refused_service {
+    background-color: #7FB3D5;
+    border-color: #7FB3D5;
+}
+
+.btn-ezl-refused_service:hover,
+.btn-ezl-refused_service:focus,
+.btn-ezl-refused_service:active,
+.btn-ezl-refused_service.active {
+    background-color: #6ca8cf;
+    border-color: #599cc8;
+}
+
+.btn-ezl-refused_service.disabled:hover,
+.btn-ezl-refused_service.disabled:focus,
+.btn-ezl-refused_service.disabled:active,
+.btn-ezl-refused_service.disabled.active,
+.btn-ezl-refused_service[disabled]:hover,
+.btn-ezl-refused_service[disabled]:focus,
+.btn-ezl-refused_service[disabled]:active,
+.btn-ezl-refused_service[disabled].active,
+fieldset[disabled] .btn-ezl-refused_service:hover,
+fieldset[disabled] .btn-ezl-refused_service:focus,
+fieldset[disabled] .btn-ezl-refused_service:active,
+fieldset[disabled] .btn-ezl-refused_service.active {
+    background-color: #7FB3D5;
+    border-color: #7FB3D5;
+}
+
+/*REFUSED*/
+.btn-ezl-refused {
+    background-color: #566573;
+    border-color: #566573;
+}
+
+.btn-ezl-refused:hover,
+.btn-ezl-refused:focus,
+.btn-ezl-refused:active,
+.btn-ezl-refused.active {
+    background-color: #4b5864;
+    border-color: #404b56;
+}
+
+.btn-ezl-refused.disabled:hover,
+.btn-ezl-refused.disabled:focus,
+.btn-ezl-refused.disabled:active,
+.btn-ezl-refused.disabled.active,
+.btn-ezl-refused[disabled]:hover,
+.btn-ezl-refused[disabled]:focus,
+.btn-ezl-refused[disabled]:active,
+.btn-ezl-refused[disabled].active,
+fieldset[disabled] .btn-ezl-refused:hover,
+fieldset[disabled] .btn-ezl-refused:focus,
+fieldset[disabled] .btn-ezl-refused:active,
+fieldset[disabled] .btn-ezl-refused.active {
+    background-color: #566573;
+    border-color: #566573;
+}
+
+/*BLOCKEDPAYMENT*/
+.btn-ezl-blockedpayment {
+    background-color: #17202A;
+    border-color: #17202A;
+}
+
+.btn-ezl-blockedpayment:hover,
+.btn-ezl-blockedpayment:focus,
+.btn-ezl-blockedpayment:active,
+.btn-ezl-blockedpayment.active {
+    background-color: #0e131a;
+    border-color: #050709;
+    color: #e9e9e9;
+}
+
+.btn-ezl-blockedpayment.disabled:hover,
+.btn-ezl-blockedpayment.disabled:focus,
+.btn-ezl-blockedpayment.disabled:active,
+.btn-ezl-blockedpayment.disabled.active,
+.btn-ezl-blockedpayment[disabled]:hover,
+.btn-ezl-blockedpayment[disabled]:focus,
+.btn-ezl-blockedpayment[disabled]:active,
+.btn-ezl-blockedpayment[disabled].active,
+fieldset[disabled] .btn-ezl-blockedpayment:hover,
+fieldset[disabled] .btn-ezl-blockedpayment:focus,
+fieldset[disabled] .btn-ezl-blockedpayment:active,
+fieldset[disabled] .btn-ezl-blockedpayment.active {
+    background-color: #17202A;
+    border-color: #17202A;
+}
+
+/*INVALID*/
+.btn-ezl-invalid {
+    background-color: #8a6d3b;
+    border-color: #8a6d3b;
+}
+
+.btn-ezl-invalid:hover,
+.btn-ezl-invalid:focus,
+.btn-ezl-invalid:active,
+.btn-ezl-invalid.active {
+    background-color: #785f33;
+    border-color: #66512c;
+}
+
+.btn-ezl-invalid.disabled:hover,
+.btn-ezl-invalid.disabled:focus,
+.btn-ezl-invalid.disabled:active,
+.btn-ezl-invalid.disabled.active,
+.btn-ezl-invalid[disabled]:hover,
+.btn-ezl-invalid[disabled]:focus,
+.btn-ezl-invalid[disabled]:active,
+.btn-ezl-invalid[disabled].active,
+fieldset[disabled] .btn-ezl-invalid:hover,
+fieldset[disabled] .btn-ezl-invalid:focus,
+fieldset[disabled] .btn-ezl-invalid:active,
+fieldset[disabled] .btn-ezl-invalid.active {
+    background-color: #8a6d3b;
+    border-color: #8a6d3b;
+}
+
+/*ERROR*/
+.btn-ezl-error {
+    background-color: #CD6155;
+    border-color: #CD6155;
+}
+
+.btn-ezl-error:hover,
+.btn-ezl-error:focus,
+.btn-ezl-error:active,
+.btn-ezl-error.active {
+    background-color: #c74f41;
+    border-color: #b94336;
+}
+
+.btn-ezl-error.disabled:hover,
+.btn-ezl-error.disabled:focus,
+.btn-ezl-error.disabled:active,
+.btn-ezl-error.disabled.active,
+.btn-ezl-error[disabled]:hover,
+.btn-ezl-error[disabled]:focus,
+.btn-ezl-error[disabled]:active,
+.btn-ezl-error[disabled].active,
+fieldset[disabled] .btn-ezl-error:hover,
+fieldset[disabled] .btn-ezl-error:focus,
+fieldset[disabled] .btn-ezl-error:active,
+fieldset[disabled] .btn-ezl-error.active {
+    background-color: #CD6155;
+    border-color: #CD6155;
+}
+
+
+/* Pagina de criar OS */
+
+.create-os-active{
+    background-color: #ff9900!important;
+}
+
+.create-os-active:hover{
+    background-color: #e68a00!important;
+}
+
+#page-wrapper{
+    min-height: 254px;
+}
+
+.btn-sm-custom{
+    padding: 0px 4px;
+    margin-bottom: 5px;
+}
+
+#task_form .select2{
+    margin-top: 0!important;
+}
+
+.disabled-btn,
+.disabled-btn:hover,
+.disabled-btn:active,
+.disabled-btn:focus,
+.disabled-btn.active{
+    background-color: #CCC!important;
+    border: #CCC!important;
+}
+/* OUTROS */
+.ezl-required:before {
+    content: "\2217\20";
+    color: red;
+};

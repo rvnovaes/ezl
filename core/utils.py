@@ -70,3 +70,72 @@ def logout_log(f):
         return f(*args, **kwargs)
 
     return wrapper
+
+
+def get_office_field(request, profile=None):
+    """
+    Método para montar o campo de office, de acordo com a variável de sessão custom_session_user
+    :param request:
+    :param profile:
+    :return: forms.ModelChoiceField
+    """
+    from core.models import Office, DefaultOffice
+    from django import forms
+    try:
+        if profile:
+            queryset = profile.person.offices.all()
+            initial = DefaultOffice.objects.filter(auth_user=profile).first().office if \
+                DefaultOffice.objects.filter(auth_user=profile).first() else None
+        elif request.session.get('custom_session_user'):
+            custom_session_user = list(request.session.get('custom_session_user').values())
+            queryset = Office.objects.filter(pk=custom_session_user[0]['current_office'])
+            initial = queryset.first().id
+        else:
+            queryset = request.user.person.offices.all()
+            initial = None
+    except Exception as e:
+        queryset = Office.objects.none()
+        initial = None
+
+    return forms.ModelChoiceField(
+        queryset=queryset,
+        empty_label='',
+        required=True,
+        label=u'Escritório',
+        initial=initial
+    )
+
+
+def get_office_related_office_field(request):
+    from core.models import Office, DefaultOffice
+    from django import forms
+    queryset = Office.objects.none()
+    initial = None
+    office = get_office_session(request)
+    if office:
+        queryset = office.offices.all()
+
+    return forms.ModelChoiceField(
+        queryset=queryset,
+        empty_label='',
+        required=True,
+        label=u'Escritório',
+        initial=initial
+    )
+
+def get_office_session(request):
+    """
+    Retorna o objeto Office de acordo com a sessão atual do usuário; Ou False caso não tenha selecionado escritório
+    :param request:
+    :return: Office object or False
+    """
+    from core.models import Office
+    office = Office.objects.none()
+    if request:
+        if request.session.get('custom_session_user'):
+            custom_session_user = list(request.session.get('custom_session_user').values())
+            office = Office.objects.filter(pk=custom_session_user[0]['current_office']).first()
+        else:
+            office = False
+
+    return office

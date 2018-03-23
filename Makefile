@@ -14,7 +14,7 @@ create_certificate:
 create_certificate_teste:
 	docker-compose run certbot certbot certonly --webroot -w /tmp/www -d teste.ezlawyer.com.br -m contato@ezlawyer.com.br --agree-tos
 
-deploy: check_compose_override build restart run migrate collectstatic
+deploy: check_compose_override build restart run migrate collectstatic load_fixtures
 
 local_sqlserver:
 	ln -s docker-compose.sqlserver.yml docker-compose.override.yml
@@ -26,7 +26,7 @@ migrate:
 	docker-compose run web python manage.py migrate --noinput
 
 load_fixtures:
-	docker-compose run web python manage.py loaddata auth_user country state court_district court_division city type_movement type_task
+	# docker-compose run web python manage.py loaddata auth_user country state court_district court_division city type_movement type_task
 	docker-compose run web python manage.py ezl_create_groups_and_permissions
 
 ps:
@@ -63,7 +63,6 @@ set_env_demo:
 	sed -i -e 's/teste\.ezlawyer\.com\.br/demo\.ezlawyer\.com\.br/g' docker-compose.demo.yml
 	sed -i -e 's/ezl-teste/ezl-demo/g' docker-compose.demo.yml
 	ln -s docker-compose.demo.yml docker-compose.override.yml
-
 
 shell:
 	docker-compose run web bash

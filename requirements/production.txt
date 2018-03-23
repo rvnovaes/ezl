@@ -7,6 +7,7 @@ python-dateutil==2.6.1
 
 # Django
 django<1.12
+django-extensions
 django-allauth==0.32
 django-autocomplete-light==3.2.9
 django-bootstrap3==8.2.3

@@ -1,48 +1,94 @@
-import os
-from urllib.parse import urlparse
 import json
-from chat.models import UserByChat
+import csv
+import os
+import copy
+from urllib.parse import urlparse
+import pickle
+from django.contrib import messages
+from chat.models import Chat, UserByChat
 from django.core.cache import cache
+from django.core.files.storage import FileSystemStorage
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from core.views import CustomLoginRequiredView
 from django.contrib.auth.models import User, Group
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
 from django.db.models import Q
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
+from chat.models import UserByChat
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
-    DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED
+    DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
 from core.models import Person
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
 from task.filters import TaskFilter
-from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm
-from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel
+from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm, TaskToAssignForm, FilterForm
+from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter
 from task.signals import send_notes_execution_date
-from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable
+from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable, FilterTable
 from financial.models import ServicePriceTable
 from chat.models import Chat
+from survey.models import SurveyPermissions
 from financial.tables import ServicePriceTableTaskTable
+from core.utils import get_office_session
+from ecm.models import DefaultAttachmentRule, Attachment
+from task.utils import get_task_attachment
 
 
-class TaskListView(LoginRequiredMixin, SingleTableViewMixin):
+class TaskListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Task
     table_class = TaskTable
+
+
+class TaskBulkCreateView(AuditFormMixin, CreateView):
+    model = Task
+    form_class = TaskCreateForm
+    success_url = reverse_lazy('task_list')
+    success_message = CREATE_SUCCESS_MESSAGE
+    template_name_suffix = '_bulk_create_form'
+
+    def form_valid(self, form):
+        task = form.instance
+        form.instance.movement_id = self.request.POST['movement']
+        self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
+        form.instance.__server = self.request.META['HTTP_HOST']
+        response = super(TaskBulkCreateView, self).form_valid(form)
+
+        if form.cleaned_data['documents']:
+            for document in form.cleaned_data['documents']:
+                task.ecm_set.create(path=document,
+                                    create_user=task.create_user)
+
+        form.delete_temporary_files()
+
+        return response
+
+    def get_success_url(self):
+        return "{}?movement={}&movementLabel={}&lawsuit={}&lawsuitLabel={}&folder={}&folderLabel={}".format(
+            reverse('task_add'),
+            self.object.movement_id,
+            self.object.movement.type_movement.name,
+            self.object.movement.law_suit_id,
+            self.object.movement.law_suit,
+            self.object.movement.law_suit.folder_id,
+            self.object.movement.law_suit.folder,
+        )
 
 
 class TaskCreateView(AuditFormMixin, CreateView):
     model = Task
     form_class = TaskCreateForm
-    success_url = reverse_lazy('task_list')
     success_message = CREATE_SUCCESS_MESSAGE
     template_name_suffix = '_create_form'
 
@@ -59,6 +105,11 @@ class TaskCreateView(AuditFormMixin, CreateView):
             self.form_class.declared_fields['is_active'].disabled = False
 
         return self.initial.copy()
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
     def form_valid(self, form):
         task = form.instance
@@ -82,16 +133,33 @@ class TaskCreateView(AuditFormMixin, CreateView):
                                'pk': self.kwargs['movement']})
 
 
+class TaskToAssignView(AuditFormMixin, UpdateView):
+    model = Task
+    form_class = TaskToAssignForm
+    success_url = reverse_lazy('dashboard')
+    template_name_suffix = '_to_assign'
+
+    def form_valid(self, form):
+        super().form_valid(form)
+        if form.is_valid():
+            form.instance.task_status = TaskStatus.OPEN
+            # TODO: rever processo de anexo, quando for trocar para o ECM Generico
+            get_task_attachment(self, form)
+            form.save()
+        return HttpResponseRedirect(self.success_url + str(form.instance.id))
+
+
 class TaskUpdateView(AuditFormMixin, UpdateView):
     model = Task
     form_class = TaskForm
-    success_url = reverse_lazy('task_list')
     success_message = UPDATE_SUCCESS_MESSAGE
 
     def get_initial(self):
         if self.kwargs.get('movement'):
             lawsuit_id = Movement.objects.get(id=self.kwargs.get('movement')).law_suit_id
             self.kwargs['lawsuit'] = lawsuit_id
+            self.success_url = reverse('movement_update', kwargs={'lawsuit': self.kwargs['lawsuit'],
+                                                                  'pk': self.kwargs['movement']})
         if isinstance(self, CreateView):
             self.form_class.declared_fields['is_active'].initial = True
             self.form_class.declared_fields['is_active'].disabled = True
@@ -100,17 +168,16 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
             self.form_class.declared_fields['is_active'].disabled = False
         return self.initial.copy()
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
     def form_valid(self, form):
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
         form.instance.__server = self.request.META['HTTP_HOST']
         super(TaskUpdateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
-
-    def get_success_url(self):
-        self.success_url = reverse('movement_update',
-                                   kwargs={'lawsuit': self.kwargs['lawsuit'],
-                                           'pk': self.kwargs['movement']})
-        super(TaskUpdateView, self).get_success_url()
 
     def get_context_data(self, **kwargs):
         context = super(TaskUpdateView, self).get_context_data(**kwargs)
@@ -119,23 +186,27 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
         return context
 
 
-class TaskDeleteView(SuccessMessageMixin, LoginRequiredMixin, MultiDeleteViewMixin):
+class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteViewMixin):
     model = Task
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
     def post(self, request, *args, **kwargs):
-        self.success_url = urlparse(request.environ.get('HTTP_REFERER')).path
+        self.success_url = urlparse(request.META.get('HTTP_REFERER')).path
         return super(TaskDeleteView, self).post(request, *args, **kwargs)
 
 
-class DashboardView(MultiTableMixin, TemplateView):
+class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
     template_name = 'task/task_dashboard.html'
     table_pagination = {
         'per_page': 5
     }
+    count_task = 0
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        person = Person.objects.get(auth_user=self.request.user)
+        context['task_count'] = self.count_task
+
         if not self.request.user.get_all_permissions():
             context['messages'] = [
                 {'tags': 'error', 'message': NO_PERMISSIONS_DEFINED}
@@ -144,23 +215,33 @@ class DashboardView(MultiTableMixin, TemplateView):
 
     def get_tables(self):
         person = Person.objects.get(auth_user=self.request.user)
+        data, data_error = self.get_data(person)
+        self.set_count_task(data, data_error)
+        tables = self.get_list_tables(data, data_error, person) if person else []
+        return tables
+
+    def set_count_task(self, data, data_error):
+        self.count_task = len(data) + len(data_error)
+
+    def get_data(self, person):
         dynamic_query = self.get_dynamic_query(person)
         data = []
         data_error = []
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
         if dynamic_query or person.is_admin:
             # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
-            data = DashboardViewModel.objects.filter(dynamic_query)
-            data_error = DashboardViewModel.objects.filter(dynamic_query, task_status=TaskStatus.ERROR)
-
-        # nao mostra as OSs dos status de "erro" e "solicitadas" para pessoas que forem correspondente ou solicitante
-        if person.auth_user.groups.filter(~Q(name__in=['Correspondente', 'Solicitante'])).exists():
-            data = data | DashboardViewModel.objects.filter(task_status=TaskStatus.REQUESTED)
-            data_error = data_error | DashboardViewModel.objects.filter(task_status=TaskStatus.ERROR)
-        tables = self.get_list_tables(data, data_error, person) if person else []
-        if not dynamic_query:
-            return tables
-        return tables
+            office_session = get_office_session(self.request)
+            if office_session:
+                data = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query)
+                data_error = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query, task_status=TaskStatus.ERROR)
+            # nao mostra as OSs dos status de "erro" e "solicitadas" para pessoas que forem correspondente ou solicitante
+            if person.auth_user.groups.filter(~Q(name__in=['Correspondente', 'Solicitante'])).exists():
+                if office_session:
+                    requested = DashboardViewModel.objects.filter(task_status=TaskStatus.REQUESTED, office_id=office_session.id)
+                    errors = DashboardViewModel.objects.filter(task_status=TaskStatus.ERROR, office_id=office_session.id)
+                    data = data | requested if data else requested
+                    data_error = data_error | errors if data else errors
+        return data, data_error
 
     @staticmethod
     def get_list_tables(data, data_error, person):
@@ -266,7 +347,7 @@ class DashboardView(MultiTableMixin, TemplateView):
         return dynamic_query
 
 
-class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
+class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
     model = Task
     form_class = TaskDetailForm
     success_url = reverse_lazy('dashboard')
@@ -274,30 +355,30 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     template_name = 'task/task_detail.html'
 
     def form_valid(self, form):
-        execution_date = form.initial['execution_date']
         form.instance.task_status = TaskStatus[self.request.POST['action']] or TaskStatus.INVALID
         form.instance.alter_user = User.objects.get(id=self.request.user.id)
         notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None
-        if form.cleaned_data['execution_date']:
-            execution_date = form.cleaned_data['execution_date']
+        execution_date = (form.cleaned_data['execution_date']
+                          if form.cleaned_data['execution_date'] else form.initial['execution_date'])
         survey_result = (form.cleaned_data['survey_result']
-                         if form.cleaned_data['survey_result'] else None)
+                         if form.cleaned_data['survey_result'] else form.initial['survey_result'])
 
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
                                        execution_date=execution_date, survey_result=survey_result)
         form.instance.__server = self.request.META['HTTP_HOST']
         if form.instance.task_status == TaskStatus.ACCEPTED_SERVICE:
-            form.instance.acceptance_service_date = timezone.now()
             form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.REFUSED_SERVICE:
-            form.instance.refused_service_date = timezone.now()
             form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.OPEN:
-            form.instance.amount = form.cleaned_data['amount']
-            servicepricetable_id = self.request.POST['servicepricetable_id']
-            servicepricetable = ServicePriceTable.objects.get(id=servicepricetable_id)
-            form.instance.person_executed_by = (servicepricetable.correspondent
-                                                if servicepricetable.correspondent else None)
+            form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else None)
+            servicepricetable_id = (self.request.POST['servicepricetable_id'] if self.request.POST['servicepricetable_id'] else None)
+            servicepricetable = ServicePriceTable.objects.filter(id=servicepricetable_id).first()
+            if servicepricetable:
+                self.delegate_child_task(form.instance, servicepricetable.office_correspondent)
+                form.instance.person_executed_by = None
+            get_task_attachment(self, form)
+
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
@@ -306,6 +387,8 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
+        context['survey_data'] = (self.object.type_task.survey.data
+                                  if self.object.type_task.survey else None)
 
         # Atualiza ou cria o chat, (Eh necessario encontrar um lugar melhor para este bloco de codigo)
         state = ''
@@ -318,19 +401,19 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         Parte adversa: {opposing_party}, Cliente: {client},
         {court_district} - {state}, Prazo: {final_deadline_date}
         """.format(opposing_party=opposing_party, client=self.object.client,
-        court_district=self.object.court_district, state=state,
-        final_deadline_date=self.object.final_deadline_date.strftime('%d/%m/%Y %H:%M'))
+                   court_district=self.object.court_district, state=state,
+                   final_deadline_date=self.object.final_deadline_date.strftime('%d/%m/%Y %H:%M'))
         if self.object.chat:
             self.object.chat.description = description
             self.object.chat.save()
         else:
             label = 'task-{}'.format(self.object.pk)
             title = """#{task_number} - {type_task}""".format(
-            task_number=self.object.task_number, type_task=self.object.type_task)
+                task_number=self.object.task_number, type_task=self.object.type_task)
             self.object.chat = Chat.objects.create(
                 create_user=self.request.user, label=label, title=title,
                 description=description, back_url='/dashboard/{}'.format(self.object.pk))
-            self.object.save()
+            self.object.save(skip_signal=True)
         self.create_user_by_chat(self.object, ['person_asked_by', 'person_executed_by',
                                                'person_distributed_by'])
         type_task = self.object.type_task
@@ -338,7 +421,7 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         state = self.object.movement.law_suit.court_district.state
         client = self.object.movement.law_suit.folder.person_customer
         context['correspondents_table'] = ServicePriceTableTaskTable(
-            ServicePriceTable.objects.filter(Q(type_task=type_task),
+            ServicePriceTable.objects.filter(Q(office=self.object.office), Q(type_task=type_task),
                                              Q(Q(court_district=court_district) | Q(court_district=None)),
                                              Q(Q(state=state) | Q(state=None)),
                                              Q(Q(client=client) | Q(client=None)))
@@ -355,8 +438,25 @@ class TaskDetailView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
                     'create_user': user, 'user_by_chat': user, 'chat': task.chat
                 })
 
+    @staticmethod
+    def delegate_child_task(object_parent, office_correspondent):
+        """
+        Este metodo e chamado quando um escritorio delega uma OS para outro escritorio
+        Ao realizar este processo a nova OS criada devera ficar com o status de Solicitada
+        enquanto a OS pai devera ficar com o status de Delegada/Em Aberti
+        :param object_parent: Task que sera copiada para gerar a nova task
+        :param office_correspondent: Escritorio responsavel pela nova task
+        :return:
+        """
+        new_task = copy.copy(object_parent)
+        new_task.pk = new_task.task_number = None
+        new_task.office = office_correspondent
+        new_task.task_status = TaskStatus.REQUESTED
+        new_task.parent = object_parent
+        new_task.save()
 
-class EcmCreateView(LoginRequiredMixin, CreateView):
+
+class EcmCreateView(CustomLoginRequiredView, CreateView):
     def post(self, request, *args, **kwargs):
 
         files = request.FILES.getlist('path')
@@ -364,9 +464,6 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
         data = {'success': False,
                 'message': exception_create()}
 
-        data = {'success': False,
-                'message': exception_create()
-                }
         for file in files:
 
             ecm = Ecm(path=file,
@@ -403,7 +500,7 @@ class EcmCreateView(LoginRequiredMixin, CreateView):
         return JsonResponse(data)
 
 
-class TypeTaskListView(LoginRequiredMixin, SingleTableViewMixin):
+class TypeTaskListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = TypeTask
     table_class = TypeTaskTable
 
@@ -413,6 +510,11 @@ class TypeTaskCreateView(AuditFormMixin, CreateView):
     form_class = TypeTaskForm
     success_url = reverse_lazy('typetask_list')
     success_message = CREATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class TypeTaskUpdateView(AuditFormMixin, UpdateView):
@@ -432,6 +534,11 @@ class TypeTaskUpdateView(AuditFormMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         cache.set('type_task_page', self.request.META.get('HTTP_REFERER'))
         return context
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
     def post(self, request, *args, **kwargs):
         """
@@ -480,7 +587,7 @@ def delete_ecm(request, pk):
     return JsonResponse(data)
 
 
-class DashboardSearchView(LoginRequiredMixin, SingleTableView):
+class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
     model = DashboardViewModel
     filter_class = TaskFilter
     template_name = 'task/task_filter.html'
@@ -491,144 +598,173 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
 
     def query_builder(self):
         query_set = {}
+        person_dynamic_query = Q()
         person = Person.objects.get(auth_user=self.request.user)
 
-        request = self.request.GET
-        task_filter = TaskFilter(request)
+        filters = self.request.GET
+        task_filter = TaskFilter(data=filters,request=self.request)
         task_form = task_filter.form
 
         if task_form.is_valid():
             data = task_form.cleaned_data
-            task_dynamic_query = Q()
-            person_dynamic_query = Q()
-            client_query = Q()
-            requested_dynamic_query = Q()
-            accepted_service_dynamic_query = Q()
-            refused_service_query = Q()
-            open_dynamic_query = Q()
-            accepted_dynamic_query = Q()
-            refused_dynamic_query = Q()
-            return_dynamic_query = Q()
-            done_dynamic_query = Q()
-            blocked_payment_dynamic_query = Q()
-            finished_dynamic_query = Q()
 
-            if not self.request.user.has_perm('core.view_all_tasks'):
-                if self.request.user.has_perm('core.view_delegated_tasks'):
-                    person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-                elif self.request.user.has_perm('core.view_requested_tasks'):
-                    person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+            if data['custom_filter']:
+                q = pickle.loads(data['custom_filter'].query)
+                query_set = DashboardViewModel.objects.filter(q)
 
-            if data['state']:
-                task_dynamic_query.add(Q(movement__law_suit__court_district__state=data['state']), Q.AND)
-            if data['court_district']:
-                task_dynamic_query.add(Q(movement__law_suit__court_district=data['court_district']), Q.AND)
-            if data['type_task']:
-                task_dynamic_query.add(Q(type_task=data['type_task']), Q.AND)
-            if data['court']:
-                task_dynamic_query.add(Q(movement__law_suit__organ=data['court']), Q.AND)
-            if data['cost_center']:
-                task_dynamic_query.add(Q(movement__law_suit__folder__cost_center=data['cost_center']), Q.AND)
-            if data['folder_number']:
-                task_dynamic_query.add(Q(movement__law_suit__folder__folder_number=data['folder_number']), Q.AND)
-            if data['law_suit_number']:
-                task_dynamic_query.add(Q(movement__law_suit__law_suit_number=data['law_suit_number']), Q.AND)
-            if data['task_number']:
-                task_dynamic_query.add(Q(task_number=data['task_number']), Q.AND)
-            if data['task_legacy_code']:
+            else:
+                task_dynamic_query = Q()
+                client_query = Q()
+                requested_dynamic_query = Q()
+                accepted_service_dynamic_query = Q()
+                refused_service_query = Q()
+                open_dynamic_query = Q()
+                accepted_dynamic_query = Q()
+                refused_dynamic_query = Q()
+                return_dynamic_query = Q()
+                done_dynamic_query = Q()
+                blocked_payment_dynamic_query = Q()
+                finished_dynamic_query = Q()
+
+                if not self.request.user.has_perm('core.view_all_tasks'):
+                    if self.request.user.has_perm('core.view_delegated_tasks'):
+                        person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+                    elif self.request.user.has_perm('core.view_requested_tasks'):
+                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+
+                if data['state']:
+                    task_dynamic_query.add(Q(movement__law_suit__court_district__state=data['state']), Q.AND)
+                if data['court_district']:
+                    task_dynamic_query.add(Q(movement__law_suit__court_district=data['court_district']), Q.AND)
+                if data['type_task']:
+                    task_dynamic_query.add(Q(type_task=data['type_task']), Q.AND)
+                if data['court']:
+                    task_dynamic_query.add(Q(movement__law_suit__organ=data['court']), Q.AND)
+                if data['cost_center']:
+                    task_dynamic_query.add(Q(movement__law_suit__folder__cost_center=data['cost_center']), Q.AND)
+                if data['folder_number']:
+                    task_dynamic_query.add(Q(movement__law_suit__folder__folder_number=data['folder_number']), Q.AND)
+                if data['folder_legacy_code']:
+                    task_dynamic_query.add(Q(movement__law_suit__folder__legacy_code=data['folder_legacy_code']), Q.AND)
+                if data['client']:
+                    task_dynamic_query.add(Q(movement__law_suit__folder__person_customer__id=data['client']), Q.AND)
+                if data['law_suit_number']:
+                    task_dynamic_query.add(Q(movement__law_suit__law_suit_number=data['law_suit_number']), Q.AND)
+                if data['task_number']:
+                    task_dynamic_query.add(Q(task_number=data['task_number']), Q.AND)
+                if data['task_legacy_code']:
                     task_dynamic_query.add(Q(legacy_code=data['task_legacy_code']), Q.AND)
-            if data['person_executed_by']:
-                task_dynamic_query.add(Q(person_executed_by=data['person_executed_by']), Q.AND)
-            if data['person_asked_by']:
-                task_dynamic_query.add(Q(person_asked_by=data['person_asked_by']), Q.AND)
-            if data['person_distributed_by']:
-                task_dynamic_query.add(Q(person_distributed_by=data['person_distributed_by']), Q.AND)
-            if data['requested_in']:
-                if data['requested_in'].start:
-                    requested_dynamic_query.add(
-                        Q(requested_date__gte=data['requested_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['requested_in'].stop:
-                    requested_dynamic_query.add(
-                        Q(requested_date__lte=data['requested_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['accepted_service_in']:
-                if data['accepted_service_in'].start:
-                    accepted_service_dynamic_query.add(
-                        Q(acceptance_service_date__gte=data['accepted_service_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['accepted_service_in'].stop:
-                    accepted_service_dynamic_query.add(
-                        Q(acceptance_service_date__lte=data['accepted_service_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['refused_service_in']:
-                if data['refused_service_in'].start:
-                    refused_service_query.add(
-                        Q(refused_service_date__gte=data['refused_service_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['refused_service_in'].stop:
-                    refused_service_query.add(
-                        Q(refused_service_date__lte=data['refused_service_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['open_in']:
-                if data['open_in'].start:
-                    open_dynamic_query.add(
-                        Q(delegation_date__gte=data['open_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['open_in'].stop:
-                    open_dynamic_query.add(
-                        Q(delegation_date__lte=data['open_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['accepted_in']:
-                if data['accepted_in'].start:
-                    accepted_dynamic_query.add(
-                        Q(acceptance_date__gte=data['accepted_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['accepted_in'].stop:
-                    accepted_dynamic_query.add(
-                        Q(acceptance_date__lte=data['accepted_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['refused_in']:
-                if data['refused_in'].start:
-                    refused_dynamic_query.add(
-                        Q(refused_date__gte=data['refused_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['refused_in'].stop:
-                    refused_dynamic_query.add(
-                        Q(refused_date__lte=data['refused_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['return_in']:
-                if data['return_in'].start:
-                    return_dynamic_query.add(
-                        Q(return_date__gte=data['return_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['return_in'].stop:
-                    return_dynamic_query.add(
-                        Q(return_date__lte=data['return_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['done_in']:
-                if data['done_in'].start:
-                    done_dynamic_query.add(
-                        Q(execution_date__gte=data['done_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['done_in'].stop:
-                    done_dynamic_query.add(
-                        Q(execution_date__lte=data['done_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['blocked_payment_in']:
-                if data['blocked_payment_in'].start:
-                    blocked_payment_dynamic_query.add(
-                        Q(blocked_payment_date__gte=data['blocked_payment_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['blocked_payment_in'].stop:
-                    blocked_payment_dynamic_query.add(
-                        Q(blocked_payment_date__lte=data['blocked_payment_in'].stop.replace(hour=23, minute=59)), Q.AND)
-            if data['finished_in']:
-                if data['finished_in'].start:
-                    finished_dynamic_query.add(
-                        Q(finished_date__gte=data['finished_in'].start.replace(hour=0, minute=0)), Q.AND)
-                if data['finished_in'].stop:
-                    finished_dynamic_query.add(
-                        Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['person_executed_by']:
+                    task_dynamic_query.add(Q(person_executed_by=data['person_executed_by']), Q.AND)
+                if data['person_asked_by']:
+                    task_dynamic_query.add(Q(person_asked_by=data['person_asked_by']), Q.AND)
+                if data['person_distributed_by']:
+                    task_dynamic_query.add(Q(person_distributed_by=data['person_distributed_by']), Q.AND)
+                if data['requested_in']:
+                    if data['requested_in'].start:
+                        requested_dynamic_query.add(
+                            Q(requested_date__gte=data['requested_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['requested_in'].stop:
+                        requested_dynamic_query.add(
+                            Q(requested_date__lte=data['requested_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['accepted_service_in']:
+                    if data['accepted_service_in'].start:
+                        accepted_service_dynamic_query.add(
+                            Q(acceptance_service_date__gte=data['accepted_service_in'].start.replace(hour=0, minute=0)),
+                            Q.AND)
+                    if data['accepted_service_in'].stop:
+                        accepted_service_dynamic_query.add(
+                            Q(acceptance_service_date__lte=data['accepted_service_in'].stop.replace(hour=23,
+                                                                                                    minute=59)), Q.AND)
+                if data['refused_service_in']:
+                    if data['refused_service_in'].start:
+                        refused_service_query.add(
+                            Q(refused_service_date__gte=data['refused_service_in'].start.replace(hour=0, minute=0)),
+                            Q.AND)
+                    if data['refused_service_in'].stop:
+                        refused_service_query.add(
+                            Q(refused_service_date__lte=data['refused_service_in'].stop.replace(hour=23, minute=59)),
+                            Q.AND)
+                if data['open_in']:
+                    if data['open_in'].start:
+                        open_dynamic_query.add(
+                            Q(delegation_date__gte=data['open_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['open_in'].stop:
+                        open_dynamic_query.add(
+                            Q(delegation_date__lte=data['open_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['accepted_in']:
+                    if data['accepted_in'].start:
+                        accepted_dynamic_query.add(
+                            Q(acceptance_date__gte=data['accepted_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['accepted_in'].stop:
+                        accepted_dynamic_query.add(
+                            Q(acceptance_date__lte=data['accepted_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['refused_in']:
+                    if data['refused_in'].start:
+                        refused_dynamic_query.add(
+                            Q(refused_date__gte=data['refused_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['refused_in'].stop:
+                        refused_dynamic_query.add(
+                            Q(refused_date__lte=data['refused_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['return_in']:
+                    if data['return_in'].start:
+                        return_dynamic_query.add(
+                            Q(return_date__gte=data['return_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['return_in'].stop:
+                        return_dynamic_query.add(
+                            Q(return_date__lte=data['return_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['done_in']:
+                    if data['done_in'].start:
+                        done_dynamic_query.add(
+                            Q(execution_date__gte=data['done_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['done_in'].stop:
+                        done_dynamic_query.add(
+                            Q(execution_date__lte=data['done_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['blocked_payment_in']:
+                    if data['blocked_payment_in'].start:
+                        blocked_payment_dynamic_query.add(
+                            Q(blocked_payment_date__gte=data['blocked_payment_in'].start.replace(hour=0, minute=0)),
+                            Q.AND)
+                    if data['blocked_payment_in'].stop:
+                        blocked_payment_dynamic_query.add(
+                            Q(blocked_payment_date__lte=data['blocked_payment_in'].stop.replace(hour=23, minute=59)),
+                            Q.AND)
+                if data['finished_in']:
+                    if data['finished_in'].start:
+                        finished_dynamic_query.add(
+                            Q(finished_date__gte=data['finished_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['finished_in'].stop:
+                        finished_dynamic_query.add(
+                            Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
 
-            person_dynamic_query.add(Q(client_query), Q.AND)\
-                .add(Q(task_dynamic_query), Q.AND)\
-                .add(Q(requested_dynamic_query), Q.AND)\
-                .add(Q(accepted_service_dynamic_query), Q.AND)\
-                .add(Q(refused_service_query), Q.AND)\
-                .add(Q(open_dynamic_query), Q.AND)\
-                .add(Q(accepted_dynamic_query), Q.AND)\
-                .add(Q(refused_dynamic_query), Q.AND)\
-                .add(Q(return_dynamic_query), Q.AND)\
-                .add(Q(done_dynamic_query), Q.AND)\
-                .add(Q(blocked_payment_dynamic_query), Q.AND)\
-                .add(Q(finished_dynamic_query), Q.AND)
+                person_dynamic_query.add(Q(client_query), Q.AND) \
+                    .add(Q(task_dynamic_query), Q.AND) \
+                    .add(Q(requested_dynamic_query), Q.AND) \
+                    .add(Q(accepted_service_dynamic_query), Q.AND) \
+                    .add(Q(refused_service_query), Q.AND) \
+                    .add(Q(open_dynamic_query), Q.AND) \
+                    .add(Q(accepted_dynamic_query), Q.AND) \
+                    .add(Q(refused_dynamic_query), Q.AND) \
+                    .add(Q(return_dynamic_query), Q.AND) \
+                    .add(Q(done_dynamic_query), Q.AND) \
+                    .add(Q(blocked_payment_dynamic_query), Q.AND) \
+                    .add(Q(finished_dynamic_query), Q.AND)
 
-            query_set = DashboardViewModel.objects.filter(person_dynamic_query)
+                office_id = (get_office_session(self.request).id if get_office_session(self.request) else 0)
+                query_set = DashboardViewModel.objects.filter(office_id=office_id).filter(person_dynamic_query)
 
+            try:
+                if filters.get('save_filter', None) is not None:
+                    filter_name = data['custom_filter_name']
+                    filter_description = data['custom_filter_description']
+                    q = pickle.dumps(person_dynamic_query)
+                    new_filter = Filter(name=filter_name, query=q, description=filter_description,
+                                        create_user=self.request.user, create_date=timezone.now())
+                    new_filter.save()
+            except IntegrityError:
+                messages.add_message(self.request, messages.ERROR, 'Já existe filtro com este nome.')
+        else:
+            messages.add_message(self.request, messages.ERROR, 'Formulário inválido.')
         return query_set, task_filter
 
     def get_queryset(self, **kwargs):
@@ -646,8 +782,58 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
         context['table'] = table
         return context
 
+    def get(self, request):
+        if (self.request.GET.get('export_answers') and
+                self.request.user.has_perm(SurveyPermissions.can_view_survey_results)):
+            return self._export_answers(request)
 
-class DashboardStatusCheckView(LoginRequiredMixin, View):
+        return super().get(request)
+
+    def _export_answers(self, request):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="respostas_dos_formularios.csv"'
+        writer = csv.writer(response)
+
+        queryset = self.get_queryset().filter(survey_result__isnull=False)
+        tasks = self._fill_tasks_answers(queryset)
+        columns = self._get_answers_columns(tasks)
+        writer.writerow(['N° da OS', 'N° da OS no sistema de origem'] + columns)
+
+        for task in tasks:
+            self._export_answers_write_task(writer, task, columns)
+        return response
+
+    def _fill_tasks_answers(self, queryset):
+        tasks = []
+        for task in queryset:
+            try:
+                task.survey_result = json.loads(task.survey_result)
+                tasks.append(task)
+            except ValueError:
+                return
+        return tasks
+
+    def _export_answers_write_task(self, writer, task, columns):
+        base_fields = [task.id, task.legacy_code]
+        answers = ['' for x in range(len(columns))]
+        for question, answer in task.survey_result.items():
+            question_index = columns.index(question)
+            answers[question_index] = answer
+
+        writer.writerow(base_fields + answers)
+
+    def _get_answers_columns(self, tasks):
+        columns = []
+        i = 0
+        for task in tasks:
+            for question, answer in task.survey_result.items():
+                if question not in columns:
+                    columns.append(question)
+        columns.sort()
+        return columns
+
+
+class DashboardStatusCheckView(CustomLoginRequiredView, View):
 
     def post(self, request, *args, **kwargs):
         tasks_payload = request.POST.get('tasks')
@@ -666,3 +852,112 @@ class DashboardStatusCheckView(LoginRequiredMixin, View):
         # Comparamos as tasks que foram enviadas com as que estão no banco para saber se houve mudanças
         has_changed = tuple(db_tasks) != tasks
         return JsonResponse({"has_changed": has_changed})
+
+
+@login_required
+def ajax_get_task_data_table(request):
+    status = request.GET.get('status')
+    query = DashboardViewModel.objects.filter(task_status=status, office=get_office_session(request))
+    xdata = []
+    xdata.append(
+        list(
+            map(lambda x: [
+                x.pk,
+                x.task_number,
+                x.final_deadline_date.strftime('%d/%m/%Y %H:%M') if x.final_deadline_date else '',
+                x.type_service,
+                x.lawsuit_number,
+                x.client,
+                x.opposing_party,
+                x.delegation_date.strftime('%d/%m/%Y %H:%M') if x.delegation_date else '',
+                x.legacy_code,
+                'Movimentação sem processo',
+                'Preencher o processo na movimentação',
+            ], query)
+        )
+    )
+
+
+    data = {
+        "data": xdata[0]
+    }
+    return JsonResponse(data)
+
+
+def ajax_get_ecms(request):
+    task_id = request.GET.get('task_id')
+    data_list = []
+    ecms = Ecm.objects.filter(task_id=task_id)
+    for ecm in ecms:
+        data_list.append({
+            'task_id': ecm.task_id,
+            'pk': ecm.pk,
+            'url': ecm.path.name,
+            'filename': ecm.filename,
+            'user': ecm.create_user.username,
+            'data': ecm.create_date.strftime('%d/%m/%Y %H:%M'),
+            'state': ecm.task.get_task_status_display(),
+        })
+    data = {
+        'task_id': task_id,
+        'total_ecms': ecms.count(),
+        'ecms': data_list
+    }
+    return JsonResponse(data)
+
+class FilterListView(CustomLoginRequiredView, SingleTableViewMixin):
+    model = Filter
+    table_class = FilterTable
+
+    def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data para retornar apenas filtros criados pelo usuário logado
+        :param kwargs:
+        :return: Retorna o contexto contendo a listatem
+        :rtype: dict
+        """
+        context = super(FilterListView, self).get_context_data(**kwargs)
+        if not self.request.user.is_superuser:
+            context['table'] = self.table_class(context['table'].data.data.filter(create_user=self.request.user))
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
+        return context
+
+
+class FilterUpdateView(AuditFormMixin, UpdateView):
+    model = Filter
+    form_class = FilterForm
+    success_url = reverse_lazy('filter_list')
+    success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_context_data(self, **kwargs):
+        """
+        Sobrescreve o metodo get_context_data e seta a ultima url acessada no cache
+        Isso e necessario para que ao salvar uma alteracao, o metodo post consiga verificar
+        a pagina da paginacao onde o usuario fez a alteracao
+        :param kwargs:
+        :return: super
+        """
+        context = super().get_context_data(**kwargs)
+        cache.set('filter_page', self.request.META.get('HTTP_REFERER'))
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Sobrescreve o metodo post e verifica se existe cache da ultima url
+        Isso e necessario pelo fato da necessidade de retornar pra mesma paginacao
+        Que o usuario se encontrava ao fazer a alteracao
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: super
+        """
+        if cache.get('filter_page'):
+            self.success_url = cache.get('filter_page')
+
+        return super().post(request, *args, **kwargs)
+
+
+class FilterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
+    model = Filter
+    success_url = reverse_lazy('filter_list')
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)

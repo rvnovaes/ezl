@@ -1,21 +1,35 @@
-{% if value.name == 'ACCEPTED' %}
-    <i class="material-icons ACCEPTED" data-toggle="tooltip" data-placement="bottom"
-       title="A Cumprir">assignment_ind</i>
+{% if value.name == 'ERROR' %}
+    <i class="mdi mdi-close-circle-outline ezl-text-error font-30" data-toggle="tooltip" data-placement="bottom"
+       title="Erro no sistema de origem"></i>
+{% elif value.name == 'REQUESTED' %}
+    <i class="mdi mdi-playlist-play ezl-text-requested font-30" data-toggle="tooltip" data-placement="bottom"
+       title="Solicitada"></i>
+{% elif value.name == 'ACCEPTED_SERVICE' %}
+    <i class="mdi mdi-thumb-up-outline ezl-text-accepted_service font-30" data-toggle="tooltip" data-placement="bottom"
+       title="Aceita pelo Service"></i>
+{% elif value.name == 'REFUSED_SERVICE' %}
+    <i class="mdi mdi-thumb-down-outline ezl-text-refused_service font-30" data-toggle="tooltip" data-placement="bottom"
+       title="Recusada pelo Service"></i>
+{% elif value.name == 'ACCEPTED' %}
+    <i class="mdi mdi-calendar-clock ezl-text-accepted font-30" data-toggle="tooltip" data-placement="bottom"
+       title="A Cumprir"></i>
 {% elif value.name == 'OPEN' %}
-    <i class="material-icons OPEN" data-toggle="tooltip" data-placement="bottom" title="Em Aberto">assignment</i>
+    <i class="mdi mdi-account-location ezl-text-open font-30" data-toggle="tooltip" data-placement="bottom"
+       title="Em Aberto"></i>
 {% elif value.name == 'RETURN' %}
-    <i class="material-icons RETURN " data-toggle="tooltip" data-placement="bottom"
-       title="Retorno">assignment_return</i>
+    <i class="mdi mdi-backburger ezl-text-return font-30" data-toggle="tooltip" data-placement="bottom"
+       title="Retorno"></i>
 {% elif value.name == 'DONE' %}
-    <i class="material-icons DONE" data-toggle="tooltip" data-placement="bottom"
-       title="Cumprida">assignment_turned_in</i>
+    <i class="mdi mdi-checkbox-marked-circle-outline ezl-text-done font-30" data-toggle="tooltip" data-placement="bottom"
+       title="Cumprida"></i>
 {% elif value.name == 'REFUSED' %}
-    <i class="material-icons REFUSED" data-toggle="tooltip" data-placement="bottom" title="Recusada">assignment_late</i>
+    <i class="mdi mdi-clipboard-alert ezl-text-refused font-30" data-toggle="tooltip" data-placement="bottom"
+       title="Recusada"></i>
 {% elif value.name == 'BLOCKEDPAYMENT' %}
-    <i class="material-icons BLOCKEDPAYMENT" data-toggle="tooltip" data-placement="bottom"
-       title="Glosada">money_off</i>
+    <i class="mdi mdi-currency-usd-off ezl-text-blockedpayment font-30" data-toggle="tooltip" data-placement="bottom"
+       title="Glosada"></i>
 {% elif value.name == 'FINISHED' %}
-    <i class="material-icons FINISHED" data-toggle="tooltip" data-placement="bottom"
-       title="Finalizada">gavel</i>
+    <i class="mdi mdi-gavel ezl-text-finished font-30" data-toggle="tooltip" data-placement="bottom"
+       title="Finalizada"></i>
 {% endif %}
 

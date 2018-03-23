@@ -31,13 +31,6 @@ def to_dict(model_instance, query_instance=None):
         return {cols[i]['name']: model_instance[i] for i in range(len(cols))}
 
 
-def parse_survey_result(survey, agenda_id):
-    json = loads(survey)
-    json['agenda_id'] = agenda_id
-    json['versao'] = 1
-    return json
-
-
 survey_tables = {'Courthearing': JuridFMAudienciaCorrespondente, 'Diligence'
 : JuridFMDiligenciaCorrespondente, 'Protocol': JuridFMProtocoloCorrespondente,
                  'Operationlicense': JuridFMAlvaraCorrespondente}
@@ -73,9 +66,10 @@ class TaskETL(GenericETL):
                 a.Advogado AS person_executed_by_legacy_code,
                 a.CodMov AS type_task_legacy_code,
                 a.OBS AS description,
-                a.Data_confirmacao AS blocked_or_finished_date,
                 a.Data AS requested_date,
-                a.prazo_fatal AS final_deadline_date,
+                CASE WHEN (a.prazo_fatal IS NULL)
+                    THEN a.Data_Prazo
+                  ELSE a.prazo_fatal END AS final_deadline_date,
                 p.Codigo_Comp AS folder_legacy_code,
                 p.Cliente
                 FROM Jurid_agenda_table AS a
@@ -102,7 +96,7 @@ class TaskETL(GenericETL):
         return self._import_query.format(cliente="','".join(get_clients_to_import()))
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         from core.models import Person
         for row in rows:
             print(rows_count)
@@ -129,7 +123,6 @@ class TaskETL(GenericETL):
                     requested_date = None
 
                 description = row['description']
-                blocked_or_finished_date = row['blocked_or_finished_date']
 
                 task = Task.objects.filter(legacy_code=legacy_code,
                                            system_prefix=LegacySystem.ADVWIN.value).first()
@@ -186,6 +179,7 @@ class TaskETL(GenericETL):
                     task.final_deadline_date = final_deadline_date
                     task.description = description
                     task.task_status = status_code_advwin
+                    task.type_task = type_task
                     task.alter_user = user
                     task.person_asked_by = person_asked_by
                     task.person_executed_by = person_executed_by
@@ -198,12 +192,12 @@ class TaskETL(GenericETL):
                     task.movement = movement
 
                     update_fields = ['requested_date', 'final_deadline_date', 'description',
-                                     'task_status', 'task_status', 'alter_user', 'person_asked_by',
+                                     'task_status', 'alter_user', 'person_asked_by',
                                      'person_executed_by', 'type_task', 'refused_date',
                                      'execution_date', 'blocked_payment_date', 'finished_date', 'requested_date',
                                      'movement']
 
-                    task.save(update_fields=update_fields)
+                    task.save(update_fields=update_fields, skip_signal=True)
 
                 else:
                     task = self.model.objects.create(movement=movement,
@@ -221,7 +215,8 @@ class TaskETL(GenericETL):
                                                      blocked_payment_date=blocked_payment_date,
                                                      finished_date=finished_date,
                                                      task_status=status_code_advwin,
-                                                     requested_date=requested_date)
+                                                     requested_date=requested_date,
+                                                     office=default_office)
 
                 if status_code_advwin == TaskStatus.ERROR:
                     for inconsistency in inconsistencies:
@@ -230,7 +225,8 @@ class TaskETL(GenericETL):
                             inconsistency=inconsistency['inconsistency'],
                             solution=inconsistency['solution'],
                             create_user=user,
-                            alter_user=user)
+                            alter_user=user,
+                            office=default_office)
                 else:
                     InconsistencyETL.objects.filter(task=task).update(is_active=False)
 
@@ -268,10 +264,10 @@ class TaskETL(GenericETL):
 
         survey_result = done_tasks.filter(Q(survey_result__isnull=False) & ~Q(survey_result=''))
 
-        survey_result = map(lambda x: (
-            insert(survey_tables.get(x.type_task.survey_type).__table__).values(to_dict(
-                survey_tables.get(x.type_task.survey_type)(**parse_survey_result(x.survey_result, x.legacy_code))))
-        ), survey_result)
+        # survey_result = map(lambda x: (
+        #     insert(survey_tables.get(x.type_task.survey_type).__table__).values(to_dict(
+        #         survey_tables.get(x.type_task.survey_type)(**parse_survey_result(x.survey_result, x.legacy_code))))
+        # ), survey_result)
 
         accepeted_history = TaskHistory.objects.filter(task_id__in=accepted_tasks.values('id'),
                                                        status=TaskStatus.ACCEPTED.value)

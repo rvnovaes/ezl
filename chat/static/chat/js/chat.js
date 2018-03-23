@@ -1,15 +1,25 @@
 var setBadgeItem = function (items) {
-    $("[badge-id]").text(null);
+    var tmpl_msg_list =  '<a href="javascript:void(0)" data-toggle="tooltipe" title="${message__chat__title}">\n' +
+                         '    <div class="mail-contnet">\n' +
+                         '        <h5>\n' +
+                         '            ${message__chat__title}' +
+                         '            <span class="text-danger pull-rigth">(${quantity})</span>\n' +
+                         '        </h5>\n' +
+                         '    </div>\n' +
+                         '</a>'
+    var elm = $("#chat-notify");
+    $('#message-center').html(null);
     items.forEach(function (item) {
-        var el = $("[badge-id=" + item.message__chat__pk + "]");
         if (item.quantity > 0) {
-            el.text(item.quantity)
+            elm.removeClass('hide');
+            $.tmpl(tmpl_msg_list, item).appendTo('#message-center')
         } else {
-            el.text(null)
+            elm.addClass('hide')
         }
 
     })
 };
+
 
 var chatReadMessage = function (chat_id, csrf_token) {
     $.ajax({
@@ -28,23 +38,33 @@ var chatReadMessage = function (chat_id, csrf_token) {
     })
 };
 
-setInterval(function () {
+var count_message = setInterval(function () {
     $.ajax({
         type: "GET",
         url: "/chat/count_message/",
         data: {},
         success: function (response) {
-            console.log(response.all_messages);
             if (response.all_messages > 0) {
-                $('.chat-badge.badge').text(response.all_messages)
+                $("#chat-notify").removeClass('hide');
+                $("#li-message-center").removeClass('hide');
+                $("#message-center").removeClass('hide');
+
+                if (response.all_messages == 1) {
+                    $("#drop-title").html(response.all_messages + ' Mensagem');
+                } else {
+                    $("#drop-title").html(response.all_messages + ' Mensagens');
+                }
             } else {
-                $('.chat-badge.badge').text(null)
+                $("#drop-title").html('0 Mensagens');
+                $("#chat-notify").addClass('hide');
+                $("#li-message-center").addClass('hide');
+                $("#message-center").addClass('hide');
             }
             setBadgeItem(response.grouped_messages)
         },
         dataType: "json"
     });
-}, 1000);
+}, 5000);
 
 
 var formatDate = function (strDate) {

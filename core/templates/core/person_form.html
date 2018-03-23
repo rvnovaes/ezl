@@ -1,61 +1,54 @@
-{% extends "core/base_form.html" %}
+{% extends "skeleton/forms/base.html" %}
+{% load static   %}
 
-{% load material_form %}
-{% load staticfiles %}
-
-{% block extrahead %}
-    {{ block.super }}
-{% endblock %}
-
-{% block extrajs %}
-
-    {{ block.super }}
-
-    <script type="text/javascript">
-        $(function () {
-            $('#id_legal_type').change(function () {
-                if (this.value == 'F') {
-                    $("#id_cpf_cnpj").mask('000.000.000-00', {reverse: true});
-                }
-                else {
-                    $('#id_cpf_cnpj').mask('00.000.000/0000-00', {reverse: true});
-                }
-            }).change();
-        })
-    </script>
-    {{ form.media }}
-    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
-
-{% endblock %}
-
-{% block form_container %}
-    {% form %}
-{#        {% for field in form %}#}
-{#            <div class="form-group col-sm-5">#}
-{#                <label>#}
-{#                    {{ field.label }}#}
-{#                </label>#}
-{#                {{ field }}#}
-{#            </div>#}
-{#        {% endfor %}#}
-    {% endform %}
-                </div>
-            </div>
-        </div>
-                        {% if personaddress.forms %}
-                            {{ personaddress.management_form }}
-                            {% for form in personaddress.forms %}
-                                {% if forloop.first %}
-        <div class="row">
-            <div class="panel panel-primary">
+{% block extra_form %}
+    <div class="col-sm-12">
+    {% if personaddress.forms %}
+        {{ personaddress.management_form }}
+        {% for form in personaddress.forms %}
+            {% if forloop.first %}
+                <div class="row">
+                <div class="panel panel-default">
                 <div class="panel-heading">
                     <h1 class="panel-title">
                         Endereço
                     </h1>
                 </div>
-                                {% endif %}
-                <div class="panel-body">
-                                {% include 'core/address_base_form.html' %}
-                            {% endfor %}
-                        {% endif %}
-{% endblock form_container %}
+            {% endif %}
+            <div class="panel-body">
+            {% include 'core/address_base_form.html' with form=form %}
+            </div>
+        {% endfor %}
+    {% endif %}
+    </div>
+{% include 'core/mask_selector.html' %}
+{% endblock %}
+
+{% block button_cancel %}
+    {% include 'core/widgets/cancel_button.html'  with link_list='person_list' %}
+{% endblock %}
+{% block extra_scripts %}
+    {% if view.model.use_upload %}
+        <!-- UPLOADS SCRIPTS  -->
+        {% if form.documents %}
+            <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
+            <script src="{% static "file_form/file_form.js" %}"></script>
+            <script>
+               $(function() {
+                   initUploadFields($('#object_form'));
+               });
+            </script>
+        {% else %}
+            {% include 'ecm/javascripts.html' %}
+
+            <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+            <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+            <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+            <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
+                 a medida que for adicionando novos arquivos -->
+            <div id="scripts">
+            </div>
+        {% endif %}
+        {{ personaddress.forms.0.media }}
+    {% endif %}
+{% endblock %}

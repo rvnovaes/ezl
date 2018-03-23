@@ -40,7 +40,7 @@ class FolderETL(GenericETL):
         return self._import_query.format(cliente="','".join(get_clients_to_import()))
 
     @validate_import
-    def config_import(self, rows, user, rows_count, log=False):
+    def config_import(self, rows, user, rows_count, default_office, log=False):
         invalid_cost_center = InvalidObjectFactory.get_invalid_model(CostCenter)
         for row in rows:
             rows_count -= 1
@@ -71,12 +71,14 @@ class FolderETL(GenericETL):
                         instance.is_active = True
                         instance.alter_user = user
                         instance.cost_center = cost_center_instance
+                        instance.office = default_office
                         instance.save(
                             update_fields=['person_customer',
                                            'is_active',
                                            'alter_date',
                                            'alter_user',
-                                           'cost_center'])
+                                           'cost_center',
+                                           'office'])
                     else:
                         obj = self.model(person_customer=person_customer,
                                          is_active=True,
@@ -84,7 +86,8 @@ class FolderETL(GenericETL):
                                          system_prefix=LegacySystem.ADVWIN.value,
                                          create_user=user,
                                          cost_center=cost_center_instance,
-                                         alter_user=user)
+                                         alter_user=user,
+                                         office=default_office)
                         obj.save()
 
                 self.debug_logger.debug("Pastas,%s,%s,%s,%s,%s,%s,%s"%(str(person_customer.id),str(True),str(legacy_code),

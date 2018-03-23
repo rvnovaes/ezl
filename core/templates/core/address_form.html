@@ -1,28 +1,10 @@
-{% extends "core/base_form.html" %}
+{% extends "skeleton/forms/base.html" %}
 
-{% load material_form %}
 {% load staticfiles %}
 
-{% block extrahead %}
-    {{ block.super }}
-{% endblock %}
-
-{% block form_title %}
-
-    {% if object %}
-        {{ block.super }}
-    {% else %}
-        Novo endereço para {{ person }}
-    {% endif %}
-
-{% endblock %}
-
-{% block form_container %}
+{% block form %}
     {% include 'core/address_base_form.html' %}
 {% endblock %}
-
-{% block extrajs %}
-    {{ block.super }}
-    {{ form.media }}
-    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
-{% endblock %}
+{% block extra_content %}
+    {% include 'core/mask_selector.html' %}
+{% endblock extra_content %}

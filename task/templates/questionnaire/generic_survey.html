@@ -2,13 +2,16 @@
 
 {% block content %}
     {% load bootstrap3 %}
-    <script src="{% static  "js" %}/{{ generic_survey|lower }}.js"></script>
+    <script id="inline-script">
+        window.survey = new Survey.Model({{ survey_data|safe }});
+        window.survey2 = new Survey.Model({{ survey_data|safe }});
+    </script>
         <div id="survey" class="modal">
         <div class="modal-dialog">
             <div class="modal-content ">
                 <div id=" modal modalHeader">
                     <h4 style="text-align: center" class="panel-header panel-title panel-heading DONE">
-                        <i class="material-icons ">question_answer</i>
+                        <i class="fa fa-align-justify"></i>
                         Formulário de Cumprimento </h4>
                 </div>
                 <div class="modal-body">
@@ -24,24 +27,54 @@
         </div>
     </div>
     <script>
-    //Função para retornar o método submit default
+        setInterval(function(){
+            $('#survey input[type=file]').each(function(){
+                var $el = $(this),
+                    id = $el.attr('id').replace('i', ''),
+                    $button = $('<button type="button" class="btn btn-sm btn-primary btn-raised" style="color: #fff !important;"><i class="icon-cloud-upload"></i> &nbsp; Enviar Arquivo(s)<div class="ripple-container"></div></button>'),
+                    $parent = $el.parent();
+
+                if ($parent.find('button').length == 0){
+                    $parent.append($button);
+                    $el.hide();
+                    $button.click(function(){
+                        SurveyUploadDatabase.currentField = id;
+                        SurveyUploadDatabase.inProgress = true;
+                        $('.js-upload-files').click();
+                        return false;
+                    });
+                }
+            });
+        }, 1000);
+
+
+        //Função para retornar o método submit default
         function submitSurvey() {
             $('#task_detail').unbind('submit').submit();
 
         }
 
+        // Retorna as respostas da pesquisa formatadas corretamente
+        function getSurveyResult(result){
+            var data = {};
+            $.each(result.getAllQuestions(), function(i, question){
+                if (question.visible && question.getType() != "file") {
+                    data[question.title] = question.value || "";
+                }
+            });
+            return data;
+        }
+
         Survey.Survey.cssType = "bootstrapmaterial";
         Survey.defaultBootstrapMaterialCss.navigationButton = "btn btn-sm btn-raised btn-primary";
-        $.material.init();
+
         survey.onComplete.add(function (result) {
-            var surveyResponse = JSON.stringify(result.data);
+            var surveyResponse = JSON.stringify(getSurveyResult(result));
             var surveyResult = document.getElementsByName('survey_result').item(0);
             surveyResult.value = surveyResponse;
             document.getElementById('id_survey_result').innerHTML = surveyResponse;
-            document.getElementById('surveyElement').innerHTML = '<p>Formulário preenchido com sucesso.</p><div class="alert alert-info" role="alert"> <strong>Atenção!</strong><br> <strong>Lembre-se de anexar o arquivo, caso necessário.</strong> </div>'
-            var v = document.createElement('p');
-            v.innerHTML = '<button name="action" value="DONE" onclick="submitSurvey();" class="btn btn-sm btn-raised btn-primary pull-right" type="submit">Enviar</button>';
-            document.getElementById('surveyElement').appendChild(v);
+            $('<input name="action" value="DONE">').appendTo($('#task_detail'));
+            submitSurvey();
         });
         survey.locale = "pt";
         Survey.JsonObject.metaData.addProperty("dropdown", {
@@ -92,7 +125,6 @@
         Survey.CustomWidgetCollection.Instance.addCustomWidget(widget);
 
         $("#surveyElement").Survey({model: survey});
-
 
         var footer = document.querySelector(".panel-footer")
         var cancelBtn = document.createElement("button");

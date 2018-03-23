@@ -1,1 +1,5 @@
-{% extends "core/base_form.html" %}
+{% extends 'skeleton/forms/base.html' %}
+
+{% block button_cancel %}
+    {% include 'core/widgets/cancel_button.html'  with link_list='costcenter_list' %}
+{% endblock %}

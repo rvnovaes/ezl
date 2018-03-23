@@ -1,38 +1,13 @@
-{% load material_form %}
-{% load staticfiles %}
+{% load staticfiles bootstrap3 %}
 
-<div class="valign-wrapper layout-row row">
-    <div class="col s12 m4">
-        <label for="{{ form.correspondent.id_for_label }}" style="position: relative;" id="select2_label">{{ form.correspondent.label }}</label>
-        {{ form.correspondent }}
-    </div>
-    <div class="select-field col s12 m4 required" id="{{ form.type_task.id_for_label }}_container">
-        <label for="{{ form.type_task.id_for_label }}">{{ form.type_task.label }}</label>
-        {{ form.type_task }}
-    </div>
-    <div class="col s12 m4">
-        <div class="input-field col s12" id="{{ form.value.id_for_label }}_container">
-            {{ form.value }}
-            <label for="{{ form.value.id_for_label }}">{{ form.value.label }}</label>
-        </div>
-    </div>
-</div>
-<div class="layout-row row">
-    <div class="col s12 m4">
-        <label for="{{ form.client.id_for_label }}" style="position: relative;" id="select2_label">{{ form.client.label }}</label>
-        {{ form.client }}
-    </div>
-    <div class="select-field col s12 m4" id="{{ form.state.id_for_label }}_container">
-        <label for="{{ form.state.id_for_label }}">{{ form.state.label }}</label>
-        {{ form.state }}
-    </div>
-    <div class="col s12 m4">
-        <label for="{{ form.court_district.id_for_label }}" style="position: relative;" id="select2_label">{{ form.court_district.label }}</label>
-        {{ form.court_district }}
-    </div>
-</div>
 
-{% block extrajs %}
-    {{ form.media }}
-    <script type="text/javascript" src="{% static 'select2-tab-fix.min.js' %}"></script>
-{% endblock %}
+<div class="row">
+    {% bootstrap_field form.office_correspondent form_group_class="form-group col-sm-4" %}
+    {% bootstrap_field form.type_task form_group_class="form-group col-sm-4" %}
+    {% bootstrap_field form.value form_group_class="form-group col-sm-4" %}
+</div>
+<div class="row">
+    {% bootstrap_field form.client form_group_class="form-group col-sm-4" %}
+    {% bootstrap_field form.state form_group_class="form-group col-sm-4" %}
+    {% bootstrap_field form.court_district form_group_class="form-group col-sm-4" %}
+</div>

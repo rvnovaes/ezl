@@ -1,0 +1,100 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static "survey/survey-editor.css" %}">
+<script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/sortablejs@1.7.0/Sortable.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.15.0/vuedraggable.min.js"></script>
+<script type="text/html" survey-template>
+    {% verbatim %}
+    <div id="app">
+        <div class="panel panel-survey-container">
+            <div class="panel-heading">
+                <div class="panel-title">
+                    <b>Campos do Questionário</b>
+                </div>
+            </div>
+            <div class="panel-body form-group is-focused">
+    
+            <draggable :list="questions" class="dragArea">
+                <div class="panel panel-survey-question" v-for="(question, i) in questions">
+                    <div class="panel-heading" data-toggle="collapse" :data-target="'#id_'+i+'collapse'"
+                        href="#id_collapse">
+                        <div class="panel-title">
+                            <i class="fa fa-pencil"></i>
+                            <b panel-title>{{ question.title }}</b>
+                            <button type="button"
+                                class="close"
+                                v-on:click="removeQuestion(question)"
+                                btn-close>
+                            <span aria-hidden="true">&times;</span>
+                            <span class="sr-only">Close</span>
+                            </button>
+                            <span class="pull-right">{{ question.visibleIf }}</span>
+                        </div>
+                    </div>
+                    <div class="panel-body form-group is-focused collapse" :id="'id_'+i+'collapse'">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                        <div class="form-group ezl-required">
+                                            <label :for="'id_'+i+'_title'" class="control-label">Titulo do campo</label>
+                                            <input :id="'id_'+i+'_title'" name="title" type="text" v-model="question.title" class="form-control">
+                                        </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group ezl-required">
+                                            <label :for="'id_'+i+'_name'" class="control-label">Código do campo</label>
+                                            <input :id="'id_'+i+'_name'" type="text" v-model="question.name" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="row">
+                                        <div class="form-group ezl-required">
+                                            <label :for="'id_'+i+'_required'" class="control-label">Obrigatório</label>
+                                            <div class="checkbox checkbox-success">
+                                                <input :id="'id_'+i+'_required'" :name="'id_'+i+'_required'" type="checkbox" v-model="question.isRequired" class="form-control">
+                                                <label :for="'id_'+i+'_required'"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                        <div class="form-group ezl-required">
+                                            <label :for="'id_'+i+'_question_type'" class="control-label">Tipo de campo</label>
+                                            <select :id="'id_'+i+'_question_type'" name="question_type" v-model="question.type" class="form-control">
+                                                <option value="text" se>Texto</option>
+                                                <option value="comment">Comentário</option>
+                                                <option value="radiogroup">Seleção</option>
+                                                <option value="checkbox">Seleção múltipla</option>
+                                                <option value="file">Upload de arquivo</option>
+                                            </select>
+                                        </div>
+                                </div>
+                                <div class="col-sm-6">
+                                        <div class="form-group ezl-required">
+                                            <label :for="'id_'+i+'_condition'" class="control-label">Condição de exibição</label>
+                                            <input :id="'id_'+i+'_condition'" :name="'id_'+i+'_condition'" type="text" v-model="question.visibleIf" class="form-control">
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="layout-row row" v-if="question.type == 'radiogroup' || question.type == 'checkbox'">
+                                <div class="col-sm-6">
+                                        <div class="form-group ezl-required">
+                                            <label :for="'id_'+i+'_choices'" class="control-label">Opções</label>
+                                            <input :id="'id_'+i+'_choices'" :name="'id_'+i+'_choices'" type="text" v-model="question.choices" class="form-control">
+                                        </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </draggable>
+            <button type="button" class="btn btn-sm btn-raised btn-primary " v-on:click="addQuestion">
+                <i class="mdi mdi-plus"></i> Adicionar campo
+            </button>
+    
+            </div>
+        </div>
+    </div>
+    {% endverbatim %}
+</script>
+<script type="text/javascript" src="{% static 'survey/survey-editor.js' %}"></script>

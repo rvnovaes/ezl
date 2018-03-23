@@ -2,6 +2,8 @@
 
 CREATE_SUCCESS_MESSAGE = 'Registro criado com sucesso'
 
+USER_CREATE_SUCCESS_MESSAGE = 'Registro criado com sucesso'
+
 UPDATE_SUCCESS_MESSAGE = 'Registro atualizado com sucesso'
 
 ADDRESS_UPDATE_SUCCESS_MESSAGE = 'Endereço atualizado com sucesso.'
@@ -47,3 +49,7 @@ def exception_create():
 
 def integrity_error_delete():
     return 'Erro: impossível excluir o arquivo.'
+
+
+def record_from_wrong_office():
+    return 'Erro: este registro pertence a outro escritório.'
