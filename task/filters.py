@@ -29,9 +29,10 @@ class TaskFilter(FilterSet):
                                     label="Setor")
     court = ModelChoiceFilter(queryset=filter_valid_choice_form(Organ.objects.filter(is_active=True)),
                                     label="Órgão")
-    folder_number = NumberFilter(label=u"Número da Pasta")
-    law_suit_number = CharFilter(label=u"Número do processo")
-    task_number = NumberFilter(label=u"Número da OS")
+    folder_number = NumberFilter(label=u"Nº da pasta")
+    law_suit_number = CharFilter(label=u"Nº do processo")
+    task_number = NumberFilter(label=u"Nº da OS")
+    task_legacy_code = CharFilter(label=u"Nº da OS de origem")
 
     person_executed_by = ModelChoiceFilter(queryset=Person.objects.filter(),
                                            label="Correspondente",

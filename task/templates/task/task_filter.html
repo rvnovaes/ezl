@@ -87,7 +87,7 @@
                         </div>
                     </div>
                     <div class="layout-row row">
-                        <div class="col s12 m4">
+                        <div class="col s12 m6">
                             <div class="row">
                                 <div class="input-field col s12 required" id="{{ filter.form.folder_number.id_for_label }}_container">
                                     <label for="{{ filter.form.folder_number.id_for_label }}">{{ filter.form.folder_number.label }}</label>
@@ -95,7 +95,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col s12 m4">
+                        <div class="col s12 m6">
                             <div class="row">
                                 <div class="input-field col s12 required" id="{{ filter.form.law_suit_number.id_for_label }}_container">
                                     <label for="{{ filter.form.law_suit_number.id_for_label }}">{{ filter.form.law_suit_number.label }}</label>
@@ -103,11 +103,21 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col s12 m4">
+                    </div>
+                    <div class="layout-row row">
+                        <div class="col s12 m6">
                             <div class="row">
                                 <div class="input-field col s12 required" id="{{ filter.form.task_number.id_for_label }}_container">
                                     <label for="{{ filter.form.task_number.id_for_label }}">{{ filter.form.task_number.label }}</label>
                                     {{ filter.form.task_number }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col s12 m6">
+                            <div class="row">
+                                <div class="input-field col s12 required" id="{{ filter.form.task_legacy_code.id_for_label }}_container">
+                                    <label for="{{ filter.form.task_legacy_code.id_for_label }}">{{ filter.form.task_legacy_code.label }}</label>
+                                    {{ filter.form.task_legacy_code }}
                                 </div>
                             </div>
                         </div>
