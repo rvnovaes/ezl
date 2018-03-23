@@ -41,10 +41,7 @@ class LawsuitETL(GenericETL):
                             THEN
                               p.Varas
                           ELSE d.D_Vara END                        AS court_division_legacy_code,
-                          CASE WHEN (rtrim(ltrim(d.D_NumPrc)) LIKE '') OR (d.D_NumPrc IS NULL)
-                            THEN
-                              p.NumPrc1
-                          ELSE d.D_NumPrc END                      AS law_suit_number
+                          d.D_NumPrc                               AS law_suit_number
                     FROM Jurid_Pastas AS p
                           LEFT JOIN Jurid_Distribuicao AS d ON
                                                               p.Codigo_Comp = d.Codigo_Comp
