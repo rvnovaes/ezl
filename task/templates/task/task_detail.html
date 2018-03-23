@@ -255,6 +255,7 @@
             var data = {}
             data['latitude'] = position.coords.latitude
             data['longitude'] = position.coords.longitude
+            data['task_id'] = {{ form.instance.pk }}
             $.ajax({
                 type: 'POST',
                 url: '/providencias/providencias/geolocation/criar',
@@ -263,6 +264,7 @@
                     if (result.error){
                         showToast('error', 'Atenção', result.error, 0, false);
                     }
+                    $('#CheckinPosition').html(result)
                     $('#locating').modal('hide');
                 },
                 error: function (request, status, error) {

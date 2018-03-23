@@ -34,7 +34,7 @@ from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
 from task.filters import TaskFilter
 from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm, TaskToAssignForm, FilterForm
-from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter
+from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskGeolocation
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable, FilterTable
 from financial.models import ServicePriceTable
@@ -44,6 +44,7 @@ from financial.tables import ServicePriceTableTaskTable
 from core.utils import get_office_session
 from ecm.models import DefaultAttachmentRule, Attachment
 from task.utils import get_task_attachment
+from decimal import Decimal
 
 
 class TaskListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -966,15 +967,24 @@ class FilterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
 class GeolocationTaskSave(CustomLoginRequiredView, View):
 
     def post(self, request):
-        print(self)
-        # items = json.loads(request.POST['items'])
-        # for item in items:
-        #     model_class = self.models.get(item['model'])
-        #     if model_class is None:
-        #         continue
-        #     instance = model_class.objects.get(id=item['id'])
-        #     for field_item in item['fields']:
-        #         setattr(instance, field_item['field'], field_item['value'])
-        #     instance.save()
-
-        return JsonResponse({"ok": True})
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+        task_pk = request.POST.get('task_pk')
+        task = Task.objects.filter(pk=task_pk).first()
+        if task and latitude and longitude:
+            taskgeolocation = TaskGeolocation.objects.filter(task=task).first()
+            if taskgeolocation:
+                taskgeolocation.latitude = Decimal(latitude)
+                taskgeolocation.longitude = Decimal(longitude)
+                taskgeolocation.alter_user = request.user
+                taskgeolocation.save()
+            else:
+                TaskGeolocation.create(
+                    latitude=Decimal(latitude),
+                    longitude = Decimal(longitude),
+                    create_user = request.user
+                )
+            return JsonResponse({"ok": True,
+                                "latitude": latitude,
+                                "longitude": longitude})
+        return JsonResponse({"ok": False})
