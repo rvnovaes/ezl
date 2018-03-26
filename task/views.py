@@ -979,11 +979,10 @@ class GeolocationTaskSave(CustomLoginRequiredView, View):
                 taskgeolocation.alter_user = request.user
                 taskgeolocation.save()
             else:
-                TaskGeolocation.create(
-                    latitude=Decimal(latitude),
-                    longitude = Decimal(longitude),
-                    create_user = request.user
-                )
+                TaskGeolocation.objects.create(latitude=Decimal(latitude),
+                                               longitude = Decimal(longitude),
+                                               create_user = request.user
+                                               )
             return JsonResponse({"ok": True,
                                 "latitude": latitude,
                                 "longitude": longitude})
