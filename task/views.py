@@ -514,9 +514,11 @@ class DashboardSearchView(LoginRequiredMixin, SingleTableView):
             finished_dynamic_query = Q()
 
             if not self.request.user.has_perm('core.view_all_tasks'):
-                if self.request.user.has_perm('core.view_delegated_tasks'):
+                if person.auth_user.groups.count() == 1 and \
+                    person.auth_user.groups.filter(name=Person.CORRESPONDENT_GROUP):
                     person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-                elif self.request.user.has_perm('core.view_requested_tasks'):
+                elif person.auth_user.groups.count() == 1 and \
+                    person.auth_user.groups.filter(name=Person.REQUESTER_GROUP):
                     person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
             if data['state']:

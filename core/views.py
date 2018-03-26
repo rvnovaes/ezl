@@ -299,6 +299,7 @@ class SingleTableViewMixin(SingleTableView):
         context['form_name_plural'] = self.model._meta.verbose_name_plural
         generic_search = GenericSearchFormat(self.request, self.model, self.model._meta.fields)
         args = generic_search.despatch()
+
         if args:
             table = eval(args)
         else:
