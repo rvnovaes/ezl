@@ -23,6 +23,7 @@ services:
       - web-media:/app/media
       - ezl-logs:/var/log/ezl
       - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas
     logging:
       driver: "json-file"
       options:
@@ -84,6 +85,7 @@ services:
       - letsencrypt-www:/usr/share/nginx/html/certbot
       - letsencrypt-etc:/etc/letsencrypt
       - /mnt/windows_ecm/Agenda:/usr/share/nginx/html/media/ECM
+      - /mnt/windows_ecm/Pastas:/usr/share/nginx/html/media/ECM/Pastas
     depends_on:
       - web
     networks:
