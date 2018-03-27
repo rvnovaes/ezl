@@ -16,7 +16,7 @@ class ChatListView(ListView):
         if self.request.user.person.is_admin:
             context['chats'] = Chat.objects.all()
         else:
-            context['chats'] = Chat.objects.filter(users__user_by_chat=self.request.user).order_by(
+            context['chats'] = Chat.objects.filter(users__user_by_chat=self.request.user, users__is_active=True).order_by(
                 'pk').distinct('pk')
         return context
 
