@@ -429,14 +429,18 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         return context
 
     def create_user_by_chat(self, task, fields):
+        users = []
         for field in fields:
             user = None
             if getattr(task, field):
                 user = getattr(getattr(task, field), 'auth_user')
             if user:
-                UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
+                user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
                     'create_user': user, 'user_by_chat': user, 'chat': task.chat
                 })
+                user = user.user_by_chat
+            users.append(user)
+        UserByChat.objects.filter(~Q(user_by_chat__in=users), chat=task.chat).update(is_active=False)
 
     @staticmethod
     def delegate_child_task(object_parent, office_correspondent):
@@ -626,11 +630,13 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 blocked_payment_dynamic_query = Q()
                 finished_dynamic_query = Q()
 
-                if not self.request.user.has_perm('core.view_all_tasks'):
-                    if self.request.user.has_perm('core.view_delegated_tasks'):
-                        person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-                    elif self.request.user.has_perm('core.view_requested_tasks'):
-                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+            if not self.request.user.has_perm('core.view_all_tasks'):
+                if person.auth_user.groups.count() == 1 and \
+                    person.auth_user.groups.filter(name=Person.CORRESPONDENT_GROUP):
+                    person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+                elif person.auth_user.groups.count() == 1 and \
+                    person.auth_user.groups.filter(name=Person.REQUESTER_GROUP):
+                    person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
                 if data['state']:
                     task_dynamic_query.add(Q(movement__law_suit__court_district__state=data['state']), Q.AND)
