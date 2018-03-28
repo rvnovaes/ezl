@@ -87,9 +87,17 @@
             </td>
         </tr>
         <tr>
-            <th>Checkin</th>
+            <th>Registro de atendimento</th>
             <td id="CheckinPosition">
-                {{ form.instance.geolocation.first.position|default:"---" }}
+                {% if form.instance.geolocation.first.position %}
+                    Atendimento iniciado em: {{ form.instance.geolocation.first.started_date|localtime }}
+                    (<a href='https://www.google.com/maps/?q={{ form.instance.geolocation.first.position }}' target="_blank">{{ form.instance.geolocation.first.position }}</a>)
+                    {% if form.instance.geolocation.first.finished_date %}
+                        <br>Atendimento finalizado em: {{ form.instance.geolocation.first.finished_date|localtime }}
+                    {% endif %}
+                {% else %}
+                    Registro de atendimento não realizado
+                {% endif %}
             </td>
         </tr>
         </tbody>

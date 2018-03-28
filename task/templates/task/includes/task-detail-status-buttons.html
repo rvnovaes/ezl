@@ -61,14 +61,14 @@
             <a>{{ form.execution_date }}</a>
         </div>
         {% if not form.instance.geolocation.first %}
-            <button type="button" onclick="getLocation()" id="CHECKIN" type="button" data-toggle="" data-target=""
-                    class="text-white btn default">
-                <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> Checkin
+            <button type="button" onclick="getLocation()" id="GEOLOCATION" type="button" data-toggle="" data-target=""
+                    class="text-white btn btn-primary">
+                <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkin</span>
             </button>
-        {% else %}
-            <button type="button" onclick="" id="CHECKOUT" type="button" data-toggle="" data-target=""
-                    class="text-white btn default">
-                <span class="btn-label"><i class="mdi mdi-map-marker-off"></i></span> Checkout
+        {% elif not form.instance.geolocation.first.finished_date %}
+            <button type="button" onclick="checkOut()" id="GEOLOCATION" type="button" data-toggle="" data-target=""
+                    class="text-white btn btn-primary">
+                <span class="btn-label"><i class="mdi mdi-map-marker-off"></i></span> <span id="label_button">Checkout</span>
             </button>
         {% endif %}
         <button type="button" onclick="getId(this)" id="DONE" type="submit" data-toggle="" data-target="#confirmAction"

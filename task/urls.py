@@ -18,8 +18,11 @@ urlpatterns = [
     url(r'^providencias/excluir$', login_required(views.TaskDeleteView.as_view()),
         name='task_delete'),
 
-    url(r'^providencias/geolocation/criar$', login_required(views.GeolocationTaskSave.as_view()),
+    url(r'^providencias/geolocation/criar$', login_required(views.GeolocationTaskCreate.as_view()),
         name='task_geolocation_create'),
+
+    url(r'^providencias/geolocation/finalizar$', login_required(views.GeolocationTaskFinish.as_view()),
+        name='task_geolocation_finish'),
 
     url(r'^ecm/(?P<pk>[0-9]+)/$', login_required(views.EcmCreateView.as_view()), name='ecm_add'),
 

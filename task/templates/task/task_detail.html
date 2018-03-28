@@ -260,15 +260,25 @@
                 type: 'POST',
                 url: '/providencias/providencias/geolocation/criar',
                 data: data,
-                success: function (result, status, xhr) {
-                    if (result.error){
-                        showToast('error', 'Atenção', result.error, 0, false);
+                success: function (result) {
+                    console.log(result);
+                    if (result.ok){
+                        var latitude = parseFloat(result.latitude).toFixed(6)
+                        var longitude = parseFloat(result.longitude).toFixed(6)
+                        $('#CheckinPosition').html("Atendimento iniciado em: "+result.started_date+
+                                                   " (<a href='https://www.google.com/maps/?q="+latitude+","+longitude+"' target="_blank">"+
+                                                   +latitude+","+longitude+"</a>)")
+                        $('#GEOLOCATION').attr("onclick","checkOut()");
+                        $('#GEOLOCATION').find("i").removeClass("mdi-map-marker");
+                        $('#GEOLOCATION').find("i").addClass("mdi-map-marker-off");
+                        $('#label_button').html("Checkout")
+                        $('#locating').modal('hide');
+                    }else{
+                        $('#locating').modal('hide');
+                        showToast('error', 'Atenção', "Localização não registrada", 0, false);
                     }
-                    $('#CheckinPosition').html(result)
-                    $('#locating').modal('hide');
                 },
                 error: function (request, status, error) {
-
                 },
                 beforeSend: function (xhr, settings) {
                     xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
@@ -294,6 +304,34 @@
                     break;
             }
             showToast('error', 'Atenção', msg, 0, false);
+        }
+        </script>
+        <script>
+        function checkOut() {
+            var data = {}
+            data['task_id'] = {{ form.instance.pk }}
+            $.ajax({
+                type: 'POST',
+                url: '/providencias/providencias/geolocation/finalizar',
+                data: data,
+                success: function (result) {
+                    if (result.ok){
+                        $("#CheckinPosition").append("<br>Atendimento finalizado em: "+result.finished_date)
+                        $('#GEOLOCATION').attr("onclick","");
+                        $('#GEOLOCATION').addClass("hide");
+                        $('#locating').modal('hide');
+                    }else{
+                        $('#locating').modal('hide');
+                        showToast('error', 'Atenção', "Atendimento não finalizado", 0, false);
+                    }
+                },
+                error: function (request, status, error) {
+                },
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                },
+                dataType: 'json'
+            })
         }
         </script>
     <script type="text/javascript">

@@ -19,6 +19,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
+from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
@@ -964,26 +965,48 @@ class FilterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
-class GeolocationTaskSave(CustomLoginRequiredView, View):
+class GeolocationTaskCreate(CustomLoginRequiredView, View):
 
     def post(self, request):
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
-        task_pk = request.POST.get('task_pk')
-        task = Task.objects.filter(pk=task_pk).first()
+        started_date = timezone.now()
+        task_id = request.POST.get('task_id')
+        task = Task.objects.filter(pk=task_id).first()
         if task and latitude and longitude:
             taskgeolocation = TaskGeolocation.objects.filter(task=task).first()
             if taskgeolocation:
                 taskgeolocation.latitude = Decimal(latitude)
                 taskgeolocation.longitude = Decimal(longitude)
+                taskgeolocation.started_date = started_date
                 taskgeolocation.alter_user = request.user
                 taskgeolocation.save()
             else:
                 TaskGeolocation.objects.create(latitude=Decimal(latitude),
                                                longitude = Decimal(longitude),
-                                               create_user = request.user
+                                               create_user = request.user,
+                                               started_date = started_date,
+                                               task=task
                                                )
             return JsonResponse({"ok": True,
                                 "latitude": latitude,
-                                "longitude": longitude})
+                                "longitude": longitude,
+                                "started_date": date_format(timezone.localtime(started_date), 'DATETIME_FORMAT')})
+        return JsonResponse({"ok": False})
+
+
+class GeolocationTaskFinish(CustomLoginRequiredView, View):
+
+    def post(self, request):
+        finished_date = timezone.now()
+        task_id = request.POST.get('task_id')
+        task = Task.objects.filter(pk=task_id).first()
+        if task:
+            taskgeolocation = TaskGeolocation.objects.filter(task=task).first()
+            if taskgeolocation:
+                taskgeolocation.finished_date = finished_date
+                taskgeolocation.alter_user = request.user
+                taskgeolocation.save()
+            return JsonResponse({"ok": True,
+                                "finished_date": date_format(timezone.localtime(finished_date), 'DATETIME_FORMAT')})
         return JsonResponse({"ok": False})
