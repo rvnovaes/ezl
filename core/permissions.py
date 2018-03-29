@@ -62,7 +62,7 @@ def create_permission(office):
     from core.models import Office
     content_type = ContentType.objects.get_for_model(Office)
     for group_name, permissions in GROUP_PERMISSIONS.items():
-        group_name = '{}-{}'.format(group_name, office.legal_name)
+        group_name = '{}-{}-{}'.format(group_name, office.id, office.legal_name)
         group, nil = Group.objects.get_or_create(name=group_name)
         group.permissions.clear()
         for codename in permissions:

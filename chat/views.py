@@ -12,7 +12,8 @@ class ChatListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.user.is_superuser:
+        checker = ObjectPermissionChecker(self.request.user)
+        if checker.has_perm('group_admin', get_office_session(self.request)):
             context['chats'] = Chat.objects.all()
         else:
             context['chats'] = Chat.objects.filter(users__user_by_chat=self.request.user).order_by(

@@ -536,7 +536,8 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
         user = User.objects.get(id=self.request.user.id)
-        kw['is_superuser'] = user.is_superuser
+        checker = ObjectPermissionChecker(user)
+        kw['is_admin'] = checker.has_perm('group_admin', get_office_session(self.request))
         return kw
 
     def get_success_url(self):
@@ -758,7 +759,6 @@ class UserCreateView(AuditFormMixin, CreateView):
     def form_valid(self, form):
         form.save(commit=False)
         offices_user = []
-        import pdb; pdb.set_trace()
         if form.is_valid:
             have_group = False
             for office in self.request.user.person.offices.all():

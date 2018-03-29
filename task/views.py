@@ -45,6 +45,7 @@ from core.utils import get_office_session
 from ecm.models import DefaultAttachmentRule, Attachment
 from task.utils import get_task_attachment
 from guardian.core import ObjectPermissionChecker
+from guardian.shortcuts import  get_groups_with_perms
 
 
 class TaskListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -225,23 +226,17 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         self.count_task = len(data) + len(data_error)
 
     def get_data(self, person):
-        dynamic_query = self.get_dynamic_query(person)
+        checker = ObjectPermissionChecker(person.auth_user)
+        dynamic_query = self.get_dynamic_query(person, checker)
         data = []
         data_error = []
+        office_session = get_office_session(self.request)
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
-        if dynamic_query or list(filter(lambda i: i == 'core.view_all_tasks', person.auth_user.get_all_permissions())):
+        if dynamic_query or checker.has_perm('view_all_tasks', office_session):
             # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
-            office_session = get_office_session(self.request)
             if office_session:
                 data = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query)
                 data_error = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query, task_status=TaskStatus.ERROR)
-            # nao mostra as OSs dos status de "erro" e "solicitadas" para pessoas que forem correspondente ou solicitante
-            if person.auth_user.groups.filter(~Q(name__in=['Correspondente', 'Solicitante'])).exists():
-                if office_session:
-                    requested = DashboardViewModel.objects.filter(task_status=TaskStatus.REQUESTED, office_id=office_session.id)
-                    errors = DashboardViewModel.objects.filter(task_status=TaskStatus.ERROR, office_id=office_session.id)
-                    data = data | requested if data else requested
-                    data_error = data_error | errors if data else errors
         return data, data_error, office_session
 
     @staticmethod
@@ -264,8 +259,17 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
 
         return_list = []
         checker = ObjectPermissionChecker(person.auth_user)
+        if office_session:
+            str_admin_group = '{}-{}-{}'.format(Person.ADMINISTRATOR_GROUP, office_session.id, office_session.legal_name)
+            str_correspondent_group = '{}-{}-{}'.format(Person.CORRESPONDENT_GROUP, office_session.id, office_session.legal_name)
+            admin_group = get_groups_with_perms(office_session).filter(name=str_admin_group).first()
+            correspondent_group = get_groups_with_perms(office_session).filter(name=str_correspondent_group).first()
+            total_user_groups = person.auth_user.groups.filter(name__endswith='-{}-{}'.format(office_session.id, office_session.legal_name)).count()
+        else:
+            return []
 
-        if not checker.has_perm('view_delegated_tasks', office_session) or person.auth_user.is_superuser:
+        if not (correspondent_group in person.auth_user.groups.all() and total_user_groups == 1) \
+            or admin_group in person.auth_user.groups.all():
             return_list.append(DashboardErrorStatusTable(error,
                                                          title='Erro no sistema de origem',
                                                          status=TaskStatus.ERROR))
@@ -331,9 +335,8 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
     def get_query_distributed_tasks(person):
         return Q(person_distributed_by=person.id)
 
-    def get_dynamic_query(self, person):
+    def get_dynamic_query(self, person, checker):
         office_session = get_office_session(self.request)
-        checker = ObjectPermissionChecker(person.auth_user)
         if checker.has_perm('view_all_tasks', office_session):
             return self.get_query_all_tasks(person)
         dynamic_query = Q()
@@ -629,9 +632,19 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 finished_dynamic_query = Q()
 
                 if not checker.has_perm('view_all_tasks', office_session):
-                    if checker.has_perm('view_delegated_tasks', office_session):
+                    str_correspondent_group = '{}-{}-{}'.format(Person.CORRESPONDENT_GROUP, office_session.id, office_session.legal_name)
+                    str_requester_group = '{}-{}-{}'.format(Person.REQUESTER_GROUP, office_session.id, office_session.legal_name)
+                    correspondent_group = get_groups_with_perms(office_session).filter(name=str_correspondent_group).first()
+                    requester_group = get_groups_with_perms(office_session).filter(name=str_requester_group).first()
+                    total_user_groups = person.auth_user.groups.filter(name__endswith='-{}-{}'.format(office_session.id, office_session.legal_name)).count()
+                    if (correspondent_group in person.auth_user.groups.all() and total_user_groups == 1):
                         person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-                    elif checker.has_perm('view_requested_tasks', office_session):
+                    if (requester_group in person.auth_user.groups.all() and total_user_groups == 1):
+                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+                    if requester_group in person.auth_user.groups.all() and \
+                        correspondent_group in person.auth_user.groups.all() and \
+                        total_user_groups == 2:
+                        person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
                         person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
                 if data['state']:
@@ -920,7 +933,8 @@ class FilterListView(CustomLoginRequiredView, SingleTableViewMixin):
         :rtype: dict
         """
         context = super(FilterListView, self).get_context_data(**kwargs)
-        if not self.request.user.is_superuser:
+        checker = ObjectPermissionChecker(self.request.user)
+        if not checker.has_perm('group_admin', get_office_session(self.request)):
             context['table'] = self.table_class(context['table'].data.data.filter(create_user=self.request.user))
         RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
