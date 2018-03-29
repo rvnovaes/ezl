@@ -29,9 +29,10 @@ var chatReadMessage = function (chat_id, csrf_token) {
 };
 
 setInterval(function () {
+    var has_groups = $("[badge-id]").length > 0
     $.ajax({
         type: "GET",
-        url: "/chat/count_message/",
+        url: "/chat/count_message/?has_groups=" + has_groups,
         data: {},
         success: function (response) {
             console.log(response.all_messages);
@@ -40,7 +41,9 @@ setInterval(function () {
             } else {
                 $('.chat-badge.badge').text(null)
             }
-            setBadgeItem(response.grouped_messages)
+            if (has_groups){
+                setBadgeItem(response.grouped_messages)
+            }
         },
         dataType: "json"
     });
