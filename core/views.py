@@ -46,6 +46,7 @@ from task.models import Task
 from ecm.forms import AttachmentForm
 from ecm.utils import attachment_form_valid, attachments_multi_delete
 from guardian.core import ObjectPermissionChecker
+from guardian.shortcuts import get_groups_with_perms
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -902,9 +903,9 @@ class OfficeCreateView(AuditFormMixin, CreateView):
         form.instance.create_user = self.request.user
         form.instance.save()
         form.instance.persons.add(form.instance.create_user.person)
-        for group_office in form.instance.office_groups.filter(
-            group__permissions__codename='group_admin'):
-            group_office.group.user_set.add(form.instance.create_user)
+        for group in {group for group, perms in
+                      get_groups_with_perms(form.instance, attach_perms=True).items() if 'group_admin' in perms}:
+            form.instance.create_user.groups.add(group)
         return super().form_valid(form)
 
     def get_success_url(self):

@@ -1,9 +1,10 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.dispatch import receiver, Signal
-from django.db.models.signals import post_init, pre_save, post_save
+from django.db.models.signals import post_init, pre_save, post_save, post_delete
 from core.models import Person, Office
 from core.permissions import create_permission
+from guardian.shortcuts import get_groups_with_perms
 
 
 def create_person(instance, sender, **kwargs):
@@ -29,5 +30,17 @@ models.signals.post_save.connect(create_person, sender=User, dispatch_uid='creat
 
 @receiver(post_save, sender=Office)
 def office_post_save(sender, instance, created, **kwargs):
-    if created:
+    if created or not get_groups_with_perms(instance):
         create_permission(instance)
+    else:
+        for group in get_groups_with_perms(instance):
+            group.name = '{}-{}-{}'.format(group.name.split('-')[0],
+                                           instance.pk,
+                                           instance.legal_name)
+            group.save()
+
+
+@receiver(post_delete, sender=Office)
+def office_post_delete(sender, instance, **kwargs):
+    for group in get_groups_with_perms(instance):
+        group.delete()

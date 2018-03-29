@@ -5,6 +5,9 @@ from django.http import JsonResponse
 from django.views.generic import View
 from django.db.models import Count
 import json
+from core.utils import get_office_session
+from guardian.core import ObjectPermissionChecker
+from guardian.shortcuts import  get_groups_with_perms
 
 
 class ChatListView(ListView):

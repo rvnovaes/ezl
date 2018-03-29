@@ -232,11 +232,15 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         data_error = []
         office_session = get_office_session(self.request)
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
-        if dynamic_query or checker.has_perm('view_all_tasks', office_session):
+        if dynamic_query or checker.has_perm('group_admin', office_session):
             # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
             if office_session:
                 data = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query)
                 data_error = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query, task_status=TaskStatus.ERROR)
+        # nao mostra as OSs dos status de "erro" e "solicitadas" para pessoas que forem correspondente ou solicitante
+        if (checker.has_perm('view_distributed_tasks', office_session) or checker.has_perm('view_all_tasks', office_session)) and office_session:
+            data = data | DashboardViewModel.objects.filter(task_status=TaskStatus.REQUESTED)
+            data_error = data_error | DashboardViewModel.objects.filter(task_status=TaskStatus.ERROR)
         return data, data_error, office_session
 
     @staticmethod
@@ -259,17 +263,10 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
 
         return_list = []
         checker = ObjectPermissionChecker(person.auth_user)
-        if office_session:
-            str_admin_group = '{}-{}-{}'.format(Person.ADMINISTRATOR_GROUP, office_session.id, office_session.legal_name)
-            str_correspondent_group = '{}-{}-{}'.format(Person.CORRESPONDENT_GROUP, office_session.id, office_session.legal_name)
-            admin_group = get_groups_with_perms(office_session).filter(name=str_admin_group).first()
-            correspondent_group = get_groups_with_perms(office_session).filter(name=str_correspondent_group).first()
-            total_user_groups = person.auth_user.groups.filter(name__endswith='-{}-{}'.format(office_session.id, office_session.legal_name)).count()
-        else:
+        if not office_session:
             return []
 
-        if not (correspondent_group in person.auth_user.groups.all() and total_user_groups == 1) \
-            or admin_group in person.auth_user.groups.all():
+        if checker.has_perm('can_access_general_data', office_session) or checker.has_perm('group_admin', office_session):
             return_list.append(DashboardErrorStatusTable(error,
                                                          title='Erro no sistema de origem',
                                                          status=TaskStatus.ERROR))
@@ -631,20 +628,10 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 blocked_payment_dynamic_query = Q()
                 finished_dynamic_query = Q()
 
-                if not checker.has_perm('view_all_tasks', office_session):
-                    str_correspondent_group = '{}-{}-{}'.format(Person.CORRESPONDENT_GROUP, office_session.id, office_session.legal_name)
-                    str_requester_group = '{}-{}-{}'.format(Person.REQUESTER_GROUP, office_session.id, office_session.legal_name)
-                    correspondent_group = get_groups_with_perms(office_session).filter(name=str_correspondent_group).first()
-                    requester_group = get_groups_with_perms(office_session).filter(name=str_requester_group).first()
-                    total_user_groups = person.auth_user.groups.filter(name__endswith='-{}-{}'.format(office_session.id, office_session.legal_name)).count()
-                    if (correspondent_group in person.auth_user.groups.all() and total_user_groups == 1):
+                if not checker.has_perm('can_distribute_tasks', office_session):
+                    if checker.has_perm('view_delegated_tasks', office_session):
                         person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-                    if (requester_group in person.auth_user.groups.all() and total_user_groups == 1):
-                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
-                    if requester_group in person.auth_user.groups.all() and \
-                        correspondent_group in person.auth_user.groups.all() and \
-                        total_user_groups == 2:
-                        person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+                    if checker.has_perm('view_requested_tasks', office_session):
                         person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
                 if data['state']:
