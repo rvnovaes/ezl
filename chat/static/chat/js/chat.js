@@ -47,7 +47,7 @@ setInterval(function () {
         },
         dataType: "json"
     });
-}, 1000);
+}, 3000);
 
 
 var formatDate = function (strDate) {
