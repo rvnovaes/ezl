@@ -89,12 +89,38 @@
         <tr>
             <th>Registro de atendimento</th>
             <td id="CheckinPosition">
-                {% if form.instance.geolocation.first.position %}
-                    Atendimento iniciado em: {{ form.instance.geolocation.first.started_date|localtime }}
-                    (<a href='https://www.google.com/maps/?q={{ form.instance.geolocation.first.position }}' target="_blank">{{ form.instance.geolocation.first.position }}</a>)
-                    {% if form.instance.geolocation.first.finished_date %}
-                        <br>Atendimento finalizado em: {{ form.instance.geolocation.first.finished_date|localtime }}
+                {% if form.instance.geolocation.first %}
+                    Atendimento iniciado em: {{ form.instance.geolocation.all.0.date|localtime }}
+                    ({{ form.instance.geolocation.all.0.position }})
+                    {% if form.instance.geolocation.all.1 %}
+                        <br>Atendimento finalizado em: {{ form.instance.geolocation.all.1.date|localtime }}
+                        ({{ form.instance.geolocation.all.1.position }})
                     {% endif %}
+                    <div class="panel panel-default">
+                        <a href="#" data-perform="panel-collapse">Ver mapa</a>
+                        <div class="panel-wrapper collapse" aria-expanded="false">
+                            <div id="map" style="height: 400px;width: 100%;"></div>
+                            <!-- Replace the value of the key parameter with your own API key. -->
+                            <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC0hD-M4jbVAjy6j7K-2dJyUg9GycS0g48&callback=initMap"> </script>
+                            <script>
+                                function initMap() {
+                                    var latitude = "{{ form.instance.geolocation.all.0.latitude }}";
+                                    var longitude = "{{ form.instance.geolocation.all.0.longitude }}";
+                                    var center = {lat: parseFloat(latitude.replace(',','.')), lng: parseFloat(longitude.replace(',','.'))};
+                                    var map = new google.maps.Map(document.getElementById('map'), {
+                                        zoom: 16, center: center });
+                                    {% for marker in form.instance.geolocation.all %}
+                                        latitude = "{{ marker.latitude }}";
+                                        longitude = "{{ marker.longitude }}";
+                                        var {{ marker.checkpointtype }}{{ marker.id }} = {lat: parseFloat(latitude.replace(',','.')), lng: parseFloat(longitude.replace(',','.'))};
+                                        var marker = new google.maps.Marker({ position: {{ marker.checkpointtype }}{{ marker.id }},
+                                                                              title: "{{ marker.checkpointtype }}",
+                                                                              map: map });
+                                    {% endfor %}
+                                }
+                            </script>
+                        </div>
+                    </div>
                 {% else %}
                     Registro de atendimento não realizado
                 {% endif %}

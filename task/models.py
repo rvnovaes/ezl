@@ -118,6 +118,18 @@ class SurveyType(Enum):
         return [(x.value, x.name) for x in cls]
 
 
+class CheckPointType(Enum):
+    CHECKIN = 'Checkin'
+    CHECKOUT = 'Checkout'
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        return [(x.value, x.name) for x in cls]
+
+
 class TypeTask(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, null=False, blank=False,
                             verbose_name='Tipo de Serviço')
@@ -343,8 +355,10 @@ class TaskHistory(AuditCreate):
 class TaskGeolocation(Audit):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, blank=False, null=False,
                             related_name='geolocation')
-    started_date = models.DateTimeField(null=True, verbose_name='Data de Início')
-    finished_date = models.DateTimeField(null=True, verbose_name='Data de Finalização')
+    date = models.DateTimeField(null=True, verbose_name='Data de Início')
+    checkpointtype = models.CharField(null=True, verbose_name='Tipo de Marcação', max_length=10,
+                                      choices=((x.value, x.name.title()) for x in CheckPointType),
+                                      default=CheckPointType.CHECKIN)
     latitude = models.DecimalField(null=True, blank=True, verbose_name='Latitude',
                                    max_digits=9, decimal_places=6)
     longitude = models.DecimalField(null=True, blank=True, verbose_name='Longitude',

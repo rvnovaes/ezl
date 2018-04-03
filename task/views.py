@@ -970,28 +970,30 @@ class GeolocationTaskCreate(CustomLoginRequiredView, View):
     def post(self, request):
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
-        started_date = timezone.now()
+        checkpointtype = request.POST.get('checkpointtype')
         task_id = request.POST.get('task_id')
+        check_date = timezone.now()
         task = Task.objects.filter(pk=task_id).first()
         if task and latitude and longitude:
-            taskgeolocation = TaskGeolocation.objects.filter(task=task).first()
+            taskgeolocation = TaskGeolocation.objects.filter(task=task, checkpointtype=checkpointtype).first()
             if taskgeolocation:
                 taskgeolocation.latitude = Decimal(latitude)
                 taskgeolocation.longitude = Decimal(longitude)
-                taskgeolocation.started_date = started_date
+                taskgeolocation.date = check_date
                 taskgeolocation.alter_user = request.user
                 taskgeolocation.save()
             else:
                 TaskGeolocation.objects.create(latitude=Decimal(latitude),
-                                               longitude = Decimal(longitude),
-                                               create_user = request.user,
-                                               started_date = started_date,
+                                               longitude=Decimal(longitude),
+                                               create_user=request.user,
+                                               date=check_date,
+                                               checkpointtype=checkpointtype,
                                                task=task
                                                )
             return JsonResponse({"ok": True,
                                 "latitude": latitude,
                                 "longitude": longitude,
-                                "started_date": date_format(timezone.localtime(started_date), 'DATETIME_FORMAT')})
+                                "check_date": date_format(timezone.localtime(check_date), 'DATETIME_FORMAT')})
         return JsonResponse({"ok": False})
 
 

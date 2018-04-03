@@ -247,31 +247,25 @@
                 $('#locating').modal('show');
                 navigator.geolocation.getCurrentPosition(showPosition, showError);
             } else {
-                console.log("Geolocation is not supported by this browser.");
+                console.log("Geolocalização não é suportada pelo browser.");
             }
         }
         function showPosition(position) {
-            console.log(position.coords.latitude +"," + position.coords.longitude);
-            var data = {}
-            data['latitude'] = position.coords.latitude
-            data['longitude'] = position.coords.longitude
-            data['task_id'] = {{ form.instance.pk }}
+            var data = {};
+            var checkpointtype = $('#GEOLOCATION').data("checkpointtype");
+            data['latitude'] = position.coords.latitude;
+            data['longitude'] = position.coords.longitude;
+            data['task_id'] = {{ form.instance.pk }};
+            data['checkpointtype'] = checkpointtype;
+            var url = $('#GEOLOCATION').data("url");
             $.ajax({
                 type: 'POST',
-                url: '/providencias/providencias/geolocation/criar',
+                url: url,
                 data: data,
                 success: function (result) {
                     console.log(result);
                     if (result.ok){
-                        var latitude = parseFloat(result.latitude).toFixed(6)
-                        var longitude = parseFloat(result.longitude).toFixed(6)
-                        $('#CheckinPosition').html("Atendimento iniciado em: "+result.started_date+
-                                                   " (<a href='https://www.google.com/maps/?q="+latitude+","+longitude+"' target="_blank">"+
-                                                   +latitude+","+longitude+"</a>)")
-                        $('#GEOLOCATION').attr("onclick","checkOut()");
-                        $('#GEOLOCATION').find("i").removeClass("mdi-map-marker");
-                        $('#GEOLOCATION').find("i").addClass("mdi-map-marker-off");
-                        $('#label_button').html("Checkout")
+                        location.reload();
                         $('#locating').modal('hide');
                     }else{
                         $('#locating').modal('hide');
@@ -291,47 +285,19 @@
             var msg = ''
             switch(error.code) {
                 case error.PERMISSION_DENIED:
-                    msg = "User denied the request for Geolocation."
+                    msg = "O usuário negou o acesso à Geolocalização.";
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    msg = "Location information is unavailable.";
+                    msg = "Informação de localização não disponível.";
                     break;
                 case error.TIMEOUT:
-                    msg = "The request to get user location timed out.";
+                    msg = "Tempo limite atingido para o pedido de localização.";
                     break;
                 case error.UNKNOWN_ERROR:
-                    msg = "An unknown error occurred.";
+                    msg = "Ocorreu um erro desconhecido.";
                     break;
             }
             showToast('error', 'Atenção', msg, 0, false);
-        }
-        </script>
-        <script>
-        function checkOut() {
-            var data = {}
-            data['task_id'] = {{ form.instance.pk }}
-            $.ajax({
-                type: 'POST',
-                url: '/providencias/providencias/geolocation/finalizar',
-                data: data,
-                success: function (result) {
-                    if (result.ok){
-                        $("#CheckinPosition").append("<br>Atendimento finalizado em: "+result.finished_date)
-                        $('#GEOLOCATION').attr("onclick","");
-                        $('#GEOLOCATION').addClass("hide");
-                        $('#locating').modal('hide');
-                    }else{
-                        $('#locating').modal('hide');
-                        showToast('error', 'Atenção', "Atendimento não finalizado", 0, false);
-                    }
-                },
-                error: function (request, status, error) {
-                },
-                beforeSend: function (xhr, settings) {
-                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
-                },
-                dataType: 'json'
-            })
         }
         </script>
     <script type="text/javascript">

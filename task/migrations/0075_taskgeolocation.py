@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
+import task.models
 
 
 class Migration(migrations.Migration):
@@ -22,13 +23,13 @@ class Migration(migrations.Migration):
                 ('create_date', models.DateTimeField(auto_now_add=True, verbose_name='Criado em')),
                 ('alter_date', models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em')),
                 ('is_active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('started_date', models.DateTimeField(null=True, verbose_name='Data de Início')),
-                ('finished_date', models.DateTimeField(null=True, verbose_name='Data de Finalização')),
+                ('date', models.DateTimeField(null=True, verbose_name='Data de Início')),
                 ('latitude', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True, verbose_name='Latitude')),
                 ('longitude', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True, verbose_name='Longitude')),
                 ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='taskgeolocation_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por')),
                 ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='taskgeolocation_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por')),
                 ('task', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='geolocation', to='task.Task')),
+                ('checkpointtype', models.CharField(choices=[('Checkin', 'Checkin'), ('Checkout', 'Checkout')], default=task.models.CheckPointType('Checkin'), max_length=10, null=True, verbose_name='Tipo de Marcação')),
             ],
             options={
                 'verbose_name': 'Geolocalização da Providência',
