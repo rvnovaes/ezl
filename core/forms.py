@@ -257,9 +257,9 @@ class PersonForm(BaseModelForm):
         return cleaned_data
 
     def __init__(self, *args, **kwargs):
-        is_superuser = kwargs.pop('is_superuser', None)
+        is_admin = kwargs.pop('is_admin', None)
         super().__init__(*args, **kwargs)
-        if is_superuser:
+        if is_admin:
             self.layout = Layout(
                 Row('legal_name', 'name'),
                 Row('legal_type', 'cpf_cnpj'),

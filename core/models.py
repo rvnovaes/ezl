@@ -236,6 +236,31 @@ class AbstractPerson(Audit, LegacyCode):
     def get_address(self):
         return self.address_set.exclude(id=1)
 
+    @property
+    def is_admin(self):
+        return True if self.auth_user.groups.filter(name=self.ADMINISTRATOR_GROUP).first() \
+            else False
+
+    @property
+    def is_correspondent(self):
+        return True if self.auth_user.groups.filter(name=self.CORRESPONDENT_GROUP).first() \
+            else False
+
+    @property
+    def is_requester(self):
+        return True if self.auth_user.groups.filter(name=self.REQUESTER_GROUP).first() \
+            else False
+
+    @property
+    def is_service(self):
+        return True if self.auth_user.groups.filter(name=self.SERVICE_GROUP).first() \
+            else False
+
+    @property
+    def is_supervisor(self):
+        return True if self.auth_user.groups.filter(name=self.SUPERVISOR_GROUP).first() \
+            else False
+
     class Meta:
         abstract = True
 

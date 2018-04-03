@@ -41,10 +41,7 @@ class LawsuitETL(GenericETL):
                             THEN
                               p.Varas
                           ELSE d.D_Vara END                        AS court_division_legacy_code,
-                          CASE WHEN (rtrim(ltrim(d.D_NumPrc)) LIKE '') OR (d.D_NumPrc IS NULL)
-                            THEN
-                              p.NumPrc1
-                          ELSE d.D_NumPrc END                      AS law_suit_number
+                          d.D_NumPrc                               AS law_suit_number
                     FROM Jurid_Pastas AS p
                           LEFT JOIN Jurid_Distribuicao AS d ON
                                                               p.Codigo_Comp = d.Codigo_Comp
@@ -58,12 +55,11 @@ class LawsuitETL(GenericETL):
                           (p.Status = 'Ativa' OR p.Status = 'Especial') AND
                           cm.UsarOS = 1 AND
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
-                          a.SubStatus = 10 AND
+                          (a.SubStatus = 10 OR a.SubStatus = 11) AND
                           p.Cliente IN ('{cliente}') AND
-                          a.Status = '0' -- STATUS ATIVO
+                          a.Status = '0' AND -- STATUS ATIVO
+                          p.Unidade IN ('11') -- Unidade BH-Centro
                           AND
-                          ((p.NumPrc1 IS NOT NULL AND p.NumPrc1 <> '') OR
-                           (d.D_NumPrc IS NOT NULL AND d.D_NumPrc <> '')) AND
                           ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
                            (d.Codigo_Comp IS NOT NULL AND d.Codigo_Comp <> '')) AND
                           ((p.Instancia IS NOT NULL AND p.Instancia <> '') OR
@@ -131,7 +127,8 @@ class LawsuitETL(GenericETL):
                     lawsuit.court_district = court_district
                     lawsuit.court_division = court_division
                     lawsuit.organ = organ
-                    lawsuit.law_suit_number = law_suit_number
+                    if law_suit_number:
+                        lawsuit.law_suit_number = law_suit_number
                     lawsuit.is_active = True
                     lawsuit.opposing_party = opposing_party
                     lawsuit.office = default_office
@@ -185,6 +182,7 @@ class LawsuitETL(GenericETL):
                                               rows_count, e, self.timestr)
                 self.error_logger.error(msg)
                 save_error_log(log, user, msg)
+
 
 if __name__ == "__main__":
     LawsuitETL().import_data()

@@ -538,7 +538,7 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
         user = User.objects.get(id=self.request.user.id)
-        kw['is_superuser'] = user.is_superuser
+        kw['is_admin'] = user.person.is_admin
         return kw
 
     def get_success_url(self):
