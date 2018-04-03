@@ -43,7 +43,7 @@ from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable
 from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
-from task.models import Task
+from task.models import Task, TaskStatus
 from ecm.forms import AttachmentForm
 from ecm.utils import attachment_form_valid, attachments_multi_delete
 
@@ -1272,12 +1272,22 @@ class OfficeMembershipInactiveView(UpdateView):
 
             try:
                 for record in self.model.objects.filter(pk__in=pks):
-                    record.is_active = False
-                    record.save()
-                    try:
-                        DefaultOffice.objects.filter(auth_user=record.person.auth_user, office=record.office).delete()
-                    except:
-                        pass
+                    if not Task.objects.filter(~Q(Q(task_status=TaskStatus.FINISHED) |
+                                                  Q(task_status=TaskStatus.REFUSED) |
+                                                  Q(task_status=TaskStatus.REFUSED_SERVICE) |
+                                                  Q(task_status=TaskStatus.BLOCKEDPAYMENT)),
+                                               Q(Q(person_asked_by=record.person) |
+                                                 Q(person_executed_by=record.person) |
+                                                 Q(person_distributed_by=record.person))):
+                        record.is_active = False
+                        record.save()
+                        try:
+                            DefaultOffice.objects.filter(auth_user=record.person.auth_user, office=record.office).delete()
+                        except:
+                            pass
+                    else:
+                        messages.error(self.request, "O usuário {} não pode ser desvinculado do escritório, uma vez que"
+                                                     " ainda existem OS a serem cumpridas por ele".format(record.person))
                 messages.success(self.request, self.success_message)
             except ProtectedError as e:
                 qs = e.protected_objects.first()
