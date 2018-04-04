@@ -36,6 +36,12 @@ def teste():
 
 
 @task
+def demo():
+    env.hosts = env.roledefs["teste"]["hosts"]
+    env["NAME"] = "demo"
+
+
+@task
 def psql(revision=None, rsync=False):
     with cd(get_repo_path()):
         run("make psql")
@@ -43,12 +49,19 @@ def psql(revision=None, rsync=False):
 
 @task
 def deploy(revision=None, rsync=False):
+    print("{} Deploy em {} {}".format("=" * 40, env["NAME"], "=" *40))
+    confirm = raw_input(
+        "Tem certeza que deseja fazer deploy do branch '{}' no ambiente '{}'? (S/N)".format(revision, env["NAME"]))
+    if confirm.strip().lower() != "s":
+        return
+
     setup_ssh()
     if rsync:
         rsync_repo()
     else:
         update_repo(revision)
     with cd(get_repo_path()):
+        run("make set_env_{}".format(env["NAME"]))
         run("make deploy")
 
 

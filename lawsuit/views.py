@@ -503,6 +503,7 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, CustomLoginRequiredView, Ge
         :param kwargs:
         :return: super
         """
+        self.success_url = reverse('folder_update', kwargs={'pk': self.kwargs['folder']})
         if cache.get('lawsuit_movement_page'):
             self.success_url = cache.get('lawsuit_movement_page')
         return super(LawsuitMovementUpdateView, self).post(request, *args, **kwargs)
@@ -576,7 +577,7 @@ class MovementDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
     def post(self, request, *args, **kwargs):
-        self.success_url = urlparse(request.environ.get('HTTP_REFERER')).path
+        self.success_url = urlparse(request.META.get('HTTP_REFERER')).path
         return super(MovementDeleteView, self).post(request, *args, **kwargs)
 
 
@@ -730,7 +731,7 @@ class FolderAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params):
         data = []
-        for folder in Folder.objects.filter(Q(person_customer__name__unaccent__istartswith=q) |
+        for folder in Folder.objects.filter(Q(person_customer__legal_name__unaccent__istartswith=q) |
                                             Q(folder_number__startswith=q)):
             data.append({'id': folder.id, 'data-value-txt': folder.__str__()})
         return list(data)

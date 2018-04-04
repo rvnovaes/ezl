@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import migrations, models
 from django.utils import timezone
 import django.db.models.deletion
+import core.models
 
 
 def remove_persons_from_office(apps, schema_editor):
@@ -94,4 +95,41 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.Person'),
         ),
         migrations.RunPython(populate_office_persons),
+        migrations.AddField(
+            model_name='invite',
+            name='email',
+            field=models.EmailField(blank=True, max_length=255, null=True, verbose_name='E-mail'),
+        ),
+        migrations.AddField(
+            model_name='invite',
+            name='invite_code',
+            field=models.CharField(blank=True, max_length=50, null=True, unique=True,
+                                   verbose_name='Código do convite'),
+        ),
+        migrations.AlterField(
+            model_name='invite',
+            name='person',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
+                                    related_name='invites', to='core.Person', verbose_name='Pessoa'),
+        ),
+        migrations.AlterField(
+            model_name='invite',
+            name='status',
+            field=models.CharField(
+                choices=[('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'), ('E', 'EXTERNAL')], default='N',
+                max_length=1, verbose_name='Status'),
+        ),
+        migrations.AlterField(
+            model_name='inviteoffice',
+            name='status',
+            field=models.CharField(
+                choices=[('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'), ('E', 'EXTERNAL')], default='N',
+                max_length=1, verbose_name='Status'),
+        ),
+        migrations.AlterField(
+            model_name='invite',
+            name='invite_code',
+            field=models.CharField(blank=True, default=core.models._create_hash, max_length=50, null=True, unique=True,
+                                   verbose_name='Código do convite'),
+        ),
     ]

@@ -11,7 +11,7 @@ from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from core.views import CustomLoginRequiredView
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
@@ -191,7 +191,7 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteVi
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
     def post(self, request, *args, **kwargs):
-        self.success_url = urlparse(request.environ.get('HTTP_REFERER')).path
+        self.success_url = urlparse(request.META.get('HTTP_REFERER')).path
         return super(TaskDeleteView, self).post(request, *args, **kwargs)
 
 
@@ -228,7 +228,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         data = []
         data_error = []
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
-        if dynamic_query or list(filter(lambda i: i == 'core.view_all_tasks', person.auth_user.get_all_permissions())):
+        if dynamic_query or person.is_admin:
             # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
             office_session = get_office_session(self.request)
             if office_session:
@@ -263,7 +263,9 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
 
         return_list = []
 
-        if not person.auth_user.has_perm('core.view_delegated_tasks') or person.auth_user.is_superuser:
+        if not (person.auth_user.groups.count() == 1 and
+            person.auth_user.groups.filter(name=Person.CORRESPONDENT_GROUP)) \
+            or person.auth_user.groups.filter(name=Person.ADMINISTRATOR_GROUP):
             return_list.append(DashboardErrorStatusTable(error,
                                                          title='Erro no sistema de origem',
                                                          status=TaskStatus.ERROR))
@@ -330,7 +332,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         return Q(person_distributed_by=person.id)
 
     def get_dynamic_query(self, person):
-        if list(filter(lambda i: i == 'core.view_all_tasks', person.auth_user.get_all_permissions())):
+        if person.is_admin:
             return self.get_query_all_tasks(person)
         dynamic_query = Q()
         permissions_to_check = {
@@ -427,12 +429,18 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         return context
 
     def create_user_by_chat(self, task, fields):
+        users = []
         for field in fields:
-            if getattr(task, field) and getattr(task, field).auth_user:
-                user = getattr(task, field).auth_user
-                UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
+            user = None
+            if getattr(task, field):
+                user = getattr(getattr(task, field), 'auth_user')
+            if user:
+                user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
                     'create_user': user, 'user_by_chat': user, 'chat': task.chat
                 })
+                user = user.user_by_chat
+            users.append(user)
+        UserByChat.objects.filter(~Q(user_by_chat__in=users), chat=task.chat).update(is_active=False)
 
     @staticmethod
     def delegate_child_task(object_parent, office_correspondent):
@@ -622,11 +630,13 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 blocked_payment_dynamic_query = Q()
                 finished_dynamic_query = Q()
 
-                if not self.request.user.has_perm('core.view_all_tasks'):
-                    if self.request.user.has_perm('core.view_delegated_tasks'):
-                        person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-                    elif self.request.user.has_perm('core.view_requested_tasks'):
-                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+            if not self.request.user.has_perm('core.view_all_tasks'):
+                if person.auth_user.groups.count() == 1 and \
+                    person.auth_user.groups.filter(name=Person.CORRESPONDENT_GROUP):
+                    person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+                elif person.auth_user.groups.count() == 1 and \
+                    person.auth_user.groups.filter(name=Person.REQUESTER_GROUP):
+                    person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
                 if data['state']:
                     task_dynamic_query.add(Q(movement__law_suit__court_district__state=data['state']), Q.AND)
@@ -853,25 +863,49 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
 @login_required
 def ajax_get_task_data_table(request):
     status = request.GET.get('status')
-    query = DashboardViewModel.objects.filter(task_status=status, office=get_office_session(request))
     xdata = []
-    xdata.append(
-        list(
-            map(lambda x: [
-                x.pk,
-                x.task_number,
-                x.final_deadline_date.strftime('%d/%m/%Y %H:%M') if x.final_deadline_date else '',
-                x.type_service,
-                x.lawsuit_number,
-                x.client,
-                x.opposing_party,
-                x.delegation_date.strftime('%d/%m/%Y %H:%M') if x.delegation_date else '',
-                x.legacy_code,
-                'Movimentação sem processo',
-                'Preencher o processo na movimentação',
-            ], query)
+    if status == str(TaskStatus.ERROR):
+        query = InconsistencyETL.objects.filter(is_active=True, office=get_office_session(request))
+        xdata.append(
+            list(
+                map(lambda x: [
+                    x.pk,
+                    x.task.task_number,
+                    x.task.final_deadline_date.strftime('%d/%m/%Y %H:%M') if x.task.final_deadline_date else '',
+                    x.task.type_task.name,
+                    x.task.lawsuit_number,
+                    x.task.court_district.name,
+                    x.task.court_district.state.initials,
+                    x.task.client.name,
+                    x.task.opposing_party,
+                    x.task.delegation_date.strftime('%d/%m/%Y %H:%M') if x.task.delegation_date else '',
+                    x.task.legacy_code,
+                    x.inconsistency,
+                    x.solution,
+                ], query)
+            )
         )
-    )
+    else:
+        query = DashboardViewModel.objects.filter(task_status=status, office=get_office_session(request))
+        xdata.append(
+            list(
+                map(lambda x: [
+                    x.pk,
+                    x.task_number,
+                    x.final_deadline_date.strftime('%d/%m/%Y %H:%M') if x.final_deadline_date else '',
+                    x.type_service,
+                    x.lawsuit_number,
+                    x.court_district.name,
+                    x.court_district.state.initials,
+                    x.client,
+                    x.opposing_party,
+                    x.delegation_date.strftime('%d/%m/%Y %H:%M') if x.delegation_date else '',
+                    x.legacy_code,
+                    '',
+                    '',
+                ], query)
+            )
+        )
 
 
     data = {

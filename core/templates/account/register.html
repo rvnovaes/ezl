@@ -186,6 +186,9 @@
     <div class="login-box login-sidebar">
         <div class="white-box">
             <form class="form-horizontal form-material" id="loginform" action="{% url 'register_user' %}" method="POST">{% csrf_token %}
+                {% if invite_code %}
+                    <input class="form-control" required="" placeholder="Invite Code" type="hidden" name="invite_code" value="{{ invite_code }}">
+                {% endif %}
                 <a href="javascript:void(0)" class="text-center db"><img
                         src="{% static 'img/logo_ezl.png'%}" alt="Home" width="80%"><br><img
                         src="{% static 'img/logo.png' %}" alt="Home" width="20%" style="padding: 5px"></a>
@@ -203,7 +206,10 @@
                 </div>
                 <div class="form-group ">
                     <div class="col-xs-12">
-                        <input class="form-control" required="" placeholder="E-mail" type="text" name="email">
+                        <input class="form-control" required="" placeholder="E-mail" type="text" name="email"
+                        {% if email %}
+                            value="{{ email }}"
+                        {% endif %}>
                     </div>
                 </div>
                 <div class="form-group ">

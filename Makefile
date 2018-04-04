@@ -45,12 +45,6 @@ run: check_compose_override
 restart:
 	docker-compose restart web nginx luigi tasks
 
-reset_db:
-	docker-compose stop
-	docker-compose up -d db
-	docker-compose run db bash -c "PGPASSWORD=ezl dropdb -hdb -Uezl ezl"
-	docker-compose run db bash -c "PGPASSWORD=ezl createdb -hdb -Uezl ezl"
-
 set_env_development:
 	@rm docker-compose.override.yml || true
 	ln -s docker-compose.development.yml docker-compose.override.yml
@@ -62,6 +56,13 @@ set_env_production:
 set_env_teste:
 	@rm docker-compose.override.yml || true
 	ln -s docker-compose.teste.yml docker-compose.override.yml
+
+set_env_demo:
+	@rm docker-compose.override.yml || true
+	cp docker-compose.teste.yml docker-compose.demo.yml
+	sed -i -e 's/teste\.ezlawyer\.com\.br/demo\.ezlawyer\.com\.br/g' docker-compose.demo.yml
+	sed -i -e 's/ezl-teste/ezl-demo/g' docker-compose.demo.yml
+	ln -s docker-compose.demo.yml docker-compose.override.yml
 
 shell:
 	docker-compose run web bash

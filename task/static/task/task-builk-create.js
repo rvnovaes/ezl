@@ -61,6 +61,7 @@ TaskForm = (function($){
                 choices.push('<option value="' + item.id + '">' + item.law_suit_number + ' - ' + item.person_lawyer.name + '</option>');
             });
             self.$lawsuit.html(choices.join(''));
+            self.$lawsuit.selectpicker('refresh')
 
             if (typeof(callback) == "function"){
                 callback();
@@ -86,6 +87,7 @@ TaskForm = (function($){
                 choices.push('<option value="' + item.id + '">' + item.type_movement_name + '</option>');
             });
             self.$movement.html(choices.join(''));
+            self.$movement.selectpicker('refresh')
 
             if (typeof(callback) == "function"){
                 callback();
@@ -146,10 +148,18 @@ TaskForm = (function($){
 
     TaskForm.prototype.disableAdd = function(field){
         self['$btn_add_' + field].addClass('disabled-btn');
+        if(field == 'lawsuit' || field == 'movement'){
+            self['$' + field].prop('disabled', true);
+            self['$' + field].selectpicker('refresh');
+        }
     };
 
     TaskForm.prototype.enableAdd = function(field){
         self['$btn_add_' + field].removeClass('disabled-btn');
+        if(field == 'lawsuit' || field == 'movement'){
+            self['$' + field].prop('disabled', false);
+            self['$' + field].selectpicker('refresh');
+        }
     };
 
     TaskForm.prototype.clearTaskList = function(){
@@ -210,12 +220,14 @@ TaskForm = (function($){
         var $el = self["$" + field];
         if ($el.prop('tagName').toLowerCase() == "select"){
             addOption($el, decodeURI(label), value);
+            $el.val(value);
+            $el.value = value;
         } else {
-            $('#select2-id_'+ field +'-container').append(decodeURI(label));
-            $('.select2-selection__placeholder').text('');
+            $('#id_folder').attr('data-value', value);
+            $('#id_folder').attr('data-value-txt', decodeURI(label));
+            $('#id_folder').attr('value', value);
+            $('#id_folder').val(decodeURI(label));
         }
-        $el.val(value);
-        $el.value = value;
         self.fieldWasChanged(field, value);
         if (field == 'lawsuit' || field == 'folder') {
             self.$movement.html('');
@@ -224,6 +236,9 @@ TaskForm = (function($){
         if (field == 'folder') {
             self.$lawsuit.html('');
             addOption(self.$lawsuit, "Sem registros", "");
+        }
+        if ($el.hasClass('selectpicker')){
+            $el.selectpicker('refresh')
         }
         $("html, body").animate({ scrollTop: 0 }, "slow");
     };
@@ -238,9 +253,10 @@ TaskForm = (function($){
 
     TaskForm.prototype.fillForm = function(params){
         if (params.folder != undefined && params.folderLabel != undefined){
-            $('#select2-id_folder-container').append(decodeURI(params.folderLabel));
-            $('.select2-selection__placeholder').text('');
-            self.$folder.value = params.folder;
+            $('#id_folder').attr('data-value', decodeURI(params.folder))
+            $('#id_folder').attr('data-value-txt', decodeURI(params.folderLabel))
+            $('#id_folder').attr('value', decodeURI(params.folder))
+            $('#id_folder').val(decodeURI(params.folderLabel))
             self.enableAdd('lawsuit');
             self.$btn_add_lawsuit.removeClass('disabled-btn');
         }
@@ -250,7 +266,9 @@ TaskForm = (function($){
             self.eventChangeLawsuit(params.lawsuit, function(){
                 self.$movement.val(params.movement);
                 self.eventChangeMovement(params.movement);
+                self.$movement.selectpicker('refresh')
             });
+            self.$lawsuit.selectpicker('refresh')
         });
     };
 

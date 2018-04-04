@@ -163,7 +163,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                   verbose_name='Tipo de Serviço')
     delegation_date = models.DateTimeField(null=True, default=timezone.now, blank=True, verbose_name='Data de Delegação')
     acceptance_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação')
-    final_deadline_date = models.DateTimeField(null=False, blank=False, default=timezone.now, verbose_name='Prazo')
+    final_deadline_date = models.DateTimeField(null=False, blank=False, default=timezone.now, verbose_name='Prazo Fatal')
     execution_date = models.DateTimeField(null=True, verbose_name='Data de Cumprimento')
 
     requested_date = models.DateTimeField(null=True, verbose_name='Data de Solicitação')

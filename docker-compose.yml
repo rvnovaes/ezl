@@ -9,6 +9,11 @@ volumes:
   letsencrypt-etc:
   ezl-logs:
 
+networks:
+  gateway:
+    external:
+      name: traefik_webgateway
+
 services:
   web:
     image: ezl:latest
@@ -18,6 +23,7 @@ services:
       - web-media:/app/media
       - ezl-logs:/var/log/ezl
       - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas
     logging:
       driver: "json-file"
       options:
@@ -27,8 +33,6 @@ services:
     volumes:
       - .:/app
       - ezl-logs:/var/log/ezl
-    ports:
-      - '8002:8002'
     command: daphne -b 0.0.0.0 -p 8002 --ws-protocol "graphql-ws" --proxy-headers ezl.asgi:channel_layer
   ws-worker:
     image: ezl:latest
@@ -49,8 +53,6 @@ services:
       driver: "json-file"
       options:
         max-size: "100m"
-    ports:
-      - "8082:8082"
     depends_on:
       - builder
       - db
@@ -72,6 +74,10 @@ services:
 
   nginx:
     image: nginx:1.13
+    labels:
+      - "traefik.backend=ezl"
+      - "traefik.frontend.rule=Host:ezl.local"
+      - "traefik.docker.network=traefik_webgateway"
     volumes:
       - ./containers/nginx/conf.d/ezl.conf:/etc/nginx/conf.d/default.conf
       - web-static:/usr/share/nginx/html/static
@@ -79,8 +85,12 @@ services:
       - letsencrypt-www:/usr/share/nginx/html/certbot
       - letsencrypt-etc:/etc/letsencrypt
       - /mnt/windows_ecm/Agenda:/usr/share/nginx/html/media/ECM
+      - /mnt/windows_ecm/Pastas:/usr/share/nginx/html/media/ECM/Pastas
     depends_on:
       - web
+    networks:
+      - gateway
+      - default
 
   db:
     image: postgres:9.6
@@ -88,8 +98,6 @@ services:
       POSTGRES_DB: ezl
       POSTGRES_USER: ezl
       POSTGRES_PASSWORD: ezl
-    ports:
-      - "127.0.0.1:57002:5432"
     volumes:
       - "db-data:/var/lib/postgresql/data"
       - "./containers/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
@@ -98,20 +106,10 @@ services:
       options:
         max-size: "100m"
 
-  pgweb:
-    build:
-      context: .
-      dockerfile: containers/pgweb/Dockerfile
-    command: pgweb --url postgres://ezl:ezl@db:5432/ezl?sslmode=disable --bind 0.0.0.0 --auth-user=admin --auth-pass=dev@2016
-    ports:
-    - "9002:8081"
-
   redis:
     image: redis:4.0.6
     volumes:
       - ".containers/redis/redis.conf:/etc/redis/redis.conf"
-    ports:
-      - "6379:6379"
 
 #  db_advwin:
 #    image: microsoft/mssql-server-linux:2017-latest

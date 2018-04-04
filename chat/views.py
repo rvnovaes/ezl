@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.views.generic import View
 from django.db.models import Count
 import json
+from core.models import Person
 
 
 class ChatListView(ListView):
@@ -12,10 +13,10 @@ class ChatListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.user.is_superuser:
+        if self.request.user.person.is_admin:
             context['chats'] = Chat.objects.all()
         else:
-            context['chats'] = Chat.objects.filter(users__user_by_chat=self.request.user).order_by(
+            context['chats'] = Chat.objects.filter(users__user_by_chat=self.request.user, users__is_active=True).order_by(
                 'pk').distinct('pk')
         return context
 

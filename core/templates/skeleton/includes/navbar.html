@@ -52,20 +52,21 @@
                         </ul>
                         <!-- /.dropdown-messages -->
                     </li>
-                    <li class="open">
+                    <li class="open" data-toggle="tooltip" data-original-title="Criar OS" data-placement="bottom">
                         <a href="{% url 'task_add' %}" class="waves-effect waves-lightact create-os-active">
-                            <i class="mdi mdi-plus-circle-outline"></i> Criar OS
+                            <i class="mdi mdi-plus-circle-outline"></i><span class="hidden-sm hidden-xs"> Criar OS</span>
                         </a>
                     </li>
                 </ul>
                 <ul class="nav navbar-top-links navbar-right pull-right">
-                    <li>
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
                           aria-haspopup="true" aria-expanded="false">
-                          <span id="current_office"></span>
-                          <span class="caret"></span>
+                            <i class="fa fa-building-o">&nbsp;</i>
+                            <span id="current_office" class="hidden-sm hidden-xs"></span>
+                            <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-right animated flipInY">
                         {% for office in request.user.person.offices.active_offices %}
                            <li onclick="updateSession('current_office', '{{office.pk}}', '{{csrf_token}}');"><a href="#">{{office.legal_name}}</a></li>
                         {% endfor %}
@@ -77,7 +78,7 @@
                             <b class="hidden-xs">{{ request.user }}</b>
                             <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu dropdown-user animated flipInY">
+                        <ul class="dropdown-menu dropdown-user animated flipInX">
                             <li><!-- Gerenciar filtros -->
                                 <a href="{% url 'filter_list' %}">
                                     <i class="mdi mdi-filter"></i> Gerenciar Filtros

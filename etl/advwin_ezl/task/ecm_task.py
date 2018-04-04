@@ -25,9 +25,10 @@ class EcmEtl(GenericETL):
                           AND G.Link IS NOT NULL
                           AND cm.UsarOS = 1
                           AND (P.Status = 'Ativa' OR P.Status = 'Especial' OR p.Dt_Saida IS NULL)
-                          AND a.SubStatus = 10 AND
-                          p.Cliente IN ('{cliente}') AND 
-                          a.Status = '0' -- STATUS ATIVO
+                          AND (a.SubStatus = 10 OR a.SubStatus = 11) AND
+                          p.Cliente IN ('{cliente}') AND
+                          a.Status = '0' AND -- STATUS ATIVO
+                          p.Unidade IN ('11') -- Unidade BH-Centro
                     UNION
                     SELECT DISTINCT
                       G.ID_doc AS ecm_legacy_code,
@@ -47,9 +48,10 @@ class EcmEtl(GenericETL):
                           AND G.Link <> ''
                           AND G.Link IS NOT NULL
                           AND cm.UsarOS = 1
-                          AND a.SubStatus = 10 AND
-                          p.Cliente IN ('{cliente}') AND 
-                          a.Status = '0' -- STATUS ATIVO
+                          AND (a.SubStatus = 10 OR a.SubStatus = 11) AND
+                          p.Cliente IN ('{cliente}') AND
+                          a.Status = '0' AND -- STATUS ATIVO
+                          p.Unidade IN ('11') -- Unidade BH-Centro
                           """
     model = Ecm
     field_check = 'ecm_legacy_code'
@@ -73,27 +75,26 @@ class EcmEtl(GenericETL):
         for row in rows:
             print(row)
             try:
-                if 'Agenda' in row['path']:
-                    path = ecm_path_advwin2ezl(row['path'])
-                    tasks = Task.objects.filter(legacy_code=row['task_legacy_code'])
-                    for task in tasks:
-                        try:
-                            ecm = self.model(path=path, task=task, is_active=True,
-                                             legacy_code=row['ecm_legacy_code'],
-                                             system_prefix=LegacySystem.ADVWIN.value,
-                                             create_user=user,
-                                             alter_user=user, updated=False)
-                            ecm.save()
-                            self.debug_logger.debug(
-                                'ECM,%s,%s,%s,%s' % (
-                                    str(row['ecm_legacy_code']), str(row['task_legacy_code']),
-                                    str(row['path']), self.timestr))
-                        except IntegrityError as e:
-                            msg = get_message_log_default(
-                                self.model._meta.verbose_name, rows_count, e,
-                                self.timestr)
-                            self.error_logger.error(msg)
-                            save_error_log(log, user, msg)
+                path = ecm_path_advwin2ezl(row['path'])
+                tasks = Task.objects.filter(legacy_code=row['task_legacy_code'])
+                for task in tasks:
+                    try:
+                        ecm = self.model(path=path, task=task, is_active=True,
+                                         legacy_code=row['ecm_legacy_code'],
+                                         system_prefix=LegacySystem.ADVWIN.value,
+                                         create_user=user,
+                                         alter_user=user, updated=False)
+                        ecm.save()
+                        self.debug_logger.debug(
+                            'ECM,%s,%s,%s,%s' % (
+                                str(row['ecm_legacy_code']), str(row['task_legacy_code']),
+                                str(row['path']), self.timestr))
+                    except IntegrityError as e:
+                        msg = get_message_log_default(
+                            self.model._meta.verbose_name, rows_count, e,
+                            self.timestr)
+                        self.error_logger.error(msg)
+                        save_error_log(log, user, msg)
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,
                                               rows_count, e, self.timestr)
