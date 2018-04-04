@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.db.models.deletion
+from django.utils import timezone
 
 
 def person_office(apps, schema_editor):
@@ -18,10 +19,11 @@ def person_office(apps, schema_editor):
                                                               cpf_cnpj=person.cpf_cnpj,
                                                               name=person.name,
                                                               legal_name=person.legal_name)
-        OfficeMembership.objects.create(person=person,
-                                        office=person_office,
-                                        create_user=admin,
-                                        is_active=True)
+        OfficeMembership(office=person_office,
+                         person=person,
+                         create_user=admin,
+                         is_active=True,
+                         create_date=timezone.now()).save()
         record.office_correspondent = person_office
         record.save()
 
@@ -30,6 +32,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('financial', '0013_auto_20180214_1738'),
+        ('core', '0073_auto_20180221_0933'),
     ]
 
     operations = [
