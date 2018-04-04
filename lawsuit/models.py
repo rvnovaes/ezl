@@ -12,6 +12,11 @@ def get_folder_number(office):
     return get_next_value('lawsuit_office_%s_folder_folder_number' % office.pk)
 
 
+@transaction.atomic
+def get_lawsuit_number():
+    return get_next_value('lawsuit_lawsuit_lawsuit_number')
+
+
 class TypeMovement(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, blank=False, null=False, default="", verbose_name='Nome')
     uses_wo = models.BooleanField(default=False, verbose_name='Utiliza ordem de serviço?')
@@ -189,6 +194,11 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
 
     def __str__(self):
         return "{} - {}".format(self.law_suit_number, self.person_lawyer.name)
+
+    def save(self, *args, **kwargs):
+        if not self.law_suit_number:
+            self.law_suit_number = get_lawsuit_number()
+        super().save(*args, **kwargs)
 
 
 class Movement(Audit, LegacyCode, OfficeMixin):
