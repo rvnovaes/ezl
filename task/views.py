@@ -235,12 +235,15 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
             office_session = get_office_session(self.request)
             if office_session:
                 data = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query)
-                data_error = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query, task_status=TaskStatus.ERROR)
+                data_error = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query,
+                                                                                                   task_status=TaskStatus.ERROR)
             # nao mostra as OSs dos status de "erro" e "solicitadas" para pessoas que forem correspondente ou solicitante
             if person.auth_user.groups.filter(~Q(name__in=['Correspondente', 'Solicitante'])).exists():
                 if office_session:
-                    requested = DashboardViewModel.objects.filter(task_status=TaskStatus.REQUESTED, office_id=office_session.id)
-                    errors = DashboardViewModel.objects.filter(task_status=TaskStatus.ERROR, office_id=office_session.id)
+                    requested = DashboardViewModel.objects.filter(task_status=TaskStatus.REQUESTED,
+                                                                  office_id=office_session.id)
+                    errors = DashboardViewModel.objects.filter(task_status=TaskStatus.ERROR,
+                                                               office_id=office_session.id)
                     data = data | requested if data else requested
                     data_error = data_error | errors if data else errors
         return data, data_error
@@ -261,13 +264,13 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         accepted_service = grouped.get(TaskStatus.ACCEPTED_SERVICE) or {}
         refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}
         #  Necessario filtrar as inconsistencias pelos ids das tasks pelo fato das instancias de error serem de DashboardTaskView
-        error  = InconsistencyETL.objects.filter(is_active=True, task__id__in=[task.pk for task in data_error]) or {}
+        error = InconsistencyETL.objects.filter(is_active=True, task__id__in=[task.pk for task in data_error]) or {}
 
         return_list = []
 
         if not (person.auth_user.groups.count() == 1 and
-            person.auth_user.groups.filter(name=Person.CORRESPONDENT_GROUP)) \
-            or person.auth_user.groups.filter(name=Person.ADMINISTRATOR_GROUP):
+                person.auth_user.groups.filter(name=Person.CORRESPONDENT_GROUP)) \
+                or person.auth_user.groups.filter(name=Person.ADMINISTRATOR_GROUP):
             return_list.append(DashboardErrorStatusTable(error,
                                                          title='Erro no sistema de origem',
                                                          status=TaskStatus.ERROR))
@@ -374,7 +377,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.OPEN:
             form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else None)
-            servicepricetable_id = (self.request.POST['servicepricetable_id'] if self.request.POST['servicepricetable_id'] else None)
+            servicepricetable_id = (
+                self.request.POST['servicepricetable_id'] if self.request.POST['servicepricetable_id'] else None)
             servicepricetable = ServicePriceTable.objects.filter(id=servicepricetable_id).first()
             if servicepricetable:
                 self.delegate_child_task(form.instance, servicepricetable.office_correspondent)
@@ -608,7 +612,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         person = Person.objects.get(auth_user=self.request.user)
 
         filters = self.request.GET
-        task_filter = TaskFilter(data=filters,request=self.request)
+        task_filter = TaskFilter(data=filters, request=self.request)
         task_form = task_filter.form
 
         if task_form.is_valid():
@@ -632,13 +636,13 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 blocked_payment_dynamic_query = Q()
                 finished_dynamic_query = Q()
 
-            if not self.request.user.has_perm('core.view_all_tasks'):
-                if person.auth_user.groups.count() == 1 and \
-                    person.auth_user.groups.filter(name=Person.CORRESPONDENT_GROUP):
-                    person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
-                elif person.auth_user.groups.count() == 1 and \
-                    person.auth_user.groups.filter(name=Person.REQUESTER_GROUP):
-                    person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+                if not self.request.user.has_perm('core.view_all_tasks'):
+                    if person.auth_user.groups.count() == 1 and \
+                            person.auth_user.groups.filter(name=Person.CORRESPONDENT_GROUP):
+                        person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+                    elif person.auth_user.groups.count() == 1 and \
+                            person.auth_user.groups.filter(name=Person.REQUESTER_GROUP):
+                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
 
                 if data['state']:
                     task_dynamic_query.add(Q(movement__law_suit__court_district__state=data['state']), Q.AND)
@@ -866,8 +870,9 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
 def ajax_get_task_data_table(request):
     status = request.GET.get('status')
     xdata = []
+    dynamic_query = DashboardView.get_dynamic_query(DashboardView, request.user.person)
     if status == str(TaskStatus.ERROR):
-        query = InconsistencyETL.objects.filter(is_active=True, office=get_office_session(request))
+        query = InconsistencyETL.objects.filter(dynamic_query).filter(is_active=True, office=get_office_session(request))
         xdata.append(
             list(
                 map(lambda x: [
@@ -888,7 +893,7 @@ def ajax_get_task_data_table(request):
             )
         )
     else:
-        query = DashboardViewModel.objects.filter(task_status=status, office=get_office_session(request))
+        query = DashboardViewModel.objects.filter(dynamic_query).filter(task_status=status, office=get_office_session(request))
         xdata.append(
             list(
                 map(lambda x: [
@@ -908,7 +913,6 @@ def ajax_get_task_data_table(request):
                 ], query)
             )
         )
-
 
     data = {
         "data": xdata[0]
@@ -936,6 +940,7 @@ def ajax_get_ecms(request):
         'ecms': data_list
     }
     return JsonResponse(data)
+
 
 class FilterListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Filter
@@ -1021,9 +1026,9 @@ class GeolocationTaskCreate(CustomLoginRequiredView, View):
                                                task=task
                                                )
             return JsonResponse({"ok": True,
-                                "latitude": latitude,
-                                "longitude": longitude,
-                                "check_date": date_format(timezone.localtime(check_date), 'DATETIME_FORMAT')})
+                                 "latitude": latitude,
+                                 "longitude": longitude,
+                                 "check_date": date_format(timezone.localtime(check_date), 'DATETIME_FORMAT')})
         return JsonResponse({"ok": False})
 
 
@@ -1040,5 +1045,5 @@ class GeolocationTaskFinish(CustomLoginRequiredView, View):
                 taskgeolocation.alter_user = request.user
                 taskgeolocation.save()
             return JsonResponse({"ok": True,
-                                "finished_date": date_format(timezone.localtime(finished_date), 'DATETIME_FORMAT')})
+                                 "finished_date": date_format(timezone.localtime(finished_date), 'DATETIME_FORMAT')})
         return JsonResponse({"ok": False})
