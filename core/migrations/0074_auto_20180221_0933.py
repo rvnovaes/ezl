@@ -7,6 +7,8 @@ from django.db import migrations, models
 from django.utils import timezone
 import django.db.models.deletion
 import core.models
+from core.permissions import create_permission
+from guardian.shortcuts import get_groups_with_perms
 
 
 def remove_persons_from_office(apps, schema_editor):
@@ -14,27 +16,50 @@ def remove_persons_from_office(apps, schema_editor):
     admin = User.objects.filter(username='admin').first()
     if admin:
         Office = apps.get_model('core', 'Office')
-        default_office, created = Office.objects.get_or_create(create_user=admin,
-                                                               cpf_cnpj='03.482.042/0001-02',
-                                                               name='Marcelo Tostes Advogados Associados',
-                                                               legal_name='Marcelo Tostes Advogados Associados')
-
-        for record in default_office.persons.all():
-            default_office.persons.remove(record)
+        # Office.objects.all().delete()
+        Office(create_user=admin,
+               cpf_cnpj='03.482.042/0001-02',
+               name='Marcelo Tostes Advogados Associados',
+               legal_name='Marcelo Tostes Advogados Associados').save()
 
 
 def populate_office_persons(apps, schema_editor):
-    User = apps.get_model('auth', 'User')
+    from django.contrib.auth.models import User
+    from core.models import Office
     admin = User.objects.filter(username='admin').first()
     if admin:
-        Office = apps.get_model('core', 'Office')
         OfficeMembership = apps.get_model('core', 'OfficeMembership')
         default_office = Office.objects.filter(create_user=admin,
                                                cpf_cnpj='03.482.042/0001-02',
                                                name='Marcelo Tostes Advogados Associados',
                                                legal_name='Marcelo Tostes Advogados Associados').first()
+        create_permission(Office.objects.get(pk=default_office.pk))
+        for group in {group for group, perms in
+                      get_groups_with_perms(default_office, attach_perms=True).items() if 'group_admin' in perms}:
+            admin.groups.add(group)
+        from core.models import Person
+        from guardian.models import Group
+        for user in User.objects.filter(groups__name=Person.ADMINISTRATOR_GROUP):
+            user.groups.add(Group.objects.get(
+                name='{}-{}-{}'.format(Person.ADMINISTRATOR_GROUP, default_office.pk, default_office.legal_name)))
+        for user in User.objects.filter(groups__name=Person.CORRESPONDENT_GROUP):
+            user.groups.add(Group.objects.get(
+                name='{}-{}-{}'.format(Person.CORRESPONDENT_GROUP, default_office.pk, default_office.legal_name)))
+        for user in User.objects.filter(groups__name=Person.REQUESTER_GROUP):
+            user.groups.add(Group.objects.get(
+                name='{}-{}-{}'.format(Person.REQUESTER_GROUP, default_office.pk, default_office.legal_name)))
+        for user in User.objects.filter(groups__name=Person.SERVICE_GROUP):
+            user.groups.add(Group.objects.get(
+                name='{}-{}-{}'.format(Person.SERVICE_GROUP, default_office.pk, default_office.legal_name)))
+        for user in User.objects.filter(groups__name=Person.SUPERVISOR_GROUP):
+            user.groups.add(Group.objects.get(
+                name='{}-{}-{}'.format(Person.SUPERVISOR_GROUP, default_office.pk, default_office.legal_name)))
         Person = apps.get_model('core', 'Person')
         persons_active = Person.objects.filter(is_active=True).all()
+        User = apps.get_model('auth', 'User')
+        Office = apps.get_model('core','Office')
+        admin = User.objects.filter(username='admin').first()
+        default_office = Office.objects.filter(pk=default_office.pk).first()
         OfficeMembership(office=default_office,
                          person=admin.person,
                          create_user=admin,
@@ -51,7 +76,8 @@ def populate_office_persons(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('core', '0072_auto_20180220_1457'),
+        ('guardian', '0001_initial'),
+        ('core', '0073_officerelgroup'),
     ]
 
     operations = [

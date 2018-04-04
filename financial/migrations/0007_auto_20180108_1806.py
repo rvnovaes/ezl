@@ -12,10 +12,10 @@ def get_default_office(apps, schema_editor):
     admin = User.objects.filter(username='admin').first()
     if admin:
         Office = apps.get_model('core', 'Office')
-        default_office, created = Office.objects.get_or_create(create_user=admin,
-                                                               cpf_cnpj='03.482.042/0001-02',
-                                                               name='Marcelo Tostes Advogados Associados',
-                                                               legal_name='Marcelo Tostes Advogados Associados')
+        default_office = Office.objects.get(create_user=admin,
+                                            cpf_cnpj='03.482.042/0001-02',
+                                            name='Marcelo Tostes Advogados Associados',
+                                            legal_name='Marcelo Tostes Advogados Associados')
         ServicePriceTable = apps.get_model('financial', 'servicepricetable')
         for record in ServicePriceTable.objects.all():
             record.office_id = default_office.id
@@ -26,6 +26,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('core', '0074_auto_20180221_0933'),
         ('financial', '0006_auto_20180108_1806'),
     ]
 

@@ -236,11 +236,15 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
             # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
             if office_session:
                 data = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query)
-                data_error = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query, task_status=TaskStatus.ERROR)
+                data_error = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query,
+                                                                                                   task_status=TaskStatus.ERROR)
         # nao mostra as OSs dos status de "erro" e "solicitadas" para pessoas que forem correspondente ou solicitante
-        if (checker.has_perm('view_distributed_tasks', office_session) or checker.has_perm('view_all_tasks', office_session)) and office_session:
-            data = data | DashboardViewModel.objects.filter(task_status=TaskStatus.REQUESTED)
-            data_error = data_error | DashboardViewModel.objects.filter(task_status=TaskStatus.ERROR)
+        elif (checker.has_perm('view_distributed_tasks', office_session) or checker.has_perm('view_all_tasks',
+                                                                                             office_session)) and office_session:
+            data = data | DashboardViewModel.objects.filter(office_id=office_session.id).filter(
+                task_status=TaskStatus.REQUESTED)
+            data_error = data_error | DashboardViewModel.objects.filter(office_id=office_session.id).filter(
+                task_status=TaskStatus.ERROR)
         return data, data_error, office_session
 
     @staticmethod
@@ -259,7 +263,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         accepted_service = grouped.get(TaskStatus.ACCEPTED_SERVICE) or {}
         refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}
         #  Necessario filtrar as inconsistencias pelos ids das tasks pelo fato das instancias de error serem de DashboardTaskView
-        error  = InconsistencyETL.objects.filter(is_active=True, task__id__in=[task.pk for task in data_error]) or {}
+        error = InconsistencyETL.objects.filter(is_active=True, task__id__in=[task.pk for task in data_error]) or {}
 
         return_list = []
         checker = ObjectPermissionChecker(person.auth_user)
