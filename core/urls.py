@@ -93,5 +93,7 @@ urlpatterns = [
     url(r'^typeahead/search/inviteuser$', login_required(views.TypeaHeadInviteUserSearch.as_view()),
         name='typeahead_invite_user'),
     url(r'^typeahead/search/inviteoffice$', login_required(views.TypeaHeadInviteOfficeSearch.as_view()),
-        name='typeahead_invite_office')
+        name='typeahead_invite_office'),
+    url(r'^taginput/(?P<office_pk>[0-9]+)/permissions$', login_required(views.TagsInputPermissionsView.as_view()),
+        name='taginput_permissions'),
 ]

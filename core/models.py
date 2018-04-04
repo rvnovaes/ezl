@@ -4,12 +4,17 @@ import time
 
 from django.conf import settings
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 from core.managers import PersonManager
 from core.utils import LegacySystem
+from guardian.shortcuts import get_perms
 
 INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'), ('E', 'EXTERNAL'))
+
+
+class CorePermissions(Enum):
+    group_admin = 'Group Administrator'
 
 
 class LegalType(Enum):
@@ -61,9 +66,6 @@ class OfficeManager(models.Manager):
         if office:
             res = super().get_queryset().filter(office__id__in=office)
         return res
-
-    def get_by_natural_key(self, cpf_cnpj):
-        return self.get(persons__cpf_cnpj=cpf_cnpj)
 
 
 class AuditAlter(models.Model):
@@ -284,6 +286,16 @@ class Person(AbstractPerson):
         """Simple JSON representation of instance"""
         return {"id": self.id, "legal_name": self.legal_name, "name": self.name}
 
+    @property
+    def get_person_permissions(self):
+        permissions = dict()
+        for group in self.auth_user.groups.all():
+            if hasattr(group, 'officerelgroup'):
+                if group.officerelgroup.office not in permissions:
+                    permissions[group.officerelgroup.office] = []
+                permissions[group.officerelgroup.office].extend(get_perms(group, group.officerelgroup.office))
+        return permissions
+
 
 class Office(AbstractPerson):
     objects = PersonManager()
@@ -308,6 +320,21 @@ class OfficeMixin(models.Model):
 class OfficeMembership(Audit):
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
     office = models.ForeignKey(Office, on_delete=models.CASCADE)
+
+
+class OfficeRelGroup(models.Model):
+    office = models.ForeignKey(Office, on_delete=models.CASCADE, related_name='office_groups')
+    group = models.OneToOneField(Group, on_delete=models.CASCADE)
+
+    @property
+    def label_group(self):
+        try:
+            return self.group.name.split('-')[0]
+        except:
+            return self.group.name
+
+    class Meta:
+        verbose_name = 'Groupos por escritório'
 
 
 class DefaultOffice(OfficeMixin, Audit):

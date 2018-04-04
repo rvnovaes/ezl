@@ -52,11 +52,13 @@
                         </ul>
                         <!-- /.dropdown-messages -->
                     </li>
-                    <li class="open" data-toggle="tooltip" data-original-title="Criar OS" data-placement="bottom">
-                        <a href="{% url 'task_add' %}" class="waves-effect waves-lightact create-os-active">
-                            <i class="mdi mdi-plus-circle-outline"></i><span class="hidden-sm hidden-xs"> Criar OS</span>
-                        </a>
-                    </li>
+                    {% if 'can_access_general_data' in office_session_perms %}
+                        <li class="open" data-toggle="tooltip" data-original-title="Criar OS" data-placement="bottom">
+                            <a href="{% url 'task_add' %}" class="waves-effect waves-lightact create-os-active">
+                                <i class="mdi mdi-plus-circle-outline"></i><span class="hidden-sm hidden-xs"> Criar OS</span>
+                            </a>
+                        </li>
+                    {% endif %}
                 </ul>
                 <ul class="nav navbar-top-links navbar-right pull-right">
                     <li class="dropdown">

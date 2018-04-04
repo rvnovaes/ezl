@@ -48,6 +48,8 @@ from task.models import Task, TaskStatus
 from ecm.forms import AttachmentForm
 from ecm.utils import attachment_form_valid, attachments_multi_delete
 from django.core.validators import validate_email
+from guardian.core import ObjectPermissionChecker
+from guardian.shortcuts import get_groups_with_perms
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -542,7 +544,8 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
         user = User.objects.get(id=self.request.user.id)
-        kw['is_admin'] = user.person.is_admin
+        checker = ObjectPermissionChecker(user)
+        kw['is_admin'] = checker.has_perm('group_admin', get_office_session(self.request))
         return kw
 
     def get_success_url(self):
@@ -762,17 +765,30 @@ class UserCreateView(AuditFormMixin, CreateView):
         return reverse_lazy('user_list')
 
     def form_valid(self, form):
-        form.save()
-        OfficeMembership.objects.create(person=form.instance.person,
-                                        office=get_office_session(self.request),
-                                        create_user=self.request.user,
-                                        is_active=True)
+        form.save(commit=False)
+        offices_user = []
         if form.is_valid:
-            groups = form.cleaned_data['groups']
-            ids = list(group.id for group in groups)
+            have_group = False
+            for office in self.request.user.person.offices.all():
+                groups = self.request.POST.getlist('office_' + str(office.id), '')
+                if groups and not form.instance.id:
+                    form.save()
+                    for group_office in office.office_groups.all():
+                        if str(group_office.group.id) in groups:
+                            if office not in offices_user:
+                                offices_user.append(office)
+                            offices_user.append(office)
+                            group_office.group.user_set.add(form.instance)
+                            have_group = True
+            if not have_group:
+                form.add_error(None, "O usuário deve pertencer a pelo menos um grupo")
+                return self.form_invalid(form)
 
-            for group in Group.objects.filter(id__in=ids):
-                group.user_set.add(form.instance)
+            for office in offices_user:
+                OfficeMembership.objects.create(person=form.instance.person,
+                                                office=office,
+                                                create_user=self.request.user,
+                                                is_active=True)
 
         super(UserCreateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
@@ -791,15 +807,26 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         return self.initial.copy()
 
     def form_valid(self, form):
-        form.save()
+        form.save(commit=False)
+        checker = ObjectPermissionChecker(self.request.user)
         if form.is_valid:
-            groups = form.cleaned_data['groups']
-            ids = list(group.id for group in groups)
+            have_group = True
+            for office in form.instance.person.offices.all():
+                if checker.has_perm('can_access_general_data', office):
+                    have_group = False
+                    groups = self.request.POST.getlist('office_' + str(office.id), '')
+                    for group_office in office.office_groups.all():
+                        if str(group_office.group.id) in groups:
+                            group_office.group.user_set.add(form.instance)
+                            have_group = True
+                        else:
+                            group_office.group.user_set.remove(form.instance)
+            if not have_group:
+                form.add_error(None, "O usuário deve pertencer a pelo menos um grupo")
+                return self.form_invalid(form)
 
-            for group in Group.objects.filter(id__in=ids):
-                group.user_set.add(form.instance)
+            form.save()
             default_office = form.cleaned_data['office']
-
             obj = DefaultOffice.objects.filter(auth_user=form.instance).first()
             if obj:
                 obj.office = default_office
@@ -889,6 +916,9 @@ class OfficeCreateView(AuditFormMixin, CreateView):
                                         office=form.instance,
                                         create_user=form.instance.create_user,
                                         is_active=True)
+        for group in {group for group, perms in
+                      get_groups_with_perms(form.instance, attach_perms=True).items() if 'group_admin' in perms}:
+            form.instance.create_user.groups.add(group)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -1333,3 +1363,15 @@ class OfficeMembershipInactiveView(UpdateView):
 
     def get_success_url(self):
         return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})
+
+
+class TagsInputPermissionsView(View):
+    def get(self, request, office_pk, *args, **kwargs):
+        groups = Office.objects.get(pk=office_pk).office_groups.all()
+        data = []
+        for group in groups:
+            data.append({
+                'value': group.group.pk,
+                'text': group.label_group
+            })
+        return JsonResponse(data, safe=False)
