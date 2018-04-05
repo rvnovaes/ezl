@@ -377,10 +377,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             servicepricetable_id = (
                 self.request.POST['servicepricetable_id'] if self.request.POST['servicepricetable_id'] else None)
             servicepricetable = ServicePriceTable.objects.filter(id=servicepricetable_id).first()
+            get_task_attachment(self, form)
             if servicepricetable:
                 self.delegate_child_task(form.instance, servicepricetable.office_correspondent)
                 form.instance.person_executed_by = None
-            get_task_attachment(self, form)
 
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
@@ -461,6 +461,11 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.task_status = TaskStatus.REQUESTED
         new_task.parent = object_parent
         new_task.save()
+        for ecm in object_parent.ecm_set.all():
+            new_ecm = copy.copy(ecm)
+            new_ecm.pk = None
+            new_ecm.task = new_task
+            new_ecm.save()
 
 
 class EcmCreateView(CustomLoginRequiredView, CreateView):
