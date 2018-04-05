@@ -50,6 +50,7 @@ from ecm.utils import attachment_form_valid, attachments_multi_delete
 from django.core.validators import validate_email
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_groups_with_perms
+from django.contrib.sites.shortcuts import get_current_site
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -1076,7 +1077,7 @@ class InviteCreateView(AuditFormMixin, CreateView):
             form.instance.person = Person.objects.filter(pk=person).first() if person else None
             form.instance.office = Office.objects.get(pk=office)
             form.instance.email = email
-            form.instance.__host = '{}://{}'.format(request.scheme, request.META.get('HTTP_HOST'))
+            form.instance.__host = '{}://{}'.format(request.scheme, request.META.get('HTTP_X_FORWARDED_HOST', request.META.get('HTTP_HOST')))
             form.instance.save()
         return JsonResponse({'status': 'ok'})
 
