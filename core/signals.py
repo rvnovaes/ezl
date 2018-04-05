@@ -32,6 +32,8 @@ def create_person(instance, sender, **kwargs):
 @receiver(post_save, sender=Invite)
 def send_invite_email(instance, sender, **kwargs):
     project_link = settings.PROJECT_LINK
+    if hasattr(instance, '_InviteCreateView__host'):
+        project_link = instance._InviteCreateView__host
     mail = SendMail()
     mail.subject = 'Easy Lawyer - Convite para cadastro'
     mail.message = render_to_string('core/mail/base.html',

@@ -1076,6 +1076,7 @@ class InviteCreateView(AuditFormMixin, CreateView):
             form.instance.person = Person.objects.filter(pk=person).first() if person else None
             form.instance.office = Office.objects.get(pk=office)
             form.instance.email = email
+            form.instance.__host = '{}://{}'.format(request.scheme, request.META.get('HTTP_HOST'))
             form.instance.save()
         return JsonResponse({'status': 'ok'})
 

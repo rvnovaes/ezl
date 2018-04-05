@@ -182,12 +182,12 @@ class DefaultOffice(object):
     @staticmethod
     def create():
         admin = User.objects.filter(username='admin').first()
-        admin_person = Person.objects.filter(auth_user=admin).first()
+        admin_person = admin.person
         default_office = get_default_office()
-        OfficeMembership.objects.create(person=admin_person,
-                                        office=default_office,
-                                        create_user=admin,
-                                        is_active=True)
+        OfficeMembership.objects.get_or_create(person=admin_person,
+                                               office=default_office,
+                                               create_user=admin,
+                                               is_active=True)
 
 
 if __name__ == '__main__':
