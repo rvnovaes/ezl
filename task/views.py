@@ -874,7 +874,10 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
 def ajax_get_task_data_table(request):
     status = request.GET.get('status')
     xdata = []
-    dynamic_query = DashboardView.get_dynamic_query(DashboardView, request.user.person)
+    checker = ObjectPermissionChecker(request.user)
+    dash = DashboardView()
+    dash.request = request
+    dynamic_query = dash.get_dynamic_query(request.user.person, checker)
     if status == str(TaskStatus.ERROR):
         query = InconsistencyETL.objects.filter(dynamic_query).filter(is_active=True, office=get_office_session(request))
         xdata.append(
