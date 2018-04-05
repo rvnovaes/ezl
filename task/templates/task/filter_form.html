@@ -1,5 +1,7 @@
 {% extends 'skeleton/forms/base.html' %}
-{#{% load core_filters %}#}
+{% load core_filters %}
+{% load guardian_tags %}
+{% load core_filters core_match %}
 {% load bootstrap3 %}
 {% block extra_scripts %}
     {{ block.super }}
@@ -8,10 +10,14 @@
 {% block form %}
     {% bootstrap_field form.name form_group_class="form-group col-sm-6" bound_css_class='' %}
     {% bootstrap_field form.description form_group_class="form-group col-sm-6" bound_css_class='' %}
-    {% if request.user.is_superuser %}
-        <div class="col-sm-12">
-            <label for="query_sql">SQL</label><br />
-            <code class="prettyprint lang-sql">{{ form.instance.query_sql }}</code>
-        </div>
-    {% endif %}
+    {% with request|get_office_session_pk as office_session_id %}
+        {% get_model_instance 'core' 'office' office_session_id as office_session %}
+        {% get_obj_perms request.user for office_session as "office_session_perms" %}
+        {% if 'group_admin' in office_session_perms %}
+            <div class="col-sm-12">
+                <label for="query_sql">SQL</label><br />
+                <code class="prettyprint lang-sql">{{ form.instance.query_sql }}</code>
+            </div>
+        {% endif %}
+    {% endwith %}
 {% endblock form %}

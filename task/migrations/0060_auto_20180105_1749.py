@@ -11,10 +11,10 @@ def get_default_office(apps, schema_editor):
     admin = User.objects.filter(username='admin').first()
     if admin:
         Office = apps.get_model('core', 'Office')
-        default_office, created = Office.objects.get_or_create(create_user=admin,
-                                                               cpf_cnpj='03.482.042/0001-02',
-                                                               name='Marcelo Tostes Advogados Associados',
-                                                               legal_name='Marcelo Tostes Advogados Associados')
+        default_office = Office.objects.get(create_user=admin,
+                                            cpf_cnpj='03.482.042/0001-02',
+                                            name='Marcelo Tostes Advogados Associados',
+                                            legal_name='Marcelo Tostes Advogados Associados')
         Task = apps.get_model('task', 'task')
         for record in Task.objects.all():
             record.office_id = default_office.id
@@ -29,7 +29,7 @@ def get_default_office(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0057_office'),
+        ('core', '0074_auto_20180221_0933'),
         ('task', '0059_auto_20180117_0944'),
     ]
 

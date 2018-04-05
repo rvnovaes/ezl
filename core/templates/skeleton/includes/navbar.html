@@ -52,11 +52,13 @@
                         </ul>
                         <!-- /.dropdown-messages -->
                     </li>
-                    <li class="open" data-toggle="tooltip" data-original-title="Criar OS" data-placement="bottom">
-                        <a href="{% url 'task_add' %}" class="waves-effect waves-lightact create-os-active">
-                            <i class="mdi mdi-plus-circle-outline"></i><span class="hidden-sm hidden-xs"> Criar OS</span>
-                        </a>
-                    </li>
+                    {% if 'can_access_general_data' in office_session_perms %}
+                        <li class="open" data-toggle="tooltip" data-original-title="Criar OS" data-placement="bottom">
+                            <a href="{% url 'task_add' %}" class="waves-effect waves-lightact create-os-active">
+                                <i class="mdi mdi-plus-circle-outline"></i><span class="hidden-sm hidden-xs"> Criar OS</span>
+                            </a>
+                        </li>
+                    {% endif %}
                 </ul>
                 <ul class="nav navbar-top-links navbar-right pull-right">
                     <li class="dropdown">
@@ -67,7 +69,7 @@
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-right animated flipInY">
-                        {% for office in request.user.person.offices.all %}
+                        {% for office in request.user.person.offices.active_offices %}
                            <li onclick="updateSession('current_office', '{{office.pk}}', '{{csrf_token}}');"><a href="#">{{office.legal_name}}</a></li>
                         {% endfor %}
                         </ul>

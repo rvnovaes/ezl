@@ -1,79 +1,84 @@
-{% if perms.core.can_distribute_tasks %}
-    <button type="button" id="ACCEPTED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-ezl-accepted_service align-middle {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
-        <span class="btn-label align-middle"><i class="mdi mdi-thumb-up-outline"></i></span> Aceitar Solicitação
-    </button>
+{% load guardian_tags %}
+{% load core_filters core_match %}
+{% with request|get_office_session_pk as office_session_id %}
+    {% get_model_instance 'core' 'office' office_session_id as office_session %}
+    {% get_obj_perms request.user for office_session as "office_session_perms" %}
+    {% if 'can_distribute_tasks' in office_session_perms %}
+        <button type="button" id="ACCEPTED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                class="text-white btn btn-ezl-accepted_service align-middle {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
+            <span class="btn-label align-middle"><i class="mdi mdi-thumb-up-outline"></i></span> Aceitar Solicitação
+        </button>
 
-    <button type="button" id="REFUSED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-ezl-refused_service {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
-        <span class="btn-label"><i class="mdi mdi-thumb-down-outline"></i></span> Recusar Solicitação
-    </button>
+        <button type="button" id="REFUSED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                class="text-white btn btn-ezl-refused_service {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
+            <span class="btn-label"><i class="mdi mdi-thumb-down-outline"></i></span> Recusar Solicitação
+        </button>
 
-    <button type="button" data-toggle="modal" data-target="#to-assign"
-            class="text-white btn btn-info {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
-        <span class="btn-label"><i class="mdi mdi-account-location"></i></span> Atribuir
-    </button>
+        <button type="button" data-toggle="modal" data-target="#to-assign"
+                class="text-white btn btn-info {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
+            <span class="btn-label"><i class="mdi mdi-account-location"></i></span> Atribuir
+        </button>
 
-    <button type="button" id="OPEN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-ezl-open {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
-        <span class="btn-label"><i class="mdi mdi-account-location"></i></span> Delegar
-    </button>
-{% endif %}
-{% if perms.core.view_delegated_tasks %}
-    <button type="button" id="ACCEPTED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"task = Task.objects.get(pk=1560)
-
-            class="text-white btn btn-ezl-accepted {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
-        <span class="btn-label"><i class="mdi mdi-calendar-clock"></i></span> Aceitar
-    </button>
-    <button type="button" id="REFUSED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-ezl-refused {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
-        <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Recusar
-    </button>
-{% endif %}
-{% if perms.core.delegate_tasks %}
-    <button type="button" id="DELEGATE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-ezl-delegate {% if not form.instance.status.name == 'DELEGATE' %}hidden{% endif %}">
-        <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Delegar
-    </button>
-{% endif %}
-{% if perms.core.block_payment_tasks %}
-    <button type="button" id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-ezl-blockedpayment {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}">
-        <span class="btn-label"><i class="mdi mdi-currency-usd-off"></i></span> Glosar
-    </button>
-{% endif %}
-{% if perms.core.validate_all_tasks %}
-    <button type="button" id="FINISHED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-raised btn-ezl-finished FINISHED {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}">
-        <span class="btn-label"><i class="mdi mdi-gavel"></i></span> Finalizar
-    </button>
-{% endif %}
-{% if perms.core.return_all_tasks %}
-    <button type="button" id="RETURN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-            class="text-white btn btn-ezl-return {% if not  form.instance.status.name == 'DONE' %}hidden{% endif %}">
-        <span class="btn-label"><i class="mdi mdi-backburger"></i></span> Retornar
-    </button>
-{% endif %}
-{% if perms.core.view_delegated_tasks %}
-    {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-        <div class="col-sm-3">
-            {{ form.survey_result }}
-            <a>{{ form.execution_date }}</a>
-        </div>
-        {% if form.instance.geolocation.last.checkpointtype == 'Checkin' %}
-            <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
-                    data-checkpointtype="Checkout" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
-                <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkout</span>
-            </button>
-        {% elif not form.instance.geolocation.last.checkpointtype %}
-            <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
-                    data-checkpointtype="Checkin" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
-                <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkin</span>
-            </button>
-        {% endif %}
-        <button type="button" onclick="getId(this)" id="DONE" type="submit" data-toggle="" data-target="#confirmAction"
-                class="text-white btn btn-ezl-done">
-            <span class="btn-label"><i class="mdi mdi-checkbox-marked-circle-outline"></i></span> Cumprir
+        <button type="button" id="OPEN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                class="text-white btn btn-ezl-open {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
+            <span class="btn-label"><i class="mdi mdi-account-location"></i></span> Delegar
         </button>
     {% endif %}
-{% endif %}
+    {% if 'view_delegated_tasks' in office_session_perms %}
+        <button type="button" id="ACCEPTED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                class="text-white btn btn-ezl-accepted {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
+            <span class="btn-label"><i class="mdi mdi-calendar-clock"></i></span> Aceitar
+        </button>
+        <button type="button" id="REFUSED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                class="text-white btn btn-ezl-refused {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
+            <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Recusar
+        </button>
+    {% endif %}
+    {% if 'delegate_tasks' in office_session_perms %}
+        <button type="button" id="DELEGATE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                class="text-white btn btn-ezl-delegate {% if not form.instance.status.name == 'DELEGATE' %}hidden{% endif %}">
+            <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Delegar
+        </button>
+    {% endif %}
+    {% if 'block_payment_tasks' in office_session_perms %}
+        <button type="button" id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                class="text-white btn btn-ezl-blockedpayment {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}">
+            <span class="btn-label"><i class="mdi mdi-currency-usd-off"></i></span> Glosar
+        </button>
+    {% endif %}
+    {% if 'validate_all_tasks' in office_session_perms %}
+        <button type="button" id="FINISHED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                class="text-white btn btn-raised btn-ezl-finished FINISHED {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}">
+            <span class="btn-label"><i class="mdi mdi-gavel"></i></span> Finalizar
+        </button>
+    {% endif %}
+    {% if 'return_all_tasks' in office_session_perms %}
+        <button type="button" id="RETURN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                class="text-white btn btn-ezl-return {% if not  form.instance.status.name == 'DONE' %}hidden{% endif %}">
+            <span class="btn-label"><i class="mdi mdi-backburger"></i></span> Retornar
+        </button>
+    {% endif %}
+    {% if 'view_delegated_tasks' in office_session_perms %}
+        {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
+            <div class="col-sm-3">
+                {{ form.survey_result }}
+                <a>{{ form.execution_date }}</a>
+            </div>
+            {% if form.instance.geolocation.last.checkpointtype == 'Checkin' %}
+                <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
+                        data-checkpointtype="Checkout" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
+                    <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkout</span>
+                </button>
+            {% elif not form.instance.geolocation.last.checkpointtype %}
+                <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
+                        data-checkpointtype="Checkin" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
+                    <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkin</span>
+                </button>
+            {% endif %}
+            <button type="button" onclick="getId(this)" id="DONE" type="submit" data-toggle="" data-target="#confirmAction"
+                    class="text-white btn btn-ezl-done">
+                <span class="btn-label"><i class="mdi mdi-checkbox-marked-circle-outline"></i></span> Cumprir
+            </button>
+        {% endif %}
+    {% endif %}
+{% endwith %}

@@ -318,11 +318,6 @@ class UserCreateForm(BaseForm, UserCreationForm):
         help_text=_('Enter the same password as before, for verification.'),
     )
 
-    groups = forms.ModelMultipleChoiceField(label='Perfis', required=True,
-                                            queryset=Group.objects.all().order_by('name'),
-                                            widget=forms.SelectMultiple(
-                                                attrs={'class': 'form-control profile-selector'}))
-
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2',
@@ -358,11 +353,6 @@ class UserUpdateForm(UserChangeForm):
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
-    groups = forms.ModelMultipleChoiceField(label='Perfis', required=True,
-                                            queryset=Group.objects.all().order_by('name'),
-                                            widget=forms.SelectMultiple(
-                                                attrs={'class': 'form-control profile-selector'}))
-
     is_active = CustomBooleanField(
         required=False,
         label='Ativo'
@@ -378,12 +368,13 @@ class UserUpdateForm(UserChangeForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'username', 'email', 'password',
-                  'groups', 'is_active']
+                  'is_active']
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request, profile=kwargs['instance'])
+        self.fields['office'].label = 'Escritório padrão'
 
 
 class ResetPasswordFormMixin(forms.Form):
