@@ -83,7 +83,7 @@ class TaskDetailForm(ModelForm):
         initial='',
         label='Insira um comentário',
         widget=forms.Textarea(
-            attrs={'class': 'form-control', 'cols': '5', 'id': 'notes_id'}
+            attrs={'rows': 2, 'class': 'form-control', 'cols': '5', 'id': 'notes_id'}
         )
     )
 
@@ -95,6 +95,16 @@ class TaskDetailForm(ModelForm):
 
     servicepricetable_id = forms.CharField(required=False,
                                            widget=forms.HiddenInput())
+
+    feedback_rating = forms.IntegerField(
+        label="Nota",
+        required=False
+    )
+    feedback_comment = forms.CharField(
+        label="Comentário sobre o atendimento do correspondente",
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 2})
+    )
 
     def clean_servicepricetable_id(self):
         servicepricetable_id = self.cleaned_data['servicepricetable_id']
