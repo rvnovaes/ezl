@@ -339,19 +339,20 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         return Q(person_distributed_by=person.id)
 
     def get_dynamic_query(self, person, checker):
-        office_session = get_office_session(self.request)
-        if checker.has_perm('view_all_tasks', office_session):
-            return self.get_query_all_tasks(person)
         dynamic_query = Q()
-        permissions_to_check = {
-            'view_all_tasks': self.get_query_all_tasks,
-            'view_delegated_tasks': self.get_query_delegated_tasks,
-            'view_distributed_tasks': self.get_query_distributed_tasks,
-            'view_requested_tasks': self.get_query_requested_tasks
-        }
-        for permission in checker.get_perms(office_session):
-            if permission in permissions_to_check.keys():
-                dynamic_query |= permissions_to_check.get(permission)(person)
+        office_session = get_office_session(self.request)
+        if office_session:
+            if checker.has_perm('view_all_tasks', office_session):
+                return self.get_query_all_tasks(person)
+            permissions_to_check = {
+                'view_all_tasks': self.get_query_all_tasks,
+                'view_delegated_tasks': self.get_query_delegated_tasks,
+                'view_distributed_tasks': self.get_query_distributed_tasks,
+                'view_requested_tasks': self.get_query_requested_tasks
+            }
+            for permission in checker.get_perms(office_session):
+                if permission in permissions_to_check.keys():
+                    dynamic_query |= permissions_to_check.get(permission)(person)
         return dynamic_query
 
 
