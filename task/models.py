@@ -118,6 +118,18 @@ class SurveyType(Enum):
         return [(x.value, x.name) for x in cls]
 
 
+class CheckPointType(Enum):
+    CHECKIN = 'Checkin'
+    CHECKOUT = 'Checkout'
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        return [(x.value, x.name) for x in cls]
+
+
 class TypeTask(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, null=False, blank=False,
                             verbose_name='Tipo de Serviço')
@@ -354,6 +366,27 @@ class TaskHistory(AuditCreate):
     def save(self, *args, **kwargs):
         self._skip_signal = kwargs.pop('skip_signal', False)
         return super(TaskHistory, self).save(*args, **kwargs)
+
+
+class TaskGeolocation(Audit):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, blank=False, null=False,
+                            related_name='geolocation')
+    date = models.DateTimeField(null=True, verbose_name='Data de Início')
+    checkpointtype = models.CharField(null=True, verbose_name='Tipo de Marcação', max_length=10,
+                                      choices=((x.value, x.name.title()) for x in CheckPointType),
+                                      default=CheckPointType.CHECKIN)
+    latitude = models.DecimalField(null=True, blank=True, verbose_name='Latitude',
+                                   max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(null=True, blank=True, verbose_name='Longitude',
+                                   max_digits=9, decimal_places=6)
+
+    class Meta:
+        verbose_name = 'Geolocalização da Providência'
+        verbose_name_plural = 'Geolocalização das Providências'
+
+    @property
+    def position(self):
+        return "{},{}".format(self.latitude, self.longitude)
 
 
 class DashboardViewModel(Audit, OfficeMixin):

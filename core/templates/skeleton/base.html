@@ -1,4 +1,6 @@
 {% load static %}
+{% load guardian_tags %}
+{% load core_filters core_match %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -59,12 +61,16 @@
     <!-- Wrapper -->
     <!-- ============================================================== -->
     <div id="wrapper" >
-        <!-- Topbar header - style you can find in pages.scss -->
-        {% include 'skeleton/includes/navbar.html' %}
-        <!-- End Top Navigation -->
+        {% with request|get_office_session_pk as office_session_id %}
+            {% get_model_instance 'core' 'office' office_session_id as office_session %}
+            {% get_obj_perms request.user for office_session as "office_session_perms" %}
+                <!-- Topbar header - style you can find in pages.scss -->
+                {% include 'skeleton/includes/navbar.html' %}
+                <!-- End Top Navigation -->
 
-        <!-- Left Sidebar - style you can find in sidebar.scss  -->
-        {% include 'skeleton/includes/sidebar.html' %}
+                <!-- Left Sidebar - style you can find in sidebar.scss  -->
+                {% include 'skeleton/includes/sidebar.html' %}
+        {% endwith %}
         <!-- End Left Sidebar -->
 
         <!-- ============================================================== -->

@@ -274,6 +274,65 @@
             return true;
         }
     </script>
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                $('#locating').modal('show');
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                console.log("Geolocalização não é suportada pelo browser.");
+            }
+        }
+        function showPosition(position) {
+            var data = {};
+            var checkpointtype = $('#GEOLOCATION').data("checkpointtype");
+            data['latitude'] = position.coords.latitude;
+            data['longitude'] = position.coords.longitude;
+            data['task_id'] = {{ form.instance.pk }};
+            data['checkpointtype'] = checkpointtype;
+            var url = $('#GEOLOCATION').data("url");
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: data,
+                success: function (result) {
+                    console.log(result);
+                    if (result.ok){
+                        location.reload();
+                        $('#locating').modal('hide');
+                    }else{
+                        $('#locating').modal('hide');
+                        showToast('error', 'Atenção', "Localização não registrada", 0, false);
+                    }
+                },
+                error: function (request, status, error) {
+                },
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                },
+                dataType: 'json'
+            })
+        }
+        function showError(error) {
+            $('#locating').modal('hide');
+            var msg = ''
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    msg = "O usuário negou o acesso à Geolocalização.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    msg = "Informação de localização não disponível.";
+                    break;
+                case error.TIMEOUT:
+                    msg = "Tempo limite atingido para o pedido de localização.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    msg = "Ocorreu um erro desconhecido.";
+                    break;
+            }
+            showToast('error', 'Atenção', msg, 0, false);
+        }
+        </script>
     <script type="text/javascript">
         $("#correspondents-table tbody tr").click(function(){
             id = $(this).data('id');
@@ -326,6 +385,19 @@
                             0
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Janela modal para mostrar enquanto processa a geolocalização -->
+    <div id="locating" class="modal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center;">
+                    <h1>Aguarde...</h1>
+                    <p class="h1"><i class="fa fa-spin fa-map-marker"></i></p>
+                </div>
+                <div class="modal-footer">
                 </div>
             </div>
         </div>

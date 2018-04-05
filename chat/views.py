@@ -6,6 +6,9 @@ from django.views.generic import View
 from django.db.models import Count
 import json
 from core.models import Person
+from core.utils import get_office_session
+from guardian.core import ObjectPermissionChecker
+from guardian.shortcuts import  get_groups_with_perms
 
 
 class ChatListView(ListView):
@@ -13,10 +16,11 @@ class ChatListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.user.person.is_admin:
+        checker = ObjectPermissionChecker(self.request.user)
+        if checker.has_perm('group_admin', get_office_session(self.request)):
             context['chats'] = Chat.objects.all()
         else:
-            context['chats'] = Chat.objects.filter(users__user_by_chat=self.request.user).order_by(
+            context['chats'] = Chat.objects.filter(users__user_by_chat=self.request.user, users__is_active=True).order_by(
                 'pk').distinct('pk')
         return context
 

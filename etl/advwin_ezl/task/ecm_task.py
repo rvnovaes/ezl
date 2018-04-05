@@ -75,27 +75,26 @@ class EcmEtl(GenericETL):
         for row in rows:
             print(row)
             try:
-                if 'Agenda' in row['path']:
-                    path = ecm_path_advwin2ezl(row['path'])
-                    tasks = Task.objects.filter(legacy_code=row['task_legacy_code'])
-                    for task in tasks:
-                        try:
-                            ecm = self.model(path=path, task=task, is_active=True,
-                                             legacy_code=row['ecm_legacy_code'],
-                                             system_prefix=LegacySystem.ADVWIN.value,
-                                             create_user=user,
-                                             alter_user=user, updated=False)
-                            ecm.save()
-                            self.debug_logger.debug(
-                                'ECM,%s,%s,%s,%s' % (
-                                    str(row['ecm_legacy_code']), str(row['task_legacy_code']),
-                                    str(row['path']), self.timestr))
-                        except IntegrityError as e:
-                            msg = get_message_log_default(
-                                self.model._meta.verbose_name, rows_count, e,
-                                self.timestr)
-                            self.error_logger.error(msg)
-                            save_error_log(log, user, msg)
+                path = ecm_path_advwin2ezl(row['path'])
+                tasks = Task.objects.filter(legacy_code=row['task_legacy_code'])
+                for task in tasks:
+                    try:
+                        ecm = self.model(path=path, task=task, is_active=True,
+                                         legacy_code=row['ecm_legacy_code'],
+                                         system_prefix=LegacySystem.ADVWIN.value,
+                                         create_user=user,
+                                         alter_user=user, updated=False)
+                        ecm.save()
+                        self.debug_logger.debug(
+                            'ECM,%s,%s,%s,%s' % (
+                                str(row['ecm_legacy_code']), str(row['task_legacy_code']),
+                                str(row['path']), self.timestr))
+                    except IntegrityError as e:
+                        msg = get_message_log_default(
+                            self.model._meta.verbose_name, rows_count, e,
+                            self.timestr)
+                        self.error_logger.error(msg)
+                        save_error_log(log, user, msg)
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,
                                               rows_count, e, self.timestr)

@@ -35,19 +35,23 @@ from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
     record_from_wrong_office, DELETE_SUCCESS_MESSAGE, ADDRESS_UPDATE_ERROR_MESSAGE, ADDRESS_UPDATE_SUCCESS_MESSAGE, \
     USER_CREATE_SUCCESS_MESSAGE
-from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, OfficeMixin, \
-    InviteOffice
+from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
+    OfficeMixin, \
+    InviteOffice, OfficeMembership
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
-    InviteOfficeTable
+    InviteOfficeTable, OfficeMembershipTable
 from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
-from task.models import Task
+from task.models import Task, TaskStatus
 from task.metrics import get_correspondent_metrics
 from ecm.forms import AttachmentForm
 from ecm.utils import attachment_form_valid, attachments_multi_delete
 from django.core.validators import validate_email
+from guardian.core import ObjectPermissionChecker
+from guardian.shortcuts import get_groups_with_perms
+from django.contrib.sites.shortcuts import get_current_site
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -93,7 +97,7 @@ def login(request):
 @login_required
 def inicial(request):
     if request.user.is_authenticated:
-        if request.user.person.offices.all().exists():
+        if request.user.person.offices.active_offices().exists():
             set_office_session(request)
             if not get_office_session(request):
                 return HttpResponseRedirect(reverse_lazy('office_instance'))
@@ -398,7 +402,7 @@ class SingleTableViewMixin(SingleTableView):
             office = Office.objects.filter(pk=int(current_office_session.get(
                 'current_office'))).values_list('id', flat=True)
         if not office:
-            office = self.request.user.person.offices.all().values_list('id', flat=True)
+            office = self.request.user.person.offices.active_offices().values_list('id', flat=True)
 
         generic_search = GenericSearchFormat(self.request, self.model, self.model._meta.fields)
         args = generic_search.despatch(office=office)
@@ -468,8 +472,8 @@ class PersonListView(CustomLoginRequiredView, SingleTableViewMixin):
         context = super(PersonListView, self).get_context_data(**kwargs)
         office_session = get_office_session(request=self.request)
         table = self.table_class(
-            context['table'].data.data.filter(offices=office_session).exclude(pk__in=Organ.objects.all()).order_by(
-                '-pk'))
+            context['table'].data.data.filter(offices=office_session, officemembership__is_active=True).exclude(
+                pk__in=Organ.objects.all()).order_by('-pk'))
         context['table'] = table
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         return context
@@ -519,7 +523,10 @@ class PersonCreateView(AuditFormMixin, CreateView):
                 return self.form_invalid(form)
 
             self.object = form.save()
-            self.object.offices.add(office_session)
+            OfficeMembership.objects.create(person=self.object,
+                                            office=get_office_session(self.request),
+                                            create_user=self.request.user,
+                                            is_active=True)
 
             if personaddress.is_valid():
                 address = personaddress.forms[0].save(commit=False)
@@ -545,7 +552,8 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
         user = User.objects.get(id=self.request.user.id)
-        kw['is_admin'] = user.person.is_admin
+        checker = ObjectPermissionChecker(user)
+        kw['is_admin'] = checker.has_perm('group_admin', get_office_session(self.request))
         return kw
 
     def get_success_url(self):
@@ -765,14 +773,30 @@ class UserCreateView(AuditFormMixin, CreateView):
         return reverse_lazy('user_list')
 
     def form_valid(self, form):
-        form.save()
-        form.instance.person.offices.add(get_office_session(self.request))
+        form.save(commit=False)
+        offices_user = []
         if form.is_valid:
-            groups = form.cleaned_data['groups']
-            ids = list(group.id for group in groups)
+            have_group = False
+            for office in self.request.user.person.offices.all():
+                groups = self.request.POST.getlist('office_' + str(office.id), '')
+                if groups and not form.instance.id:
+                    form.save()
+                    for group_office in office.office_groups.all():
+                        if str(group_office.group.id) in groups:
+                            if office not in offices_user:
+                                offices_user.append(office)
+                            offices_user.append(office)
+                            group_office.group.user_set.add(form.instance)
+                            have_group = True
+            if not have_group:
+                form.add_error(None, "O usuário deve pertencer a pelo menos um grupo")
+                return self.form_invalid(form)
 
-            for group in Group.objects.filter(id__in=ids):
-                group.user_set.add(form.instance)
+            for office in offices_user:
+                OfficeMembership.objects.create(person=form.instance.person,
+                                                office=office,
+                                                create_user=self.request.user,
+                                                is_active=True)
 
         super(UserCreateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
@@ -791,15 +815,26 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         return self.initial.copy()
 
     def form_valid(self, form):
-        form.save()
+        form.save(commit=False)
+        checker = ObjectPermissionChecker(self.request.user)
         if form.is_valid:
-            groups = form.cleaned_data['groups']
-            ids = list(group.id for group in groups)
+            have_group = True
+            for office in form.instance.person.offices.all():
+                if checker.has_perm('can_access_general_data', office):
+                    have_group = False
+                    groups = self.request.POST.getlist('office_' + str(office.id), '')
+                    for group_office in office.office_groups.all():
+                        if str(group_office.group.id) in groups:
+                            group_office.group.user_set.add(form.instance)
+                            have_group = True
+                        else:
+                            group_office.group.user_set.remove(form.instance)
+            if not have_group:
+                form.add_error(None, "O usuário deve pertencer a pelo menos um grupo")
+                return self.form_invalid(form)
 
-            for group in Group.objects.filter(id__in=ids):
-                group.user_set.add(form.instance)
+            form.save()
             default_office = form.cleaned_data['office']
-
             obj = DefaultOffice.objects.filter(auth_user=form.instance).first()
             if obj:
                 obj.office = default_office
@@ -871,7 +906,7 @@ class OfficeListView(CustomLoginRequiredView, SingleTableViewMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['table'] = self.table_class(
-            context['table'].data.data.filter(pk__in=self.request.user.person.offices.all()))
+            context['table'].data.data.filter(pk__in=self.request.user.person.offices.active_offices()))
         RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
 
@@ -885,7 +920,13 @@ class OfficeCreateView(AuditFormMixin, CreateView):
     def form_valid(self, form):
         form.instance.create_user = self.request.user
         form.instance.save()
-        form.instance.persons.add(form.instance.create_user.person)
+        OfficeMembership.objects.create(person=form.instance.create_user.person,
+                                        office=form.instance,
+                                        create_user=form.instance.create_user,
+                                        is_active=True)
+        for group in {group for group, perms in
+                      get_groups_with_perms(form.instance, attach_perms=True).items() if 'group_admin' in perms}:
+            form.instance.create_user.groups.add(group)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -903,10 +944,14 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
     def get_context_data(self, **kwargs):
         kwargs.update({
             'table': AddressOfficeTable(self.object.get_address()),
+            'table_members': OfficeMembershipTable(
+                self.object.officemembership_set.filter(is_active=True, person__auth_user__isnull=False)
+                    .exclude(person__auth_user=self.request.user)),
         })
         data = super().get_context_data(**kwargs)
         data['inviteofficeform'] = InviteForm(self.request.POST) \
             if InviteForm(self.request.POST).is_valid() else InviteForm()
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(kwargs.get('table_members'))
         return data
 
 
@@ -1039,6 +1084,7 @@ class InviteCreateView(AuditFormMixin, CreateView):
             form.instance.person = Person.objects.filter(pk=person).first() if person else None
             form.instance.office = Office.objects.get(pk=office)
             form.instance.email = email
+            form.instance.__host = '{}://{}'.format(request.scheme, request.META.get('HTTP_X_FORWARDED_HOST', request.META.get('HTTP_HOST')))
             form.instance.save()
         return JsonResponse({'status': 'ok'})
 
@@ -1070,7 +1116,10 @@ class InviteUpdateView(UpdateView):
         invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
         invite.status = request.POST.get('status')
         if invite.status == 'A':
-            invite.office.persons.add(request.user.person.pk)
+            OfficeMembership.objects.update_or_create(person=request.user.person,
+                                                      office=invite.office,
+                                                      defaults={'create_user': self.request.user,
+                                                                'is_active': True})
         invite.save()
         return HttpResponse('ok')
 
@@ -1280,3 +1329,58 @@ class TypeaHeadInviteOfficeSearch(TypeaHeadGenericSearch):
         for office in Office.objects.filter(Q(legal_name__unaccent__icontains=q)):
             data.append({'id': office.id, 'data-value-txt': office.legal_name})
         return list(data)
+
+
+class OfficeMembershipInactiveView(UpdateView):
+    model = OfficeMembership
+    success_message = "Usuário desvinculado com sucesso!"
+
+    def post(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            pks = request.POST.getlist('selection')
+
+            try:
+                for record in self.model.objects.filter(pk__in=pks):
+                    if not Task.objects.filter(~Q(Q(task_status=TaskStatus.FINISHED) |
+                                                  Q(task_status=TaskStatus.REFUSED) |
+                                                  Q(task_status=TaskStatus.REFUSED_SERVICE) |
+                                                  Q(task_status=TaskStatus.BLOCKEDPAYMENT)),
+                                               Q(Q(person_asked_by=record.person) |
+                                                 Q(person_executed_by=record.person) |
+                                                 Q(person_distributed_by=record.person))):
+                        record.is_active = False
+                        record.save()
+                        try:
+                            DefaultOffice.objects.filter(auth_user=record.person.auth_user, office=record.office).delete()
+                        except:
+                            pass
+                    else:
+                        messages.error(self.request, "O usuário {} não pode ser desvinculado do escritório, uma vez que"
+                                                     " ainda existem OS a serem cumpridas por ele".format(record.person))
+                messages.success(self.request, self.success_message)
+            except ProtectedError as e:
+                qs = e.protected_objects.first()
+                messages.error(self.request,
+                               delete_error_protected(str(self.model._meta.verbose_name),
+                                                      qs.__str__()))
+
+        # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
+        if self.success_url:
+            return HttpResponseRedirect(self.success_url)
+        else:
+            return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})
+
+
+class TagsInputPermissionsView(View):
+    def get(self, request, office_pk, *args, **kwargs):
+        groups = Office.objects.get(pk=office_pk).office_groups.all()
+        data = []
+        for group in groups:
+            data.append({
+                'value': group.group.pk,
+                'text': group.label_group
+            })
+        return JsonResponse(data, safe=False)

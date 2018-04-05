@@ -3,13 +3,14 @@ from django.db import connection
 from django.contrib.auth.models import User
 
 from core.models import Country, State, City, Person, Address, AddressType, ContactMechanism, \
-    ContactMechanismType, Office
+    ContactMechanismType, Office, OfficeMembership
 from core import signals
 from lawsuit.models import TypeMovement, Instance, Folder, CourtDivision, CourtDistrict, LawSuit, \
     Movement, Organ
 from task.models import TypeTask, Task, TaskStatus, TaskHistory
 from financial.models import CostCenter
 from etl.utils import get_default_office
+from django.utils import timezone
 
 
 config_parser = get_parser()
@@ -181,9 +182,12 @@ class DefaultOffice(object):
     @staticmethod
     def create():
         admin = User.objects.filter(username='admin').first()
-        admin_person = Person.objects.filter(auth_user=admin).first()
+        admin_person = admin.person
         default_office = get_default_office()
-        default_office.persons.add(admin_person)
+        OfficeMembership.objects.get_or_create(person=admin_person,
+                                               office=default_office,
+                                               create_user=admin,
+                                               is_active=True)
 
 
 if __name__ == '__main__':

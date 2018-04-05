@@ -11,7 +11,7 @@
             <span class="hide-menu">Pesquisar</span>
         </a>
     </li>
-    {% if perms.core.can_access_general_data %}
+    {% if 'can_access_general_data' in office_session_perms %}
     <li> <!-- CADASTROS -->
         <a href="javascript:void(0)" class="waves-effect">
             <i class="fa fa-pencil-square-o fa-fw" data-icon="v"></i>
@@ -93,7 +93,7 @@
                     <span class="hide-menu">Escritórios</span>
                 </a>
             </li>
-            {% if perms.core.can_edit_surveys %}
+            {% if 'can_edit_surveys' in office_session_perms %}
                 <li> <!-- QUESTIONARIOS -->
                     <a href="{% url 'survey_list' %}" target="_self">
                         <i class="fa fa-check-square-o fa-fw"></i>

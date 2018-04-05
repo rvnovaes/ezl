@@ -1,3 +1,4 @@
+{% load core_filters %}
 <div id="to-assign" class="modal fade"
     tabindex="-1" role="alert" aria-labelledby="modalTitle"
     aria-hidden="true">
@@ -19,12 +20,8 @@
                             <select class="person-to-assign form-control" style='width: 100%;'
                                     name="person_executed_by">
                                 <option value="" selected></option>
-                                {% for person in task.office.persons.all %}
-                                    {% for group in person.auth_user.groups.all %}
-                                        {% if group.name == 'Correspondente' %}
-                                            <option value="{{ person.pk }}">{{ person.name }}</option>
-                                        {% endif %}
-                                    {% endfor %}
+                                {% for person in task.office.persons.active_offices|get_correspondent:task.office %}
+                                    <option value="{{ person.pk }}">{{ person.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>

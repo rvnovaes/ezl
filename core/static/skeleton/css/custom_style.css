@@ -1,0 +1,9 @@
+/* Isto coloca scroll no modal para nao ter problema no formulario de pesquisa */
+/* Important part */
+.modal-dialog{
+    overflow-y: initial !important;
+}
+.modal-body {
+    overflow-y: auto !important;
+    max-height: 500px;
+}

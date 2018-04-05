@@ -1,5 +1,7 @@
 from django import template
 from django.conf import settings
+from core.models import Office
+
 
 register = template.Library()
 
@@ -85,3 +87,34 @@ def label_capitalizer(text):
 @register.filter
 def get_class_name(value):
     return value.__class__.__name__
+
+
+@register.filter
+def get_permission_label(value):
+    return value.split('-')[0]
+
+
+@register.filter
+def get_selected_state_group(user, group):
+    if user.groups.filter(id=group.id).first():
+        return 'selected'
+    return ''
+
+
+@register.filter
+def get_office_session_pk(request):
+    if request.session.get('custom_session_user') and request.user.pk:
+        return int(request.session.get('custom_session_user').get(
+            str(request.user.pk)).get('current_office'))
+    return None
+
+
+@register.filter
+def order_groups_by_office_name(request):
+    return request.order_by('officerelgroup__office__name')
+
+
+@register.filter
+def get_correspondent(persons, office):
+    return persons.filter(auth_user__groups__name__startswith='Correspondente-{}'.format(office.pk))
+

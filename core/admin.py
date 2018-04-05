@@ -1,7 +1,7 @@
 from django.contrib import admin
 from core.models import AddressType, ContactMechanismType, ContactMechanism
 #Todo: Remover office
-from core.models import Office, Invite, InviteOffice
+from core.models import Office, Invite, InviteOffice, OfficeRelGroup
 
 
 @admin.register(ContactMechanismType)
@@ -42,6 +42,12 @@ class InviteUserAdmin(admin.ModelAdmin):
 class InviteOfficeAdmin(admin.ModelAdmin):
     list_display = ['pk', 'create_user', 'office_invite', 'office', 'status']
     fields = ['create_user', 'office_invite', 'office', 'status']
+
+
+@admin.register(OfficeRelGroup)
+class OfficeRelGroupAdmin(admin.ModelAdmin):
+    list_display = ['pk', 'office', 'group']
+
 
 
 admin.site.register(AddressType)
