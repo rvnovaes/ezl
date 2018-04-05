@@ -19,6 +19,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
+from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 
@@ -34,7 +35,7 @@ from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
 from task.filters import TaskFilter
 from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm, TaskToAssignForm, FilterForm
-from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter
+from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskGeolocation
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable, FilterTable
 from financial.models import ServicePriceTable
@@ -44,6 +45,7 @@ from financial.tables import ServicePriceTableTaskTable
 from core.utils import get_office_session
 from ecm.models import DefaultAttachmentRule, Attachment
 from task.utils import get_task_attachment
+from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import  get_groups_with_perms
 
@@ -999,3 +1001,52 @@ class FilterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = Filter
     success_url = reverse_lazy('filter_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+
+
+class GeolocationTaskCreate(CustomLoginRequiredView, View):
+
+    def post(self, request):
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+        checkpointtype = request.POST.get('checkpointtype')
+        task_id = request.POST.get('task_id')
+        check_date = timezone.now()
+        task = Task.objects.filter(pk=task_id).first()
+        if task and latitude and longitude:
+            taskgeolocation = TaskGeolocation.objects.filter(task=task, checkpointtype=checkpointtype).first()
+            if taskgeolocation:
+                taskgeolocation.latitude = Decimal(latitude)
+                taskgeolocation.longitude = Decimal(longitude)
+                taskgeolocation.date = check_date
+                taskgeolocation.alter_user = request.user
+                taskgeolocation.save()
+            else:
+                TaskGeolocation.objects.create(latitude=Decimal(latitude),
+                                               longitude=Decimal(longitude),
+                                               create_user=request.user,
+                                               date=check_date,
+                                               checkpointtype=checkpointtype,
+                                               task=task
+                                               )
+            return JsonResponse({"ok": True,
+                                "latitude": latitude,
+                                "longitude": longitude,
+                                "check_date": date_format(timezone.localtime(check_date), 'DATETIME_FORMAT')})
+        return JsonResponse({"ok": False})
+
+
+class GeolocationTaskFinish(CustomLoginRequiredView, View):
+
+    def post(self, request):
+        finished_date = timezone.now()
+        task_id = request.POST.get('task_id')
+        task = Task.objects.filter(pk=task_id).first()
+        if task:
+            taskgeolocation = TaskGeolocation.objects.filter(task=task).first()
+            if taskgeolocation:
+                taskgeolocation.finished_date = finished_date
+                taskgeolocation.alter_user = request.user
+                taskgeolocation.save()
+            return JsonResponse({"ok": True,
+                                "finished_date": date_format(timezone.localtime(finished_date), 'DATETIME_FORMAT')})
+        return JsonResponse({"ok": False})
