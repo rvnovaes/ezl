@@ -240,13 +240,6 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
                 data = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query)
                 data_error = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query,
                                                                                                    task_status=TaskStatus.ERROR)
-        # nao mostra as OSs dos status de "erro" e "solicitadas" para pessoas que forem correspondente ou solicitante
-        elif (checker.has_perm('view_distributed_tasks', office_session) or checker.has_perm('view_all_tasks',
-                                                                                             office_session)) and office_session:
-            data = data | DashboardViewModel.objects.filter(office_id=office_session.id).filter(
-                task_status=TaskStatus.REQUESTED)
-            data_error = data_error | DashboardViewModel.objects.filter(office_id=office_session.id).filter(
-                task_status=TaskStatus.ERROR)
         return data, data_error, office_session
 
     @staticmethod
@@ -336,7 +329,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
 
     @staticmethod
     def get_query_distributed_tasks(person):
-        return Q(person_distributed_by=person.id)
+        return Q(task_status=TaskStatus.REQUESTED) | Q(task_status=TaskStatus.ERROR) | Q(person_distributed_by=person.id)
 
     def get_dynamic_query(self, person, checker):
         dynamic_query = Q()
@@ -479,14 +472,21 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
                 'message': exception_create()}
 
         for file in files:
-
+            obj_task = Task.objects.get(id=task)
             ecm = Ecm(path=file,
-                      task=Task.objects.get(id=task),
+                      task=obj_task,
                       create_user_id=str(request.user.id),
                       create_date=timezone.now())
 
             try:
                 ecm.save()
+                if obj_task.parent:
+                    # Salva o anexo na os pai
+                    ecm_parent = Ecm(path=file,
+                                     task=obj_task.parent,
+                                     create_user_id=str(request.user.id),
+                                     create_date=timezone.now())
+                    ecm_parent.save()
                 data = {'success': True,
                         'id': ecm.id,
                         'name': str(file),

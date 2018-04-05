@@ -112,3 +112,9 @@ def get_office_session_pk(request):
 @register.filter
 def order_groups_by_office_name(request):
     return request.order_by('officerelgroup__office__name')
+
+
+@register.filter
+def get_correspondent(persons, office):
+    return persons.filter(auth_user__groups__name__startswith='Correspondente-{}'.format(office.pk))
+
