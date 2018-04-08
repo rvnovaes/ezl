@@ -61,7 +61,14 @@
                                         <span class="text-info">Você não recebeu avaliações nos últimos 3 meses</span>
                                     {% endif %}
                                 </p>
-                                <p><strong>OS Retornadas:</strong> {{ returned_os }} %</p>
+                                <p>
+                                    <strong>OS Retornadas:</strong>
+                                    {% if returned_os %}
+                                        {{ returned_os }} %
+                                    {% else %}
+                                        <span class="text-info">Você não possui OS retornadas</span>
+                                    {% endif %}
+                                </p>
                             </div>
                         </div>
                     </div>
