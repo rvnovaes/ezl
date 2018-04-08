@@ -1,6 +1,7 @@
 from django.db import models
 from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager, Office
 from decimal import Decimal
+from task.metrics import get_correspondent_metrics
 
 
 class CostCenter(Audit, LegacyCode, OfficeMixin):
@@ -79,6 +80,10 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
     )
 
     objects = OfficeManager()
+
+    @property
+    def correspondent_rating(self):
+        return get_correspondent_metrics(self.correspondent)['rating']
 
     def __str__(self):
         return self.office.name if self.office else ""
