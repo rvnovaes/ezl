@@ -38,10 +38,11 @@ var chatReadMessage = function (chat_id, csrf_token) {
     })
 };
 
-var count_message = setInterval(function () {
+setInterval(function () {
+    var has_groups = $("[badge-id]").length > 0
     $.ajax({
         type: "GET",
-        url: "/chat/count_message/",
+        url: "/chat/count_message/?has_groups=" + has_groups,
         data: {},
         success: function (response) {
             if (response.all_messages > 0) {
@@ -60,11 +61,13 @@ var count_message = setInterval(function () {
                 $("#li-message-center").addClass('hide');
                 $("#message-center").addClass('hide');
             }
-            setBadgeItem(response.grouped_messages)
+            if (has_groups){
+                setBadgeItem(response.grouped_messages)
+            }
         },
         dataType: "json"
     });
-}, 5000);
+}, 3000);
 
 
 var formatDate = function (strDate) {

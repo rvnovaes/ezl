@@ -373,6 +373,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         if form.instance.task_status == TaskStatus.REFUSED_SERVICE:
             form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.OPEN:
+            if not form.instance.person_distributed_by:
+                form.instance.person_distributed_by = self.request.user.person
             form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else None)
             servicepricetable_id = (
                 self.request.POST['servicepricetable_id'] if self.request.POST['servicepricetable_id'] else None)
