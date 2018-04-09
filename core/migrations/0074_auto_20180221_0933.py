@@ -55,7 +55,7 @@ def populate_office_persons(apps, schema_editor):
             user.groups.add(Group.objects.get(
                 name='{}-{}-{}'.format(Person.SUPERVISOR_GROUP, default_office.pk, default_office.legal_name)))
         Person = apps.get_model('core', 'Person')
-        persons_active = Person.objects.filter(is_active=True).all()
+        persons = Person.objects.all()
         User = apps.get_model('auth', 'User')
         Office = apps.get_model('core','Office')
         admin = User.objects.filter(username='admin').first()
@@ -65,7 +65,7 @@ def populate_office_persons(apps, schema_editor):
                          create_user=admin,
                          is_active=True,
                          create_date=timezone.now()).save()
-        for person in persons_active:
+        for person in persons:
             OfficeMembership(office=default_office,
                              person=person,
                              create_user=admin,

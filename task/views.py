@@ -233,6 +233,8 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         data = []
         data_error = []
         office_session = get_office_session(self.request)
+        if not office_session:
+            return data, data_error, office_session
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
         if dynamic_query or checker.has_perm('group_admin', office_session):
             # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
