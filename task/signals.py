@@ -179,7 +179,7 @@ def update_status_parent_task(sender, instance, **kwargs):
     :param kwargs:
     :return:
     """
-    if instance.parent:
+    if instance.parent and not instance.task_status == TaskStatus.REQUESTED:
         instance.parent.task_status = get_parent_status(instance.status)
         instance.parent.save()
 

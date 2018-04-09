@@ -113,7 +113,7 @@ def get_office_related_office_field(request):
     initial = None
     office = get_office_session(request)
     if office:
-        queryset = office.offices.all()
+        queryset = office.offices.all().order_by('legal_name')
 
     return forms.ModelChoiceField(
         queryset=queryset,
