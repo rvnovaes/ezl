@@ -79,11 +79,20 @@ class TaskETL(GenericETL):
                      a.CodMov = cm.Codigo
                 WHERE
                     cm.UsarOS = 1 AND
+                    a.Status = '0' AND -- STATUS ATIVO
                     (p.Status = 'Ativa' OR p.Status = 'Especial') AND
                     (a.SubStatus = 10 OR a.SubStatus = 11) AND
-                    p.Cliente IN ('{cliente}') AND
-                    a.Status = '0' AND -- STATUS ATIVO
-                    p.Unidade IN ('11') -- Unidade BH-Centro
+                    (
+                      (
+                        p.Cliente IN ('{cliente}') AND
+                        p.Unidade IN ('11') -- Unidade BH-Centro
+                      ) 
+                      OR
+                      (
+                        p.Cliente IN ('17155730000164') AND
+                        p.Unidade IN ('01') -- Unidade Savassi
+                      )
+                    )
 
     """
     model = Task
