@@ -14,7 +14,10 @@ def person_office(apps, schema_editor):
     from core.models import Office, OfficeMembership
     from financial.models import ServicePriceTable
     admin = User.objects.filter(username='admin').first()
-    office_mt = Office.objects.get(cpf_cnpj='03.482.042/0001-02')
+    office_mt = Office.objects.filter(cpf_cnpj='03.482.042/0001-02').last()
+    if not office_mt:
+      return True
+  
     for record in ServicePriceTable.objects.order_by('correspondent__id').all():
         person = record.correspondent
         create_user = User.objects.get(pk=person.auth_user.pk) if person.auth_user else admin
