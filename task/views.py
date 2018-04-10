@@ -377,7 +377,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         if form.instance.task_status == TaskStatus.OPEN:
             if not form.instance.person_distributed_by:
                 form.instance.person_distributed_by = self.request.user.person
-            form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else None)
+            default_amount = Decimal('0.00') if not form.instance.amount else form.instance.amount
+            form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else default_amount)
             servicepricetable_id = (
                 self.request.POST['servicepricetable_id'] if self.request.POST['servicepricetable_id'] else None)
             servicepricetable = ServicePriceTable.objects.filter(id=servicepricetable_id).first()
