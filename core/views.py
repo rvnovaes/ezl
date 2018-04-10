@@ -516,11 +516,13 @@ class PersonCreateView(AuditFormMixin, CreateView):
                 return self.form_invalid(form)
 
             self.object = form.save()
-            OfficeMembership.objects.create(person=self.object,
-                                            office=get_office_session(self.request),
-                                            create_user=self.request.user,
-                                            is_active=True)
-
+            member, created = OfficeMembership.objects.get_or_create(
+                person=self.object, office=get_office_session(self.request),
+                defaults={'create_user': self.request.user, 'is_active': True})
+            if not created:
+                # Caso o relacionamento esteja apenas inativo
+                member.is_active = True
+                member.save()
             if personaddress.is_valid():
                 address = personaddress.forms[0].save(commit=False)
                 address.person = self.object
@@ -786,10 +788,13 @@ class UserCreateView(AuditFormMixin, CreateView):
                 return self.form_invalid(form)
 
             for office in offices_user:
-                OfficeMembership.objects.create(person=form.instance.person,
-                                                office=office,
-                                                create_user=self.request.user,
-                                                is_active=True)
+                member, created = OfficeMembership.objects.get_or_create(
+                    person=form.instance.person, office=office,
+                    defaults={'create_user': self.request.user, 'is_active': True})
+                if not created:
+                    #Caso o relacionamento exista mas esta inativo
+                    member.is_active=True
+                    member.save()
 
         super(UserCreateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
@@ -913,10 +918,13 @@ class OfficeCreateView(AuditFormMixin, CreateView):
     def form_valid(self, form):
         form.instance.create_user = self.request.user
         form.instance.save()
-        OfficeMembership.objects.create(person=form.instance.create_user.person,
-                                        office=form.instance,
-                                        create_user=form.instance.create_user,
-                                        is_active=True)
+        member, created = OfficeMembership.objects.get_or_create(
+            person=form.instance.create_user.person, office=form.instance,
+            defaults={'create_user': form.instance.create_user, 'is_active': True})
+        if not created:
+            # Caso o relacionamento esteja apenas inativo
+            member.is_active = True
+            member.save()
         for group in {group for group, perms in
                       get_groups_with_perms(form.instance, attach_perms=True).items() if 'group_admin' in perms}:
             form.instance.create_user.groups.add(group)
