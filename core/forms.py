@@ -411,11 +411,11 @@ class ResetPasswordFormMixin(forms.Form):
             temp_key = token_generator.make_token(user)
 
             # send the password reset email
+            base_url = '{}://{}'.format(request.scheme, request.META.get('HTTP_X_FORWARDED_HOST', request.META.get('HTTP_HOST')))
             path = reverse("account_reset_password_from_key",
                            kwargs=dict(uidb36=user_pk_to_url_str(user),
                                        key=temp_key))
-            url = build_absolute_uri(
-                request, path)
+            url = '{}{}'.format(base_url, path)
 
             context = {"current_site": current_site,
                        "user": user,
