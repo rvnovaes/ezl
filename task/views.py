@@ -895,7 +895,7 @@ def ajax_get_task_data_table(request):
         xdata.append(
             list(
                 map(lambda x: [
-                    x.pk,
+                    x.task.pk,
                     x.task.task_number,
                     x.task.final_deadline_date.strftime('%d/%m/%Y %H:%M') if x.task.final_deadline_date else '',
                     x.task.type_task.name,
