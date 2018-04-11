@@ -1,18 +1,17 @@
+$(document).ready(function(){
+  if (window.location.pathname) {
+    $('.bg-title').addClass('hide')
+  } else {
+    $('.bg-title').removeClass('hide')
+  }
+})
+
 var setBadgeItem = function (items) {
-    var tmpl_msg_list =  '<a href="javascript:void(0)" data-toggle="tooltipe" title="${message__chat__title}">\n' +
-                         '    <div class="mail-contnet">\n' +
-                         '        <h5>\n' +
-                         '            ${message__chat__title}' +
-                         '            <span class="text-danger pull-rigth">(${quantity})</span>\n' +
-                         '        </h5>\n' +
-                         '    </div>\n' +
-                         '</a>'
-    var elm = $("#chat-notify");
-    $('#message-center').html(null);
     items.forEach(function (item) {
+        var elm = $('#notify-' + item.message__chat__pk)
         if (item.quantity > 0) {
             elm.removeClass('hide');
-            $.tmpl(tmpl_msg_list, item).appendTo('#message-center')
+            elm.text(item.quantity)
         } else {
             elm.addClass('hide')
         }
@@ -39,7 +38,7 @@ var chatReadMessage = function (chat_id, csrf_token) {
 };
 
 setInterval(function () {
-    var has_groups = $("[badge-id]").length > 0
+    var has_groups = $("#chat-notify").length > 0
     $.ajax({
         type: "GET",
         url: "/chat/count_message/?has_groups=" + has_groups,
@@ -51,12 +50,12 @@ setInterval(function () {
                 $("#message-center").removeClass('hide');
 
                 if (response.all_messages == 1) {
-                    $("#drop-title").html(response.all_messages + ' Mensagem');
+                    $("#drop-title").html(response.all_messages + ' mensagem não lida');
                 } else {
-                    $("#drop-title").html(response.all_messages + ' Mensagens');
+                    $("#drop-title").html(response.all_messages + ' mensagens não lidas');
                 }
             } else {
-                $("#drop-title").html('0 Mensagens');
+                $("#drop-title").html('0 mensagem não lida');
                 $("#chat-notify").addClass('hide');
                 $("#li-message-center").addClass('hide');
                 $("#message-center").addClass('hide');
