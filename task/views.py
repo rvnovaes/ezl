@@ -903,7 +903,7 @@ def ajax_get_task_data_table(request):
     dynamic_query = dash.get_dynamic_query(request.user.person, checker)
     query = DashboardViewModel.objects.filter(dynamic_query).filter(is_active=True, task_status=status, office=get_office_session(request))
     if status == str(TaskStatus.ERROR):
-        query_error = InconsistencyETL.objects.filter(task__id__in=list(query.values_list('id', flat=True)))
+        query_error = InconsistencyETL.objects.filter(is_active=True, task__id__in=list(query.values_list('id', flat=True)))
         xdata.append(
             list(
                 map(lambda x: [
