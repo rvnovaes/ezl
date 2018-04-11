@@ -784,7 +784,7 @@ class UserCreateView(AuditFormMixin, CreateView):
                             group_office.group.user_set.add(form.instance)
                             have_group = True
             if not have_group:
-                form.add_error(None, "O usuário deve pertencer a pelo menos um grupo")
+                messages.error(self.request, "O usuário deve pertencer a pelo menos um grupo")
                 return self.form_invalid(form)
 
             for office in offices_user:
@@ -828,7 +828,7 @@ class UserUpdateView(AuditFormMixin, UpdateView):
                         else:
                             group_office.group.user_set.remove(form.instance)
             if not have_group:
-                form.add_error(None, "O usuário deve pertencer a pelo menos um grupo")
+                messages.error(self.request, "O usuário deve pertencer a pelo menos um grupo")
                 return self.form_invalid(form)
 
             form.save()
