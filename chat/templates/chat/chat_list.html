@@ -17,14 +17,13 @@
                     {% for chat in chats|dictsortreversed:'alter_date' %}
                         {% if chat.messages.all|length > 0 %}
                         <li>
-                            <a href="javascript:chatGetMessages('{{ chat.pk }}', '{{ chat.label }}')" class="mytooltip" data-chat-label="{{ chat.label }}">
-                                <div class="circle circle-sm bg-info di">OS
-                                    <div class="notify hide" id="notify-{{ chat.pk }}">
-                                        <span class="heartbit"></span>
-                                        <span class="point"></span>
-                                    </div>
+                            <a class="chat-list-a" href="javascript:chatGetMessages('{{ chat.pk }}', '{{ chat.label }}')" class="mytooltip" data-chat-label="{{ chat.label }}" onclick='chatReadMessage("{{chat.pk}}", "{{csrf_token}}")'>
+                              <div class="chat-title">
+                                <span class="label label-rouded label-primary pull-right hide" id="notify-{{ chat.pk }}" style="color:#fff"></span>
+                                  <div class="circle circle-sm bg-info di">OS
+                                  </div>
+                                  <span>{{ chat.title }}</span>
                                 </div>
-                                <span>{{ chat.title }}</span>
                                 <p class="text-muted pull-right"><i class="fa fa-clock-o"></i> {{ chat.alter_date|time }}</p>
                             </a>
                         </li>
