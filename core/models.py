@@ -306,6 +306,9 @@ class Office(AbstractPerson):
     class Meta:
         verbose_name = 'Escritório'
 
+    def __str__(self):
+        return self.legal_name
+
 
 class OfficeMixin(models.Model):
     office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=False,
