@@ -1,11 +1,3 @@
-$(document).ready(function(){
-  if (window.location.pathname) {
-    $('.bg-title').addClass('hide')
-  } else {
-    $('.bg-title').removeClass('hide')
-  }
-})
-
 var setBadgeItem = function (items) {
     items.forEach(function (item) {
         var elm = $('#notify-' + item.message__chat__pk)
