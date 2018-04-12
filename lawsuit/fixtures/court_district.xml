@@ -31050,7 +31050,7 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="name" type="CharField">Bom Jesus de Itabapoana</field>
+        <field name="name" type="CharField">São João do Meriti</field>
         <field name="state" rel="ManyToOneRel" to="core.state">20</field>
     </object>
     <object model="lawsuit.courtdistrict" pk="2825">
@@ -31216,17 +31216,6 @@
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
         <field name="name" type="CharField">Vila Inhomirim</field>
-        <field name="state" rel="ManyToOneRel" to="core.state">20</field>
-    </object>
-    <object model="lawsuit.courtdistrict" pk="2840">
-        <field name="create_date" type="DateTimeField">2018-04-12T18:14:59+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
-        <field name="alter_date" type="DateTimeField"><None></None></field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
-        <field name="legacy_code" type="CharField"><None></None></field>
-        <field name="system_prefix" type="CharField"><None></None></field>
-        <field name="is_active" type="BooleanField">True</field>
-        <field name="name" type="CharField">São João do Meriti</field>
         <field name="state" rel="ManyToOneRel" to="core.state">20</field>
     </object>
 </django-objects>
