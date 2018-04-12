@@ -48,7 +48,7 @@ from task.utils import get_task_attachment
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import  get_groups_with_perms
-
+from django.core.files.base import ContentFile
 
 class TaskListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Task
@@ -474,6 +474,9 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             new_ecm = copy.copy(ecm)
             new_ecm.pk = None
             new_ecm.task = new_task
+            new_file = ContentFile(ecm.path.read())
+            new_file.name = os.path.basename(ecm.path.name)
+            new_ecm.path = new_file
             new_ecm.save()
 
     def dispatch(self, request, *args, **kwargs):
@@ -496,6 +499,7 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
                 'message': exception_create()}
 
         for file in files:
+            file_name = file._name
             obj_task = Task.objects.get(id=task)
             ecm = Ecm(path=file,
                       task=obj_task,
@@ -506,10 +510,12 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
                 ecm.save()
                 if obj_task.parent:
                     # Salva o anexo na os pai
-                    ecm_parent = Ecm(path=file,
-                                     task=obj_task.parent,
-                                     create_user_id=str(request.user.id),
-                                     create_date=timezone.now())
+                    ecm_parent = copy.copy(ecm)
+                    ecm_parent.pk = None
+                    ecm_parent.task = obj_task.parent
+                    new_file = ContentFile(ecm.path.read())
+                    new_file.name = file_name
+                    ecm_parent.path = new_file
                     ecm_parent.save()
                 data = {'success': True,
                         'id': ecm.id,

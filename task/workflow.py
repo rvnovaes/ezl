@@ -2,7 +2,7 @@ from task.models import TaskStatus
 
 PARENT_STATUS = {
     TaskStatus.REQUESTED: TaskStatus.OPEN,
-    TaskStatus.ACCEPTED_SERVICE: TaskStatus.OPEN,
+    TaskStatus.ACCEPTED_SERVICE: TaskStatus.ACCEPTED,
     TaskStatus.REFUSED_SERVICE: TaskStatus.REQUESTED,
     TaskStatus.OPEN: TaskStatus.OPEN,
     TaskStatus.ACCEPTED: TaskStatus.OPEN,
