@@ -21,7 +21,7 @@ from allauth.utils import build_absolute_uri
 from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType, Office, Invite, \
     InviteOffice
-from core.utils import filter_valid_choice_form, get_office_field, get_office_session
+from core.utils import filter_valid_choice_form, get_office_field, get_office_session, get_domain
 from core.widgets import TypeaHeadWidget
 from core.widgets import TypeaHeadForeignKeyWidget
 from core.models import OfficeMixin
@@ -411,11 +411,11 @@ class ResetPasswordFormMixin(forms.Form):
             temp_key = token_generator.make_token(user)
 
             # send the password reset email
+            base_url = get_domain(request)
             path = reverse("account_reset_password_from_key",
                            kwargs=dict(uidb36=user_pk_to_url_str(user),
                                        key=temp_key))
-            url = build_absolute_uri(
-                request, path)
+            url = '{}{}'.format(base_url, path)
 
             context = {"current_site": current_site,
                        "user": user,

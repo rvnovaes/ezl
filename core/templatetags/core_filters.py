@@ -103,9 +103,8 @@ def get_selected_state_group(user, group):
 
 @register.filter
 def get_office_session_pk(request):
-    if request.session.get('custom_session_user') and request.user.pk:
-        return int(request.session.get('custom_session_user').get(
-            str(request.user.pk)).get('current_office'))
+    if request.session.get('custom_session_user') and list(request.session.get('custom_session_user').values())[0]:
+        return int(list(request.session.get('custom_session_user').values())[0].get('current_office'))
     return None
 
 

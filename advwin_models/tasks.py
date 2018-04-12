@@ -13,6 +13,7 @@ from etl.utils import ecm_path_ezl2advwin, get_ecm_file_name
 from task.models import Task, TaskStatus, TaskHistory, Ecm
 from sqlalchemy import and_
 from django.utils import timezone
+from guardian.shortcuts import get_users_with_perms
 
 
 LOGGER = get_task_logger(__name__)
@@ -443,14 +444,24 @@ def export_task(task_id, task=None, execute=True):
 
         return update_advwin_task(task, values, execute)
     elif task.task_status == TaskStatus.OPEN.value:
+        advwin_advogado = None
+        if hasattr(task, 'child'):
+            delegated_to = task.child.office.legal_name
+            for user in {user for user, perms in get_users_with_perms(task.child.office, attach_perms=True).items() if
+                         'group_admin' in perms}:
+                if user.person.legacy_code:
+                    advwin_advogado = user.person.legacy_code
+                    break
+        else:
+            delegated_to = task.person_executed_by.auth_user.username
 
         values = {
             'SubStatus': 30,
-            'Advogado': task.person_executed_by.legacy_code,
-            'Advogado_or': task.person_distributed_by.legacy_code,
+            'Advogado': advwin_advogado,
+            'Advogado_or': task.person_distributed_by.legacy_code if task.person_distributed_by else None,
             'prazo_lido': 0,
             'Data_delegacao': task.delegation_date,
-            'Obs': get_task_observation(task, 'Ordem de Serviço delegada para:' + task.person_executed_by.auth_user.username + ' por ', 'delegation_date'),
+            'Obs': get_task_observation(task, 'Ordem de Serviço delegada para:' + delegated_to + ' por ', 'delegation_date'),
         }
 
         return update_advwin_task(task, values, execute)

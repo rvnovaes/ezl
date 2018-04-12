@@ -146,6 +146,8 @@ class TaskToAssignView(AuditFormMixin, UpdateView):
     def form_valid(self, form):
         super().form_valid(form)
         if form.is_valid():
+            if not form.instance.person_distributed_by:
+                form.instance.person_distributed_by = self.request.user.person
             form.instance.task_status = TaskStatus.OPEN
             # TODO: rever processo de anexo, quando for trocar para o ECM Generico
             get_task_attachment(self, form)
@@ -233,6 +235,8 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         data = []
         data_error = []
         office_session = get_office_session(self.request)
+        if not office_session:
+            return data, data_error, office_session
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
         if dynamic_query or checker.has_perm('group_admin', office_session):
             # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
@@ -373,7 +377,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         if form.instance.task_status == TaskStatus.REFUSED_SERVICE:
             form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.OPEN:
-            form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else None)
+            if not form.instance.person_distributed_by:
+                form.instance.person_distributed_by = self.request.user.person
+            default_amount = Decimal('0.00') if not form.instance.amount else form.instance.amount
+            form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else default_amount)
             servicepricetable_id = (
                 self.request.POST['servicepricetable_id'] if self.request.POST['servicepricetable_id'] else None)
             servicepricetable = ServicePriceTable.objects.filter(id=servicepricetable_id).first()
@@ -477,6 +484,16 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             new_ecm.pk = None
             new_ecm.task = new_task
             new_ecm.save()
+
+    def dispatch(self, request, *args, **kwargs):
+        office_session = get_office_session(request)
+        if office_session != Task.objects.filter(pk=kwargs.get('pk')).first().office:
+            messages.error(self.request, "A OS que está tentando acessar, não pertence ao escritório selecionado."
+                                         " Favor selecionar o escritório correto")
+            del request.session['custom_session_user']
+            request.session.modified = True
+            return HttpResponseRedirect(reverse('office_instance'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class EcmCreateView(CustomLoginRequiredView, CreateView):
@@ -895,12 +912,13 @@ def ajax_get_task_data_table(request):
     dash = DashboardView()
     dash.request = request
     dynamic_query = dash.get_dynamic_query(request.user.person, checker)
+    query = DashboardViewModel.objects.filter(dynamic_query).filter(is_active=True, task_status=status, office=get_office_session(request))
     if status == str(TaskStatus.ERROR):
-        query = InconsistencyETL.objects.filter(dynamic_query).filter(is_active=True, office=get_office_session(request))
+        query_error = InconsistencyETL.objects.filter(is_active=True, task__id__in=list(query.values_list('id', flat=True)))
         xdata.append(
             list(
                 map(lambda x: [
-                    x.pk,
+                    x.task.pk,
                     x.task.task_number,
                     x.task.final_deadline_date.strftime('%d/%m/%Y %H:%M') if x.task.final_deadline_date else '',
                     x.task.type_task.name,
@@ -913,11 +931,10 @@ def ajax_get_task_data_table(request):
                     x.task.legacy_code,
                     x.inconsistency,
                     x.solution,
-                ], query)
+                ], query_error)
             )
         )
     else:
-        query = DashboardViewModel.objects.filter(dynamic_query).filter(task_status=status, office=get_office_session(request))
         xdata.append(
             list(
                 map(lambda x: [

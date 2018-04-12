@@ -70,15 +70,6 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         default=Decimal('0.00')
     )
 
-    correspondent = models.ForeignKey(
-        'core.Person',
-        null=True,
-        blank=True,
-        on_delete=models.PROTECT,
-        related_name='%(class)s_correspondent',
-        verbose_name='Correspondente'
-    )
-
     objects = OfficeManager()
 
     @property
@@ -90,7 +81,7 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         return get_office_correspondent_metrics(self.office_correspondent)['returned_os_rate']
 
     def __str__(self):
-        return self.office.name if self.office else ""
+        return self.office.legal_name if self.office else ""
 
     class Meta:
         db_table = 'service_price_table'

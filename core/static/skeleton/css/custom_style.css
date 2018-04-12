@@ -7,3 +7,25 @@
     overflow-y: auto !important;
     max-height: 500px;
 }
+
+.chat-list-a {
+  padding: 2px !important;
+}
+
+div.chat-title {
+  white-space: nowrap !important;
+  width: auto !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+
+.chatonline {
+  overflow: scroll !important;
+  height: 90% !important;
+}
+
+
+.chat-main-box {
+  /* height: 572px; */
+}

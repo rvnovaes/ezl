@@ -113,7 +113,7 @@ def get_office_related_office_field(request):
     initial = None
     office = get_office_session(request)
     if office:
-        queryset = office.offices.all()
+        queryset = office.offices.all().order_by('legal_name')
 
     return forms.ModelChoiceField(
         queryset=queryset,
@@ -139,3 +139,12 @@ def get_office_session(request):
             office = False
 
     return office
+
+
+def get_domain(request):
+    try:
+        if request.META.get('HTTP_X_FORWARDED_HOST'):
+            return '{}://{}'.format(request.scheme, request.META.get('HTTP_X_FORWARDED_HOST'))
+        return request.META.get('HTTP_REFERER')[:-1]
+    except:
+        return '{}://{}'.format(request.scheme, request.get_host())
