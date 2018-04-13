@@ -50,6 +50,19 @@ class ChatReadMessages(CustomLoginRequiredView, View):
         return JsonResponse({'status': 'ok'})
 
 
+class ChatMarkMessagesUnread(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        chat_id = request.GET.get('chat_id')
+        chat = Chat.objects.filter(pk=int(chat_id)).first()
+        if chat:
+            for message in Message.objects.filter(~Q(create_user=self.request.user),
+                                                  chat=chat).all()
+                UnreadMessage.objects.create(create_user=message.user,
+                                             user_by_message=self.request.user,
+                                             message=message)
+        return JsonResponse({'status': 'ok'})
+
+
 class ChatGetMessages(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):
         chat_id = request.POST.get('chat_id')
