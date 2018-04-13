@@ -2,14 +2,14 @@ from task.models import TaskStatus
 
 PARENT_STATUS = {
     TaskStatus.REQUESTED: TaskStatus.OPEN,
-    TaskStatus.ACCEPTED_SERVICE: TaskStatus.OPEN,
+    TaskStatus.ACCEPTED_SERVICE: TaskStatus.ACCEPTED,
     TaskStatus.REFUSED_SERVICE: TaskStatus.REQUESTED,
-    TaskStatus.OPEN: TaskStatus.OPEN,
-    TaskStatus.ACCEPTED: TaskStatus.OPEN,
-    TaskStatus.REFUSED: TaskStatus.OPEN,
-    TaskStatus.DONE: TaskStatus.OPEN,
-    TaskStatus.RETURN: TaskStatus.OPEN,
-    TaskStatus.BLOCKEDPAYMENT: TaskStatus.OPEN,
+    TaskStatus.OPEN: TaskStatus.ACCEPTED,
+    TaskStatus.ACCEPTED: TaskStatus.ACCEPTED,
+    TaskStatus.REFUSED: TaskStatus.ACCEPTED,
+    TaskStatus.DONE: TaskStatus.ACCEPTED,
+    TaskStatus.RETURN: TaskStatus.ACCEPTED,
+    TaskStatus.BLOCKEDPAYMENT: TaskStatus.DONE,
     TaskStatus.FINISHED: TaskStatus.DONE,
 }
 
