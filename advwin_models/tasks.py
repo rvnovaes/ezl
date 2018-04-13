@@ -373,7 +373,7 @@ def export_task(task_id, task=None, execute=True):
         values = {
             'SubStatus': 40,
             'status_correspondente': 1,
-            'Advogado': task.person_distributed_by.legacy_code,            
+            'Advogado': task.person_distributed_by.legacy_code,
             'Data_correspondente': task.refused_date,
             'Obs': get_task_observation(task, 'Ordem de serviço recusada por', 'refused_date'),
         }
@@ -445,9 +445,9 @@ def export_task(task_id, task=None, execute=True):
         return update_advwin_task(task, values, execute)
     elif task.task_status == TaskStatus.OPEN.value:
         advwin_advogado = None
-        if hasattr(task, 'child'):
-            delegated_to = task.child.office.legal_name
-            for user in {user for user, perms in get_users_with_perms(task.child.office, attach_perms=True).items() if
+        if task.child.exists():
+            delegated_to = task.child.latest('pk').office.legal_name
+            for user in {user for user, perms in get_users_with_perms(task.child.latest('pk').office, attach_perms=True).items() if
                          'group_admin' in perms}:
                 if user.person.legacy_code:
                     advwin_advogado = user.person.legacy_code

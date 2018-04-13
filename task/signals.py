@@ -195,5 +195,5 @@ def update_status_child_task(sender, instance, **kwargs):
     """
     status = get_child_status(instance.status)
     if instance.get_child and status:
-        instance.child.task_status = status
-        instance.child.save()
+        instance.child.latest('pk').task_status = status
+        instance.child.latest('pk').save()

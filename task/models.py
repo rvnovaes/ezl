@@ -155,7 +155,7 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
 class Task(Audit, LegacyCode, OfficeMixin):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
-    parent = models.OneToOneField('self', null=True, blank=True, related_name='child')
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='child')
 
     task_number = models.PositiveIntegerField(verbose_name='Número da Providência',
                                               unique=False)
@@ -286,8 +286,8 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     @property
     def get_child(self):
-        if hasattr(self, 'child'):
-            return self.child
+        if self.child.exists():
+            return self.child.latest('pk')
         return None
 
     @transaction.atomic

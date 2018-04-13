@@ -462,12 +462,13 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         :param office_correspondent: Escritorio responsavel pela nova task
         :return:
         """
+        import pdb; pdb.set_trace()
         new_task = copy.copy(object_parent)
         new_task.legacy_code = None
         new_task.system_prefix = None
         new_task.pk = new_task.task_number = None
         new_task.office = office_correspondent
-        new_task.task_status = TaskStatus.REQUESTED
+        new_task.task_status = TaskStatus.REQUESTED        
         new_task.parent = object_parent
         new_task.save()
         for ecm in object_parent.ecm_set.all():
