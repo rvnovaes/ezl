@@ -1,5 +1,5 @@
 from django.views.generic import ListView
-from chat.models import Chat, UnreadMessage, Message
+from chat.models import Chat, UnreadMessage, Message, UserByChat
 from core.views import CustomLoginRequiredView
 from django.http import JsonResponse
 from django.views.generic import View
@@ -9,6 +9,7 @@ from core.models import Person
 from core.utils import get_office_session
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import  get_groups_with_perms
+from django.db.models import Q
 
 
 class ChatListView(ListView):
@@ -53,14 +54,22 @@ class ChatReadMessages(CustomLoginRequiredView, View):
 class ChatMarkMessagesUnread(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
         chat_id = request.GET.get('chat_id')
-        chat = Chat.objects.filter(pk=int(chat_id)).first()
+        chat = Chat.objects.filter(pk=int(chat_id),
+                                   users__user_by_chat=self.request.user,
+                                   users__is_active=True).first()
+        data = {}
         if chat:
             for message in Message.objects.filter(~Q(create_user=self.request.user),
-                                                  chat=chat).all()
-                UnreadMessage.objects.create(create_user=message.user,
-                                             user_by_message=self.request.user,
+                                                  chat=chat).all():
+                user_by_message = UserByChat.objects.filter(user_by_chat=self.request.user,
+                                                            chat=chat).first()
+                UnreadMessage.objects.create(create_user=message.create_user,
+                                             user_by_message=user_by_message,
                                              message=message)
-        return JsonResponse({'status': 'ok'})
+        data['grouped_messages'] = list(UnreadMessage.objects.filter(
+            user_by_message__user_by_chat=self.request.user
+            ).values('message__chat__pk').annotate(quantity=Count('id')).order_by())
+        return JsonResponse(data)
 
 
 class ChatGetMessages(CustomLoginRequiredView, View):

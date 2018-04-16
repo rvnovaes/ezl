@@ -17,7 +17,9 @@
                     {% for chat in chats|dictsortreversed:'alter_date' %}
                         {% if chat.messages.all|length > 0 %}
                         <li>
-                            <a class="chat-list-a" href="javascript:chatGetMessages('{{ chat.pk }}', '{{ chat.label }}')" class="mytooltip" data-chat-label="{{ chat.label }}" onclick='chatReadMessage("{{chat.pk}}", "{{csrf_token}}")'>
+                            <a class="chat-list-a" href="javascript:chatGetMessages('{{ chat.pk }}', '{{ chat.label }}')" class="mytooltip"
+                                data-chat-label="{{ chat.label }}" onclick='chatReadMessage("{{chat.pk}}", "{{csrf_token}}")'
+                                >
                               <div class="chat-title">
                                 <span class="label label-rouded label-primary pull-right hide" id="notify-{{ chat.pk }}" style="color:#fff"></span>
                                   <div class="circle circle-sm bg-info di">OS
@@ -103,7 +105,12 @@
             '  </div>\n' +
             '</li>\n';
 
-        var tmplChatMessageTitle = '<h4 class="box-title"><a href="${back_url}">${title}</a></h4>\n' +
+        var tmplChatMessageTitle = '<h4 class="box-title"><a href="${back_url}">${title}</a>&nbsp;' +
+                                   '<a class="label label-rouded pull-right label-primary" style="color:#fff" ' +
+                                   'data-balloon="Marcar como não lida" data-balloon-pos="left"' +
+                                   'onclick="chatUnreadMessage(\'${pk}\', \'{{ csrf_token }}\')">' +
+                                   '<i class="mdi mdi-eye-off"></i>' +
+                                   '</a></h4>' +
                                    '<p>${description}</p>';
 
         function to_listen(label) {

@@ -29,3 +29,12 @@ div.chat-title {
 .chat-main-box {
   /* height: 572px; */
 }
+[data-balloon]{
+  z-index: 2 !important;
+}
+[data-balloon]:hover::after{
+  z-index: 9999 !important
+}
+.itemdechat{
+  z-index: 1 !important;
+}
