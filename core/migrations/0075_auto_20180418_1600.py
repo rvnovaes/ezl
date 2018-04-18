@@ -8,7 +8,6 @@ from django.utils import timezone
 
 
 def add_admin_to_offices(apps, schema_editor):
-    import pdb;pdb.set_trace()
     User = apps.get_model('auth', 'User')
     Office = apps.get_model('core', 'Office')
     OfficeMembership = apps.get_model('core', 'OfficeMembership')
