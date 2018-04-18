@@ -16,7 +16,7 @@
                         {% get_model_instance 'core' 'office' office_session_id as office_session %}
                         <tr>
                             <td style="vertical-align: middle;">
-                                {{ office_session.name }}
+                                {{ office_session.legal_name }}
                             </td>
                             <td>
                                 <select class="select2 m-b-10 select2-multiple"
@@ -41,7 +41,7 @@
                         {% if 'can_access_general_data' in office_perms %}
                             <tr>
                                 <td style="vertical-align: middle;">
-                                    {{ office.name }}
+                                    {{ office.legal_name }}
                                 </td>
                                 <td>
                                     {% get_obj_perms request.user for office as "office_perms" %}

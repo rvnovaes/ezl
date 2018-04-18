@@ -9,7 +9,7 @@ from core.models import ContactMechanism, ContactMechanismType, Person
 from django.conf import settings
 from task.mail import SendMail
 from task.models import Task, TaskStatus, TaskHistory, Ecm
-from task.workflow import get_parent_status, get_child_status
+from task.workflow import get_parent_status, get_child_status, get_parent_fields
 
 send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'execution_date'])
 
@@ -159,13 +159,13 @@ def change_status(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Task)
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
-    if not getattr(instance, '_skip_signal'):
-        export_task.delay(instance.pk)
+    if not getattr(instance, '_skip_signal') and instance.legacy_code:
+        export_task(instance.pk)
 
 
 @receiver(post_save, sender=TaskHistory)
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
-    if not getattr(instance, '_skip_signal'):
+    if not getattr(instance, '_skip_signal') and instance.task.legacy_code:
         export_task_history.delay(instance.pk)
 
 
@@ -181,6 +181,9 @@ def update_status_parent_task(sender, instance, **kwargs):
     """
     if instance.parent and not instance.task_status == TaskStatus.REQUESTED:
         instance.parent.task_status = get_parent_status(instance.status)
+        fields = get_parent_fields(instance.status)
+        for field in fields:
+            setattr(instance.parent, field, getattr(instance, field))
         instance.parent.save()
 
 
@@ -195,5 +198,5 @@ def update_status_child_task(sender, instance, **kwargs):
     """
     status = get_child_status(instance.status)
     if instance.get_child and status:
-        instance.child.task_status = status
-        instance.child.save()
+        instance.child.latest('pk').task_status = status
+        instance.child.latest('pk').save()

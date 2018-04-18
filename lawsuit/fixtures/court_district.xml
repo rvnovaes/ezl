@@ -21208,17 +21208,6 @@
         <field name="name" type="CharField">Bom Jardim</field>
         <field name="state" rel="ManyToOneRel" to="core.state">20</field>
     </object>
-    <object model="lawsuit.courtdistrict" pk="1930">
-        <field name="create_date" type="DateTimeField">2017-08-04T18:14:59+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
-        <field name="alter_date" type="DateTimeField"><None></None></field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
-        <field name="legacy_code" type="CharField"><None></None></field>
-        <field name="system_prefix" type="CharField"><None></None></field>
-        <field name="is_active" type="BooleanField">True</field>
-        <field name="name" type="CharField">Bom Jesus de Itabapoana</field>
-        <field name="state" rel="ManyToOneRel" to="core.state">20</field>
-    </object>
     <object model="lawsuit.courtdistrict" pk="1931">
         <field name="create_date" type="DateTimeField">2017-08-04T18:14:59+00:00</field>
         <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
@@ -21843,7 +21832,7 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="name" type="CharField">São Francisco do Itabapoana</field>
+        <field name="name" type="CharField">São Francisco de Itabapoana</field>
         <field name="state" rel="ManyToOneRel" to="core.state">20</field>
     </object>
     <object model="lawsuit.courtdistrict" pk="1988">
@@ -31050,7 +31039,7 @@
         <field name="legacy_code" type="CharField"><None></None></field>
         <field name="system_prefix" type="CharField"><None></None></field>
         <field name="is_active" type="BooleanField">True</field>
-        <field name="name" type="CharField">São João do Meriti</field>
+        <field name="name" type="CharField">Bom Jesus do Itabapoana</field>
         <field name="state" rel="ManyToOneRel" to="core.state">20</field>
     </object>
     <object model="lawsuit.courtdistrict" pk="2825">
@@ -31217,5 +31206,60 @@
         <field name="is_active" type="BooleanField">True</field>
         <field name="name" type="CharField">Vila Inhomirim</field>
         <field name="state" rel="ManyToOneRel" to="core.state">20</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2840">
+        <field name="create_date" type="DateTimeField">2018-03-02T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-03-02T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Arneiroz</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2841">
+        <field name="create_date" type="DateTimeField">2018-03-02T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-03-02T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Santa Luzia do Pará</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">15</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2842">
+        <field name="create_date" type="DateTimeField">2018-03-02T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-03-02T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">São João do Meriti</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">20</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2843">
+        <field name="create_date" type="DateTimeField">2018-03-02T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-03-02T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Carpina</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">17</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2844">
+        <field name="create_date" type="DateTimeField">2018-03-02T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-03-02T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Pau dos Ferros</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">21</field>
     </object>
 </django-objects>
