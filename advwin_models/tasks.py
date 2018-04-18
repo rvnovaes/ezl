@@ -308,7 +308,6 @@ def update_advwin_task(task, values, execute=True):
     if execute:
         LOGGER.debug('Exportando OS %d-%s ', task.id, task)
         try:
-            import pdb; pdb.set_trace()
             result = get_advwin_engine().execute(stmt)
         except Exception as exc:
             result = None

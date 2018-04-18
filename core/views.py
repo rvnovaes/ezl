@@ -930,7 +930,6 @@ class OfficeCreateView(AuditFormMixin, CreateView):
                 member, created = OfficeMembership.objects.update_or_create(
                     person=super_user.person, office=form.instance,
                     defaults={'create_user': form.instance.create_user, 'is_active': True})
-        import pdb;pdb.set_trace()
         if not form.instance.create_user.is_superuser:
             for group in {group for group, perms in
                           get_groups_with_perms(form.instance, attach_perms=True).items() if 'group_admin' in perms}:
