@@ -46,7 +46,9 @@ services:
     command: luigid
     environment:
       ENV: development
-
+  flower:
+    environment:
+      ENV: development
   tasks:
     environment:
       ENV: development
