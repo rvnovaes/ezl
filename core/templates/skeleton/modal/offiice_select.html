@@ -1,0 +1,21 @@
+{% load static %}
+<div id="about-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Selecione o Escritório</h4>
+            </div>
+            <div class="modal-body p-l-20">
+                <ul class="dropdown-menu dropdown-menu-right">
+                {% for office in request.user.person.offices.active_offices %}
+                   <li onclick="updateSession('current_office', '{{office.pk}}', '{{csrf_token}}');"><a href="#">{{office.legal_name}}</a></li>
+                {% endfor %}
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success waves-effect" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
