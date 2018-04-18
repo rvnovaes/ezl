@@ -308,10 +308,11 @@ def update_advwin_task(task, values, execute=True):
     if execute:
         LOGGER.debug('Exportando OS %d-%s ', task.id, task)
         try:
+            import pdb; pdb.set_trace()
             result = get_advwin_engine().execute(stmt)
         except Exception as exc:
             result = None
-            LOGGER.warning('Não foi possíve exportar OS: %d-%s com status %s\n%s',
+            LOGGER.warning('Não foi possível exportar OS: %d-%s com status %s\n%s',
                            task.id,
                            task,
                            task.task_status,
@@ -332,63 +333,24 @@ def export_task(task_id, task=None, execute=True):
 
     table = JuridAgendaTable.__table__
 
-    if task.task_status == TaskStatus.ACCEPTED.value:
-
+    if task.task_status == TaskStatus.ACCEPTED_SERVICE.value:
         values = {
-            'SubStatus': 50,
-            'status_correspondente': 0,
-            'prazo_lido': 0,
+            'SubStatus': 11,
+            'Status': 0,
+            'Advogado_or': task.person_distributed_by.legacy_code,
+            'Data_backoffice': timezone.localtime(task.acceptance_service_date),
             'envio_alerta': 0,
-            'Ag_StatusExecucao': 'Em execucao',
-            'Data_correspondente': timezone.localtime(task.execution_date),
-            'Obs': get_task_observation(task, 'Ordem de serviço aceita por', 'acceptance_date'),
-        }
-
-        return update_advwin_task(task, values, execute)
-
-    elif task.task_status == TaskStatus.DONE.value:
-
-        values = {
-            'SubStatus': 70,
-            'Status': 2,
-            'Data_Fech': timezone.localtime(task.execution_date),
-            'prazo_lido': 1,
-            'Prazo_Interm': 1,
-            'Ag_StatusExecucao': '',
-            'Data_cumprimento': task.execution_date,
-            'Obs': get_task_observation(task, TaskObservation.DONE.value, 'execution_date'),
-        }
-
-        result = update_advwin_task(task, values, execute)
-
-        stmts = result
-
-        if execute:
-            return result
-
-        return stmts
-
-    elif task.task_status == TaskStatus.REFUSED.value:
-
-        values = {
-            'SubStatus': 40,
-            'status_correspondente': 1,
-            'Advogado': task.person_distributed_by.legacy_code,
-            'Data_correspondente': task.refused_date,
-            'Obs': get_task_observation(task, 'Ordem de serviço recusada por', 'refused_date'),
+            'Obs': get_task_observation(task, 'Aceita por Back Office:', 'acceptance_service_date'),
         }
         return update_advwin_task(task, values, execute)
-    elif task.task_status == TaskStatus.FINISHED.value:
+    elif task.task_status == TaskStatus.REFUSED_SERVICE.value:
         values = {
-            'SubStatus': 100,
+            'SubStatus': 20,
             'Status': 1,
             'prazo_lido': 1,
-            'Prazo_Interm': 1,
-            'Data_correspondente': task.refused_date,
-            'Ag_StatusExecucao': '',
-            'Data_cumprimento': task.execution_date,
-            'Obs': get_task_observation(task, 'Diligência devidamente cumprida por',
-                                        'finished_date')
+            'Data_backoffice': timezone.localtime(task.refused_service_date),
+            'envio_alerta': 0,
+            'Obs': get_task_observation(task, 'Recusada por Back Office', 'refused_service_date'),
         }
         return update_advwin_task(task, values, execute)
     elif task.task_status == TaskStatus.RETURN.value:
@@ -405,6 +367,70 @@ def export_task(task_id, task=None, execute=True):
                 'return_date')
         }
         return update_advwin_task(task, values, execute)
+    elif task.task_status == TaskStatus.OPEN.value:
+        advwin_advogado = None
+        if task.child.exists():
+            delegated_to = task.child.latest('pk').office.legal_name
+            for user in {user for user, perms in get_users_with_perms(task.child.latest('pk').office, attach_perms=True).items() if
+                         'group_admin' in perms}:
+                if user.person.legacy_code:
+                    advwin_advogado = user.person.legacy_code
+                    break
+        else:
+            advwin_advogado = task.person_executed_by.legacy_code
+            delegated_to = task.person_executed_by.auth_user.username
+
+        values = {
+            'SubStatus': 30,
+            'Advogado': advwin_advogado,
+            'Advogado_or': task.person_distributed_by.legacy_code if task.person_distributed_by else None,
+            'prazo_lido': 0,
+            'Data_delegacao': task.delegation_date,
+            'Obs': get_task_observation(task, 'Ordem de Serviço delegada para:' + delegated_to + ' por ', 'delegation_date'),
+        }
+        return update_advwin_task(task, values, execute)
+    elif task.task_status == TaskStatus.ACCEPTED.value:
+        values = {
+            'SubStatus': 50,
+            'status_correspondente': 0,
+            'prazo_lido': 0,
+            'envio_alerta': 0,
+            'Ag_StatusExecucao': 'Em execucao',
+            'Data_correspondente': timezone.localtime(task.acceptance_date),
+            'Obs': get_task_observation(task, 'Ordem de serviço aceita por', 'acceptance_date'),
+        }
+        return update_advwin_task(task, values, execute)
+    elif task.task_status == TaskStatus.DONE.value:
+        values = {
+            'SubStatus': 70,
+            'Status': 2,
+            'Data_Fech': timezone.localtime(task.execution_date),
+            'prazo_lido': 1,
+            'Prazo_Interm': 1,
+            'Ag_StatusExecucao': '',
+            'Data_cumprimento': timezone.localtime(task.execution_date),
+            'Data_correspondente': timezone.localtime(task.acceptance_date),
+            'Obs': get_task_observation(task, TaskObservation.DONE.value, 'execution_date'),
+        }
+
+        result = update_advwin_task(task, values, execute)
+
+        stmts = result
+
+        if execute:
+            return result
+
+        return stmts
+
+    elif task.task_status == TaskStatus.REFUSED.value:
+        values = {
+            'SubStatus': 40,
+            'status_correspondente': 1,
+            'Advogado': task.person_distributed_by.legacy_code,
+            'Data_correspondente': task.refused_date,
+            'Obs': get_task_observation(task, 'Ordem de serviço recusada por', 'refused_date'),
+        }
+        return update_advwin_task(task, values, execute)
     elif task.task_status == TaskStatus.BLOCKEDPAYMENT.value:
         values = {
             'SubStatus': 90,
@@ -419,49 +445,14 @@ def export_task(task_id, task=None, execute=True):
                                         'blocked_payment_date')
         }
         return update_advwin_task(task, values, execute)
-    elif task.task_status == TaskStatus.ACCEPTED_SERVICE.value:
-
+    elif task.task_status == TaskStatus.FINISHED.value:
         values = {
-            'SubStatus': 11,
-            'Status': 0,
-            'Advogado_or': task.person_distributed_by.legacy_code,
-            'Data_backoffice': timezone.localtime(task.acceptance_service_date),
-            'envio_alerta': 0,
-            'Obs': get_task_observation(task, 'Aceita por Back Office:', 'acceptance_service_date'),
-        }
-
-        return update_advwin_task(task, values, execute)
-    elif task.task_status == TaskStatus.REFUSED_SERVICE.value:
-
-        values = {
-            'SubStatus': 20,
+            'SubStatus': 100,
             'Status': 1,
             'prazo_lido': 1,
-            'Data_backoffice': timezone.localtime(task.refused_service_date),
-            'envio_alerta': 0,
-            'Obs': get_task_observation(task, 'Recusada por Back Office', 'refused_service_date'),
+            'Ag_StatusExecucao': 'Em Execucao',
+            'Data_confirmacao': timezone.localtime(task.finished_date),
+            'Obs': get_task_observation(task, 'Diligência devidamente cumprida por',
+                                        'finished_date')
         }
-
-        return update_advwin_task(task, values, execute)
-    elif task.task_status == TaskStatus.OPEN.value:
-        advwin_advogado = None
-        if task.child.exists():
-            delegated_to = task.child.latest('pk').office.legal_name
-            for user in {user for user, perms in get_users_with_perms(task.child.latest('pk').office, attach_perms=True).items() if
-                         'group_admin' in perms}:
-                if user.person.legacy_code:
-                    advwin_advogado = user.person.legacy_code
-                    break
-        else:
-            delegated_to = task.person_executed_by.auth_user.username
-
-        values = {
-            'SubStatus': 30,
-            'Advogado': advwin_advogado,
-            'Advogado_or': task.person_distributed_by.legacy_code if task.person_distributed_by else None,
-            'prazo_lido': 0,
-            'Data_delegacao': task.delegation_date,
-            'Obs': get_task_observation(task, 'Ordem de Serviço delegada para:' + delegated_to + ' por ', 'delegation_date'),
-        }
-
         return update_advwin_task(task, values, execute)
