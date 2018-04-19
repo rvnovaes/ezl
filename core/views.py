@@ -1391,3 +1391,18 @@ class TagsInputPermissionsView(View):
                 'text': group.label_group
             })
         return JsonResponse(data, safe=False)
+
+
+class OfficeSessionSearch(View):
+    def get(self, request, *args, **kwargs):
+        q = request.GET.get('q', '')
+        offices = request.user.person.offices.all()
+        selected_offices = list(offices.filter(legal_name__icontains=q).values_list('id', flat=True))
+        data = []
+        for office in offices:
+            show = True if office.pk in selected_offices else False
+            data.append({
+                'id': office.pk,
+                'show': show
+            })
+        return JsonResponse(data, safe=False)

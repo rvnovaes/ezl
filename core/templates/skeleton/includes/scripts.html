@@ -73,4 +73,24 @@
         $(window).bind("resize", set);
     });
     {% endif %}
+    function filter_office_session(office_legal_name) {
+        $.ajax({
+            type: 'GET',
+            url: "/office_session_filter/",
+            data: {
+                'object_id': office_legal_name,
+            },
+            dataType: 'json',
+            success: function (data) {
+                $.each(data, function( index, value ) {
+                    console.debug(value);
+                    if (value.show == false){
+                        $("#office-"+value.id).addClass('hide');
+                    }else{
+                        $("#office-"+value.id).removeClass('hide');
+                    }
+                })
+            }
+        });
+    }
 </script>

@@ -29,3 +29,23 @@ div.chat-title {
 .chat-main-box {
   /* height: 572px; */
 }
+.office-card {
+    height: 255px;
+    position: relative;
+}
+.office-legal-name {
+  -ms-word-wrap: break-word;
+  word-wrap: break-word;
+
+  /* Non standard for webkit */
+  word-wrap: break-word;
+
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
+  hyphens: auto;
+}
+.office-select-button {
+    position: absolute;
+    width: 100%;
+    bottom: 10px;
+}
