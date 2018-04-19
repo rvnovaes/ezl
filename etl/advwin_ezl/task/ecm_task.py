@@ -88,12 +88,14 @@ class EcmEtl(GenericETL):
                 tasks = Task.objects.filter(legacy_code=row['task_legacy_code'])
                 for task in tasks:
                     try:
-                        ecm = self.model(path=path, task=task, is_active=True,
-                                         legacy_code=row['ecm_legacy_code'],
-                                         system_prefix=LegacySystem.ADVWIN.value,
-                                         create_user=user,
-                                         alter_user=user, updated=False)
-                        ecm.save()
+                        self.model.objects.get_or_create(task=task,
+                                                         legacy_code=row['ecm_legacy_code'],
+                                                         system_prefix=LegacySystem.ADVWIN.value,
+                                                         defaults={'is_active': True,
+                                                                   'path': path,
+                                                                   'create_user': user,
+                                                                   'alter_user': user,
+                                                                   'updated': False})
                         self.debug_logger.debug(
                             'ECM,%s,%s,%s,%s' % (
                                 str(row['ecm_legacy_code']), str(row['task_legacy_code']),
