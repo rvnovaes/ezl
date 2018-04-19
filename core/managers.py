@@ -41,7 +41,7 @@ class PersonManagerQuerySet(QuerySet):
             'name', 'auth_user').distinct('name', 'auth_user')
 
     def active_offices(self):
-        return self.filter(officemembership__is_active=True)
+        return self.filter(officemembership__is_active=True).order_by('legal_name')
 
     def inactive_offices(self):
-        return self.filter(officemembership__is_active=False)
+        return self.filter(officemembership__is_active=False).order_by('legal_name')
