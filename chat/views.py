@@ -9,6 +9,10 @@ from core.models import Person
 from core.utils import get_office_session
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import  get_groups_with_perms
+from django.shortcuts import render
+
+def chat_teste(request):
+    return render(request, 'chat/chat_test.html', {'teste': {'teste': 'tetando'}})
 
 
 class ChatListView(ListView):
@@ -77,3 +81,11 @@ class ChatGetMessages(CustomLoginRequiredView, View):
             }
         }
         return JsonResponse(data)
+
+class ChatContactView(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        from core.models import Office
+        chats = Chat.objects.filter(users__user_by_chat=self.request.user, users__is_active=True).order_by(
+            'pk').distinct('pk')
+        data = list(Office.objects.filter(chats__in=chats).values('pk', 'legal_name'))
+        return JsonResponse(data, safe=False)

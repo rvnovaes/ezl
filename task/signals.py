@@ -9,7 +9,9 @@ from core.models import ContactMechanism, ContactMechanismType, Person
 from django.conf import settings
 from task.mail import SendMail
 from task.models import Task, TaskStatus, TaskHistory, Ecm
-from task.workflow import get_parent_status, get_child_status, get_parent_fields
+from task.workflow import get_parent_status, get_child_status
+from chat.models import Chat
+from lawsuit.models import CourtDistrict
 
 send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'execution_date'])
 
@@ -159,13 +161,13 @@ def change_status(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Task)
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
-    if not getattr(instance, '_skip_signal') and instance.legacy_code:
+    if not getattr(instance, '_skip_signal'):
         export_task.delay(instance.pk)
 
 
 @receiver(post_save, sender=TaskHistory)
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
-    if not getattr(instance, '_skip_signal') and instance.task.legacy_code:
+    if not getattr(instance, '_skip_signal'):
         export_task_history.delay(instance.pk)
 
 
@@ -181,9 +183,6 @@ def update_status_parent_task(sender, instance, **kwargs):
     """
     if instance.parent and not instance.task_status == TaskStatus.REQUESTED:
         instance.parent.task_status = get_parent_status(instance.status)
-        fields = get_parent_fields(instance.status)
-        for field in fields:
-            setattr(instance.parent, field, getattr(instance, field))
         instance.parent.save()
 
 
@@ -200,3 +199,57 @@ def update_status_child_task(sender, instance, **kwargs):
     if instance.get_child and status:
         instance.child.latest('pk').task_status = status
         instance.child.latest('pk').save()
+
+@receiver(post_save, sender=Task)
+def create_or_update_chat(sender, instance, created, **kwargs):
+    opposing_party = ''
+    if instance.movement and instance.movement.law_suit:
+        opposing_party = instance.movement.law_suit.opposing_party
+    state = ''
+    if isinstance(instance.court_district, CourtDistrict):
+        state = instance.court_district.state
+    description = """
+    Parte adversa: {opposing_party}, Cliente: {client},
+    {court_district} - {state}, Prazo: {final_deadline_date}
+    """.format(opposing_party=opposing_party, client=instance.client,
+               court_district=instance.court_district, state=state,
+               final_deadline_date=instance.final_deadline_date.strftime('%d/%m/%Y %H:%M'))
+    label = 'task-{}'.format(instance.pk)
+    title = """#{task_number} - {type_task}""".format(
+                    task_number=instance.task_number, type_task=instance.type_task)
+    chat, chat_created = Chat.objects.update_or_create(
+        label=label, defaults={
+            'create_user': instance.create_user,
+            'description': description,
+            'title': title,
+            'back_url': '/dashboard/{}'.format(instance.pk),
+        }
+    )
+    instance.chat = chat
+    instance.chat.offices.add(instance.office)
+    if instance.parent:
+        instance.chat.offices.add(instance.parent.office)
+    post_save.disconnect(create_or_update_chat, sender=sender)
+    instance.save()
+    post_save.connect(create_or_update_chat, sender=sender)
+
+
+
+
+    self.create_user_by_chat(self.object, ['person_asked_by', 'person_executed_by',
+                                           'person_distributed_by'])
+
+
+def create_user_by_chat(self, task, fields):
+    users = []
+    for field in fields:
+        user = None
+        if getattr(task, field):
+            user = getattr(getattr(task, field), 'auth_user')
+        if user:
+            user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
+                'create_user': user, 'user_by_chat': user, 'chat': task.chat
+            })
+            user = user.user_by_chat
+        users.append(user)
+    UserByChat.objects.filter(~Q(user_by_chat__in=users), chat=task.chat).update(is_active=False)
