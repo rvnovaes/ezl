@@ -45,6 +45,7 @@ from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task, TaskStatus
+from task.metrics import get_correspondent_metrics
 from ecm.forms import AttachmentForm
 from ecm.utils import attachment_form_valid, attachments_multi_delete
 from django.core.validators import validate_email
@@ -106,11 +107,17 @@ def inicial(request):
         return HttpResponseRedirect('/')
 
 
-class StartUserView(View):
+class StartUserView(TemplateView):
     template_name = 'core/start_user.html'
 
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+    def get_context_data(self):
+        context = super().get_context_data()
+
+        if self.request.user.person.is_correspondent:
+            metrics = get_correspondent_metrics(self.request.user.person)
+            context['rating'] = metrics['rating']
+            context['returned_os'] = metrics['returned_os_rate']
+        return context
 
 
 class OfficeInstanceView(View):

@@ -240,27 +240,27 @@ class AbstractPerson(Audit, LegacyCode):
 
     @property
     def is_admin(self):
-        return True if self.auth_user.groups.filter(name=self.ADMINISTRATOR_GROUP).first() \
+        return True if self.auth_user.groups.filter(name__startswith=self.ADMINISTRATOR_GROUP).first() \
             else False
 
     @property
     def is_correspondent(self):
-        return True if self.auth_user.groups.filter(name=self.CORRESPONDENT_GROUP).first() \
+        return True if self.auth_user.groups.filter(name__startswith=self.CORRESPONDENT_GROUP).first() \
             else False
 
     @property
     def is_requester(self):
-        return True if self.auth_user.groups.filter(name=self.REQUESTER_GROUP).first() \
+        return True if self.auth_user.groups.filter(name__startswith=self.REQUESTER_GROUP).first() \
             else False
 
     @property
     def is_service(self):
-        return True if self.auth_user.groups.filter(name=self.SERVICE_GROUP).first() \
+        return True if self.auth_user.groups.filter(name__startswith=self.SERVICE_GROUP).first() \
             else False
 
     @property
     def is_supervisor(self):
-        return True if self.auth_user.groups.filter(name=self.SUPERVISOR_GROUP).first() \
+        return True if self.auth_user.groups.filter(name__startswith=self.SUPERVISOR_GROUP).first() \
             else False
 
     class Meta:
