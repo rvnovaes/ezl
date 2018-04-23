@@ -3,14 +3,14 @@ from django.db.models.signals import post_init, pre_save, post_save
 from django.dispatch import receiver, Signal
 from django.template.loader import render_to_string
 from django.utils import timezone
-
+from django.db.models import Q
 from advwin_models.tasks import export_ecm, export_task, export_task_history
 from core.models import ContactMechanism, ContactMechanismType, Person
 from django.conf import settings
 from task.mail import SendMail
 from task.models import Task, TaskStatus, TaskHistory, Ecm
 from task.workflow import get_parent_status, get_child_status
-from chat.models import Chat
+from chat.models import Chat, UserByChat
 from lawsuit.models import CourtDistrict
 
 send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'execution_date'])
@@ -200,6 +200,21 @@ def update_status_child_task(sender, instance, **kwargs):
         instance.child.latest('pk').task_status = status
         instance.child.latest('pk').save()
 
+
+def create_or_update_user_by_chat(task, fields):
+    users = []
+    for field in fields:
+        user = None
+        if getattr(task, field):
+            user = getattr(getattr(task, field), 'auth_user')
+        if user:
+            user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
+                'create_user': user, 'user_by_chat': user, 'chat': task.chat
+            })
+            user = user.user_by_chat
+        users.append(user)
+    UserByChat.objects.filter(~Q(user_by_chat__in=users), chat=task.chat).update(is_active=False)
+
 @receiver(post_save, sender=Task)
 def create_or_update_chat(sender, instance, created, **kwargs):
     opposing_party = ''
@@ -227,29 +242,10 @@ def create_or_update_chat(sender, instance, created, **kwargs):
     )
     instance.chat = chat
     instance.chat.offices.add(instance.office)
+    create_or_update_user_by_chat(instance,[
+        'person_asked_by', 'person_executed_by', 'person_distributed_by'])
     if instance.parent:
         instance.chat.offices.add(instance.parent.office)
     post_save.disconnect(create_or_update_chat, sender=sender)
     instance.save()
     post_save.connect(create_or_update_chat, sender=sender)
-
-
-
-
-    self.create_user_by_chat(self.object, ['person_asked_by', 'person_executed_by',
-                                           'person_distributed_by'])
-
-
-def create_user_by_chat(self, task, fields):
-    users = []
-    for field in fields:
-        user = None
-        if getattr(task, field):
-            user = getattr(getattr(task, field), 'auth_user')
-        if user:
-            user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
-                'create_user': user, 'user_by_chat': user, 'chat': task.chat
-            })
-            user = user.user_by_chat
-        users.append(user)
-    UserByChat.objects.filter(~Q(user_by_chat__in=users), chat=task.chat).update(is_active=False)

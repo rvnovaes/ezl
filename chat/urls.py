@@ -7,5 +7,8 @@ urlpatterns = [
     url(r'^chat_read_messages$', views.ChatReadMessages.as_view(), name='chat_read_message'),
     url(r'^chat_get_messages$', views.ChatGetMessages.as_view(), name='chat_get_message'),
     url(r'^chat_teste$', views.chat_teste, name='chat_teste'),
-    url(r'^contact/$', views.ChatContactView.as_view(), name="contact")
+    url(r'^contact/$', views.ChatOfficeContactView.as_view(), name="contact"),
+    url(r'^chats_by_office/$', views.ChatsByOfficeView.as_view(), name="chat_by_office"),
+    url(r'^chat_messages/$', views.ChatMenssage.as_view(), name='chat_messages')
+
 ]

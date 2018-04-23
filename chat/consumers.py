@@ -30,8 +30,10 @@ def ws_message(message):
         for user in UserByChat.objects.filter(~Q(user_by_chat=message.user), chat=chat, is_active=True):
             UnreadMessage.objects.create(create_user=message.user, user_by_message=user,
                                          message=chat_message)
-        data['user'] = message.user.username
-        data['message_create_date'] = timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M')
+        data['create_date'] = timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M')
+        data['create_user_id'] = chat_message.create_user.id
+        data['create_user__username'] = chat_message.create_user.username
+        data['message'] = chat_message.message
         Group(data.get('label')).send({
                 'text': json.dumps(data),
                 })

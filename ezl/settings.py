@@ -253,6 +253,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 # Host configuration to send email
+# Todo: Ao subir descomentar este código
 EMAIL_USE_SSL = email_use_ssl
 EMAIL_HOST = email_host
 EMAIL_PORT = email_port

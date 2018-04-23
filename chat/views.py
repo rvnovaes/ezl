@@ -6,6 +6,7 @@ from django.views.generic import View
 from django.db.models import Count
 import json
 from core.models import Person
+from core.models import Office
 from core.utils import get_office_session
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import  get_groups_with_perms
@@ -20,12 +21,6 @@ class ChatListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        checker = ObjectPermissionChecker(self.request.user)
-        if checker.has_perm('group_admin', get_office_session(self.request)):
-            context['chats'] = Chat.objects.all()
-        else:
-            context['chats'] = Chat.objects.filter(users__user_by_chat=self.request.user, users__is_active=True).order_by(
-                'pk').distinct('pk')
         return context
 
 
@@ -82,10 +77,27 @@ class ChatGetMessages(CustomLoginRequiredView, View):
         }
         return JsonResponse(data)
 
-class ChatContactView(CustomLoginRequiredView, View):
+class ChatOfficeContactView(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
-        from core.models import Office
         chats = Chat.objects.filter(users__user_by_chat=self.request.user, users__is_active=True).order_by(
             'pk').distinct('pk')
-        data = list(Office.objects.filter(chats__in=chats).values('pk', 'legal_name'))
+        data = list(Office.objects.filter(chats__in=chats).values('pk', 'legal_name').distinct('pk'))
         return JsonResponse(data, safe=False)
+
+
+class ChatsByOfficeView(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        office = Office.objects.get(pk=int(request.GET.get('office')))
+        chats = office.chats.filter(users__user_by_chat=self.request.user, users__is_active=True)
+        data = list(chats.values())
+        return JsonResponse(data, safe=False)
+
+class ChatMenssage(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        chat = Chat.objects.get(pk=int(request.GET.get('chat')))
+        messages = list(chat.messages.all().values('message', 'create_user__username', 'create_user_id', 'create_date'))
+        data = {
+            "messages": messages, 
+            "request_user_id": request.user.id
+        }
+        return  JsonResponse(data, safe=False)
