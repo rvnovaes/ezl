@@ -1,4 +1,7 @@
-angular.module('app').controller('chatCtrl', function($scope, $interval, chatApiService){
+angular.module('app').controller('chatCtrl', function($scope, $interval, chatApiService,
+    $location, $anchorScroll){
+
+
   $scope.contacts = [];
   $scope.chats = [];
   $scope.messages = []
@@ -25,16 +28,20 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   };
 
   $scope.getMessages = function(chat){
+    $location.hash('bottom')
+    $anchorScroll()
     $scope.chat = chat
     chatApiService.getMessages(chat.id).then(function(data){
       $scope.messages = data
-      $scope.socket = chatApiService.newSocket(chat.label)
+      var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+      $scope.socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + chat.label);
       $scope.socket.onopen = function (data) {
+        console.log(data)
         $scope.socket.send(data);
       };
       $scope.socket.onmessage = function(e){
-        console.debug(e)
         $scope.messages.messages.push(JSON.parse(e.data))
+        $scope.$apply()
       }
     })
   };
@@ -46,6 +53,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
       'label': $scope.chat.label
     })
     $scope.socket.onopen(data)
+    $scope.message = ""
   }
 
   $scope.getClass = function(message_user_id, request_user_id){
@@ -54,6 +62,5 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     }
     return 'bounceInLeft animated'
   }
-
 
 })

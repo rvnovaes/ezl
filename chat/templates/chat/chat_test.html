@@ -7,82 +7,85 @@
 <script src="{% static 'chat/js/services/chatApiService.js'%}"></script>
 {%verbatim%}
 <section ng-app='app' ng-controller='chatCtrl'>
-<div class="chat-main-box">
-                    <!-- .chat-left-panel -->
-  <div class="chat-left-aside">
-      <div class="open-panel"><i class="ti-angle-right"></i></div>
-      <div class="chat-left-inner" style="height: 133px;">
-          <div class="form-material">
-              <input class="form-control p-20" placeholder="Pesquisar..." type="text" ng-model="pesquisa">
-          </div>
-          <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 100%;"><ul class="chatonline style-none " style="overflow: hidden; width: auto; height: 100%;">
-              <li ng-repeat="contact in contacts" ng-if="listOffices" ng-click="getChats(contact.pk)">
-                <a class="chat-list-a">
-                  <div class="chat-title">
-                    <span class="label label-rouded label-primary pull-right hide" id="notify-1251" style="color:#fff"></span>
-                      <div class="circle circle-sm bg-info di">OS
-                      </div>
-                      <span>{{contact.legal_name}}</span>
-                    </div>
-                    <p class="text-muted pull-right"></p>
-                </a>
-              </li>
-              <li ng-repeat="chat in chats" ng-if="!listOffices" ng-click="getMessages(chat)">
-                <a class="chat-list-a" href="#" data-chat-label="{{chat.label}}">
-                  <div class="chat-title">
-                    <span class="label label-rouded label-primary pull-right hide" id="notify-1251" style="color:#fff"></span>
-                      <div class="circle circle-sm bg-info di">OS
-                      </div>
-                      <span>{{chat.title}}</span>
-                    </div>
-                    <p class="text-muted pull-right"><i class="fa fa-clock-o"></i>{{chat.alter_date|date:"HH:mm"}}</p>
-                </a>
-              </li>
-              <li class="p-20"></li>
-          </ul><div class="slimScrollBar" style="background: rgb(220, 220, 220) none repeat scroll 0% 0%; width: 0px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 1px; height: 30px;"></div><div class="slimScrollRail" style="width: 0px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51) none repeat scroll 0% 0%; opacity: 0.2; z-index: 90; right: 1px;"></div></div>
-      </div>
-  </div>
-  <!-- .chat-left-panel -->
-  <!-- .chat-right-panel -->
-  <div class="chat-right-aside">
-      <div class="chat-main-header">
-          <div class="p-20 b-b">
-              <h3 class="box-title">{{chat.title}}</h3> </div>
-      </div>
-      <div class="chat-box">
-        <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 100%;">
-          <ul class="chat-list slimscroll p-t-30" id="messageList" style="overflow: hidden; width: auto; height: 104px;">
-            <li ng-repeat="message in messages.messages" ng-class="getClass(message.create_user_id, messages.request_user_id)">
-              <div class="chat-image">
-                <div class="circle circle-sm bg-info di">
-                  <i class="fa fa-user"></i>
-                </div>
+  <div class="chat-main">
+    <div class="chat-main-box">
+                        <!-- .chat-left-panel -->
+      <div class="chat-left-aside">
+          <div class="open-panel"><i class="ti-angle-right"></i></div>
+          <div class="chat-left-inner" style="height: 133px;">
+              <div class="form-material">
+                  <input class="form-control p-20" placeholder="Pesquisar..." type="text" ng-model="pesquisa">
               </div>
-              <div class="chat-body">
-                <div class="chat-text">
-                  <h4>{{message.create_user__username}}</h4>
-                  <p>{{message.message}}</p> <b>{{message.create_date | date: "dd/MM/yyyy HH:mm:ss"}}</b>
-                </div>
+              <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 100%;"><ul class="chatonline style-none " style="overflow: hidden; width: auto; height: 100%;">
+                  <li ng-repeat="contact in contacts" ng-if="listOffices" ng-click="getChats(contact.pk)">
+                    <a class="chat-list-a">
+                      <div class="chat-title">
+                        <span class="label label-rouded label-primary pull-right hide" id="notify-1251" style="color:#fff"></span>
+                          <div class="circle circle-sm bg-info di">OS
+                          </div>
+                          <span>{{contact.legal_name}}</span>
+                        </div>
+                        <p class="text-muted pull-right"></p>
+                    </a>
+                  </li>
+                  <li ng-repeat="chat in chats" ng-if="!listOffices" ng-click="getMessages(chat)">
+                    <a class="chat-list-a" href="#" data-chat-label="{{chat.label}}">
+                      <div class="chat-title">
+                        <span class="label label-rouded label-primary pull-right hide" id="notify-1251" style="color:#fff"></span>
+                          <div class="circle circle-sm bg-info di">OS
+                          </div>
+                          <span>{{chat.title}}</span>
+                        </div>
+                        <p class="text-muted pull-right"><i class="fa fa-clock-o"></i>{{chat.alter_date|date:"HH:mm"}}</p>
+                    </a>
+                  </li>
+                  <li class="p-20"></li>
+              </ul><div class="slimScrollBar" style="background: rgb(220, 220, 220) none repeat scroll 0% 0%; width: 0px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 1px; height: 30px;"></div><div class="slimScrollRail" style="width: 0px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51) none repeat scroll 0% 0%; opacity: 0.2; z-index: 90; right: 1px;"></div></div>
+          </div>
+      </div>
+      <!-- .chat-left-panel -->
+      <!-- .chat-right-panel -->
+      <div class="chat-right-aside">
+          <div class="chat-main-header">
+              <div class="p-20 b-b">
+                  <h3 class="box-title">{{chat.title}}</h3> </div>
+          </div>
+          <div class="chat-box">
+            <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 100%;">
+              <ul class="chat-list slimscroll p-t-30" id="messageList" style="overflow: hidden; width: auto; height: 104px;">
+                {{teste}}
+                <li ng-repeat="message in messages.messages" ng-class="getClass(message.create_user_id, messages.request_user_id)">
+                  <div class="chat-image">
+                    <div class="circle circle-sm bg-info di">
+                      <i class="fa fa-user"></i>
+                    </div>
+                  </div>
+                  <div class="chat-body">
+                    <div class="chat-text">
+                      <h4>{{message.create_user__username}}</h4>
+                      <p>{{message.message}}</p> <b>{{message.create_date | date: "dd/MM/yyyy HH:mm:ss"}}</b>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+              <div class="slimScrollBar" style="background: rgb(120, 197, 220) none repeat scroll 0% 0%; width: 5px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 1px; height: 263px;">
               </div>
-            </li>
-          </ul>
-          <div class="slimScrollBar" style="background: rgb(120, 197, 220) none repeat scroll 0% 0%; width: 5px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 1px; height: 263px;">
-          </div>
-          <div class="slimScrollRail" style="width: 5px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51) none repeat scroll 0% 0%; opacity: 0.2; z-index: 90; right: 1px;">
-          </div>
-        </div>
-        <div class="send-chat-box">
-            <div class="col-sm-12 p-b-10">
-                <input class="form-control" placeholder="Digite sua mensagem" id="inputMsg" ng-model="message">
-                <div class="custom-send p-r-10 p-b-10">
-                    <button class="btn btn-success btn-lg btn-circle" type="button" ng-click="sendMessage()" id="btnSend">
-                        <i class="fa fa-paper-plane-o"></i></button>
+              <div id="bottom" class="slimScrollRail" style="width: 5px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51) none repeat scroll 0% 0%; opacity: 0.2; z-index: 90; right: 1px;">
+              </div>
+            </div>
+            <div class="send-chat-box">
+                <div class="col-sm-12 p-b-10">
+                    <input class="form-control" placeholder="Digite sua mensagem" id="inputMsg" ng-model="message">
+                    <div class="custom-send p-r-10 p-b-10">
+                        <button class="btn btn-success btn-lg btn-circle" type="button" ng-click="sendMessage()" id="btnSend">
+                            <i class="fa fa-paper-plane-o"></i></button>
+                    </div>
                 </div>
             </div>
         </div>
+      </div>                    <!-- .chat-right-panel -->
     </div>
-  </div>                    <!-- .chat-right-panel -->
-</div>
+  </div>
 </section>
 {%endverbatim%}
 <script src="{% static 'skeleton/js/chat.js' %}"></script>
