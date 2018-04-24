@@ -160,7 +160,7 @@ def change_status(sender, instance, **kwargs):
 @receiver(post_save, sender=Task)
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
     if not getattr(instance, '_skip_signal') and instance.legacy_code:
-        export_task(instance.pk)
+        export_task.delay(instance.pk)
 
 
 @receiver(post_save, sender=TaskHistory)

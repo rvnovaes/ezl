@@ -43,8 +43,11 @@ services:
       ENV: development
     ports:
       - "8082:8082"
-
-
+  flower:
+    ports:
+      - "8083:8083"
+    environment:
+      ENV: development
   tasks:
     environment:
       ENV: development
