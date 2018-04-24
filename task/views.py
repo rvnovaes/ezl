@@ -154,6 +154,9 @@ class TaskToAssignView(AuditFormMixin, UpdateView):
             form.save()
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
+    def form_invalid(self, form):
+        super().form_invalid(form)
+        return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
 class TaskUpdateView(AuditFormMixin, UpdateView):
     model = Task
@@ -361,6 +364,11 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
     template_name = 'task/task_detail.html'
 
     def form_valid(self, form):
+        if TaskStatus[self.request.POST['action']] == TaskStatus.OPEN \
+            and not form.cleaned_data['servicepricetable_id']:
+            form.is_valid = False
+            messages.error(self.request, "Favor Selecionar um correspondente")
+            return self.form_invalid(form)
         form.instance.task_status = TaskStatus[self.request.POST['action']] or TaskStatus.INVALID
         form.instance.alter_user = User.objects.get(id=self.request.user.id)
         notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None

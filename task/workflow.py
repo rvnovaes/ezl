@@ -17,6 +17,17 @@ CHILD_STATUS = {
     TaskStatus.RETURN: TaskStatus.RETURN,
 }
 
+PARENT_FIELDS = {
+    TaskStatus.ACCEPTED_SERVICE: ['acceptance_date'],
+    TaskStatus.OPEN: ['acceptance_date'],
+    TaskStatus.ACCEPTED: ['acceptance_date'],
+    TaskStatus.REFUSED: ['acceptance_date'],
+    TaskStatus.DONE: ['acceptance_date'],
+    TaskStatus.RETURN: ['acceptance_date'],
+    TaskStatus.BLOCKEDPAYMENT: ['execution_date'],
+    TaskStatus.FINISHED: ['execution_date'],
+}
+
 
 def get_parent_status(child_status):
     """
@@ -34,3 +45,12 @@ def get_child_status(parent_status):
     :return:
     """
     return CHILD_STATUS.get(parent_status)
+
+
+def get_parent_fields(child_status):
+    """
+    Retorna os campos da OS pai que serão atualizados de acordo com o status da OS filha informado no parametro
+    :param child_status:
+    :return: lista de string com nomes de campos
+    """
+    return PARENT_FIELDS.get(child_status, [])

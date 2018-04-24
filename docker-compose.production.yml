@@ -67,6 +67,11 @@ services:
       ENV: production
     ports:
       - "8082:8082"
+  flower:
+    ports:
+      - "8083:8083"
+    environment:
+      ENV: production
   certbot:
     build:
       context: .

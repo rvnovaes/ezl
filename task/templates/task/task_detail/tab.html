@@ -37,7 +37,7 @@
                 </section>
                 <section id="sec-corres" style="padding: 0 0 0 0">
                     {% if form.instance.get_child %}
-                        {% include 'task/office_info.html' with office=form.instance.child.office %}
+                        {% include 'task/office_info.html' with office=form.instance.get_child.office %}
                     {% else %}
                         {% include 'task/person_info.html' with person=form.instance.person_executed_by %}
                     {% endif %}

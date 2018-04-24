@@ -16,7 +16,8 @@ class PersonETL(GenericETL):
                            CASE a1.correspondente
                              WHEN 0 THEN 'False'
                              ELSE 'True'
-                           END       AS is_correspondent
+                           END       AS is_correspondent,
+                           a1.Status
                     FROM   {advogado} AS a1
                     WHERE  a1.status = 'Ativo'
                            AND a1.nome IS NOT NULL
@@ -36,9 +37,16 @@ class PersonETL(GenericETL):
                            END       AS legal_type,
                            cf.tipocf AS customer_supplier,
                            'False'   AS is_lawyer,
-                           'False'   AS is_correspondent
+                           'False'   AS is_correspondent,
+                           CASE cf.tipocf
+                             WHEN 'C' THEN cf.Status
+                             WHEN 'F' THEN cf.StatusFornecedor
+                             ELSE cf.Status
+                           END       AS Status
                     FROM   {clifor} AS cf
-                    WHERE  cf.status = 'Ativo'
+                    WHERE  ((cf.tipocf = 'C' and Status = 'Ativo') OR
+                    	   (cf.tipocf = 'F' and StatusFornecedor = 'Ativo') OR
+						   (cf.tipocf = 'A' and Status = 'Ativo' and StatusFornecedor = 'Ativo'))
                            AND cf.razao IS NOT NULL
                            AND cf.razao <> ''
                 """.format(tribunal='Jurid_Tribunais', advogado='Jurid_Advogado',

@@ -10,7 +10,7 @@ from core.models import Person
 from core.utils import filter_valid_choice_form, get_office_field
 from core.widgets import MDDateTimepicker, MDDatePicker
 from core.forms import BaseForm
-from task.models import Task, TypeTask, Filter
+from task.models import Task, TypeTask, Filter, TaskStatus
 
 
 class TaskForm(BaseForm):
@@ -106,13 +106,6 @@ class TaskDetailForm(ModelForm):
         widget=forms.Textarea(attrs={"rows": 2})
     )
 
-    def clean_servicepricetable_id(self):
-        servicepricetable_id = self.cleaned_data['servicepricetable_id']
-        amount = (self.cleaned_data['amount'] if self.cleaned_data['amount'] else 0)
-        if amount and amount >= 0.0 and not servicepricetable_id:
-            raise forms.ValidationError("Favor Selecionar um correspondente")
-        return servicepricetable_id
-
     def clean_amount(self):
         amount = (self.cleaned_data['amount'] if self.cleaned_data['amount'] else str(0))
         amount = amount.replace('.', '')
@@ -149,3 +142,7 @@ class TaskToAssignForm(BaseForm):
     class Meta:
         model = Task
         fields = ['person_executed_by']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['person_executed_by'].required = True
