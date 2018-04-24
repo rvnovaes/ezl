@@ -3,7 +3,7 @@ from chat.models import Chat, UnreadMessage, Message
 from core.views import CustomLoginRequiredView
 from django.http import JsonResponse
 from django.views.generic import View
-from django.db.models import Count
+from django.db.models import Count, Q
 import json
 from core.models import Person
 from core.models import Office
@@ -79,9 +79,10 @@ class ChatGetMessages(CustomLoginRequiredView, View):
 
 class ChatOfficeContactView(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
+        current_office = get_office_session(request)
         chats = Chat.objects.filter(users__user_by_chat=self.request.user, users__is_active=True).order_by(
             'pk').distinct('pk')
-        data = list(Office.objects.filter(chats__in=chats).values('pk', 'legal_name').distinct('pk'))
+        data = list(Office.objects.filter(~Q(pk=current_office.pk), chats__in=chats,).values('pk', 'legal_name').distinct('pk'))
         return JsonResponse(data, safe=False)
 
 
@@ -97,7 +98,7 @@ class ChatMenssage(CustomLoginRequiredView, View):
         chat = Chat.objects.get(pk=int(request.GET.get('chat')))
         messages = list(chat.messages.all().values('message', 'create_user__username', 'create_user_id', 'create_date'))
         data = {
-            "messages": messages, 
+            "messages": messages,
             "request_user_id": request.user.id
         }
         return  JsonResponse(data, safe=False)

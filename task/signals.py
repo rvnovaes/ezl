@@ -213,7 +213,6 @@ def create_or_update_user_by_chat(task, fields):
             })
             user = user.user_by_chat
         users.append(user)
-    UserByChat.objects.filter(~Q(user_by_chat__in=users), chat=task.chat).update(is_active=False)
 
 @receiver(post_save, sender=Task)
 def create_or_update_chat(sender, instance, created, **kwargs):
@@ -246,6 +245,9 @@ def create_or_update_chat(sender, instance, created, **kwargs):
         'person_asked_by', 'person_executed_by', 'person_distributed_by'])
     if instance.parent:
         instance.chat.offices.add(instance.parent.office)
+        create_or_update_user_by_chat(instance.parent, [
+            'person_asked_by', 'person_executed_by', 'person_distributed_by'
+        ])
     post_save.disconnect(create_or_update_chat, sender=sender)
     instance.save()
     post_save.connect(create_or_update_chat, sender=sender)

@@ -63,4 +63,8 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     return 'bounceInLeft animated'
   }
 
+  $scope.goOfficeList = function(){
+    $scope.listOffices = true
+  }
+
 })
