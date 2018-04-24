@@ -34,9 +34,8 @@ div.chat-title {
     position: relative;
 }
 .office-legal-name {
-  -ms-word-wrap: break-word;
-  word-wrap: break-word;
-
+    -ms-word-wrap: break-word;
+    word-wrap: break-word;
   /* Non standard for webkit */
   word-wrap: break-word;
 
@@ -48,4 +47,13 @@ div.chat-title {
     position: absolute;
     width: 100%;
     bottom: 10px;
+}
+[data-balloon]{
+  z-index: 2 !important;
+}
+[data-balloon]:hover::after{
+  z-index: 9999 !important
+}
+.itemdechat{
+  z-index: 1 !important;
 }
