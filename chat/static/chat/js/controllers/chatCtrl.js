@@ -67,4 +67,10 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     $scope.listOffices = true
   }
 
+  $scope.onEnterKey = function(event){
+    if (event.key === 'Enter') {
+      $scope.sendMessage()
+    }
+  }
+
 })

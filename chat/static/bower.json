@@ -15,6 +15,7 @@
     "tests"
   ],
   "dependencies": {
-    "angular": "1.6.9"
+    "angular": "1.6.9",
+    "angular-ui-event": "^1.0.0"
   }
 }

@@ -2,6 +2,7 @@
 {% load static %}
 {% block content %}
 <script src="{% static 'chat/vendor/angular/angular.js' %}"></script>
+<script src="{% static 'chat/vendor/angular-ui-event/dist/event.min.js' %}"></script>
 <script src="{% static 'chat/js/app.js' %}"></script>
 <script src="{% static 'chat/js/controllers/chatCtrl.js' %}"></script>
 <script src="{% static 'chat/js/services/chatApiService.js'%}"></script>
@@ -10,7 +11,7 @@
 <section ng-app='app' ng-controller='chatCtrl'>
   <div class="chat-main">
     <div class="chat-main-box">
-                        <!-- .chat-left-panel -->
+      <!-- .chat-left-panel -->
       <div class="chat-left-aside">
           <div class="open-panel"><i class="ti-angle-right"></i></div>
           <div class="chat-left-inner" style="height: 133px;">
@@ -18,9 +19,12 @@
                 <button class="btn btn-success btn-block" ng-if="!listOffices" ng-click="goOfficeList()"><i class="fa fa-arrow-left"></i> Voltar</button>
               </div>
               <div class="form-material">
-                  <input class="form-control p-20" placeholder="Pesquisar..." type="text" ng-model="pesquisa">
-              </div>
-              <div class="row">
+                  <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-10">
+                    </div>
+                    <input class="form-control p-20" placeholder="Pesquisar..." type="text" ng-model="pesquisa">
+                  </div>
               </div>
               <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 100%;"><ul class="chatonline style-none " style="overflow: hidden; width: auto; height: 100%;">
                   <li ng-repeat="contact in contacts" ng-if="listOffices" ng-click="getChats(contact.pk)">
@@ -30,7 +34,7 @@
                           <div class="circle circle-sm bg-success di">
                            <i class="fa fa-building-o"></i>
                           </div>
-                          <span>{{contact.legal_name}}</span>
+                          <span>{{contact.legal_name|uppercase}}</span>
                         </div>
                         <p class="text-muted pull-right"></p>
                     </a>
@@ -55,7 +59,9 @@
       <div class="chat-right-aside">
           <div class="chat-main-header">
               <div class="p-20 b-b">
-                  <h3 class="box-title">{{chat.title}}</h3> </div>
+                  <h3 class="box-title">{{chat.title}}</h3>
+                  <span class="heading-description text-wrap">{{ chat.description }}</span>
+              </div>
           </div>
           <div class="chat-box">
             <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 100%;">
@@ -81,7 +87,7 @@
             </div>
             <div class="send-chat-box">
                 <div class="col-sm-12 p-b-10">
-                    <input class="form-control" placeholder="Digite sua mensagem" id="inputMsg" ng-model="message">
+                    <input class="form-control" placeholder="Digite sua mensagem" id="inputMsg" ng-model="message" ui-event="{ keypress: 'onEnterKey($event)' }">
                     <div class="custom-send p-r-10 p-b-10">
                         <button class="btn btn-success btn-lg btn-circle" type="button" ng-click="sendMessage()" id="btnSend" scroll-bottom="scroll-bottom">
                             <i class="fa fa-paper-plane-o"></i></button>
