@@ -36,7 +36,6 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
       var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
       $scope.socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + chat.label);
       $scope.socket.onopen = function (data) {
-        console.log(data)
         $scope.socket.send(data);
       };
       $scope.socket.onmessage = function(e){
@@ -51,8 +50,12 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
       'text': $scope.message,
       'chat': $scope.chat.id,
       'label': $scope.chat.label
-    })
-    $scope.socket.onopen(data)
+    });
+    $scope.socket.onopen(data);
+    var scrollID = $('#scroll-bottom');
+    setTimeout(function(){
+      scrollID.scrollTop(scrollID[0].scrollHeight)
+    }, 500);
     $scope.message = ""
   }
 
@@ -71,6 +74,10 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     if (event.key === 'Enter') {
       $scope.sendMessage()
     }
+  }
+
+  $scope.onChangeMessage = function(event){
+    console.debug(event);
   }
 
 })

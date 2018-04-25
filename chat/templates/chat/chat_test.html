@@ -65,7 +65,7 @@
           </div>
           <div class="chat-box">
             <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 100%;">
-              <ul id="scroll-bottom" class="chat-list slimscroll p-t-30" id="messageList" style="overflow: hidden; width: auto; height: 104px;">
+              <ul id="scroll-bottom" ui-event="{ change: 'onChangeMessage($event)' }" class="chat-list slimscroll p-t-30" id="messageList" style="overflow: hidden; width: auto; height: 104px;">
                 <li ng-repeat="message in messages.messages" ng-class="getClass(message.create_user_id, messages.request_user_id)">
                   <div class="chat-image">
                     <div class="circle circle-sm bg-info di">
