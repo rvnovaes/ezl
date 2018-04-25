@@ -11,6 +11,14 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   $scope.socket = {}
   $scope.office_id = false
 
+  var readMessage = function(chat){
+    data = {
+      chat_id: chat.id
+    }
+    chatApiService.readMessage(data)
+    setTimeout(getChats, 500)    
+  }
+
   var getContacts = function () {
     if ($scope.listOffices) {
       chatApiService.getContacts().then(function(data){
@@ -56,6 +64,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
           updateScroll()
         }
       }
+      readMessage(chat)
     })
   };
 
@@ -86,12 +95,12 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
 
   $scope.goOfficeList = function(){
     $scope.listOffices = true
-  }
+  };
 
   $scope.onEnterKey = function(event){
     if (event.key === 'Enter') {
       $scope.sendMessage()
     }
-  }
+  };
 
 })

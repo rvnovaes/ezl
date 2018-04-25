@@ -41,7 +41,7 @@ class ChatCountMessages(CustomLoginRequiredView, View):
 
 class ChatReadMessages(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):
-        chat_id = request.POST.get('chat_id')
+        chat_id = json.loads(request.body).get('chat_id')
         chat = Chat.objects.filter(pk=int(chat_id)).first()
         if chat:
             UnreadMessage.objects.filter(user_by_message__user_by_chat=self.request.user,

@@ -23,10 +23,17 @@ angular.module('app').factory('chatApiService', function($http){
     return new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + label);
   }
 
+  var _readMessage = function(data) {
+    return $http.post('/chat/chat_read_messages?format=json', data).then(function(response){
+      return response.data
+    })
+  }
+
   return {
     getContacts: _getContacts,
     getChats: _getChats,
     getMessages: _getMessages,
-    newSocket: _newSocket
+    newSocket: _newSocket,
+    readMessage: _readMessage
   }
 })
