@@ -23,26 +23,45 @@
               </div>
               <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 100%;"><ul class="chatonline style-none " style="overflow: hidden; width: auto; height: 100%;">
                   <li ng-repeat="contact in contacts" ng-if="listOffices" ng-click="getChats(contact.pk)">
-                    <a class="chat-list-a">
-                      <div class="chat-title">
+                    <a class="chat-list-a" href="#" data-chat-label="{{chat.label}}">
+                      <div>
                         <span class="label label-rouded label-primary pull-right hide" id="notify-1251" style="color:#fff"></span>
-                          <div class="circle circle-sm bg-success di">
-                           <i class="fa fa-building-o"></i>
+                          <div class="row">
+                            <div class="col-md-2">
+                              <div class="circle circle-sm bg-success di">
+                               <i class="fa fa-building-o"></i>
+                              </div>
+                            </div>
+                            <div class="col-md-10 chat-title">
+                              <span id="chat-title">
+                                {{contact.legal_name|uppercase}}
+                                <p class="label label-rouded label-warning pull-right" ng-if="contact.unread_message_quanty > 0">{{contact.unread_message_quanty}}</small>
+                              </span>
+                            </div>
                           </div>
-                          <span>{{contact.legal_name|uppercase}}</span>
                         </div>
-                        <p class="text-muted pull-right"></p>
                     </a>
                   </li>
                   <li ng-repeat="chat in chats" ng-if="!listOffices" ng-click="getMessages(chat)" scroll-bottom="scroll-bottom">
                     <a class="chat-list-a" href="#" data-chat-label="{{chat.label}}">
-                      <div class="chat-title">
+                      <div>
                         <span class="label label-rouded label-primary pull-right hide" id="notify-1251" style="color:#fff"></span>
-                          <div class="circle circle-sm bg-info di">OS
+                          <div class="row">
+                            <div class="col-md-2">
+                              <div class="circle circle-sm bg-info di">OS
+                              </div>
+                            </div>
+                            <div class="col-md-10 chat-title">
+                              <span id="chat-title">
+                                {{chat.title}}
+                                <small class="text-muted">
+                                  <i class="fa fa-clock-o"></i>{{chat.alter_date|date:"HH:mm"}}
+                                </small>
+                                <p class="label label-rouded label-warning pull-right" ng-if="chat.unread_message_quanty > 0">{{chat.unread_message_quanty}}</small>
+                              </span>
+                            </div>
                           </div>
-                          <span>{{chat.title}}</span>
                         </div>
-                        <p class="text-muted pull-right"><i class="fa fa-clock-o"></i>{{chat.alter_date|date:"HH:mm"}}</p>
                     </a>
                   </li>
                   <li class="p-20"></li>

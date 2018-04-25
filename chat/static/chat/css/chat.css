@@ -7,3 +7,19 @@
 .chat-main-box .chat-right-aside .chat-list {
   overflow-y: auto !important;
 }
+
+.chat-list-a {
+  padding: 2px !important;
+}
+
+div.chat-title {
+  white-space: nowrap !important;  
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+
+.chatonline {
+  overflow: scroll !important;
+  height: 90% !important;
+}

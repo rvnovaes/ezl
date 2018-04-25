@@ -78,19 +78,40 @@ class ChatGetMessages(CustomLoginRequiredView, View):
         return JsonResponse(data)
 
 class ChatOfficeContactView(CustomLoginRequiredView, View):
+    @staticmethod
+    def add_count_unread_message(user, contact_offices):
+        for office in contact_offices:
+            unread_message_quanty = UnreadMessage.objects.filter(
+                user_by_message__user_by_chat=user,
+                message__chat__offices__id=office.get('pk')).count()
+            office['unread_message_quanty'] = unread_message_quanty
+        return contact_offices
+
     def get(self, request, *args, **kwargs):
         current_office = get_office_session(request)
         chats = Chat.objects.filter(users__user_by_chat=self.request.user, users__is_active=True).order_by(
             'pk').distinct('pk')
-        data = list(Office.objects.filter(~Q(pk=current_office.pk), chats__in=chats,).values('pk', 'legal_name').distinct('pk'))
+        data = list(Office.objects.filter(~Q(pk=current_office.pk),
+            chats__in=chats,).values('pk', 'legal_name').distinct('pk'))
+        data = self.add_count_unread_message(request.user, data)
         return JsonResponse(data, safe=False)
 
 
 class ChatsByOfficeView(CustomLoginRequiredView, View):
+    @staticmethod
+    def add_count_unread_message(user, chats):
+        for chat in chats:
+            unread_message_quanty = UnreadMessage.objects.filter(
+                user_by_message__user_by_chat=user,
+                message__chat_id=chat.get('id')).count()
+            chat['unread_message_quanty'] = unread_message_quanty
+        return chats
+
     def get(self, request, *args, **kwargs):
         office = Office.objects.get(pk=int(request.GET.get('office')))
-        chats = office.chats.filter(users__user_by_chat=self.request.user, users__is_active=True)
-        data = list(chats.values())
+        chats = office.chats.filter(users__user_by_chat=self.request.user,
+            users__is_active=True)
+        data = self.add_count_unread_message(request.user, list(chats.values()))
         return JsonResponse(data, safe=False)
 
 class ChatMenssage(CustomLoginRequiredView, View):

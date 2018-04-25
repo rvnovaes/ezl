@@ -9,23 +9,34 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   $scope.search = "";
   $scope.chatSelected = {}
   $scope.socket = {}
-    // update_list = $interval(function(){
-    //   chatApiService.getContacts().then(function(data){
-    //     $scope.contacts = data
-    //   })
-    // }, 1000)
+  $scope.office_id = false
 
-  chatApiService.getContacts().then(function(data){
-    $scope.contacts = data
-    $scope.listOffices = true;
-  });
+  var getContacts = function () {
+    if ($scope.listOffices) {
+      chatApiService.getContacts().then(function(data){
+        $scope.contacts = data
+      });
+    }
+  }
 
-  $scope.getChats = function(office_id){
-    chatApiService.getChats(office_id).then(function(data){
-      $scope.listOffices = false;
-      $scope.chats = data;
-    })
+  getContacts()
+
+  var getChats = function(){
+    if ($scope.office_id && !$scope.listOffices) {
+      chatApiService.getChats($scope.office_id).then(function(data){
+        $scope.chats = data;
+      })
+    }
   };
+
+  $scope.getChats = function(office_id) {
+    $scope.office_id = office_id
+    $scope.listOffices = false;
+    getChats()
+  }
+
+  update_list_office = $interval(getContacts, 5000)
+  update_list_chats = $interval(getChats, 5000)
 
   $scope.getMessages = function(chat){
     $location.hash('bottom')
@@ -39,11 +50,21 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
         $scope.socket.send(data);
       };
       $scope.socket.onmessage = function(e){
-        $scope.messages.messages.push(JSON.parse(e.data))
-        $scope.$apply()
+        if (JSON.parse(e.data).chat === $scope.chat.id){
+          $scope.messages.messages.push(JSON.parse(e.data))
+          $scope.$apply()
+          updateScroll()
+        }
       }
     })
   };
+
+  var updateScroll = function(){
+    var scrollID = $('#scroll-bottom');
+    setTimeout(function(){
+      scrollID.scrollTop(scrollID[0].scrollHeight)
+    }, 500);
+  }
 
   $scope.sendMessage = function(){
     var data = JSON.stringify({
@@ -52,10 +73,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
       'label': $scope.chat.label
     });
     $scope.socket.onopen(data);
-    var scrollID = $('#scroll-bottom');
-    setTimeout(function(){
-      scrollID.scrollTop(scrollID[0].scrollHeight)
-    }, 500);
+    updateScroll()
     $scope.message = ""
   }
 
@@ -74,10 +92,6 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     if (event.key === 'Enter') {
       $scope.sendMessage()
     }
-  }
-
-  $scope.onChangeMessage = function(event){
-    console.debug(event);
   }
 
 })
