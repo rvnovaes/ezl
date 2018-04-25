@@ -19,12 +19,7 @@
                 <button class="btn btn-success btn-block" ng-if="!listOffices" ng-click="goOfficeList()"><i class="fa fa-arrow-left"></i> Voltar</button>
               </div>
               <div class="form-material">
-                  <div class="row">
-                    <div class="col-md-2"></div>
-                    <div class="col-md-10">
-                    </div>
-                    <input class="form-control p-20" placeholder="Pesquisar..." type="text" ng-model="pesquisa">
-                  </div>
+                <input class="form-control p-20" placeholder="Pesquisar..." type="text" ng-model="pesquisa">
               </div>
               <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 100%;"><ul class="chatonline style-none " style="overflow: hidden; width: auto; height: 100%;">
                   <li ng-repeat="contact in contacts" ng-if="listOffices" ng-click="getChats(contact.pk)">

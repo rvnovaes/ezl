@@ -1,7 +1,7 @@
 angular.module('app').controller('chatCtrl', function($scope, $interval, chatApiService,
     $location, $anchorScroll){
 
-
+  $('.bg-title').css('display', 'none')
   $scope.contacts = [];
   $scope.chats = [];
   $scope.messages = []
