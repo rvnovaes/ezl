@@ -16,7 +16,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
       chat_id: chat.id
     }
     chatApiService.readMessage(data)
-    setTimeout(getChats, 500)    
+    setTimeout(getChats, 500)
   }
 
   var getContacts = function () {

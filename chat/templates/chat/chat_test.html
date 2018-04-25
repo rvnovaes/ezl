@@ -22,7 +22,7 @@
                 <input class="form-control p-20" placeholder="Pesquisar..." type="text" ng-model="pesquisa">
               </div>
               <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 100%;"><ul class="chatonline style-none " style="overflow: hidden; width: auto; height: 100%;">
-                  <li ng-repeat="contact in contacts" ng-if="listOffices" ng-click="getChats(contact.pk)">
+                  <li class="list-chat" ng-repeat="contact in contacts" ng-if="listOffices" ng-click="getChats(contact.pk)">
                     <a class="chat-list-a" href="#" data-chat-label="{{chat.label}}">
                       <div>
                         <span class="label label-rouded label-primary pull-right hide" id="notify-1251" style="color:#fff"></span>
@@ -35,14 +35,18 @@
                             <div class="col-md-10 chat-title">
                               <span id="chat-title">
                                 {{contact.legal_name|uppercase}}
-                                <p class="label label-rouded label-warning pull-right" ng-if="contact.unread_message_quanty > 0">{{contact.unread_message_quanty}}</small>
+                                <div class="row">
+                                  <div class="col-md-12">
+                                    <small class="label label-rouded label-warning pull-right" ng-if="contact.unread_message_quanty > 0">{{contact.unread_message_quanty}}</small>
+                                  </div>
+                                </div>
                               </span>
                             </div>
                           </div>
                         </div>
                     </a>
                   </li>
-                  <li ng-repeat="chat in chats" ng-if="!listOffices" ng-click="getMessages(chat)" scroll-bottom="scroll-bottom">
+                  <li class="list-chat" ng-repeat="chat in chats" ng-if="!listOffices" ng-click="getMessages(chat)" scroll-bottom="scroll-bottom">
                     <a class="chat-list-a" href="#" data-chat-label="{{chat.label}}">
                       <div>
                         <span class="label label-rouded label-primary pull-right hide" id="notify-1251" style="color:#fff"></span>
@@ -54,18 +58,28 @@
                             <div class="col-md-10 chat-title">
                               <span id="chat-title">
                                 {{chat.title}}
-                                <small class="text-muted">
-                                  <i class="fa fa-clock-o"></i>{{chat.alter_date|date:"HH:mm"}}
-                                </small>
-                                <p class="label label-rouded label-warning pull-right" ng-if="chat.unread_message_quanty > 0">{{chat.unread_message_quanty}}</small>
+                                <div class="row">
+                                  <div class="col-md-6">
+                                    <small class="text-muted">
+                                      <i class="fa fa-clock-o"></i>{{chat.alter_date|date:"HH:mm"}}
+                                    </small>
+                                  </div>
+                                  <div class="col-md-6">
+                                    <small class="label label-rouded label-warning pull-right" ng-if="chat.unread_message_quanty > 0">{{chat.unread_message_quanty}}</small>
+                                  </div>
+                                </div>
                               </span>
                             </div>
                           </div>
                         </div>
                     </a>
+                    <hr/>
                   </li>
                   <li class="p-20"></li>
-              </ul><div class="slimScrollBar" style="background: rgb(220, 220, 220) none repeat scroll 0% 0%; width: 0px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 1px; height: 30px;"></div><div class="slimScrollRail" style="width: 0px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51) none repeat scroll 0% 0%; opacity: 0.2; z-index: 90; right: 1px;"></div></div>
+              </ul>
+              <div class="slimScrollBar" style="background: rgb(220, 220, 220) none repeat scroll 0% 0%; width: 0px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 1px; height: 30px;"></div><div class="slimScrollRail" style="width: 0px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51) none repeat scroll 0% 0%; opacity: 0.2; z-index: 90; right: 1px;">
+              </div>
+            </div>
           </div>
       </div>
       <!-- .chat-left-panel -->
