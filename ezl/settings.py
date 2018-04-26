@@ -31,9 +31,9 @@ try:
     host = os.environ.get('DB_HOST', source['host'])
     port = os.environ.get('DB_PORT', source['port'])
     environment = source['environment']
-    email_use_ssl = True if source['email_use_ssl'].lower() == "true" else False
-    email_host = source['email_host']
-    email_port = source['email_port']
+    email_use_ssl = True if os.environ.get('EMAIL_USE_SSL', source['email_use_ssl'].lower()) == "true" else False
+    email_host = os.environ.get('EMAIL_HOST', source['email_host'])
+    email_port = os.environ.get('EMAIL_PORT', source['email_port'])
     email_host_user = source['email_host_user']
     email_host_password = source['email_host_password']
     linux_password = source_etl['linux_password']
