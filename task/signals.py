@@ -154,8 +154,6 @@ def change_status(sender, instance, **kwargs):
 
         instance.alter_date = now_date
 
-        # instance.__previous_status = instance.task_status
-
 
 @receiver(post_save, sender=Task)
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
@@ -181,10 +179,11 @@ def update_status_parent_task(sender, instance, **kwargs):
     """
     if instance.parent and not instance.task_status == TaskStatus.REQUESTED:
         instance.parent.task_status = get_parent_status(instance.status)
-        fields = get_parent_fields(instance.status)
-        for field in fields:
-            setattr(instance.parent, field, getattr(instance, field))
-        instance.parent.save()
+        if not TaskStatus(instance.parent.task_status) == TaskStatus(instance.parent.__previous_status):
+            fields = get_parent_fields(instance.status)
+            for field in fields:
+                setattr(instance.parent, field, getattr(instance, field))
+            instance.parent.save()
 
 
 @receiver(pre_save, sender=Task)
@@ -197,6 +196,8 @@ def update_status_child_task(sender, instance, **kwargs):
     :return:
     """
     status = get_child_status(instance.status)
+    if TaskStatus(instance.task_status) == TaskStatus(instance.__previous_status):
+        setattr(instance, '_skip_signal', True)
     if instance.get_child and status:
         instance.child.latest('pk').task_status = status
         instance.child.latest('pk').save()
