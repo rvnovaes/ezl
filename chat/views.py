@@ -15,6 +15,9 @@ from django.shortcuts import render
 def chat_teste(request):
     return render(request, 'chat/chat_test.html', {'teste': {'teste': 'tetando'}})
 
+def chat_contacts_test(request):
+    return render(request, 'chat/chat-right-sidbar-contacts.html', {})
+
 
 class ChatListView(ListView):
     model = Chat
