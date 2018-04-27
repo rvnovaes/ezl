@@ -43,83 +43,83 @@ def new_task(sender, instance, created, **kwargs):
                                    create_user=user,
                                    status=instance.task_status,
                                    create_date=instance.create_date, notes=notes)
-    contact_mechanism_type = ContactMechanismType.objects.filter(name__iexact='email')
-    if not contact_mechanism_type:
-        return
+        contact_mechanism_type = ContactMechanismType.objects.filter(name__iexact='email')
+        if not contact_mechanism_type:
+            return
 
-    id_email = contact_mechanism_type[0].id
+        id_email = contact_mechanism_type[0].id
 
-    if instance.legacy_code:
-        number = instance.legacy_code
-    else:
-        number = instance.id
-
-    person_to_receive = None
-    custom_text = ''
-    short_message = {TaskStatus.ACCEPTED: 'foi aceita', TaskStatus.BLOCKEDPAYMENT: 'foi glosada',
-                     TaskStatus.DONE: 'foi cumprida', TaskStatus.FINISHED: 'foi finalizada',
-                     TaskStatus.OPEN: 'foi aberta', TaskStatus.REFUSED: 'foi recusada',
-                     TaskStatus.RETURN: 'foi retornada'}
-
-    if instance.task_status in [TaskStatus.OPEN, TaskStatus.FINISHED]:
-        custom_text = ' pelo(a) solicitante ' + str(instance.person_asked_by).title()
-        person_to_receive = instance.person_executed_by_id
-    elif instance.task_status in [TaskStatus.BLOCKEDPAYMENT, TaskStatus.RETURN]:
-        custom_text = ''
-        person_to_receive = instance.person_executed_by_id
-    elif instance.task_status in [TaskStatus.DONE]:
-        custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
-        person_to_receive = instance.person_asked_by_id
-    elif instance.task_status in [TaskStatus.ACCEPTED, TaskStatus.REFUSED]:
-        custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
-        person_to_receive = instance.person_distributed_by_id
-
-    if person_to_receive:
-        mails = ContactMechanism.objects.filter(contact_mechanism_type_id=id_email,
-                                                person_id=person_to_receive)
-        mail_list = []
-
-        for mail in mails:
-            mail_list.append(mail.description)
-
-        person = Person.objects.filter(id=person_to_receive).first()
-        mail_auth_user = User.objects.filter(id=person.auth_user_id).first()
-        if mail_auth_user:
-            mail_list.append(mail_auth_user.email)
-
-        if hasattr(instance, '_TaskCreateView__server'):
-            project_link = instance._TaskCreateView__server
-
-        elif hasattr(instance, '_TaskUpdateView__server'):
-            project_link = instance._TaskUpdateView__server
-
-        elif hasattr(instance, '_TaskDetailView__server'):
-            project_link = instance._TaskDetailView__server
-
+        if instance.legacy_code:
+            number = instance.legacy_code
         else:
-            project_link = settings.PROJECT_LINK
+            number = instance.id
 
-        mail = SendMail()
-        mail.subject = 'Easy Lawyer - OS '+str(number) + ' - ' + str(
-            instance.type_task).title() + ' - Prazo: ' + \
-            instance.final_deadline_date.strftime('%d/%m/%Y')
-        mail.message = render_to_string('mail/base.html',
-                                        {'server': 'http://' + project_link, 'pk': instance.pk,
-                                         'project_name': settings.PROJECT_NAME,
-                                         'number': str(number),
-                                         'short_message': short_message[instance.status],
-                                         'custom_text': custom_text,
-                                         'task': instance
-                                         })
-        mail.to_mail = mail_list
+        person_to_receive = None
+        custom_text = ''
+        short_message = {TaskStatus.ACCEPTED: 'foi aceita', TaskStatus.BLOCKEDPAYMENT: 'foi glosada',
+                         TaskStatus.DONE: 'foi cumprida', TaskStatus.FINISHED: 'foi finalizada',
+                         TaskStatus.OPEN: 'foi aberta', TaskStatus.REFUSED: 'foi recusada',
+                         TaskStatus.RETURN: 'foi retornada'}
 
-        # TODO: tratar corretamente a excecao
+        if instance.task_status in [TaskStatus.OPEN, TaskStatus.FINISHED]:
+            custom_text = ' pelo(a) solicitante ' + str(instance.person_asked_by).title()
+            person_to_receive = instance.person_executed_by_id
+        elif instance.task_status in [TaskStatus.BLOCKEDPAYMENT, TaskStatus.RETURN]:
+            custom_text = ''
+            person_to_receive = instance.person_executed_by_id
+        elif instance.task_status in [TaskStatus.DONE]:
+            custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
+            person_to_receive = instance.person_asked_by_id
+        elif instance.task_status in [TaskStatus.ACCEPTED, TaskStatus.REFUSED]:
+            custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
+            person_to_receive = instance.person_distributed_by_id
 
-        try:
-            mail.send()
-        except Exception as e:
-            print(e)
-            print('Você tentou mandar um e-mail')
+        if person_to_receive:
+            mails = ContactMechanism.objects.filter(contact_mechanism_type_id=id_email,
+                                                    person_id=person_to_receive)
+            mail_list = []
+
+            for mail in mails:
+                mail_list.append(mail.description)
+
+            person = Person.objects.filter(id=person_to_receive).first()
+            mail_auth_user = User.objects.filter(id=person.auth_user_id).first()
+            if mail_auth_user:
+                mail_list.append(mail_auth_user.email)
+
+            if hasattr(instance, '_TaskCreateView__server'):
+                project_link = instance._TaskCreateView__server
+
+            elif hasattr(instance, '_TaskUpdateView__server'):
+                project_link = instance._TaskUpdateView__server
+
+            elif hasattr(instance, '_TaskDetailView__server'):
+                project_link = instance._TaskDetailView__server
+
+            else:
+                project_link = settings.PROJECT_LINK
+
+            mail = SendMail()
+            mail.subject = 'Easy Lawyer - OS '+str(number) + ' - ' + str(
+                instance.type_task).title() + ' - Prazo: ' + \
+                instance.final_deadline_date.strftime('%d/%m/%Y')
+            mail.message = render_to_string('mail/base.html',
+                                            {'server': 'http://' + project_link, 'pk': instance.pk,
+                                             'project_name': settings.PROJECT_NAME,
+                                             'number': str(number),
+                                             'short_message': short_message[instance.status],
+                                             'custom_text': custom_text,
+                                             'task': instance
+                                             })
+            mail.to_mail = mail_list
+
+            # TODO: tratar corretamente a excecao
+
+            try:
+                mail.send()
+            except Exception as e:
+                print(e)
+                print('Você tentou mandar um e-mail')
 
 
 @receiver(pre_save, sender=Task)
@@ -179,7 +179,7 @@ def update_status_parent_task(sender, instance, **kwargs):
     """
     if instance.parent and not instance.task_status == TaskStatus.REQUESTED:
         instance.parent.task_status = get_parent_status(instance.status)
-        if not TaskStatus(instance.parent.task_status) == TaskStatus(instance.parent.__previous_status):
+        if not TaskStatus(instance.parent.task_status) == TaskStatus(instance.parent.__previous_status) and not getattr(instance, '_from_parent'):
             fields = get_parent_fields(instance.status)
             for field in fields:
                 setattr(instance.parent, field, getattr(instance, field))
@@ -199,5 +199,6 @@ def update_status_child_task(sender, instance, **kwargs):
     if TaskStatus(instance.task_status) == TaskStatus(instance.__previous_status):
         setattr(instance, '_skip_signal', True)
     if instance.get_child and status:
-        instance.child.latest('pk').task_status = status
-        instance.child.latest('pk').save()
+        child = instance.child.latest('pk')
+        child.task_status = status
+        child.save(from_parent=True)
