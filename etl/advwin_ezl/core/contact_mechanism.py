@@ -170,7 +170,7 @@ class ContactMechanismETL(GenericETL):
                          ) AS TMP
                     WHERE description IS NOT NULL AND description <> ''
                     """
-    has_status = True
+    has_status = False
     field_check = 'description'
 
     @validate_import
