@@ -37,8 +37,23 @@
   <button class="right-side-toggle  kc_fab_main_btn" ng-click="getChatContacts({%endverbatim%}{{object.pk}}, {{object.chat.pk}} {%verbatim%})"><i class="ti-comments"></i></button>
   <div class="right-sidebar">
     <div>
-      <div class="rpanel-title ezl-bg-open font-bold"><i class="{{ task.status.get_icon }}"></i> {%endverbatim%}{{object.chat.title}} {%verbatim%}
+      <div class="rpanel-title ezl-bg-open font-bold" ng-if="in_office_list" id="close-message">
+        <i class="{{ task.status.get_icon }}"></i>
+          {%endverbatim%}{{object.chat.title}}{%verbatim%}
         <span> <i class="ti-close right-side-toggle"></i></span>
+      </div>
+      <div class="rpanel-title ezl-bg-open font-bold" ng-if="!in_office_list">
+        <div class="row">
+          <div class="col-md-3">
+            <a href="#" class="right-side-toggle" style="text-decoration:none; color: #FFF" ng-click="setListState()"><i class="fa fa-2x fa-reply"></i></a>
+          </div>
+          <div class="col-md-8">
+            {%endverbatim%}{{object.chat.title}}{%verbatim%}
+          </div>
+          <div class="col-md-1">
+            <i class="ti-close" id="close-message"></i>
+          </div>
+        </div>
       </div>
       <div class="r-panel-body" ng-if="in_office_list">
         <div class="panel panel-info">

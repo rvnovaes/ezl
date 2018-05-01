@@ -26,4 +26,8 @@ angular.module('app').controller('chatInternalCtrl', function($scope, chatApiSer
     return ""
   }
 
+  $scope.setListState = function(){
+    $scope.in_office_list =! $scope.in_office_list;
+  }
+
 })
