@@ -55,14 +55,17 @@ angular.module('app').controller('chatInternalCtrl', function($scope, chatApiSer
   }
 
   vm.sendMessage = function(){
-    var data = JSON.stringify({
-      'text': vm.messageToSend,
-      'chat': vm.chat.id,
-      'label': vm.chat.label
-    });
-    vm.socket.onopen(data);
-    updateScroll()
-    vm.messageToSend = ""
+    if (vm.messageToSend) {
+      var data = JSON.stringify({
+        'text': vm.messageToSend,
+        'chat': vm.chat.id,
+        'label': vm.chat.label
+      });
+      vm.socket.onopen(data);
+      updateScroll()
+      vm.messageToSend = ""
+
+    }
   }
 
   vm.onEnterKey = function(event){
