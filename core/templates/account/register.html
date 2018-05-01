@@ -13,7 +13,7 @@
     <!-- animation CSS -->
     <link href="{% static 'skeleton/css/animate.css' %}" rel="stylesheet">
     <!-- Wizard CSS -->
-    <link href="{% static 'skeleton/plugins/bower_components/register-steps/steps.css' %}" rel="stylesheet">
+    <link href="{% static 'skeleton/plugins/bower_components/jquery-wizard-master/css/wizard.css' %}" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{% static 'skeleton/css/style.css' %}" rel="stylesheet">
     <!-- color CSS -->
@@ -26,90 +26,121 @@
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
 <![endif]-->
-
 </head>
-<body class="fix-header">
+<body class="">
+    <!-- ============================================================== -->
     <!-- Preloader -->
+    <!-- ============================================================== -->
     <div class="preloader">
-      <div class="cssload-speeding-wheel"></div>
+        <svg class="circular" viewBox="25 25 50 50">
+            <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" />
+        </svg>
     </div>
-    <header>
+    <!-- ============================================================== -->
+    <!-- Wrapper -->
+    <!-- ============================================================== -->
+    <div id="wrapper">
         <nav class="navbar navbar-default navbar-static-top m-b-0">
-            <div class="col-md-12 text-center">
+            <div class="col-md-12 text-center m-t-15 m-b-10">
                 <p>Já possui uma conta? <a href="{% url 'login' %}" class="text-primary m-l-5"><b>Entrar</b></a>
                 </p>
             </div>
         </nav>
-    </header>
-    <section id="wrapper" class="step-register">
-      <div class="register-box">
-        <div class="">
-            <a href="javascript:void(0)" class="text-center db m-b-40 m-t-40">
-                <img src="{% static 'img/logo_ezl.png'%}" alt="Home" width="80%"><br />
-                <img src="{% static 'img/logo.png' %}" alt="Home" width="20%" style="padding: 5px">
-            </a>
-          <!-- multistep form -->
-            <form id="msform" action="{% url 'register_user' %}" method="POST">{% csrf_token %}
-                {% if invite_code %}
-                    <input class="form-control" required="" placeholder="Invite Code" type="hidden" name="invite_code" value="{{ invite_code }}">
-                {% endif %}
-            <!-- progressbar -->
-            <ul id="eliteregister">
-                <li class="active">Dados de Acesso</li>
-                <li>Seleção de escritório</li>
-                <li>Escolha seu plano</li>
-            </ul>
-            <!-- fieldsets -->
-            <fieldset>
-            <h2 class="fs-title">Crie sua conta</h2>
-            <h3 class="fs-subtitle">Passo 1 - Cria sua conta para começar a trabalhar</h3>
-            <input class="form-control" required="" placeholder="Nome" type="text" name="name">
-            <input class="form-control" required="" placeholder="Usuário" type="text" name="username">
-            <input class="form-control" required="" placeholder="E-mail" type="text" name="email"
-            {% if email %}
-                value="{{ email }}"
-            {% endif %}>
-            <input class="form-control" required="" placeholder="Senha" type="password" name="password">
-            <input class="form-control" required="" placeholder="Confirmar Senha" type="password" name="password">
+        <div id="page-wrapper" style="margin-left: 0px; ">
+            <div class="container-fluid">
+                <!-- .row -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="white-box">
+                            <h3 class="box-title m-b-0">CADASTRE-SE AGORA</h3>
+                            <p class="text-muted m-b-30 font-13">Crie sua conta para começar a trabalhar</p>
+                            <div id="registerForm" class="wizard">
+                                <ul class="wizard-steps" role="tablist">
+                                    <li class="active" role="tab">
+                                        <h4><span><i class="ti-user"></i></span>Dados de Acesso</h4> </li>
+                                    <li role="tab">
+                                        <h4><span><i class="fa fa-building-o"></i></span>Forma de trabalho</h4> </li>
+                                    <li role="tab">
+                                        <h4><span><i class="ti-check"></i></span>Confirmar</h4> </li>
+                                </ul>
+                                <form id="validation" class="form-horizontal">
+                                    <div class="wizard-content">
+                                        <div class="wizard-pane active" role="tabpanel">
+                                            <div class="form-group">
+                                                <label class="col-xs-3 control-label">Nome</label>
+                                                <div class="col-xs-5">
+                                                    <input type="text" class="form-control" name="name" /> </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-xs-3 control-label">Usuário</label>
+                                                <div class="col-xs-5">
+                                                    <input type="text" class="form-control" name="username" /> </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-xs-3 control-label">E-mail</label>
+                                                <div class="col-xs-5">
+                                                    <input type="text" class="form-control" name="email" /> </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-xs-3 control-label">Senha</label>
+                                                <div class="col-xs-5">
+                                                    <input type="password" class="form-control" name="password" /> </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-xs-3 control-label">Confirmar Senha</label>
+                                                <div class="col-xs-5">
+                                                    <input type="password" class="form-control" name="confirmpassword" /> </div>
+                                            </div>
+                                        </div>
+                                        <div class="wizard-pane" role="tabpanel">
+                                            <div class="form-group">
+                                                <div class="input-group">
+                                                    <label for="">PAYMENT METHOD</label>
+                                                </div>
+                                                <input type="hidden" name="select_office_register" required>
+                                                <ul id="select_office_register" class="select-row-icon">
+                                                    <li>
+                                                        <a id="existing_office" data-id="1" class='select_office_list' href="javascript:void(0)"><i class="mdi mdi-credit-card"></i> <span>Vincular-me a um escritório já cadastrado</span> <i class="whn-hov mdi mdi-checkbox-marked-circle"></i></a>
+                                                    </li>
+                                                    <li>
+                                                        <a id="new_office" data-id="2" class='select_office_list' href="javascript:void(0)"><i class="mdi mdi-monitor"></i> <span> Não encontrei meu escritório e desejo cadastrá-lo</span> <i class="whn-hov mdi mdi-checkbox-marked-circle"></i></a>
+                                                    </li>
+                                                    <li>
+                                                        <a id="work_alone" data-id="3" class='select_office_list' href="javascript:void(0)"><i class="mdi mdi-cash"></i> <span>Trabalho sozinho</span> <i class="whn-hov mdi mdi-checkbox-marked-circle"></i></a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="wizard-pane" role="tabpanel">
 
-            <input type="button" name="next" class="next action-button" value="Próximo" />
-            </fieldset>
-            <fieldset>
-            <h2 class="fs-title">Social Profiles</h2>
-            <h3 class="fs-subtitle">Your presence on the social network</h3>
-            <input type="text" name="twitter" placeholder="Twitter" />
-            <input type="text" name="facebook" placeholder="Facebook" />
-            <input type="text" name="gplus" placeholder="Google Plus" />
-            <input type="button" name="previous" class="previous action-button" value="Anterior" />
-            <input type="button" name="next" class="next action-button" value="Próximo" />
-            </fieldset>
-            <fieldset>
-            <h2 class="fs-title">Personal Details</h2>
-            <h3 class="fs-subtitle">We will never sell it</h3>
-            <input type="text" name="fname" placeholder="First Name" />
-            <input type="text" name="lname" placeholder="Last Name" />
-            <input type="text" name="phone" placeholder="Phone" />
-            <textarea name="address" placeholder="Address"></textarea>
-            <input type="button" name="previous" class="previous action-button" value="Anterior" />
-            <input type="submit" name="submit" class="submit action-button" value="Registrar" />
-            </fieldset>
-            </form>
-            <div class="clear"></div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>
         </div>
-      </div>
-    </section>
+    </div>
     <!-- jQuery -->
     <script src="{% static 'skeleton/plugins/bower_components/jquery/dist/jquery.min.js' %}"></script>
     <!-- Bootstrap Core JavaScript -->
     <script src="{% static 'skeleton/bootstrap/dist/js/bootstrap.min.js' %}"></script>
     <!-- Menu Plugin JavaScript -->
     <script src="{% static 'skeleton/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js' %}"></script>
-    <script src="{% static 'skeleton/plugins/bower_components/register-steps/jquery.easing.min.js' %}"></script>
-    <script src="{% static 'skeleton/plugins/bower_components/register-steps/register-init.js' %}"></script>
     <!--slimscroll JavaScript -->
     <script src="{% static 'skeleton/js/jquery.slimscroll.js' %}"></script>
     <!--Wave Effects -->
     <script src="{% static 'skeleton/js/waves.js' %}"></script>
+    <!-- Form Wizard JavaScript -->
+    <script src="{% static 'skeleton/plugins/bower_components/jquery-wizard-master/dist/jquery-wizard.min.js' %}"></script>
+    <!-- FormValidation -->
+    <link rel="stylesheet" href="{% static 'skeleton/plugins/bower_components/jquery-wizard-master/libs/formvalidation/formValidation.min.css' %}">
+    <!-- FormValidation plugin and the class supports validating Bootstrap form -->
+    <script src="{% static 'skeleton/plugins/bower_components/jquery-wizard-master/libs/formvalidation/formValidation.min.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/jquery-wizard-master/libs/formvalidation/bootstrap.min.js' %}"></script>
     <!-- Custom Theme JavaScript -->
     <script src="{% static 'skeleton/js/custom.min.js' %}"></script>
     <!--Style Switcher -->
@@ -130,5 +161,90 @@
             {% endif %}
         })
     </script>
+    <script type="text/javascript">
+    (function() {
+        $('#registerForm').wizard({
+            buttonLabels: {
+                next: 'Próximo',
+                back: 'Anterior',
+                finish: 'Finalizar'
+            },
+            onInit: function() {
+                $('#validation').formValidation({
+                    framework: 'bootstrap',
+                    fields: {
+                        name: {
+                            validators: {
+                                notEmpty: {
+                                    message: 'O campo de nome é obrigatório'
+                                }
+                            }
+                        },
+                        username: {
+                            validators: {
+                                notEmpty: {
+                                    message: 'O nome de usuário é obrigatório'
+                                },
+                            }
+                        },
+                        email: {
+                            validators: {
+                                notEmpty: {
+                                    message: 'O e-mail é obrigatório'
+                                },
+                                emailAddress: {
+                                    message: 'O valor inserido não é um endereço de e-mail válido'
+                                }
+                            }
+                        },
+                        password: {
+                            validators: {
+                                notEmpty: {
+                                    message: 'É obrigatório uma senha de acesso'
+                                },
+                                different: {
+                                    field: 'username',
+                                    message: 'A senha não pode ser a mesma do usuário'
+                                }
+                            }
+                        },
+                        confirmpassword: {
+                            validators: {
+                                identical: {
+                                    field: 'password',
+                                    message: 'Os valores digitados para os campos de senha não conferem'
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+            validator: function() {
+                var fv = $('#validation').data('formValidation');
+                var $this = $(this);
+                // Validate the container
+                fv.validateContainer($this);
+                var isValidStep = fv.isValidContainer($this);
+                if (isValidStep === false || isValidStep === null) {
+                    return false;
+                }
+                return true;
+            },
+            onFinish: function() {
+                $('#validation').submit();
+                swal("Message Finish!", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed lorem erat eleifend ex semper, lobortis purus sed.");
+            }
+        });
+    })();
+    </script>
+    <script>
+
+    $("#select_office_register li a").on('click', function () {
+        $('.select_office_list').removeClass("selected");
+        $(this).addClass("selected");
+        $('input[name=select_office_register]').val($(this).data('id'));
+    });
+    </script>
+
 </body>
 </html>
