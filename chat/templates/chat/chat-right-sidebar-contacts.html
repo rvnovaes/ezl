@@ -39,12 +39,12 @@
       <div class="rpanel-title ezl-bg-open font-bold"><i class="{{ task.status.get_icon }}"></i> {%endverbatim%}{{object.chat.title}} {%verbatim%}
         <span> <i class="ti-close right-side-toggle"></i></span>
       </div>
-      <div class="r-panel-body">
+      <div class="r-panel-body" ng-if="in_office_list">
         <div class="panel panel-info">
           <div class="panel-body">
             <div class="chat-box" id="chatBox">
-              <div class="chat-list" style="overflow: hidden;" tabindex="5005" id="messageList" ng-show="in_office_list">
-                <div class="slimscroll">
+              <div class="chat-list" style="overflow: hidden;" tabindex="5005" id="messageList">
+                <div class="slimscroll" ng-if="in_office_list">
                   <div ng-repeat="office in offices track by office.office_pk">
                     <a href="#" style="color:#000;text-decoration: none;" ng-click="getMessages(office.chat)">
                       <div class="row">
@@ -62,9 +62,17 @@
                   </div>
                 </div>
               </div>
-              <ul class="chat-list" style="overflow: hidden;" tabindex="5005" id="messageList" ng-show="!in_office_list">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="r-panel-body" ng-if="!in_office_list">
+        <div class="panel panel-info">
+          <div class="panel-body">
+            <div class="chat-box" id="chatBox">
+              <ul class="chat-list" style="overflow: hidden;" tabindex="5005" id="messageList">
                 <div class="slimscroll">
-                  <li ng-repeat="message in messages.messages" ng-class="get_class()">
+                  <li ng-repeat="message in messages.messages" ng-class="getClass(message)">
                     <div class="chat-image">
                       <div class="circle circle-sm bg-info di">
                         <i class="fa fa-user"></i>
@@ -72,7 +80,7 @@
                       <div class="chat-body">
                         <div class="chat-text">
                           <h4>{{ message.create_user }}</h4>
-                          <p>{{ message.message }}</p> <b>{{ message.create_date|date:"d/m/Y H:i" }}</b>
+                          <p>{{ message.message }}</p> <b>{{ message.create_date|date:"dd/MM/yyyy HH:mm" }}</b>
                         </div>
                       </div>
                     </div>

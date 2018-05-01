@@ -25,5 +25,17 @@ div.chat-title {
 }
 
 .list-chat {
-  margin-bottom: 20px !important;  
+  margin-bottom: 20px !important;
+}
+
+.r-panel-body {
+  padding: 1px !important;
+}
+
+.chat-image {
+  min-width: 200px !important;
+}
+
+.chat-body {
+  margin-right: 2px !important;
 }

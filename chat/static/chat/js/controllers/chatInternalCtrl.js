@@ -19,6 +19,11 @@ angular.module('app').controller('chatInternalCtrl', function($scope, chatApiSer
     $scope.in_office_list = false;
   }
 
-
+  $scope.getClass = function(message){
+    if (message.create_user_id === $scope.messages.request_user_id) {
+      return "odd"
+    }
+    return ""
+  }
 
 })
