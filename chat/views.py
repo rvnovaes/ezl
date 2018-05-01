@@ -4,6 +4,7 @@ from core.views import CustomLoginRequiredView
 from django.http import JsonResponse
 from django.views.generic import View
 from django.db.models import Count, Q
+from django.core import serializers
 import json
 from core.models import Person
 from core.models import Office
@@ -11,13 +12,10 @@ from core.utils import get_office_session
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import  get_groups_with_perms
 from django.shortcuts import render
+from task.models import Task
 
 def chat_teste(request):
     return render(request, 'chat/chat_test.html', {'teste': {'teste': 'tetando'}})
-
-def chat_contacts_test(request):
-    return render(request, 'chat/chat-right-sidbar-contacts.html', {})
-
 
 class ChatListView(ListView):
     model = Chat
@@ -126,3 +124,21 @@ class ChatMenssage(CustomLoginRequiredView, View):
             "request_user_id": request.user.id
         }
         return  JsonResponse(data, safe=False)
+
+class InternalChatOffices(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        task = Task.objects.get(pk=int(request.GET.get('task')))
+        data = []
+        if task.parent:
+            data.append({
+                'chat': task.chat.pk, # "Deve ser o pk da propria task"
+                'office_pk': task.parent.office.pk, #"Deve ser o pk do office do parent"
+                'office_legal_name': task.parent.office.legal_name
+            })
+        for task_child in task.child.all():
+            data.append({
+                'chat': task_child.chat.pk, # "Deve ser o pk do chat da task filha"
+                'office_pk': task_child.office.pk,
+                'office_legal_name': task_child.office.legal_name
+            })
+        return JsonResponse(data, safe=False)

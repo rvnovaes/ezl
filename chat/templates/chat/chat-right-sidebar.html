@@ -27,52 +27,7 @@
 </style>
 <button class="right-side-toggle  kc_fab_main_btn"><i class="ti-comments"></i></button>
 {% with object.chat as chat %}
-
 <div class="right-sidebar">
-  <div>
-    <div class="rpanel-title ezl-bg-{{ task.status.name|lower }} font-bold"><i class="{{ task.status.get_icon }}"></i> {{ chat.title }}
-        <span> <i class="ti-close right-side-toggle"></i></span>
-    </div>
-    <div class="r-panel-body">
-      <div class="panel panel-info">
-        <div class="panel-body">
-          <div class="chat-box" id="chatBox">
-            <div class="chat-list" id="messageList" style="overflow: hidden;" tabindex="5005">
-              <ul class="chatonline style-none " style="overflow: hidden; width: auto; height: 100%;">
-                <li class="list-chat">
-                  <a class="chat-list-a" href="#" data-chat-label="{{chat.label}}">
-                    <div>
-                      <span class="label label-rouded label-primary pull-right hide" id="notify-1251" style="color:#fff"></span>
-                        <div class="row">
-                          <div class="col-md-2">
-                            <div class="circle circle-sm bg-success di">
-                             <i class="fa fa-building-o"></i>
-                            </div>
-                          </div>
-                          <div class="col-md-10 chat-title">
-                            <span id="chat-title">
-                              TESTE
-                              <div class="row">
-                                <div class="col-md-12">
-                                  <small class="label label-rouded label-warning pull-right">TESTE</small>
-                                </div>
-                              </div>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- <div class="right-sidebar">
     <div>
         <div class="rpanel-title ezl-bg-{{ task.status.name|lower }} font-bold"><i class="{{ task.status.get_icon }}"></i> {{ chat.title }}
             <span> <i class="ti-close right-side-toggle"></i></span>
@@ -119,5 +74,5 @@
             </div>
         </div>
     </div>
-</div> -->
+</div>
 {% endwith %}

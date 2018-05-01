@@ -29,11 +29,18 @@ angular.module('app').factory('chatApiService', function($http){
     })
   }
 
+  var _getInternalChatOffices = function(task_id){
+    return $http.get('/chat/internal_chat_offices/', {params: {task: task_id}}).then(function(response){
+      return response.data
+    })
+  }
+
   return {
     getContacts: _getContacts,
     getChats: _getChats,
     getMessages: _getMessages,
     newSocket: _newSocket,
-    readMessage: _readMessage
+    readMessage: _readMessage,
+    getInternalChatOffices: _getInternalChatOffices
   }
 })
