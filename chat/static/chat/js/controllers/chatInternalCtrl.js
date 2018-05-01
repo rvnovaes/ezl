@@ -65,4 +65,10 @@ angular.module('app').controller('chatInternalCtrl', function($scope, chatApiSer
     vm.messageToSend = ""
   }
 
+  vm.onEnterKey = function(event){
+    if (event.key === 'Enter') {
+      vm.sendMessage()
+    }
+  };
+
 })

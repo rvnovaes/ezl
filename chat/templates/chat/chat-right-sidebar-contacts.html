@@ -109,7 +109,7 @@
             <div class="row">
               <div class="col-xs-8">
                 {{messageToSend}}
-                <input placeholder="Digite aqui sua mensagem..." class="chat-box-input" ng-model="$ctrl.messageToSend" type="text"/>
+                <input placeholder="Digite aqui sua mensagem..." class="chat-box-input" ng-model="$ctrl.messageToSend" type="text" ui-event="{ keypress: '$ctrl.onEnterKey($event)' }"/>
               </div>
               <div class="col-xs-4 text-right">
                 <button class="btn btn-success btn-circle btn-xl" ng-click="$ctrl.sendMessage()" type="button"><i class="fa fa-paper-plane-o"></i></button>
