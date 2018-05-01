@@ -5,6 +5,7 @@
 <script src="{% static 'chat/js/controllers/chatInternalCtrl.js' %}"></script>
 <script src="{% static 'chat/js/services/chatApiService.js'%}"></script>
 <script src="{% static 'chat/js/directives/chatDirective.js'%}"></script>
+<script src="{% static 'chat/js/directives/chatMessagesDirective.js'%}"></script>
 <style>
     .kc_fab_main_btn{
         background-color: #12897a;
@@ -46,7 +47,7 @@
               <div class="chat-list" style="overflow: hidden;" tabindex="5005" id="messageList">
                 <div class="slimscroll" ng-if="in_office_list">
                   <div ng-repeat="office in offices track by office.office_pk">
-                    <a href="#" style="color:#000;text-decoration: none;" ng-click="getMessages(office.chat)">
+                    <a href="#" style="color:#000;text-decoration: none;" ng-click="getMessages(office.chat)" class="get-message">
                       <div class="row">
                         <div class="col-md-2">
                           <div class="circle circle-sm bg-success di">
@@ -66,11 +67,12 @@
           </div>
         </div>
       </div>
-      <div class="r-panel-body" ng-if="!in_office_list">
+      <chat-messages-directive ng-if="!in_office_list">
+      <div class="r-panel-body">
         <div class="panel panel-info">
           <div class="panel-body">
             <div class="chat-box" id="chatBox">
-              <ul class="chat-list" style="overflow: hidden;" tabindex="5005" id="messageList">
+              <ul class="chat-list" style="overflow: hidden;" tabindex="5005" id="messageList" style="height:100%">
                 <div class="slimscroll">
                   <li ng-repeat="message in messages.messages" ng-class="getClass(message)">
                     <div class="chat-image">
@@ -89,18 +91,19 @@
               </ul>
             </div>
           </div>
-        </div>
-        <div class="panel-footer">
-          <div class="row" ng-show="!in_office_list">
-            <div class="col-xs-8">
-              <input id="inputMsg" placeholder="Digite aqui sua mensagem..." class="chat-box-input"></input>
-            </div>
-            <div class="col-xs-4 text-right">
-              <button class="btn btn-success btn-circle btn-xl" type="button"><i class="fa fa-paper-plane-o"></i></button>
+          <div class="panel-footer">
+            <div class="row">
+              <div class="col-xs-8">
+                <input id="inputMsg" placeholder="Digite aqui sua mensagem..." class="chat-box-input"></input>
+              </div>
+              <div class="col-xs-4 text-right">
+                <button class="btn btn-success btn-circle btn-xl" type="button"><i class="fa fa-paper-plane-o"></i></button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </chat-messages-directive>
     </div>
   </div>
 </section>

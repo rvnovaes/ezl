@@ -39,3 +39,11 @@ div.chat-title {
 .chat-body {
   margin-right: 2px !important;
 }
+
+.chat-box .slimScrollDiv {
+  min-height: 403px !important;
+}
+
+.chat-box .chat-list {
+  height: 100% !important;
+}
