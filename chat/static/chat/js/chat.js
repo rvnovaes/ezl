@@ -30,10 +30,9 @@ var chatReadMessage = function (chat_id, csrf_token) {
 };
 
 setInterval(function () {
-    var has_groups = $("#chat-notify").length > 0
     $.ajax({
         type: "GET",
-        url: "/chat/count_message/?has_groups=" + has_groups,
+        url: "/chat/count_message/?has_groups=" + false,
         data: {},
         success: function (response) {
             if (response.all_messages > 0) {
@@ -51,9 +50,6 @@ setInterval(function () {
                 $("#chat-notify").addClass('hide');
                 $("#li-message-center").addClass('hide');
                 $("#message-center").addClass('hide');
-            }
-            if (has_groups){
-                setBadgeItem(response.grouped_messages)
             }
         },
         dataType: "json"
