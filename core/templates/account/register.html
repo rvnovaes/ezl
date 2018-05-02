@@ -20,6 +20,8 @@
     <link href="{% static 'skeleton/css/colors/default.css' %}" id="theme" rel="stylesheet">
 
     <link href="{% static 'libs/toastr/build/toastr.min.css' %}" rel="stylesheet">
+
+    <link href="{% static 'skeleton/plugins/bower_components/custom-select/custom-select.css' %}" rel="stylesheet" type="text/css">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 <!--[if lt IE 9]>
@@ -95,18 +97,34 @@
                                         <div class="wizard-pane" role="tabpanel">
                                             <div class="form-group">
                                                 <div class="input-group">
-                                                    <label for="">PAYMENT METHOD</label>
                                                 </div>
                                                 <input type="hidden" name="select_office_register" required>
                                                 <ul id="select_office_register" class="select-row-icon">
                                                     <li>
                                                         <a id="existing_office" data-id="1" class='select_office_list' href="javascript:void(0)"><i class="mdi mdi-credit-card"></i> <span>Vincular-me a um escritório já cadastrado</span> <i class="whn-hov mdi mdi-checkbox-marked-circle"></i></a>
+                                                        <div id="select_office_detail_1" class="hide b-all p-20 m-b-15 text-center">
+                                                            <label for="existing_office">Selecione os escritórios que deseja se vincular:</label>
+                                                            <select class="select2 m-b-10 select2-multiple" multiple="multiple"
+                                                                    data-placeholder="Selecione um escritório" tabindex="-1"
+                                                                    name="existing_office" style="" >
+                                                                {% for office in offices %}
+                                                                <option value="{{ office.pk }}">{{ office.legal_name }}</option>
+                                                            {% endfor %}
+                                                            </select>
+                                                            <select>
+                                                            {% for office in offices %}
+                                                                <option value="{{ office.pk }}">{{ office.legal_name }}</option>
+                                                            {% endfor %}
+                                                            </select>
+                                                        </div>
                                                     </li>
                                                     <li>
                                                         <a id="new_office" data-id="2" class='select_office_list' href="javascript:void(0)"><i class="mdi mdi-monitor"></i> <span> Não encontrei meu escritório e desejo cadastrá-lo</span> <i class="whn-hov mdi mdi-checkbox-marked-circle"></i></a>
+                                                        <div id="select_office_detail_2" class="hide b-all p-20 m-b-15 text-center">TESTE 2</div>
                                                     </li>
                                                     <li>
                                                         <a id="work_alone" data-id="3" class='select_office_list' href="javascript:void(0)"><i class="mdi mdi-cash"></i> <span>Trabalho sozinho</span> <i class="whn-hov mdi mdi-checkbox-marked-circle"></i></a>
+                                                        <div id="select_office_detail_3" class="hide b-all p-20 m-b-15 text-center">TESTE 3</div>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -147,6 +165,7 @@
     <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
     <!--Toast-->
     <script src="{% static 'libs/toastr/build/toastr.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'skeleton/plugins/bower_components/custom-select/custom-select.min.js' %}"></script>
     <script>
         $(document).ready(function () {
             {% if form.errors %}
@@ -159,6 +178,7 @@
                     toastr.error('{{ error }}', 'Erro ao efetuar o login', {timeOut: 5000});
                 {% endfor %}
             {% endif %}
+            $('.select2').select2();
         })
     </script>
     <script type="text/javascript">
@@ -243,6 +263,8 @@
         $('.select_office_list').removeClass("selected");
         $(this).addClass("selected");
         $('input[name=select_office_register]').val($(this).data('id'));
+        $('div[id^="select_office_detail_"]').addClass("hide");
+        $("#select_office_detail_"+$(this).data('id')).removeClass("hide");
     });
     </script>
 

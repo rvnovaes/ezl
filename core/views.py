@@ -1014,6 +1014,7 @@ class RegisterNewUser(CreateView):
             invite = Invite.objects.filter(invite_code=request.GET['invite_code']).first()
             context['email'] = invite.email
             context['invite_code'] = request.GET['invite_code']
+        context['offices'] = Office.objects.all()
         return render(request, 'account/register.html', context)
 
 
