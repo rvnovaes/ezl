@@ -4,11 +4,11 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   $('.bg-title').css('display', 'none')
   $scope.contacts = [];
   $scope.chats = [];
+  $scope.sockets = {};
   $scope.messages = []
   $scope.listOffices = true;
   $scope.search = "";
   $scope.chatSelected = {}
-  $scope.socket = {}
   $scope.office_id = false
 
   var readMessage = function(chat){
@@ -43,8 +43,8 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     getChats()
   }
 
-  update_list_office = $interval(getContacts, 5000)
-  update_list_chats = $interval(getChats, 5000)
+  update_list_office = $interval(getContacts, 500)
+  update_list_chats = $interval(getChats, 500)
 
   $scope.getMessages = function(chat){
     $location.hash('bottom')
@@ -53,16 +53,19 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     chatApiService.getMessages(chat.id).then(function(data){
       $scope.messages = data
       var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-      $scope.socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + chat.label);
-      $scope.socket.onopen = function (data) {
-        $scope.socket.send(data);
-      };
-      $scope.socket.onmessage = function(e){
-        if (JSON.parse(e.data).chat === $scope.chat.id){
-          $scope.messages.messages.push(JSON.parse(e.data))
-          $scope.$apply()
-          updateScroll()
-        }
+      if (!$scope.sockets[chat.id] ||
+        ($scope.sockets[chat.id] && $scope.sockets[chat.id].readyState !=WebSocket.OPEN)){
+          $scope.sockets[chat.id] = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + chat.label);
+          $scope.sockets[chat.id].onopen = function (data) {
+              $scope.sockets[chat.id].send(data);
+          };
+          $scope.sockets[chat.id].onmessage = function(e){
+            if (JSON.parse(e.data).chat === $scope.chat.id){
+              $scope.messages.messages.push(JSON.parse(e.data))
+              $scope.$apply()
+              updateScroll()
+            }
+          }
       }
       readMessage(chat)
     })
@@ -81,7 +84,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
       'chat': $scope.chat.id,
       'label': $scope.chat.label
     });
-    $scope.socket.onopen(data);
+    $scope.sockets[$scope.chat.id].onopen(data);
     updateScroll()
     $scope.message = ""
   }

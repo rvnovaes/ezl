@@ -11,7 +11,7 @@ from django.db.models import Q
 
 
 @channel_session_user_from_http
-def ws_connect(message):
+def ws_connect(message, label):
     message.reply_channel.send({'accept': True})
     params = parse_qs(message.content['query_string'])
     if b'label' in params:
@@ -21,7 +21,7 @@ def ws_connect(message):
         message.reply_channel.send({"close": True})
 
 @channel_session_user
-def ws_message(message):
+def ws_message(message, label):
     try:
         data = json.loads(message['text'])
         chat, created = Chat.objects.get_or_create(pk=int(data.get('chat')))
