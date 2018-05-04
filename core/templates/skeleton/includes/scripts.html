@@ -83,7 +83,6 @@
             dataType: 'json',
             success: function (data) {
                 $.each(data, function( index, value ) {
-                    console.debug(value);
                     if (value.show == false){
                         if (!$("#office-"+value.id).hasClass('card-fixed')){
                             $("#office-"+value.id).addClass('hide');

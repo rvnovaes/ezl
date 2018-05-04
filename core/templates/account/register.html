@@ -91,7 +91,7 @@
                                             <div id="select_office_detail_1" class="hide b-all p-10 m-b-15 text-center">
                                                 <h5 class="modal-title">Selecione o Escritório</h5>
                                                 <div class="row m-t-10 m-b-10">
-                                                    <div class="col-md-12"><input type="text" class="form-control form-inline" autocomplete="off" data-session="false" placeholder="Procurar..." id="filter_office_legal_name"></div>
+                                                    <div class="col-md-12"><input type="text" class="form-control form-inline" autocomplete="off" data-session="false" placeholder="Procurar..." id="filter_office_legal_name" name="filter_office_legal_name" ></div>
                                                 </div>
                                                 <div class="row" style="max-height: 400px; min-height: 140px; overflow: scroll">
                                                     {% for office in offices %}
@@ -105,7 +105,12 @@
                                                                     </div>
                                                                     <div class="col-md-10 col-sm-10" style="overflow-y: auto; overflow-x:hidden;">
                                                                         <span class="box-title office-legal-name"><small>{{office.legal_name}}</small></span>
-                                                                        <input type="checkbox" name="office_{{ office.pk }}" class="hidden">
+                                                                        {% with office.get_address.first as first_address  %}
+                                                                            {% if first_address %}
+                                                                                <br /><small><strong>{{ first_address.city.name }} ({{ first_address.city.state.initials }})</strong></small>
+                                                                            {% endif %}
+                                                                        {% endwith %}
+                                                                        <input type="checkbox" name="office_checkbox_{{ office.pk }}" class="hidden" value="{{ office.pk }}" >
                                                                     </div>
                                                                 </div>
                                                                 <div class="row">
@@ -124,11 +129,36 @@
                                         </div>
                                         <div class="row col-md-12">
                                             <a id="new_office" data-id="2" class='select_office_list' href="javascript:void(0)"><i class="mdi mdi-monitor"></i> <span> Não encontrei meu escritório e desejo cadastrá-lo</span> <i class="whn-hov mdi mdi-checkbox-marked-circle"></i></a>
-                                            <div id="select_office_detail_2" class="hide b-all p-20 m-b-15 text-center">TESTE 2</div>
+                                            <div id="select_office_detail_2" class="hide b-all p-20 m-b-15 text-center">
+                                                <div class="form-group">
+                                                    <label class="col-xs-3 control-label">Razão social / Nome complete</label>
+                                                    <div class="col-xs-5">
+                                                        <input type="text" class="form-control" name="legal_name" /> </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-3 control-label">Nome fantasia / Apelido</label>
+                                                    <div class="col-xs-5">
+                                                        <input type="text" class="form-control" name="office_name" /> </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-3 control-label">Tipo</label>
+                                                    <div class="col-xs-5">
+                                                        <select name="legal_type" class="form-control" title="" id="id_legal_type">
+                                                          <option value="F">Física</option>
+                                                          <option value="J" selected="">Jurídica</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-3 control-label">CPF / CNPJ</label>
+                                                    <div class="col-xs-5">
+                                                        <input type="text" class="form-control" name="cpf_cnpj" id="id_cpf_cnpj" />
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="row col-md-12">
                                             <a id="work_alone" data-id="3" class='select_office_list' href="javascript:void(0)"><i class="mdi mdi-cash"></i> <span>Trabalho sozinho</span> <i class="whn-hov mdi mdi-checkbox-marked-circle"></i></a>
-                                            <div id="select_office_detail_3" class="hide b-all p-20 m-b-15 text-center">TESTE 3</div>
                                         </div>
                                     </div>
                                 </div>
@@ -137,6 +167,7 @@
 
                             </div>
                         </div>
+                        {% include 'core/mask_selector.html' %}
                     </form>
                 </div>
             </div>
@@ -212,6 +243,43 @@
                                     message: 'Os valores digitados para os campos de senha não conferem'
                                 }
                             }
+                        },
+                        legal_name: {
+                            validators: {
+                                callback: {
+                                    message: 'Este campo é obrigatório',
+                                    callback: function (value, validator, $field) {
+                                        var select_office_register = $('input[name=select_office_register]').val();
+                                        if (select_office_register === '2'){
+                                            return value !== '';
+                                        }else{
+                                            return true;
+                                        }
+                                    }
+                                },
+                            }
+                        },
+                        filter_office_legal_name: {
+                            validators: {
+                                callback: {
+                                    message: "Favor selecionar pelo menos um escritório para se vincular",
+                                    callback: function (value, validator, $field) {
+                                        var select_office_register = $('input[name=select_office_register]').val();
+                                        if (select_office_register === '1'){
+                                            retorno = false
+                                            $('input[name^=office_checkbox_]').each(function (index) {
+                                                if ($( this ).prop("checked")){
+                                                    retorno = true;
+                                                }
+                                            });
+                                            console.log(retorno)
+                                            return retorno;
+                                        }else{
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 });
@@ -245,7 +313,7 @@
     </script>
     <script>
         function select_office(office_id) {
-            var office_input = $('input[name=office_'+office_id+']');
+            var office_input = $('input[name=office_checkbox_'+office_id+']');
             var office_icon = $('#icon-'+office_id);
             var office_title = $('#title-'+office_id);
             var button_action = $('#button_action-'+office_id);
@@ -267,6 +335,7 @@
                 button_action.addClass('btn-custom')
                 office_card.removeClass('card-fixed')
             }
+            $('#validation').formValidation('revalidateField', 'filter_office_legal_name')
 
         }
     </script>
@@ -283,4 +352,20 @@
         {% endfor %}
     {% endif %}
     $('.select2').select2();
+    $('input[name^=office_checkbox_]').each(function (index) {
+        if($( this ).prop("checked")){
+            var office_id = $( this ).val();
+            var office_card = $('#office-'+office_id);
+            var office_icon = $('#icon-'+office_id);
+            var office_title = $('#title-'+office_id);
+            var button_action = $('#button_action-'+office_id);
+            office_icon.removeClass('fa-check')
+            office_icon.addClass('fa-times')
+            office_title.html(' Remover')
+            button_action.removeClass('btn-custom')
+            button_action.addClass('btn-danger')
+            office_card.addClass('card-fixed')
+            office_card.removeClass('hide')
+        }
+    })
 {% endblock %}
