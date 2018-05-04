@@ -24,11 +24,7 @@ $(document).ready(function () {
     $(".right-side-toggle").on("click", function () {
         $('#chatBox').css({
              'height': (($(window).height()) - 230) + 'px'
-         });
-        var bottomCoord = $('#messageList')[0].scrollHeight;
-        $('#messageList').slimScroll({scrollTo: bottomCoord});
-        console.log('aolaksloalsol')
-        $(".right-sidebar").slideDown(50).toggleClass("shw-rside");
+         });        
         $(".fxhdr").on("click", function () {
             body.toggleClass("fix-header"); /* Fix Header JS */
         });

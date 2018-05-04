@@ -5,41 +5,49 @@ angular.module('app').controller('chatInternalCtrl', function($scope, chatApiSer
   vm.offices = [];
   vm.messages = [];
   vm.messageToSend = "";
+  vm.sockets = {};
   vm.chat = {};
+  vm.slideDownSidebar = function(){
+    debugger;
+    $(".right-sidebar").slideDown(50).toggleClass("shw-rside");
+  }
+  vm.updateScroll = function(){
+    setTimeout(function(){
+      var scrollID = $('ul#scroll-bottom.chat-list');
+      scrollID.scrollTop(scrollID[0].scrollHeight);
+    }, 500)
+  }
   vm.getChatContacts = function(task_id, chat_id){
-    vm.task_id = task_id;
-    vm.chat_id = chat_id;
-    vm.chat['id'] = chat_id;
-    vm.chat['label'] = "task-" + chat_id;
-    chatApiService.getInternalChatOffices(task_id).then(function(data){
-      vm.offices = data
+  vm.slideDownSidebar();
+  vm.task_id = task_id;
+  vm.chat_id = chat_id;
+  chatApiService.getInternalChatOffices(task_id).then(function(data){
+    vm.offices = data
     })
   }
-
-  var updateScroll = function(){
-    var scrollID = $('#scroll-bottom');
-    setTimeout(function(){
-      scrollID.scrollTop(scrollID[0].scrollHeight)
-    }, 500);
-  }
-
 
   vm.getMessages = function(chat){
     chatApiService.getMessages(chat).then(function(data){
       vm.messages = data;
       vm.in_office_list = false;
+      vm.chat = data.chat
+      console.debug(vm.chat)
       var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-      vm.socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + vm.chat.label);
-      vm.socket.onopen = function (data) {
-        vm.socket.send(data);
-      };
-      vm.socket.onmessage = function(e){
-        if (JSON.parse(e.data).chat === vm.chat.id){
-          vm.messages.messages.push(JSON.parse(e.data))
-          $scope.$apply()
-          updateScroll()
-        }
+      if (!vm.sockets[vm.chat.id] ||
+        (vm.sockets[vm.chat.id] && vm.sockets[vm.chat.id].readyState != WebSocket.OPEN)){
+          vm.sockets[vm.chat.id] = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + vm.chat.label);
+          vm.sockets[vm.chat.id].onopen = function (data) {
+              vm.sockets[vm.chat.id].send(data);
+          };
+          vm.sockets[vm.chat.id].onmessage = function(e){
+            if (JSON.parse(e.data).chat === vm.chat.id){
+              vm.messages.messages.push(JSON.parse(e.data))
+              $scope.$apply()
+              vm.updateScroll()
+            }
+          }
       }
+      vm.updateScroll()
     })
   }
 
@@ -61,8 +69,8 @@ angular.module('app').controller('chatInternalCtrl', function($scope, chatApiSer
         'chat': vm.chat.id,
         'label': vm.chat.label
       });
-      vm.socket.onopen(data);
-      updateScroll()
+      vm.sockets[vm.chat.id].onopen(data);
+      vm.updateScroll()
       vm.messageToSend = ""
 
     }

@@ -33,15 +33,26 @@
     }
 
 </style>
+
+<script>
+  var parent_id = false;
+  var child_id = false;
+  {% if object.parent  %}
+    parent_id = {{object.parent.pk}};
+  {%endif%}
+  {% if object.get_child %}
+    child_id = {{object.get_child.pk}};
+  {% endif %}
+</script>
 {%verbatim%}
 <section ng-app="app" ng-controller="chatInternalCtrl as $ctrl">
-  <button class="right-side-toggle  kc_fab_main_btn" ng-click="$ctrl.getChatContacts({%endverbatim%}{{object.pk}}, {{object.chat.pk}} {%verbatim%})"><i class="ti-comments"></i></button>
+  <button class="right-side-toggle  kc_fab_main_btn" ng-click="$ctrl.getChatContacts({%endverbatim%}{{object.pk}}, {{object.chat.pk}}{%verbatim%})"><i class="ti-comments"></i></button>
   <div class="right-sidebar">
     <div>
       <div class="rpanel-title ezl-bg-open font-bold" ng-if="$ctrl.in_office_list" id="close-message">
         <i class="{{ task.status.get_icon }}"></i>
           {%endverbatim%}{{object.chat.title}}{%verbatim%}
-        <span> <i class="ti-close right-side-toggle"></i></span>
+        <span ng-click="$ctrl.slideDownSidebar()"><i class="ti-close"></i></span>
       </div>
       <div class="rpanel-title ezl-bg-open font-bold" ng-if="!$ctrl.in_office_list">
         <div class="row">
@@ -49,10 +60,10 @@
             <a href="#" class="right-side-toggle" style="text-decoration:none; color: #FFF" ng-click="$ctrl.setListState()"><i class="fa fa-2x fa-reply"></i></a>
           </div>
           <div class="col-md-8">
-            {%endverbatim%}{{object.chat.title}}{%verbatim%}
+            {%endverbatim%}{{object.title}}{%verbatim%}
           </div>
           <div class="col-md-1">
-            <i class="ti-close" id="close-message"></i>
+            <span ng-click="$ctrl.slideDownSidebar()"><i class="ti-close"></i></span>
           </div>
         </div>
       </div>

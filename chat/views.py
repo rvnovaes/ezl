@@ -13,6 +13,7 @@ from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import  get_groups_with_perms
 from django.shortcuts import render
 from task.models import Task
+from django.forms.models import model_to_dict
 
 def chat_teste(request):
     return render(request, 'chat/chat_test.html', {'teste': {'teste': 'tetando'}})
@@ -121,7 +122,8 @@ class ChatMenssage(CustomLoginRequiredView, View):
         messages = list(chat.messages.all().values('message', 'create_user__username', 'create_user_id', 'create_date'))
         data = {
             "messages": messages,
-            "request_user_id": request.user.id
+            "request_user_id": request.user.id,
+            "chat": model_to_dict(chat, fields=([field.name for field in chat._meta.fields]))
         }
         return  JsonResponse(data, safe=False)
 
