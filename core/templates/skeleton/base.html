@@ -68,8 +68,10 @@
                 {% include 'skeleton/includes/navbar.html' %}
                 <!-- End Top Navigation -->
 
-                <!-- Left Sidebar - style you can find in sidebar.scss  -->
-                {% include 'skeleton/includes/sidebar.html' %}
+                {% block sidebar %}
+                    <!-- Left Sidebar - style you can find in sidebar.scss  -->
+                    {% include 'skeleton/includes/sidebar.html' %}
+                {% endblock %}
         {% endwith %}
         <!-- End Left Sidebar -->
 
@@ -138,6 +140,7 @@
         <!-- MODALS -->
         {% block modal %}
             {% include 'skeleton/modal/about.html' %}
+            {% include 'skeleton/modal/offiice_select_modal.html' %}
         {% endblock modal %}
         {% block extra_modal %}
 

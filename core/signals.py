@@ -60,9 +60,10 @@ models.signals.post_save.connect(create_person, sender=User, dispatch_uid='creat
 def office_post_save(sender, instance, created, **kwargs):
     if created or not get_groups_with_perms(instance):
         create_permission(instance)
-        for group in {group for group, perms in
-                      get_groups_with_perms(instance, attach_perms=True).items() if 'group_admin' in perms}:
-            instance.create_user.groups.add(group)
+        if not instance.create_user.is_superuser:
+            for group in {group for group, perms in
+                          get_groups_with_perms(instance, attach_perms=True).items() if 'group_admin' in perms}:
+                instance.create_user.groups.add(group)
     else:
         for group in get_groups_with_perms(instance):
             group.name = '{}-{}-{}'.format(group.name.split('-')[0],
