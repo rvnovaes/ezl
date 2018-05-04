@@ -31,10 +31,12 @@ div.chat-title {
 }
 .office-card {
     height: 255px;
-    position: relative;
 }
 .office-card-p {
     height: 100px;
+}
+.office-card, .office-card-p{
+    cursor: pointer;
     position: relative;
 }
 .office-legal-name {

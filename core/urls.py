@@ -97,4 +97,5 @@ urlpatterns = [
     url(r'^taginput/(?P<office_pk>[0-9]+)/permissions$', login_required(views.TagsInputPermissionsView.as_view()),
         name='taginput_permissions'),
     url(r'^office_session_filter/$', views.OfficeSessionSearch.as_view(), name='office_session_filter'),
+    url(r'^office_filter/$', views.OfficeSearch.as_view(), name='office_filter'),
 ]

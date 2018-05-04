@@ -91,15 +91,15 @@
                                             <div id="select_office_detail_1" class="hide b-all p-10 m-b-15 text-center">
                                                 <h5 class="modal-title">Selecione o Escritório</h5>
                                                 <div class="row m-t-10 m-b-10">
-                                                    <div class="col-md-12"><input type="text" class="form-control form-inline" placeholder="Procurar..." id="filter_office_legal_name"></div>
+                                                    <div class="col-md-12"><input type="text" class="form-control form-inline" autocomplete="off" data-session="false" placeholder="Procurar..." id="filter_office_legal_name"></div>
                                                 </div>
                                                 <div class="row" style="max-height: 400px; min-height: 140px; overflow: scroll">
                                                     {% for office in offices %}
                                                         <div class="col-md-4 col-sm-12 hide" id="office-{{ office.id }}">
-                                                            <div class="white-box color-bordered-table muted-bordered-table p-10 office-card-p">
+                                                            <div class="white-box color-bordered-table muted-bordered-table p-10 office-card-p" onclick="select_office('{{office.pk}}')">
                                                                 <div class="row">
                                                                     <div class="col-md-2 col-sm-2 text-center">
-                                                                        <button type="button" onclick="select_office('{{office.pk}}')" class="btn btn-default btn-circle btn-md">
+                                                                        <button type="button" class="btn btn-default btn-circle btn-md">
                                                                             <i class="fa fa-building-o"></i>
                                                                         </button>
                                                                     </div>
@@ -111,7 +111,6 @@
                                                                 <div class="row">
                                                                     <div class="col-md-12 office-select-button">
                                                                         <button id="button_action-{{ office.pk }}"
-                                                                                onclick="select_office('{{office.pk}}')"
                                                                                 class="btn btn-custom btn-block btn-rounded btn-block m-t-10 p-t-0 p-b-0">
                                                                             <i id='icon-{{ office.pk }}' class="fa fa-check" style="font-size: 13px;"></i>
                                                                             <span id="title-{{ office.pk }}" style="font-size: 12px;">Selecionar</span></button>

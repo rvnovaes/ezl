@@ -1418,3 +1418,21 @@ class OfficeSessionSearch(View):
                 'show': show
             })
         return JsonResponse(data, safe=False)
+
+
+class OfficeSearch(View):
+    def get(self, request, *args, **kwargs):
+        q_string = request.GET.get('office_legal_name', '')
+        offices = Office.objects.all()
+        if q_string != '':
+            selected_offices = list(offices.filter(legal_name__icontains=q_string).values_list('id', flat=True))
+        else:
+            selected_offices = []
+        data = []
+        for office in offices:
+            show = True if office.pk in selected_offices else False
+            data.append({
+                'id': office.pk,
+                'show': show
+            })
+        return JsonResponse(data, safe=False)
