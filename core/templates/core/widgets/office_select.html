@@ -6,7 +6,7 @@
     </div>
     {% endblock %}
     {% block body %}
-        {% for office in request.user.person.offices.active_offices %}
+        {% for office in offices %}
             <div class="col-md-4 col-sm-12" id="office-{{ office.id }}">
                 <div class="white-box color-bordered-table muted-bordered-table p-10 office-card">
                     <div class="row">

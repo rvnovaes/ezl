@@ -33,6 +33,10 @@ div.chat-title {
     height: 255px;
     position: relative;
 }
+.office-card-p {
+    height: 100px;
+    position: relative;
+}
 .office-legal-name {
     -ms-word-wrap: break-word;
     word-wrap: break-word;

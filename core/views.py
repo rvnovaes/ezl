@@ -1014,7 +1014,7 @@ class RegisterNewUser(CreateView):
             invite = Invite.objects.filter(invite_code=request.GET['invite_code']).first()
             context['email'] = invite.email
             context['invite_code'] = request.GET['invite_code']
-        context['offices'] = Office.objects.all()
+        context['offices'] = Office.objects.all().order_by('legal_name')
         return render(request, 'account/register.html', context)
 
 
@@ -1405,7 +1405,10 @@ class TagsInputPermissionsView(View):
 class OfficeSessionSearch(View):
     def get(self, request, *args, **kwargs):
         q = request.GET.get('office_legal_name', '')
-        offices = request.user.person.offices.all()
+        if hasattr(request.user, 'person'):
+            offices = request.user.person.offices.all()
+        else:
+            offices = Office.objects.all()
         selected_offices = list(offices.filter(legal_name__icontains=q).values_list('id', flat=True))
         data = []
         for office in offices:

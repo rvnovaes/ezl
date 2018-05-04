@@ -73,7 +73,7 @@
         $(window).bind("resize", set);
     });
     {% endif %}
-    function filter_office_session(office_legal_name) {
+    function filter_office(office_legal_name) {
         $.ajax({
             type: 'GET',
             url: "/office_session_filter/",
@@ -82,11 +82,12 @@
             },
             dataType: 'json',
             success: function (data) {
-                console.log(data)
                 $.each(data, function( index, value ) {
                     console.debug(value);
                     if (value.show == false){
-                        $("#office-"+value.id).addClass('hide');
+                        if (!$("#office-"+value.id).hasClass('card-fixed')){
+                            $("#office-"+value.id).addClass('hide');
+                        }
                     }else{
                         $("#office-"+value.id).removeClass('hide');
                     }
@@ -108,8 +109,7 @@
 
     //user is "finished typing," do something
     function doneTyping() {
-      console.log('parei de digitar');
-      filter_office_session($('#filter_office_legal_name').val())
+      filter_office($('#filter_office_legal_name').val())
     }
 
 
