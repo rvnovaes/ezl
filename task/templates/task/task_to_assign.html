@@ -18,7 +18,7 @@
                             <input type='hidden' name='office' value='{{ task.office }}'>
                             <label>Selecione o correspondente que irá executar esta OS.</label>
                             <select class="person-to-assign form-control" style='width: 100%;'
-                                    name="person_executed_by">
+                                    name="person_executed_by" required>
                                 <option value="" selected></option>
                                 {% for person in task.office.persons.active_offices|get_correspondent:task.office %}
                                     <option value="{{ person.pk }}">{{ person.name }}</option>
