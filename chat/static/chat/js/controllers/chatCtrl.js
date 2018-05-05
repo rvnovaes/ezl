@@ -91,14 +91,16 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   }
 
   $scope.sendMessage = function(){
-    var data = JSON.stringify({
-      'text': $scope.message,
-      'chat': $scope.chat.id,
-      'label': $scope.chat.label
-    });
-    $scope.sockets[$scope.chat.id].onopen(data);
-    updateScroll()
-    $scope.message = ""
+    if ($scope.message) {
+      var data = JSON.stringify({
+        'text': $scope.message,
+        'chat': $scope.chat.id,
+        'label': $scope.chat.label
+      });
+      $scope.sockets[$scope.chat.id].onopen(data);
+      updateScroll()
+      $scope.message = ""  
+    }
   }
 
   $scope.getClass = function(message_user_id, request_user_id){
