@@ -61,3 +61,8 @@ div.chat-title {
   width: 100%;
   border-radius: 10px;
 }
+
+.chat-text {
+  width: 100%;
+  word-wrap: break-word;
+}

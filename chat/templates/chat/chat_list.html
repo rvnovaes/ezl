@@ -102,8 +102,8 @@
                       <h3 class="box-title">{{chat.title}}</h3>
                       <span class="heading-description text-wrap">{{ chat.description }}</span>
                     </div>
-                    <div class="col-md-2">
-                      <button class="btn btn-primary btn-outline">
+                    <div class="col-md-2" ng-if="!existsUnread">
+                      <button class="btn btn-primary btn-outline" ng-click="unreadMessage(chat)">
                         <i class="mdi mdi-eye-off"></i>
                       </button>
                     </div>

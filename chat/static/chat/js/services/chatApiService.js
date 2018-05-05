@@ -35,12 +35,19 @@ angular.module('app').factory('chatApiService', function($http){
     })
   }
 
+  var _unreadMessage = function(data) {
+    return $http.post('/chat/unread_message/', data).then(function(response){
+      return response.data
+    })
+  }
+
   return {
     getContacts: _getContacts,
     getChats: _getChats,
     getMessages: _getMessages,
     newSocket: _newSocket,
     readMessage: _readMessage,
-    getInternalChatOffices: _getInternalChatOffices
+    getInternalChatOffices: _getInternalChatOffices,
+    unreadMessage: _unreadMessage
   }
 })

@@ -4,6 +4,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   $('.bg-title').css('display', 'none')
   $scope.inMessage = false;
   $scope.contacts = [];
+  $scope.chat = {}
   $scope.chats = [];
   $scope.sockets = {};
   $scope.messages = []
@@ -12,6 +13,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   $scope.chatSelected = {}
   $scope.office_id = false
   $scope.listScrollChat = false
+  $scope.existsUnread = false;
 
   $('#list-chat-scroll').ready(function(){
     $scope.listScrollChat = new PerfectScrollbar('#list-chat-scroll', {
@@ -19,12 +21,23 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     })
   })
 
+  $scope.unreadMessage = function(chat){
+    data = {
+      chat: chat.id
+    }
+    chatApiService.unreadMessage(data).then(function(data){
+      setTimeout(getChats, 500);
+      $scope.existsUnread = true;
+    })
+  }
+
   var readMessage = function(chat){
     data = {
       chat_id: chat.id
     }
     chatApiService.readMessage(data)
     setTimeout(getChats, 500)
+    $scope.existsUnread = false;
   }
 
   var getContacts = function () {
@@ -99,7 +112,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
       });
       $scope.sockets[$scope.chat.id].onopen(data);
       updateScroll()
-      $scope.message = ""  
+      $scope.message = ""
     }
   }
 
@@ -121,5 +134,4 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
       $scope.sendMessage()
     }
   };
-
 })

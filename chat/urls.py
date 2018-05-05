@@ -10,5 +10,7 @@ urlpatterns = [
     url(r'^contact/$', views.ChatOfficeContactView.as_view(), name="contact"),
     url(r'^chats_by_office/$', views.ChatsByOfficeView.as_view(), name="chat_by_office"),
     url(r'^chat_messages/$', views.ChatMenssage.as_view(), name='chat_messages'),
-    url(r'^internal_chat_offices/$', views.InternalChatOffices.as_view(), name="internal_chat_offices")
+    url(r'^internal_chat_offices/$', views.InternalChatOffices.as_view(), name="internal_chat_offices"),
+    url(r'^unread_message/$', views.UnreadMessageView.as_view(), name='unread_message')
+
 ]

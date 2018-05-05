@@ -144,3 +144,13 @@ class InternalChatOffices(CustomLoginRequiredView, View):
                 'office_legal_name': task_child.office.legal_name
             })
         return JsonResponse(data, safe=False)
+
+
+class UnreadMessageView(CustomLoginRequiredView, View):
+    def post(self, request, *args, **kwargs):
+        chat_id = json.loads(request.body).get('chat')
+        chat = Chat.objects.get(pk=chat_id)
+        user_by_chat = chat.users.filter(user_by_chat=request.user).first()
+        UnreadMessage.objects.create(
+            create_user=request.user, message=chat.messages.latest('pk'), user_by_message=user_by_chat)
+        return JsonResponse({'status': 'ok'})
