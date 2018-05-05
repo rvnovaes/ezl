@@ -8,7 +8,6 @@ angular.module('app').controller('chatInternalCtrl', function($scope, chatApiSer
   vm.sockets = {};
   vm.chat = {};
   vm.slideDownSidebar = function(){
-    debugger;
     $(".right-sidebar").slideDown(50).toggleClass("shw-rside");
   }
   vm.updateScroll = function(){
