@@ -47,3 +47,18 @@ div.chat-title {
 .chat-box .chat-list {
   height: 100% !important;
 }
+
+.chat-image {
+  width: 100% !important;
+}
+.chat-text {
+  width: 100% !important;
+}
+
+.non-odd > .chat-image {
+  text-align: left;
+}
+
+.odd > .chat-image {
+  text-align: right;
+}

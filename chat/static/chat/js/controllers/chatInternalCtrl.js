@@ -54,7 +54,7 @@ angular.module('app').controller('chatInternalCtrl', function($scope, chatApiSer
     if (message.create_user_id === vm.messages.request_user_id) {
       return "odd"
     }
-    return ""
+    return "non-odd"
   }
 
   vm.setListState = function(){
