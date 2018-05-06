@@ -93,8 +93,7 @@ class ChatOfficeContactView(CustomLoginRequiredView, View):
         current_office = get_office_session(request)
         chats = Chat.objects.filter(users__user_by_chat=self.request.user, users__is_active=True).order_by(
             'pk').distinct('pk')
-        data = list(Office.objects.filter(~Q(pk=current_office.pk),
-            chats__in=chats,).values('pk', 'legal_name').distinct('pk'))
+        data = list(Office.objects.filter(chats__in=chats,).values('pk', 'legal_name').distinct('pk'))
         data = self.add_count_unread_message(request.user, data)
         return JsonResponse(data, safe=False)
 
@@ -142,6 +141,12 @@ class InternalChatOffices(CustomLoginRequiredView, View):
                 'chat': task_child.chat.pk, # "Deve ser o pk do chat da task filha"
                 'office_pk': task_child.office.pk,
                 'office_legal_name': task_child.office.legal_name
+            })
+        if not all([task.parent, task.child.exists()]):
+            data.append({
+                'chat': task.chat.pk, # "Deve ser o pk do chat da task filha"
+                'office_pk': task.office.pk,
+                'office_legal_name': task.office.legal_name
             })
         return JsonResponse(data, safe=False)
 

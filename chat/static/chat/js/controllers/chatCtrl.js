@@ -67,8 +67,8 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     getChats()
   }
 
-  update_list_office = $interval(getContacts, 500)
-  update_list_chats = $interval(getChats, 500)
+  update_list_office = $interval(getContacts, 5000)
+  update_list_chats = $interval(getChats, 5000)
 
   $scope.getMessages = function(chat){
     $scope.inMessage = true;
