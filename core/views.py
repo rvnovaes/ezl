@@ -7,7 +7,7 @@ from django import forms
 from django.forms.utils import ErrorList
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import logout, password_validation
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -16,6 +16,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.exceptions import ValidationError
 from django.db.models import ProtectedError, Q, F
 from django.db import transaction
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
@@ -1435,4 +1436,20 @@ class OfficeSearch(View):
                 'id': office.pk,
                 'show': show
             })
+        return JsonResponse(data, safe=False)
+
+
+class ValidatePassword(View):
+    def post(self, request, *args, **kwargs):
+        password = request.POST.get('password')
+        data = {}
+        try:
+            password_validation.validate_password(password)
+            data['valid'] = True
+        except ValidationError as error:
+            data['valid'] = False
+            message = error.messages
+            message = [x + '<br>' for x in message]
+            data['message'] = message
+
         return JsonResponse(data, safe=False)

@@ -52,6 +52,7 @@
                             <h4><span><i class="ti-check"></i></span>Confirmar</h4> </li>
                     </ul>
                     <form id="validation" class="form-horizontal">
+                        {% csrf_token %}
                         <div class="wizard-content">
                             <div class="wizard-pane active" role="tabpanel">
                                 <div class="form-group">
@@ -226,6 +227,7 @@
                             }
                         },
                         password: {
+                            threshold: 8,
                             validators: {
                                 notEmpty: {
                                     message: 'É obrigatório uma senha de acesso'
@@ -233,6 +235,16 @@
                                 different: {
                                     field: 'username',
                                     message: 'A senha não pode ser a mesma do usuário'
+                                },
+                                remote: {
+                                    message: 'A senha não atende aos requisitos',
+                                    url: '/validate_password/',
+                                    type: 'POST',
+                                    data: function(validator, $field, value) {
+                                        return {
+                                            csrfmiddlewaretoken: validator.getFieldElements('csrfmiddlewaretoken').val()
+                                        };
+                                    }
                                 }
                             }
                         },
@@ -336,7 +348,6 @@
                 office_card.removeClass('card-fixed')
             }
             $('#validation').formValidation('revalidateField', 'filter_office_legal_name')
-
         }
     </script>
 {% endblock extra_scripts %}
@@ -368,4 +379,7 @@
             office_card.removeClass('hide')
         }
     })
+    $( "input[name=password]" ).blur(function() {
+      $('#validation').formValidation('revalidateField', 'password')
+    });
 {% endblock %}
