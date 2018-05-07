@@ -3,9 +3,11 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
 
   $('.bg-title').css('display', 'none')
   $scope.inMessage = false;
+  $scope.realContacts = [];
   $scope.contacts = [];
   $scope.chat = {}
   $scope.chats = [];
+  $scope.realChats = [];
   $scope.sockets = {};
   $scope.messages = []
   $scope.listOffices = true;
@@ -14,12 +16,29 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   $scope.office_id = false
   $scope.listScrollChat = false
   $scope.existsUnread = false;
+  $scope.search = ''
 
   $('#list-chat-scroll').ready(function(){
     $scope.listScrollChat = new PerfectScrollbar('#list-chat-scroll', {
       wheelSpeed: 2
     })
-  })
+  });
+
+  $scope.$watch('search', function(newValue, oldValue) {
+    if ($scope.listOffices) {
+      $scope.contacts = $scope.realContacts.filter(function(contact){
+        if (contact.legal_name.toUpperCase().indexOf(newValue.toUpperCase()) !== -1) {
+          return contact;
+        }
+      })
+    } else {
+      $scope.chats = $scope.realChats.filter(function(contact){
+        if (contact.title.toUpperCase().indexOf(newValue.toUpperCase()) !== -1) {
+          return contact;
+        }
+      })
+    }
+  });
 
   $scope.unreadMessage = function(chat){
     data = {
@@ -43,7 +62,10 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   var getContacts = function () {
     if ($scope.listOffices) {
       chatApiService.getContacts().then(function(data){
-        $scope.contacts = data
+        $scope.realContacts = data;
+        if (!$scope.search.length) {
+          $scope.contacts = data;
+        }
       });
     }
   }
@@ -53,7 +75,10 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   var getChats = function(){
     if ($scope.office_id && !$scope.listOffices) {
       chatApiService.getChats($scope.office_id).then(function(data){
-        $scope.chats = data;
+        $scope.realChats = data;
+        if (!$scope.search.length) {
+            $scope.chats = data;
+        }
         setTimeout(function(){
           $scope.listScrollChat.update();
         }, 200)
@@ -64,6 +89,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   $scope.getChats = function(office_id) {
     $scope.office_id = office_id
     $scope.listOffices = false;
+    $scope.search = "";
     getChats()
   }
 
@@ -125,6 +151,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
 
   $scope.goToOfficeList = function(){
     $scope.listOffices = true
+    $scope.search = '';
     $scope.inMessage = false;
     getContacts()
   };
