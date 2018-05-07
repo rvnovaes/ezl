@@ -5,7 +5,7 @@
                 Nome
             </th>
             <td>
-                {{ office.name|capfirst|default_if_none:"---" }}
+                {{ office.legal_name|capfirst|default_if_none:"---" }}
             </td>
         </tr>
         <tr>
@@ -35,7 +35,7 @@
                 Email
             </th>
             <td>
-                {% with emails=person.get_emails %}
+                {% with emails=office.get_emails %}
                 {% if emails %}
                     {% if emails|length == 1 %}
                         {{ emails.0 }}
@@ -57,7 +57,7 @@
                 Telefone
             </th>
             <td>
-                {% with phones=person.get_phones %}
+                {% with phones=office.get_phones %}
                 {% if phones %}
                     {% if phones|length == 1 %}
                         {{ phones.0 }}

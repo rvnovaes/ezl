@@ -29,6 +29,24 @@ var chatReadMessage = function (chat_id, csrf_token) {
     })
 };
 
+var chatUnreadMessage = function (chat_id, csrf_token) {
+    console.log("AQI");
+    $.ajax({
+        type: 'GET',
+        url: '/chat/chat_unread_messages',
+        data: {
+            chat_id: chat_id
+        },
+        success: function (response) {
+          setBadgeItem(response.grouped_messages);
+        },
+        beforeSend: function (xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrf_token);
+        },
+        dataType: 'json'
+    })
+};
+
 setInterval(function () {
     $.ajax({
         type: "GET",

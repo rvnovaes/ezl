@@ -296,6 +296,22 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                                                  name=self.TASK_NUMBER_SEQUENCE))
 
 
+class TaskFeedback(models.Model):
+    feedback_date = models.DateTimeField(auto_now_add=True)
+    task = models.ForeignKey('Task', verbose_name='OS')
+    rating = models.SmallIntegerField(
+        verbose_name='Nota',
+        choices=[(x, x) for x in range(1,6)]
+    )
+    comment = models.TextField(null=True, verbose_name='Comentário')
+    create_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='%(class)s_create_user',
+        verbose_name='Criado por'
+    )
+
+
 def get_dir_name(instance, filename):
     path = os.path.join('media', 'ECM', str(instance.task_id))
     if not os.path.exists(path):

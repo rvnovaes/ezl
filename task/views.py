@@ -32,7 +32,7 @@ from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
 from task.filters import TaskFilter
 from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm, TaskToAssignForm, FilterForm
-from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskGeolocation
+from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, TaskGeolocation
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable, FilterTable
 from financial.models import ServicePriceTable
@@ -392,6 +392,15 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             if servicepricetable:
                 self.delegate_child_task(form.instance, servicepricetable.office_correspondent)
                 form.instance.person_executed_by = None
+
+        feedback_rating = form.cleaned_data.get('feedback_rating')
+        feedback_comment = form.cleaned_data.get('feedback_comment')
+        if feedback_rating and not form.instance.taskfeedback_set.exists():
+            TaskFeedback.objects.create(
+                task=form.instance,
+                rating=feedback_rating,
+                comment=feedback_comment,
+                create_user=form.instance.alter_user)
 
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))

@@ -17,11 +17,10 @@ def person_office(apps, schema_editor):
     office_mt = Office.objects.filter(cpf_cnpj='03.482.042/0001-02').last()
     if not office_mt:
       return True
-  
+
     for record in ServicePriceTable.objects.order_by('correspondent__id').all():
         person = record.correspondent
         create_user = User.objects.get(pk=person.auth_user.pk) if person.auth_user else admin
-        # import pdb;pdb.set_trace()
         person_office, created = Office.objects.get_or_create(create_user=create_user,
                                                               cpf_cnpj=person.cpf_cnpj,
                                                               name=person.name,

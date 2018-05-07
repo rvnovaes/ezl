@@ -1,0 +1,23 @@
+{% extends 'core/widgets/offiice_select.html' %}
+{% load static %}
+{% block title %}
+    <div id="office-select-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    {{ block.super }}
+            </div>
+            <div class="modal-body p-l-20 bg-light">
+                <div class="row">
+                </div>
+{% endblock %}
+{% block body %}
+    {{ block.super }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success waves-effect" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

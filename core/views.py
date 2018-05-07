@@ -45,6 +45,7 @@ from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task, TaskStatus
+from task.metrics import get_correspondent_metrics
 from ecm.forms import AttachmentForm
 from ecm.utils import attachment_form_valid, attachments_multi_delete
 from django.core.validators import validate_email
@@ -106,11 +107,17 @@ def inicial(request):
         return HttpResponseRedirect('/')
 
 
-class StartUserView(View):
+class StartUserView(TemplateView):
     template_name = 'core/start_user.html'
 
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+    def get_context_data(self):
+        context = super().get_context_data()
+
+        if self.request.user.person.is_correspondent:
+            metrics = get_correspondent_metrics(self.request.user.person)
+            context['rating'] = metrics['rating']
+            context['returned_os'] = metrics['returned_os_rate']
+        return context
 
 
 class OfficeInstanceView(View):
@@ -751,7 +758,8 @@ class UserListView(CustomLoginRequiredView, SingleTableViewMixin):
         context = super().get_context_data(**kwargs)
         table_data = context['table'].data.data
         context['table'] = self.table_class(
-            list(map(lambda i: i.auth_user, get_office_session(self.request).persons.filter(auth_user__in=table_data))))
+            list(map(lambda i: i.auth_user, get_office_session(self.request).persons.filter(auth_user__in=table_data,
+                                                                                            auth_user__is_superuser=False))))
         RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
 
@@ -925,9 +933,15 @@ class OfficeCreateView(AuditFormMixin, CreateView):
             # Caso o relacionamento esteja apenas inativo
             member.is_active = True
             member.save()
-        for group in {group for group, perms in
-                      get_groups_with_perms(form.instance, attach_perms=True).items() if 'group_admin' in perms}:
-            form.instance.create_user.groups.add(group)
+        else:
+            for super_user in User.objects.filter(is_superuser=True).all():
+                member, created = OfficeMembership.objects.update_or_create(
+                    person=super_user.person, office=form.instance,
+                    defaults={'create_user': form.instance.create_user, 'is_active': True})
+        if not form.instance.create_user.is_superuser:
+            for group in {group for group, perms in
+                          get_groups_with_perms(form.instance, attach_perms=True).items() if 'group_admin' in perms}:
+                form.instance.create_user.groups.add(group)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -1383,5 +1397,20 @@ class TagsInputPermissionsView(View):
             data.append({
                 'value': group.group.pk,
                 'text': group.label_group
+            })
+        return JsonResponse(data, safe=False)
+
+
+class OfficeSessionSearch(View):
+    def get(self, request, *args, **kwargs):
+        q = request.GET.get('office_legal_name', '')
+        offices = request.user.person.offices.all()
+        selected_offices = list(offices.filter(legal_name__icontains=q).values_list('id', flat=True))
+        data = []
+        for office in offices:
+            show = True if office.pk in selected_offices else False
+            data.append({
+                'id': office.pk,
+                'show': show
             })
         return JsonResponse(data, safe=False)

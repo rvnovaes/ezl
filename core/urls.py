@@ -96,4 +96,6 @@ urlpatterns = [
         name='typeahead_invite_office'),
     url(r'^taginput/(?P<office_pk>[0-9]+)/permissions$', login_required(views.TagsInputPermissionsView.as_view()),
         name='taginput_permissions'),
+    url(r'^office_session_filter/$', login_required(views.OfficeSessionSearch.as_view()),
+        name='office_session_filter'),
 ]

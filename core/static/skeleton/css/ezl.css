@@ -581,8 +581,26 @@ fieldset[disabled] .btn-ezl-error.active {
     background-color: #CCC!important;
     border: #CCC!important;
 }
+
+.rating-container{
+    margin: 1em 0;
+    display: none;
+}
+    .rating-container #id_feedback_comment{
+        width: 100%;
+    }
+    .rating-container .rating-symbol{
+        font-size: 40px;
+        cursor: pointer;
+    }
+    .rating-container .glyphicon-star::before {
+        color: yellow;
+    }
+
+
 /* OUTROS */
 .ezl-required:before {
     content: "\2217\20";
     color: red;
 };
+

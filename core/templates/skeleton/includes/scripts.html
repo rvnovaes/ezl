@@ -75,4 +75,44 @@
         $(window).bind("resize", set);
     });
     {% endif %}
+    function filter_office_session(office_legal_name) {
+        $.ajax({
+            type: 'GET',
+            url: "/office_session_filter/",
+            data: {
+                'office_legal_name': office_legal_name,
+            },
+            dataType: 'json',
+            success: function (data) {
+                console.log(data)
+                $.each(data, function( index, value ) {
+                    console.debug(value);
+                    if (value.show == false){
+                        $("#office-"+value.id).addClass('hide');
+                    }else{
+                        $("#office-"+value.id).removeClass('hide');
+                    }
+                })
+            }
+        });
+    }
+
+    var typingTimer; //timer identifier
+    var doneTypingInterval = 500; //time in ms, 5 second for example
+
+    //on keyup, start the countdown
+    $('#filter_office_legal_name').keyup(function() {
+      clearTimeout(typingTimer);
+      if ($('#filter_office_legal_name').val) {
+        typingTimer = setTimeout(doneTyping, doneTypingInterval);
+      }
+    });
+
+    //user is "finished typing," do something
+    function doneTyping() {
+      console.log('parei de digitar');
+      filter_office_session($('#filter_office_legal_name').val())
+    }
+
+
 </script>
