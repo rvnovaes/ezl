@@ -100,7 +100,6 @@ def new_task(sender, instance, created, **kwargs):
 
         else:
             project_link = settings.PROJECT_LINK
-
         mail = SendMail()
         mail.subject = 'Easy Lawyer - OS '+str(number) + ' - ' + str(
             instance.type_task).title() + ' - Prazo: ' + \
@@ -114,11 +113,10 @@ def new_task(sender, instance, created, **kwargs):
                                          'task': instance
                                          })
         mail.to_mail = mail_list
-
-        # TODO: tratar corretamente a excecao
-
         try:
-            mail.send()
+            if not getattr(instance, '_skip_mail'):
+                mail.send()
+                print('enviando email')
         except Exception as e:
             print(e)
             print('Você tentou mandar um e-mail')
@@ -161,13 +159,13 @@ def change_status(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Task)
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
-    if not getattr(instance, '_skip_signal'):
+    if not getattr(instance, '_skip_signal', None):
         export_task.delay(instance.pk)
 
 
 @receiver(post_save, sender=TaskHistory)
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
-    if not getattr(instance, '_skip_signal'):
+    if not getattr(instance, '_skip_signal', None):
         export_task_history.delay(instance.pk)
 
 
@@ -183,7 +181,8 @@ def update_status_parent_task(sender, instance, **kwargs):
     """
     if instance.parent and not instance.task_status == TaskStatus.REQUESTED:
         instance.parent.task_status = get_parent_status(instance.status)
-        instance.parent.save()
+        instance.parent.save(**{'skip_signal': instance._skip_signal,
+        'skip_mail': instance._skip_signal})
 
 
 @receiver(pre_save, sender=Task)
@@ -198,7 +197,8 @@ def update_status_child_task(sender, instance, **kwargs):
     status = get_child_status(instance.status)
     if instance.get_child and status:
         instance.child.latest('pk').task_status = status
-        instance.child.latest('pk').save()
+        instance.child.latest('pk').save(**{'skip_signal': instance._skip_signal,
+        'skip_mail': instance._skip_signal})
 
 
 def create_or_update_user_by_chat(task, fields):
@@ -249,5 +249,5 @@ def create_or_update_chat(sender, instance, created, **kwargs):
             'person_asked_by', 'person_executed_by', 'person_distributed_by'
         ])
     post_save.disconnect(create_or_update_chat, sender=sender)
-    instance.save()
+    instance.save(**{'skip_signal': True, 'skip_mail': True})
     post_save.connect(create_or_update_chat, sender=sender)
