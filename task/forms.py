@@ -120,7 +120,7 @@ class TaskDetailForm(ModelForm):
 class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
-        fields = ['office', 'name', 'survey', 'is_active']
+        fields = ['name', 'survey', 'is_active']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

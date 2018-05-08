@@ -130,7 +130,7 @@ class CheckPointType(Enum):
         return [(x.value, x.name) for x in cls]
 
 
-class TypeTask(Audit, LegacyCode, OfficeMixin):
+class TypeTask(Audit, LegacyCode):
     name = models.CharField(max_length=255, null=False, blank=False,
                             verbose_name='Tipo de Serviço')
     survey = models.ForeignKey(
@@ -145,8 +145,7 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
         db_table = 'type_task'
         ordering = ('name',)
         verbose_name = 'Tipo de Serviço'
-        verbose_name_plural = 'Tipos de Serviço'
-        unique_together = (('office', 'name'),)
+        verbose_name_plural = 'Tipos de Serviço'        
 
     def __str__(self):
         return self.name
