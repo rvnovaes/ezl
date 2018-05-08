@@ -1453,3 +1453,13 @@ class ValidatePassword(View):
             data['message'] = message
 
         return JsonResponse(data, safe=False)
+
+
+class ValidateUsername(View):
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get('username')
+        data = {'valid': True}
+        if User.objects.filter(username=username).first():
+            data['valid'] = False
+
+        return JsonResponse(data, safe=False)

@@ -48,7 +48,9 @@
                             <h4><span><i class="ti-user"></i></span>Dados de Acesso</h4> </li>
                         <li role="tab">
                             <h4><span><i class="fa fa-building-o"></i></span>Forma de trabalho</h4> </li>
-                        <li role="tab">
+                        <li data-target="#plan_tab" role="tab">
+                            <h4><span><i class="fa fa-dashboard"></i></span>Plano de acesso</h4> </li>
+                        <li data-target="#confirm_tab" role="tab">
                             <h4><span><i class="ti-check"></i></span>Confirmar</h4> </li>
                     </ul>
                     <form id="validation" class="form-horizontal">
@@ -86,6 +88,7 @@
                                     <div class="input-group">
                                     </div>
                                     <input type="hidden" name="select_office_register" required>
+                                    <div id="tab-1-alert" class="alert alert-danger alert" style="display: none">Favor selecionar uma forma de trabalho. </div>
                                     <div id="select_office_register" class="select-row-icon">
                                         <div class="row col-md-12">
                                             <a id="existing_office" data-id="1" class='select_office_list' href="javascript:void(0)"><i class="mdi mdi-credit-card"></i> <span>Vincular-me a um escritório já cadastrado</span> <i class="whn-hov mdi mdi-checkbox-marked-circle"></i></a>
@@ -106,11 +109,11 @@
                                                                     </div>
                                                                     <div class="col-md-10 col-sm-10" style="overflow-y: auto; overflow-x:hidden;">
                                                                         <span class="box-title office-legal-name"><small>{{office.legal_name}}</small></span>
-                                                                        {% with office.get_address.first as first_address  %}
-                                                                            {% if first_address %}
-                                                                                <br /><small><strong>{{ first_address.city.name }} ({{ first_address.city.state.initials }})</strong></small>
-                                                                            {% endif %}
-                                                                        {% endwith %}
+                                                                            {% with office.get_address.first as first_address  %}
+                                                                                {% if first_address %}
+                                                                                    <br /><small><strong><span id="office-city">{{ first_address.city.name }} ({{ first_address.city.state.initials }})</span></strong></small>
+                                                                                {% endif %}
+                                                                            {% endwith %}
                                                                         <input type="checkbox" name="office_checkbox_{{ office.pk }}" class="hidden" value="{{ office.pk }}" >
                                                                     </div>
                                                                 </div>
@@ -132,7 +135,7 @@
                                             <a id="new_office" data-id="2" class='select_office_list' href="javascript:void(0)"><i class="mdi mdi-monitor"></i> <span> Não encontrei meu escritório e desejo cadastrá-lo</span> <i class="whn-hov mdi mdi-checkbox-marked-circle"></i></a>
                                             <div id="select_office_detail_2" class="hide b-all p-20 m-b-15 text-center">
                                                 <div class="form-group">
-                                                    <label class="col-xs-3 control-label">Razão social / Nome complete</label>
+                                                    <label class="col-xs-3 control-label">Razão social / Nome completo</label>
                                                     <div class="col-xs-5">
                                                         <input type="text" class="form-control" name="legal_name" /> </div>
                                                 </div>
@@ -164,8 +167,160 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="wizard-pane" role="tabpanel">
-
+                            <div class="wizard-pane active" id="plan_tab" role="tabpanel">
+                                <div id="tab-2-alert" class="alert alert-danger alert" style="display: none">Favor selecionar um Plano de acesso. </div>
+                                <div class="row pricing-plan">
+                                    <div class="col-md-4 col-xs-12 col-sm-6 no-padding">
+                                        <div id="plan-1-box" class="pricing-box b-l">
+                                            <div class="pricing-body">
+                                                <div class="pricing-header">
+                                                    <h4 class="text-center">Silver</h4>
+                                                    <h2 class="text-center"><span class="price-sign">$</span>24</h2>
+                                                    <p class="uppercase">per month</p>
+                                                </div>
+                                                <div class="price-table-content">
+                                                    <div class="price-row"><i class="icon-user"></i> 3 Members</div>
+                                                    <div class="price-row"><i class="icon-screen-smartphone"></i> Single Device</div>
+                                                    <div class="price-row"><i class="icon-drawar"></i> 50GB Storage</div>
+                                                    <div class="price-row"><i class="icon-refresh"></i> Monthly Backups</div>
+                                                    <div class="price-row">
+                                                        <button class="btn btn-success waves-effect waves-light m-t-20"
+                                                                data-select="plan"
+                                                                data-value="1"
+                                                                onclick="choose_plan(this)">Escolher</button>
+                                                        <input type='radio' id='plan-1-radio' name='plan' value='1' class="hidden" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-xs-12 col-sm-6 no-padding">
+                                        <div id="plan-2-box" class="pricing-box b-l">
+                                            <div class="pricing-body">
+                                                <div class="pricing-header">
+                                                    <h4 class="text-center">Gold</h4>
+                                                    <h2 class="text-center"><span class="price-sign">$</span>34</h2>
+                                                    <p class="uppercase">per month</p>
+                                                </div>
+                                                <div class="price-table-content">
+                                                    <div class="price-row"><i class="icon-user"></i> 5 Members</div>
+                                                    <div class="price-row"><i class="icon-screen-smartphone"></i> Single Device</div>
+                                                    <div class="price-row"><i class="icon-drawar"></i> 80GB Storage</div>
+                                                    <div class="price-row"><i class="icon-refresh"></i> Monthly Backups</div>
+                                                    <div class="price-row">
+                                                        <button class="btn btn-success waves-effect waves-light m-t-20"
+                                                                data-select="plan"
+                                                                data-value="2"
+                                                                onclick="choose_plan(this)">Escolher</button>
+                                                        <input type='radio' id='plan-2-radio' name='plan' value='2' class="hidden" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-xs-12 col-sm-6 no-padding">
+                                        <div id="plan-3-box" class="pricing-box b-r">
+                                            <div class="pricing-body">
+                                                <div class="pricing-header">
+                                                    <h4 class="text-center">Dimond</h4>
+                                                    <h2 class="text-center"><span class="price-sign">$</span>54</h2>
+                                                    <p class="uppercase">per month</p>
+                                                </div>
+                                                <div class="price-table-content">
+                                                    <div class="price-row"><i class="icon-user"></i> 15 Members</div>
+                                                    <div class="price-row"><i class="icon-screen-smartphone"></i> Single Device</div>
+                                                    <div class="price-row"><i class="icon-drawar"></i> 1TB Storage</div>
+                                                    <div class="price-row"><i class="icon-refresh"></i> Monthly Backups</div>
+                                                    <div class="price-row">
+                                                        <button class="btn btn-success waves-effect waves-light m-t-20"
+                                                                data-select="plan"
+                                                                data-value="3"
+                                                                onclick="choose_plan(this)">Escolher</button>
+                                                        <input type='radio' id='plan-3-radio' name='plan' value='3' class="hidden" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="wizard-pane" id="confirm_tab" role="tabpanel">
+                                <div class="row">
+                                    <h4>Dados de acesso</h4>
+                                    <div class="form-group m-b-0">
+                                        <label class="col-xs-3 control-label p-t-10">Nome</label>
+                                        <div class="col-xs-5 p-t-10">
+                                            <span id="name"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group m-b-0">
+                                        <label class="col-xs-3 control-label p-t-10">Usuário</label>
+                                        <div class="col-xs-5 p-t-10">
+                                            <span id="username"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group m-b-0">
+                                        <label class="col-xs-3 control-label p-t-10">E-mail</label>
+                                        <div class="col-xs-5 p-t-10">
+                                            <span id="email"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <h4>Forma de trabalho</h4>
+                                    <div id="select_office_register-1" class="form-group m-b-0">
+                                        <label class="col-xs-3 control-label p-t-10">Vicular-me a um escritório já cadastrado:</label>
+                                        <div class="col-xs-5 p-t-10">
+                                            <span id="office_list"></span>
+                                        </div>
+                                    </div>
+                                    <div id="select_office_register-2" class="form-group m-b-0">
+                                        <label class="col-xs-3 control-label p-t-10">Não encontrei meu escritório e desejo cadastrá-lo:</label>
+                                        <div class="col-xs-5 p-t-10">
+                                            <div class="form-group m-b-0">
+                                                <label class="col-xs-3 control-label p-t-10">Razão social / Nome completo</label>
+                                                <div class="col-xs-5 p-t-10">
+                                                    <span id="legal_name"></span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group m-b-0">
+                                                <label class="col-xs-3 control-label p-t-10">Nome fantasia / Apelido</label>
+                                                <div class="col-xs-5 p-t-10">
+                                                    <span id="office_name"></span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group m-b-0">
+                                                <label class="col-xs-3 control-label p-t-10">Tipo</label>
+                                                <div class="col-xs-5 p-t-10">
+                                                    <span id="legal_type"></span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group m-b-0">
+                                                <label class="col-xs-3 control-label p-t-10">CPF / CNPJ</label>
+                                                <div class="col-xs-5 p-t-10">
+                                                    <span id="cpf_cnpj"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="select_office_register-3" class="form-group m-b-0">
+                                        <label class="col-xs-3 control-label p-t-10">Trabalho Sozinho</label>
+                                    </div>
+                                </div>
+                                <div id="plan-row" class="row">
+                                    <h4>Plano de acesso</h4>
+                                    <h5 id="selected-plan"></h5>
+                                </div>
+                                <div class="row">
+                                    <h4>Termos de uso e serviço</h4>
+                                    <div class="row">
+                                        <blockquote>
+                                            <p>All the x-ray visions will be lost in histories like turbulences in faiths</p>
+                                            <p>Meet wihtout definition, and we won’t question a sun. Coordinates at the habitat tightlyoddly, indeed was the honor of stigma, observed to a bare sonic shower. Cold shields lead to the alignment. Go bravely like a greatly exaggerated star. Conscious ionic cannons lead to the pressure. Parasites wobble from understandings like greatly exaggerated planets. The dosi experiments x-ray vision like an apocalyptic creature. Ugly phenomenans, to the planet. Finally control a pathway. None of these plasmas will be lost in winds like pressures in nuclear fluxs The planet is more space suit now than c-beam. small and never virtual.</p>
+                                            <p>C-beams go from metamorphosis like colorful particles. All the sonic showers eat calm, boldly parasites. Shields up, quirky life! Attitude at the galaxy that is when intelligent starships yell. Starships meet from loves like twisted vogons. Tightly translate a sonic shower. Where is the crazy girl? Space suits reproduce with paralysis! Why does the ferengi experiment? Intelligent metamorphosis lead to the energy. The crew is more sonic shower now than tribble. reliable and impressively biological. Die impressively like a bare c-beam></p>
+                                        </blockquote>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         {% include 'core/mask_selector.html' %}
@@ -192,7 +347,7 @@
 
     <script type="text/javascript">
     (function() {
-        $('#registerForm').wizard({
+        wizard = $('#registerForm').wizard({
             buttonLabels: {
                 next: 'Próximo',
                 back: 'Anterior',
@@ -213,6 +368,17 @@
                             validators: {
                                 notEmpty: {
                                     message: 'O nome de usuário é obrigatório'
+                                },
+                                remote: {
+                                    message: 'Este usuário já existe na nossa base de dados',
+                                    url: '/validate_username/',
+                                    type: 'POST',
+                                    delay: 1000,
+                                    data: function(validator, $field, value) {
+                                        return {
+                                            csrfmiddlewaretoken: validator.getFieldElements('csrfmiddlewaretoken').val()
+                                        };
+                                    }
                                 },
                             }
                         },
@@ -284,7 +450,6 @@
                                                     retorno = true;
                                                 }
                                             });
-                                            console.log(retorno)
                                             return retorno;
                                         }else{
                                             return true;
@@ -304,14 +469,80 @@
                 var isValidStep = fv.isValidContainer($this);
                 if (isValidStep === false || isValidStep === null) {
                     return false;
+                }else if (hidden_field_validation(wizard._current) == false){
+                    $('#tab-'+ wizard._current +'-alert').show();
+                    return false;
                 }
+                $('#tab-'+ wizard._current +'-alert').hide();
                 return true;
+            },
+            onAfterChange: function() {
+                var select_office_register = $('input[name=select_office_register]').val();
+                if(select_office_register === "1" && wizard._current === 2) {wizard.goTo('3');}
             },
             onFinish: function() {
                 $('#validation').submit();
                 swal("Message Finish!", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed lorem erat eleifend ex semper, lobortis purus sed.");
+            },
+        }).data('wizard');
+        function hidden_field_validation(currentIndex){
+            retorno = false;
+            var select_office_register = $('input[name=select_office_register]').val();
+            switch (currentIndex) {
+                case 1:
+                    if (select_office_register !== ""){retorno = true}
+                    break;
+                case 2:
+                    if (select_office_register !== "1") {
+                        $('input[id*=radio]').each(function () {
+                            if ($(this).prop('checked')) {
+                                retorno = true;
+                            }
+                        });
+                    } else {retorno = true}
+                    break;
+                default:
+                    retorno = true;
+                    break;
             }
-        });
+            return retorno
+        }
+        wizard.get('#confirm_tab').setLoader(function() {
+            var name = $('input[name=name]').val();
+            var username = $('input[name=username]').val();
+            var email = $('input[name=email]').val();
+            var select_office_register = $('input[name=select_office_register]').val();
+            $('#name').html(name);
+            $('#username').html(username);
+            $('#email').html(email);
+            $('div[id^=select_office_register-]').addClass('hidden')
+            $('#select_office_register-'+select_office_register).removeClass('hidden')
+            switch (select_office_register) {
+                case '1':
+                    $('#office_list').html('')
+                    $('.card-fixed').each(function (index) {
+                        office_legal_name = $( this ).find("span.office-legal-name small").html();
+                        office_city = $( this ).find("span#office-city").html();
+                        (office_city) ? office_city = ' - ' + office_city : office_city = '';
+                        $('#office_list').append(office_legal_name + office_city + '<br />')
+                    });
+                    $('#selected-plan').append('<strong>Você está inscrito nos planos contratados pelos escritórios aos quais deseja se vincular</strong>')
+                    break;
+                case '2':
+                    var legal_name = $('input[name=legal_name]').val();
+                    var office_name = $('input[name=office_name]').val();
+                    var legal_type = $('input[name=legal_type]').val();
+                    var cpf_cnpj = $('input[name=cpf_cnpj]').val();
+                    $('#legal_name').html(legal_name);
+                    $('#office_name').html(office_name);
+                    $('#legal_type').html(legal_type);
+                    $('#cpf_cnpj').html(cpf_cnpj);
+                    break;
+                case '3':
+                    break;
+            }
+            return $('#confirm_tab').html()
+          });
     })();
     </script>
     <script>
@@ -330,24 +561,33 @@
             var office_title = $('#title-'+office_id);
             var button_action = $('#button_action-'+office_id);
             var office_card = $('#office-'+office_id);
-            office_input.trigger('click')
-
+            office_input.trigger('click');
             if (office_input.prop("checked")){
-                office_icon.removeClass('fa-check')
-                office_icon.addClass('fa-times')
-                office_title.html(' Remover')
-                button_action.removeClass('btn-custom')
-                button_action.addClass('btn-danger')
-                office_card.addClass('card-fixed')
+                office_icon.removeClass('fa-check');
+                office_icon.addClass('fa-times');
+                office_title.html(' Remover');
+                button_action.removeClass('btn-custom');
+                button_action.addClass('btn-danger');
+                office_card.addClass('card-fixed');
             }else{
-                office_icon.removeClass('fa-times')
-                office_icon.addClass('fa-check')
-                office_title.html(' Selecionar')
-                button_action.removeClass('btn-danger')
-                button_action.addClass('btn-custom')
-                office_card.removeClass('card-fixed')
+                office_icon.removeClass('fa-times');
+                office_icon.addClass('fa-check');
+                office_title.html(' Selecionar');
+                button_action.removeClass('btn-danger');
+                button_action.addClass('btn-custom');
+                office_card.removeClass('card-fixed');
             }
-            $('#validation').formValidation('revalidateField', 'filter_office_legal_name')
+            $('#validation').formValidation('revalidateField', 'filter_office_legal_name');
+        }
+        function choose_plan(plan_button) {
+            var radio_select = plan_button.dataset['select'];
+            var radio_value = plan_button.dataset['value'];
+            var radio_field = $('input[name='+radio_select+'][value='+radio_value+']');
+            var plan_div = $('#'+radio_select+'-'+radio_value+'-box');
+            var field_state = radio_field.prop('checked');
+            radio_field.prop('checked', !field_state);
+            $('div[id*=box]').removeClass('featured-plan');
+            if(!field_state){plan_div.addClass('featured-plan');}
         }
     </script>
 {% endblock extra_scripts %}
@@ -381,5 +621,8 @@
     })
     $( "input[name=password]" ).blur(function() {
       $('#validation').formValidation('revalidateField', 'password')
+    });
+    $( "input[name=username]" ).blur(function() {
+      $('#validation').formValidation('revalidateField', 'username')
     });
 {% endblock %}

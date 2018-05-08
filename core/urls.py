@@ -99,4 +99,5 @@ urlpatterns = [
     url(r'^office_session_filter/$', views.OfficeSessionSearch.as_view(), name='office_session_filter'),
     url(r'^office_filter/$', views.OfficeSearch.as_view(), name='office_filter'),
     url(r'^validate_password/$', views.ValidatePassword.as_view(), name='validate_password'),
+    url(r'^validate_username/$', views.ValidateUsername.as_view(), name='validate_username'),
 ]
