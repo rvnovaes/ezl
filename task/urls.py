@@ -28,21 +28,6 @@ urlpatterns = [
 
     url(r'^ecm/(?P<pk>[0-9]+)/excluir$', views.delete_ecm, name='delete_ecm'),
 
-    # TipoServico
-    url(r'^tipo_servico/$',
-        login_required(views.TypeTaskListView.as_view()),
-        name='typetask_list'),
-
-    url(r'^tipo_servico/criar/$',
-        login_required(views.TypeTaskCreateView.as_view()),
-        name='typetask_add'),
-
-    url(r'^tipo_servico/(?P<pk>[0-9]+)/$', login_required(views.TypeTaskUpdateView.as_view()),
-        name='typetask_update'),
-
-    url(r'^tipo_servico/excluir$', login_required(views.TypeTaskDeleteView.as_view()),
-        name='typetask_delete'),
-
     url(r'^ajax_get_task_data_table/$', login_required(views.ajax_get_task_data_table),
         name='ajax_get_task_data_table'),
     url(r'^ajax_get_ecms/$', login_required(views.ajax_get_ecms),
