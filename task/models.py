@@ -133,6 +133,8 @@ class CheckPointType(Enum):
 class TypeTask(Audit, LegacyCode):
     name = models.CharField(max_length=255, null=False, blank=False,
                             verbose_name='Tipo de Serviço')
+    simple_service = models.BooleanField(verbose_name="Serviço simples",
+        default=False)
     survey = models.ForeignKey(
         'survey.Survey',
         null=True,
@@ -145,7 +147,7 @@ class TypeTask(Audit, LegacyCode):
         db_table = 'type_task'
         ordering = ('name',)
         verbose_name = 'Tipo de Serviço'
-        verbose_name_plural = 'Tipos de Serviço'        
+        verbose_name_plural = 'Tipos de Serviço'
 
     def __str__(self):
         return self.name
