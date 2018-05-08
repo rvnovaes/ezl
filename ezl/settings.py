@@ -115,7 +115,8 @@ INSTALLED_APPS = [
     'chat',
     'ecm',
     'guardian',
-    'billing'
+    'billing',
+    'djmoney',
 ]
 
 MIDDLEWARE = [
