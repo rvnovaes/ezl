@@ -5,8 +5,9 @@ from .models import TypeTask
 
 @admin.register(TypeTask)
 class TypeTaskModelAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'name', 'survey']
+    list_display = ['pk', 'name', 'survey', 'simple_service']
     list_display_links = ['pk', 'name']
     search_fields = ['name']
-    fields = ['create_user', 'name', 'survey']
+    fields = ['create_user', 'name', 'survey', 'simple_service']
+    list_filter = ['simple_service']
     ordering = ['name']
