@@ -114,7 +114,8 @@ INSTALLED_APPS = [
     'channels',
     'chat',
     'ecm',
-    'guardian'
+    'guardian',
+    'billing'
 ]
 
 MIDDLEWARE = [
