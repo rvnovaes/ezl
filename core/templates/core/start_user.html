@@ -1,6 +1,16 @@
 {% extends 'skeleton/base.html' %}
 {% load guardian_tags %}
 {% load core_filters %}
+{% load static %}
+{% block extra_stylesheets %}
+    <!-- DataTables -->
+    <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
+{% endblock %}
+{% block extra_scripts %}
+    <!-- DataTables -->
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+{% endblock %}
 {% block content %}
     <div class="row">
         <div class="col-lg-12 col-sm-12">
@@ -39,7 +49,9 @@
                 </div>
             </div>
         </div>
-        {% if request.user.person.is_correspondent %}
+    </div>
+    {% if request.user.person.is_correspondent %}
+    <div class="row">
         <div class="col-lg-12 col-sm-12">
             <div class="panel panel-theme">
                 <div class="panel-heading">
@@ -75,98 +87,204 @@
                 </div>
             </div>
         </div>
-        {% endif %}
-        <div class="col-lg-6 col-sm-6">
-            <div class="panel panel-theme">
-                <div class="panel-heading"> Meus escritórios vinculados
-                    <div class="pull-right">
-                        <a href="#" data-perform="panel-collapse"><i class="ti-minus"></i></a>
-                        <a href="{% url 'office_add' %}"><i class="fa fa-plus"></i></a>
+    </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-md-6 col-sm-12">
+            <div class="col-lg-12 col-sm-12 p-l-0 p-r-0">
+                <div class="panel panel-theme">
+                    <div class="panel-heading"> Meus escritórios vinculados
+                        <div class="pull-right">
+                            <a href="#" data-perform="panel-collapse"><i class="ti-minus"></i></a>
+                            <a href="{% url 'office_add' %}"><i class="fa fa-plus"></i></a>
+                        </div>
                     </div>
-                </div>
-                <div class="panel-wrapper collapse in" aria-expanded="true">
-                    <div class="panel-body">
-                        {% if request.user.person.offices.active_offices %}
-                            <table class="table table-hover">
-                                <thead>
-                                <tr>
-                                    <th>NOME</th>
-                                    <th>CPF/CNPJ</th>
-                                    <th></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for office in request.user.person.offices.active_offices %}
-                                    {% get_obj_perms request.user for office as "office_perms" %}
+                    <div class="panel-wrapper collapse in" aria-expanded="true">
+                        <ul class="nav customtab nav-tabs" role="tablist">
+                            <li role="presentation" class="active">
+                                <a href="#office-tab" aria-controls="home" role="tab" data-toggle="tab" aria-expanded="true">
+                                    <span class="visible-xs"><i class="ti-home"></i></span><span class="hidden-xs"> Escritórios</span>
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a href="#request-tab" aria-controls="home" role="tab" data-toggle="tab" aria-expanded="true">
+                                    <span class="visible-xs"><i class="ti-home"></i></span><span class="hidden-xs"> Solicitações</span>
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="panel-body">
+                            <div class="tab-content m-t-0">
+                                <div role="tabpanel" class="tab-pane fade active in" id="office-tab">
+                                {% if request.user.person.offices.active_offices %}
+                                    <table id="office-table" class="table table-hover">
+                                        <thead>
                                         <tr>
-                                            <td>{{ office.legal_name }}</td>
-                                            <td>{{ office.cpf_cnpj | default_if_none:'' }}</td>
-                                            {% if 'can_access_general_data' in office_perms %}
-                                                <td><a href="/escritorios/{{ office.pk }}">
-                                                    <i class="fa fa-edit" aria-hidden="true"></i></a></td>
-                                            {% else %}
-                                                <td>&nbsp;</td>
-                                            {% endif %}
+                                            <th>NOME</th>
+                                            <th>CPF/CNPJ</th>
+                                            <th></th>
                                         </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        {% else %}
-                            <p>Você não possui relacionamento com escritórios</p>
-                        {% endif %}
+                                        </thead>
+                                        <tbody>
+                                        {% for office in request.user.person.offices.active_offices %}
+                                            {% get_obj_perms request.user for office as "office_perms" %}
+                                                <tr>
+                                                    <td>{{ office.legal_name }}</td>
+                                                    <td>{{ office.cpf_cnpj | default_if_none:'' }}</td>
+                                                    {% if 'can_access_general_data' in office_perms %}
+                                                        <td><a href="/escritorios/{{ office.pk }}">
+                                                            <i class="fa fa-edit" aria-hidden="true"></i></a></td>
+                                                    {% else %}
+                                                        <td>&nbsp;</td>
+                                                    {% endif %}
+                                                </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% else %}
+                                    <p>Você não possui relacionamento com escritórios</p>
+                                {% endif %}
+                                </div>
+                                <div role="tabpanel" class="tab-pane fade " id="request-tab">
+                                    {% if person_invites %}
+                                    <table id="office-invite-table" class="table table-hover">
+                                        <thead>
+                                        <tr>
+                                            <th>Escritório</th>
+                                            <th>Pessoa</th>
+                                            <th>Aceitar</th>
+                                            <th>Rejeitar</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for invite in person_invites %}
+                                            <tr>
+                                                <td>{{ invite.office.legal_name }}</td>
+                                                <td>{{ invite.person.legal_name }}</td>
+                                                {% get_obj_perms request.user for invite.office as "office_perms" %}
+                                                {% if 'group_admin' in office_perms %}
+                                                <td>
+                                                    <button type="button"
+                                                            class="btn btn-raised btn-fab btn-fab-mini btn-success"
+                                                            onclick="updateInvite('{{ invite.pk }}', 'A', '{{ csrf_token }}')">
+                                                        <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                                    </button>
+                                                </td>
+                                                <td>
+                                                    <button type="button"
+                                                            class="btn btn-raised btn-fab btn-fab-mini btn-danger"
+                                                            onclick="updateInvite('{{ invite.pk }}', 'R', '{{ csrf_token }}')">
+                                                        <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                                                    </button>
+                                                </td>
+                                                {% else %}
+                                                    <td>{{ invite.status }}</td>
+                                                    <td></td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    {% else %}
+                                    <p>Não existem solicitações para os seus escritórios</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-6 col-sm-6">
-            <div class="panel panel-theme">
-                <div class="panel-heading"> Meus convites
-                    <div class="pull-right">
-                        <a href="#" data-perform="panel-collapse"><i class="ti-minus"></i></a>
-                        <a href="{% url 'user_update' request.user.pk %}"><i class="fa fa-edit"></i></a>
-                    </div>
-                </div>
-                <div class="panel-wrapper collapse in" aria-expanded="true">
-                    <div class="panel-body">
-                        {% if request.user.person.invites.all %}
-                            <table class="table table-hover">
-                                <thead>
-                                <tr>
-                                    <th>Escritório</th>
-                                    <th>Aceitar</th>
-                                    <th>Recusar</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for invite in request.user.person.invites.all %}
-                                    {% if invite.status == 'N' %}
+        <div class="col-md-6 col-sm-12">
+            <div class="row">
+                <div class="col-lg-12 col-sm-12 p-l-0 p-r-0">
+                    <div class="panel panel-theme">
+                        <div class="panel-heading"> Meus convites
+                            <div class="pull-right">
+                                <a href="#" data-perform="panel-collapse"><i class="ti-minus"></i></a>
+                                <a href="{% url 'user_update' request.user.pk %}"><i class="fa fa-edit"></i></a>
+                            </div>
+                        </div>
+                        <div class="panel-wrapper collapse in" aria-expanded="true">
+                            <div class="panel-body">
+                                {% if request.user.person.invites.all %}
+                                    <table id="person-invite-table" class="table table-hover">
+                                        <thead>
                                         <tr>
-                                            <td>{{ invite.office.legal_name }}</td>
-                                            <td>
-                                                <button type="button"
-                                                        class="btn btn-raised btn-fab btn-fab-mini btn-success"
-                                                        onclick="updateInvite('{{ invite.pk }}', 'A', '{{ csrf_token }}')">
-                                                    <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
-                                                </button>
-                                            </td>
-                                            <td>
-                                                <button type="button"
-                                                        class="btn btn-raised btn-fab btn-fab-mini btn-danger"
-                                                        onclick="updateInvite('{{ invite.pk }}', 'R', '{{ csrf_token }}')">
-                                                    <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
-                                                </button>
-                                            </td>
+                                            <th>Escritório</th>
+                                            <th>Aceitar</th>
+                                            <th>Recusar</th>
                                         </tr>
-                                    {% endif %}
-                                {% endfor %}
+                                        </thead>
+                                        <tbody>
+                                        {% for invite in request.user.person.invites.all %}
+                                            {% if invite.status == 'N' and invite.invite_from == 'O' %}
+                                                <tr>
+                                                    <td>{{ invite.office.legal_name }}</td>
+                                                    <td>
+                                                        <button type="button"
+                                                                class="btn btn-raised btn-fab btn-fab-mini btn-success"
+                                                                onclick="updateInvite('{{ invite.pk }}', 'A', '{{ csrf_token }}')">
+                                                            <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button"
+                                                                class="btn btn-raised btn-fab btn-fab-mini btn-danger"
+                                                                onclick="updateInvite('{{ invite.pk }}', 'R', '{{ csrf_token }}')">
+                                                            <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
                                 {% else %}
-                                </tbody>
-                            </table>
-                            <p>Você não possui relacionamento com escritórios</p>
-                        {% endif %}
+                                    <p>Você não possui relacionamento com escritórios</p>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 {% endblock content %}
+{% block script_document_ready %}
+    {{ block.super }}
+    var office_table = $('#office-table').DataTable({
+        pageLength: 10,
+        dom: 'Bfrtip',
+        buttons: [],
+        language: {
+            "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+        },
+        columnDefs: [
+            { "targets": [ 2 ], "visible": true, "searchable": false, "orderable": false },
+        ]
+    });
+    var person_invite_table = $('#person-invite-table').DataTable({
+        pageLength: 10,
+        dom: 'Bfrtip',
+        buttons: [],
+        searching: false,
+        language: {
+            "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+        },
+        columnDefs: [
+            { "targets": [ 1, 2 ], "visible": true, "searchable": false, "orderable": false },
+        ]
+    });
+    var office_invite_table = $('#office-invite-table').DataTable({
+        pageLength: 10,
+        dom: 'Bfrtip',
+        buttons: [],
+        searching: false,
+        language: {
+            "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+        },
+        columnDefs: [
+            { "targets": [ 2, 3 ], "visible": true, "searchable": false, "orderable": false },
+        ]
+    });
+{% endblock %}

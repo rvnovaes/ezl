@@ -137,6 +137,10 @@ class StartUserView(TemplateView):
             metrics = get_correspondent_metrics(self.request.user.person)
             context['rating'] = metrics['rating']
             context['returned_os'] = metrics['returned_os_rate']
+
+        office_pks = self.request.user.person.offices.active_offices().values_list('pk', flat=True)
+        context['person_invites'] = Invite.objects.filter(invite_from='P', office_id__in=office_pks, status='N').all()
+
         return context
 
 
@@ -1044,6 +1048,7 @@ class RegisterNewUser(CreateView):
                                       person=instance.person,
                                       status='N',
                                       create_user=instance,
+                                      invite_from='P',
                                       is_active=True)
         elif select_office_register == '2':
             legal_name = request.POST.get('legal_name')
@@ -1246,6 +1251,23 @@ class InviteOfficeTableView(CustomLoginRequiredView, ListView):
         return context
 
 
+class InviteVerify(View):
+    def get(self, request):
+        user = request.user
+        person = user.person
+        office_pks = person.offices.active_offices().values_list('pk', flat=True)
+
+        data = []
+
+        for invite in Invite.objects.filter(Q(status='N'),
+                                            Q(Q(Q(office_id__in=office_pks), Q(invite_from='P')) |
+                                            Q(Q(person=person), Q(invite_from='O')))):
+            data.append({'id': invite.pk, 'office': invite.office.legal_name, 'person': invite.person.legal_name,
+                         'invite_from': invite.invite_from})
+
+        return JsonResponse(data, safe=False)
+
+
 class EditableListSave(CustomLoginRequiredView, View):
     """
     O nome da classe ficou generico pelo fato desta view poder ser utilizada
@@ -1302,7 +1324,7 @@ class InviteMultipleUsersView(CustomLoginRequiredView, CreateView):
                 person = Person.objects.get(pk=person_pk)
                 office = Office.objects.get(pk=office_pk)
                 Invite.objects.create(create_user=request.user, person=person,
-                                      office=office, status='N')
+                                      office=office, status='N', invite_from='O')
             return HttpResponseRedirect(reverse_lazy('office_update', kwargs={'pk': office_pk}))
         return reverse_lazy('office_list')
 

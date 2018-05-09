@@ -89,6 +89,7 @@ urlpatterns = [
     url(r'^convites/convidar$', login_required(views.InviteMultipleUsersView.as_view()), name='invite_multiple_users'),
     url(r'^convites/table/(?P<office_pk>[0-9]+)/$', login_required(views.InviteTableView.as_view()), name='invite_table'),
     url(r'^convites/office/table/(?P<office_pk>[0-9]+)/$', login_required(views.InviteOfficeTableView.as_view()), name='invite_office_table'),
+    url(r'^convites/verificar/$', login_required(views.InviteVerify.as_view()), name='invite_verify'),
     url(r'^typeahead/search$', login_required(views.TypeaHeadGenericSearch.as_view()), name='typeahead_search'),
     url(r'^typeahead/search/inviteuser$', login_required(views.TypeaHeadInviteUserSearch.as_view()),
         name='typeahead_invite_user'),
