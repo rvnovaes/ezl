@@ -6,6 +6,17 @@
     <!-- DataTables -->
     <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
     <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        .btn.btn-outline.btn-success.btn-rounded {
+            color: #53e69d;
+            background-color: transparent !important;
+        }
+
+        .btn.btn-outline.btn-success.btn-rounded:hover {
+            color: #fff;
+            background-color: #53e69d !important;
+        }
+    </style>
 {% endblock %}
 {% block extra_scripts %}
     <!-- DataTables -->
@@ -164,20 +175,28 @@
                                                 {% if 'group_admin' in office_perms %}
                                                 <td>
                                                     <button type="button"
-                                                            class="btn btn-raised btn-fab btn-fab-mini btn-success"
+                                                            class="btn btn-outline btn-success btn-rounded"
                                                             onclick="updateInvite('{{ invite.pk }}', 'A', '{{ csrf_token }}')">
                                                         <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
                                                     </button>
                                                 </td>
                                                 <td>
                                                     <button type="button"
-                                                            class="btn btn-raised btn-fab btn-fab-mini btn-danger"
+                                                            class="btn btn-outline btn-danger btn-rounded"
                                                             onclick="updateInvite('{{ invite.pk }}', 'R', '{{ csrf_token }}')">
                                                         <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
                                                     </button>
                                                 </td>
                                                 {% else %}
-                                                    <td>{{ invite.status }}</td>
+                                                    {% if invite.status == 'N' %}
+                                                        <td><span class="label label-warning label-rounded"><i class="fa fa-warning"></i> Pendente</span></td>
+                                                    {% elif invite.status == 'E'%}
+                                                        <td style="width: 100px !important;"><span class="label label-primary label-rounded"><i class="fa fa-external-link"></i> Pendente Externo</span></td>
+                                                    {% elif invite.status == 'A'%}
+                                                        <td style="width: 100px !important;"><span class="label label-success label-rounded"><i class="fa fa-check"></i> Aceito</span></td>
+                                                    {% else %}
+                                                        <td><span class="label label-danger label-rounded"><i class="fa fa-remove"></i> Recusado</span></td>
+                                                    {% endif %}
                                                     <td></td>
                                                 {% endif %}
                                             </tr>
@@ -222,14 +241,14 @@
                                                     <td>{{ invite.office.legal_name }}</td>
                                                     <td>
                                                         <button type="button"
-                                                                class="btn btn-raised btn-fab btn-fab-mini btn-success"
+                                                                class="btn btn-outline btn-success btn-rounded"
                                                                 onclick="updateInvite('{{ invite.pk }}', 'A', '{{ csrf_token }}')">
                                                             <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
                                                         </button>
                                                     </td>
                                                     <td>
                                                         <button type="button"
-                                                                class="btn btn-raised btn-fab btn-fab-mini btn-danger"
+                                                                class="btn btn-outline btn-danger btn-rounded"
                                                                 onclick="updateInvite('{{ invite.pk }}', 'R', '{{ csrf_token }}')">
                                                             <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
                                                         </button>

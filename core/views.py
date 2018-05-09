@@ -969,7 +969,8 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
         kwargs.update({
             'table': AddressOfficeTable(self.object.get_address()),
             'table_members': OfficeMembershipTable(
-                self.object.officemembership_set.filter(is_active=True, person__auth_user__isnull=False)
+                self.object.officemembership_set.filter(is_active=True, person__auth_user__isnull=False,
+                                                        person__auth_user__is_superuser=False)
                     .exclude(person__auth_user=self.request.user)),
         })
         data = super().get_context_data(**kwargs)
@@ -1055,6 +1056,8 @@ class RegisterNewUser(CreateView):
             office_name = request.POST.get('office_name')
             legal_type = request.POST.get('legal_type')
             cpf_cnpj = request.POST.get('cpf_cnpj')
+            if cpf_cnpj == '':
+                cpf_cnpj = None
             office_instance = Office.objects.create(legal_name=legal_name,
                                                     name=office_name,
                                                     legal_type=legal_type,
@@ -1062,6 +1065,8 @@ class RegisterNewUser(CreateView):
                                                     is_active=True,
                                                     create_user=instance)
             post_create_office(office_instance)
+            DefaultOffice.objects.create(auth_user=instance, office=office_instance,
+                                         create_user=instance)
         elif select_office_register == '3':
             legal_name = request.POST.get('name')
             office_name = request.POST.get('name')
@@ -1081,7 +1086,7 @@ class RegisterNewUser(CreateView):
                                       month_value=plan.month_value,
                                       task_limit=plan.task_limit,
                                       create_user=instance)
-        return HttpResponseRedirect(reverse_lazy('start_user'))
+        return HttpResponseRedirect(reverse_lazy('login'))
         # return render(request, 'account/register.html', {'form': form, 'invite_code': invite_code, })
 
     def get(self, request, *args, **kwargs):
@@ -1209,10 +1214,15 @@ class InviteUpdateView(UpdateView):
         invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
         invite.status = request.POST.get('status')
         if invite.status == 'A':
-            OfficeMembership.objects.update_or_create(person=request.user.person,
+            OfficeMembership.objects.update_or_create(person=invite.person,
                                                       office=invite.office,
                                                       defaults={'create_user': self.request.user,
                                                                 'is_active': True})
+            for group in {group for group, perms in
+                          get_groups_with_perms(invite.office, attach_perms=True).items() if 'view_delegated_tasks' in perms}:
+                if group not in invite.person.auth_user.groups.all():
+                    invite.person.auth_user.groups.add(group)
+
         invite.save()
         return HttpResponse('ok')
 
@@ -1233,7 +1243,7 @@ class InviteTableView(CustomLoginRequiredView, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        table = InviteTable(Invite.objects.filter(office__id=self.kwargs.get('office_pk')).order_by('-pk'))
+        table = InviteTable(Invite.objects.filter(office__id=self.kwargs.get('office_pk'), invite_from='O').order_by('-pk'))
         RequestConfig(self.request).configure(table)
         context['table'] = table
         return context

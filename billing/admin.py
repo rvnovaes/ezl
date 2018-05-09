@@ -1,5 +1,5 @@
 from django.contrib import admin
-from billing.models import Plan
+from billing.models import Plan, PlanOffice
 
 
 @admin.register(Plan)
@@ -10,3 +10,5 @@ class PlanAdmin(admin.ModelAdmin):
     class Meta:
         verbose_name = 'Plano'
         verbose_name_plural = 'Planos'
+
+admin.site.register(PlanOffice)
