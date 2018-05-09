@@ -94,7 +94,7 @@ class TaskCreateView(AuditFormMixin, CreateView):
     model = Task
     form_class = TaskCreateForm
     success_message = CREATE_SUCCESS_MESSAGE
-    template_name_suffix = '_create_form'
+    template_name_suffix = '_persist_form'
 
     def get_initial(self):
         if self.kwargs.get('movement'):
@@ -162,6 +162,7 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
     model = Task
     form_class = TaskForm
     success_message = UPDATE_SUCCESS_MESSAGE
+    template_name_suffix = '_persist_form'
 
     def get_initial(self):
         if self.kwargs.get('movement'):
