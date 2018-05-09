@@ -436,9 +436,16 @@
                 $('#tab-'+ wizard._current +'-alert').hide();
                 return true;
             },
-            onAfterChange: function() {
+            onAfterChange: function(from, to) {
                 var select_office_register = $('input[name=select_office_register]').val();
-                if(select_office_register === "1" && wizard._current === 2) {$('#registerForm').wizard('next');}
+                if(select_office_register === "1" && to.index === 2) {
+                    if (from.index === 1) {
+                        $('#registerForm').wizard('next');
+                    }
+                    else if (from.index === 3) {
+                        $('#registerForm').wizard('back');
+                    }
+                }
             },
             onFinish: function() {
                 $('#validation')[0].submit();
