@@ -1,5 +1,6 @@
 {% extends 'skeleton/base.html' %}
 {% load static %}
+{% load djmoney %}
 {% block sidebar %}
 {% endblock %}
 {% block extra_stylesheets %}
@@ -53,8 +54,9 @@
                         <li data-target="#confirm_tab" role="tab">
                             <h4><span><i class="ti-check"></i></span>Confirmar</h4> </li>
                     </ul>
-                    <form id="validation" class="form-horizontal">
+                    <form enctype="multipart/form-data" id="validation" class="form-horizontal" method="post" action="{% url 'register_user' %}">
                         {% csrf_token %}
+                        <input type="hidden" name="invite_code" {% if invite_code %}value="{{ invite_code }}"{% endif %} >
                         <div class="wizard-content">
                             <div class="wizard-pane active" role="tabpanel">
                                 <div class="form-group">
@@ -70,7 +72,8 @@
                                 <div class="form-group">
                                     <label class="col-xs-3 control-label">E-mail</label>
                                     <div class="col-xs-5">
-                                        <input type="text" class="form-control" name="email" /> </div>
+                                        <input type="text" class="form-control" name="email"
+                                        {% if email %}value="{{ email }}"{% endif %}/> </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-xs-3 control-label">Senha</label>
@@ -114,7 +117,7 @@
                                                                                     <br /><small><strong><span id="office-city">{{ first_address.city.name }} ({{ first_address.city.state.initials }})</span></strong></small>
                                                                                 {% endif %}
                                                                             {% endwith %}
-                                                                        <input type="checkbox" name="office_checkbox_{{ office.pk }}" class="hidden" value="{{ office.pk }}" >
+                                                                        <input type="checkbox" id="office_checkbox_{{ office.pk }}" name="office_checkbox" class="hidden" value="{{ office.pk }}" >
                                                                     </div>
                                                                 </div>
                                                                 <div class="row">
@@ -169,79 +172,36 @@
                             </div>
                             <div class="wizard-pane active" id="plan_tab" role="tabpanel">
                                 <div id="tab-2-alert" class="alert alert-danger alert" style="display: none">Favor selecionar um Plano de acesso. </div>
+                                <input type="hidden" name="plan_name" id="plan_name" >
                                 <div class="row pricing-plan">
-                                    <div class="col-md-4 col-xs-12 col-sm-6 no-padding">
-                                        <div id="plan-1-box" class="pricing-box b-l">
-                                            <div class="pricing-body">
-                                                <div class="pricing-header">
-                                                    <h4 class="text-center">Silver</h4>
-                                                    <h2 class="text-center"><span class="price-sign">$</span>24</h2>
-                                                    <p class="uppercase">per month</p>
-                                                </div>
-                                                <div class="price-table-content">
-                                                    <div class="price-row"><i class="icon-user"></i> 3 Members</div>
-                                                    <div class="price-row"><i class="icon-screen-smartphone"></i> Single Device</div>
-                                                    <div class="price-row"><i class="icon-drawar"></i> 50GB Storage</div>
-                                                    <div class="price-row"><i class="icon-refresh"></i> Monthly Backups</div>
-                                                    <div class="price-row">
-                                                        <button class="btn btn-success waves-effect waves-light m-t-20"
-                                                                data-select="plan"
-                                                                data-value="1"
-                                                                onclick="choose_plan(this)">Escolher</button>
-                                                        <input type='radio' id='plan-1-radio' name='plan' value='1' class="hidden" />
+                                    {% for plan in plans %}
+                                        <div class="col-md-4 col-xs-12 col-sm-6 no-padding">
+                                            <div id="plan-{{ plan.pk }}-box" class="pricing-box b-l b-r">
+                                                <div class="pricing-body">
+                                                    <div class="pricing-header">
+                                                        <h4 class="text-center">{{ plan.name }}</h4>
+                                                        <h2 class="text-center">
+                                                            {% money_localize plan.month_value on as formated_month_value%}
+                                                            <span class="price-sign">{{ formated_month_value|make_list|slice:':2'|join:'' }}</span>
+                                                            {{ formated_month_value|make_list|slice:'2:'|join:'' }}
+                                                        </h2>
+                                                        <p class="uppercase">por mês</p>
+                                                    </div>
+                                                    <div class="price-table-content">
+                                                        <div class="price-row">{{ plan.description|safe }}</div>
+                                                        <div class="price-row">
+                                                            <button class="btn btn-success waves-effect waves-light m-t-20"
+                                                                    data-select="plan"
+                                                                    data-value="{{ plan.pk }}"
+                                                                    data-name="{{ plan.name }}"
+                                                                    onclick="choose_plan(this)">Escolher</button>
+                                                            <input type='radio' id='plan-{{ plan.pk }}-radio' name='plan' value='{{ plan.pk }}' class="hidden" />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-4 col-xs-12 col-sm-6 no-padding">
-                                        <div id="plan-2-box" class="pricing-box b-l">
-                                            <div class="pricing-body">
-                                                <div class="pricing-header">
-                                                    <h4 class="text-center">Gold</h4>
-                                                    <h2 class="text-center"><span class="price-sign">$</span>34</h2>
-                                                    <p class="uppercase">per month</p>
-                                                </div>
-                                                <div class="price-table-content">
-                                                    <div class="price-row"><i class="icon-user"></i> 5 Members</div>
-                                                    <div class="price-row"><i class="icon-screen-smartphone"></i> Single Device</div>
-                                                    <div class="price-row"><i class="icon-drawar"></i> 80GB Storage</div>
-                                                    <div class="price-row"><i class="icon-refresh"></i> Monthly Backups</div>
-                                                    <div class="price-row">
-                                                        <button class="btn btn-success waves-effect waves-light m-t-20"
-                                                                data-select="plan"
-                                                                data-value="2"
-                                                                onclick="choose_plan(this)">Escolher</button>
-                                                        <input type='radio' id='plan-2-radio' name='plan' value='2' class="hidden" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 col-xs-12 col-sm-6 no-padding">
-                                        <div id="plan-3-box" class="pricing-box b-r">
-                                            <div class="pricing-body">
-                                                <div class="pricing-header">
-                                                    <h4 class="text-center">Dimond</h4>
-                                                    <h2 class="text-center"><span class="price-sign">$</span>54</h2>
-                                                    <p class="uppercase">per month</p>
-                                                </div>
-                                                <div class="price-table-content">
-                                                    <div class="price-row"><i class="icon-user"></i> 15 Members</div>
-                                                    <div class="price-row"><i class="icon-screen-smartphone"></i> Single Device</div>
-                                                    <div class="price-row"><i class="icon-drawar"></i> 1TB Storage</div>
-                                                    <div class="price-row"><i class="icon-refresh"></i> Monthly Backups</div>
-                                                    <div class="price-row">
-                                                        <button class="btn btn-success waves-effect waves-light m-t-20"
-                                                                data-select="plan"
-                                                                data-value="3"
-                                                                onclick="choose_plan(this)">Escolher</button>
-                                                        <input type='radio' id='plan-3-radio' name='plan' value='3' class="hidden" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    {% endfor %}
                                 </div>
                             </div>
                             <div class="wizard-pane" id="confirm_tab" role="tabpanel">
@@ -309,7 +269,7 @@
                                 </div>
                                 <div id="plan-row" class="row">
                                     <h4>Plano de acesso</h4>
-                                    <h5 id="selected-plan"></h5>
+                                    <label id="selected-plan" class="col-xs-3 control-label p-t-10"></label>
                                 </div>
                                 <div class="row">
                                     <h4>Termos de uso e serviço</h4>
@@ -445,7 +405,7 @@
                                         var select_office_register = $('input[name=select_office_register]').val();
                                         if (select_office_register === '1'){
                                             retorno = false
-                                            $('input[name^=office_checkbox_]').each(function (index) {
+                                            $('input[id^=office_checkbox_]').each(function (index) {
                                                 if ($( this ).prop("checked")){
                                                     retorno = true;
                                                 }
@@ -478,11 +438,11 @@
             },
             onAfterChange: function() {
                 var select_office_register = $('input[name=select_office_register]').val();
-                if(select_office_register === "1" && wizard._current === 2) {wizard.goTo('3');}
+                if(select_office_register === "1" && wizard._current === 2) {$('#registerForm').wizard('next');}
             },
             onFinish: function() {
-                $('#validation').submit();
-                swal("Message Finish!", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed lorem erat eleifend ex semper, lobortis purus sed.");
+                $('#validation')[0].submit();
+                swal('Finalizado', 'Seu cadastro foi finalizado com sucesso!!!')
             },
         }).data('wizard');
         function hidden_field_validation(currentIndex){
@@ -507,16 +467,26 @@
             }
             return retorno
         }
+        wizard.get('#plan_tab').setLoader(function () {
+            var select_office_register = $('input[name=select_office_register]').val();
+            if (select_office_register === '1'){
+                return '<strong>Você está inscrito nos planos contratados pelos escritórios aos quais deseja se vincular</strong>';
+            }else{
+                return $('#plan_tab').html();
+            }
+        });
         wizard.get('#confirm_tab').setLoader(function() {
             var name = $('input[name=name]').val();
             var username = $('input[name=username]').val();
             var email = $('input[name=email]').val();
             var select_office_register = $('input[name=select_office_register]').val();
+            var plan_name = $('input[name=plan_name]').val();
             $('#name').html(name);
             $('#username').html(username);
             $('#email').html(email);
             $('div[id^=select_office_register-]').addClass('hidden')
             $('#select_office_register-'+select_office_register).removeClass('hidden')
+            $('#selected-plan').html('')
             switch (select_office_register) {
                 case '1':
                     $('#office_list').html('')
@@ -537,8 +507,10 @@
                     $('#office_name').html(office_name);
                     $('#legal_type').html(legal_type);
                     $('#cpf_cnpj').html(cpf_cnpj);
+                    $('#selected-plan').append(plan_name)
                     break;
                 case '3':
+                    $('#selected-plan').append(plan_name)
                     break;
             }
             return $('#confirm_tab').html()
@@ -556,7 +528,7 @@
     </script>
     <script>
         function select_office(office_id) {
-            var office_input = $('input[name=office_checkbox_'+office_id+']');
+            var office_input = $('#office_checkbox_'+office_id);
             var office_icon = $('#icon-'+office_id);
             var office_title = $('#title-'+office_id);
             var button_action = $('#button_action-'+office_id);
@@ -582,11 +554,13 @@
         function choose_plan(plan_button) {
             var radio_select = plan_button.dataset['select'];
             var radio_value = plan_button.dataset['value'];
+            var plan_name = plan_button.dataset['name'];
             var radio_field = $('input[name='+radio_select+'][value='+radio_value+']');
             var plan_div = $('#'+radio_select+'-'+radio_value+'-box');
             var field_state = radio_field.prop('checked');
             radio_field.prop('checked', !field_state);
             $('div[id*=box]').removeClass('featured-plan');
+            $('#plan_name').val(plan_name);
             if(!field_state){plan_div.addClass('featured-plan');}
         }
     </script>
@@ -603,7 +577,7 @@
         {% endfor %}
     {% endif %}
     $('.select2').select2();
-    $('input[name^=office_checkbox_]').each(function (index) {
+    $('input[id^=office_checkbox_]').each(function (index) {
         if($( this ).prop("checked")){
             var office_id = $( this ).val();
             var office_card = $('#office-'+office_id);

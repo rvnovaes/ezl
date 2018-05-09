@@ -52,7 +52,26 @@ from ecm.utils import attachment_form_valid, attachments_multi_delete
 from django.core.validators import validate_email
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_groups_with_perms
-from django.contrib.sites.shortcuts import get_current_site
+from billing.models import Plan, PlanOffice
+
+
+def post_create_office(office):
+    member, created = OfficeMembership.objects.get_or_create(
+        person=office.create_user.person, office=office,
+        defaults={'create_user': office.create_user, 'is_active': True})
+    if not created:
+        # Caso o relacionamento esteja apenas inativo
+        member.is_active = True
+        member.save()
+    else:
+        for super_user in User.objects.filter(is_superuser=True).all():
+            member, created = OfficeMembership.objects.update_or_create(
+                person=super_user.person, office=office,
+                defaults={'create_user': office.create_user, 'is_active': True})
+    if not office.create_user.is_superuser:
+        for group in {group for group, perms in
+                      get_groups_with_perms(office, attach_perms=True).items() if 'group_admin' in perms}:
+            office.create_user.groups.add(group)
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -927,22 +946,7 @@ class OfficeCreateView(AuditFormMixin, CreateView):
     def form_valid(self, form):
         form.instance.create_user = self.request.user
         form.instance.save()
-        member, created = OfficeMembership.objects.get_or_create(
-            person=form.instance.create_user.person, office=form.instance,
-            defaults={'create_user': form.instance.create_user, 'is_active': True})
-        if not created:
-            # Caso o relacionamento esteja apenas inativo
-            member.is_active = True
-            member.save()
-        else:
-            for super_user in User.objects.filter(is_superuser=True).all():
-                member, created = OfficeMembership.objects.update_or_create(
-                    person=super_user.person, office=form.instance,
-                    defaults={'create_user': form.instance.create_user, 'is_active': True})
-        if not form.instance.create_user.is_superuser:
-            for group in {group for group, perms in
-                          get_groups_with_perms(form.instance, attach_perms=True).items() if 'group_admin' in perms}:
-                form.instance.create_user.groups.add(group)
+        post_create_office(form.instance)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -994,7 +998,32 @@ class RegisterNewUser(CreateView):
             last_name = ' '.join(name[1:])
         username = request.POST.get('username')
         password = request.POST.get('password')
+        confirm_password = request.POST.get('confirmpassword')
         email = request.POST.get('email')
+        errors = []
+        if not password == confirm_password:
+            errors.append('As senhas digitadas não conferem')
+        else:
+            try:
+                password_validation.validate_password(password)
+            except ValidationError as error:
+                errors.append(error)
+
+        select_office_register = request.POST.get('select_office_register')
+        selected_plan = request.POST.get('plan')
+        office_pks = request.POST.getlist('office_checkbox')
+        if select_office_register == "":
+            errors.append('Nenhuma Forma de trabalho selecionada')
+        if select_office_register == '1':
+            if not office_pks:
+                errors.append('Nenhum escritório selecionado, para vincular com o usuário criado')
+        elif select_office_register == '2' or select_office_register == '3':
+            if selected_plan == "":
+                errors.append('Nenhum plano selecionado')
+
+        if errors:
+            raise ValidationError(errors)
+
         form = RegisterNewUserForm(
             {'username': username, 'first_name': first_name, 'last_name': last_name, 'email': email,
              'password1': password, 'password2': password})
@@ -1006,8 +1035,49 @@ class RegisterNewUser(CreateView):
                     invite.person = Person.objects.filter(auth_user=instance).first()
                     invite.status = 'N'
                     invite.save()
-            return HttpResponseRedirect(reverse_lazy('start_user'))
-        return render(request, 'account/register.html', {'form': form, 'invite_code': invite_code, })
+        else:
+            raise ValidationError('Erro no registro de usuário')
+        office_instance = None
+        if select_office_register == '1':
+            for office in Office.objects.filter(id__in=office_pks):
+                Invite.objects.create(office=office,
+                                      person=instance.person,
+                                      status='N',
+                                      create_user=instance,
+                                      is_active=True)
+        elif select_office_register == '2':
+            legal_name = request.POST.get('legal_name')
+            office_name = request.POST.get('office_name')
+            legal_type = request.POST.get('legal_type')
+            cpf_cnpj = request.POST.get('cpf_cnpj')
+            office_instance = Office.objects.create(legal_name=legal_name,
+                                                    name=office_name,
+                                                    legal_type=legal_type,
+                                                    cpf_cnpj=cpf_cnpj,
+                                                    is_active=True,
+                                                    create_user=instance)
+            post_create_office(office_instance)
+        elif select_office_register == '3':
+            legal_name = request.POST.get('name')
+            office_name = request.POST.get('name')
+            legal_type = 'F'
+            office_instance = Office.objects.create(legal_name=legal_name,
+                                                    name=office_name,
+                                                    legal_type=legal_type,
+                                                    is_active=True,
+                                                    create_user=instance)
+            post_create_office(office_instance)
+            DefaultOffice.objects.create(auth_user=instance, office=office_instance,
+                                         create_user=instance)
+        if office_instance:
+            plan = Plan.objects.get(pk=selected_plan)
+            PlanOffice.objects.create(office=office_instance,
+                                      plan=plan,
+                                      month_value=plan.month_value,
+                                      task_limit=plan.task_limit,
+                                      create_user=instance)
+        return HttpResponseRedirect(reverse_lazy('start_user'))
+        # return render(request, 'account/register.html', {'form': form, 'invite_code': invite_code, })
 
     def get(self, request, *args, **kwargs):
         context = {}
@@ -1016,6 +1086,7 @@ class RegisterNewUser(CreateView):
             context['email'] = invite.email
             context['invite_code'] = request.GET['invite_code']
         context['offices'] = Office.objects.all().order_by('legal_name')
+        context['plans'] = Plan.objects.filter(is_active=True)
         return render(request, 'account/register.html', context)
 
 
