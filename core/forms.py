@@ -140,19 +140,10 @@ class ContactForm(ModelForm):
     )
 
 
-class ContactMechanismForm(ModelForm):
+class ContactMechanismForm(BaseModelForm):
     class Meta:
         model = ContactMechanism
-        fields = ['contact_mechanism_type', 'name', 'description', 'notes', 'is_active']
-
-    # contact_mechanism_type = forms.Select()
-
-    name = forms.CharField(
-        label=u'Nome',
-        required=True,
-        max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
-    )
+        fields = ['contact_mechanism_type', 'description', 'notes', 'is_active']
 
     description = forms.CharField(
         label=u'Descrição',
@@ -165,6 +156,12 @@ class ContactMechanismForm(ModelForm):
         label=u'Observação',
         required=False,
         widget=forms.Textarea(attrs={'class': 'form-control input-sm'})
+    )
+
+    is_active = CustomBooleanField(
+        required=False,
+        label='Ativo',
+        widget=CheckboxInput(attrs={'class': 'filled-in', })
     )
 
 
@@ -183,7 +180,7 @@ class AddressForm(BaseModelForm):
     )
 
     is_active = CustomBooleanField(
-        required=True,
+        required=False,
         label='Ativo',
         widget=CheckboxInput(attrs={'class': 'filled-in', })
     )

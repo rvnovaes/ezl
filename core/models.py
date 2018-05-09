@@ -432,14 +432,18 @@ class ContactMechanismType(Audit):
 
 class ContactMechanism(Audit):
     contact_mechanism_type = models.ForeignKey(
-        ContactMechanismType, on_delete=models.PROTECT, blank=False, null=False)
-    description = models.CharField(max_length=255, null=False, unique=True)
-    notes = models.CharField(max_length=400, blank=True)
+        ContactMechanismType, on_delete=models.PROTECT, blank=False, null=False,
+        verbose_name="Tipo")
+    description = models.CharField(max_length=255, null=False, unique=True,
+        verbose_name="Descrição")
+    notes = models.CharField(max_length=400, blank=True, verbose_name="Observações")
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True)
     office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'contact_mechanism'
+        verbose_name = 'Mecanismo de contato'
+        verbose_name_plural = 'Mecanismos de contato'
 
     def __str__(self):
         return self.description

@@ -98,4 +98,29 @@ urlpatterns = [
         name='taginput_permissions'),
     url(r'^office_session_filter/$', login_required(views.OfficeSessionSearch.as_view()),
         name='office_session_filter'),
+    
+    # Contact mechanism views
+    url(r'^pessoas/(?P<person_pk>[0-9]+)/contato/criar/$',
+        views.ContactMechanismCreateView.as_view(),
+        name='contact_mechanism_create'),
+
+    url(r'^pessoas/(?P<person_pk>[0-9]+)/contatos/(?P<pk>[0-9]+)/$',
+        views.ContactMechanismUpdateView.as_view(),
+        name='contact_mechanism_update'), 
+    
+    url(r'^pessoas/(?P<person_pk>[0-9]+)/contatos/excluir/$',
+        views.ContactMechanismDeleteView.as_view(),
+        name='contact_mechanism_delete'),
+    
+    url(r'^escritorio/(?P<office_pk>[0-9]+)/contato/criar/$',
+        views.ContactMechanismOfficeCreateView.as_view(),
+        name='contact_mechanism_office_create'),
+
+    url(r'^escritorios/(?P<office_pk>[0-9]+)/contatos/(?P<pk>[0-9]+)/$',
+        views.ContactMechanismOfficeUpdateView.as_view(),
+        name='contact_mechanism_office_update'),
+    
+    url(r'^escritorios/(?P<office_pk>[0-9]+)/contatos/excluir/$',
+        views.ContactMechanismOfficeDeleteView.as_view(),
+        name='contact_mechanism_office_delete'),
 ]
