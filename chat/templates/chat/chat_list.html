@@ -16,13 +16,15 @@
       <div class="chat-left-aside">
           <div class="open-panel"><i class="ti-angle-right"></i></div>
           <div class="chat-left-inner" style="height: 133px;">
+            <div class="row">
+              <div class="col-md-12">
+                <button ng-if="!listOffices" ng-click="goToOfficeList()" class="btn btn-block btn-rounded btn-success">
+                  <i class="fa fa-arrow-left"></i> Voltar
+                </button>                
+              </div>
+            </div>
               <div class="form-material">
                 <input class="form-control p-20" placeholder="Pesquisar..." type="text" ng-model="search"/>
-              </div>
-              <div class="row">
-                <div class="col-md-4">
-                  <a ng-if="!listOffices" ng-click="goToOfficeList()"><i class="fa fa-arrow-left"></i> Voltar</a>
-                </div>
               </div>
               <div>
                 <ul class="chatonline style-none" style="overflow: hidden; width: auto; height: 100%;" ng-if="listOffices">
