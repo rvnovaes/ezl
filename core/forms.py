@@ -140,7 +140,7 @@ class ContactForm(ModelForm):
     )
 
 
-class ContactMechanismForm(BaseModelForm):
+class ContactMechanismForm(BaseModelForm):        
     class Meta:
         model = ContactMechanism
         fields = ['contact_mechanism_type', 'description', 'notes', 'is_active']
@@ -513,17 +513,6 @@ class OfficeForm(BaseModelForm):
                     self.error_class(exc.messages)
                 del cleaned_data['cpf_cnpj']
         return cleaned_data
-
-
-class AddressOfficeForm(AddressForm):
-    class Meta:
-        model = Address
-        fields = ['zip_code', 'city_region', 'address_type', 'state', 'city', 'street', 'number',
-                  'notes', 'is_active']
-
-
-AddressOfficeFormSet = inlineformset_factory(Office, Address, form=AddressOfficeForm, extra=1,
-                                             max_num=1)
 
 
 class InviteForm(forms.ModelForm):
