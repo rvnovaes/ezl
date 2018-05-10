@@ -172,7 +172,6 @@
                             </div>
                             <div class="wizard-pane active" id="plan_tab" role="tabpanel">
                                 <div id="tab-2-alert" class="alert alert-danger alert" style="display: none">Favor selecionar um Plano de acesso. </div>
-                                <input type="hidden" name="plan_name" id="plan_name" >
                                 <div class="row pricing-plan">
                                     {% for plan in plans %}
                                         <div class="col-md-4 col-xs-12 col-sm-6 no-padding">
@@ -198,6 +197,11 @@
                                                                     data-select="plan"
                                                                     data-value="{{ plan.pk }}"
                                                                     data-name="{{ plan.name }}"
+                                                                    {% if plan.custom_pricing %}
+                                                                    data-month_value="{{ plan.custom_pricing_text }}"
+                                                                    {% else %}
+                                                                    data-month_value="{{ formated_month_value }}/mês"
+                                                                    {% endif %}
                                                                     onclick="choose_plan(this)">Contratar</button>
                                                             <input type='radio' id='plan-{{ plan.pk }}-radio' name='plan' value='{{ plan.pk }}' class="hidden" />
                                                         </div>
@@ -233,37 +237,37 @@
                                 <div class="row">
                                     <h4 class="font-bold">Forma de trabalho</h4>
                                     <div id="select_office_register-1" class="form-group m-b-0">
-                                        <label class="col-xs-3 control-label p-t-10">Vicular-me a um escritório já cadastrado:</label>
+                                        <label class="col-xs-3 control-label p-t-10">Vicular-me a um escritório já cadastrado</label>
                                         <div class="col-xs-5 p-t-10">
                                             <span id="office_list"></span>
                                         </div>
                                     </div>
                                     <div id="select_office_register-2" class="form-group m-b-0">
-                                        <label class="col-xs-3 control-label p-t-10">Não encontrei meu escritório e desejo cadastrá-lo:</label>
-                                        <div class="col-xs-5 p-t-10">
-                                            <div class="form-group m-b-0">
-                                                <label class="col-xs-3 control-label p-t-10">Razão social / Nome completo</label>
-                                                <div class="col-xs-5 p-t-10">
-                                                    <span id="legal_name"></span>
-                                                </div>
+                                        <div class="form-group m-b-0 m-l-15">
+                                            <label class="control-label p-t-10">Não encontrei meu escritório e desejo cadastrá-lo</label>
+                                        </div>
+                                        <div class="form-group m-b-0">
+                                            <label class="col-xs-3 control-label p-t-10">Razão social / Nome completo</label>
+                                            <div class="col-xs-5 p-t-10">
+                                                <span id="legal_name"></span>
                                             </div>
-                                            <div class="form-group m-b-0">
-                                                <label class="col-xs-3 control-label p-t-10">Nome fantasia / Apelido</label>
-                                                <div class="col-xs-5 p-t-10">
-                                                    <span id="office_name"></span>
-                                                </div>
+                                        </div>
+                                        <div class="form-group m-b-0">
+                                            <label class="col-xs-3 control-label p-t-10">Nome fantasia / Apelido</label>
+                                            <div class="col-xs-5 p-t-10">
+                                                <span id="office_name"></span>
                                             </div>
-                                            <div class="form-group m-b-0">
-                                                <label class="col-xs-3 control-label p-t-10">Tipo</label>
-                                                <div class="col-xs-5 p-t-10">
-                                                    <span id="legal_type"></span>
-                                                </div>
+                                        </div>
+                                        <div class="form-group m-b-0">
+                                            <label class="col-xs-3 control-label p-t-10">Tipo</label>
+                                            <div class="col-xs-5 p-t-10">
+                                                <span id="legal_type"></span>
                                             </div>
-                                            <div class="form-group m-b-0">
-                                                <label class="col-xs-3 control-label p-t-10">CPF / CNPJ</label>
-                                                <div class="col-xs-5 p-t-10">
-                                                    <span id="cpf_cnpj"></span>
-                                                </div>
+                                        </div>
+                                        <div class="form-group m-b-0">
+                                            <label class="col-xs-3 control-label p-t-10">CPF / CNPJ</label>
+                                            <div class="col-xs-5 p-t-10">
+                                                <span id="cpf_cnpj"></span>
                                             </div>
                                         </div>
                                     </div>
@@ -273,7 +277,12 @@
                                 </div>
                                 <div id="plan-row" class="row">
                                     <h4 class="font-bold">Plano de acesso</h4>
-                                    <label id="selected-plan" class="col-xs-3 control-label p-t-10"></label>
+                                    <div class="form-group m-b-0">
+                                        <label id="selected-plan_name" class="col-xs-3 control-label p-t-10"></label>
+                                        <div class="col-xs-5 p-t-10">
+                                            <span id="selected-plan_month_value"></span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="row">
                                     <h4 class="font-bold">Termos de uso e serviço</h4>
@@ -501,7 +510,8 @@
             var username = $('input[name=username]').val();
             var email = $('input[name=email]').val();
             var select_office_register = $('input[name=select_office_register]').val();
-            var plan_name = $('input[name=plan_name]').val();
+            var plan_name = sessionStorage.getItem('plan_name');
+            var plan_month_value = sessionStorage.getItem('plan_month_value');
             $('#name').html(name);
             $('#username').html(username);
             $('#email').html(email);
@@ -522,16 +532,18 @@
                 case '2':
                     var legal_name = $('input[name=legal_name]').val();
                     var office_name = $('input[name=office_name]').val();
-                    var legal_type = $('input[name=legal_type]').val();
+                    var legal_type = $('select[name=legal_type]').find(":selected").text();
                     var cpf_cnpj = $('input[name=cpf_cnpj]').val();
                     $('#legal_name').html(legal_name);
                     $('#office_name').html(office_name);
                     $('#legal_type').html(legal_type);
                     $('#cpf_cnpj').html(cpf_cnpj);
-                    $('#selected-plan').append(plan_name)
+                    $('#selected-plan_name').append(plan_name);
+                    $('#selected-plan_month_value').append(plan_month_value);
                     break;
                 case '3':
-                    $('#selected-plan').append(plan_name)
+                    $('#selected-plan_name').append(plan_name);
+                    $('#selected-plan_month_value').append(plan_month_value);
                     break;
             }
             return $('#confirm_tab').html()
@@ -576,12 +588,14 @@
             var radio_select = plan_button.dataset['select'];
             var radio_value = plan_button.dataset['value'];
             var plan_name = plan_button.dataset['name'];
+            var plan_month_value = plan_button.dataset['month_value'];
             var radio_field = $('input[name='+radio_select+'][value='+radio_value+']');
             var plan_div = $('#'+radio_select+'-'+radio_value+'-box');
             var field_state = radio_field.prop('checked');
             radio_field.prop('checked', !field_state);
             $('div[id*=box]').removeClass('featured-plan');
-            $('#plan_name').val(plan_name);
+            sessionStorage.setItem('plan_name', plan_name);
+            sessionStorage.setItem('plan_month_value', plan_month_value);
             if(!field_state){plan_div.addClass('featured-plan');}
         }
     </script>
