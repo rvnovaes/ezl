@@ -238,7 +238,8 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
             finished_query = Q()
 
             if data['status']:
-                query.add(Q(billing_date__isnull=data['status'] != 'true'), Q.AND)
+                key = "{}__isnull".format(self.datetime_field)
+                query.add(Q(**{key: data['status'] != 'true'}), Q.AND)
 
             if data['client']:
                 query.add(Q(movement__law_suit__folder__person_customer_id=data['client']), Q.AND)
