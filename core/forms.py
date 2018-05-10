@@ -19,8 +19,8 @@ from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, 
 from allauth.utils import build_absolute_uri
 
 from core.fields import CustomBooleanField
-from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType, Office, Invite, \
-    InviteOffice
+from core.models import ContactUs, Person, Address, City, ContactMechanism, ContactMechanismType, AddressType, \
+    LegalType, Office, Invite, InviteOffice
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session, get_domain
 from core.widgets import TypeaHeadWidget
 from core.widgets import TypeaHeadForeignKeyWidget
@@ -145,6 +145,13 @@ class ContactMechanismForm(BaseModelForm):
         model = ContactMechanism
         fields = ['contact_mechanism_type', 'description', 'notes', 'is_active']
 
+    contact_mechanism_type = forms.ModelChoiceField(
+        queryset=filter_valid_choice_form(ContactMechanismType.objects.all()),
+        empty_label='',
+        required=True,
+        label='Tipo',
+    )
+
     description = forms.CharField(
         label=u'Descrição',
         required=True,
@@ -162,7 +169,7 @@ class ContactMechanismForm(BaseModelForm):
         required=False,
         label='Ativo',
         widget=CheckboxInput(attrs={'class': 'filled-in', })
-    )
+    )    
 
 
 class AddressForm(BaseModelForm):

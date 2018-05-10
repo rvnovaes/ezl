@@ -1428,6 +1428,19 @@ class ContactMechanismCreateView(ViewRelatedMixin, CreateView):
 
     def get_success_url(self):        
         return reverse('person_update', args=(self.kwargs.get('person_pk'),))
+    
+    def form_valid(self, form):        
+        # Se tipo do mecanismo de contato for e-mail validar se é válido        
+        if form.instance.contact_mechanism_type.is_email():
+            try:                
+                validate_email(form.instance.description)
+            except ValidationError as e:                
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    'Informe um endereço de e-mail válido.')
+                return self.form_invalid(form)
+        return super().form_valid(form)                
 
 
 class ContactMechanismUpdateView(UpdateView):
@@ -1439,6 +1452,15 @@ class ContactMechanismUpdateView(UpdateView):
         return reverse('person_update', args=(self.kwargs.get('person_pk'),))
 
     def form_valid(self, form):
+        if form.instance.contact_mechanism_type.is_email():
+            try:                
+                validate_email(form.instance.description)
+            except ValidationError as e:                
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    'Informe um endereço de e-mail válido.')
+                return self.form_invalid(form)
         try:
             #TODO - Verificar se é a melhor forma de tratar duplicidades
             return super().form_valid(form)
@@ -1467,6 +1489,19 @@ class ContactMechanismOfficeCreateView(ViewRelatedMixin, CreateView):
 
     def get_success_url(self):
         return reverse('office_update', args=(self.kwargs.get('office_pk'),))
+    
+    def form_valid(self, form):        
+        # Se tipo do mecanismo de contato for e-mail validar se é válido        
+        if form.instance.contact_mechanism_type.is_email():
+            try:                
+                validate_email(form.instance.description)
+            except ValidationError as e:                
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    'Informe um endereço de e-mail válido.')
+                return self.form_invalid(form)
+        return super().form_valid(form)  
 
 
 class ContactMechanismOfficeUpdateView(ContactMechanismUpdateView):
