@@ -34,7 +34,7 @@ from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixi
 from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
-from task.filters import TaskFilter, TaskToPayFilter
+from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter
 from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm, TaskToAssignForm, FilterForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskGeolocation
 from task.signals import send_notes_execution_date
@@ -205,18 +205,16 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteVi
         return super(TaskDeleteView, self).post(request, *args, **kwargs)
 
 
-class ToReceiveTaskReportView(CustomLoginRequiredView, TemplateView):
-    template_name = 'task/reports/to_receive.html'
-
-
-class ToPayTaskReportView(PermissionRequiredMixin, CustomLoginRequiredView, TemplateView):
-    template_name = 'task/reports/to_pay.html'
+class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateView):
     permission_required = ('core.view_all_tasks', )
+    template_name = None
+    filter_class = None
+    datetime_field = None
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
 
-        self.task_filter = TaskToPayFilter(data=self.request.GET, request=self.request)
+        self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
         context['filter'] = self.task_filter
         context['offices'] = self.get_os_grouped_by_office()
         return context
@@ -239,8 +237,8 @@ class ToPayTaskReportView(PermissionRequiredMixin, CustomLoginRequiredView, Temp
             query = Q()
             finished_query = Q()
 
-            if data['billed']:
-                query.add(Q(billing_date__isnull=data['billed'] != 'true'), Q.AND)
+            if data['status']:
+                query.add(Q(billing_date__isnull=data['status'] != 'true'), Q.AND)
 
             if data['client']:
                 query.add(Q(movement__law_suit__folder__person_customer_id=data['client']), Q.AND)
@@ -270,7 +268,7 @@ class ToPayTaskReportView(PermissionRequiredMixin, CustomLoginRequiredView, Temp
         offices_map = {}
         tasks = self.get_queryset()
         for task in tasks:
-            correspondent = task.get_child.office
+            correspondent = self._get_related_office(task)
             if correspondent not in offices_map:
                 offices_map[correspondent] = []
             offices_map[correspondent].append(task)
@@ -285,6 +283,25 @@ class ToPayTaskReportView(PermissionRequiredMixin, CustomLoginRequiredView, Temp
 
         return offices
 
+
+class ToReceiveTaskReportView(TaskReportBase):
+    template_name = 'task/reports/to_receive.html'
+    filter_class = TaskToReceiveFilter
+    datetime_field = 'receipt_date'
+
+    def get_queryset(self):
+        office = get_office_session(self.request)
+        queryset = Task.objects.filter(
+            office=office,
+            task_status=TaskStatus.FINISHED,
+            parent__isnull=False
+        )
+        queryset = self.filter_queryset(queryset)
+        return queryset.order_by('parent__office__name')
+
+    def _get_related_office(self, task):
+        return task.parent.office
+
     def post(self, request):
         office = get_office_session(self.request)
         tasks_payload = request.POST.get('tasks')
@@ -293,11 +310,45 @@ class ToPayTaskReportView(PermissionRequiredMixin, CustomLoginRequiredView, Temp
 
         for task_id in json.loads(tasks_payload):
             task = Task.objects.get(id=task_id, office=office)
-            task.billing_date = timezone.now()
+            setattr(task, self.datetime_field, timezone.now())
+            task.save()
+
+        messages.add_message(self.request, messages.INFO, "OS's marcadas como recebidas com sucesso.")
+        return JsonResponse({"status": "ok"})
+
+
+class ToPayTaskReportView(TaskReportBase):
+    template_name = 'task/reports/to_pay.html'
+    filter_class = TaskToPayFilter
+    datetime_field = 'billing_date'
+
+    def get_queryset(self):
+        office = get_office_session(self.request)
+        queryset = Task.objects.filter(
+            parent__office=office,
+            task_status=TaskStatus.FINISHED,
+            parent__isnull=False
+        )
+        queryset = self.filter_queryset(queryset)
+        return queryset.order_by('child__office__name')
+
+    def _get_related_office(self, task):
+        return task.office
+
+    def post(self, request):
+        office = get_office_session(self.request)
+        tasks_payload = request.POST.get('tasks')
+        if not tasks_payload:
+            return JsonResponse({"error": "tasks is required"}, status=400)
+
+        for task_id in json.loads(tasks_payload):
+            task = Task.objects.get(id=task_id, parent__office=office)
+            setattr(task, self.datetime_field, timezone.now())
             task.save()
 
         messages.add_message(self.request, messages.INFO, "OS's faturadas com sucesso.")
         return JsonResponse({"status": "ok"})
+
 
 
 class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):

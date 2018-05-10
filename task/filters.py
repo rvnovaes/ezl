@@ -89,17 +89,9 @@ class TaskFilter(FilterSet):
         order_by = ['final_deadline_date']
 
 
-class TaskToPayFilter(FilterSet):
 
+class TaskReportFilterBase(FilterSet):
     finished_in = MDDateTimeRangeFilter(name='finished_in')
-
-    billed = ChoiceFilter(
-        empty_label='Todas',
-        choices=(
-            ('true', 'Somente faturadas'),
-            ('false', 'Somente não faturadas'),
-            )
-        )
 
     client = CharFilter(label="Cliente",
                         required=False,
@@ -113,8 +105,25 @@ class TaskToPayFilter(FilterSet):
                                                          field_related='name',
                                                          name='office',
                                                          url='/office_form'))
-
     class Meta:
         model = Task
         fields = []
 
+
+class TaskToPayFilter(TaskReportFilterBase):
+    status = ChoiceFilter(
+        empty_label='Todas',
+        choices=(
+            ('true', 'Somente faturadas'),
+            ('false', 'Somente não faturadas'),
+            )
+        )
+
+class TaskToReceiveFilter(TaskReportFilterBase):
+    status = ChoiceFilter(
+        empty_label='Todas',
+        choices=(
+            ('true', 'Somente recebidas'),
+            ('false', 'Somente não recebidas'),
+            )
+        )
