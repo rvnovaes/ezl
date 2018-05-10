@@ -10,6 +10,7 @@ from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from core.views import CustomLoginRequiredView
 from django.contrib.auth.models import User, Group
 from django.contrib.messages.views import SuccessMessageMixin
@@ -33,7 +34,7 @@ from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixi
 from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
-from task.filters import TaskFilter
+from task.filters import TaskFilter, TaskToPayFilter
 from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm, TaskToAssignForm, FilterForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskGeolocation
 from task.signals import send_notes_execution_date
@@ -202,6 +203,101 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteVi
     def post(self, request, *args, **kwargs):
         self.success_url = urlparse(request.META.get('HTTP_REFERER')).path
         return super(TaskDeleteView, self).post(request, *args, **kwargs)
+
+
+class ToReceiveTaskReportView(CustomLoginRequiredView, TemplateView):
+    template_name = 'task/reports/to_receive.html'
+
+
+class ToPayTaskReportView(PermissionRequiredMixin, CustomLoginRequiredView, TemplateView):
+    template_name = 'task/reports/to_pay.html'
+    permission_required = ('core.view_all_tasks', )
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        self.task_filter = TaskToPayFilter(data=self.request.GET, request=self.request)
+        context['filter'] = self.task_filter
+        context['offices'] = self.get_os_grouped_by_office()
+        return context
+
+    def get_queryset(self):
+        office = get_office_session(self.request)
+        queryset = Task.objects.filter(
+            office=office,
+            task_status=TaskStatus.FINISHED,
+            child__isnull=False
+        )
+        queryset = self.filter_queryset(queryset)
+        return queryset.order_by('child__office__name')
+
+    def filter_queryset(self, queryset):
+        if not self.task_filter.form.is_valid():
+            messages.add_message(self.request, messages.ERROR, 'Formulário inválido.')
+        else:
+            data = self.task_filter.form.cleaned_data
+            query = Q()
+            finished_query = Q()
+
+            if data['billed']:
+                query.add(Q(billing_date__isnull=data['billed'] != 'true'), Q.AND)
+
+            if data['client']:
+                query.add(Q(movement__law_suit__folder__person_customer_id=data['client']), Q.AND)
+            
+            if data['office']:
+                query.add(Q(child__office_id=data['office']), Q.AND)
+
+            if data['finished_in']:
+                if data['finished_in'].start:
+                    finished_query.add(
+                        Q(finished_date__gte=data['finished_in'].start.replace(hour=0, minute=0)), Q.AND)
+                if data['finished_in'].stop:
+                    finished_query.add(
+                        Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
+            else:
+                # O filtro padrão para finished_date é o més atual
+                finished_query.add(
+                    Q(finished_date__gte=timezone.now().replace(day=1, hour=0, minute=0)), Q.AND)
+
+            query.add(Q(finished_query), Q.AND)
+            queryset = queryset.filter(query)
+
+        return queryset
+
+    def get_os_grouped_by_office(self):
+        offices = []
+        offices_map = {}
+        tasks = self.get_queryset()
+        for task in tasks:
+            correspondent = task.get_child.office
+            if correspondent not in offices_map:
+                offices_map[correspondent] = []
+            offices_map[correspondent].append(task)
+
+        for office, tasks in offices_map.items():
+            tasks.sort(key=lambda x: x.client.name)
+            offices.append({
+                "name": office.name,
+                "tasks": tasks,
+                "total": sum(map(lambda x: x.amount, tasks))
+                })
+
+        return offices
+
+    def post(self, request):
+        office = get_office_session(self.request)
+        tasks_payload = request.POST.get('tasks')
+        if not tasks_payload:
+            return JsonResponse({"error": "tasks is required"}, status=400)
+
+        for task_id in json.loads(tasks_payload):
+            task = Task.objects.get(id=task_id, office=office)
+            task.billing_date = timezone.now()
+            task.save()
+
+        messages.add_message(self.request, messages.INFO, "OS's faturadas com sucesso.")
+        return JsonResponse({"status": "ok"})
 
 
 class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):

@@ -45,6 +45,9 @@ run: check_compose_override
 restart:
 	docker-compose restart web nginx luigi tasks
 
+restart_web:
+	docker-compose restart web ws ws-worker
+
 set_env_development:
 	@rm docker-compose.override.yml || true
 	ln -s docker-compose.development.yml docker-compose.override.yml
