@@ -1,13 +1,13 @@
-from django.forms import Select, Textarea
-from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter
+from django.forms import Select, Textarea, RadioSelect
+from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter
 from django import forms
 
-from core.models import Person, State
+from core.models import Person, State, Office
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
 from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ
-from task.models import TypeTask, Filter
+from task.models import TypeTask, Task, Filter
 from .models import DashboardViewModel
 
 
@@ -87,3 +87,43 @@ class TaskFilter(FilterSet):
         model = DashboardViewModel
         fields = []
         order_by = ['final_deadline_date']
+
+
+
+class TaskReportFilterBase(FilterSet):
+    finished_in = MDDateTimeRangeFilter(name='finished_in')
+
+    client = CharFilter(label="Cliente",
+                        required=False,
+                        widget=TypeaHeadForeignKeyWidget(model=Person,
+                                                         field_related='legal_name',
+                                                         name='client',
+                                                         url='/client_form'))
+    office = CharFilter(label="Escritório Correspondente",
+                        required=False,
+                        widget=TypeaHeadForeignKeyWidget(model=Office,
+                                                         field_related='name',
+                                                         name='office',
+                                                         url='/office_form'))
+    class Meta:
+        model = Task
+        fields = []
+
+
+class TaskToPayFilter(TaskReportFilterBase):
+    status = ChoiceFilter(
+        empty_label='Todas',
+        choices=(
+            ('true', 'Somente faturadas'),
+            ('false', 'Somente não faturadas'),
+            )
+        )
+
+class TaskToReceiveFilter(TaskReportFilterBase):
+    status = ChoiceFilter(
+        empty_label='Todas',
+        choices=(
+            ('true', 'Somente recebidas'),
+            ('false', 'Somente não recebidas'),
+            )
+        )

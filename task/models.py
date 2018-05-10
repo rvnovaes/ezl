@@ -197,6 +197,9 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                  max_digits=9, decimal_places=2, default=Decimal('0.00'))
     chat = models.ForeignKey(Chat, verbose_name='Chat', on_delete=models.SET_NULL, null=True,
                              blank=True)
+    billing_date = models.DateTimeField(null=True, blank=True)
+    receipt_date = models.DateTimeField(null=True, blank=True)
+
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
 

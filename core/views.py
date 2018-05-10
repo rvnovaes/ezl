@@ -1304,6 +1304,17 @@ class ClientAutocomplete(TypeaHeadGenericSearch):
         return list(data)
 
 
+class OfficeAutocomplete(TypeaHeadGenericSearch):
+
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params):
+        data = []
+        for item in Office.objects.filter(Q(name__unaccent__icontains=q),
+                                            Q(offices=office)):
+            data.append({'id': item.id, 'data-value-txt': item.__str__()})
+        return list(data)
+
+
 class CorrespondentAutocomplete(TypeaHeadGenericSearch):
 
     @staticmethod
