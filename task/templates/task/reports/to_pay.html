@@ -111,6 +111,12 @@
                                 <td colspan="11">Nenhuma OS encontrada com os filtros especificados.</td>
                             </tr>
                         {% endfor %}
+                        {% if offices %}
+                            <tr class="total-container">
+                                <th colspan="10" class="text-center" >Total Geral</th>
+                                <th class="text-center">R$ {{total}}</th>
+                            </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
@@ -186,11 +192,8 @@
     .page-content{
         margin-top: -25px;
     }
-    .tab-content{
-        margin-top: 0!important;
-    }
-    form input[type=text]{
-        width: 100%;
+    .total-container{
+        background-color: #f2f5f7;
     }
 </style>
 

@@ -217,6 +217,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
         self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
         context['filter'] = self.task_filter
         context['offices'] = self.get_os_grouped_by_office()
+        context['total'] = sum(map(lambda x: x['total'], context['offices']))
         return context
 
     def get_queryset(self):
