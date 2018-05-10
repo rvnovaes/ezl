@@ -101,4 +101,5 @@ urlpatterns = [
     url(r'^office_filter/$', views.OfficeSearch.as_view(), name='office_filter'),
     url(r'^validate_password/$', views.ValidatePassword.as_view(), name='validate_password'),
     url(r'^validate_username/$', views.ValidateUsername.as_view(), name='validate_username'),
+    url(r'^validate_email/$', views.ValidateEmail.as_view(), name='validate_email'),
 ]

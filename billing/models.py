@@ -9,6 +9,9 @@ class Plan(Audit):
     month_value = MoneyField(max_digits=10, decimal_places=2, default_currency='BRL', verbose_name="Valor mensal",
                              null=False, blank=False)
     task_limit = models.IntegerField(verbose_name="Limite mensal", null=True, blank=True)
+    custom_pricing = models.BooleanField(null=False, default=False, verbose_name='Preço customizado')
+    custom_pricing_text = models.CharField(max_length=50, blank=True, null=True,
+                                           verbose_name='Descrição para preço customizado')
 
     class Meta:
         ordering = ['month_value']

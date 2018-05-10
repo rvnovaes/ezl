@@ -18,6 +18,8 @@
     <link href="{% static 'skeleton/css/colors/blue.css' %}" id="theme" rel="stylesheet">
 
     <link href="{% static 'libs/toastr/build/toastr.min.css' %}" rel="stylesheet">
+    <!--alerts CSS -->
+    <link href="{% static 'skeleton/plugins/bower_components/sweetalert/sweetalert.css' %}" rel="stylesheet" type="text/css">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -266,6 +268,9 @@
 <script src="{% static 'skeleton/js/custom.min.js' %}"></script>
 <!--Style Switcher -->
 <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
+<!-- Sweet-Alert  -->
+<script src="{% static 'skeleton/plugins/bower_components/sweetalert/sweetalert.min.js' %}"></script>
+<script src="{% static 'skeleton/plugins/bower_components/sweetalert/jquery.sweet-alert.custom.js' %}"></script>
 <script>
     $(document).ready(function () {
         {% if form.errors %}
@@ -278,7 +283,12 @@
                 toastr.error('{{ error }}', 'Erro ao efetuar o login', {timeOut: 5000});
             {% endfor %}
         {% endif %}
-    })
+        {% for message in messages %}
+            {% if message.tags == 'add_new_user success' %}
+            swal('Cadastro Finalizado', '{{ message }}');
+            {% endif %}
+        {% endfor %}
+    });
 </script>
 </body>
 </html>

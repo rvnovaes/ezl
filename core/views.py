@@ -1007,27 +1007,31 @@ class RegisterNewUser(CreateView):
         email = request.POST.get('email')
         errors = []
         if not password == confirm_password:
-            errors.append('As senhas digitadas não conferem')
+            errors.append({'title': 'Senha', 'error': 'As senhas digitadas não conferem'})
         else:
             try:
                 password_validation.validate_password(password)
             except ValidationError as error:
-                errors.append(error)
+                errors.append({'title': 'Senha', 'error': error})
 
         select_office_register = request.POST.get('select_office_register')
         selected_plan = request.POST.get('plan')
         office_pks = request.POST.getlist('office_checkbox')
         if select_office_register == "":
-            errors.append('Nenhuma Forma de trabalho selecionada')
+            errors.append({'title': 'Forma de Trabalho', 'error': 'Nenhuma Forma de trabalho selecionada'})
         if select_office_register == '1':
             if not office_pks:
-                errors.append('Nenhum escritório selecionado, para vincular com o usuário criado')
+                errors.append({'title': 'Escritório', 'error': 'Nenhum escritório selecionado, para vincular com o usuário criado'})
         elif select_office_register == '2' or select_office_register == '3':
             if selected_plan == "":
-                errors.append('Nenhum plano selecionado')
+                errors.append({'title': 'Plano de acesso', 'error': 'Nenhum plano selecionado'})
 
         if errors:
-            raise ValidationError(errors)
+            return render(request, 'account/register.html', {'errors': errors})
+
+        if select_office_register == '2' and request.POST.get('legal_name') == '':
+            errors.append({'title': 'Cadastro de escritório',
+                           'error': 'É obrigatório que o escrtório cadastrado possua um nome'})
 
         form = RegisterNewUserForm(
             {'username': username, 'first_name': first_name, 'last_name': last_name, 'email': email,
@@ -1041,7 +1045,10 @@ class RegisterNewUser(CreateView):
                     invite.status = 'N'
                     invite.save()
         else:
-            raise ValidationError('Erro no registro de usuário')
+            for title, error in form.errors.items():
+                errors.append({'title': title, 'message': error})
+            return render(request, 'account/register.html', {'errors': errors})
+
         office_instance = None
         if select_office_register == '1':
             for office in Office.objects.filter(id__in=office_pks):
@@ -1052,12 +1059,10 @@ class RegisterNewUser(CreateView):
                                       invite_from='P',
                                       is_active=True)
         elif select_office_register == '2':
-            legal_name = request.POST.get('legal_name')
-            office_name = request.POST.get('office_name')
-            legal_type = request.POST.get('legal_type')
-            cpf_cnpj = request.POST.get('cpf_cnpj')
-            if cpf_cnpj == '':
-                cpf_cnpj = None
+            legal_name = request.POST.get('legal_name') if request.POST.get('legal_name') != '' else None
+            office_name = request.POST.get('office_name') if request.POST.get('office_name') != '' else None
+            legal_type = request.POST.get('legal_type') if request.POST.get('legal_type') != '' else None
+            cpf_cnpj = request.POST.get('cpf_cnpj') if request.POST.get('cpf_cnpj') != '' else None
             office_instance = Office.objects.create(legal_name=legal_name,
                                                     name=office_name,
                                                     legal_type=legal_type,
@@ -1086,10 +1091,13 @@ class RegisterNewUser(CreateView):
                                       month_value=plan.month_value,
                                       task_limit=plan.task_limit,
                                       create_user=instance)
+
+        messages.add_message(request, messages.SUCCESS, "Registro concluído com sucesso!", 'add_new_user')
         return HttpResponseRedirect(reverse_lazy('login'))
-        # return render(request, 'account/register.html', {'form': form, 'invite_code': invite_code, })
 
     def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('dashboard'))
         context = {}
         if request.GET.get('invite_code'):
             invite = Invite.objects.filter(invite_code=request.GET['invite_code']).first()
@@ -1563,6 +1571,16 @@ class ValidateUsername(View):
         username = request.POST.get('username')
         data = {'valid': True}
         if User.objects.filter(username=username).first():
+            data['valid'] = False
+
+        return JsonResponse(data, safe=False)
+
+
+class ValidateEmail(View):
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get('email')
+        data = {'valid': True}
+        if User.objects.filter(email=email).first():
             data['valid'] = False
 
         return JsonResponse(data, safe=False)

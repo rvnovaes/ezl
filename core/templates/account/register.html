@@ -178,23 +178,27 @@
                                         <div class="col-md-4 col-xs-12 col-sm-6 no-padding">
                                             <div id="plan-{{ plan.pk }}-box" class="pricing-box b-l b-r">
                                                 <div class="pricing-body">
-                                                    <div class="pricing-header">
+                                                    <div class="pricing-header" style="min-height: 110px">
                                                         <h4 class="text-center">{{ plan.name }}</h4>
+                                                        {% if plan.custom_pricing %}
+                                                            <h2 class="p-b-20 font-bold">{{ plan.custom_pricing_text }}</h2>
+                                                        {% else %}
                                                         <h2 class="text-center">
                                                             {% money_localize plan.month_value on as formated_month_value%}
                                                             <span class="price-sign">{{ formated_month_value|make_list|slice:':2'|join:'' }}</span>
                                                             {{ formated_month_value|make_list|slice:'2:'|join:'' }}
                                                         </h2>
                                                         <p class="uppercase">por mês</p>
+                                                        {% endif %}
                                                     </div>
                                                     <div class="price-table-content">
-                                                        <div class="price-row">{{ plan.description|safe }}</div>
+                                                        {{ plan.description|safe }}
                                                         <div class="price-row">
                                                             <button class="btn btn-success waves-effect waves-light m-t-20"
                                                                     data-select="plan"
                                                                     data-value="{{ plan.pk }}"
                                                                     data-name="{{ plan.name }}"
-                                                                    onclick="choose_plan(this)">Escolher</button>
+                                                                    onclick="choose_plan(this)">Contratar</button>
                                                             <input type='radio' id='plan-{{ plan.pk }}-radio' name='plan' value='{{ plan.pk }}' class="hidden" />
                                                         </div>
                                                     </div>
@@ -206,7 +210,7 @@
                             </div>
                             <div class="wizard-pane" id="confirm_tab" role="tabpanel">
                                 <div class="row">
-                                    <h4>Dados de acesso</h4>
+                                    <h4 class="font-bold">Dados de acesso</h4>
                                     <div class="form-group m-b-0">
                                         <label class="col-xs-3 control-label p-t-10">Nome</label>
                                         <div class="col-xs-5 p-t-10">
@@ -227,7 +231,7 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <h4>Forma de trabalho</h4>
+                                    <h4 class="font-bold">Forma de trabalho</h4>
                                     <div id="select_office_register-1" class="form-group m-b-0">
                                         <label class="col-xs-3 control-label p-t-10">Vicular-me a um escritório já cadastrado:</label>
                                         <div class="col-xs-5 p-t-10">
@@ -268,11 +272,11 @@
                                     </div>
                                 </div>
                                 <div id="plan-row" class="row">
-                                    <h4>Plano de acesso</h4>
+                                    <h4 class="font-bold">Plano de acesso</h4>
                                     <label id="selected-plan" class="col-xs-3 control-label p-t-10"></label>
                                 </div>
                                 <div class="row">
-                                    <h4>Termos de uso e serviço</h4>
+                                    <h4 class="font-bold">Termos de uso e serviço</h4>
                                     <div class="row">
                                         <blockquote>
                                             <p>All the x-ray visions will be lost in histories like turbulences in faiths</p>
@@ -349,7 +353,18 @@
                                 },
                                 emailAddress: {
                                     message: 'O valor inserido não é um endereço de e-mail válido'
-                                }
+                                },
+                                remote: {
+                                    message: 'Já existe um usuário cadastrado com este e-mail',
+                                    url: '/validate_email/',
+                                    type: 'POST',
+                                    delay: 1000,
+                                    data: function(validator, $field, value) {
+                                        return {
+                                            csrfmiddlewaretoken: validator.getFieldElements('csrfmiddlewaretoken').val()
+                                        };
+                                    }
+                                },
                             }
                         },
                         password: {
@@ -449,7 +464,6 @@
             },
             onFinish: function() {
                 $('#validation')[0].submit();
-                swal('Finalizado', 'Seu cadastro foi finalizado com sucesso!!!')
             },
         }).data('wizard');
         function hidden_field_validation(currentIndex){
@@ -573,14 +587,9 @@
     </script>
 {% endblock extra_scripts %}
 {% block script_document_ready %}
-    {% if form.errors %}
-        {% for field in form %}
-            {% for error in field.errors %}
-                toastr.error('{{ error }}', 'Erro ao efetuar o login', {timeOut: 5000});
-            {% endfor %}
-        {% endfor %}
-        {% for error in form.non_field_errors %}
-            toastr.error('{{ error }}', 'Erro ao efetuar o login', {timeOut: 5000});
+    {% if errors %}
+        {% for error in errors %}
+             showToast('error', '{{ error.title }}', '{{ error.message|escape }}', 0, false);
         {% endfor %}
     {% endif %}
     $('.select2').select2();
@@ -605,5 +614,8 @@
     });
     $( "input[name=username]" ).blur(function() {
       $('#validation').formValidation('revalidateField', 'username')
+    });
+    $( "input[name=email]" ).blur(function() {
+      $('#validation').formValidation('revalidateField', 'email')
     });
 {% endblock %}
