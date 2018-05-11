@@ -19,8 +19,8 @@ from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, 
 from allauth.utils import build_absolute_uri
 
 from core.fields import CustomBooleanField
-from core.models import ContactUs, Person, Address, City, ContactMechanism, AddressType, LegalType, Office, Invite, \
-    InviteOffice
+from core.models import ContactUs, Person, Address, City, ContactMechanism, ContactMechanismType, AddressType, \
+    LegalType, Office, Invite, InviteOffice
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session, get_domain
 from core.widgets import TypeaHeadWidget
 from core.widgets import TypeaHeadForeignKeyWidget
@@ -140,10 +140,17 @@ class ContactForm(ModelForm):
     )
 
 
-class ContactMechanismForm(BaseModelForm):
+class ContactMechanismForm(BaseModelForm):        
     class Meta:
         model = ContactMechanism
         fields = ['contact_mechanism_type', 'description', 'notes', 'is_active']
+
+    contact_mechanism_type = forms.ModelChoiceField(
+        queryset=filter_valid_choice_form(ContactMechanismType.objects.all()),
+        empty_label='',
+        required=True,
+        label='Tipo',
+    )
 
     description = forms.CharField(
         label=u'Descrição',
@@ -162,7 +169,7 @@ class ContactMechanismForm(BaseModelForm):
         required=False,
         label='Ativo',
         widget=CheckboxInput(attrs={'class': 'filled-in', })
-    )
+    )    
 
 
 class AddressForm(BaseModelForm):
@@ -513,17 +520,6 @@ class OfficeForm(BaseModelForm):
                     self.error_class(exc.messages)
                 del cleaned_data['cpf_cnpj']
         return cleaned_data
-
-
-class AddressOfficeForm(AddressForm):
-    class Meta:
-        model = Address
-        fields = ['zip_code', 'city_region', 'address_type', 'state', 'city', 'street', 'number',
-                  'notes', 'is_active']
-
-
-AddressOfficeFormSet = inlineformset_factory(Office, Address, form=AddressOfficeForm, extra=1,
-                                             max_num=1)
 
 
 class InviteForm(forms.ModelForm):

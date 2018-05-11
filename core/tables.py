@@ -182,8 +182,8 @@ class ContactMechanismTable(tables.Table):
             'data_href': lambda record: '/pessoas/' + str(record.person.pk) + '/contatos/' + str(record.pk) + '/'
             }
 
-#class ContactMechanismOfficeTable(ContactMechanismTable):
-#    class Meta:
-#        row_attrs = {
-#            'data_href': lambda record: '/escritorios/' + str(record.office.pk) + '/enderecos/' + str(record.pk) + '/'
-#        }
+class ContactMechanismOfficeTable(ContactMechanismTable):
+    class Meta:
+        row_attrs = {
+            'data_href': lambda record: '/escritorios/' + str(record.office.pk) + '/contatos/' + str(record.pk) + '/'
+        }
