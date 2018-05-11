@@ -486,6 +486,11 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.office = office_correspondent
         new_task.task_status = TaskStatus.REQUESTED
         new_task.parent = object_parent
+        new_type_task, created = TypeTask.objects.get_or_create(name=object_parent.type_task.name,
+                                                    survey=object_parent.type_task.survey,
+                                                    office=office_correspondent,
+                                                    defaults={'create_user':object_parent.create_user})
+        new_task.type_task = new_type_task
         new_task.save()
         for ecm in object_parent.ecm_set.all():
             new_ecm = copy.copy(ecm)

@@ -57,7 +57,7 @@ class AddressETL(GenericETL):
                     WHERE CLIFOR_END_COB.Status = 'Ativo' AND CLIFOR_END_COB.Razao IS NOT NULL AND CLIFOR_END_COB.Razao <> ''
                           AND (Cob_endereco IS NOT NULL OR Cob_Cidade IS NOT NULL OR Cob_Bairro IS NOT NULL OR Cob_UF IS NOT NULL)
                     """
-    has_status = True
+    has_status = False
 
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):

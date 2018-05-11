@@ -145,7 +145,7 @@ class GenericETL(object):
 
     def deactivate_all(self):
         if not truncate_all_tables:
-            self.model.objects.all().update(is_active=False)
+            self.model.objects.filter(system_prefix=LegacySystem.ADVWIN.value).update(is_active=False)
 
     def config_import(self, rows, user, rows_count, default_office, log=False):
         raise NotImplementedError()

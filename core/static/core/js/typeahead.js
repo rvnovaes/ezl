@@ -40,7 +40,7 @@ $(document).ready(function () {
             name: $(this).attr('id'),
             value: 'id',
             display: 'data-value-txt',
-            limit: 10,
+            limit: 15,
             source: getTypeaheadData
         }).on('typeahead:selected', function (el, data) {
             $(this).attr('value', data.id);
