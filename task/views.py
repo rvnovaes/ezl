@@ -4,6 +4,7 @@ import os
 import copy
 from urllib.parse import urlparse
 import pickle
+from pathlib import Path
 from django.contrib import messages
 from chat.models import Chat, UserByChat
 from django.core.cache import cache
@@ -484,13 +485,14 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.type_task = new_type_task
         new_task.save()
         for ecm in object_parent.ecm_set.all():
-            new_ecm = copy.copy(ecm)
-            new_ecm.pk = None
-            new_ecm.task = new_task
-            new_file = ContentFile(ecm.path.read())
-            new_file.name = os.path.basename(ecm.path.name)
-            new_ecm.path = new_file
-            new_ecm.save()
+            if Path(ecm.path.path).is_file():
+                new_file = ContentFile(ecm.path.read())
+                new_file.name = os.path.basename(ecm.path.name)
+                new_ecm = copy.copy(ecm)
+                new_ecm.pk = None
+                new_ecm.task = new_task
+                new_ecm.path = new_file
+                new_ecm.save()
 
     def dispatch(self, request, *args, **kwargs):
         office_session = get_office_session(request)
