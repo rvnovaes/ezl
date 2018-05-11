@@ -1,3 +1,19 @@
+$(document).ready(function() {
+    var resizeChat =  function(){
+        var screen_len = $(window).height() -80 + "px";
+        $('.chat-main').css('height', screen_len);
+        var chatBoxHeight = $('.chat-main').height() - 190 + "px";
+        $('.chat-box').css('height', chatBoxHeight);        
+    }
+
+    resizeChat();
+
+    $(window).resize(function(){        
+        resizeChat();
+    })
+})
+
+
 var setBadgeItem = function (items) {
     items.forEach(function (item) {
         var elm = $('#notify-' + item.message__chat__pk)
@@ -10,7 +26,6 @@ var setBadgeItem = function (items) {
 
     })
 };
-
 
 var chatReadMessage = function (chat_id, csrf_token) {
     $.ajax({
