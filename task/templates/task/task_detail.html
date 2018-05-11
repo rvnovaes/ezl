@@ -149,6 +149,16 @@
     <div id="scripts">
     </div>
 
+    <script>        
+        $(document).ready(function () {
+            {% for message in messages %}
+                {% if 'info-message-public-office' in message.extra_tags %}
+                    swal("Importante", '{{ message }}');
+                {% endif %}                            
+            {% endfor %}
+        })
+    </script>
+
     <script>
         var expanded = false;
 

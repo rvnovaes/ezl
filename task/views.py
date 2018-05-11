@@ -396,7 +396,20 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             get_task_attachment(self, form)
             if servicepricetable:
                 self.delegate_child_task(form.instance, servicepricetable.office_correspondent)
-                form.instance.person_executed_by = None
+                form.instance.person_executed_by = None                               
+                if servicepricetable.office.public_office:
+                    messages.add_message(
+                        self.request,
+                        messages.INFO,
+                        ('Para a contratação dos serviços do EZLog deve ser feita a transferência do valor %s '+ 
+                        'reais para a conta abaixo: '+
+                        '\nBanco Bradesco'+
+                        '\nAgência: 2146-6'+
+                        '\nConta corrente: 40930-8'+
+                        '\nSílex Sistemas Ltda.'+
+                        '\n04.170.575-0001-03'+
+                        '\nTelefone de contato: 31 2538-7869') % str(form.instance.amount),
+                        extra_tags='info-message-public-office')
 
         feedback_rating = form.cleaned_data.get('feedback_rating')
         feedback_comment = form.cleaned_data.get('feedback_comment')
