@@ -41,6 +41,14 @@ select option {
     padding-left: 0px;
 
 }
+.terms-conditions{
+    max-height: 400px;
+    overflow-x: auto;
+}
+
+.terms-conditions blockquote .small:before, .terms-conditions blockquote footer:before, .terms-conditions blockquote small:before {
+    content: '' !important;
+}
 
 /* Main Colors */
 :root {
