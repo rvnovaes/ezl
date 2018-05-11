@@ -449,7 +449,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         state = self.object.movement.law_suit.court_district.state
         client = self.object.movement.law_suit.folder.person_customer
         context['correspondents_table'] = ServicePriceTableTaskTable(
-            ServicePriceTable.objects.filter(Q(office=self.object.office), Q(type_task=type_task),
+            ServicePriceTable.objects.filter(Q(office=self.object.office) | Q(office__public_office=True), Q(Q(type_task=type_task) | Q(type_task=None) ),
                                              Q(Q(court_district=court_district) | Q(court_district=None)),
                                              Q(Q(state=state) | Q(state=None)),
                                              Q(Q(client=client) | Q(client=None)))
@@ -489,7 +489,6 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.parent = object_parent
         new_type_task, created = TypeTask.objects.get_or_create(name=object_parent.type_task.name,
                                                     survey=object_parent.type_task.survey,
-                                                    office=office_correspondent,
                                                     defaults={'create_user':object_parent.create_user})
         new_task.type_task = new_type_task
         new_task.save()
