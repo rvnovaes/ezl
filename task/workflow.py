@@ -6,7 +6,7 @@ PARENT_STATUS = {
     TaskStatus.REFUSED_SERVICE: TaskStatus.REQUESTED,
     TaskStatus.OPEN: TaskStatus.ACCEPTED,
     TaskStatus.ACCEPTED: TaskStatus.ACCEPTED,
-    TaskStatus.REFUSED: TaskStatus.ACCEPTED,
+    TaskStatus.REFUSED: TaskStatus.REQUESTED,
     TaskStatus.DONE: TaskStatus.ACCEPTED,
     TaskStatus.RETURN: TaskStatus.ACCEPTED,
     TaskStatus.BLOCKEDPAYMENT: TaskStatus.DONE,
