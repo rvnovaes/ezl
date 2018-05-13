@@ -94,17 +94,9 @@ class TaskReportFilterBase(FilterSet):
     finished_in = MDDateTimeRangeFilter(name='finished_in')
 
     client = CharFilter(label="Cliente",
-                        required=False,
-                        widget=TypeaHeadForeignKeyWidget(model=Person,
-                                                         field_related='legal_name',
-                                                         name='client',
-                                                         url='/client_form'))
+                        required=False)
     office = CharFilter(label="Escritório Correspondente",
-                        required=False,
-                        widget=TypeaHeadForeignKeyWidget(model=Office,
-                                                         field_related='name',
-                                                         name='office',
-                                                         url='/office_form'))
+                        required=False)
     class Meta:
         model = Task
         fields = []

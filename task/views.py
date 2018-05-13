@@ -243,10 +243,13 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
                 query.add(Q(**{key: data['status'] != 'true'}), Q.AND)
 
             if data['client']:
-                query.add(Q(movement__law_suit__folder__person_customer_id=data['client']), Q.AND)
+                query.add(Q(movement__law_suit__folder__person_customer__legal_name__unaccent__icontains=data['client']), Q.AND)
             
             if data['office']:
-                query.add(Q(child__office_id=data['office']), Q.AND)
+                if isinstance(self, ToReceiveTaskReportView):
+                    query.add(Q(parent__office__name__unaccent__icontains=data['office']), Q.AND)
+                else:
+                    query.add(Q(child__office__name__unaccent__icontains=data['office']), Q.AND)
 
             if data['finished_in']:
                 if data['finished_in'].start:
