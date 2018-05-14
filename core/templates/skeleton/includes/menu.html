@@ -24,12 +24,6 @@
                     <span class="hide-menu">Centros de Custos</span>
                 </a>
             </li>
-            <!--<li> &lt;!&ndash; COMARCAS &ndash;&gt;-->
-                <!--<a href="{% url 'courtdistrict_list' %}" target="_self">-->
-                    <!--<i class="fa fa-map-marker fa-fw"></i>-->
-                    <!--<span class="hide-menu">Comarcas</span>-->
-                <!--</a>-->
-            <!--</li>-->
             <li> <!-- INSTANCIAS  -->
                 <a href="{% url 'instance_list' %}" target="_self">
                     <i class="fa fa-gavel fa-fw"></i>
@@ -87,7 +81,7 @@
                     <span class="hide-menu">Escritórios</span>
                 </a>
             </li>
-            {% if 'can_edit_surveys' in office_session_perms %}
+            {% if request.user.is_superuser %}
                 <li> <!-- QUESTIONARIOS -->
                     <a href="{% url 'survey_list' %}" target="_self">
                         <i class="fa fa-check-square-o fa-fw"></i>
