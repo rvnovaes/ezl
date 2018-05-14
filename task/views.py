@@ -398,6 +398,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 self.delegate_child_task(form.instance, servicepricetable.office_correspondent)
                 form.instance.person_executed_by = None                               
                 if servicepricetable.office.public_office:
+                    
                     messages.add_message(
                         self.request,
                         messages.INFO,

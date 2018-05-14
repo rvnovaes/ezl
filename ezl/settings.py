@@ -2,10 +2,13 @@ import datetime
 import os
 import sys
 import tempfile
+import moneyed
 
 from django.urls import reverse_lazy
 
 from config.config import get_parser
+from decimal import ROUND_HALF_EVEN
+from moneyed.localization import _FORMATTER, DEFAULT
 
 MUST_LOGIN = True
 
@@ -114,7 +117,9 @@ INSTALLED_APPS = [
     'channels',
     'chat',
     'ecm',
-    'guardian'
+    'guardian',
+    'billing',
+    'djmoney',
 ]
 
 MIDDLEWARE = [
@@ -223,6 +228,16 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+# configuração de formatação de moeda para o campo de Money da biblioteca django-money
+_FORMATTER.add_sign_definition('pt_BR', moneyed.BRL, prefix='R$')
+_FORMATTER.add_sign_definition(DEFAULT, moneyed.BRL, prefix='R$')
+_FORMATTER.add_formatting_definition(
+    'pt_BR', group_size=3, group_separator='.', decimal_point=',',
+    positive_sign='', trailing_positive_sign='',
+    negative_sign='-', trailing_negative_sign='',
+    rounding_method=ROUND_HALF_EVEN
+)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
