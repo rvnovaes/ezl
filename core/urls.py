@@ -102,4 +102,29 @@ urlpatterns = [
     url(r'^validate_password/$', views.ValidatePassword.as_view(), name='validate_password'),
     url(r'^validate_username/$', views.ValidateUsername.as_view(), name='validate_username'),
     url(r'^validate_email/$', views.ValidateEmail.as_view(), name='validate_email'),
+
+    # Contact mechanism views
+    url(r'^pessoas/(?P<person_pk>[0-9]+)/contato/criar/$',
+        views.ContactMechanismCreateView.as_view(),
+        name='contact_mechanism_create'),
+
+    url(r'^pessoas/(?P<person_pk>[0-9]+)/contatos/(?P<pk>[0-9]+)/$',
+        views.ContactMechanismUpdateView.as_view(),
+        name='contact_mechanism_update'),
+
+    url(r'^pessoas/(?P<person_pk>[0-9]+)/contatos/excluir/$',
+        views.ContactMechanismDeleteView.as_view(),
+        name='contact_mechanism_delete'),
+
+    url(r'^escritorio/(?P<office_pk>[0-9]+)/contato/criar/$',
+        views.ContactMechanismOfficeCreateView.as_view(),
+        name='contact_mechanism_office_create'),
+
+    url(r'^escritorios/(?P<office_pk>[0-9]+)/contatos/(?P<pk>[0-9]+)/$',
+        views.ContactMechanismOfficeUpdateView.as_view(),
+        name='contact_mechanism_office_update'),
+
+    url(r'^escritorios/(?P<office_pk>[0-9]+)/contatos/excluir/$',
+        views.ContactMechanismOfficeDeleteView.as_view(),
+        name='contact_mechanism_office_delete'),
 ]
