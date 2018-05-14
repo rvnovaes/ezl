@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 import django_tables2 as tables
 from django_tables2.utils import AttributeDict, A
 
-from .models import Person, Address, Office, Invite, OfficeMembership
+from .models import Person, Address, Office, Invite, OfficeMembership, ContactMechanism
 
 
 class CheckBoxMaterial(tables.CheckBoxColumn):
@@ -167,3 +167,23 @@ class OfficeMembershipTable(tables.Table):
         per_page = 10
         model = OfficeMembership
         fields = ('selection', 'person.legal_name', 'person.legal_type', 'person.cpf_cnpj', 'person.auth_user.username')
+
+
+class ContactMechanismTable(tables.Table):
+
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
+
+    class Meta:
+        sequecence = ('selection', 'contact_mechanism_type', 'description', 'notes', 'is_active')
+        model = ContactMechanism
+        fields = ['selection', 'contact_mechanism_type', 'description', 'notes', 'is_active']
+        attrs = {"class": "table-striped table-bordered"}
+        row_attrs = {
+            'data_href': lambda record: '/pessoas/' + str(record.person.pk) + '/contatos/' + str(record.pk) + '/'
+            }
+
+class ContactMechanismOfficeTable(ContactMechanismTable):
+    class Meta:
+        row_attrs = {
+            'data_href': lambda record: '/escritorios/' + str(record.office.pk) + '/contatos/' + str(record.pk) + '/'
+        }

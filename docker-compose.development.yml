@@ -16,6 +16,9 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     environment:
       ENV: development
+      EMAIL_HOST: mail
+      EMAIL_PORT: 1025
+      EMAIL_USE_SSL: "false"
     ports:
       - "8000:8000"
     depends_on:
@@ -80,3 +83,9 @@ services:
   db:
     ports:
       - "57002:5432"
+
+  mail:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+      - "1025:1025"

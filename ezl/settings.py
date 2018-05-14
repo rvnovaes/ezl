@@ -2,10 +2,13 @@ import datetime
 import os
 import sys
 import tempfile
+import moneyed
 
 from django.urls import reverse_lazy
 
 from config.config import get_parser
+from decimal import ROUND_HALF_EVEN
+from moneyed.localization import _FORMATTER, DEFAULT
 
 MUST_LOGIN = True
 
@@ -31,9 +34,9 @@ try:
     host = os.environ.get('DB_HOST', source['host'])
     port = os.environ.get('DB_PORT', source['port'])
     environment = source['environment']
-    email_use_ssl = True if source['email_use_ssl'].lower() == "true" else False
-    email_host = source['email_host']
-    email_port = source['email_port']
+    email_use_ssl = True if os.environ.get('EMAIL_USE_SSL', source['email_use_ssl'].lower()) == "true" else False
+    email_host = os.environ.get('EMAIL_HOST', source['email_host'])
+    email_port = os.environ.get('EMAIL_PORT', source['email_port'])
     email_host_user = source['email_host_user']
     email_host_password = source['email_host_password']
     linux_password = source_etl['linux_password']
@@ -114,7 +117,9 @@ INSTALLED_APPS = [
     'channels',
     'chat',
     'ecm',
-    'guardian'
+    'guardian',
+    'billing',
+    'djmoney',
 ]
 
 MIDDLEWARE = [
@@ -223,6 +228,16 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+# configuração de formatação de moeda para o campo de Money da biblioteca django-money
+_FORMATTER.add_sign_definition('pt_BR', moneyed.BRL, prefix='R$')
+_FORMATTER.add_sign_definition(DEFAULT, moneyed.BRL, prefix='R$')
+_FORMATTER.add_formatting_definition(
+    'pt_BR', group_size=3, group_separator='.', decimal_point=',',
+    positive_sign='', trailing_positive_sign='',
+    negative_sign='-', trailing_negative_sign='',
+    rounding_method=ROUND_HALF_EVEN
+)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/

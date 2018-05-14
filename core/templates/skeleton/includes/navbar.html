@@ -13,9 +13,9 @@
                         <!-- Logo text image you can use text also -->
                         <span class="hidden-xs">
                             <!--This is dark logo text-->
-                            <img src="{% static 'img/logo_ezl.png' %}" alt="home" class="dark-logo" width="140"/>
+                            <img src="{% static 'img/logo_ezl_dark.png' %}" alt="home" class="dark-logo" width="180"/>
                             <!--This is light logo text-->
-                            <img src="{% static 'img/logo_ezl.png' %}" alt="home" class="light-logo"  width="140"/>
+                            <img src="{% static 'img/logo_ezl.png' %}" alt="home" class="light-logo"  width="180"/>
                      </span> </a>
                 </div>
                 <!-- /Logo -->
@@ -29,13 +29,28 @@
                     {% if office_session_id %}
                         <li class="dropdown">
                             <a class="dropdown-toggle waves-effect waves-light" data-toggle="dropdown" href="#">
+                                <i class="mdi mdi-bell-outline"></i>
+                                <div class="notify hide" id="request-notify">
+                                    <span class="heartbit"></span>
+                                    <span class="point"></span>
+                                </div>
+                            </a>
+                            <ul id="request-list" class="dropdown-menu animated flipInX">
+                                <li>
+                                    <strong class="drop-title" id="">Nenhuma solicitação</strong>
+                                </li>
+                            </ul>
+                            <!-- /.dropdown-messages -->
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle waves-effect waves-light" data-toggle="dropdown" href="#">
                                 <i class="mdi mdi-comment-text-outline"></i>
                                 <div class="notify hide" id="chat-notify">
                                     <span class="heartbit"></span>
                                     <span class="point"></span>
                                 </div>
                             </a>
-                            <ul class="dropdown-menu animated bounceInDown">
+                            <ul class="dropdown-menu animated flipInX">
                                 <li>
                                     <a class="text-center" href="{% url 'chat_list' %}">
                                         <strong class="drop-title" id="drop-title">0 mensagens</strong>
@@ -46,7 +61,7 @@
                             <!-- /.dropdown-messages -->
                         </li>
                         {% if 'can_access_general_data' in office_session_perms %}
-                            <li class="open" data-balloon="Criar OS" data-balloon-pos="right">
+                            <li class="open">
                                 <a href="{% url 'task_add' %}" class="waves-effect waves-lightact create-os-active">
                                     <i class="mdi mdi-plus-circle-outline"></i><span class="hidden-sm hidden-xs"> Criar OS</span>
                                 </a>

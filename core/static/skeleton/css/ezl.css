@@ -1,3 +1,9 @@
+a{
+    color: #54667a;
+}
+a:hover{
+    color: #0d3c55;
+}
 .modal label{
     font-weight: normal;
 }
@@ -31,6 +37,23 @@ select option {
 
 .select2-container--default .select2-selection--single {
     padding-top: 4px;
+}
+
+.pricing-body h2 span{
+    margin-left: -20px!important;
+}
+.price-row ul{
+    list-style-type: none;
+    padding-left: 0px;
+
+}
+.terms-conditions{
+    max-height: 400px;
+    overflow-x: auto;
+}
+
+.terms-conditions blockquote .small:before, .terms-conditions blockquote footer:before, .terms-conditions blockquote small:before {
+    content: '' !important;
 }
 
 /* Main Colors */
@@ -602,5 +625,5 @@ fieldset[disabled] .btn-ezl-error.active {
 .ezl-required:before {
     content: "\2217\20";
     color: red;
-};
+}
 

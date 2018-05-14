@@ -280,6 +280,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
     def save(self, *args, **kwargs):
         self._skip_signal = kwargs.pop('skip_signal', False)
         self._skip_mail = kwargs.pop('skip_mail', False)
+        self._from_parent = kwargs.pop('from_parent', False)
         if not self.task_number:
             self.task_number = self.get_task_number()
         return super().save(*args, **kwargs)
