@@ -16,7 +16,6 @@ from etl.advwin_ezl.law_suit.law_suit import LawsuitETL
 from etl.advwin_ezl.law_suit.movement import MovementETL
 from etl.advwin_ezl.law_suit.type_movement import TypeMovementETL
 from etl.advwin_ezl.task.task import TaskETL
-from etl.advwin_ezl.task.type_task import TypeTaskETL
 from etl.advwin_ezl.task.ecm_task import EcmEtl
 from django.core.management import call_command
 from django.core.management.commands import loaddata, migrate
@@ -239,20 +238,6 @@ class TypeMovementTask(luigi.Task):
         TypeMovementETL().import_data()
 
 
-class TypeTaskTask(luigi.Task):
-    date_interval = luigi.DateHourParameter()
-
-    def output(self):
-        return luigi.LocalTarget(path=get_target_path(self))
-
-    def requires(self):
-        yield TypeMovementTask(self.date_interval)
-
-    def run(self):
-        self.output().open("w").close()
-        TypeTaskETL().import_data()
-
-
 class MovementTask(luigi.Task):
     date_interval = luigi.DateHourParameter()
 
@@ -260,7 +245,7 @@ class MovementTask(luigi.Task):
         return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield TypeTaskTask(self.date_interval)
+        yield TypeMovementTask(self.date_interval)
 
     def run(self):
         self.output().open("w").close()

@@ -302,6 +302,7 @@ class Office(AbstractPerson):
 
     persons = models.ManyToManyField(Person, blank=True, related_name='offices', through='OfficeMembership')
     offices = models.ManyToManyField('self', blank=True)
+    public_office = models.BooleanField(default=False, verbose_name='Escritório público')
 
     class Meta:
         verbose_name = 'Escritório'

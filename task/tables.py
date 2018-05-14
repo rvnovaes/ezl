@@ -69,19 +69,6 @@ class DashboardStatusTable(tables.Table):
         order_by = ('-final_deadline_date', )
 
 
-class TypeTaskTable(tables.Table):
-    selection = CheckBoxMaterial(accessor="pk", orderable=False)
-
-    class Meta:
-        sequence = ('selection', 'name', 'survey', 'is_active', 'legacy_code')
-        model = TypeTask
-        fields = ['selection', 'legacy_code', 'name', 'is_active', 'survey']
-        empty_text = "Não existem tipos de serviço cadastrados"
-        row_attrs = {
-            'data_href': lambda record: '/providencias/tipo_servico/' + str(record.pk) + '/'
-        }
-
-
 class FilterTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 

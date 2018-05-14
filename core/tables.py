@@ -136,7 +136,7 @@ class OfficeTable(tables.Table):
     class Meta:
         exclude = ('id', 'create_date', 'create_user', 'auth_user',
                    'alter_user', 'is_customer', 'is_supplier', 'alter_date', 'legacy_code',
-                   'system_prefix', 'is_lawyer', 'import_from_legacy')
+                   'system_prefix', 'is_lawyer', 'import_from_legacy', 'public_office')
         sequence = ('selection', 'legal_name', 'name', 'legal_type',
                     'cpf_cnpj')
         model = Office

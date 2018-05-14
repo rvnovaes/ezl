@@ -1,44 +1,6 @@
 {% extends 'skeleton/forms/base.html' %}
 {% load core_filters form_tags staticfiles bootstrap3 %}
 
-{% block extra_scripts %}
-    {{ block.super }}
-    <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
-    <script src="{% static "file_form/file_form.js" %}"></script>
-    <script>
-       $(function() {
-           initUploadFields($('#task_form'));
-       });
-    </script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
-    <script src="{% static 'task/task-builk-create.js' %}"></script>
-    <script src="{% static 'skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js' %}"></script>
-    <script src="{% static 'core/js/typeahead.js' %}"></script>
-{% endblock %}
-
-{% block extra_stylesheets %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{% static "fileuploader.css" %}">
-    <style type="text/css">
-        .select2{
-            margin-top: 20px !important;
-        }
-        .nav-form label{
-            width: 100%;
-        }
-        .modal-dialog {
-            width: 95%!important;
-        }
-    </style>
-
-    <link href="/static/autocomplete_light/vendor/select2/dist/css/select2.css" type="text/css" media="all" rel="stylesheet" />
-    <link href="/static/autocomplete_light/select2.css" type="text/css" media="all" rel="stylesheet" />
-    <script type="text/javascript" src="/static/autocomplete_light/jquery.init.js"></script>
-    <script type="text/javascript" src="/static/autocomplete_light/autocomplete.init.js"></script>
-    <script type="text/javascript" src="/static/autocomplete_light/vendor/select2/dist/js/select2.full.js"></script>
-    <script type="text/javascript" src="/static/autocomplete_light/vendor/select2/dist/js/i18n/pt-BR.js"></script>
-    <script type="text/javascript" src="/static/libs/django-autocomplete-light-3.2.9/select2.js"></script>
-{% endblock %}
 
 {% block page_title %}
 
@@ -167,7 +129,7 @@
                                 </div>
                             </div>
                         </div>
-                        {% endverbatim %}        
+                        {% endverbatim %}
                         <div id="form-content" class="modal">
                             <div class="modal-dialog modal-lg">
                                 <div class="modal-content ">
@@ -179,19 +141,42 @@
                                         <div class="form-row">
                                             <div class="panel panel-primary">
                                                 <div class="panel-body">
-                                                    {% for field in form %}
-                                                        {% field_type field as field_type %}
-                                                        {% if field_type == 'checkbox' %}
-                                                            <div class="form-group col-sm-6">
-                                                                <div class="checkbox checkbox-success">
-                                                                    {{ field }}
-                                                                    {{ field.label_tag }}
-                                                                </div>
-                                                            </div>
-                                                        {% elif field_type != 'clearablefile' and field.name != 'documents'  %}
-                                                            {% bootstrap_field field form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
+                                                  {% for field in form %}
+                                                      {% field_type field as field_type %}
+                                                      {% if field_type == 'checkbox'%}
+                                                          <div class="form-group col-sm-6">
+                                                              <div class="checkbox checkbox-success">
+                                                                  {{ field }}
+                                                                  {{ field.label_tag }}
+                                                              </div>
+                                                          </div>
+                                                      {% elif field_type != 'clearablefile' and field.name != 'documents' %}
+                                                        {% if field.name == 'type_task' %}
+                                                          <script>
+                                                            var selectedItem = '{{form.type_task.value}}';
+                                                            var typeTaskList = []
+                                                            {% for data in field.field.queryset %}
+                                                                var setTypeTaskList = function (pk, name, simple_service) {
+                                                                  typeTaskList.push({
+                                                                    pk: pk,
+                                                                    name: name,
+                                                                    simple_service: simple_service
+                                                                  })
+                                                                }
+                                                                setTypeTaskList('{{data.pk}}', '{{data.name}}', '{{data.simple_service}}')
+                                                            {% endfor %}
+                                                          </script>
+                                                          <div class="form-group col-sm-6 ezl-required">
+                                                            <label class="control-label" for="id_type_task">Tipo de Serviço</label>
+                                                            <select name="type_task" class="form-control" title="" required="" id="id_type_task">
+                                                              <option value="" selected="">Selecione...</option>
+                                                            </select>
+                                                          </div>
+                                                        {% else %}
+                                                          {% bootstrap_field field form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
                                                         {% endif %}
-                                                    {% endfor %}
+                                                      {% endif %}
+                                                  {% endfor %}
                                                 </div>
                                             </div>
                                         </div>
@@ -214,5 +199,91 @@
                 </div>
             </div>
     </form>
-
+    {%block extra_form %}
+    <!-- Modal -->
+    <div class="modal fade" id="modal-type-task" tabindex="-1" role="dialog" aria-labelledby="modal-type-task-label">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="modal-type-task-label">Selecione o tipo de serviço</h4>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table id='table-type-task' class="table-hover">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for type_task in form.type_task.field.queryset %}
+                    <tr id="{{type_task.pk}}" data-label="{{type_task.name}}">
+                      <td>
+                        {{type_task.name}}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+            <button type="button" class="btn btn-primary">Salvar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {%endblock%}
 {% endblock content %}
+
+
+{% block extra_scripts %}
+    {{ block.super }}
+    <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
+    <script src="{% static "file_form/file_form.js" %}"></script>
+    <script>
+       $(function() {
+           initUploadFields($('#task_form'));
+       });
+    </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
+    <script src="{% static 'task/task-builk-create.js' %}"></script>
+    <script src="{% static 'task/task-typetask.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js' %}"></script>
+    <script src="{% static 'core/js/typeahead.js' %}"></script>
+    <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
+    <script src="{% static "file_form/file_form.js" %}"></script>
+    <script src="{% static "skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js" %}"></script>
+    <script>
+       $(function() {
+           initUploadFields($('#object_form'));
+       });
+    {% endblock %}
+
+{% block extra_stylesheets %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static "fileuploader.css" %}">
+    <link href="{% static "skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css" %}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="{% static "fileuploader.css" %}">
+    <style type="text/css">
+        .select2{
+            margin-top: 20px !important;
+        }
+        .nav-form label{
+            width: 100%;
+        }
+        .modal-dialog {
+            width: 95%!important;
+        }
+    </style>
+
+    <link href="/static/autocomplete_light/vendor/select2/dist/css/select2.css" type="text/css" media="all" rel="stylesheet" />
+    <link href="/static/autocomplete_light/select2.css" type="text/css" media="all" rel="stylesheet" />
+    <script type="text/javascript" src="/static/autocomplete_light/jquery.init.js"></script>
+    <script type="text/javascript" src="/static/autocomplete_light/autocomplete.init.js"></script>
+    <script type="text/javascript" src="/static/autocomplete_light/vendor/select2/dist/js/select2.full.js"></script>
+    <script type="text/javascript" src="/static/autocomplete_light/vendor/select2/dist/js/i18n/pt-BR.js"></script>
+    <script type="text/javascript" src="/static/libs/django-autocomplete-light-3.2.9/select2.js"></script>
+{% endblock %}

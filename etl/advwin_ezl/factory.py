@@ -140,12 +140,11 @@ class InvalidObjectFactory(object):
             person=invalid_person, create_user=user
         )
 
-        # Registros inválidos para o app Task
+        # Registros inválidos para o app Task        
         invalid_type_task, created = TypeTask.objects.get_or_create(
             create_user=user,
             legacy_code=invalid_legacy_code,
-            name=TypeTask._meta.verbose_name.upper() + invalid_registry,
-            office=default_office)
+            name=TypeTask._meta.verbose_name.upper() + invalid_registry)
 
         invalid_task, created = Task.objects.get_or_create(create_user=user,
                                                            movement=invalid_movement,

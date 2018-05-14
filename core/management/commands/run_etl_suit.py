@@ -8,7 +8,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('etl', choices=['user', 'ecm', 'luigi', 'folder', 'person',
-                                             'lawsuit', 'movement', 'task', 'type_task', 'contact_mechanism'])
+                                             'lawsuit', 'movement', 'task', 'contact_mechanism'])
 
     def run_user_etl(self):
         from etl.advwin_ezl.account.user import UserETL
@@ -38,10 +38,6 @@ class Command(BaseCommand):
         from etl.advwin_ezl.task.task import TaskETL
         TaskETL().import_data()
 
-    def run_type_task_etl(self):
-        from etl.advwin_ezl.task.type_task import TypeTaskETL
-        TypeTaskETL().import_data()
-
     def run_ecm_etl(self):
         from etl.advwin_ezl.task.ecm_task import EcmEtl
         EcmEtl().import_data()
@@ -59,8 +55,7 @@ class Command(BaseCommand):
             'folder': self.run_folder_etl,
             'lawsuit': self.run_lawsuit_etl,
             'movement': self.run_movement_etl,
-            'task': self.run_task_etl,
-            'type_task': self.run_type_task_etl,
+            'task': self.run_task_etl,            
             'ecm': self.run_ecm_etl,
             'luigi': self.run_luigi
         }

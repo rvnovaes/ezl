@@ -46,12 +46,14 @@
                                 {% render_table correspondents_table %}
                                 <div id="servicepricetable-alert" class="alert alert-danger alert hidden">
                                 Favor selecionar um escritório correspondente. </div>
-                                <div class="text-info"><b>Avaliação*:</b> A avaliação é composta pela média móvel dos últimos 3 meses.</div>
+                                <b>Avaliação*:</b> A avaliação é composta pela média móvel dos últimos 3 meses.
                             </div>
+                            <br>
                             <div class="form-group" style="margin: auto">
                                 <label>{{ form.amount.label }}</label>
                                 {{ form.amount }}
                             </div>
+                            <br>
                         {% endif %}
                         <div class="form-group" style="margin: auto">
                             <label> {{ form.notes.label }}</label>
@@ -143,6 +145,16 @@
          a medida que for adicionando novos arquivos -->
     <div id="scripts">
     </div>
+
+    <script>        
+        $(document).ready(function () {
+            {% for message in messages %}
+                {% if 'info-message-public-office' in message.extra_tags %}
+                    swal("Importante", '{{ message }}');
+                {% endif %}                            
+            {% endfor %}
+        })
+    </script>
 
     <script>
         var expanded = false;

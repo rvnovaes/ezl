@@ -117,16 +117,6 @@ class TaskDetailForm(ModelForm):
         return form_data
 
 
-class TypeTaskForm(BaseForm):
-    class Meta:
-        model = TypeTask
-        fields = ['office', 'name', 'survey', 'is_active']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['office'] = get_office_field(self.request)
-
-
 class FilterForm(BaseForm):
     name = forms.CharField(label=u"Nome", required=True,
                                   widget=forms.Textarea(
