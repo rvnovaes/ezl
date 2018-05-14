@@ -19,7 +19,7 @@ def create_office_ezlog(apps, schema_editor):
 
 class Migration(migrations.Migration):
 	dependencies = [
-		('core', '0077_office_public_office'), 
+		('core', '0080_contactmechanismtype_type_contact_mechanism'), 
 	]
 
 	operations = [

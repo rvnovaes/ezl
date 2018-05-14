@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0076_invite_invite_from'),
+        ('core', '0077_auto_20180509_0946'),
     ]
 
     operations = [
