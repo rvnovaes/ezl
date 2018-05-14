@@ -22,3 +22,13 @@ def get_model_instance(app, model, pk):
         return model.objects.filter(pk=pk).first()
     except:
         return None
+
+
+@register.simple_tag
+def get_opened_office_invites(office):
+    return office.invites_offices.filter(status='N').all()
+
+
+@register.simple_tag
+def get_opened_person_invites(office):
+    return office.invites.filter(status='N', invite_from='P').all()

@@ -7,7 +7,7 @@ from django import forms
 from django.forms.utils import ErrorList
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import logout, password_validation
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -16,6 +16,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.exceptions import ValidationError
 from django.db.models import ProtectedError, Q, F
 from django.db import transaction
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
@@ -51,7 +52,26 @@ from ecm.utils import attachment_form_valid, attachments_multi_delete
 from django.core.validators import validate_email
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_groups_with_perms
-from django.contrib.sites.shortcuts import get_current_site
+from billing.models import Plan, PlanOffice
+
+
+def post_create_office(office):
+    member, created = OfficeMembership.objects.get_or_create(
+        person=office.create_user.person, office=office,
+        defaults={'create_user': office.create_user, 'is_active': True})
+    if not created:
+        # Caso o relacionamento esteja apenas inativo
+        member.is_active = True
+        member.save()
+    else:
+        for super_user in User.objects.filter(is_superuser=True).all():
+            member, created = OfficeMembership.objects.update_or_create(
+                person=super_user.person, office=office,
+                defaults={'create_user': office.create_user, 'is_active': True})
+    if not office.create_user.is_superuser:
+        for group in {group for group, perms in
+                      get_groups_with_perms(office, attach_perms=True).items() if 'group_admin' in perms}:
+            office.create_user.groups.add(group)
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -117,6 +137,10 @@ class StartUserView(TemplateView):
             metrics = get_correspondent_metrics(self.request.user.person)
             context['rating'] = metrics['rating']
             context['returned_os'] = metrics['returned_os_rate']
+
+        office_pks = self.request.user.person.offices.active_offices().values_list('pk', flat=True)
+        context['person_invites'] = Invite.objects.filter(invite_from='P', office_id__in=office_pks, status='N').all()
+
         return context
 
 
@@ -926,22 +950,7 @@ class OfficeCreateView(AuditFormMixin, CreateView):
     def form_valid(self, form):
         form.instance.create_user = self.request.user
         form.instance.save()
-        member, created = OfficeMembership.objects.get_or_create(
-            person=form.instance.create_user.person, office=form.instance,
-            defaults={'create_user': form.instance.create_user, 'is_active': True})
-        if not created:
-            # Caso o relacionamento esteja apenas inativo
-            member.is_active = True
-            member.save()
-        else:
-            for super_user in User.objects.filter(is_superuser=True).all():
-                member, created = OfficeMembership.objects.update_or_create(
-                    person=super_user.person, office=form.instance,
-                    defaults={'create_user': form.instance.create_user, 'is_active': True})
-        if not form.instance.create_user.is_superuser:
-            for group in {group for group, perms in
-                          get_groups_with_perms(form.instance, attach_perms=True).items() if 'group_admin' in perms}:
-                form.instance.create_user.groups.add(group)
+        post_create_office(form.instance)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -960,7 +969,8 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
         kwargs.update({
             'table': AddressOfficeTable(self.object.get_address()),
             'table_members': OfficeMembershipTable(
-                self.object.officemembership_set.filter(is_active=True, person__auth_user__isnull=False)
+                self.object.officemembership_set.filter(is_active=True, person__auth_user__isnull=False,
+                                                        person__auth_user__is_superuser=False)
                     .exclude(person__auth_user=self.request.user)),
         })
         data = super().get_context_data(**kwargs)
@@ -985,15 +995,42 @@ class RegisterNewUser(CreateView):
 
     def post(self, request, *args, **kwargs):
         invite_code = request.POST.get('invite_code')
-        name = str(request.POST.get('name')).split(' ')
-        first_name = ''
-        last_name = ''
-        if name:
-            first_name = name[0]
-            last_name = ' '.join(name[1:])
+        first_name = request.POST.get('name')
+        last_name = request.POST.get('last_name')
         username = request.POST.get('username')
         password = request.POST.get('password')
+        confirm_password = request.POST.get('confirmpassword')
         email = request.POST.get('email')
+        errors = []
+        if first_name == '' or last_name == '':
+            errors.append({'title': 'Identificação do Usuário', 'error': 'Os campos Nome e Sobrenome são obrigatórios'})
+        if not password == confirm_password:
+            errors.append({'title': 'Senha', 'error': 'As senhas digitadas não conferem'})
+        else:
+            try:
+                password_validation.validate_password(password)
+            except ValidationError as error:
+                errors.append({'title': 'Senha', 'error': error})
+
+        select_office_register = request.POST.get('select_office_register')
+        selected_plan = request.POST.get('plan')
+        office_pks = request.POST.getlist('office_checkbox')
+        if select_office_register == "":
+            errors.append({'title': 'Forma de Trabalho', 'error': 'Nenhuma Forma de trabalho selecionada'})
+        if select_office_register == '1':
+            if not office_pks:
+                errors.append({'title': 'Escritório', 'error': 'Nenhum escritório selecionado, para vincular com o usuário criado'})
+        elif select_office_register == '2' or select_office_register == '3':
+            if selected_plan == "":
+                errors.append({'title': 'Plano de acesso', 'error': 'Nenhum plano selecionado'})
+
+        if select_office_register == '2' and request.POST.get('legal_name') == '':
+            errors.append({'title': 'Cadastro de escritório',
+                           'error': 'É obrigatório que o escrtório cadastrado possua um nome'})
+
+        if errors:
+            return render(request, 'account/register.html', {'errors': errors})
+
         form = RegisterNewUserForm(
             {'username': username, 'first_name': first_name, 'last_name': last_name, 'email': email,
              'password1': password, 'password2': password})
@@ -1005,15 +1042,67 @@ class RegisterNewUser(CreateView):
                     invite.person = Person.objects.filter(auth_user=instance).first()
                     invite.status = 'N'
                     invite.save()
-            return HttpResponseRedirect(reverse_lazy('start_user'))
-        return render(request, 'account/register.html', {'form': form, 'invite_code': invite_code, })
+        else:
+            for title, error in form.errors.items():
+                errors.append({'title': title, 'message': error})
+            return render(request, 'account/register.html', {'errors': errors})
+
+        office_instance = None
+        if select_office_register == '1':
+            for office in Office.objects.filter(id__in=office_pks):
+                Invite.objects.create(office=office,
+                                      person=instance.person,
+                                      status='N',
+                                      create_user=instance,
+                                      invite_from='P',
+                                      is_active=True)
+        elif select_office_register == '2':
+            legal_name = request.POST.get('legal_name') if request.POST.get('legal_name') != '' else None
+            office_name = request.POST.get('office_name') if request.POST.get('office_name') != '' else None
+            legal_type = request.POST.get('legal_type') if request.POST.get('legal_type') != '' else None
+            cpf_cnpj = request.POST.get('cpf_cnpj') if request.POST.get('cpf_cnpj') != '' else None
+            office_instance = Office.objects.create(legal_name=legal_name,
+                                                    name=office_name,
+                                                    legal_type=legal_type,
+                                                    cpf_cnpj=cpf_cnpj,
+                                                    is_active=True,
+                                                    create_user=instance)
+            post_create_office(office_instance)
+            DefaultOffice.objects.create(auth_user=instance, office=office_instance,
+                                         create_user=instance)
+        elif select_office_register == '3':
+            legal_name = '{} {}'.format(first_name, last_name)
+            office_name = legal_name
+            legal_type = 'F'
+            office_instance = Office.objects.create(legal_name=legal_name,
+                                                    name=office_name,
+                                                    legal_type=legal_type,
+                                                    is_active=True,
+                                                    create_user=instance)
+            post_create_office(office_instance)
+            DefaultOffice.objects.create(auth_user=instance, office=office_instance,
+                                         create_user=instance)
+        if office_instance:
+            plan = Plan.objects.get(pk=selected_plan)
+            PlanOffice.objects.create(office=office_instance,
+                                      plan=plan,
+                                      month_value=plan.month_value,
+                                      task_limit=plan.task_limit,
+                                      create_user=instance)
+
+        messages.add_message(request, messages.SUCCESS, "Registro concluído com sucesso!", 'add_new_user')
+        return HttpResponseRedirect(reverse_lazy('login'))
 
     def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('dashboard'))
         context = {}
         if request.GET.get('invite_code'):
             invite = Invite.objects.filter(invite_code=request.GET['invite_code']).first()
             context['email'] = invite.email
             context['invite_code'] = request.GET['invite_code']
+        context['offices'] = Office.objects.all().order_by('legal_name')
+        context['plans'] = Plan.objects.filter(is_active=True)
         return render(request, 'account/register.html', context)
 
 
@@ -1131,10 +1220,15 @@ class InviteUpdateView(UpdateView):
         invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
         invite.status = request.POST.get('status')
         if invite.status == 'A':
-            OfficeMembership.objects.update_or_create(person=request.user.person,
+            OfficeMembership.objects.update_or_create(person=invite.person,
                                                       office=invite.office,
                                                       defaults={'create_user': self.request.user,
                                                                 'is_active': True})
+            for group in {group for group, perms in
+                          get_groups_with_perms(invite.office, attach_perms=True).items() if 'view_delegated_tasks' in perms}:
+                if group not in invite.person.auth_user.groups.all():
+                    invite.person.auth_user.groups.add(group)
+
         invite.save()
         return HttpResponse('ok')
 
@@ -1155,7 +1249,7 @@ class InviteTableView(CustomLoginRequiredView, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        table = InviteTable(Invite.objects.filter(office__id=self.kwargs.get('office_pk')).order_by('-pk'))
+        table = InviteTable(Invite.objects.filter(office__id=self.kwargs.get('office_pk'), invite_from='O').order_by('-pk'))
         RequestConfig(self.request).configure(table)
         context['table'] = table
         return context
@@ -1171,6 +1265,23 @@ class InviteOfficeTableView(CustomLoginRequiredView, ListView):
         RequestConfig(self.request).configure(table)
         context['table'] = table
         return context
+
+
+class InviteVerify(View):
+    def get(self, request):
+        user = request.user
+        person = user.person
+        office_pks = person.offices.active_offices().values_list('pk', flat=True)
+
+        data = []
+
+        for invite in Invite.objects.filter(Q(status='N'),
+                                            Q(Q(Q(office_id__in=office_pks), Q(invite_from='P')) |
+                                            Q(Q(person=person), Q(invite_from='O')))):
+            data.append({'id': invite.pk, 'office': invite.office.legal_name, 'person': invite.person.legal_name,
+                         'invite_from': invite.invite_from})
+
+        return JsonResponse(data, safe=False)
 
 
 class EditableListSave(CustomLoginRequiredView, View):
@@ -1229,7 +1340,7 @@ class InviteMultipleUsersView(CustomLoginRequiredView, CreateView):
                 person = Person.objects.get(pk=person_pk)
                 office = Office.objects.get(pk=office_pk)
                 Invite.objects.create(create_user=request.user, person=person,
-                                      office=office, status='N')
+                                      office=office, status='N', invite_from='O')
             return HttpResponseRedirect(reverse_lazy('office_update', kwargs={'pk': office_pk}))
         return reverse_lazy('office_list')
 
@@ -1404,7 +1515,10 @@ class TagsInputPermissionsView(View):
 class OfficeSessionSearch(View):
     def get(self, request, *args, **kwargs):
         q = request.GET.get('office_legal_name', '')
-        offices = request.user.person.offices.all()
+        if hasattr(request.user, 'person'):
+            offices = request.user.person.offices.all()
+        else:
+            offices = Office.objects.all()
         selected_offices = list(offices.filter(legal_name__icontains=q).values_list('id', flat=True))
         data = []
         for office in offices:
@@ -1413,4 +1527,58 @@ class OfficeSessionSearch(View):
                 'id': office.pk,
                 'show': show
             })
+        return JsonResponse(data, safe=False)
+
+
+class OfficeSearch(View):
+    def get(self, request, *args, **kwargs):
+        q_string = request.GET.get('office_legal_name', '')
+        offices = Office.objects.all()
+        if q_string != '':
+            selected_offices = list(offices.filter(legal_name__icontains=q_string).values_list('id', flat=True))
+        else:
+            selected_offices = []
+        data = []
+        for office in offices:
+            show = True if office.pk in selected_offices else False
+            data.append({
+                'id': office.pk,
+                'show': show
+            })
+        return JsonResponse(data, safe=False)
+
+
+class ValidatePassword(View):
+    def post(self, request, *args, **kwargs):
+        password = request.POST.get('password')
+        data = {}
+        try:
+            password_validation.validate_password(password)
+            data['valid'] = True
+        except ValidationError as error:
+            data['valid'] = False
+            message = error.messages
+            message = [x + '<br>' for x in message]
+            data['message'] = message
+
+        return JsonResponse(data, safe=False)
+
+
+class ValidateUsername(View):
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get('username')
+        data = {'valid': True}
+        if User.objects.filter(username=username).first():
+            data['valid'] = False
+
+        return JsonResponse(data, safe=False)
+
+
+class ValidateEmail(View):
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get('email')
+        data = {'valid': True}
+        if User.objects.filter(email=email).first():
+            data['valid'] = False
+
         return JsonResponse(data, safe=False)

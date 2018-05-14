@@ -11,6 +11,7 @@ from core.utils import LegacySystem
 from guardian.shortcuts import get_perms
 
 INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'), ('E', 'EXTERNAL'))
+INVITE_FROM = (('P', 'PERSON'), ('O', 'OFFICE'))
 
 
 class CorePermissions(Enum):
@@ -364,6 +365,7 @@ class Invite(Audit):
                               )
     invite_code = models.CharField(blank=True, null=True, verbose_name='Código do convite', max_length=50,
                                    default=_create_hash, unique=True)
+    invite_from = models.CharField(choices=INVITE_FROM, default='O', max_length=1, verbose_name='Origem do convite')
 
     class Meta:
         verbose_name = 'Convite'
