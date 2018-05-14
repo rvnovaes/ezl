@@ -261,7 +261,7 @@ function select_office(office_id) {
     office_icon.toggleClass('fa-times', addOrRemove);
     button_action.toggleClass('btn-custom', !addOrRemove);
     button_action.toggleClass('btn-danger', addOrRemove);
-    button_action.toggleClass('card-fixed', addOrRemove);
+    office_card.toggleClass('card-fixed', addOrRemove);
     office_title.html(' Remover') ? addOrRemove : office_title.html(' Selecionar');
     $('#validation').formValidation('revalidateField', 'filter_office_legal_name');
 }
