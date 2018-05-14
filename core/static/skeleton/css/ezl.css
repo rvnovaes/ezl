@@ -39,6 +39,23 @@ select option {
     padding-top: 4px;
 }
 
+.pricing-body h2 span{
+    margin-left: -20px!important;
+}
+.price-row ul{
+    list-style-type: none;
+    padding-left: 0px;
+
+}
+.terms-conditions{
+    max-height: 400px;
+    overflow-x: auto;
+}
+
+.terms-conditions blockquote .small:before, .terms-conditions blockquote footer:before, .terms-conditions blockquote small:before {
+    content: '' !important;
+}
+
 /* Main Colors */
 :root {
     --ezl-requested-color: #C39BD3;

@@ -31,6 +31,12 @@ div.chat-title {
 }
 .office-card {
     height: 255px;
+}
+.office-card-p {
+    height: 120px;
+}
+.office-card, .office-card-p{
+    cursor: pointer;
     position: relative;
 }
 .office-legal-name {

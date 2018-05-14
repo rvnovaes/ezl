@@ -1,33 +1,14 @@
 {% extends "skeleton/forms/base.html" %}
 {% load static   %}
-
 {% block extra_form %}
-    <div class="col-sm-12">
-    {% if personaddress.forms %}
-        {{ personaddress.management_form }}
-        {% for form in personaddress.forms %}
-            {% if forloop.first %}
-                <div class="row">
-                <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h1 class="panel-title">
-                        Endereço
-                    </h1>
-                </div>
-            {% endif %}
-            <div class="panel-body">
-            {% include 'core/address_base_form.html' with form=form %}
-            </div>
-        {% endfor %}
-    {% endif %}
-    </div>
-{% include 'core/mask_selector.html' %}
+    {% include 'core/mask_selector.html' %} 
 {% endblock %}
 
 {% block button_cancel %}
     {% include 'core/widgets/cancel_button.html'  with link_list='person_list' %}
 {% endblock %}
 {% block extra_scripts %}
+
     {% if view.model.use_upload %}
         <!-- UPLOADS SCRIPTS  -->
         {% if form.documents %}
@@ -48,7 +29,6 @@
                  a medida que for adicionando novos arquivos -->
             <div id="scripts">
             </div>
-        {% endif %}
-        {{ personaddress.forms.0.media }}
+        {% endif %}        
     {% endif %}
 {% endblock %}

@@ -3,7 +3,7 @@
 {% block sidebar %}
 {% endblock %}
 {% block containner %}
-    {% include 'core/widgets/offiice_select.html' %}
+    {% include 'core/widgets/office_select.html' with offices=request.user.person.offices.active_offices %}
 {% endblock %}
 {% block extra_stylesheets %}
     <style>
