@@ -49,6 +49,7 @@ from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import  get_groups_with_perms
 from django.core.files.base import ContentFile
+from djmoney.money import Money
 
 class TaskListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Task
@@ -398,18 +399,18 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 self.delegate_child_task(form.instance, servicepricetable.office_correspondent)
                 form.instance.person_executed_by = None                               
                 if servicepricetable.office.public_office:
-                    
+                    currency_value = Money(form.instance.amount, 'BRL').__str__()
                     messages.add_message(
                         self.request,
                         messages.INFO,
                         ("Para a contratação dos serviços do EZLog deve ser feita a transferência do valor %s "
-                        "reais para a conta abaixo: "
+                        "para a conta abaixo: "
                         "\\nBanco Bradesco"
                         "\\nAgência: 2146-6"
                         "\\nConta corrente: 40930-8"
                         "\\nSílex Sistemas Ltda."
                         "\\n04.170.575-0001-03"
-                        "\\nTelefone de contato: 31 2538-7869") % str(form.instance.amount),
+                        "\\nTelefone de contato: 31 2538-7869") % currency_value,
                         extra_tags='info-message-public-office')
 
         feedback_rating = form.cleaned_data.get('feedback_rating')
