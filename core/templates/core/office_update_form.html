@@ -3,6 +3,7 @@
 {% load static %}
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
+{% load core_filters core_match %}
 {% block head %}
     {{ block.super }}
     {% block css_head %}
@@ -31,9 +32,10 @@
         <ul class="nav nav-tabs">
             <li class="active" id="li-endereco"><a data-toggle="tab" name="endereco" href="#endereco">Endereços</a></li>
             <li id="li-contact-mechanism"><a data-toggle="tab" name="contact-mechanism" href="#contact-mechanism">Mecanismos de contato</a></li>
-            <li id="li-invite-users"><a data-toggle="tab" href="#invite-users">Convites para usuários</a></li>
-            <li id="li-invite-offices"><a data-toggle="tab" href="#invite-offices">Convites para escritórios</a></li>
-            <li id="li-invite-my-offices"><a data-toggle="tab" href="#my-invite-offices">Meus convites</a></li>
+            <li id="li-invite-users"><a data-toggle="tab" href="#invite-users">Usuários Convidados</a></li>
+            <li id="li-invite-offices"><a data-toggle="tab" href="#invite-offices">Escritórios Convidados</a></li>
+            <li id="li-invite-my-offices"><a data-toggle="tab" href="#my-invite-offices">Solicitações de Escritórios</a></li>
+            <li id="li-invite-my-persons"><a data-toggle="tab" href="#my-invite-persons">Solicitações de Usuários</a></li>
             <li id="li-office-users"><a data-toggle="tab" href="#office-users">Usuários Vinculados</a></li>
         </ul>
         <div class="tab-content">
@@ -103,7 +105,7 @@
             </div>
             <div id="contact-mechanism" class="tab-pane fade">
                 <form action="{% url 'contact_mechanism_office_delete' office_pk=object.pk %}" method="post" id="contactMechanismOfficeForm">
-                    {% csrf_token %}                                                                            
+                    {% csrf_token %}
                     <div class="table-responsive">
                         <table class="table table-striped table-hover" paginate-fixed>
                             {% block table_contact_mechanism.thead %}
@@ -127,7 +129,7 @@
                                 </thead>
                             {% endblock table_contact_mechanism.thead %}
                             {% block table_contact_mechanism.tbody %}
-                                <tbody>                                                                                                 
+                                <tbody>
                                 {% for row in table_contact_mechanism.page.object_list|default:table_contact_mechanism.rows %} {# support pagination #}
                                     {% block table_contact_mechanism.tbody.row %}
                                         <tr class="{% cycle "odd" "even" %}" data-href="{{ row.attrs.data_href }}">
@@ -156,7 +158,7 @@
                     <div class="text-right" style="">
                         <div class="text-right" style="">
                             <div class="fixed-btn">
-                                <button type="button" id="delete_button" onclick="warningDelete(this)" 
+                                <button type="button" id="delete_button" onclick="warningDelete(this)"
                                     class="btn btn-danger " disabled>Remover
                                 </button>
                                 <a class="btn btn-success" href="{% url 'contact_mechanism_office_create' object.pk %}">
@@ -166,7 +168,7 @@
                         </div>
 
                     </div>
-                                                
+
                     <!-- Modal -->
                     <div id="confirmDelete" class="modal">
                         <div class="modal-dialog">
@@ -193,8 +195,8 @@
                             </div>
                         </div>
                     </div>
-        
-                </form>                    
+
+                </form>
             </div>
             <div id="invite-users" class="tab-pane fade">
                 <form class="form-inline editable-form" id="form-invite-user" action="#">
@@ -248,7 +250,54 @@
             </div>
             <div id="my-invite-offices" class="tab-pane fade">
                 <div class="table-responsive">
-                    {% if not object.invites_offices.all %}
+                {% get_opened_office_invites object as oppened_invites %}
+                {% if not oppened_invites %}
+                    <div class="alert alert-info alert-dismissable">
+                        <p>
+                            <i class="fa fa-1x fa-info-circle" aria-hidden="true"> </i>
+                            <strong>Este escritório não possui nenhum convite pendente!</strong>
+                        </p>
+                    </div>
+                {% else %}
+                    <table class="table table-striped table-hover" paginate-fixed>
+                        <thead>
+                        <tr>
+                            <th>Escritório</th>
+                            <th>CPF/CNPJ</th>
+                            <th>Aceitar</th>
+                            <th>Recusar</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for invite in oppened_invites %}
+                            <tr class="{% cycle 'odd' 'even' %}">
+                                <td>{{ invite.office.legal_name }}</td>
+                                <td>{{ invite.office.cpf_cnpj|default_if_none:'' }}</td>
+                                <td>
+                                    <button type="button"
+                                            class="btn btn-outline btn-success btn-rounded"
+                                            onclick="updateInvite('{{ invite.pk }}', 'A', '{{ csrf_token }}', '/convites/invite_office_update/')">
+                                        <i class="fa fa-thumbs-o-up"></i>
+                                    </button>
+                                </td>
+                                <td>
+                                    <button type="button"
+                                            class="btn btn-outline btn-danger btn-rounded"
+                                            onclick="updateInvite('{{ invite.pk }}', 'R', '{{ csrf_token }}', '/convites/invite_office_update/')">
+                                        <i class="fa fa-thumbs-o-down"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+                </div>
+            </div>
+            <div id="my-invite-persons" class="tab-pane fade">
+                <div class="table-responsive">
+                    {% get_opened_person_invites object as oppened_invites %}
+                    {% if not oppened_invites %}
                         <div class="alert alert-info alert-dismissable">
                             <p>
                                 <i class="fa fa-1x fa-info-circle" aria-hidden="true"> </i>
@@ -259,34 +308,32 @@
                         <table class="table table-striped table-hover" paginate-fixed>
                             <thead>
                             <tr>
-                                <th>Escritório</th>
+                                <th>Pessoa</th>
                                 <th>CPF/CNPJ</th>
                                 <th>Aceitar</th>
                                 <th>Recusar</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {% for invite in object.invites_offices.all %}
-                                {% if invite.status == 'N' %}
-                                    <tr class="{% cycle 'odd' 'even' %}">
-                                        <td>{{ invite.office.legal_name }}</td>
-                                        <td>{{ invite.office.cpf_cnpj|default_if_none:'' }}</td>
-                                        <td>
-                                            <button type="button"
-                                                    class="btn btn-outline btn-success btn-rounded"
-                                                    onclick="updateInvite('{{ invite.pk }}', 'A', '{{ csrf_token }}', '/convites/invite_office_update/')">
-                                                <i class="fa fa-thumbs-o-up"></i>
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button type="button"
-                                                    class="btn btn-outline btn-danger btn-rounded"
-                                                    onclick="updateInvite('{{ invite.pk }}', 'R', '{{ csrf_token }}', '/convites/invite_office_update/')">
-                                                <i class="fa fa-thumbs-o-down"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                {% endif %}
+                            {% for invite in oppened_invites %}
+                                <tr class="{% cycle 'odd' 'even' %}">
+                                    <td>{{ invite.person.legal_name }}</td>
+                                    <td>{{ invite.person.cpf_cnpj|default_if_none:'' }}</td>
+                                    <td>
+                                        <button type="button"
+                                                class="btn btn-outline btn-success btn-rounded"
+                                                onclick="updateInvite('{{ invite.pk }}', 'A', '{{ csrf_token }}', '/convites/invite_update/')">
+                                            <i class="fa fa-thumbs-o-up"></i>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button type="button"
+                                                class="btn btn-outline btn-danger btn-rounded"
+                                                onclick="updateInvite('{{ invite.pk }}', 'R', '{{ csrf_token }}', '/convites/invite_update/')">
+                                            <i class="fa fa-thumbs-o-down"></i>
+                                        </button>
+                                    </td>
+                                </tr>
                             {% endfor %}
                             </tbody>
                         </table>

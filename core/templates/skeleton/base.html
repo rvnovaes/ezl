@@ -64,9 +64,11 @@
         {% with request|get_office_session_pk as office_session_id %}
             {% get_model_instance 'core' 'office' office_session_id as office_session %}
             {% get_obj_perms request.user for office_session as "office_session_perms" %}
-                <!-- Topbar header - style you can find in pages.scss -->
-                {% include 'skeleton/includes/navbar.html' %}
-                <!-- End Top Navigation -->
+                {% block navbar %}
+                    <!-- Topbar header - style you can find in pages.scss -->
+                    {% include 'skeleton/includes/navbar.html' %}
+                    <!-- End Top Navigation -->
+                {% endblock %}
 
                 {% block sidebar %}
                     <!-- Left Sidebar - style you can find in sidebar.scss  -->
@@ -140,7 +142,7 @@
         <!-- MODALS -->
         {% block modal %}
             {% include 'skeleton/modal/about.html' %}
-            {% include 'skeleton/modal/offiice_select_modal.html' %}
+            {% include 'skeleton/modal/office_select_modal.html' %}
         {% endblock modal %}
         {% block extra_modal %}
 

@@ -116,3 +116,8 @@ def order_groups_by_office_name(request):
 @register.filter
 def get_correspondent(persons, office):
     return persons.filter(auth_user__groups__name__startswith='Correspondente-{}'.format(office.pk))
+
+
+@register.filter
+def format_plan_month_value(month_value):
+    pass

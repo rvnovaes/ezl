@@ -29,6 +29,7 @@
 <!--CORE SCRIPTS-->
 <script src="{% static 'skeleton/js/ezl.js' %}"></script>
 <script src="{% static 'chat/js/chat.js' %}"></script>
+<script src="{% static 'js/request.js' %}"></script>
 <script src="{% static 'skeleton/plugins/jquery.notify.min.js' %}"></script>
 <script src="{% static 'js/table-tr-link.js' %}"></script>
 <script src="{% static "js/session.js" %}"></script>
@@ -73,20 +74,20 @@
         $(window).bind("resize", set);
     });
     {% endif %}
-    function filter_office_session(office_legal_name) {
+    function filter_office_sesion(office_legal_name, ajax_url) {
         $.ajax({
             type: 'GET',
-            url: "/office_session_filter/",
+            url: ajax_url,
             data: {
                 'office_legal_name': office_legal_name,
             },
             dataType: 'json',
             success: function (data) {
-                console.log(data)
                 $.each(data, function( index, value ) {
-                    console.debug(value);
                     if (value.show == false){
-                        $("#office-"+value.id).addClass('hide');
+                        if (!$("#office-"+value.id).hasClass('card-fixed')){
+                            $("#office-"+value.id).addClass('hide');
+                        }
                     }else{
                         $("#office-"+value.id).removeClass('hide');
                     }
@@ -108,8 +109,14 @@
 
     //user is "finished typing," do something
     function doneTyping() {
-      console.log('parei de digitar');
-      filter_office_session($('#filter_office_legal_name').val())
+        var field_office_filter = $('#filter_office_legal_name');
+        var ajax_url;
+        if (field_office_filter.data('session')) {
+            ajax_url = "/office_session_filter/";
+        }else{
+            ajax_url = "/office_filter/"
+        }
+        filter_office_sesion(field_office_filter.val(), ajax_url)
     }
 
 
