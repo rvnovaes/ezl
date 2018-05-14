@@ -207,9 +207,9 @@ class AbstractPerson(Audit, LegacyCode):
     def cnpj(self, value):
         self.cnpj = value
 
-    def contact_mechanism_by_type(self, type, formated=True):
-        type = ContactMechanismType.objects.filter(name__iexact=type).first()
-        contacts = self.contactmechanism_set.filter(contact_mechanism_type=type)
+    def contact_mechanism_by_type(self, mechanism_type, formated=True):
+        mechanism_type = ContactMechanismType.objects.filter(name__iexact=mechanism_type).first()
+        contacts = self.contactmechanism_set.filter(contact_mechanism_type=mechanism_type)
         items = [contact.description for contact in contacts]
         if formated:
             return ' | '.join(items) if items else ''
