@@ -11,18 +11,6 @@ from core.utils import LegacySystem
 from guardian.shortcuts import get_perms
 
 INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'), ('E', 'EXTERNAL'))
-CONTACT_MECHANISM_TYPE = (
-    ('0', '-'),
-    ('1', 'TELEFONE'),
-    ('2', 'E-MAIL'),
-    ('3', 'SKYPE'),
-    ('4', 'WHATSAPP'),
-    ('5', 'FACEBOOK'),
-    ('6', 'SITE'),
-    ('7', 'LINKEDIN'),
-    ('8', 'INSTAGRAM'),
-    ('9', 'SNAPCHAT'))
-
 
 class CorePermissions(Enum):
     group_admin = 'Group Administrator'
@@ -432,12 +420,37 @@ class Address(Audit):
 
 
 class ContactMechanismType(Audit):
-    type_contact_mechanism = models.CharField(choices=CONTACT_MECHANISM_TYPE, default='0', max_length=1,
-        verbose_name='Tipo')
+    INVALIDO = 1
+    PHONE = 2
+    EMAIL = 3
+    SKYPE = 4
+    WHATSAPP = 5
+    FACEBOOK = 6
+    SITE = 7
+    LINKEDIN = 8
+    INSTAGRAM = 9
+    SNAPCHAT = 10
+    CONTACT_MECHANISM_TYPE = (    
+        (INVALIDO, 'INVÁLIDO'),
+        (PHONE, 'TELEFONE'),
+        (EMAIL, 'E-MAIL'),
+        (SKYPE, 'SKYPE'),
+        (WHATSAPP, 'WHATSAPP'),
+        (FACEBOOK, 'FACEBOOK'),
+        (SITE, 'SITE'),
+        (LINKEDIN, 'LINKEDIN'),
+        (INSTAGRAM, 'INSTAGRAM'),
+        (SNAPCHAT, 'SNAPCHAT'))
+
+    type_contact_mechanism_type = models.IntegerField(
+        choices=CONTACT_MECHANISM_TYPE,        
+        verbose_name='Tipo',
+        default = PHONE,
+        null=False)
     name = models.CharField(max_length=255, null=False, unique=True)    
 
-    def is_email(self):
-        return self.type_contact_mechanism == CONTACT_MECHANISM_TYPE[2][0]    
+    def is_email(self):        
+        return self.type_contact_mechanism_type == self.EMAIL
 
     class Meta:
         db_table = 'contact_mechanism_type'
