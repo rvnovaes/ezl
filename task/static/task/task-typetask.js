@@ -10,7 +10,7 @@ $(document).ready(function() {
     if (option) {
       selectEl.add(option);
     }
-    plusOption = new Option("Selecionar outro...", 'plus');
+    plusOption = new Option("Selecionar serviço EZLog...", 'plus');
     selectEl.add(plusOption);
   }
 

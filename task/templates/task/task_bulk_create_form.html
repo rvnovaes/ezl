@@ -218,11 +218,13 @@
                 </thead>
                 <tbody>
                   {% for type_task in form.type_task.field.queryset %}
-                    <tr id="{{type_task.pk}}" data-label="{{type_task.name}}">
-                      <td>
-                        {{type_task.name}}
-                      </td>
-                    </tr>
+                    {% if not type_task.simple_service %}
+                        <tr id="{{type_task.pk}}" data-label="{{type_task.name}}">
+                          <td>
+                            {{type_task.name}}
+                          </td>
+                        </tr>
+                    {% endif %}
                   {% endfor %}
                 </tbody>
               </table>
