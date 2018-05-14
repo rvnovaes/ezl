@@ -995,17 +995,15 @@ class RegisterNewUser(CreateView):
 
     def post(self, request, *args, **kwargs):
         invite_code = request.POST.get('invite_code')
-        name = str(request.POST.get('name')).split(' ')
-        first_name = ''
-        last_name = ''
-        if name:
-            first_name = name[0]
-            last_name = ' '.join(name[1:])
+        first_name = request.POST.get('name')
+        last_name = request.POST.get('last_name')
         username = request.POST.get('username')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirmpassword')
         email = request.POST.get('email')
         errors = []
+        if first_name == '' or last_name == '':
+            errors.append({'title': 'Identificação do Usuário', 'error': 'Os campos Nome e Sobrenome são obrigatórios'})
         if not password == confirm_password:
             errors.append({'title': 'Senha', 'error': 'As senhas digitadas não conferem'})
         else:
@@ -1026,12 +1024,12 @@ class RegisterNewUser(CreateView):
             if selected_plan == "":
                 errors.append({'title': 'Plano de acesso', 'error': 'Nenhum plano selecionado'})
 
-        if errors:
-            return render(request, 'account/register.html', {'errors': errors})
-
         if select_office_register == '2' and request.POST.get('legal_name') == '':
             errors.append({'title': 'Cadastro de escritório',
                            'error': 'É obrigatório que o escrtório cadastrado possua um nome'})
+
+        if errors:
+            return render(request, 'account/register.html', {'errors': errors})
 
         form = RegisterNewUserForm(
             {'username': username, 'first_name': first_name, 'last_name': last_name, 'email': email,
@@ -1073,8 +1071,8 @@ class RegisterNewUser(CreateView):
             DefaultOffice.objects.create(auth_user=instance, office=office_instance,
                                          create_user=instance)
         elif select_office_register == '3':
-            legal_name = request.POST.get('name')
-            office_name = request.POST.get('name')
+            legal_name = '{} {}'.format(first_name, last_name)
+            office_name = legal_name
             legal_type = 'F'
             office_instance = Office.objects.create(legal_name=legal_name,
                                                     name=office_name,

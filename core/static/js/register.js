@@ -16,6 +16,13 @@
                             }
                         }
                     },
+                    last_name: {
+                        validators: {
+                            notEmpty: {
+                                message: 'O campo de sobrenome é obrigatório'
+                            }
+                        }
+                    },
                     username: {
                         validators: {
                             notEmpty: {
