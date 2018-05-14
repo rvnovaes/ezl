@@ -1,3 +1,9 @@
+a{
+    color: #54667a;
+}
+a:hover{
+    color: #0d3c55;
+}
 .modal label{
     font-weight: normal;
 }
@@ -602,5 +608,5 @@ fieldset[disabled] .btn-ezl-error.active {
 .ezl-required:before {
     content: "\2217\20";
     color: red;
-};
+}
 
