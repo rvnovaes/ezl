@@ -15,10 +15,10 @@ env.roledefs = {
         'hosts': ['{}@189.43.93.151'.format(USER)],
     },
     'demo': {
-        'hosts': ['{}@13.68.213.60'.format(USER)],
+        'hosts': ['{}@167.99.12.8'.format(USER)],
     },
     'teste': {
-        'hosts': ['{}@13.68.213.60'.format(USER)],
+        'hosts': ['{}@167.99.12.8'.format(USER)],
     }
 }
 
