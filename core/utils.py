@@ -113,7 +113,10 @@ def get_office_related_office_field(request):
     initial = None
     office = get_office_session(request)
     if office:
-        queryset = office.offices.all().order_by('legal_name') | Office.objects.filter(public_office=True)
+        if office.public_office:
+            queryset = office.offices.all().order_by('legal_name') | Office.objects.filter(public_office=True)
+        else:
+            queryset = office.offices.all().order_by('legal_name')
 
 
     return forms.ModelChoiceField(
