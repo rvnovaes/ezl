@@ -191,7 +191,7 @@
     wizard.get('#plan_tab').setLoader(function () {
         var select_office_register = $('input[name=select_office_register]').val();
         if (select_office_register === '1'){
-            return '<strong>Você está inscrito nos planos contratados pelos escritórios aos quais deseja se vincular</strong>';
+            return '<strong>O plano de acesso está vinculado ao escritório selecionado.</strong>';
         }else{
             return $('#plan_tab').html();
         }
@@ -218,7 +218,7 @@
                     (office_city) ? office_city = ' - ' + office_city : office_city = '';
                     $('#office_list').append(office_legal_name + office_city + '<br />')
                 });
-                $('#selected-plan').append('<strong>Você está inscrito nos planos contratados pelos escritórios aos quais deseja se vincular</strong>')
+                $('#selected-plan').append('<strong>O plano de acesso está vinculado ao escritório selecionado.</strong>')
                 break;
             case '2':
                 var legal_name = $('input[name=legal_name]').val();
