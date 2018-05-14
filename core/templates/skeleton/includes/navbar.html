@@ -29,13 +29,28 @@
                     {% if office_session_id %}
                         <li class="dropdown">
                             <a class="dropdown-toggle waves-effect waves-light" data-toggle="dropdown" href="#">
+                                <i class="mdi mdi-bell-outline"></i>
+                                <div class="notify hide" id="request-notify">
+                                    <span class="heartbit"></span>
+                                    <span class="point"></span>
+                                </div>
+                            </a>
+                            <ul id="request-list" class="dropdown-menu animated flipInX">
+                                <li>
+                                    <strong class="drop-title" id="">Nenhuma solicitação</strong>
+                                </li>
+                            </ul>
+                            <!-- /.dropdown-messages -->
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle waves-effect waves-light" data-toggle="dropdown" href="#">
                                 <i class="mdi mdi-comment-text-outline"></i>
                                 <div class="notify hide" id="chat-notify">
                                     <span class="heartbit"></span>
                                     <span class="point"></span>
                                 </div>
                             </a>
-                            <ul class="dropdown-menu animated bounceInDown">
+                            <ul class="dropdown-menu animated flipInX">
                                 <li>
                                     <a class="text-center" href="{% url 'chat_list' %}">
                                         <strong class="drop-title" id="drop-title">0 mensagens</strong>

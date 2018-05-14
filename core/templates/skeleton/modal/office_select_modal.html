@@ -1,4 +1,4 @@
-{% extends 'core/widgets/offiice_select.html' %}
+{% extends 'core/widgets/office_select.html' %}
 {% load static %}
 {% block title %}
     <div id="office-select-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
@@ -12,8 +12,14 @@
                 </div>
 {% endblock %}
 {% block body %}
-    {{ block.super }}
-            </div>
+    {% if not offices %}
+        {% with offices=request.user.person.offices.active_offices %}
+            {{ block.super }}
+        {% endwith %}
+    {% else %}
+        {{ block.super }}
+    {% endif %}
+           </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-success waves-effect" data-dismiss="modal">Fechar</button>
             </div>
