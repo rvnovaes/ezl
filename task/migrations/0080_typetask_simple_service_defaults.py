@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.db import migrations
 from django.core.management import call_command
 
-fixture = 'type_task_simple'
+fixture = 'type_task'
 
 
 def load_fixture(apps, schema_editor):
