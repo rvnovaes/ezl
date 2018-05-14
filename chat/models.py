@@ -1,10 +1,12 @@
 from django.db import models
-from core.models import Audit
+from core.models import Audit, OfficeMixin, Office
 from django.contrib.auth.models import User
 
 
 # Create your models here.
+
 class Chat(Audit):
+    offices = models.ManyToManyField(Office, related_name='chats')
     label = models.SlugField(unique=True)
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
@@ -42,9 +44,3 @@ class UnreadMessage(Audit):
 
     def __str__(self):
         return self.user_by_message.user_by_chat.username
-
-
-
-
-
-

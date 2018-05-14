@@ -151,7 +151,6 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
     def __str__(self):
         return self.name
 
-
 class Task(Audit, LegacyCode, OfficeMixin):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
@@ -280,6 +279,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     def save(self, *args, **kwargs):
         self._skip_signal = kwargs.pop('skip_signal', False)
+        self._skip_mail = kwargs.pop('skip_mail', False)
         self._from_parent = kwargs.pop('from_parent', False)
         if not self.task_number:
             self.task_number = self.get_task_number()
@@ -318,7 +318,6 @@ def get_dir_name(instance, filename):
     if not os.path.exists(path):
         os.makedirs(path)
     return 'ECM/{0}/{1}'.format(instance.task.pk, filename)
-
 
 class EcmQuerySet(models.QuerySet):
     def delete(self):

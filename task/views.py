@@ -5,7 +5,6 @@ import copy
 from urllib.parse import urlparse
 import pickle
 from django.contrib import messages
-from chat.models import Chat, UserByChat
 from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
@@ -22,8 +21,6 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
-
-from chat.models import UserByChat
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
@@ -39,7 +36,6 @@ from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardV
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable, FilterTable
 from financial.models import ServicePriceTable
-from chat.models import Chat
 from survey.models import SurveyPermissions
 from financial.tables import ServicePriceTableTaskTable
 from core.utils import get_office_session
@@ -417,32 +413,6 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         context['survey_data'] = (self.object.type_task.survey.data
                                   if self.object.type_task.survey else None)
 
-        # Atualiza ou cria o chat, (Eh necessario encontrar um lugar melhor para este bloco de codigo)
-        state = ''
-        if isinstance(self.object.court_district, CourtDistrict):
-            state = self.object.court_district.state
-        opposing_party = ''
-        if self.object.movement and self.object.movement.law_suit:
-            opposing_party = self.object.movement.law_suit.opposing_party
-        description = """
-        Parte adversa: {opposing_party}, Cliente: {client},
-        {court_district} - {state}, Prazo: {final_deadline_date}
-        """.format(opposing_party=opposing_party, client=self.object.client,
-                   court_district=self.object.court_district, state=state,
-                   final_deadline_date=self.object.final_deadline_date.strftime('%d/%m/%Y %H:%M'))
-        if self.object.chat:
-            self.object.chat.description = description
-            self.object.chat.save()
-        else:
-            label = 'task-{}'.format(self.object.pk)
-            title = """#{task_number} - {type_task}""".format(
-                task_number=self.object.task_number, type_task=self.object.type_task)
-            self.object.chat = Chat.objects.create(
-                create_user=self.request.user, label=label, title=title,
-                description=description, back_url='/dashboard/{}'.format(self.object.pk))
-            self.object.save(skip_signal=True)
-        self.create_user_by_chat(self.object, ['person_asked_by', 'person_executed_by',
-                                               'person_distributed_by'])
         type_task = self.object.type_task
         court_district = self.object.movement.law_suit.court_district
         state = self.object.movement.law_suit.court_district.state
@@ -454,20 +424,6 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                                              Q(Q(client=client) | Q(client=None)))
         )
         return context
-
-    def create_user_by_chat(self, task, fields):
-        users = []
-        for field in fields:
-            user = None
-            if getattr(task, field):
-                user = getattr(getattr(task, field), 'auth_user')
-            if user:
-                user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
-                    'create_user': user, 'user_by_chat': user, 'chat': task.chat
-                })
-                user = user.user_by_chat
-            users.append(user)
-        UserByChat.objects.filter(~Q(user_by_chat__in=users), chat=task.chat).update(is_active=False)
 
     @staticmethod
     def delegate_child_task(object_parent, office_correspondent):

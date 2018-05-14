@@ -11,7 +11,7 @@
 {% block right-sidebar-chat %}
     {% include 'chat/chat-right-sidebar.html' %}
 {% endblock %}
-{% block content %}
+{% block content %}    
     <link href="{% static 'skeleton/css/step-bar.css' %}" rel="stylesheet">
     <link href="{% static 'libs/bootstrap-rating/bootstrap-rating.css' %}" rel="stylesheet">
 
@@ -114,11 +114,6 @@
 {% endblock %}
 
 {% block extra_scripts %}
-    <!-- CHAT SCRIPTS  -->
-    {% with object.chat as chat %}
-        {% include 'chat/script.html' with chat=chat%}
-    {% endwith %}
-
     <!-- UPLOADS SCRIPTS  -->
     {% include 'task/includes/upload.html' %}
     <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
