@@ -1,9 +1,12 @@
+var resizeChat
 $(document).ready(function() {
-    var resizeChat =  function(){
+    resizeChat =  function(){
         var screen_len = $(window).height() -80 + "px";
         $('.chat-main').css('height', screen_len);
         var chatBoxHeight = $('.chat-main').height() - 190 + "px";
-        $('.chat-box').css('height', chatBoxHeight);        
+        var chatListHeight = $('.chat-main').height() - 100 + "px";
+        $('.chat-box').css('height', chatBoxHeight); 
+	$('#list-chat-scroll').css('height', chatListHeight)       
     }
 
     resizeChat();

@@ -19,6 +19,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   $scope.search = ''
 
   $('#list-chat-scroll').ready(function(){
+    resizeChat();
     $scope.listScrollChat = new PerfectScrollbar('#list-chat-scroll', {
       wheelSpeed: 2
     })
