@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0078_contactmechanismtype_type_contact_mechanism'),
+        ('core', '0081_office_public_ezlog'),
     ]
 
     operations = [

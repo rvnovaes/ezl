@@ -31,10 +31,10 @@ from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
 from task.filters import TaskFilter
-from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm, TaskToAssignForm, FilterForm
+from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, TaskGeolocation
 from task.signals import send_notes_execution_date
-from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable, FilterTable
+from task.tables import TaskTable, DashboardStatusTable, FilterTable
 from financial.models import ServicePriceTable
 from survey.models import SurveyPermissions
 from financial.tables import ServicePriceTableTaskTable
@@ -90,7 +90,7 @@ class TaskCreateView(AuditFormMixin, CreateView):
     model = Task
     form_class = TaskCreateForm
     success_message = CREATE_SUCCESS_MESSAGE
-    template_name_suffix = '_create_form'
+    template_name_suffix = '_persist_form'
 
     def get_initial(self):
         if self.kwargs.get('movement'):
@@ -158,6 +158,7 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
     model = Task
     form_class = TaskForm
     success_message = UPDATE_SUCCESS_MESSAGE
+    template_name_suffix = '_persist_form'
 
     def get_initial(self):
         if self.kwargs.get('movement'):
@@ -418,7 +419,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         state = self.object.movement.law_suit.court_district.state
         client = self.object.movement.law_suit.folder.person_customer
         context['correspondents_table'] = ServicePriceTableTaskTable(
-            ServicePriceTable.objects.filter(Q(office=self.object.office), Q(type_task=type_task),
+            ServicePriceTable.objects.filter(Q(office=self.object.office) | Q(office__public_office=True), Q(Q(type_task=type_task) | Q(type_task=None) ),
                                              Q(Q(court_district=court_district) | Q(court_district=None)),
                                              Q(Q(state=state) | Q(state=None)),
                                              Q(Q(client=client) | Q(client=None)))
@@ -444,7 +445,6 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.parent = object_parent
         new_type_task, created = TypeTask.objects.get_or_create(name=object_parent.type_task.name,
                                                     survey=object_parent.type_task.survey,
-                                                    office=office_correspondent,
                                                     defaults={'create_user':object_parent.create_user})
         new_task.type_task = new_type_task
         new_task.save()
@@ -520,69 +520,6 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
                         'message': exception_create()}
 
         return JsonResponse(data)
-
-
-class TypeTaskListView(CustomLoginRequiredView, SingleTableViewMixin):
-    model = TypeTask
-    table_class = TypeTaskTable
-
-
-class TypeTaskCreateView(AuditFormMixin, CreateView):
-    model = TypeTask
-    form_class = TypeTaskForm
-    success_url = reverse_lazy('typetask_list')
-    success_message = CREATE_SUCCESS_MESSAGE
-
-    def get_form_kwargs(self):
-        kw = super().get_form_kwargs()
-        kw['request'] = self.request
-        return kw
-
-
-class TypeTaskUpdateView(AuditFormMixin, UpdateView):
-    model = TypeTask
-    form_class = TypeTaskForm
-    success_url = reverse_lazy('typetask_list')
-    success_message = UPDATE_SUCCESS_MESSAGE
-
-    def get_context_data(self, **kwargs):
-        """
-        Sobrescreve o metodo get_context_data e seta a ultima url acessada no cache
-        Isso e necessario para que ao salvar uma alteracao, o metodo post consiga verificar
-        a pagina da paginacao onde o usuario fez a alteracao
-        :param kwargs:
-        :return: super
-        """
-        context = super().get_context_data(**kwargs)
-        cache.set('type_task_page', self.request.META.get('HTTP_REFERER'))
-        return context
-
-    def get_form_kwargs(self):
-        kw = super().get_form_kwargs()
-        kw['request'] = self.request
-        return kw
-
-    def post(self, request, *args, **kwargs):
-        """
-        Sobrescreve o metodo post e verifica se existe cache da ultima url
-        Isso e necessario pelo fato da necessidade de retornar pra mesma paginacao
-        Que o usuario se encontrava ao fazer a alteracao
-        :param request:
-        :param args:
-        :param kwargs:
-        :return: super
-        """
-        if cache.get('type_task_page'):
-            self.success_url = cache.get('type_task_page')
-
-        return super().post(request, *args, **kwargs)
-
-
-class TypeTaskDeleteView(AuditFormMixin, MultiDeleteViewMixin):
-    model = TypeTask
-    success_url = reverse_lazy('typetask_list')
-    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
-
 
 @login_required
 def delete_ecm(request, pk):
