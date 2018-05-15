@@ -391,7 +391,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 self.request.POST['servicepricetable_id'] if self.request.POST['servicepricetable_id'] else None)
             servicepricetable = ServicePriceTable.objects.filter(id=servicepricetable_id).first()
             get_task_attachment(self, form)
-            if servicepricetable:
+            if servicepricetable:                
                 self.delegate_child_task(form.instance, servicepricetable.office_correspondent)
                 form.instance.person_executed_by = None
 
@@ -444,9 +444,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.office = office_correspondent
         new_task.task_status = TaskStatus.REQUESTED
         new_task.parent = object_parent
-        new_type_task, created = TypeTask.objects.get_or_create(name=object_parent.type_task.name,
-                                                    survey=object_parent.type_task.survey,
-                                                    defaults={'create_user':object_parent.create_user})
+        new_type_task = TypeTask.objects.filter(
+            name=object_parent.type_task.name, survey=object_parent.type_task.survey).latest('pk')                
         new_task.type_task = new_type_task
         new_task.save()
         for ecm in object_parent.ecm_set.all():
