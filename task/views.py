@@ -6,7 +6,6 @@ from urllib.parse import urlparse
 import pickle
 from pathlib import Path
 from django.contrib import messages
-from chat.models import Chat, UserByChat
 from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
@@ -23,8 +22,6 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
-
-from chat.models import UserByChat
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
@@ -35,12 +32,11 @@ from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
 from task.filters import TaskFilter
-from task.forms import TaskForm, TaskDetailForm, TypeTaskForm, TaskCreateForm, TaskToAssignForm, FilterForm
-from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskGeolocation
+from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm
+from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, TaskGeolocation
 from task.signals import send_notes_execution_date
-from task.tables import TaskTable, DashboardStatusTable, TypeTaskTable, FilterTable
+from task.tables import TaskTable, DashboardStatusTable, FilterTable
 from financial.models import ServicePriceTable
-from chat.models import Chat
 from survey.models import SurveyPermissions
 from financial.tables import ServicePriceTableTaskTable
 from core.utils import get_office_session
@@ -95,7 +91,7 @@ class TaskCreateView(AuditFormMixin, CreateView):
     model = Task
     form_class = TaskCreateForm
     success_message = CREATE_SUCCESS_MESSAGE
-    template_name_suffix = '_create_form'
+    template_name_suffix = '_persist_form'
 
     def get_initial(self):
         if self.kwargs.get('movement'):
@@ -163,6 +159,7 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
     model = Task
     form_class = TaskForm
     success_message = UPDATE_SUCCESS_MESSAGE
+    template_name_suffix = '_persist_form'
 
     def get_initial(self):
         if self.kwargs.get('movement'):
@@ -398,6 +395,15 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 self.delegate_child_task(form.instance, servicepricetable.office_correspondent)
                 form.instance.person_executed_by = None
 
+        feedback_rating = form.cleaned_data.get('feedback_rating')
+        feedback_comment = form.cleaned_data.get('feedback_comment')
+        if feedback_rating and not form.instance.taskfeedback_set.exists():
+            TaskFeedback.objects.create(
+                task=form.instance,
+                rating=feedback_rating,
+                comment=feedback_comment,
+                create_user=form.instance.alter_user)
+
         super(TaskDetailView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
@@ -409,57 +415,17 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         context['survey_data'] = (self.object.type_task.survey.data
                                   if self.object.type_task.survey else None)
 
-        # Atualiza ou cria o chat, (Eh necessario encontrar um lugar melhor para este bloco de codigo)
-        state = ''
-        if isinstance(self.object.court_district, CourtDistrict):
-            state = self.object.court_district.state
-        opposing_party = ''
-        if self.object.movement and self.object.movement.law_suit:
-            opposing_party = self.object.movement.law_suit.opposing_party
-        description = """
-        Parte adversa: {opposing_party}, Cliente: {client},
-        {court_district} - {state}, Prazo: {final_deadline_date}
-        """.format(opposing_party=opposing_party, client=self.object.client,
-                   court_district=self.object.court_district, state=state,
-                   final_deadline_date=self.object.final_deadline_date.strftime('%d/%m/%Y %H:%M'))
-        if self.object.chat:
-            self.object.chat.description = description
-            self.object.chat.save()
-        else:
-            label = 'task-{}'.format(self.object.pk)
-            title = """#{task_number} - {type_task}""".format(
-                task_number=self.object.task_number, type_task=self.object.type_task)
-            self.object.chat = Chat.objects.create(
-                create_user=self.request.user, label=label, title=title,
-                description=description, back_url='/dashboard/{}'.format(self.object.pk))
-            self.object.save(skip_signal=True)
-        self.create_user_by_chat(self.object, ['person_asked_by', 'person_executed_by',
-                                               'person_distributed_by'])
         type_task = self.object.type_task
         court_district = self.object.movement.law_suit.court_district
         state = self.object.movement.law_suit.court_district.state
         client = self.object.movement.law_suit.folder.person_customer
         context['correspondents_table'] = ServicePriceTableTaskTable(
-            ServicePriceTable.objects.filter(Q(office=self.object.office), Q(type_task=type_task),
+            ServicePriceTable.objects.filter(Q(office=self.object.office) | Q(office__public_office=True), Q(Q(type_task=type_task) | Q(type_task=None) ),
                                              Q(Q(court_district=court_district) | Q(court_district=None)),
                                              Q(Q(state=state) | Q(state=None)),
                                              Q(Q(client=client) | Q(client=None)))
         )
         return context
-
-    def create_user_by_chat(self, task, fields):
-        users = []
-        for field in fields:
-            user = None
-            if getattr(task, field):
-                user = getattr(getattr(task, field), 'auth_user')
-            if user:
-                user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
-                    'create_user': user, 'user_by_chat': user, 'chat': task.chat
-                })
-                user = user.user_by_chat
-            users.append(user)
-        UserByChat.objects.filter(~Q(user_by_chat__in=users), chat=task.chat).update(is_active=False)
 
     @staticmethod
     def delegate_child_task(object_parent, office_correspondent):
@@ -480,7 +446,6 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.parent = object_parent
         new_type_task, created = TypeTask.objects.get_or_create(name=object_parent.type_task.name,
                                                     survey=object_parent.type_task.survey,
-                                                    office=office_correspondent,
                                                     defaults={'create_user':object_parent.create_user})
         new_task.type_task = new_type_task
         new_task.save()
@@ -557,69 +522,6 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
                         'message': exception_create()}
 
         return JsonResponse(data)
-
-
-class TypeTaskListView(CustomLoginRequiredView, SingleTableViewMixin):
-    model = TypeTask
-    table_class = TypeTaskTable
-
-
-class TypeTaskCreateView(AuditFormMixin, CreateView):
-    model = TypeTask
-    form_class = TypeTaskForm
-    success_url = reverse_lazy('typetask_list')
-    success_message = CREATE_SUCCESS_MESSAGE
-
-    def get_form_kwargs(self):
-        kw = super().get_form_kwargs()
-        kw['request'] = self.request
-        return kw
-
-
-class TypeTaskUpdateView(AuditFormMixin, UpdateView):
-    model = TypeTask
-    form_class = TypeTaskForm
-    success_url = reverse_lazy('typetask_list')
-    success_message = UPDATE_SUCCESS_MESSAGE
-
-    def get_context_data(self, **kwargs):
-        """
-        Sobrescreve o metodo get_context_data e seta a ultima url acessada no cache
-        Isso e necessario para que ao salvar uma alteracao, o metodo post consiga verificar
-        a pagina da paginacao onde o usuario fez a alteracao
-        :param kwargs:
-        :return: super
-        """
-        context = super().get_context_data(**kwargs)
-        cache.set('type_task_page', self.request.META.get('HTTP_REFERER'))
-        return context
-
-    def get_form_kwargs(self):
-        kw = super().get_form_kwargs()
-        kw['request'] = self.request
-        return kw
-
-    def post(self, request, *args, **kwargs):
-        """
-        Sobrescreve o metodo post e verifica se existe cache da ultima url
-        Isso e necessario pelo fato da necessidade de retornar pra mesma paginacao
-        Que o usuario se encontrava ao fazer a alteracao
-        :param request:
-        :param args:
-        :param kwargs:
-        :return: super
-        """
-        if cache.get('type_task_page'):
-            self.success_url = cache.get('type_task_page')
-
-        return super().post(request, *args, **kwargs)
-
-
-class TypeTaskDeleteView(AuditFormMixin, MultiDeleteViewMixin):
-    model = TypeTask
-    success_url = reverse_lazy('typetask_list')
-    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
-
 
 @login_required
 def delete_ecm(request, pk):

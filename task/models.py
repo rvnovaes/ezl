@@ -130,9 +130,11 @@ class CheckPointType(Enum):
         return [(x.value, x.name) for x in cls]
 
 
-class TypeTask(Audit, LegacyCode, OfficeMixin):
+class TypeTask(Audit, LegacyCode):
     name = models.CharField(max_length=255, null=False, blank=False,
                             verbose_name='Tipo de Serviço')
+    simple_service = models.BooleanField(verbose_name="Serviço simples",
+        default=False)
     survey = models.ForeignKey(
         'survey.Survey',
         null=True,
@@ -146,11 +148,9 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
         ordering = ('name',)
         verbose_name = 'Tipo de Serviço'
         verbose_name_plural = 'Tipos de Serviço'
-        unique_together = (('office', 'name'),)
 
     def __str__(self):
         return self.name
-
 
 class Task(Audit, LegacyCode, OfficeMixin):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
@@ -280,6 +280,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     def save(self, *args, **kwargs):
         self._skip_signal = kwargs.pop('skip_signal', False)
+        self._skip_mail = kwargs.pop('skip_mail', False)
         self._from_parent = kwargs.pop('from_parent', False)
         if not self.task_number:
             self.task_number = self.get_task_number()
@@ -297,12 +298,27 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                                                  name=self.TASK_NUMBER_SEQUENCE))
 
 
+class TaskFeedback(models.Model):
+    feedback_date = models.DateTimeField(auto_now_add=True)
+    task = models.ForeignKey('Task', verbose_name='OS')
+    rating = models.SmallIntegerField(
+        verbose_name='Nota',
+        choices=[(x, x) for x in range(1,6)]
+    )
+    comment = models.TextField(null=True, verbose_name='Comentário')
+    create_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='%(class)s_create_user',
+        verbose_name='Criado por'
+    )
+
+
 def get_dir_name(instance, filename):
     path = os.path.join('media', 'ECM', str(instance.task_id))
     if not os.path.exists(path):
         os.makedirs(path)
     return 'ECM/{0}/{1}'.format(instance.task.pk, filename)
-
 
 class EcmQuerySet(models.QuerySet):
     def delete(self):

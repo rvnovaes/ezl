@@ -83,7 +83,7 @@ class TaskDetailForm(ModelForm):
         initial='',
         label='Insira um comentário',
         widget=forms.Textarea(
-            attrs={'class': 'form-control', 'cols': '5', 'id': 'notes_id'}
+            attrs={'rows': 2, 'class': 'form-control', 'cols': '5', 'id': 'notes_id'}
         )
     )
 
@@ -96,6 +96,16 @@ class TaskDetailForm(ModelForm):
     servicepricetable_id = forms.CharField(required=False,
                                            widget=forms.HiddenInput())
 
+    feedback_rating = forms.IntegerField(
+        label="Nota",
+        required=False
+    )
+    feedback_comment = forms.CharField(
+        label="Comentário sobre o atendimento do correspondente",
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 2})
+    )
+
     def clean_amount(self):
         amount = (self.cleaned_data['amount'] if self.cleaned_data['amount'] else str(0))
         amount = amount.replace('.', '')
@@ -105,16 +115,6 @@ class TaskDetailForm(ModelForm):
     def clean(self):
         form_data = self.cleaned_data
         return form_data
-
-
-class TypeTaskForm(BaseForm):
-    class Meta:
-        model = TypeTask
-        fields = ['office', 'name', 'survey', 'is_active']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['office'] = get_office_field(self.request)
 
 
 class FilterForm(BaseForm):

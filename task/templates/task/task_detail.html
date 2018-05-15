@@ -3,6 +3,7 @@
 {% load core_filters %}
 {% load render_table from django_tables2 %}
 {% load tz %}
+{% load djmoney %}
 
 {% block extra_stylesheets %}
 
@@ -11,8 +12,10 @@
 {% block right-sidebar-chat %}
     {% include 'chat/chat-right-sidebar.html' %}
 {% endblock %}
-{% block content %}
+{% block content %}    
     <link href="{% static 'skeleton/css/step-bar.css' %}" rel="stylesheet">
+    <link href="{% static 'libs/bootstrap-rating/bootstrap-rating.css' %}" rel="stylesheet">
+
     {% include 'task/task_to_assign.html' with task=task %}
     <form id="task_detail" action="" method="post">{% csrf_token %}
         {% include 'task/task_detail/tab.html' %}
@@ -44,19 +47,35 @@
                                 {% render_table correspondents_table %}
                                 <div id="servicepricetable-alert" class="alert alert-danger alert hidden">
                                 Favor selecionar um escritório correspondente. </div>
+                                <b>Avaliação*:</b> A avaliação é composta pela média móvel dos últimos 3 meses.
                             </div>
+                            <br>
                             <div class="form-group" style="margin: auto">
                                 <label>{{ form.amount.label }}</label>
                                 {{ form.amount }}
                             </div>
+                            <br>
                         {% endif %}
                         <div class="form-group" style="margin: auto">
                             <label> {{ form.notes.label }}</label>
                             {{ form.notes }}
                         </div>
+                        <div class="rating-container">
+                            <h4 class="panel-title text-center text-danger">
+                                <i class="fa fa-star"></i>
+                                <b> Avalie o atendimento do correspondente</b>
+                            </h4>
+                            <div class="form-group text-center" style="margin: auto">
+                                {{ form.feedback_rating }}
+                            </div>
+                            <div class="form-group" style="margin: auto">
+                                <label> {{ form.feedback_comment.label }}</label>
+                                <div>{{ form.feedback_comment }}</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
-                        <button style="width: 100px!important;" onClick="this.form.reset()"
+                        <button style="width: 100px!important;" onClick="resetForm(this)"
                                 class="btn btn-default"
                                 data-dismiss="modal">
                             <i class="mdi mdi-close"></i> Cancelar
@@ -79,7 +98,7 @@
                         {% elif form.instance.status.name == 'ACCEPTED_SERVICE' %}
                             <button id="actionButton"
                                     style="width: 100px!important;"
-                                    type="submit"
+                                    type="button"
                                     onclick="checkDelegationOffice()"
                                     class="btn btn-raised btn-success">Sim
                             </button>
@@ -98,14 +117,10 @@
 {% endblock %}
 
 {% block extra_scripts %}
-    <!-- CHAT SCRIPTS  -->
-    {% with object.chat as chat %}
-        {% include 'chat/script.html' with chat=chat%}
-    {% endwith %}
-
     <!-- UPLOADS SCRIPTS  -->
     {% include 'task/includes/upload.html' %}
     <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
+    <script src="{% static 'libs/bootstrap-rating/bootstrap-rating.min.js' %}"></script>
     <!--Style Switcher -->
     <script src="{% static 'skeleton/js/cbpFWTabs.js' %}"></script>
     <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
@@ -116,6 +131,8 @@
     <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
     <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
     <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>
+    <script src="{% static 'task/task-detail.js' %}"></script>
+
     <script type="text/javascript">
         (function() {
             [].slice.call(document.querySelectorAll('.sttabs')).forEach(function(el) {
@@ -185,14 +202,46 @@
 
         //Função para verificar se foi selecionado um escritório antes de delegar
         function checkDelegationOffice() {
-            $('#task_detail').submit(function (e) {
-                var servicepricetable_id = $('input[name=servicepricetable_id]').val();
-                if (servicepricetable_id === ""){
-                    e.preventDefault();
-                    $("#alert-correspondent").remove();
-                    $("#servicepricetable-alert").removeClass("hidden");
-                }
-            });
+            var servicepricetable_id = $('input[name=servicepricetable_id]').val();
+            var selected_office = $("#office-"+servicepricetable_id);
+            var public_office = (selected_office.data('office-public') == "True");
+            if (servicepricetable_id === ""){
+                $("#alert-correspondent").remove();
+                $("#servicepricetable-alert").removeClass("hidden");
+            }else if (public_office){
+                var text_public_office = "Para a contratação dos serviços do EZLog deve ser feita a transferência do" +
+                    " valor " + selected_office.data('formated-value') + " para a conta abaixo:" +
+                    "\nBanco Bradesco" +
+                    "\nAgência: 2146-6" +
+                    "\nConta corrente: 40930-8" +
+                    "\nSílex Sistemas Ltda." +
+                    "\n04.170.575-0001-03" +
+                    "\nTelefone de contato: 31 2538-7869";
+                swal({
+                    title: "Importante",
+                    text: text_public_office,
+                    type: "warning",
+                    showCancelButton: true,
+                    cancelButtonText: "Cancelar",
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Delegar",
+                    closeOnConfirm: false
+                }, function(isConfirm){
+                    if (isConfirm) {
+                        $('<input />').attr('type', 'hidden')
+                            .attr('name', 'action')
+                            .attr('value', 'OPEN')
+                            .appendTo('#task_detail');
+                        $('#task_detail').submit();
+                    }
+                });
+            }else{
+                $('<input />').attr('type', 'hidden')
+                    .attr('name', 'action')
+                    .attr('value', 'OPEN')
+                    .appendTo('#task_detail');
+                $('#task_detail').submit();
+            }
         }
 
         var nextState = {
@@ -208,8 +257,23 @@
             RETURN: {text: "Retornar", icon: "mdi mdi-backburger"}
         };
 
+        function resetForm(el){
+            el.form.reset();
+            if ($('#id_feedback_rating').length > 0) {
+                $('#id_feedback_rating').rating('rate', '');
+            }
+        }
+
         function getId(value) {
             var task_status = value.id;
+
+            if (value.id == "BLOCKEDPAYMENT" || value.id == "FINISHED"){
+                $('.rating-container').show();
+            } else {
+                $('.rating-container').hide();
+                $('#id_feedback_rating').rating('rate', '');
+                $('#id_feedback_comment').val('');
+            }
 
             var $input = $("input[name=execution_date]");
             if ($input.length > 0) {

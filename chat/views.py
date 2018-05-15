@@ -3,25 +3,26 @@ from chat.models import Chat, UnreadMessage, Message
 from core.views import CustomLoginRequiredView
 from django.http import JsonResponse
 from django.views.generic import View
-from django.db.models import Count
+from django.db.models import Count, Q
+from django.core import serializers
 import json
 from core.models import Person
+from core.models import Office
 from core.utils import get_office_session
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import  get_groups_with_perms
+from django.shortcuts import render
+from task.models import Task
+from django.forms.models import model_to_dict
 
+def chat_teste(request):
+    return render(request, 'chat/chat_test.html', {'teste': {'teste': 'tetando'}})
 
 class ChatListView(ListView):
     model = Chat
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        checker = ObjectPermissionChecker(self.request.user)
-        if checker.has_perm('group_admin', get_office_session(self.request)):
-            context['chats'] = Chat.objects.all()
-        else:
-            context['chats'] = Chat.objects.filter(users__user_by_chat=self.request.user, users__is_active=True).order_by(
-                'pk').distinct('pk')
         return context
 
 
@@ -42,7 +43,7 @@ class ChatCountMessages(CustomLoginRequiredView, View):
 
 class ChatReadMessages(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):
-        chat_id = request.POST.get('chat_id')
+        chat_id = json.loads(request.body).get('chat_id')
         chat = Chat.objects.filter(pk=int(chat_id)).first()
         if chat:
             UnreadMessage.objects.filter(user_by_message__user_by_chat=self.request.user,
@@ -77,3 +78,84 @@ class ChatGetMessages(CustomLoginRequiredView, View):
             }
         }
         return JsonResponse(data)
+
+class ChatOfficeContactView(CustomLoginRequiredView, View):
+    @staticmethod
+    def add_count_unread_message(user, contact_offices):
+        for office in contact_offices:
+            unread_message_quanty = UnreadMessage.objects.filter(
+                user_by_message__user_by_chat=user,
+                message__chat__offices__id=office.get('pk')).count()
+            office['unread_message_quanty'] = unread_message_quanty
+        return contact_offices
+
+    def get(self, request, *args, **kwargs):
+        current_office = get_office_session(request)
+        chats = Chat.objects.filter(users__user_by_chat=self.request.user, users__is_active=True).order_by(
+            'pk').distinct('pk')
+        data = list(Office.objects.filter(chats__in=chats,).values('pk', 'legal_name').distinct('pk'))
+        data = self.add_count_unread_message(request.user, data)
+        return JsonResponse(data, safe=False)
+
+
+class ChatsByOfficeView(CustomLoginRequiredView, View):
+    @staticmethod
+    def add_count_unread_message(user, chats):
+        for chat in chats:
+            unread_message_quanty = UnreadMessage.objects.filter(
+                user_by_message__user_by_chat=user,
+                message__chat_id=chat.get('id')).count()
+            chat['unread_message_quanty'] = unread_message_quanty
+        return chats
+
+    def get(self, request, *args, **kwargs):
+        office = Office.objects.get(pk=int(request.GET.get('office')))
+        chats = office.chats.filter(users__user_by_chat=self.request.user,
+            users__is_active=True)
+        data = self.add_count_unread_message(request.user, list(chats.values()))
+        return JsonResponse(data, safe=False)
+
+class ChatMenssage(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        chat = Chat.objects.get(pk=int(request.GET.get('chat')))
+        messages = list(chat.messages.all().values('message', 'create_user__username', 'create_user_id', 'create_date'))
+        data = {
+            "messages": messages,
+            "request_user_id": request.user.id,
+            "chat": model_to_dict(chat, fields=([field.name for field in chat._meta.fields]))
+        }
+        return  JsonResponse(data, safe=False)
+
+class InternalChatOffices(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        task = Task.objects.get(pk=int(request.GET.get('task')))
+        data = []
+        if task.parent:
+            data.append({
+                'chat': task.chat.pk, # "Deve ser o pk da propria task"
+                'office_pk': task.parent.office.pk, #"Deve ser o pk do office do parent"
+                'office_legal_name': task.parent.office.legal_name
+            })
+        for task_child in task.child.all():
+            data.append({
+                'chat': task_child.chat.pk, # "Deve ser o pk do chat da task filha"
+                'office_pk': task_child.office.pk,
+                'office_legal_name': task_child.office.legal_name
+            })
+        if not all([task.parent, task.child.exists()]):
+            data.append({
+                'chat': task.chat.pk, # "Deve ser o pk do chat da task filha"
+                'office_pk': task.office.pk,
+                'office_legal_name': task.office.legal_name
+            })
+        return JsonResponse(data, safe=False)
+
+
+class UnreadMessageView(CustomLoginRequiredView, View):
+    def post(self, request, *args, **kwargs):
+        chat_id = json.loads(request.body).get('chat')
+        chat = Chat.objects.get(pk=chat_id)
+        user_by_chat = chat.users.filter(user_by_chat=request.user).first()
+        UnreadMessage.objects.create(
+            create_user=request.user, message=chat.messages.latest('pk'), user_by_message=user_by_chat)
+        return JsonResponse({'status': 'ok'})

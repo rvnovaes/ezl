@@ -32,7 +32,12 @@ PARENT_FIELDS = {
 def get_parent_status(child_status):
     """
     Retorna o status da OS pai de acordo com o status da OS filha informado no parametro
-    :param child_status:
+    :param child_status:vou liberar o código agora
+￼￼￼￼￼
+11:03 AM
+que já da pra delegar pro ezlog
+11:03 AM
+porém ainda tem que criar a tabela de preços na mão
     :return:
     """
     return PARENT_STATUS.get(child_status)

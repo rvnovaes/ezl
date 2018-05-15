@@ -26,9 +26,12 @@
 <script src="{% static 'skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js' %}"></script>
 <!-- JQUERY TEMPLATES -->
 <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+<!-- perferct-scroll -->
+<script src="{% static 'skeleton/plugins/bower_components/perfect-scrollbar/dist/perfect-scrollbar.min.js' %}"></script>
 <!--CORE SCRIPTS-->
 <script src="{% static 'skeleton/js/ezl.js' %}"></script>
 <script src="{% static 'chat/js/chat.js' %}"></script>
+<script src="{% static 'js/request.js' %}"></script>
 <script src="{% static 'skeleton/plugins/jquery.notify.min.js' %}"></script>
 <script src="{% static 'js/table-tr-link.js' %}"></script>
 <script src="{% static "js/session.js" %}"></script>
@@ -44,7 +47,7 @@
             showCancelButton: true,
             cancelButtonText: "Continuar no sistema",
             confirmButtonColor: "#DD6B55",
-            confirmButtonText: "Sim, eu tenho!",
+            confirmButtonText: "Sim, eu tenho.",
             closeOnConfirm: false
         }, function(){
             window.location.href = "{% url 'logout' %}";
@@ -73,4 +76,50 @@
         $(window).bind("resize", set);
     });
     {% endif %}
+    function filter_office_sesion(office_legal_name, ajax_url) {
+        $.ajax({
+            type: 'GET',
+            url: ajax_url,
+            data: {
+                'office_legal_name': office_legal_name,
+            },
+            dataType: 'json',
+            success: function (data) {
+                $.each(data, function( index, value ) {
+                    if (value.show == false){
+                        if (!$("#office-"+value.id).hasClass('card-fixed')){
+                            $("#office-"+value.id).addClass('hide');
+                        }
+                    }else{
+                        $("#office-"+value.id).removeClass('hide');
+                    }
+                })
+            }
+        });
+    }
+
+    var typingTimer; //timer identifier
+    var doneTypingInterval = 500; //time in ms, 5 second for example
+
+    //on keyup, start the countdown
+    $('#filter_office_legal_name').keyup(function() {
+      clearTimeout(typingTimer);
+      if ($('#filter_office_legal_name').val) {
+        typingTimer = setTimeout(doneTyping, doneTypingInterval);
+      }
+    });
+
+    //user is "finished typing," do something
+    function doneTyping() {
+        var field_office_filter = $('#filter_office_legal_name');
+        var ajax_url;
+        if (field_office_filter.data('session')) {
+            ajax_url = "/office_session_filter/";
+        }else{
+            ajax_url = "/office_filter/"
+        }
+        filter_office_sesion(field_office_filter.val(), ajax_url)
+    }
+
+
 </script>

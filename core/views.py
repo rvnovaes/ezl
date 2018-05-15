@@ -7,7 +7,7 @@ from django import forms
 from django.forms.utils import ErrorList
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import logout, password_validation
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -16,20 +16,23 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.exceptions import ValidationError
 from django.db.models import ProtectedError, Q, F
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.views import View
 from django.views.generic import ListView, TemplateView
+from django.core.exceptions import ValidationError
 from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
     ResetPasswordFormMixin, AddressFormSet, \
-    OfficeForm, InviteForm, InviteOfficeFormSet, AddressOfficeForm, InviteOfficeForm
+    OfficeForm, InviteForm, InviteOfficeFormSet, InviteOfficeForm, \
+    ContactMechanismForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
@@ -37,20 +40,40 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     USER_CREATE_SUCCESS_MESSAGE
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
     OfficeMixin, \
-    InviteOffice, OfficeMembership
+    InviteOffice, OfficeMembership, ContactMechanism
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
-    InviteOfficeTable, OfficeMembershipTable
+    InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable
 from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task, TaskStatus
+from task.metrics import get_correspondent_metrics
 from ecm.forms import AttachmentForm
 from ecm.utils import attachment_form_valid, attachments_multi_delete
 from django.core.validators import validate_email
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_groups_with_perms
-from django.contrib.sites.shortcuts import get_current_site
+from billing.models import Plan, PlanOffice
+
+
+def post_create_office(office):
+    member, created = OfficeMembership.objects.get_or_create(
+        person=office.create_user.person, office=office,
+        defaults={'create_user': office.create_user, 'is_active': True})
+    if not created:
+        # Caso o relacionamento esteja apenas inativo
+        member.is_active = True
+        member.save()
+    else:
+        for super_user in User.objects.filter(is_superuser=True).all():
+            member, created = OfficeMembership.objects.update_or_create(
+                person=super_user.person, office=office,
+                defaults={'create_user': office.create_user, 'is_active': True})
+    if not office.create_user.is_superuser:
+        for group in {group for group, perms in
+                      get_groups_with_perms(office, attach_perms=True).items() if 'group_admin' in perms}:
+            office.create_user.groups.add(group)
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -106,11 +129,21 @@ def inicial(request):
         return HttpResponseRedirect('/')
 
 
-class StartUserView(View):
+class StartUserView(TemplateView):
     template_name = 'core/start_user.html'
 
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+    def get_context_data(self):
+        context = super().get_context_data()
+
+        if self.request.user.person.is_correspondent:
+            metrics = get_correspondent_metrics(self.request.user.person)
+            context['rating'] = metrics['rating']
+            context['returned_os'] = metrics['returned_os_rate']
+
+        office_pks = self.request.user.person.offices.active_offices().values_list('pk', flat=True)
+        context['person_invites'] = Invite.objects.filter(invite_from='P', office_id__in=office_pks, status='N').all()
+
+        return context
 
 
 class OfficeInstanceView(View):
@@ -276,8 +309,12 @@ class AuditFormMixin(CustomLoginRequiredView, SuccessMessageMixin):
         messages.error(self.request, form.errors)
         return super().form_invalid(form)
 
-
-class AddressMixin(AuditFormMixin):
+class ViewRelatedMixin(AuditFormMixin):
+    """
+        Este mixin procura abstrair funcionalidades pertinentes a models que são editados
+        como detail em outro model permitindo salvar model detalhe vinculado ao model mestre.
+        Exemplo: Cadastro de pessoa com os cadastros de endereço e mecanismo de contato.
+    """
     def __init__(self, related_model=None, related_field_pk=False, related_model_name=''):
         self.related_model = related_model
         self.related_model_name = related_model_name
@@ -295,14 +332,20 @@ class AddressMixin(AuditFormMixin):
     def form_valid(self, form):
         form.save(commit=False)
         setattr(form.instance, self.related_model_name, self.object_related)
-        return super().form_valid(form)
+        try:
+            #TODO - Verificar se é a melhor forma de tratar duplicidades
+            return super().form_valid(form)
+        except IntegrityError as e:
+            messages.add_message(self.request, messages.ERROR, 'Registro já existente.')
+            return self.form_invalid(form)
+
 
     def get_object_list_url(self):
         # TODO: Este método parece ser inútil, success_url pode ser usado.
         return reverse('{}_update'.format(self.related_model_name), args=(self.object_related.pk,))
 
 
-class AddressCreateView(AddressMixin, CreateView):
+class AddressCreateView(ViewRelatedMixin, CreateView):
     model = Address
     form_class = AddressForm
     success_message = CREATE_SUCCESS_MESSAGE
@@ -315,7 +358,7 @@ class AddressCreateView(AddressMixin, CreateView):
         return reverse('person_update', args=(self.kwargs.get('person_pk'),))
 
 
-class AddressOfficeCreateView(AddressMixin, CreateView):
+class AddressOfficeCreateView(ViewRelatedMixin, CreateView):
     model = Address
     form_class = AddressForm
     success_message = CREATE_SUCCESS_MESSAGE
@@ -477,15 +520,8 @@ class PersonCreateView(AuditFormMixin, CreateView):
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
 
-    def get_context_data(self, **kwargs):
-        data = super(PersonCreateView, self).get_context_data(**kwargs)
-        if self.request.POST:
-            data['personaddress'] = AddressFormSet(self.request.POST)
-        else:
-            data['personaddress'] = AddressFormSet()
-            data['personaddress'].forms[0].fields['is_active'].initial = True
-            data['personaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
-        return data
+    def get_success_url(self):
+        return reverse('person_update', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
 
@@ -504,7 +540,6 @@ class PersonCreateView(AuditFormMixin, CreateView):
             form.save()
 
         context = self.get_context_data()
-        personaddress = context['personaddress']
         with transaction.atomic():
             self.object = form.save(commit=False)
             office_session = get_office_session(self.request)
@@ -523,11 +558,6 @@ class PersonCreateView(AuditFormMixin, CreateView):
                 # Caso o relacionamento esteja apenas inativo
                 member.is_active = True
                 member.save()
-            if personaddress.is_valid():
-                address = personaddress.forms[0].save(commit=False)
-                address.person = self.object
-                address.create_user = self.request.user
-                address.save()
         return super().form_valid(form)
 
 
@@ -541,6 +571,7 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
     def get_context_data(self, **kwargs):
         kwargs.update({
             'table': AddressTable(self.object.address_set.all()),
+            'table_contact_mechanism': ContactMechanismTable(self.object.contactmechanism_set.all()),
         })
         return super().get_context_data(**kwargs)
 
@@ -751,7 +782,8 @@ class UserListView(CustomLoginRequiredView, SingleTableViewMixin):
         context = super().get_context_data(**kwargs)
         table_data = context['table'].data.data
         context['table'] = self.table_class(
-            list(map(lambda i: i.auth_user, get_office_session(self.request).persons.filter(auth_user__in=table_data))))
+            list(map(lambda i: i.auth_user, get_office_session(self.request).persons.filter(auth_user__in=table_data,
+                                                                                            auth_user__is_superuser=False))))
         RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
 
@@ -918,16 +950,7 @@ class OfficeCreateView(AuditFormMixin, CreateView):
     def form_valid(self, form):
         form.instance.create_user = self.request.user
         form.instance.save()
-        member, created = OfficeMembership.objects.get_or_create(
-            person=form.instance.create_user.person, office=form.instance,
-            defaults={'create_user': form.instance.create_user, 'is_active': True})
-        if not created:
-            # Caso o relacionamento esteja apenas inativo
-            member.is_active = True
-            member.save()
-        for group in {group for group, perms in
-                      get_groups_with_perms(form.instance, attach_perms=True).items() if 'group_admin' in perms}:
-            form.instance.create_user.groups.add(group)
+        post_create_office(form.instance)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -946,8 +969,10 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
         kwargs.update({
             'table': AddressOfficeTable(self.object.get_address()),
             'table_members': OfficeMembershipTable(
-                self.object.officemembership_set.filter(is_active=True, person__auth_user__isnull=False)
+                self.object.officemembership_set.filter(is_active=True, person__auth_user__isnull=False,
+                                                        person__auth_user__is_superuser=False)
                     .exclude(person__auth_user=self.request.user)),
+            'table_contact_mechanism': ContactMechanismOfficeTable(self.object.contactmechanism_set.all()),
         })
         data = super().get_context_data(**kwargs)
         data['inviteofficeform'] = InviteForm(self.request.POST) \
@@ -971,15 +996,42 @@ class RegisterNewUser(CreateView):
 
     def post(self, request, *args, **kwargs):
         invite_code = request.POST.get('invite_code')
-        name = str(request.POST.get('name')).split(' ')
-        first_name = ''
-        last_name = ''
-        if name:
-            first_name = name[0]
-            last_name = ' '.join(name[1:])
+        first_name = request.POST.get('name')
+        last_name = request.POST.get('last_name')
         username = request.POST.get('username')
         password = request.POST.get('password')
+        confirm_password = request.POST.get('confirmpassword')
         email = request.POST.get('email')
+        errors = []
+        if first_name == '' or last_name == '':
+            errors.append({'title': 'Identificação do Usuário', 'error': 'Os campos Nome e Sobrenome são obrigatórios'})
+        if not password == confirm_password:
+            errors.append({'title': 'Senha', 'error': 'As senhas digitadas não conferem'})
+        else:
+            try:
+                password_validation.validate_password(password)
+            except ValidationError as error:
+                errors.append({'title': 'Senha', 'error': error})
+
+        select_office_register = request.POST.get('select_office_register')
+        selected_plan = request.POST.get('plan')
+        office_pks = request.POST.getlist('office_checkbox')
+        if select_office_register == "":
+            errors.append({'title': 'Forma de Trabalho', 'error': 'Nenhuma Forma de trabalho selecionada'})
+        if select_office_register == '1':
+            if not office_pks:
+                errors.append({'title': 'Escritório', 'error': 'Nenhum escritório selecionado, para vincular com o usuário criado'})
+        elif select_office_register == '2' or select_office_register == '3':
+            if selected_plan == "":
+                errors.append({'title': 'Plano de acesso', 'error': 'Nenhum plano selecionado'})
+
+        if select_office_register == '2' and request.POST.get('legal_name') == '':
+            errors.append({'title': 'Cadastro de escritório',
+                           'error': 'É obrigatório que o escrtório cadastrado possua um nome'})
+
+        if errors:
+            return render(request, 'account/register.html', {'errors': errors})
+
         form = RegisterNewUserForm(
             {'username': username, 'first_name': first_name, 'last_name': last_name, 'email': email,
              'password1': password, 'password2': password})
@@ -991,15 +1043,67 @@ class RegisterNewUser(CreateView):
                     invite.person = Person.objects.filter(auth_user=instance).first()
                     invite.status = 'N'
                     invite.save()
-            return HttpResponseRedirect(reverse_lazy('start_user'))
-        return render(request, 'account/register.html', {'form': form, 'invite_code': invite_code, })
+        else:
+            for title, error in form.errors.items():
+                errors.append({'title': title, 'message': error})
+            return render(request, 'account/register.html', {'errors': errors})
+
+        office_instance = None
+        if select_office_register == '1':
+            for office in Office.objects.filter(id__in=office_pks):
+                Invite.objects.create(office=office,
+                                      person=instance.person,
+                                      status='N',
+                                      create_user=instance,
+                                      invite_from='P',
+                                      is_active=True)
+        elif select_office_register == '2':
+            legal_name = request.POST.get('legal_name') if request.POST.get('legal_name') != '' else None
+            office_name = request.POST.get('office_name') if request.POST.get('office_name') != '' else None
+            legal_type = request.POST.get('legal_type') if request.POST.get('legal_type') != '' else None
+            cpf_cnpj = request.POST.get('cpf_cnpj') if request.POST.get('cpf_cnpj') != '' else None
+            office_instance = Office.objects.create(legal_name=legal_name,
+                                                    name=office_name,
+                                                    legal_type=legal_type,
+                                                    cpf_cnpj=cpf_cnpj,
+                                                    is_active=True,
+                                                    create_user=instance)
+            post_create_office(office_instance)
+            DefaultOffice.objects.create(auth_user=instance, office=office_instance,
+                                         create_user=instance)
+        elif select_office_register == '3':
+            legal_name = '{} {}'.format(first_name, last_name)
+            office_name = legal_name
+            legal_type = 'F'
+            office_instance = Office.objects.create(legal_name=legal_name,
+                                                    name=office_name,
+                                                    legal_type=legal_type,
+                                                    is_active=True,
+                                                    create_user=instance)
+            post_create_office(office_instance)
+            DefaultOffice.objects.create(auth_user=instance, office=office_instance,
+                                         create_user=instance)
+        if office_instance:
+            plan = Plan.objects.get(pk=selected_plan)
+            PlanOffice.objects.create(office=office_instance,
+                                      plan=plan,
+                                      month_value=plan.month_value,
+                                      task_limit=plan.task_limit,
+                                      create_user=instance)
+
+        messages.add_message(request, messages.SUCCESS, "Registro concluído com sucesso!", 'add_new_user')
+        return HttpResponseRedirect(reverse_lazy('login'))
 
     def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('dashboard'))
         context = {}
         if request.GET.get('invite_code'):
             invite = Invite.objects.filter(invite_code=request.GET['invite_code']).first()
             context['email'] = invite.email
             context['invite_code'] = request.GET['invite_code']
+        context['offices'] = Office.objects.all().order_by('legal_name')
+        context['plans'] = Plan.objects.filter(is_active=True)
         return render(request, 'account/register.html', context)
 
 
@@ -1117,10 +1221,15 @@ class InviteUpdateView(UpdateView):
         invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
         invite.status = request.POST.get('status')
         if invite.status == 'A':
-            OfficeMembership.objects.update_or_create(person=request.user.person,
+            OfficeMembership.objects.update_or_create(person=invite.person,
                                                       office=invite.office,
                                                       defaults={'create_user': self.request.user,
                                                                 'is_active': True})
+            for group in {group for group, perms in
+                          get_groups_with_perms(invite.office, attach_perms=True).items() if 'view_delegated_tasks' in perms}:
+                if group not in invite.person.auth_user.groups.all():
+                    invite.person.auth_user.groups.add(group)
+
         invite.save()
         return HttpResponse('ok')
 
@@ -1141,7 +1250,7 @@ class InviteTableView(CustomLoginRequiredView, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        table = InviteTable(Invite.objects.filter(office__id=self.kwargs.get('office_pk')).order_by('-pk'))
+        table = InviteTable(Invite.objects.filter(office__id=self.kwargs.get('office_pk'), invite_from='O').order_by('-pk'))
         RequestConfig(self.request).configure(table)
         context['table'] = table
         return context
@@ -1157,6 +1266,23 @@ class InviteOfficeTableView(CustomLoginRequiredView, ListView):
         RequestConfig(self.request).configure(table)
         context['table'] = table
         return context
+
+
+class InviteVerify(View):
+    def get(self, request):
+        user = request.user
+        person = user.person
+        office_pks = person.offices.active_offices().values_list('pk', flat=True)
+
+        data = []
+
+        for invite in Invite.objects.filter(Q(status='N'),
+                                            Q(Q(Q(office_id__in=office_pks), Q(invite_from='P')) |
+                                            Q(Q(person=person), Q(invite_from='O')))):
+            data.append({'id': invite.pk, 'office': invite.office.legal_name, 'person': invite.person.legal_name,
+                         'invite_from': invite.invite_from})
+
+        return JsonResponse(data, safe=False)
 
 
 class EditableListSave(CustomLoginRequiredView, View):
@@ -1215,7 +1341,7 @@ class InviteMultipleUsersView(CustomLoginRequiredView, CreateView):
                 person = Person.objects.get(pk=person_pk)
                 office = Office.objects.get(pk=office_pk)
                 Invite.objects.create(create_user=request.user, person=person,
-                                      office=office, status='N')
+                                      office=office, status='N', invite_from='O')
             return HttpResponseRedirect(reverse_lazy('office_update', kwargs={'pk': office_pk}))
         return reverse_lazy('office_list')
 
@@ -1385,3 +1511,175 @@ class TagsInputPermissionsView(View):
                 'text': group.label_group
             })
         return JsonResponse(data, safe=False)
+
+
+class OfficeSessionSearch(View):
+    def get(self, request, *args, **kwargs):
+        q = request.GET.get('office_legal_name', '')
+        if hasattr(request.user, 'person'):
+            offices = request.user.person.offices.all()
+        else:
+            offices = Office.objects.all()
+        selected_offices = list(offices.filter(legal_name__icontains=q).values_list('id', flat=True))
+        data = []
+        for office in offices:
+            show = True if office.pk in selected_offices else False
+            data.append({
+                'id': office.pk,
+                'show': show
+            })
+        return JsonResponse(data, safe=False)
+
+
+class OfficeSearch(View):
+    def get(self, request, *args, **kwargs):
+        q_string = request.GET.get('office_legal_name', '')
+        offices = Office.objects.all()
+        if q_string != '':
+            selected_offices = list(offices.filter(legal_name__icontains=q_string).values_list('id', flat=True))
+        else:
+            selected_offices = []
+        data = []
+        for office in offices:
+            show = True if office.pk in selected_offices else False
+            data.append({
+                'id': office.pk,
+                'show': show
+            })
+        return JsonResponse(data, safe=False)
+
+
+class ValidatePassword(View):
+    def post(self, request, *args, **kwargs):
+        password = request.POST.get('password')
+        data = {}
+        try:
+            password_validation.validate_password(password)
+            data['valid'] = True
+        except ValidationError as error:
+            data['valid'] = False
+            message = error.messages
+            message = [x + '<br>' for x in message]
+            data['message'] = message
+
+        return JsonResponse(data, safe=False)
+
+
+class ValidateUsername(View):
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get('username')
+        data = {'valid': True}
+        if User.objects.filter(username=username).first():
+            data['valid'] = False
+
+        return JsonResponse(data, safe=False)
+
+
+class ValidateEmail(View):
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get('email')
+        data = {'valid': True}
+        if User.objects.filter(email=email).first():
+            data['valid'] = False
+
+        return JsonResponse(data, safe=False)
+
+class ContactMechanismCreateView(ViewRelatedMixin, CreateView):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def __init__(self):
+        super().__init__(related_model=Person, related_model_name='person',
+                         related_field_pk='person')
+
+    def get_success_url(self):
+        return reverse('person_update', args=(self.kwargs.get('person_pk'),))
+
+    def form_valid(self, form):
+        # Se tipo do mecanismo de contato for e-mail validar se é válido
+        if form.instance.contact_mechanism_type.is_email():
+            try:
+                validate_email(form.instance.description)
+            except ValidationError as e:
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    'Informe um endereço de e-mail válido.')
+                return self.form_invalid(form)
+        return super().form_valid(form)
+
+
+class ContactMechanismUpdateView(UpdateView):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+    success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_success_url(self):
+        return reverse('person_update', args=(self.kwargs.get('person_pk'),))
+
+    def form_valid(self, form):
+        if form.instance.contact_mechanism_type.is_email():
+            try:
+                validate_email(form.instance.description)
+            except ValidationError as e:
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    'Informe um endereço de e-mail válido.')
+                return self.form_invalid(form)
+        try:
+            #TODO - Verificar se é a melhor forma de tratar duplicidades
+            return super().form_valid(form)
+        except IntegrityError as e:
+            messages.add_message(self.request, messages.ERROR, 'Registro já existente.')
+            return self.form_invalid(form)
+
+
+class ContactMechanismDeleteView(MultiDeleteViewMixin):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+
+    def get_success_url(self):
+        return reverse('person_update', kwargs={'pk': self.kwargs['person_pk']})
+
+
+class ContactMechanismOfficeCreateView(ViewRelatedMixin, CreateView):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def __init__(self):
+        super().__init__(related_model=Office, related_model_name='office',
+                         related_field_pk='office')
+
+    def get_success_url(self):
+        return reverse('office_update', args=(self.kwargs.get('office_pk'),))
+
+    def form_valid(self, form):
+        # Se tipo do mecanismo de contato for e-mail validar se é válido
+        if form.instance.contact_mechanism_type.is_email():
+            try:
+                validate_email(form.instance.description)
+            except ValidationError as e:
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    'Informe um endereço de e-mail válido.')
+                return self.form_invalid(form)
+        return super().form_valid(form)
+
+
+class ContactMechanismOfficeUpdateView(ContactMechanismUpdateView):
+    def get_success_url(self):
+        return reverse('office_update', args=(self.kwargs.get('office_pk'),))
+
+
+class ContactMechanismOfficeDeleteView(ContactMechanismDeleteView):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+
+    def get_success_url(self):
+        return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})
