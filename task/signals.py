@@ -209,7 +209,8 @@ def update_status_child_task(sender, instance, **kwargs):
         child = instance.child.latest('pk')
         child.task_status = status
         child.save(** {'skip_signal': instance._skip_signal,
-            'skip_mail': instance._skip_signal, 'from_parent': True})
+                       'skip_mail': instance._skip_signal, 'from_parent': True})
+
 
 def create_or_update_user_by_chat(task, fields):
     users = []
@@ -223,6 +224,7 @@ def create_or_update_user_by_chat(task, fields):
             })
             user = user.user_by_chat
         users.append(user)
+
 
 @receiver(post_save, sender=Task)
 def create_or_update_chat(sender, instance, created, **kwargs):
@@ -259,5 +261,5 @@ def create_or_update_chat(sender, instance, created, **kwargs):
             'person_asked_by', 'person_executed_by', 'person_distributed_by'
         ])
     post_save.disconnect(create_or_update_chat, sender=sender)
-    instance.save(**{'skip_signal': True, 'skip_mail': True})
+    instance.save(**{'skip_signal': True, 'skip_mail': True, 'from_parent': True})
     post_save.connect(create_or_update_chat, sender=sender)
