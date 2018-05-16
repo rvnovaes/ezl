@@ -40,3 +40,4 @@ six==1.10.0
 SQLAlchemy==1.2.0b2
 uwsgi==2.0.15
 django-guardian==1.4.9
+django-money==0.13.2

@@ -250,19 +250,20 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
                     query.add(Q(parent__office__name__unaccent__icontains=data['office']), Q.AND)
                 else:
                     query.add(Q(child__office__name__unaccent__icontains=data['office']), Q.AND)
-
+            
             if data['finished_in']:
                 if data['finished_in'].start:
                     finished_query.add(
                         Q(finished_date__gte=data['finished_in'].start.replace(hour=0, minute=0)), Q.AND)
                 if data['finished_in'].stop:
                     finished_query.add(
-                        Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                        Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)            
             else:
-                # O filtro padrão para finished_date é o més atual
+                # O filtro padrão para finished_date é do dia 01 do mês atual e o dia corrente como data final
                 finished_query.add(
                     Q(finished_date__gte=timezone.now().replace(day=1, hour=0, minute=0)), Q.AND)
-
+                finished_query.add(
+                    Q(finished_date__lte=timezone.now().replace(hour=23, minute=59)), Q.AND)
             query.add(Q(finished_query), Q.AND)
             queryset = queryset.filter(query)
 
