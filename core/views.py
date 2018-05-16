@@ -935,8 +935,11 @@ class OfficeListView(CustomLoginRequiredView, SingleTableViewMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['table'] = self.table_class(
-            context['table'].data.data.filter(pk__in=self.request.user.person.offices.active_offices()))
+        pks = []
+        for office in self.request.user.person.offices.active_offices():
+            if self.request.user.has_perm('can_access_general_data', office):
+                pks.append(office.pk)
+        context['table'] = self.table_class(context['table'].data.data.filter(pk__in=pks))
         RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
 
@@ -979,6 +982,16 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
             if InviteForm(self.request.POST).is_valid() else InviteForm()
         RequestConfig(self.request, paginate={'per_page': 10}).configure(kwargs.get('table_members'))
         return data
+
+    def dispatch(self, request, *args, **kwargs):
+        office_instance = Office.objects.filter(pk=int(kwargs.get('pk', None))).first()
+        if not self.request.user.has_perm('can_access_general_data', office_instance):
+            messages.error(self.request, "Você não possui permissão para editar o escritório selecionado."
+                                         " Favor selecionar o escritório correto")
+            del self.request.session['custom_session_user']
+            self.request.session.modified = True
+            return HttpResponseRedirect(reverse('office_instance'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class OfficeDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
