@@ -3,13 +3,16 @@ from django.db.models.signals import post_init, pre_save, post_save
 from django.dispatch import receiver, Signal
 from django.template.loader import render_to_string
 from django.utils import timezone
-
+from django.db.models import Q
 from advwin_models.tasks import export_ecm, export_task, export_task_history
 from core.models import ContactMechanism, ContactMechanismType, Person
 from django.conf import settings
 from task.mail import SendMail
 from task.models import Task, TaskStatus, TaskHistory, Ecm
-from task.workflow import get_parent_status, get_child_status, get_parent_fields
+from task.workflow import get_parent_status, get_child_status
+from chat.models import Chat, UserByChat
+from lawsuit.models import CourtDistrict
+from task.workflow import get_parent_fields
 
 send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'execution_date'])
 
@@ -113,10 +116,9 @@ def new_task(sender, instance, created, **kwargs):
                                              })
             mail.to_mail = mail_list
 
-            # TODO: tratar corretamente a excecao
-
             try:
-                mail.send()
+                if not getattr(instance, '_skip_mail'):
+                    mail.send()
             except Exception as e:
                 print(e)
                 print('Você tentou mandar um e-mail')
@@ -157,13 +159,13 @@ def change_status(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Task)
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
-    if not getattr(instance, '_skip_signal') and instance.legacy_code:
+    if not getattr(instance, '_skip_signal', None) and instance.legacy_code:
         export_task.delay(instance.pk)
 
 
 @receiver(post_save, sender=TaskHistory)
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
-    if not getattr(instance, '_skip_signal') and instance.task.legacy_code:
+    if not getattr(instance, '_skip_signal', None) and instance.task.legacy_code:
         export_task_history.delay(instance.pk)
 
 
@@ -179,13 +181,16 @@ def update_status_parent_task(sender, instance, **kwargs):
     """
     if instance.parent and not instance.task_status == TaskStatus.REQUESTED:
         instance.parent.task_status = get_parent_status(instance.status)
-        if not TaskStatus(instance.parent.task_status) == TaskStatus(instance.parent.__previous_status) and not getattr(instance, '_from_parent'):
+        if not TaskStatus(instance.parent.task_status) == TaskStatus(instance.parent.__previous_status) \
+                and not getattr(instance, '_from_parent'):
             if instance.parent.task_status == TaskStatus.REQUESTED:
-                setattr(instance.parent, '__notes', 'O escritório {} recusou a OS {}'.format(instance.office.legal_name, instance.parent.task_number))
+                setattr(instance.parent, '__notes', 'O escritório {} recusou a OS {}'.format(instance.office.legal_name,
+                                                                                             instance.parent.task_number))
             fields = get_parent_fields(instance.status)
             for field in fields:
                 setattr(instance.parent, field, getattr(instance, field))
-            instance.parent.save()
+            instance.parent.save(**{'skip_signal': instance._skip_signal,
+                                    'skip_mail': instance._skip_signal})
 
 
 @receiver(pre_save, sender=Task)
@@ -203,4 +208,58 @@ def update_status_child_task(sender, instance, **kwargs):
     if instance.get_child and status:
         child = instance.child.latest('pk')
         child.task_status = status
-        child.save(from_parent=True)
+        child.save(** {'skip_signal': instance._skip_signal,
+                       'skip_mail': instance._skip_signal, 'from_parent': True})
+
+
+def create_or_update_user_by_chat(task, fields):
+    users = []
+    for field in fields:
+        user = None
+        if getattr(task, field):
+            user = getattr(getattr(task, field), 'auth_user')
+        if user:
+            user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
+                'create_user': user, 'user_by_chat': user, 'chat': task.chat
+            })
+            user = user.user_by_chat
+        users.append(user)
+
+
+@receiver(post_save, sender=Task)
+def create_or_update_chat(sender, instance, created, **kwargs):
+    opposing_party = ''
+    if instance.movement and instance.movement.law_suit:
+        opposing_party = instance.movement.law_suit.opposing_party
+    state = ''
+    if isinstance(instance.court_district, CourtDistrict):
+        state = instance.court_district.state
+    description = """
+    Parte adversa: {opposing_party}, Cliente: {client},
+    {court_district} - {state}, Prazo: {final_deadline_date}
+    """.format(opposing_party=opposing_party, client=instance.client,
+               court_district=instance.court_district, state=state,
+               final_deadline_date=instance.final_deadline_date.strftime('%d/%m/%Y %H:%M'))
+    label = 'task-{}'.format(instance.pk)
+    title = """#{task_number} - {type_task}""".format(
+                    task_number=instance.task_number, type_task=instance.type_task)
+    chat, chat_created = Chat.objects.update_or_create(
+        label=label, defaults={
+            'create_user': instance.create_user,
+            'description': description,
+            'title': title,
+            'back_url': '/dashboard/{}'.format(instance.pk),
+        }
+    )
+    instance.chat = chat
+    instance.chat.offices.add(instance.office)
+    create_or_update_user_by_chat(instance,[
+        'person_asked_by', 'person_executed_by', 'person_distributed_by'])
+    if instance.parent:
+        instance.chat.offices.add(instance.parent.office)
+        create_or_update_user_by_chat(instance.parent, [
+            'person_asked_by', 'person_executed_by', 'person_distributed_by'
+        ])
+    post_save.disconnect(create_or_update_chat, sender=sender)
+    instance.save(**{'skip_signal': True, 'skip_mail': True, 'from_parent': True})
+    post_save.connect(create_or_update_chat, sender=sender)

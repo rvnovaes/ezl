@@ -20,7 +20,7 @@ class Attachment(AuditCreate, LegacyCode):
     model_name = models.CharField(
         verbose_name="Model", max_length=120
     )
-    object_id = models.PositiveSmallIntegerField(
+    object_id = models.IntegerField(
         verbose_name="ID do Registro", db_index=True
     )
     file = models.FileField(

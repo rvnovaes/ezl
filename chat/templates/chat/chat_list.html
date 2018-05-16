@@ -1,230 +1,149 @@
-{% extends 'skeleton/base.html' %}
-{% load staticfiles %}
-
-
+{% extends "skeleton/forms/base.html" %}
+{% load static %}
 {% block content %}
+<link href="{% static 'chat/css/chat.css' %}" rel="stylesheet">
+<script src="{% static 'chat/vendor/angular/angular.js' %}"></script>
+<script src="{% static 'chat/vendor/angular-ui-event/dist/event.min.js' %}"></script>
+<script src="{% static 'chat/js/app.js' %}"></script>
+<script src="{% static 'chat/js/controllers/chatCtrl.js' %}"></script>
+<script src="{% static 'chat/js/services/chatApiService.js'%}"></script>
+<script src="{% static 'chat/js/directives/chatDirective.js'%}"></script>
+{%verbatim%}
+<section ng-app='app' ng-controller='chatCtrl'>
+  <div class="chat-main">
     <div class="chat-main-box">
-        <!-- .chat-left-panel -->
-        <div class="chat-left-aside">
-            <div class="open-panel"><i class="ti-angle-right"></i></div>
-            <div class="chat-left-inner">
-                <div class="chat-main-header">
-                <div class="p-20 b-b">
-                    <h3 class="box-title">Conversas</h3>
-                </div>
+      <!-- .chat-left-panel -->
+      <div class="chat-left-aside">
+          <div class="open-panel"><i class="ti-angle-right"></i></div>
+          <div class="chat-left-inner" style="height: 133px;">
+            <div class="row">
+              <div class="col-md-12">
+                <button ng-if="!listOffices" ng-click="goToOfficeList()" class="btn btn-block btn-rounded btn-success">
+                  <i class="fa fa-arrow-left"></i> Voltar
+                </button>                
+              </div>
             </div>
-                <ul class="chatonline style-none ">
-                    {% for chat in chats|dictsortreversed:'alter_date' %}
-                        {% if chat.messages.all|length > 0 %}
-                        <li>
-                            <a class="chat-list-a" href="javascript:chatGetMessages('{{ chat.pk }}', '{{ chat.label }}')" class="mytooltip"
-                                data-chat-label="{{ chat.label }}" onclick='chatReadMessage("{{chat.pk}}", "{{csrf_token}}")'
-                                >
-                              <div class="chat-title">
-                                <span class="label label-rouded label-primary pull-right hide" id="notify-{{ chat.pk }}" style="color:#fff"></span>
-                                  <div class="circle circle-sm bg-info di">OS
-                                  </div>
-                                  <span>{{ chat.title }}</span>
+              <div class="form-material">
+                <input class="form-control p-20" placeholder="Pesquisar..." type="text" ng-model="search"/>
+              </div>
+              <div>
+                <ul class="chatonline style-none" style="overflow: hidden; width: auto; height: 100%;" ng-if="listOffices">
+                  <div class="slimScroll">
+                    <li class="list-chat" ng-repeat="contact in contacts" ng-click="getChats(contact.pk)">
+                      <a class="chat-list-a" href="#" data-chat-label="{{chat.label}}">
+                        <div>
+                          <span class="label label-rouded label-primary pull-right hide" id="notify-1251" style="color:#fff"></span>
+                            <div class="row">
+                              <div class="col-md-2">
+                                <div class="circle circle-sm bg-success di">
+                                 <i class="fa fa-building-o"></i>
                                 </div>
-                                <p class="text-muted pull-right"><i class="fa fa-clock-o"></i> {{ chat.alter_date|time }}</p>
-                            </a>
-                        </li>
-                        {% endif %}
-                    {% endfor %}
+                              </div>
+                              <div class="col-md-10 chat-title">
+                                <span id="chat-title">
+                                  {{contact.legal_name|uppercase}}
+                                  <div class="row">
 
-                    <li class="p-20"></li>
-                </ul>
-            </div>
-        </div>
-        <!-- .chat-left-panel -->
-        <!-- .chat-right-panel -->
-        <div class="chat-right-aside">
-            <div class="chat-main-header">
-                <div class="p-20 b-b" id="chatMessageTitle">
-                    <h3 class="box-title">Mensagens</h3>
-                    <p class="box-title">Selecione um bate papo ao lado</p>
-                </div>
-            </div>
-            <div class="chat-box">
-                <ul class="chat-list slimscroll p-t-30" id="messageList">
-                </ul>
-                <div class="send-chat-box">
-                    <div class="col-sm-12 p-b-10">
-                        <input class="form-control" placeholder="Digite sua mensagem" id="inputMsg" disabled/>
-                        <div class="custom-send p-r-10 p-b-10">
-                            <button class="btn btn-success btn-lg btn-circle" type="button" onclick="sendMessage()"
-                                    id="btnSend" disabled>
-                                <i class="fa fa-paper-plane-o"></i></button>
-                        </div>
+                                    <div class="col-md-12">
+                                      <small class="label label-rouded label-warning pull-right" ng-if="contact.unread_message_quanty > 0">{{contact.unread_message_quanty}}</small>
+                                    </div>
+                                  </div>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                      </a>
+                      </li>
                     </div>
-                </div>
+                  </ul>
+                  <ul class="chatonline style-none" ng-show="!listOffices">
+                      <div id="list-chat-scroll">
+                        <li class="list-chat" ng-repeat="chat in chats"  ng-click="getMessages(chat)" scroll-bottom="scroll-bottom">
+                          <a class="chat-list-a" href="#" data-chat-label="{{chat.label}}">
+                            <div>
+                              <span class="label label-rouded label-primary pull-right hide" id="notify-1251" style="color:#fff"></span>
+                                <div class="row">
+                                  <div class="col-md-2">
+                                    <div class="circle circle-sm bg-info di">OS
+                                    </div>
+                                  </div>
+                                  <div class="col-md-10 chat-title">
+                                    <span id="chat-title">
+                                      {{chat.title}}
+                                      <div class="row">
+                                        <div class="col-md-6">
+                                          <small class="text-muted">
+                                            <i class="fa fa-clock-o"></i>{{chat.alter_date|date:"HH:mm"}}
+                                          </small>
+                                        </div>
+                                        <div class="col-md-6">
+                                          <small class="label label-rouded label-warning pull-right" ng-if="chat.unread_message_quanty > 0">{{chat.unread_message_quanty}}</small>
+                                        </div>
+                                      </div>
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                          </a>
+                          <hr/>
+                        </li>
+                    </div>
+                  </ul>
+              <div class="slimScrollBar" style="background: rgb(220, 220, 220) none repeat scroll 0% 0%; width: 0px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 1px; height: 30px;"></div><div class="slimScrollRail" style="width: 0px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51) none repeat scroll 0% 0%; opacity: 0.2; z-index: 90; right: 1px;">
+              </div>
             </div>
-        </div>
-        <!-- .chat-right-panel -->
+          </div>
+      </div>
+      <!-- .chat-left-panel -->
+      <!-- .chat-right-panel -->
+      <div class="chat-right-aside" ng-show="inMessage">
+          <div class="chat-main-header">
+              <div class="p-10 b-b">
+                  <div class="row">
+                    <div class="col-md-10">
+                      <h3 class="box-title">{{chat.title}}</h3>
+                      <span class="heading-description text-wrap">{{ chat.description }}</span>
+                    </div>
+                    <div class="col-md-2" ng-if="!existsUnread">
+                      <button class="btn btn-primary btn-outline" ng-click="unreadMessage(chat)">
+                        <i class="mdi mdi-eye-off"></i>
+                      </button>
+                    </div>
+                  </div>
+              </div>
+          </div>
+          <div class="chat-box">
+            <ul id="scroll-bottom" ui-event="{ change: 'onChangeMessage($event)' }" class="chat-list slimscroll p-t-30">
+              <div class="slimscroll">
+                <li ng-repeat="message in messages.messages" ng-class="getClass(message.create_user_id, messages.request_user_id)">
+                  <div class="chat-image">
+                    <div class="circle circle-sm bg-info di">
+                      <i class="fa fa-user"></i>
+                    </div>
+                  </div>
+                  <div class="chat-body">
+                    <div class="chat-text">
+                      <h4>{{message.create_user__username}}</h4>
+                      <p>{{message.message}}</p> <b>{{message.create_date | date: "dd/MM/yyyy HH:mm:ss"}}</b>
+                    </div>
+                  </div>
+                </li>
+              </div>
+            </ul>
+          </div>
+          <div class="send-chat-box">
+              <div class="input-message">
+                  <input class="form-control" placeholder="Digite sua mensagem" id="inputMsg" ng-model="message" ui-event="{ keypress: 'onEnterKey($event)' }">
+                  <div class="custom-send p-r-10 p-b-10">
+                      <button class="btn btn-success btn-lg btn-circle" type="button" ng-click="sendMessage()" id="btnSend" scroll-bottom="scroll-bottom">
+                          <i class="fa fa-paper-plane-o"></i></button>
+                  </div>
+              </div>
+          </div>
+      </div>                    <!-- .chat-right-panel -->
     </div>
-    </div>
-
-{% endblock %}
-
-
-{% block extra_scripts %}
-    <script src="{% static 'skeleton/js/chat.js' %}"></script>
-    <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
-    <script src="{% static 'skeleton/plugins/ion.sound-3.0.7/ion.sound.min.js' %}"></script>
-
-    <script>
-    // init bunch of sounds
-        ion.sound({
-            sounds: [
-                {name: "beer_can_opening"},
-                {name: "bell_ring"},
-                {name: "branch_break"},
-                {name: "water_droplet_3"},
-                {name: "button_click"}
-            ],
-
-            // main config
-            path: "{% static 'skeleton/plugins/ion.sound-3.0.7/sounds/' %}",
-            preload: true,
-            multiplay: true,
-            volume: 0.9
-        });
-        window.chat_id = false;
-        window.socket_open = [];
-        window.chat_label = false;
-
-        var tmplMsgLi = '<li class="${odd}">\n' +
-            '  <div class="chat-image">\n' +
-            '    <div class="circle circle-sm bg-info di"> <i class="fa fa-user"></i></div>\n' +
-            '  </div>\n' +
-            '  <div class="chat-body">\n' +
-            '    <div class="chat-text">\n' +
-            '        <h4>${user}</h4>\n' +
-            '        <p>${text}</p> <b>${message_create_date}</b> ' +
-            '    </div>\n' +
-            '  </div>\n' +
-            '</li>\n';
-
-        var tmplChatMessageTitle = '<h4 class="box-title"><a href="${back_url}">${title}</a>&nbsp;' +
-                                   '<a class="label label-rouded pull-right label-primary" style="color:#fff" ' +
-                                   'data-balloon="Marcar como não lida" data-balloon-pos="left"' +
-                                   'onclick="chatUnreadMessage(\'${pk}\', \'{{ csrf_token }}\')">' +
-                                   '<i class="mdi mdi-eye-off"></i>' +
-                                   '</a></h4>' +
-                                   '<p>${description}</p>';
-
-        function to_listen(label) {
-            if (window.socket_open.indexOf(label) == -1) {
-                window.socket_open.push(label)
-                var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-                socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + label);
-                {# Ao chegar uma mensagem#}
-                console.log('escutando: ' + label);
-                socket.onmessage = function (e) {
-                    data = JSON.parse(e.data);
-                    console.log('DATA CHAT', data, window.chat_id);
-                    if (data.chat == window.chat_id) {
-                        ion.sound.play("water_droplet_3");
-                        if ('{{user}}' === data.user) {
-                            data.odd = "odd bounceInRight animated";
-                            $.tmpl(tmplMsgLi, data).appendTo("#messageList")
-                        } else {
-                            data.odd = "bounceInLeft animated";
-                            $.tmpl(tmplMsgLi, data).appendTo("#messageList")
-                        }
-                        var bottomCoord = $('#messageList')[0].scrollHeight;
-                        $('#messageList').slimScroll({scrollTo: bottomCoord});
-                    } else {
-                        $('#notify-' + data.chat).removeClass('hide');
-                        ion.sound.play("bell_ring");
-                    }
-                };
-            }
-        }
-
-
-
-        function sendMessage() {
-            var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-            var socket = new WebSocket(ws_scheme + "://" + window.location.host + "/ws/?label=" + window.chat_label);
-
-            var el = $('#inputMsg');
-            if (el.val().trim()) {
-                data = JSON.stringify({
-                    'text': el.val(),
-                    'chat': window.chat_id,
-                    'label': window.chat_label
-                });
-                el.val(null);
-                socket.onopen = function() {
-                    socket.send(data);
-                }
-                // Call onopen directly if socket is already open
-                if (socket.readyState == WebSocket.OPEN) socket.onopen();
-            } else {
-                $('#inputMsg').notify(
-                    "Digite uma mensagem!",
-                    {position: "top"}
-                );
-            }
-        }
-
-        function chatGetMessages(chat_id, label) {
-            $.ajax({
-                type: 'POST',
-                url: '{% url 'chat_get_message' %}',
-                data: {
-                    chat_id: chat_id
-                },
-                success: function (response) {
-                    window.chat_id = chat_id;
-                    window.chat_label = label;
-                    $('#notify-' + chat_id).addClass('hide')
-                    $("#messageList").html('');
-                    $("#chatMessageTitle").html('');
-                    $.tmpl(tmplChatMessageTitle, response.chat).appendTo($("#chatMessageTitle"));
-                    $.each(response.messages, function( index, value ) {
-                        console.log('get message', value)
-                        if ('{{user}}' === value.user) {
-                            value.odd =  "odd bounceInRight animated";
-                            $.tmpl(tmplMsgLi, value).appendTo("#messageList");
-                        }else {
-                            value.odd =  "bounceInLeft animated";
-                            $.tmpl(tmplMsgLi, value).appendTo("#messageList");
-                        }
-
-                    });
-                    var bottomCoord = $('#messageList')[0].scrollHeight;
-                    $('#messageList').slimScroll({scrollTo: bottomCoord});
-                    to_listen(label);  // Verificar mensagens para a conversa atual
-                    $('#inputMsg').prop('disabled', false);
-                    $('#btnSend').prop('disabled', false);
-                },
-                beforeSend: function (xhr, settings) {
-                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
-                },
-                dataType: 'json'
-            })
-        };
-
-        socket = null;
-
-        var setLastMessage = function (chat_id) {
-            $("[chat-id=" + chat_id + "]").animate({scrollTop: 9999}, 1000);
-        };
-
-        $.fn.enterKey = function (fnc) {
-            return this.each(function () {
-                $(this).keypress(function (ev) {
-                    var keycode = (ev.keyCode ? ev.keyCode : ev.which);
-                    if (keycode == '13') {
-                        fnc.call(this, ev);
-                    }
-                })
-            })
-        };
-        $('#inputMsg').enterKey(function () {
-            sendMessage();
-        })
-    </script>
+  </div>
+</section>
+{%endverbatim%}
+<script src="{% static 'skeleton/js/chat.js' %}"></script>
 {% endblock %}

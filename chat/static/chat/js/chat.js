@@ -1,3 +1,22 @@
+var resizeChat
+$(document).ready(function() {
+    resizeChat =  function(){
+        var screen_len = $(window).height() -80 + "px";
+        $('.chat-main').css('height', screen_len);
+        var chatBoxHeight = $('.chat-main').height() - 190 + "px";
+        var chatListHeight = $('.chat-main').height() - 100 + "px";
+        $('.chat-box').css('height', chatBoxHeight); 
+	$('#list-chat-scroll').css('height', chatListHeight)       
+    }
+
+    resizeChat();
+
+    $(window).resize(function(){        
+        resizeChat();
+    })
+})
+
+
 var setBadgeItem = function (items) {
     items.forEach(function (item) {
         var elm = $('#notify-' + item.message__chat__pk)
@@ -10,7 +29,6 @@ var setBadgeItem = function (items) {
 
     })
 };
-
 
 var chatReadMessage = function (chat_id, csrf_token) {
     $.ajax({
@@ -48,10 +66,9 @@ var chatUnreadMessage = function (chat_id, csrf_token) {
 };
 
 setInterval(function () {
-    var has_groups = $("#chat-notify").length > 0
     $.ajax({
         type: "GET",
-        url: "/chat/count_message/?has_groups=" + has_groups,
+        url: "/chat/count_message/?has_groups=" + false,
         data: {},
         success: function (response) {
             if (response.all_messages > 0) {
@@ -70,13 +87,10 @@ setInterval(function () {
                 $("#li-message-center").addClass('hide');
                 $("#message-center").addClass('hide');
             }
-            if (has_groups){
-                setBadgeItem(response.grouped_messages)
-            }
         },
         dataType: "json"
     });
-}, 3000);
+}, 5000);
 
 
 var formatDate = function (strDate) {

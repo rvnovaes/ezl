@@ -9,55 +9,7 @@ from model_mommy import mommy
 from core.models import Person
 from lawsuit.models import Movement
 from task.models import TypeTask, Task, Ecm, TaskHistory
-from task.forms import TypeTaskForm, TaskForm, TaskDetailForm
-
-
-class TypeTaskTest(TestCase):
-    def setUp(self):
-        User.objects.create_user(username='username', password='password')
-        self.client.login(username='username', password='password')
-
-    def test_model(self):
-        # mommy deixa as coisas bem mais faaceis
-        c_inst = mommy.make(TypeTask)
-        self.assertTrue(isinstance(c_inst, TypeTask))
-
-    def test_valid_TypeTaskForm(self):
-        # form = TypeTaskForm()
-        # st = dict(form.fields['survey_type'].choices)['Diligence']
-        # Para charfield com choices em enum, usar as escolhas do enum em lowercase
-
-        data = {'name': 'Tipo1', 'survey': 1}
-        form = TypeTaskForm(data=data)
-        self.assertTrue(form.is_valid())
-
-    def test_list_view(self):
-        url = reverse('typetask_list')
-        resp = self.client.get(url)
-
-        self.assertEqual(resp.status_code, 200)
-
-    def test_create_view(self):
-        url = reverse('typetask_add')
-        resp = self.client.get(url)
-
-        self.assertEqual(resp.status_code, 200)
-
-    def test_update_view(self):
-        c_inst = mommy.make(TypeTask)
-        url = reverse('typetask_update', kwargs={'pk': c_inst.id})
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-
-    def test_delete_view(self):
-        c_inst = mommy.make(TypeTask)
-        data = {'typetask_list': {c_inst.id}}
-        url = reverse('typetask_delete')
-        resp = self.client.post(url, data, follow=True)
-        # print(resp.context)
-
-        self.assertEqual(resp.status_code, 200)
-
+from task.forms import TaskForm, TaskDetailForm
 
 class TaskTest(TestCase):
     def setUp(self):

@@ -31,7 +31,7 @@
             $('#survey input[type=file]').each(function(){
                 var $el = $(this),
                     id = $el.attr('id').replace('i', ''),
-                    $button = $('<button type="button" class="btn btn-sm btn-primary btn-raised" style="color: #fff !important;"><i class="icon-cloud-upload"></i> &nbsp; Enviar Arquivo(s)<div class="ripple-container"></div></button>'),
+                    $button = $('<button type="button" class="btn btn-sm btn-primary btn-raised" style="color: #fff !important;"><i class="icon-cloud-upload"></i> &nbsp; Enviar arquivo(s)<div class="ripple-container"></div></button>'),
                     $parent = $el.parent();
 
                 if ($parent.find('button').length == 0){
@@ -126,7 +126,7 @@
 
         $("#surveyElement").Survey({model: survey});
 
-        var footer = document.querySelector(".panel-footer")
+        var footer = document.querySelector("#surveyElement").querySelector('.panel-footer')
         var cancelBtn = document.createElement("button");
 
         {#        cancelBtn.onclick = function () {#}

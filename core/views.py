@@ -18,19 +18,21 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
 from django.db.models import ProtectedError, Q, F
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.views import View
 from django.views.generic import ListView, TemplateView
+from django.core.exceptions import ValidationError
 from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
     ResetPasswordFormMixin, AddressFormSet, \
-    OfficeForm, InviteForm, InviteOfficeFormSet, AddressOfficeForm, InviteOfficeForm
+    OfficeForm, InviteForm, InviteOfficeFormSet, InviteOfficeForm, \
+    ContactMechanismForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
@@ -38,10 +40,10 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     USER_CREATE_SUCCESS_MESSAGE
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
     OfficeMixin, \
-    InviteOffice, OfficeMembership
+    InviteOffice, OfficeMembership, ContactMechanism
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
-    InviteOfficeTable, OfficeMembershipTable
+    InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable
 from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
@@ -307,8 +309,12 @@ class AuditFormMixin(CustomLoginRequiredView, SuccessMessageMixin):
         messages.error(self.request, form.errors)
         return super().form_invalid(form)
 
-
-class AddressMixin(AuditFormMixin):
+class ViewRelatedMixin(AuditFormMixin):
+    """
+        Este mixin procura abstrair funcionalidades pertinentes a models que são editados
+        como detail em outro model permitindo salvar model detalhe vinculado ao model mestre.
+        Exemplo: Cadastro de pessoa com os cadastros de endereço e mecanismo de contato.
+    """
     def __init__(self, related_model=None, related_field_pk=False, related_model_name=''):
         self.related_model = related_model
         self.related_model_name = related_model_name
@@ -326,14 +332,20 @@ class AddressMixin(AuditFormMixin):
     def form_valid(self, form):
         form.save(commit=False)
         setattr(form.instance, self.related_model_name, self.object_related)
-        return super().form_valid(form)
+        try:
+            #TODO - Verificar se é a melhor forma de tratar duplicidades
+            return super().form_valid(form)
+        except IntegrityError as e:
+            messages.add_message(self.request, messages.ERROR, 'Registro já existente.')
+            return self.form_invalid(form)
+
 
     def get_object_list_url(self):
         # TODO: Este método parece ser inútil, success_url pode ser usado.
         return reverse('{}_update'.format(self.related_model_name), args=(self.object_related.pk,))
 
 
-class AddressCreateView(AddressMixin, CreateView):
+class AddressCreateView(ViewRelatedMixin, CreateView):
     model = Address
     form_class = AddressForm
     success_message = CREATE_SUCCESS_MESSAGE
@@ -346,7 +358,7 @@ class AddressCreateView(AddressMixin, CreateView):
         return reverse('person_update', args=(self.kwargs.get('person_pk'),))
 
 
-class AddressOfficeCreateView(AddressMixin, CreateView):
+class AddressOfficeCreateView(ViewRelatedMixin, CreateView):
     model = Address
     form_class = AddressForm
     success_message = CREATE_SUCCESS_MESSAGE
@@ -508,15 +520,8 @@ class PersonCreateView(AuditFormMixin, CreateView):
     form_class = PersonForm
     success_url = reverse_lazy('person_list')
 
-    def get_context_data(self, **kwargs):
-        data = super(PersonCreateView, self).get_context_data(**kwargs)
-        if self.request.POST:
-            data['personaddress'] = AddressFormSet(self.request.POST)
-        else:
-            data['personaddress'] = AddressFormSet()
-            data['personaddress'].forms[0].fields['is_active'].initial = True
-            data['personaddress'].forms[0].fields['is_active'].widget.attrs['class'] = 'filled-in'
-        return data
+    def get_success_url(self):
+        return reverse('person_update', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
 
@@ -535,7 +540,6 @@ class PersonCreateView(AuditFormMixin, CreateView):
             form.save()
 
         context = self.get_context_data()
-        personaddress = context['personaddress']
         with transaction.atomic():
             self.object = form.save(commit=False)
             office_session = get_office_session(self.request)
@@ -554,11 +558,6 @@ class PersonCreateView(AuditFormMixin, CreateView):
                 # Caso o relacionamento esteja apenas inativo
                 member.is_active = True
                 member.save()
-            if personaddress.is_valid():
-                address = personaddress.forms[0].save(commit=False)
-                address.person = self.object
-                address.create_user = self.request.user
-                address.save()
         return super().form_valid(form)
 
 
@@ -572,6 +571,7 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
     def get_context_data(self, **kwargs):
         kwargs.update({
             'table': AddressTable(self.object.address_set.all()),
+            'table_contact_mechanism': ContactMechanismTable(self.object.contactmechanism_set.all()),
         })
         return super().get_context_data(**kwargs)
 
@@ -972,6 +972,7 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
                 self.object.officemembership_set.filter(is_active=True, person__auth_user__isnull=False,
                                                         person__auth_user__is_superuser=False)
                     .exclude(person__auth_user=self.request.user)),
+            'table_contact_mechanism': ContactMechanismOfficeTable(self.object.contactmechanism_set.all()),
         })
         data = super().get_context_data(**kwargs)
         data['inviteofficeform'] = InviteForm(self.request.POST) \
@@ -1593,3 +1594,103 @@ class ValidateEmail(View):
             data['valid'] = False
 
         return JsonResponse(data, safe=False)
+
+class ContactMechanismCreateView(ViewRelatedMixin, CreateView):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def __init__(self):
+        super().__init__(related_model=Person, related_model_name='person',
+                         related_field_pk='person')
+
+    def get_success_url(self):
+        return reverse('person_update', args=(self.kwargs.get('person_pk'),))
+
+    def form_valid(self, form):
+        # Se tipo do mecanismo de contato for e-mail validar se é válido
+        if form.instance.contact_mechanism_type.is_email():
+            try:
+                validate_email(form.instance.description)
+            except ValidationError as e:
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    'Informe um endereço de e-mail válido.')
+                return self.form_invalid(form)
+        return super().form_valid(form)
+
+
+class ContactMechanismUpdateView(UpdateView):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+    success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_success_url(self):
+        return reverse('person_update', args=(self.kwargs.get('person_pk'),))
+
+    def form_valid(self, form):
+        if form.instance.contact_mechanism_type.is_email():
+            try:
+                validate_email(form.instance.description)
+            except ValidationError as e:
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    'Informe um endereço de e-mail válido.')
+                return self.form_invalid(form)
+        try:
+            #TODO - Verificar se é a melhor forma de tratar duplicidades
+            return super().form_valid(form)
+        except IntegrityError as e:
+            messages.add_message(self.request, messages.ERROR, 'Registro já existente.')
+            return self.form_invalid(form)
+
+
+class ContactMechanismDeleteView(MultiDeleteViewMixin):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+
+    def get_success_url(self):
+        return reverse('person_update', kwargs={'pk': self.kwargs['person_pk']})
+
+
+class ContactMechanismOfficeCreateView(ViewRelatedMixin, CreateView):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def __init__(self):
+        super().__init__(related_model=Office, related_model_name='office',
+                         related_field_pk='office')
+
+    def get_success_url(self):
+        return reverse('office_update', args=(self.kwargs.get('office_pk'),))
+
+    def form_valid(self, form):
+        # Se tipo do mecanismo de contato for e-mail validar se é válido
+        if form.instance.contact_mechanism_type.is_email():
+            try:
+                validate_email(form.instance.description)
+            except ValidationError as e:
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    'Informe um endereço de e-mail válido.')
+                return self.form_invalid(form)
+        return super().form_valid(form)
+
+
+class ContactMechanismOfficeUpdateView(ContactMechanismUpdateView):
+    def get_success_url(self):
+        return reverse('office_update', args=(self.kwargs.get('office_pk'),))
+
+
+class ContactMechanismOfficeDeleteView(ContactMechanismDeleteView):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+
+    def get_success_url(self):
+        return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})

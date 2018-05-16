@@ -13,7 +13,6 @@ from guardian.shortcuts import get_perms
 INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'), ('E', 'EXTERNAL'))
 INVITE_FROM = (('P', 'PERSON'), ('O', 'OFFICE'))
 
-
 class CorePermissions(Enum):
     group_admin = 'Group Administrator'
 
@@ -209,9 +208,9 @@ class AbstractPerson(Audit, LegacyCode):
     def cnpj(self, value):
         self.cnpj = value
 
-    def contact_mechanism_by_type(self, type, formated=True):
-        type = ContactMechanismType.objects.filter(name__iexact=type).first()
-        contacts = self.contactmechanism_set.filter(contact_mechanism_type=type)
+    def contact_mechanism_by_type(self, mechanism_type, formated=True):
+        mechanism_type = ContactMechanismType.objects.filter(name__iexact=mechanism_type).first()
+        contacts = self.contactmechanism_set.filter(contact_mechanism_type=mechanism_type)
         items = [contact.description for contact in contacts]
         if formated:
             return ' | '.join(items) if items else ''
@@ -303,6 +302,7 @@ class Office(AbstractPerson):
 
     persons = models.ManyToManyField(Person, blank=True, related_name='offices', through='OfficeMembership')
     offices = models.ManyToManyField('self', blank=True)
+    public_office = models.BooleanField(default=False, verbose_name='Escritório público')
 
     class Meta:
         verbose_name = 'Escritório'
@@ -405,7 +405,7 @@ class Address(Audit):
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False,
                                 verbose_name='País')
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True)
-    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)
+    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)    
 
     class Meta:
         db_table = 'address'
@@ -423,7 +423,37 @@ class Address(Audit):
 
 
 class ContactMechanismType(Audit):
-    name = models.CharField(max_length=255, null=False, unique=True)
+    INVALIDO = 1
+    PHONE = 2
+    EMAIL = 3
+    SKYPE = 4
+    WHATSAPP = 5
+    FACEBOOK = 6
+    SITE = 7
+    LINKEDIN = 8
+    INSTAGRAM = 9
+    SNAPCHAT = 10
+    CONTACT_MECHANISM_TYPE = (    
+        (INVALIDO, 'INVÁLIDO'),
+        (PHONE, 'TELEFONE'),
+        (EMAIL, 'E-MAIL'),
+        (SKYPE, 'SKYPE'),
+        (WHATSAPP, 'WHATSAPP'),
+        (FACEBOOK, 'FACEBOOK'),
+        (SITE, 'SITE'),
+        (LINKEDIN, 'LINKEDIN'),
+        (INSTAGRAM, 'INSTAGRAM'),
+        (SNAPCHAT, 'SNAPCHAT'))
+
+    type_contact_mechanism_type = models.IntegerField(
+        choices=CONTACT_MECHANISM_TYPE,        
+        verbose_name='Tipo',
+        default = PHONE,
+        null=False)
+    name = models.CharField(max_length=255, null=False, unique=True)    
+
+    def is_email(self):        
+        return self.type_contact_mechanism_type == self.EMAIL
 
     class Meta:
         db_table = 'contact_mechanism_type'
@@ -434,14 +464,18 @@ class ContactMechanismType(Audit):
 
 class ContactMechanism(Audit):
     contact_mechanism_type = models.ForeignKey(
-        ContactMechanismType, on_delete=models.PROTECT, blank=False, null=False)
-    description = models.CharField(max_length=255, null=False, unique=True)
-    notes = models.CharField(max_length=400, blank=True)
+        ContactMechanismType, on_delete=models.PROTECT, blank=False, null=False,
+        verbose_name="Tipo")
+    description = models.CharField(max_length=255, null=False, verbose_name="Descrição")
+    notes = models.CharField(max_length=400, blank=True, verbose_name="Observações")
     person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True)
-    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)
-
+    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)    
+    
     class Meta:
         db_table = 'contact_mechanism'
+        verbose_name = 'Mecanismo de contato'
+        verbose_name_plural = 'Mecanismos de contato'
+        unique_together = (('description', 'person'), ('description', 'office'))
 
     def __str__(self):
         return self.description

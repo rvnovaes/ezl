@@ -1,3 +1,9 @@
+a{
+    color: #54667a;
+}
+a:hover{
+    color: #0d3c55;
+}
 .modal label{
     font-weight: normal;
 }

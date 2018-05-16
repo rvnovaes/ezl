@@ -3,6 +3,7 @@ import django_tables2 as tables
 
 from core.tables import CheckBoxMaterial
 from .models import CostCenter, ServicePriceTable
+from djmoney.money import Money
 
 
 class CostCenterTable(tables.Table):
@@ -53,7 +54,10 @@ class ServicePriceTableTaskTable(tables.Table):
         empty_text = "Não existe tabela de preços cadastrada."
         order_by = ("value",)
         row_attrs = {
+            'id': lambda record: 'office-{}'.format(record.pk),
             'data-id': lambda record: record.pk,
             'data-value': lambda record: record.value,
+            'data-formated-value': lambda record: Money(record.value, 'BRL').__str__(),
+            'data-office-public': lambda record: record.office_correspondent.public_office,
             'class': 'tr_select'
         }
