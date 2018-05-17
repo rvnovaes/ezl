@@ -68,6 +68,15 @@ services:
       - db
       - queues
 
+  tasks-schedule:
+    image: ezl:latest
+    command: celery -A ezl beat -l info
+    volumes:
+      - .:/app
+      - ezl-logs:/var/log/ezl
+    depends_on:
+      - tasks
+
   flower:
     image: ezl:latest
     command: celery flower --broker=amqp://guest:guest@queues:5672/ --port=8083 --basic_auth=ezl:flower@ezl

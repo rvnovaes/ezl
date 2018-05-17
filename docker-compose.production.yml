@@ -90,6 +90,13 @@ services:
       - db
       - queues
 
+  tasks-schedule:
+    environment:
+      ENV: production
+      PYTHONPATH: /app
+    depends_on:
+      - tasks
+
   pgweb:
     build:
       context: .
