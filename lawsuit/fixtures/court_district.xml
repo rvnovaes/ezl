@@ -31537,4 +31537,230 @@
         <field name="name" type="CharField">Banabuiu</field>
         <field name="state" rel="ManyToOneRel" to="core.state">7</field>
     </object>
+    <object model="lawsuit.courtdistrict" pk="2871">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Campos Sales</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2872">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Catunda</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2873">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Choró Limão</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2874">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Deputado Irapuan Pinheiro</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2875">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Ererê</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2876">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Frecheirinha</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2877">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Guaramiranga</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2878">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Jaguaribara</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2879">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Martinópole</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2880">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Milhã</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2881">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Miraima</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2882">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Moraújo</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2883">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Ocara</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2884">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Pacujá</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2885">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Paramoti</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2886">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Penaforte</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2887">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Pires Ferreira</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2888">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Potiretama</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2889">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">São João do Jaguaribe</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+    <object model="lawsuit.courtdistrict" pk="2890">
+        <field name="create_date" type="DateTimeField">2018-05-15T13:47:03.966503+00:00</field>
+        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
+        <field name="alter_date" type="DateTimeField">2018-05-15T13:47:03.966534+00:00</field>
+        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
+        <field name="legacy_code" type="CharField"><None></None></field>
+        <field name="system_prefix" type="CharField"><None></None></field>
+        <field name="is_active" type="BooleanField">True</field>
+        <field name="name" type="CharField">Senador Sá</field>
+        <field name="state" rel="ManyToOneRel" to="core.state">7</field>
+    </object>
+
+
+
+
+
+
 </django-objects>
