@@ -18,7 +18,7 @@ CELERY_RESULT_BACKEND = 'amqp://guest:guest@queues:5672/'
 CELERY_TIMEZONE = 'America/Sao_Paulo'
 CELERY_TASK_ALWAYS_EAGER = False
 CELERY_BEAT_SCHEDULE = {
-    'task-number-one': {
+    'task-remove_old_etldashboard': {
         'task': 'etl.tasks.remove_old_etldashboard',
         'schedule': crontab(minute=0, hour=2)
     },
