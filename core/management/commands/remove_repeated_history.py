@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         debug_logger = logging.getLogger('ezl')
         repeated_history = TaskHistory.objects.all().values('notes', 'status', 'task_id').annotate(
-            total=Count('id')).order_by('task_id').filter(total__gt=2)
+            total=Count('id')).order_by('task_id').filter(total__gt=1)
         remove = 0
         for history in repeated_history:
             history_detail = TaskHistory.objects.filter(task_id=history['task_id']).order_by('id')
