@@ -847,21 +847,22 @@ class UserUpdateView(AuditFormMixin, UpdateView):
     def form_valid(self, form):
         form.save(commit=False)
         checker = ObjectPermissionChecker(self.request.user)
-        if form.is_valid:
-            have_group = True
+        if form.is_valid:            
             for office in form.instance.person.offices.all():
-                if checker.has_perm('can_access_general_data', office):
-                    have_group = False
+                if checker.has_perm('can_access_general_data', office):                    
                     groups = self.request.POST.getlist('office_' + str(office.id), '')
+                    if not groups:                    
+                        messages.error(
+                            self.request,
+                            "O usuário deve pertencer a pelo menos um grupo. Verifique as permissões do escritório %s" % office)
+                        return self.form_invalid(form)
+
                     for group_office in office.office_groups.all():
                         if str(group_office.group.id) in groups:
-                            group_office.group.user_set.add(form.instance)
-                            have_group = True
+                            group_office.group.user_set.add(form.instance)                            
                         else:
                             group_office.group.user_set.remove(form.instance)
-            if not have_group:
-                messages.error(self.request, "O usuário deve pertencer a pelo menos um grupo")
-                return self.form_invalid(form)
+
 
             form.save()
             default_office = form.cleaned_data['office']

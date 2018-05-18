@@ -7,7 +7,7 @@ from django.utils import timezone
 from django_file_form.forms import FileFormMixin, MultipleUploadedFileField
 
 from core.models import Person
-from core.utils import filter_valid_choice_form, get_office_field
+from core.utils import filter_valid_choice_form, get_office_field, get_office_session
 from core.widgets import MDDateTimepicker, MDDatePicker
 from core.forms import BaseForm
 from task.models import Task, TypeTask, Filter, TaskStatus
@@ -46,9 +46,13 @@ class TaskForm(BaseForm):
                                       attrs={'class': 'form-control', 'rows': '5',
                                              'id': 'details_id'}))
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['office'] = get_office_field(self.request)
+    def __init__(self, *args, **kwargs):        
+        super().__init__(*args, **kwargs)        
+        self.fields['office'] = get_office_field(self.request)            
+        office_session = get_office_session(self.request)        
+        if office_session:            
+            self.fields['person_asked_by'].queryset = filter_valid_choice_form(
+                Person.objects.active().requesters(office_pk=office_session.pk).active_offices().order_by('name'))
         if Person.objects.requesters().filter(auth_user=self.request.user):
             self.fields['person_asked_by'].initial = self.request.user.person
 
