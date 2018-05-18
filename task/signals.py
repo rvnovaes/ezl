@@ -41,6 +41,8 @@ def receive_notes_execution_date(notes, instance, execution_date, survey_result,
 def new_task(sender, instance, created, **kwargs):
     notes = 'Nova providência' if created else getattr(instance, '__notes', '')
     user = instance.alter_user if instance.alter_user else instance.create_user
+    import pdb;
+    pdb.set_trace()
     if not getattr(instance, '_skip_signal'):
         TaskHistory.objects.create(task=instance,
                                    create_user=user,
@@ -59,7 +61,8 @@ def new_task(sender, instance, created, **kwargs):
 
         person_to_receive = None
         custom_text = ''
-        short_message = {TaskStatus.ACCEPTED: 'foi aceita', TaskStatus.BLOCKEDPAYMENT: 'foi glosada',
+        short_message = {TaskStatus.ACCEPTED_SERVICE: 'foi aceita ', TaskStatus.REFUSED_SERVICE: 'foi recusada ',
+                         TaskStatus.ACCEPTED: 'foi aceita', TaskStatus.BLOCKEDPAYMENT: 'foi glosada',
                          TaskStatus.DONE: 'foi cumprida', TaskStatus.FINISHED: 'foi finalizada',
                          TaskStatus.OPEN: 'foi aberta', TaskStatus.REFUSED: 'foi recusada',
                          TaskStatus.RETURN: 'foi retornada'}
@@ -76,6 +79,9 @@ def new_task(sender, instance, created, **kwargs):
         elif instance.task_status in [TaskStatus.ACCEPTED, TaskStatus.REFUSED]:
             custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
             person_to_receive = instance.person_distributed_by_id
+        elif instance.task_status in [TaskStatus.ACCEPTED_SERVICE]:
+            custom_text = ' pelo(a) contratante ' + str(instance.person_distributed_by).title()
+            person_to_receive = instance.person_asked_by_id
 
         if person_to_receive:
             mails = ContactMechanism.objects.filter(contact_mechanism_type_id=id_email,
@@ -86,9 +92,8 @@ def new_task(sender, instance, created, **kwargs):
                 mail_list.append(mail.description)
 
             person = Person.objects.filter(id=person_to_receive).first()
-            mail_auth_user = User.objects.filter(id=person.auth_user_id).first()
-            if mail_auth_user:
-                mail_list.append(mail_auth_user.email)
+            if person.auth_user:
+                mail_list.append(person.auth_user.email)
 
             if hasattr(instance, '_TaskCreateView__server'):
                 project_link = instance._TaskCreateView__server
@@ -102,26 +107,27 @@ def new_task(sender, instance, created, **kwargs):
             else:
                 project_link = settings.PROJECT_LINK
 
-            mail = SendMail()
-            mail.subject = 'Easy Lawyer - OS '+str(number) + ' - ' + str(
-                instance.type_task).title() + ' - Prazo: ' + \
-                instance.final_deadline_date.strftime('%d/%m/%Y')
-            mail.message = render_to_string('mail/base.html',
-                                            {'server': 'http://' + project_link, 'pk': instance.pk,
-                                             'project_name': settings.PROJECT_NAME,
-                                             'number': str(number),
-                                             'short_message': short_message[instance.status],
-                                             'custom_text': custom_text,
-                                             'task': instance
-                                             })
-            mail.to_mail = mail_list
-
-            try:
-                if not getattr(instance, '_skip_mail'):
-                    mail.send()
-            except Exception as e:
-                print(e)
-                print('Você tentou mandar um e-mail')
+            if mail_list:
+                mail = SendMail()
+                mail.subject = 'Easy Lawyer - OS ' + str(number) + ' - ' + str(
+                    instance.type_task).title() + ' - Prazo: ' + \
+                    instance.final_deadline_date.strftime('%d/%m/%Y')
+                mail.message = render_to_string('mail/base.html',
+                                                {'server': project_link,
+                                                 'pk': instance.pk,
+                                                 'project_name': settings.PROJECT_NAME,
+                                                 'number': str(number),
+                                                 'short_message': short_message[instance.status],
+                                                 'custom_text': custom_text,
+                                                 'task': instance
+                                                 })
+                mail.to_mail = mail_list
+                try:
+                    if not getattr(instance, '_skip_mail'):
+                        mail.send()
+                except Exception as e:
+                    print(e)
+                    print('Você tentou mandar um e-mail')
 
 
 @receiver(pre_save, sender=Task)

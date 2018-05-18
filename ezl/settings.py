@@ -280,7 +280,7 @@ DEFAULT_FROM_EMAIL = email_default_from_email
 
 INTERNAL_IPS = '127.0.0.1'
 PROJECT_NAME = 'Easy Lawyer'
-PROJECT_LINK = 'https://ezl.mtostes.com.br'
+PROJECT_LINK = 'https://ezl.ezlawyer.com.br'
 
 LINK_TO_RESTORE_DB_DEMO = 'http://13.68.213.60:8001'
 

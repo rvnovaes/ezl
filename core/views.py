@@ -44,7 +44,7 @@ from core.models import Person, Address, City, State, Country, AddressType, Offi
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable
-from core.utils import login_log, logout_log, get_office_session
+from core.utils import login_log, logout_log, get_office_session, get_domain
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task, TaskStatus
@@ -1189,7 +1189,7 @@ class InviteCreateView(AuditFormMixin, CreateView):
             form.instance.person = Person.objects.filter(pk=person).first() if person else None
             form.instance.office = Office.objects.get(pk=office)
             form.instance.email = email
-            form.instance.__host = '{}://{}'.format(request.scheme, request.META.get('HTTP_X_FORWARDED_HOST', request.META.get('HTTP_HOST')))
+            form.instance.__host = get_domain(request)
             form.instance.save()
         return JsonResponse({'status': 'ok'})
 
