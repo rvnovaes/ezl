@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db.models.signals import post_init, pre_save, post_save
+from django.core.signals import request_finished
 from django.dispatch import receiver, Signal
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -41,93 +42,12 @@ def receive_notes_execution_date(notes, instance, execution_date, survey_result,
 def new_task(sender, instance, created, **kwargs):
     notes = 'Nova providência' if created else getattr(instance, '__notes', '')
     user = instance.alter_user if instance.alter_user else instance.create_user
-    import pdb;
-    pdb.set_trace()
     if not getattr(instance, '_skip_signal'):
         TaskHistory.objects.create(task=instance,
                                    create_user=user,
                                    status=instance.task_status,
                                    create_date=instance.create_date, notes=notes)
-        contact_mechanism_type = ContactMechanismType.objects.filter(name__iexact='email')
-        if not contact_mechanism_type:
-            return
 
-        id_email = contact_mechanism_type[0].id
-
-        if instance.legacy_code:
-            number = instance.legacy_code
-        else:
-            number = instance.id
-
-        person_to_receive = None
-        custom_text = ''
-        short_message = {TaskStatus.ACCEPTED_SERVICE: 'foi aceita ', TaskStatus.REFUSED_SERVICE: 'foi recusada ',
-                         TaskStatus.ACCEPTED: 'foi aceita', TaskStatus.BLOCKEDPAYMENT: 'foi glosada',
-                         TaskStatus.DONE: 'foi cumprida', TaskStatus.FINISHED: 'foi finalizada',
-                         TaskStatus.OPEN: 'foi aberta', TaskStatus.REFUSED: 'foi recusada',
-                         TaskStatus.RETURN: 'foi retornada'}
-
-        if instance.task_status in [TaskStatus.OPEN, TaskStatus.FINISHED]:
-            custom_text = ' pelo(a) solicitante ' + str(instance.person_asked_by).title()
-            person_to_receive = instance.person_executed_by_id
-        elif instance.task_status in [TaskStatus.BLOCKEDPAYMENT, TaskStatus.RETURN]:
-            custom_text = ''
-            person_to_receive = instance.person_executed_by_id
-        elif instance.task_status in [TaskStatus.DONE]:
-            custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
-            person_to_receive = instance.person_asked_by_id
-        elif instance.task_status in [TaskStatus.ACCEPTED, TaskStatus.REFUSED]:
-            custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
-            person_to_receive = instance.person_distributed_by_id
-        elif instance.task_status in [TaskStatus.ACCEPTED_SERVICE]:
-            custom_text = ' pelo(a) contratante ' + str(instance.person_distributed_by).title()
-            person_to_receive = instance.person_asked_by_id
-
-        if person_to_receive:
-            mails = ContactMechanism.objects.filter(contact_mechanism_type_id=id_email,
-                                                    person_id=person_to_receive)
-            mail_list = []
-
-            for mail in mails:
-                mail_list.append(mail.description)
-
-            person = Person.objects.filter(id=person_to_receive).first()
-            if person.auth_user:
-                mail_list.append(person.auth_user.email)
-
-            if hasattr(instance, '_TaskCreateView__server'):
-                project_link = instance._TaskCreateView__server
-
-            elif hasattr(instance, '_TaskUpdateView__server'):
-                project_link = instance._TaskUpdateView__server
-
-            elif hasattr(instance, '_TaskDetailView__server'):
-                project_link = instance._TaskDetailView__server
-
-            else:
-                project_link = settings.PROJECT_LINK
-
-            if mail_list:
-                mail = SendMail()
-                mail.subject = 'Easy Lawyer - OS ' + str(number) + ' - ' + str(
-                    instance.type_task).title() + ' - Prazo: ' + \
-                    instance.final_deadline_date.strftime('%d/%m/%Y')
-                mail.message = render_to_string('mail/base.html',
-                                                {'server': project_link,
-                                                 'pk': instance.pk,
-                                                 'project_name': settings.PROJECT_NAME,
-                                                 'number': str(number),
-                                                 'short_message': short_message[instance.status],
-                                                 'custom_text': custom_text,
-                                                 'task': instance
-                                                 })
-                mail.to_mail = mail_list
-                try:
-                    if not getattr(instance, '_skip_mail'):
-                        mail.send()
-                except Exception as e:
-                    print(e)
-                    print('Você tentou mandar um e-mail')
 
 
 @receiver(pre_save, sender=Task)
@@ -212,10 +132,11 @@ def update_status_child_task(sender, instance, **kwargs):
     if TaskStatus(instance.task_status) == TaskStatus(instance.__previous_status):
         setattr(instance, '_skip_signal', True)
     if instance.get_child and status:
-        child = instance.child.latest('pk')
+        child = instance.get_child
         child.task_status = status
         child.save(** {'skip_signal': instance._skip_signal,
-                       'skip_mail': instance._skip_signal, 'from_parent': True})
+                       'skip_mail': instance._skip_signal,
+                       'from_parent': True})
 
 
 def create_or_update_user_by_chat(task, fields):
@@ -269,3 +190,102 @@ def create_or_update_chat(sender, instance, created, **kwargs):
     post_save.disconnect(create_or_update_chat, sender=sender)
     instance.save(**{'skip_signal': True, 'skip_mail': True, 'from_parent': True})
     post_save.connect(create_or_update_chat, sender=sender)
+
+
+@receiver(post_save, sender=Task)
+def send_task_emails(sender, instance, created, **kwargs):
+    import pdb;pdb.set_trace()
+    if instance.__previous_status != instance.task_status:
+        print("AQUI")
+        if not getattr(instance, '_skip_signal'):
+            if instance.legacy_code:
+                number = instance.legacy_code
+            else:
+                number = instance.id
+
+            persons_to_receive = []
+            custom_text = ''
+            short_message = {TaskStatus.ACCEPTED_SERVICE: 'foi aceita ', TaskStatus.REFUSED_SERVICE: 'foi recusada ',
+                             TaskStatus.ACCEPTED: 'foi aceita', TaskStatus.BLOCKEDPAYMENT: 'foi glosada',
+                             TaskStatus.DONE: 'foi cumprida', TaskStatus.FINISHED: 'foi finalizada',
+                             TaskStatus.OPEN: 'foi aberta', TaskStatus.REFUSED: 'foi recusada',
+                             TaskStatus.RETURN: 'foi retornada'}
+
+            if instance.task_status in [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REFUSED_SERVICE]:
+                custom_text = ' pelo(a) contratante ' + str(instance.person_distributed_by).title()
+                persons_to_receive = [instance.person_asked_by]
+
+            elif instance.task_status in [TaskStatus.OPEN]:
+                custom_text = ' pelo(a) contratante ' + str(instance.person_distributed_by).title()
+                if instance.child.latest('pk').task_status == TaskStatus.REQUESTED:
+                    persons_to_receive = [instance.person_executed_by, instance.person_distributed_by]
+                else:
+                    persons_to_receive = [instance.person_executed_by, instance.person_distributed_by]
+
+            elif instance.task_status in [TaskStatus.ACCEPTED, TaskStatus.REFUSED]:
+                custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
+                persons_to_receive = [instance.person_distributed_by]
+
+            elif instance.task_status in [TaskStatus.DONE]:
+                custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
+                persons_to_receive = [instance.person_distributed_by]
+
+            elif instance.task_status in [TaskStatus.FINISHED]:
+                custom_text = ' pelo(a) solicitante ' + str(instance.person_asked_by).title()
+                persons_to_receive = [instance.person_executed_by, instance.person_asked_by]
+
+            elif instance.task_status in [TaskStatus.RETURN]:
+                custom_text = ' pelo(a) contratante ' + str(instance.person_distributed_by).title()
+                persons_to_receive = [instance.person_executed_by, instance.person_distributed_by]
+
+            elif instance.task_status in [TaskStatus.BLOCKEDPAYMENT]:
+                custom_text = ' pelo(a) contratante ' + str(instance.person_distributed_by).title()
+                persons_to_receive = [instance.person_executed_by]
+
+            persons_to_receive = [x for x in persons_to_receive if x is not None]
+            for person in persons_to_receive:
+                mails = person.emails.split(' | ')
+
+                mail_list = []
+
+                for mail in mails:
+                    mail_list.append(mail)
+
+                if person.auth_user:
+                    mail_list.append(person.auth_user.email)
+
+                if hasattr(instance, '_TaskCreateView__server'):
+                    project_link = instance._TaskCreateView__server
+
+                elif hasattr(instance, '_TaskUpdateView__server'):
+                    project_link = instance._TaskUpdateView__server
+
+                elif hasattr(instance, '_TaskDetailView__server'):
+                    project_link = instance._TaskDetailView__server
+
+                else:
+                    project_link = settings.PROJECT_LINK
+
+                if mail_list:
+                    mail = SendMail()
+                    mail.subject = 'Easy Lawyer - OS ' + str(number) + ' - ' + str(
+                        instance.type_task).title() + ' - Prazo: ' + \
+                                   instance.final_deadline_date.strftime('%d/%m/%Y')
+                    mail.message = render_to_string('mail/base.html',
+                                                    {'server': project_link,
+                                                     'pk': instance.pk,
+                                                     'project_name': settings.PROJECT_NAME,
+                                                     'number': str(number),
+                                                     'short_message': short_message[instance.status],
+                                                     'custom_text': custom_text,
+                                                     'task': instance
+                                                     })
+                    mail.to_mail = mail_list
+                    try:
+                        if not getattr(instance, '_skip_mail'):
+                            mail.send()
+                    except Exception as e:
+                        print(e)
+                        print('Você tentou mandar um e-mail')
+
+        instance.__previous_status = TaskStatus(instance.task_status)

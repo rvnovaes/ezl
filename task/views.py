@@ -447,6 +447,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.legacy_code = None
         new_task.system_prefix = None
         new_task.pk = new_task.task_number = None
+        new_task.person_requested_by = None
         new_task.office = office_correspondent
         new_task.task_status = TaskStatus.REQUESTED
         new_task.parent = object_parent
