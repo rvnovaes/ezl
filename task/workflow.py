@@ -28,6 +28,45 @@ PARENT_FIELDS = {
     TaskStatus.FINISHED: ['execution_date'],
 }
 
+PARENT_RECIPIENTS = {
+    TaskStatus.ACCEPTED_SERVICE: {'persons_to_receive': ['person_distributed_by'],
+                                  'short_message': 'foi aceita ',
+                                  'office': 'child'},
+    TaskStatus.REFUSED_SERVICE: {'persons_to_receive': ['person_distributed_by'],
+                                 'short_message': 'foi recusada ',
+                                 'office': 'child'},
+    TaskStatus.ACCEPTED: {'persons_to_receive': ['person_distributed_by'],
+                          'short_message': 'foi aceita ',
+                          'office': 'child'},
+    TaskStatus.REFUSED: {'persons_to_receive': ['person_distributed_by'],
+                         'short_message': 'foi recusada ',
+                         'office': 'child'},
+    TaskStatus.BLOCKEDPAYMENT: {'persons_to_receive': ['person_distributed_by'],
+                                'short_message': 'foi finalizada ',
+                                'office': 'child'},
+    TaskStatus.DONE: {'persons_to_receive': [],
+                      'short_message': '',
+                      'office': ''},
+    TaskStatus.FINISHED: {'persons_to_receive': ['person_distributed_by'],
+                          'short_message': 'foi cumprida ',
+                          'office': 'child'},
+}
+
+CHILD_RECIPIENTS = {
+    TaskStatus.OPEN: {'persons_to_receive': ['office'],
+                      'short_message': 'foi solicitada ',
+                      'office': 'parent'},
+    TaskStatus.RETURN: {'persons_to_receive': ['office'],
+                        'short_message': 'foi retornada ',
+                        'office': 'parent'},
+    TaskStatus.BLOCKEDPAYMENT: {'persons_to_receive': ['office'],
+                                'short_message': 'foi glosada ',
+                                'office': 'parent'},
+    TaskStatus.FINISHED: {'persons_to_receive': ['office'],
+                          'short_message': 'foi finalizada ',
+                          'office': 'parent'},
+}
+
 
 def get_parent_status(child_status):
     """
@@ -59,3 +98,21 @@ def get_parent_fields(child_status):
     :return: lista de string com nomes de campos
     """
     return PARENT_FIELDS.get(child_status, [])
+
+
+def get_parent_recipients(child_status):
+    """
+    Retorna os destinatários da OS pai que receberam e-mail, de acordo com o status da Os filha
+    :param child_status: status da OS filha
+    :return:
+    """
+    return PARENT_RECIPIENTS.get(child_status, {})
+
+
+def get_child_recipients(parent_status):
+    """
+    Retorna os destinatários da OS filha que receberam e-mail, de acordo com o status da OS pai
+    :param parent_status: status da OS pai
+    :return:
+    """
+    return CHILD_RECIPIENTS.get(parent_status, {})
