@@ -151,7 +151,7 @@ class Organ(Person, OfficeMixin):
         return res
 
     def __str__(self):
-        return self.court_district.name + ' / ' + self.legal_name
+        return self.legal_name
 
 
 class LawSuit(Audit, LegacyCode, OfficeMixin):
@@ -163,7 +163,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
                                  related_name='instances')
     court_district = models.ForeignKey(CourtDistrict, on_delete=models.PROTECT, blank=False, null=False,
                                        verbose_name='Comarca', related_name='court_districts')
-    organ = models.ForeignKey(Organ, on_delete=models.PROTECT, blank=False, null=True,
+    organ = models.ForeignKey(Organ, on_delete=models.PROTECT, blank=True, null=True,
                               related_name='organs', verbose_name=u'Órgão')
     court_division = models.ForeignKey(CourtDivision, on_delete=models.PROTECT, blank=False, null=False,
                                        verbose_name='Vara', related_name='court_divisions')

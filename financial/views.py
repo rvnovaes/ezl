@@ -76,7 +76,7 @@ class CostCenterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
 class CostCenterAutocomplete(TypeaHeadGenericSearch):
 
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params):
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
         data = []
         for cost_center in CostCenter.objects.filter(Q(name__unaccent__icontains=q),
                                                      Q(is_active=True),
