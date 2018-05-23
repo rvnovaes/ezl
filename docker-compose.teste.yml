@@ -12,9 +12,6 @@ services:
       ENV: development
 
   nginx:
-    ports: 
-      - "443:443"
-      - "80:80"
     labels:
       - "traefik.backend=ezl-teste"
       - "traefik.frontend.rule=Host:teste.ezlawyer.com.br"
