@@ -14,5 +14,6 @@ urlpatterns = [
     url(r'^tabelas-de-precos/criar/$', views.ServicePriceTableCreateView.as_view(), name='servicepricetable_add'),
     url(r'^tabelas-de-precos/(?P<pk>[0-9]+)/$', views.ServicePriceTableUpdateView.as_view(), name='servicepricetable_update'),
     url(r'^tabelas-de-precos/excluir$', views.ServicePriceTableDeleteView.as_view(), name='servicepricetable_delete'),
-
+    
+    url(r'^import_service_price_table/$', views.import_service_price_table, name='import_service_price_table'),
 ]

@@ -1,0 +1,22 @@
+{% extends "skeleton/base.html" %}
+
+{% load staticfiles %}
+
+{% block content %}
+    {% load staticfiles bootstrap3 %}
+    <form id="import_service_price_table_form" action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+            {% bootstrap_field form.file_xls form_group_class="form-group col-sm-12" %}              
+        </div>
+        <button class="btn btn-success waves-effect waves-light" type="submit">
+            <span class="btn-label"><i class="fa fa-save"></i></span>Importar
+        </button>
+
+        {% if errors %}
+            {% for error in errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        {% endif %}
+    </form>
+{% endblock %}

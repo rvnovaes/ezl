@@ -1,17 +1,20 @@
 from core.views import CustomLoginRequiredView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.contrib import messages
+from django.shortcuts import render
 from django.db.models import Q
 
 from django.views.generic.edit import CreateView, UpdateView
+from django.contrib.auth.decorators import login_required
 from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
                            DELETE_SUCCESS_MESSAGE)
 from core.models import Office
 from core.views import (AuditFormMixin, MultiDeleteViewMixin,
                         SingleTableViewMixin)
-from .forms import CostCenterForm, ServicePriceTableForm
+from .forms import CostCenterForm, ServicePriceTableForm, ImportServicePriceTableForm
 from .models import CostCenter, ServicePriceTable
 from .tables import CostCenterTable, ServicePriceTableTable
+from .tasks import import_xls_service_price_table
 from core.views import remove_invalid_registry, TypeaHeadGenericSearch
 from core.utils import get_office_session
 
@@ -125,3 +128,28 @@ class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(
         model._meta.verbose_name_plural)
     object_list_url = 'servicepricetable_list'
+
+
+@login_required
+def import_service_price_table(request):   
+    context = { }    
+    if request.method == 'POST':                     
+        form = ImportServicePriceTableForm(request.POST, request.FILES)        
+        if form.is_valid():
+            if not request.FILES['file_xls'].name.endswith('.xlsx'):
+                # pensar melhor forma de exibir mensagem
+                pass
+                
+            file_xls = form.save(commit=False)
+            file_xls.office = get_office_session(request)
+            file_xls.create_user = request.user
+            file_xls.save()
+            
+            import_xls_service_price_table.delay(file_xls.pk)
+                        
+            # if errors:
+                # context['errors'] = errors            
+    else:
+        form = ImportServicePriceTableForm()
+    context['form'] = form
+    return render(request, 'core/import_service_price_table.html', context)

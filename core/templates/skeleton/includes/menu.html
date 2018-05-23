@@ -5,13 +5,13 @@
             <span class="hide-menu">Dashboard</span>
         </a>
     </li>
+    {% if 'can_access_general_data' in office_session_perms %}
     <li> <!-- DASHBOARD -->
         <a href="{% url 'task_search' %}" class="waves-effect">
             <i class="mdi mdi-magnify fa-fw"></i>
             <span class="hide-menu">Pesquisar</span>
         </a>
-    </li>
-    {% if 'can_access_general_data' in office_session_perms %}
+    </li>    
     <li> <!-- CADASTROS -->
         <a href="javascript:void(0)" class="waves-effect">
             <i class="fa fa-pencil-square-o fa-fw" data-icon="v"></i>
@@ -79,6 +79,12 @@
                 <a href="{% url 'office_list' %}" target="_self">
                     <i class="fa fa-building-o fa-fw"></i>
                     <span class="hide-menu">Escritórios</span>
+                </a>
+            </li>
+            <li><!-- IMPORTAÇÃO TABELA DE PREÇO -->
+                <a href="{% url 'import_service_price_table' %}" target="_self">
+                    <i class="fa fa-money fa-fw"></i>
+                    <span class="hide-menu">Importação Tabela de Preços</span>
                 </a>
             </li>
             {% if request.user.is_superuser %}
