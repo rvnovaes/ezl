@@ -31757,10 +31757,4 @@
         <field name="name" type="CharField">Senador Sá</field>
         <field name="state" rel="ManyToOneRel" to="core.state">7</field>
     </object>
-
-
-
-
-
-
 </django-objects>
