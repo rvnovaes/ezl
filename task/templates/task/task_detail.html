@@ -6,7 +6,21 @@
 {% load djmoney %}
 
 {% block extra_stylesheets %}
-
+    <!-- DataTables -->
+    <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        table.dataTable.row-border tbody tr:first-child th, table.dataTable.row-border tbody tr:first-child td, table.dataTable.display tbody tr:first-child th, table.dataTable.display tbody tr:first-child td {
+            font-size: small !important;
+            cursor: pointer;
+        }
+        tr {
+            cursor: pointer;
+        }
+        #taskTable {
+            overflow: auto;
+        }
+    </style>
 {% endblock %}
 
 {% block right-sidebar-chat %}
@@ -132,6 +146,9 @@
     <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
     <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>
     <script src="{% static 'task/task-detail.js' %}"></script>
+
+    <!-- datatables -->
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
 
     <script type="text/javascript">
         (function() {
@@ -446,4 +463,24 @@
             </div>
         </div>
     </div>
+{% endblock %}
+{% block script_document_ready %}
+    {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
+        $('#confirmAction').on('show.bs.modal', function (event) {
+            var table = $('#correspondents-table').DataTable({
+                paging: false,
+                order: [[4, 'asc']],
+                dom: 'frti',
+                buttons: [],
+                language: {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                },
+            });
+        });
+        /* Ao fechar o modal, limpar a tabela */
+        $('#confirmAction').on('hide.bs.modal', function (event) {
+            $('#servicePriceTableTable').empty();
+            $('#servicePriceTableTable').DataTable().clear().destroy();
+        });
+    {% endif %}
 {% endblock %}
