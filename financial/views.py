@@ -1,20 +1,25 @@
 from core.views import CustomLoginRequiredView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.contrib import messages
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Q
-
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic import View
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
+from celery.task.control import revoke
+from celery.result import AsyncResult
 from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
                            DELETE_SUCCESS_MESSAGE)
 from core.models import Office
 from core.views import (AuditFormMixin, MultiDeleteViewMixin,
                         SingleTableViewMixin)
 from .forms import CostCenterForm, ServicePriceTableForm, ImportServicePriceTableForm
-from .models import CostCenter, ServicePriceTable
+from .models import CostCenter, ServicePriceTable, ImportServicePriceTable
 from .tables import CostCenterTable, ServicePriceTableTable
-from .tasks import import_xls_service_price_table
+from .tasks import import_xls_service_price_table, IMPORTED_IMPORT_SERVICE_TABLE, \
+PROCESS_PERCENT_IMPORT_SERVICE_PRICE_TABLE
 from core.views import remove_invalid_registry, TypeaHeadGenericSearch
 from core.utils import get_office_session
 
@@ -132,24 +137,58 @@ class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):
 
 @login_required
 def import_service_price_table(request):   
-    context = { }    
+    context = { }           
     if request.method == 'POST':                     
         form = ImportServicePriceTableForm(request.POST, request.FILES)        
         if form.is_valid():
             if not request.FILES['file_xls'].name.endswith('.xlsx'):
-                # pensar melhor forma de exibir mensagem
-                pass
-                
-            file_xls = form.save(commit=False)
-            file_xls.office = get_office_session(request)
-            file_xls.create_user = request.user
-            file_xls.save()
+                messages.error(request, 'Arquivo "%s" inválido para importação.' % 
+                    request.FILES['file_xls'].name)
+            else:
+                file_xls = form.save(commit=False)
+                file_xls.office = get_office_session(request)
+                file_xls.create_user = request.user
+                file_xls.save()
+                                
+                task = import_xls_service_price_table.delay(file_xls.pk)  
+                context['show_modal_progress'] = True
+                context['task_id'] = task.task_id
             
-            import_xls_service_price_table.delay(file_xls.pk)
+            context['form'] = form            
+            return render(request, 'financial/import_service_price_table.html', context)
                         
             # if errors:
                 # context['errors'] = errors            
     else:
         form = ImportServicePriceTableForm()
     context['form'] = form
-    return render(request, 'core/import_service_price_table.html', context)
+    return render(request, 'financial/import_service_price_table.html', context)
+
+
+class ImportServicePriceTableStatus(CustomLoginRequiredView, View):
+    def get(self, request, pk, *args, **kwargs):        
+        imported = False
+        percent_imported = 0
+
+        imported_cache_key = IMPORTED_IMPORT_SERVICE_TABLE + str(pk)        
+        if cache.get(imported_cache_key):
+            imported = cache.get(imported_cache_key)
+        percent_imported_cache_key = PROCESS_PERCENT_IMPORT_SERVICE_PRICE_TABLE + str(pk)
+        if cache.get(percent_imported_cache_key):
+            percent_imported = cache.get(percent_imported_cache_key)
+            if imported:
+                percent_imported = 100
+                cache.delete(imported_cache_key)
+                cache.delete(percent_imported_cache_key)
+                messages.sucess(request, 'Processo de importação de tabela de preços efetuado com sucesso.')                
+
+        return JsonResponse({
+            'imported': imported, 
+            'percent': percent_imported
+        })
+
+
+def cancel_import_service_price_table(request, task_id):    
+    revoke(task_id)#, terminate=True)
+    messages.success(request, 'Processo de importação de tabela de preços cancelado.')
+    return redirect('import_service_price_table')

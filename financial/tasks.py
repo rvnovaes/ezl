@@ -1,21 +1,25 @@
 from decimal import Decimal
 from django.contrib.auth.models import User
-from celery import shared_task
+from django.core.cache import cache
+from celery import shared_task, current_task
 from openpyxl import load_workbook
+from djmoney.money import Money
 from .models import ServicePriceTable, ImportServicePriceTable
 from core.models import Office, State, ContactMechanism, \
     ContactMechanismType, EMAIL
 from task.models import TypeTask
 from lawsuit.models import CourtDistrict
 
+IMPORTED_IMPORT_SERVICE_TABLE = 'imported_ispt_'
+PROCESS_PERCENT_IMPORT_SERVICE_PRICE_TABLE = 'process_percent_ispt_'
  
 @shared_task
 def import_xls_service_price_table(file_id):    
-
     # lista para montar log de erros da importação    
     errors = []
     
     xls_file = ImportServicePriceTable.objects.get(pk = file_id)
+    cache.set(IMPORTED_IMPORT_SERVICE_TABLE + str(xls_file.pk), False, timeout=None)
     
     user_session = User.objects.get(pk=xls_file.create_user.pk)
     office_session = Office.objects.get(pk=xls_file.office.pk)
@@ -24,6 +28,7 @@ def import_xls_service_price_table(file_id):
     wb = load_workbook(xls_file.file_xls.file, data_only=True)
     
     total = len(wb.worksheets)
+    i = 0
 
     for sheet in wb.worksheets:
         for row in sheet.iter_rows(min_row=2):                       
@@ -63,43 +68,43 @@ def import_xls_service_price_table(file_id):
                     importar = False
             
             # Comarca
+            court_district = None
             court_district_name = str(row[2].value).strip()
             court_district_name = remove_caracter_especial(court_district_name)
             if court_district_name == 'None':
                 court_district_name = ''
             if court_district_name != '':
                 court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_name, state=state.pk).first()                
-                if court_district is None:
-                    errors.append('Comarca %s pertencente ao estado %s não encontrada' % court_district_name, sigla_uf)
-                    importar = False                    
-
-            if importar:
-                try:                    
-                    service_price_table = ServicePriceTable.objects.get(
-                        office=office_session,
-                        office_correspondent = office_correspondent.pk,
-                        type_task = type_task.pk,
-                        court_district = court_district.pk, 
-                        state = state.pk)
-                except ServicePriceTable.DoesNotExist:
-                    service_price_table = None                
-                               
+                # if court_district is None:
+                #     errors.append('Comarca {} pertencente ao estado {} não encontrada'.format(court_district_name, sigla_uf))
+                #     importar = False                    
+            
+            if importar:                  
+                service_price_table = ServicePriceTable.objects.filter(
+                    office=office_session,
+                    office_correspondent = office_correspondent.pk,
+                    type_task = type_task.pk,
+                    court_district = court_district.pk if court_district else None,
+                    state = state.pk).first()
+                                
                 try:
+                    
                     if type(row[4].value) == str:
-                        raise
+                        value_str = row[4].value.replace('R$\xa0', '').replace(',', '.')
+                        value = Decimal(value_str)
                     else:                        
                         value = row[4].value
                 except:
                     value = 0
-                    errors.append('Valor %s inválido. Verificar escritório %s, comarca %s, estado %s.'%
-                            (row[4].value, office_correspondent, court_district, state))                
+                    errors.append('Valor {} inválido. Verificar escritório {}, comarca {}, estado {}.'.format(
+                        row[4].value, office_correspondent, court_district, state))                                
                 
                 if service_price_table is None:                    
                     service_price_table = ServicePriceTable.objects.create(
                         office = office_session,
                         office_correspondent = office_correspondent,
                         type_task = type_task,
-                        court_district = court_district,
+                        court_district = court_district if court_district else None,
                         state = state,            
                         value = value,
                         create_user=user_session
@@ -120,9 +125,12 @@ def import_xls_service_price_table(file_id):
                             office = office_correspondent,
                             create_user=user_session
                         )
-        
-    xls_file.imported = True
-    xls_file.save()             
+
+        process_percent = int(100 * float(i) / float(total))
+        i = i + 1
+        cache.set(PROCESS_PERCENT_IMPORT_SERVICE_PRICE_TABLE + str(xls_file.pk), process_percent, timeout=None)            
+    
+    cache.set(IMPORTED_IMPORT_SERVICE_TABLE + str(xls_file.pk), True, timeout=None)            
     
     return errors
 

@@ -1,0 +1,80 @@
+{% load staticfiles %}
+
+{% block extra_stylesheets %}
+    <style>
+            #myProgress {
+                width: 100%;
+                background-color: grey;
+            }
+            #myBar {
+                width: 1%;
+                height: 30px;
+                background-color: green;
+            }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="progressBarImportServicePriceTableAction" class="modal fade "
+        tabindex="-1" role="alert" aria-labelledby="modalTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg ">
+            <div class="modal-content">
+                <div id="modalHeader" class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 id="modalTitle" class="modal-title">
+                        <i id="icon" class="mdi-24px"></i>
+                            Importação Tabela de Preços de Serviços </h4><span id="percent"></span>
+                </div>
+                <div class="modal-body p-30">
+                    <div id="myProgress">                        
+                        <div id="myBar"></div>
+                    </div>
+                </div>                
+                {% if task_id %}                
+                    <div class="modal-footer">
+                        <a href="{% url 'cancel_import_service_price_table' task_id=task_id %}"                        
+                            class="btn btn-default"><i class="mdi mdi-close">Cancelar</i></a>                    
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script>
+        var setImported;
+        var width;
+        $(document).ready(function(){            
+            setImported = function(){
+                if ("{{form.instance.pk}}" !== "None") {
+                    $.ajax({
+                        method: 'GET', 
+                        url: "/financeiro/import_service_price_table_status/{{form.instance.pk}}/", 
+                        data: {},
+                        dataType: 'json', 
+                        success: function(response) {                            
+                            var elem = document.getElementById("myBar");
+                            var percent = document.getElementById("percent")                                                         
+                            width = response.percent;
+                            percent.innerHTML = width + '%' 
+                            elem.style.width = width + '%'; 
+                        }, 
+                        beforeSend: function (xhr, settings) {
+                            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                        },                        
+                        complete: function() {
+                            {% if imported %}
+                                $(".progressBarImportServicePriceTableAction").modal('hide');
+                            {% endif %}
+                        },
+                    })
+                }
+            }
+            setInterval(setImported, 3000)        
+        });
+        $('.close').click(function() {
+            {% if task_id %}            
+                $.get("{% url 'cancel_import_service_price_table' task_id=task_id %}");
+            {% endif %}
+        }); 
+    </script>    
+{% endblock %}

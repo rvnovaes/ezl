@@ -99,8 +99,7 @@ def get_dir_name(instance, filename):
     return 'service_price_table/{0}'.format(filename)
 
 class ImportServicePriceTable(Audit, OfficeMixin):
-    file_xls = models.FileField("Arquivo", upload_to=get_dir_name)
-    imported = models.BooleanField("Importado", default=False)
+    file_xls = models.FileField("Arquivo", upload_to=get_dir_name)    
 
     class Meta:
         verbose_name = 'Arquivos Importados de Tabela de Preços'
