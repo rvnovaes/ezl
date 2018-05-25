@@ -34,7 +34,8 @@
                 {% if task_id %}                
                     <div class="modal-footer">
                         <a href="{% url 'cancel_import_service_price_table' task_id=task_id %}"                        
-                            class="btn btn-default"><i class="mdi mdi-close">Cancelar</i></a>                    
+                            class="btn btn-default close" 
+                            data-dismiss="modal"><i class="mdi mdi-close">Cancelar</i></a>                    
                     </div>
                 {% endif %}
             </div>
@@ -56,25 +57,22 @@
                             var percent = document.getElementById("percent")                                                         
                             width = response.percent;
                             percent.innerHTML = width + '%' 
-                            elem.style.width = width + '%'; 
+                            elem.style.width = width + '%';                            
+                            if (response.imported)                                
+                                $("#progressBarImportServicePriceTableAction").modal('hide');
                         }, 
                         beforeSend: function (xhr, settings) {
                             xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-                        },                        
-                        complete: function() {
-                            {% if imported %}
-                                $(".progressBarImportServicePriceTableAction").modal('hide');
-                            {% endif %}
                         },
                     })
                 }
             }
             setInterval(setImported, 3000)        
-        });
-        $('.close').click(function() {
-            {% if task_id %}            
-                $.get("{% url 'cancel_import_service_price_table' task_id=task_id %}");
-            {% endif %}
-        }); 
+           $('#progressBarImportServicePriceTableAction').on('hide.bs.modal', function(){               
+                {% if task_id %} 
+                    $.get("{% url 'cancel_import_service_price_table' task_id=task_id %}");
+                {% endif %}
+           }) 
+        });        
     </script>    
 {% endblock %}
