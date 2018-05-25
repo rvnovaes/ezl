@@ -42,9 +42,6 @@ class EcmEtl(GenericETL):
 
     @staticmethod
     def list_chunks(l, n):
-        """Yield successive n-sized chunks from l.
-        https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
-        :param i1: """
         for i in range(0, len(l), n):
             yield l[i:i + n]
 
