@@ -12,28 +12,6 @@
             <span class="hide-menu">Pesquisar</span>
         </a>
     </li>    
-    {% if perms.core.view_all_tasks %}
-    <li>
-        <a href="javascript:void(0)" class="waves-effect">
-            <i class="mdi mdi-chart-bar fa-fw"></i>
-            <span class="hide-menu">Relatórios<span class="fa arrow"></span></span>
-        </a>
-        <ul class="nav nav-second-level">
-            <li>
-                <a href="{% url 'task_report_to_pay' %}" target="_self">
-                    <i class="fa fa-dollar fa-fw"></i>
-                    <span class="hide-menu">OS's a pagar</span>
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'task_report_to_receive' %}" target="_self">
-                    <i class="fa fa-dollar fa-fw"></i>
-                    <span class="hide-menu">OS's a receber</span>
-                </a>
-            </li>
-        </ul>
-    </li>
-    {% endif %}
     <li> <!-- CADASTROS -->
         <a href="javascript:void(0)" class="waves-effect">
             <i class="fa fa-pencil-square-o fa-fw" data-icon="v"></i>
@@ -91,6 +69,28 @@
 
         </ul>
     </li>
+    {% if perms.core.view_all_tasks %}
+    <li>
+        <a href="javascript:void(0)" class="waves-effect">
+            <i class="mdi mdi-chart-bar fa-fw"></i>
+            <span class="hide-menu">Relatórios<span class="fa arrow"></span></span>
+        </a>
+        <ul class="nav nav-second-level">
+            <li>
+                <a href="{% url 'task_report_to_pay' %}" target="_self">
+                    <i class="fa fa-dollar fa-fw"></i>
+                    <span class="hide-menu">OS's a pagar</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'task_report_to_receive' %}" target="_self">
+                    <i class="fa fa-dollar fa-fw"></i>
+                    <span class="hide-menu">OS's a receber</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    {% endif %}
     <li> <!-- ADMINISTRAÇÃO -->
         <a href="javascript:void(0)" class="waves-effect">
             <i class="fa fa-folder-o fa-fw" data-icon="v"></i>
