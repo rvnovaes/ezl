@@ -9,12 +9,20 @@ from django.urls import reverse_lazy
 from config.config import get_parser
 from decimal import ROUND_HALF_EVEN
 from moneyed.localization import _FORMATTER, DEFAULT
+from celery.schedules import crontab
 
 MUST_LOGIN = True
 
 CELERY_BROKER_URL = 'amqp://guest:guest@queues:5672/'
-
+CELERY_RESULT_BACKEND = 'amqp://guest:guest@queues:5672/'
+CELERY_TIMEZONE = 'America/Sao_Paulo'
 CELERY_TASK_ALWAYS_EAGER = False
+CELERY_BEAT_SCHEDULE = {
+    'task-remove_old_etldashboard': {
+        'task': 'etl.tasks.remove_old_etldashboard',
+        'schedule': crontab(minute=0, hour=2)
+    },
+}
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

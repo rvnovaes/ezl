@@ -43,7 +43,7 @@ def receive_notes_execution_date(notes, instance, execution_date, survey_result,
 def new_task(sender, instance, created, **kwargs):
     notes = 'Nova providência' if created else getattr(instance, '__notes', '')
     user = instance.alter_user if instance.alter_user else instance.create_user
-    if not getattr(instance, '_skip_signal'):
+    if not getattr(instance, '_skip_signal') or created:
         TaskHistory.objects.create(task=instance,
                                    create_user=user,
                                    status=instance.task_status,
@@ -58,6 +58,8 @@ def change_status(sender, instance, **kwargs):
     previous_status = TaskStatus(instance.__previous_status) or TaskStatus.INVALID
 
     if new_status is not previous_status:
+        if new_status is TaskStatus.REQUESTED:
+            instance.requested_date = now_date
         if new_status is TaskStatus.ACCEPTED_SERVICE:
             instance.acceptance_service_date = now_date
         if new_status is TaskStatus.REFUSED_SERVICE:

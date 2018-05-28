@@ -105,9 +105,9 @@ class LawSuitForm(BaseForm):
 
     class Meta:
         model = LawSuit
-        fields = ['office', 'law_suit_number', 'organ', 'instance', 'court_division',
+        fields = ['office', 'law_suit_number', 'court_district', 'organ', 'instance', 'court_division',
                   'person_lawyer', 'opposing_party',
-                  'is_current_instance', 'is_active', 'court_district']
+                  'is_current_instance', 'is_active']
 
     person_lawyer = forms.ModelChoiceField(
         empty_label=u"Selecione",
@@ -115,12 +115,15 @@ class LawSuitForm(BaseForm):
             Person.objects.filter(is_active=True, is_lawyer=True)).only('legal_name').order_by(
             'name'), required=True
     )
-    organ = forms.CharField(label='Comarca/Órgão',
-                            required=True,
+    court_district = forms.CharField(label='Comarca', required=True, widget=TypeaHeadForeignKeyWidget(
+        model=CourtDistrict, field_related='name', name='court_district', url='/processos/courtdistrict_autocomplete'))
+
+    organ = forms.CharField(label='Órgão',
+                            required=False,
                             widget=TypeaHeadForeignKeyWidget(model=Organ,
                                                              field_related='legal_name',
                                                              name='organ',
-                                                             url='/processos/organ_autocomplete'))
+                                                             url='/processos/organ_autocomplete'))    
 
     instance = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(Instance.objects.filter(is_active=True)).order_by('name'),
@@ -134,18 +137,7 @@ class LawSuitForm(BaseForm):
     opposing_party = forms.CharField(required=False)
     law_suit_number = forms.CharField(max_length=255, required=True)
     is_current_instance = CustomBooleanField(initial=False, required=False)
-    court_district = forms.CharField(required=False, widget=forms.HiddenInput(), initial=None)
 
-    def clean(self):
-        res = super(LawSuitForm, self).clean()
-        res['court_district'] = None
-        if res.get('organ'):
-            res['court_district'] = res.get('organ').court_district
-        elif self.data.get('organ'):
-            res['organ'] = Organ.objects.filter(pk=self.data.get('organ')).first()
-            if res['organ']:
-                res['court_district'] = res['organ'].court_district
-        return res
 
 class CourtDivisionForm(BaseForm):
     class Meta:
