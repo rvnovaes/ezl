@@ -247,7 +247,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
                 if isinstance(self, ToReceiveTaskReportView):
                     query.add(Q(parent__office__name__unaccent__icontains=data['office']), Q.AND)
                 else:
-                    query.add(Q(child__office__name__unaccent__icontains=data['office']), Q.AND)
+                    query.add(Q(office__name__unaccent__icontains=data['office']), Q.AND)
             
             if data['finished_in']:
                 if data['finished_in'].start:
@@ -327,7 +327,7 @@ class ToPayTaskReportView(TaskReportBase):
     datetime_field = 'billing_date'
 
     def get_queryset(self):
-        office = get_office_session(self.request)
+        office = get_office_session(self.request)        
         queryset = Task.objects.filter(
             parent__office=office,
             task_status=TaskStatus.FINISHED,
