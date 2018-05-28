@@ -7,10 +7,11 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
-from core.views import ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin, \
-    CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave, PopupSuccessView
+from core.views import (ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin,
+    CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave, PopupSuccessView,
+    OfficeAutocomplete)
 from django.conf import settings
-from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, TaskBulkCreateView
+from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView
 
 urlpatterns = [
 
@@ -29,7 +30,8 @@ urlpatterns = [
     url(r'^dashboard/$', login_required(DashboardView.as_view()), name='dashboard'),
     url(r'^chat/', include('chat.urls'), name='chat'),
     url(r'^ecm/', include('ecm.urls', namespace='ecm')),
-
+    url(r'^relatorios/os-a-receber$', ToReceiveTaskReportView.as_view(), name='task_report_to_receive'),
+    url(r'^relatorios/os-a-pagar$', ToPayTaskReportView.as_view(), name='task_report_to_pay'),
     url(r'^dashboard/(?P<pk>[0-9]+)/$',
         login_required(TaskDetailView.as_view()),
         name='task_detail'),
@@ -49,6 +51,10 @@ urlpatterns = [
     url(r'^client_form',
         login_required(ClientAutocomplete.as_view()),
         name='client_autocomplete'),
+
+    url(r'^office_form',
+        login_required(OfficeAutocomplete.as_view()),
+        name='office_autocomplete'),
 
     url(r'^correspondent_form',
         login_required(CorrespondentAutocomplete.as_view()),

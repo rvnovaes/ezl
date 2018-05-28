@@ -22,7 +22,7 @@ def chat_add_user_by_office(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('task', '0079_typetask_simple_service'),
+        ('task', '0080_typetask_simple_service'),
         ('core', '0079_office_public_office'),
         ('chat', '0010_chat_offices'),
     ]
