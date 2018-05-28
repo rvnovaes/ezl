@@ -26,11 +26,34 @@
         <div class="row">
             {% bootstrap_field form.file_xls form_group_class="form-group col-sm-12" %}              
         </div>
-        <button class="btn btn-success waves-effect waves-light" type="submit">
-            <span class="btn-label"><i class="fa fa-save"></i></span>Importar
+        <button id="btn-submit"
+            style="width: 100px!important;"
+            type="button"
+            onclick="showMessage()"
+            class="btn btn-success waves-effect waves-light">Importar
         </button>
         
         <script>
+            function showMessage()
+            {                                
+                var text_msg = "Ao iniciar o processo de importação de tabela de preços não será possível cancelá-lo. Deseja continuar?"                
+                swal({
+                        title: "Importante",
+                        text: text_msg,
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Sim",
+                        cancelButtonText: "Não",
+                        confirmButtonColor: "#DD6B55",                        
+                        closeOnConfirm: false
+                    }, function(isConfirm){
+                        if (isConfirm) {                                                   
+                            $('#import_service_price_table_form').submit();                            
+                        }
+                    }
+                );
+            } 
+            
             $(document).ready(function(){
                 {% if show_modal_progress %}
                     $('#progressBarImportServicePriceTableAction').modal('show');

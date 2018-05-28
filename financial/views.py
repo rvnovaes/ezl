@@ -137,7 +137,7 @@ class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):
 
 @login_required
 def import_service_price_table(request):   
-    context = { }           
+    context = { }
     if request.method == 'POST':                     
         form = ImportServicePriceTableForm(request.POST, request.FILES)        
         if form.is_valid():
@@ -150,11 +150,11 @@ def import_service_price_table(request):
                 file_xls.create_user = request.user
                 file_xls.save()
                                 
-                task = import_xls_service_price_table.delay(file_xls.pk)  
+                task = import_xls_service_price_table.delay(file_xls.pk)
                 context['show_modal_progress'] = True
                 context['task_id'] = task.task_id
             
-            context['form'] = form            
+            context['form'] = form
             return render(request, 'financial/import_service_price_table.html', context)
                         
             # if errors:
@@ -186,9 +186,3 @@ class ImportServicePriceTableStatus(CustomLoginRequiredView, View):
             'imported': imported, 
             'percent': percent_imported
         })
-
-
-def cancel_import_service_price_table(request, task_id):    
-    revoke(task_id)#, terminate=True)
-    messages.success(request, 'Processo de importação de tabela de preços cancelado.')
-    return redirect('import_service_price_table')
