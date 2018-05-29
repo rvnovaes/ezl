@@ -14,7 +14,7 @@ def load_fixture(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0080_typetask_simple_service'),
+        ('task', '0079_typetask_simple_service'),
     ]
 
     operations = [
