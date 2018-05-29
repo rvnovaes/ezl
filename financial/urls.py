@@ -17,4 +17,5 @@ urlpatterns = [
     
     url(r'^import_service_price_table/$', views.import_service_price_table, name='import_service_price_table'),    
     url(r'^import_service_price_table_status/(?P<pk>[0-9]+)/$', views.ImportServicePriceTableStatus.as_view(), name='import_service_price_table_status'),    
+    url(r'^ajax_get_log_import_service_price_table_data_table/$', views.ajax_get_log_import_service_price_table_data_table, name='ajax_get_log_import_service_price_table_data_table'),    
 ]

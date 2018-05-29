@@ -24,21 +24,17 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     <h4 id="modalTitle" class="modal-title">
                         <i id="icon" class="mdi-24px"></i>
-                            Importação Tabela de Preços de Serviços </h4><span id="percent"></span>
+                            <span id="title-progressbar">Importação Tabela de Preços de Serviços</span> </h4><span id="percent"></span>
                 </div>
                 <div class="modal-body p-30">
                     <div id="myProgress">                        
                         <div id="myBar"></div>
                     </div>
                 </div>                                            
-                <div class="modal-footer">
+                <div class="modal-footer" id="div-footer" style="display: none">                    
                     <a href="#" class="btn btn-default close" data-dismiss="modal" 
-                        id="btn-close" target="blank" style="display: none;">
-                        <i class="mdi mdi-close">Fechar</i></a>
-                    <a href="#" class="btn btn-default warning" data-dismiss="modal" 
-                        id="btn-log" target="blank" style="display: none;">
-                        <i class="mdi mdi-book-open">
-                            Visualizar log importação</i></a> 
+                        id="btn-close" target="blank">
+                        <i class="mdi mdi-close">Fechar</i></a> 
                 </div>                
             </div>
         </div>
@@ -46,7 +42,8 @@
     <script>
         var setImported;
         var width;
-        var finish_process=false;
+        var process_interval;
+        var finish_process=false;        
         $(document).ready(function(){            
             setImported = function(){
                 if ("{{form.instance.pk}}" !== "None") {
@@ -55,26 +52,50 @@
                         url: "/financeiro/import_service_price_table_status/{{form.instance.pk}}/", 
                         data: {},
                         dataType: 'json', 
-                        success: function(response) {                                                                                    
+                        success: function(response) {      
                             var elem = document.getElementById("myBar");
-                            var percent = document.getElementById("percent")                                                         
-                            if ((!response.imported) && (percent <= 100))
-                            {
-                                width = response.percent;
-                                percent.innerHTML = width + '%' 
-                                elem.style.width = width + '%';                            
-                            }
+                            var percent = document.getElementById("percent")
+                            var title = document.getElementById("title-progressbar")
                             
-                            if (response.imported)
+                            width = response.percent;
+                            if (response.imported_worksheet)
+                                width = 100;
+                            percent.innerHTML = width + '%';
+                            elem.style.width = width + '%';
+                            
+                            if (!response.imported)
+                                title.innerHTML = "Importação Tabela de Preços de Serviços. Planilha: " + response.worksheet_in_process;                            
+                            
+                            if ((response.imported) || (response.error_process))
                             {
-                                btnClose = document.getElementById("btn-close");
-                                btnClose.style.display = "block";
+                                $("#div-footer").show();                                
 
-                                btnLog = document.getElementById("btn-log");
-                                btnLog.style.display = "block"
-                            } 
-                            
-                            finish_process = response.imported;
+                                if (response.imported)
+                                    title.innerHTML = "Importação Tabela de Preços de Serviços finalizada com sucesso.";
+                                else
+                                {
+                                    title.innerHTML = "Importação Tabela de Preços de Serviços finalizada sem sucesso. Favor verificar log do processo";
+                                }
+
+                                if (response.process_have_log)
+                                {
+                                    $("#div-log-table").show();
+                                    var table = $('#LogTable').DataTable({
+                                        pageLength: 10,
+                                        dom: 'Bfrtip',
+                                        ajax: '{% url 'ajax_get_log_import_service_price_table_data_table' %}?pk={{form.instance.pk}}',
+                                        buttons: [
+                                            'copy', 'csv', 'excel', 'pdf', 'print'
+                                        ],
+                                        language: {
+                                            "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                                        },
+                                    });
+                                }                                
+                                
+                                finish_process = true;
+                                clearInterval(process_interval);
+                            }
                         }, 
                         beforeSend: function (xhr, settings) {
                             xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
@@ -82,7 +103,7 @@
                     })
                 }
             }
-            setInterval(setImported, 3000)           
+            process_interval = setInterval(setImported, 3000)
         }); 
 
 

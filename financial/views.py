@@ -18,10 +18,12 @@ from core.views import (AuditFormMixin, MultiDeleteViewMixin,
 from .forms import CostCenterForm, ServicePriceTableForm, ImportServicePriceTableForm
 from .models import CostCenter, ServicePriceTable, ImportServicePriceTable
 from .tables import CostCenterTable, ServicePriceTableTable
-from .tasks import import_xls_service_price_table, IMPORTED_IMPORT_SERVICE_TABLE, \
-PROCESS_PERCENT_IMPORT_SERVICE_PRICE_TABLE
+from .tasks import import_xls_service_price_table, IMPORTED_IMPORT_SERVICE_PRICE_TABLE, \
+PROCESS_PERCENT_IMPORT_SERVICE_PRICE_TABLE, WORKSHEET_IN_PROCESS, IMPORTED_WORKSHEET,\
+ERROR_PROCESS
 from core.views import remove_invalid_registry, TypeaHeadGenericSearch
 from core.utils import get_office_session
+from .utils import clearCache
 
 
 class CostCenterListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -147,18 +149,15 @@ def import_service_price_table(request):
             else:
                 file_xls = form.save(commit=False)
                 file_xls.office = get_office_session(request)
-                file_xls.create_user = request.user
+                file_xls.create_user = request.user                
                 file_xls.save()
                                 
-                task = import_xls_service_price_table.delay(file_xls.pk)
+                import_xls_service_price_table.delay(file_xls.pk)
                 context['show_modal_progress'] = True
-                context['task_id'] = task.task_id
+                context['file_xls'] = file_xls               
             
             context['form'] = form
-            return render(request, 'financial/import_service_price_table.html', context)
-                        
-            # if errors:
-                # context['errors'] = errors            
+            return render(request, 'financial/import_service_price_table.html', context)         
     else:
         form = ImportServicePriceTableForm()
     context['form'] = form
@@ -169,20 +168,62 @@ class ImportServicePriceTableStatus(CustomLoginRequiredView, View):
     def get(self, request, pk, *args, **kwargs):        
         imported = False
         percent_imported = 0
-
-        imported_cache_key = IMPORTED_IMPORT_SERVICE_TABLE + str(pk)        
+        worksheet_in_process = ""
+        imported_worksheet = False
+        error_process = False
+        process_have_log = False
+        
+        imported_cache_key = IMPORTED_IMPORT_SERVICE_PRICE_TABLE + str(pk)        
         if cache.get(imported_cache_key):
             imported = cache.get(imported_cache_key)
+        
+        worksheet_in_process_key = WORKSHEET_IN_PROCESS + str(pk)
+        if cache.get(worksheet_in_process_key):
+            worksheet_in_process = cache.get(worksheet_in_process_key)
+        
+        imported_worksheet_key = IMPORTED_WORKSHEET + str(pk)
+        if cache.get(imported_worksheet_key):
+            imported_worksheet = cache.get(imported_worksheet_key)
+
+        error_process_key = ERROR_PROCESS + str(pk)
+        if cache.get(error_process_key):
+            error_process = cache.get(error_process_key)
+        
         percent_imported_cache_key = PROCESS_PERCENT_IMPORT_SERVICE_PRICE_TABLE + str(pk)
         if cache.get(percent_imported_cache_key):
             percent_imported = cache.get(percent_imported_cache_key)
-            if imported:
-                percent_imported = 100
-                cache.delete(imported_cache_key)
-                cache.delete(percent_imported_cache_key)
-                messages.sucess(request, 'Processo de importação de tabela de preços efetuado com sucesso.')                
+            if imported or error_process:
+                if imported:
+                    percent_imported = 100
+                else:
+                    percent_imported = 0
+                process_have_log = ImportServicePriceTable.objects.get(pk=pk).log
+                clearCache([imported_cache_key,
+                    worksheet_in_process_key,
+                    imported_worksheet_key,
+                    percent_imported_cache_key,
+                    error_process_key])
 
         return JsonResponse({
             'imported': imported, 
-            'percent': percent_imported
+            'percent': percent_imported,
+            'worksheet_in_process': worksheet_in_process,
+            'imported_worksheet': imported_worksheet,
+            'error_process': error_process,
+            'process_have_log': process_have_log            
         })
+
+@login_required
+def ajax_get_log_import_service_price_table_data_table(request):    
+    pk = request.GET.get('pk')        
+    file_xls = ImportServicePriceTable.objects.get(pk=pk)    
+    log = file_xls.log.split(";")
+    log_list = []
+            
+    for item in log:
+        log_list.append(item)
+          
+    data = {
+        "data": log_list
+    }        
+    return JsonResponse(data)
