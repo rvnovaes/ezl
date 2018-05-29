@@ -10,6 +10,7 @@ from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from core.views import CustomLoginRequiredView
 from django.contrib.auth.models import User, Group
 from django.contrib.messages.views import SuccessMessageMixin
@@ -31,7 +32,7 @@ from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixi
 from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
-from task.filters import TaskFilter
+from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation
@@ -203,6 +204,158 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteVi
     def post(self, request, *args, **kwargs):
         self.success_url = urlparse(request.META.get('HTTP_REFERER')).path
         return super(TaskDeleteView, self).post(request, *args, **kwargs)
+
+
+class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateView):
+    permission_required = ('core.view_all_tasks', )
+    template_name = None
+    filter_class = None
+    datetime_field = None
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
+        context['filter'] = self.task_filter
+        context['offices'] = self.get_os_grouped_by_office()
+        context['total'] = sum(map(lambda x: x['total'], context['offices']))
+        return context
+
+    def get_queryset(self):
+        office = get_office_session(self.request)
+        queryset = Task.objects.filter(
+            office=office,
+            task_status=TaskStatus.FINISHED,
+            child__isnull=False
+        )
+        queryset = self.filter_queryset(queryset)
+        return queryset.order_by('child__office__name')
+
+    def filter_queryset(self, queryset):
+        if not self.task_filter.form.is_valid():
+            messages.add_message(self.request, messages.ERROR, 'Formulário inválido.')
+        else:
+            data = self.task_filter.form.cleaned_data
+            query = Q()
+            finished_query = Q()
+
+            if data['status']:
+                key = "{}__isnull".format(self.datetime_field)
+                query.add(Q(**{key: data['status'] != 'true'}), Q.AND)
+
+            if data['client']:
+                query.add(Q(movement__law_suit__folder__person_customer__legal_name__unaccent__icontains=data['client']), Q.AND)
+            
+            if data['office']:
+                if isinstance(self, ToReceiveTaskReportView):
+                    query.add(Q(parent__office__name__unaccent__icontains=data['office']), Q.AND)
+                else:
+                    query.add(Q(office__name__unaccent__icontains=data['office']), Q.AND)
+            
+            if data['finished_in']:
+                if data['finished_in'].start:
+                    finished_query.add(
+                        Q(finished_date__gte=data['finished_in'].start.replace(hour=0, minute=0)), Q.AND)
+                if data['finished_in'].stop:
+                    finished_query.add(
+                        Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)            
+            else:
+                # O filtro padrão para finished_date é do dia 01 do mês atual e o dia corrente como data final
+                finished_query.add(
+                    Q(finished_date__gte=timezone.now().replace(day=1, hour=0, minute=0)), Q.AND)
+                finished_query.add(
+                    Q(finished_date__lte=timezone.now().replace(hour=23, minute=59)), Q.AND)
+            query.add(Q(finished_query), Q.AND)
+            queryset = queryset.filter(query)
+
+        return queryset
+
+    def get_os_grouped_by_office(self):
+        offices = []
+        offices_map = {}
+        tasks = self.get_queryset()
+        for task in tasks:
+            correspondent = self._get_related_office(task)
+            if correspondent not in offices_map:
+                offices_map[correspondent] = []
+            offices_map[correspondent].append(task)
+
+        for office, tasks in offices_map.items():
+            tasks.sort(key=lambda x: x.client.name)
+            offices.append({
+                "name": office.name,
+                "tasks": tasks,
+                "total": sum(map(lambda x: x.amount, tasks))
+                })
+
+        return offices
+
+
+class ToReceiveTaskReportView(TaskReportBase):
+    template_name = 'task/reports/to_receive.html'
+    filter_class = TaskToReceiveFilter
+    datetime_field = 'receipt_date'
+
+    def get_queryset(self):
+        office = get_office_session(self.request)
+        queryset = Task.objects.filter(
+            office=office,
+            task_status=TaskStatus.FINISHED,
+            parent__isnull=False
+        )
+        queryset = self.filter_queryset(queryset)
+        return queryset.order_by('parent__office__name')
+
+    def _get_related_office(self, task):
+        return task.parent.office
+
+    def post(self, request):
+        office = get_office_session(self.request)
+        tasks_payload = request.POST.get('tasks')
+        if not tasks_payload:
+            return JsonResponse({"error": "tasks is required"}, status=400)
+
+        for task_id in json.loads(tasks_payload):
+            task = Task.objects.get(id=task_id, office=office)
+            setattr(task, self.datetime_field, timezone.now())
+            task.save()
+
+        messages.add_message(self.request, messages.INFO, "OS's marcadas como recebidas com sucesso.")
+        return JsonResponse({"status": "ok"})
+
+
+class ToPayTaskReportView(TaskReportBase):
+    template_name = 'task/reports/to_pay.html'
+    filter_class = TaskToPayFilter
+    datetime_field = 'billing_date'
+
+    def get_queryset(self):
+        office = get_office_session(self.request)        
+        queryset = Task.objects.filter(
+            parent__office=office,
+            task_status=TaskStatus.FINISHED,
+            parent__isnull=False
+        )
+        queryset = self.filter_queryset(queryset)
+        return queryset.order_by('child__office__name')
+
+    def _get_related_office(self, task):
+        return task.office
+
+    def post(self, request):
+        office = get_office_session(self.request)
+        tasks_payload = request.POST.get('tasks')
+        if not tasks_payload:
+            return JsonResponse({"error": "tasks is required"}, status=400)
+
+        for task_id in json.loads(tasks_payload):
+            task = Task.objects.get(id=task_id, parent__office=office)
+            setattr(task, self.datetime_field, timezone.now())
+            task.save()
+
+        messages.add_message(self.request, messages.INFO, "OS's faturadas com sucesso.")
+        return JsonResponse({"status": "ok"})
+
 
 
 class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
