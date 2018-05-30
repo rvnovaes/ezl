@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.contrib.auth.models import User
 from django.core.cache import cache
+from django.utils import timezone
 from celery import shared_task, current_task
 from celery.utils.log import get_task_logger
 from openpyxl import load_workbook
@@ -122,9 +123,12 @@ def import_xls_service_price_table(file_id):
                             value = value,
                             create_user=user_session
                         )
-                    else:
-                        service_price_table.value = value
-                        service_price_table.save()
+                    else:                        
+                        if value != service_price_table.value:
+                            xls_file.log = xls_file.log + ("Tabela de preço do escritório {}, serviço {} teve seu valor atualizado de {} para {}".format( 
+                                                            office_name, type_task, service_price_table.value, value)) + ";"
+                            service_price_table.value = value
+                            service_price_table.save()
                                         
                     emails = str(row[5].value).strip().lower() + str(row[6].value).strip().lower()
                     for email in emails.split(";"):
@@ -149,4 +153,5 @@ def import_xls_service_price_table(file_id):
     except Exception as ex:
         cache.set(error_process_key, True, timeout=None)
         xls_file.log = xls_file.log + " Planilha: " + sheet.title + " Linha " + str(i + 1) + "Erro: " + ex.args[0] + ";"        
+    xls_file.end = timezone.now()
     xls_file.save()

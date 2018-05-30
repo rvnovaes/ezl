@@ -79,18 +79,33 @@
 
                                 if (response.process_have_log)
                                 {
+
                                     $("#div-log-table").show();
-                                    var table = $('#LogTable').DataTable({
-                                        pageLength: 10,
-                                        dom: 'Bfrtip',
-                                        ajax: '{% url 'ajax_get_log_import_service_price_table_data_table' %}?pk={{form.instance.pk}}',
-                                        buttons: [
-                                            'copy', 'csv', 'excel', 'pdf', 'print'
-                                        ],
-                                        language: {
-                                            "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-                                        },
-                                    });
+                                    $.ajax({
+                                        method: 'GET', 
+                                        url: "/financeiro/ajax_get_log_import_service_price_table_data_table?pk={{form.instance.pk}}", 
+                                        data: {},
+                                        dataType: 'json',
+                                        success: function(response) {
+                                            var table = $('#LogTable');
+                                            response.data.forEach(function(d){
+                                                table.append('<tr><td>' + d + '</td></tr>')
+                                            })
+                                            table.DataTable({
+                                                pageLength: 10,
+                                                dom: 'Bfrtip',                                                
+                                                buttons: [
+                                                    'copy', 'csv', 'excel', 'pdf', 'print'
+                                                ],
+                                                language: {
+                                                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                                                },
+                                            });                                             
+                                        }, 
+                                        error: function(response){
+                                            console.debug(response)
+                                        }
+                                    })
                                 }                                
                                 
                                 finish_process = true;

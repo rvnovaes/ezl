@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic import View
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from celery.task.control import revoke
@@ -139,25 +140,28 @@ class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):
 
 @login_required
 def import_service_price_table(request):   
-    context = { }
-    if request.method == 'POST':                     
+    context = { }    
+    if request.method == 'POST':                             
         form = ImportServicePriceTableForm(request.POST, request.FILES)        
         if form.is_valid():
-            if not request.FILES['file_xls'].name.endswith('.xlsx'):
+            if not request.FILES['file_xls'].name.endswith('.xlsx'):                
                 messages.error(request, 'Arquivo "%s" inválido para importação.' % 
                     request.FILES['file_xls'].name)
             else:
                 file_xls = form.save(commit=False)
                 file_xls.office = get_office_session(request)
-                file_xls.create_user = request.user                
+                file_xls.create_user = request.user 
+                file_xls.start = timezone.now()               
                 file_xls.save()
-                                
+
                 import_xls_service_price_table.delay(file_xls.pk)
                 context['show_modal_progress'] = True
                 context['file_xls'] = file_xls               
-            
-            context['form'] = form
-            return render(request, 'financial/import_service_price_table.html', context)         
+        else:
+            if not form.instance.file_xls:
+                messages.error(request, 'Arquivo para importação não informado.')
+        context['form'] = form
+        return render(request, 'financial/import_service_price_table.html', context)         
     else:
         form = ImportServicePriceTableForm()
     context['form'] = form
@@ -197,7 +201,7 @@ class ImportServicePriceTableStatus(CustomLoginRequiredView, View):
                     percent_imported = 100
                 else:
                     percent_imported = 0
-                process_have_log = ImportServicePriceTable.objects.get(pk=pk).log
+                process_have_log = ImportServicePriceTable.objects.get(pk=pk).log != " "
                 clearCache([imported_cache_key,
                     worksheet_in_process_key,
                     imported_worksheet_key,
@@ -219,9 +223,10 @@ def ajax_get_log_import_service_price_table_data_table(request):
     file_xls = ImportServicePriceTable.objects.get(pk=pk)    
     log = file_xls.log.split(";")
     log_list = []
-            
+
     for item in log:
-        log_list.append(item)
+        if item != " ":
+            log_list.append(item)
           
     data = {
         "data": log_list

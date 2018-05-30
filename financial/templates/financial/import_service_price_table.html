@@ -5,6 +5,7 @@
 
 {% block extra_stylesheets %}
 <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
+<link href="{% static 'skeleton/plugins/bower_components/dropify/dist/css/dropify.min.css' %}" rel="stylesheet" type="text/css" />
 <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
 
     <!-- <style>
@@ -21,22 +22,31 @@
 {% endblock %}
 
 {% block content %}
-    {% load staticfiles bootstrap3 %}
+{% load staticfiles bootstrap3 %}
     
     {% include 'core/widgets/messages.html' %}
     
     <form id="import_service_price_table_form" action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="row">
-            {% bootstrap_field form.file_xls form_group_class="form-group col-sm-12" %}              
+            <!--Campo para upload do arquivo -->            
+            <div class="form-group col-sm-12">
+                <label class="control-label" for="id_file_xls">Arquivo</label>
+                <div class="row bootstrap3-multi-input">
+                    <div class="col-xs-12" style="width: 400px;">
+                        <input type="file" name="file_xls" class="dropify" title="" required="" id="id_file_xls">
+                    </div>
+                </div>
+            </div>            
         </div>
+
+        <br>
         <button id="btn-submit"
             style="width: 100px!important;"
             type="button"
             onclick="showMessage()"
             class="btn btn-success waves-effect waves-light">Importar
-        </button>
-        
+        </button>        
         <script>
             function showMessage()
             {                                
@@ -66,28 +76,27 @@
         </script>                
         
         {% include 'financial/import_service_price_table_progress_modal.html' %}
-        
-        {% if errors %}
-            {% for error in errors %}
-                <p>{{ error }}</p>
-            {% endfor %}
-        {% endif %}
     </form>
     
-    <br>
+    <br>    
     <div id="div-log-table" style="display: none">
-        <table id="LogTable" class="display">
+            <table id="LogTable">
             <thead>
                 <tr>
-                    <th>Mensagem</th>
+                    <th>Log do processo</th>
                 </tr>
             </thead>
+            <tbody>
+
+            </tbody>
         </table>
     </div> 
 {% endblock %}
 
 
 {% block extra_scripts %}
+    <script src="{% static 'skeleton/plugins/bower_components/dropify/dist/js/dropify.min.js' %}"></script>    
+    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
     <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
     <!-- start - This is for export functionality only -->
     <script src="//cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
@@ -97,4 +106,9 @@
     <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
+    <script>
+        $('document').ready(function(){
+            $('.dropify').attr('data-height', '200').attr('data-allowed-file-extensions', 'xlsx').dropify();
+        })
+    </script>
 {% endblock %}
