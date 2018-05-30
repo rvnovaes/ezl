@@ -68,7 +68,6 @@ class EcmEtl(GenericETL):
         EX: sudo ln -s /mnt/windows_ecm/Agenda/ ./ECM
         """
         for row in rows:
-            print(row)
             try:
                 path = ecm_path_advwin2ezl(row['path'])
                 tasks = Task.objects.filter(legacy_code=row['task_legacy_code'])
