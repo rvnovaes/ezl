@@ -108,7 +108,6 @@ class TaskETL(GenericETL):
     def config_import(self, rows, user, rows_count, default_office, log=False):
         from core.models import Person
         for row in rows:
-            print(rows_count)
             rows_count -= 1
             try:
                 legacy_code = row['legacy_code']
