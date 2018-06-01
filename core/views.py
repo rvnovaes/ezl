@@ -43,7 +43,8 @@ from core.models import Person, Address, City, State, Country, AddressType, Offi
     InviteOffice, OfficeMembership, ContactMechanism
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
-    InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable
+    InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, \
+    OfficeMembershipOfficeTable
 from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
