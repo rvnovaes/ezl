@@ -1,0 +1,100 @@
+{% extends "skeleton/base.html" %}
+
+{% load staticfiles %}
+
+
+{% block extra_stylesheets %}
+<link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
+<link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- <style>
+            #myProgress {
+                width: 100%;
+                background-color: grey;
+            }
+            #myBar {
+                width: 1%;
+                height: 30px;
+                background-color: green;
+            }
+    </style> -->
+{% endblock %}
+
+{% block content %}
+    {% load staticfiles bootstrap3 %}
+    
+    {% include 'core/widgets/messages.html' %}
+    
+    <form id="import_service_price_table_form" action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+            {% bootstrap_field form.file_xls form_group_class="form-group col-sm-12" %}              
+        </div>
+        <button id="btn-submit"
+            style="width: 100px!important;"
+            type="button"
+            onclick="showMessage()"
+            class="btn btn-success waves-effect waves-light">Importar
+        </button>
+        
+        <script>
+            function showMessage()
+            {                                
+                var text_msg = "Ao iniciar o processo de importação de tabela de preços não será possível cancelá-lo. Deseja continuar?"                
+                swal({
+                        title: "Importante",
+                        text: text_msg,
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Sim",
+                        cancelButtonText: "Não",
+                        confirmButtonColor: "#DD6B55",                        
+                        closeOnConfirm: false
+                    }, function(isConfirm){
+                        if (isConfirm) {                                                   
+                            $('#import_service_price_table_form').submit();                            
+                        }
+                    }
+                );
+            } 
+            
+            $(document).ready(function(){
+                {% if show_modal_progress %}
+                    $('#progressBarImportServicePriceTableAction').modal('show');
+                {% endif %}
+            })
+        </script>                
+        
+        {% include 'financial/import_service_price_table_progress_modal.html' %}
+        
+        {% if errors %}
+            {% for error in errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        {% endif %}
+    </form>
+    
+    <br>
+    <div id="div-log-table" style="display: none">
+        <table id="LogTable" class="display">
+            <thead>
+                <tr>
+                    <th>Mensagem</th>
+                </tr>
+            </thead>
+        </table>
+    </div> 
+{% endblock %}
+
+
+{% block extra_scripts %}
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+    <!-- start - This is for export functionality only -->
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.flash.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
+{% endblock %}

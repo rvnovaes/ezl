@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ServicePriceTable
+from .models import ServicePriceTable, ImportServicePriceTable
 
 
 # Register your models here.
@@ -9,3 +9,6 @@ from .models import ServicePriceTable
 class ServicePriceTableModelAdmin(admin.ModelAdmin):
 	pass
 
+@admin.register(ImportServicePriceTable)
+class ImportServicePriceTableModelAdmin(admin.ModelAdmin):
+	pass
