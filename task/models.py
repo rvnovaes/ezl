@@ -152,6 +152,7 @@ class TypeTask(Audit, LegacyCode):
     def __str__(self):
         return self.name
 
+
 class Task(Audit, LegacyCode, OfficeMixin):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
@@ -202,7 +203,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
-    __mail_attrs = None #atributo transiente
+    _mail_attrs = None  # atributo transiente
 
     objects = OfficeManager()
 

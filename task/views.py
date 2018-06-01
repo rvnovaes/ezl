@@ -38,6 +38,7 @@ from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardV
     TaskGeolocation
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable
+from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
 from survey.models import SurveyPermissions
 from financial.tables import ServicePriceTableTaskTable
@@ -357,7 +358,6 @@ class ToPayTaskReportView(TaskReportBase):
         return JsonResponse({"status": "ok"})
 
 
-
 class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
     template_name = 'task/task_dashboard.html'
     table_pagination = {
@@ -610,6 +610,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_type_task = TypeTask.objects.filter(
             name=object_parent.type_task.name, survey=object_parent.type_task.survey).latest('pk')
         new_task.type_task = new_type_task
+        new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
         new_task.save()
         for ecm in object_parent.ecm_set.all():
             if Path(ecm.path.path).is_file():

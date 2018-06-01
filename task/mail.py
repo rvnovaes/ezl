@@ -4,7 +4,6 @@ from django.template.loader import render_to_string
 from django.conf import settings
 
 
-
 class SendMail:
     subject = None
     message = None
