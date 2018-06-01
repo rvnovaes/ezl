@@ -29,8 +29,8 @@ def import_xls_service_price_table(file_id):
         imported_worksheet_key = IMPORTED_WORKSHEET + str(xls_file.pk)
         percent_imported_cache_key = PROCESS_PERCENT_IMPORT_SERVICE_PRICE_TABLE + str(xls_file.pk)
         worksheet_in_process_key = WORKSHEET_IN_PROCESS + str(xls_file.pk)
-        error_process_key = ERROR_PROCESS + str(xls_file.pk) 
-        
+        error_process_key = ERROR_PROCESS + str(xls_file.pk)        
+
         cache.set(imported_cache_key, False, timeout=None)
         cache.set(error_process_key, False, timeout=None)
 
@@ -38,7 +38,10 @@ def import_xls_service_price_table(file_id):
         office_session = Office.objects.get(pk=xls_file.office.pk)
         contact_mechanism_type = ContactMechanismType.objects.filter(type_contact_mechanism_type=EMAIL).first()
         
-        wb = load_workbook(xls_file.file_xls.file, data_only=True)                                
+        wb = load_workbook(xls_file.file_xls.file, data_only=True) 
+
+        if not contact_mechanism_type:
+            xls_file.log = xls_file.log + ('Deve ser configurado o tipo de mecanismo de contato E-mail corretamente') + ";"                               
 
         i = 0
         for sheet in wb.worksheets:
@@ -86,12 +89,15 @@ def import_xls_service_price_table(file_id):
                 
                 # Comarca
                 court_district = None
-                court_district_name = str(row[2].value).strip()
-                court_district_name = remove_caracter_especial(court_district_name)
-                if court_district_name == 'None':
-                    court_district_name = ''
-                if court_district_name != '':
-                    court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_name, state=state.pk).first()                  
+                if not state is None:
+                    court_district_name = str(row[2].value).strip()
+                    court_district_name = remove_caracter_especial(court_district_name)
+                    if court_district_name == 'None':
+                        court_district_name = ''
+                    if court_district_name != '':
+                        court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_name, state=state.pk).first()
+                        if court_district is None:
+                            xls_file.log = xls_file.log + ('Comarca %s não encontrada' % court_district_name) + ";"
                 
                 if importar:                  
                     service_price_table = ServicePriceTable.objects.filter(
@@ -129,20 +135,21 @@ def import_xls_service_price_table(file_id):
                                                             office_name, type_task, service_price_table.value, value)) + ";"
                             service_price_table.value = value
                             service_price_table.save()
-                                        
-                    emails = str(row[5].value).strip().lower() + str(row[6].value).strip().lower()
-                    for email in emails.split(";"):
-                        contact_mechanism = ContactMechanism.objects.filter(
-                            office=office_correspondent.pk,
-                            description__iexact=email).first()
-                        if contact_mechanism is None:                         
-                            ContactMechanism.objects.create(
-                                contact_mechanism_type = contact_mechanism_type,
-                                description = email,
-                                office = office_correspondent,
-                                create_user=user_session
-                            )
-
+                    
+                    if contact_mechanism_type:                                                                
+                        emails = str(row[5].value).strip().lower() + str(row[6].value).strip().lower()
+                        for email in emails.split(";"):
+                            contact_mechanism = ContactMechanism.objects.filter(
+                                office=office_correspondent.pk,
+                                description__iexact=email).first()
+                            if contact_mechanism is None:                         
+                                ContactMechanism.objects.create(
+                                    contact_mechanism_type = contact_mechanism_type,
+                                    description = email,
+                                    office = office_correspondent,
+                                    create_user=user_session
+                                )                    
+                    
                     i = i + 1
                     process_percent = int(100 * float(i) / float(total))            
                     cache.set(percent_imported_cache_key, process_percent, timeout=None)
@@ -151,7 +158,7 @@ def import_xls_service_price_table(file_id):
         
         cache.set(imported_cache_key, True, timeout=None)
     except Exception as ex:
-        cache.set(error_process_key, True, timeout=None)
+        cache.set(error_process_key, True, timeout=None)        
         xls_file.log = xls_file.log + " Planilha: " + sheet.title + " Linha " + str(i + 1) + "Erro: " + ex.args[0] + ";"        
     xls_file.end = timezone.now()
     xls_file.save()
