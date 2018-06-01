@@ -105,7 +105,7 @@ class ImportServicePriceTable(Audit, OfficeMixin):
     end = models.DateTimeField('Fim processo', null=True)
 
     def __str__(self):
-        return self.file_xls.file.name
+        return self.file_xls.file.name + ' - ' + 'Início: ' + str(self.start) + ' - ' + 'Fim: ' + str(self.end)
 
     class Meta:
         verbose_name = 'Arquivos Importados de Tabela de Preços'

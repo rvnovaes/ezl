@@ -13,7 +13,7 @@ from celery.task.control import revoke
 from celery.result import AsyncResult
 from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
                            DELETE_SUCCESS_MESSAGE)
-from core.models import Office
+from core.models import Office, ContactMechanismType, EMAIL
 from core.views import (AuditFormMixin, MultiDeleteViewMixin,
                         SingleTableViewMixin)
 from .forms import CostCenterForm, ServicePriceTableForm, ImportServicePriceTableForm
@@ -153,10 +153,10 @@ def import_service_price_table(request):
                 file_xls.create_user = request.user 
                 file_xls.start = timezone.now()               
                 file_xls.save()
-
+                                
                 import_xls_service_price_table.delay(file_xls.pk)
                 context['show_modal_progress'] = True
-                context['file_xls'] = file_xls               
+                context['file_xls'] = file_xls                
         else:
             if not form.instance.file_xls:
                 messages.error(request, 'Arquivo para importação não informado.')
@@ -164,12 +164,15 @@ def import_service_price_table(request):
         return render(request, 'financial/import_service_price_table.html', context)         
     else:
         form = ImportServicePriceTableForm()
+
+    have_type_contact_mechanism_email = ContactMechanismType.objects.filter(type_contact_mechanism_type=EMAIL).first()
+    context['type_contact_mechanism_type_EMAIL_is_empty'] = have_type_contact_mechanism_email is None        
     context['form'] = form
     return render(request, 'financial/import_service_price_table.html', context)
 
 
 class ImportServicePriceTableStatus(CustomLoginRequiredView, View):
-    def get(self, request, pk, *args, **kwargs):        
+    def get(self, request, pk, *args, **kwargs):                
         imported = False
         percent_imported = 0
         worksheet_in_process = ""
@@ -192,21 +195,22 @@ class ImportServicePriceTableStatus(CustomLoginRequiredView, View):
         error_process_key = ERROR_PROCESS + str(pk)
         if cache.get(error_process_key):
             error_process = cache.get(error_process_key)
-        
+                
         percent_imported_cache_key = PROCESS_PERCENT_IMPORT_SERVICE_PRICE_TABLE + str(pk)
         if cache.get(percent_imported_cache_key):
-            percent_imported = cache.get(percent_imported_cache_key)
-            if imported or error_process:
-                if imported:
-                    percent_imported = 100
-                else:
-                    percent_imported = 0
-                process_have_log = ImportServicePriceTable.objects.get(pk=pk).log != " "
-                clearCache([imported_cache_key,
-                    worksheet_in_process_key,
-                    imported_worksheet_key,
-                    percent_imported_cache_key,
-                    error_process_key])
+            percent_imported = cache.get(percent_imported_cache_key)            
+        
+        if imported or error_process:
+            if imported:
+                percent_imported = 100
+            else:
+                percent_imported = 0
+            process_have_log = ImportServicePriceTable.objects.get(pk=pk).log != " "
+            clearCache([imported_cache_key,
+                worksheet_in_process_key,
+                imported_worksheet_key,
+                percent_imported_cache_key,
+                error_process_key])
 
         return JsonResponse({
             'imported': imported, 

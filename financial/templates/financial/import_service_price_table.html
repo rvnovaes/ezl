@@ -44,29 +44,36 @@
         <button id="btn-submit"
             style="width: 100px!important;"
             type="button"
-            onclick="showMessage()"
+            onclick="showMessages()"
             class="btn btn-success waves-effect waves-light">Importar
         </button>        
         <script>
-            function showMessage()
-            {                                
-                var text_msg = "Ao iniciar o processo de importação de tabela de preços não será possível cancelá-lo. Deseja continuar?"                
-                swal({
-                        title: "Importante",
-                        text: text_msg,
-                        type: "warning",
-                        showCancelButton: true,
-                        confirmButtonText: "Sim",
-                        cancelButtonText: "Não",
-                        confirmButtonColor: "#DD6B55",                        
-                        closeOnConfirm: false
-                    }, function(isConfirm){
-                        if (isConfirm) {                                                   
-                            $('#import_service_price_table_form').submit();                            
+            function showMessages()
+            {                                                                              
+                {% if type_contact_mechanism_type_EMAIL_is_empty %}
+                    swal(
+                        "Erro", 
+                        "Deve ser configurado o tipo de mecanismo de contato 'E-mail' corretamente para continuar importação.", 
+                        "error")                    
+                {% else %}
+                    var text_msg = "Ao iniciar o processo de importação de tabela de preços não será possível cancelá-lo. Deseja continuar?"                
+                    swal({
+                            title: "Importante",
+                            text: text_msg,
+                            type: "warning",
+                            showCancelButton: true,
+                            confirmButtonText: "Sim",
+                            cancelButtonText: "Não",
+                            confirmButtonColor: "#DD6B55",                        
+                            closeOnConfirm: false
+                        }, function(isConfirm){
+                            if (isConfirm) {                                                   
+                                $('#import_service_price_table_form').submit();                            
+                            }
                         }
-                    }
-                );
-            } 
+                    );
+                {% endif %}                
+            }
             
             $(document).ready(function(){
                 {% if show_modal_progress %}
