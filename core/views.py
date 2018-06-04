@@ -1231,7 +1231,7 @@ class InviteUpdateView(UpdateView):
             for group in {group for group, perms in
                           get_groups_with_perms(invite.office, attach_perms=True).items() if 'view_delegated_tasks' in perms}:
                 if group not in invite.person.auth_user.groups.all():
-                    invite.person.auth_user.groups.add(group)
+                    invite.person.auth_user.groups.add(group)            
 
         invite.save()
         return HttpResponse('ok')
@@ -1243,6 +1243,11 @@ class InviteOfficeUpdateView(UpdateView):
         invite.status = request.POST.get('status')
         if invite.status == 'A':
             invite.office.offices.add(invite.office_invite)
+            service_price_table = ServicePriceTable.objects.filter(
+                office=invite.office,
+                office_correspondent=invite.office_invite)
+            if service_price_table:
+                service_price_table.update(is_active = True)
         invite.save()
         return HttpResponse('ok')
 
@@ -1460,11 +1465,6 @@ class TypeaHeadInviteOfficeSearch(TypeaHeadGenericSearch):
             data.append({'id': office.id, 'data-value-txt': office.legal_name})
         return list(data)
 
-def filter_status_query_task():
-    return ~Q(Q(task_status=TaskStatus.FINISHED) |
-        Q(task_status=TaskStatus.REFUSED) |
-        Q(task_status=TaskStatus.REFUSED_SERVICE) |
-        Q(task_status=TaskStatus.BLOCKEDPAYMENT))
 
 class OfficeMembershipInactiveView(UpdateView):
     model = OfficeMembership
@@ -1476,7 +1476,10 @@ class OfficeMembershipInactiveView(UpdateView):
 
             try:
                 for record in self.model.objects.filter(pk__in=pks):
-                    if not Task.objects.filter(filter_status_query_task(),
+                    if not Task.objects.filter(~Q(Q(task_status=TaskStatus.FINISHED) |
+                                                  Q(task_status=TaskStatus.REFUSED) |
+                                                  Q(task_status=TaskStatus.REFUSED_SERVICE) |
+                                                  Q(task_status=TaskStatus.BLOCKEDPAYMENT)),
                                                Q(Q(person_asked_by=record.person) |
                                                  Q(person_executed_by=record.person) |
                                                  Q(person_distributed_by=record.person))):
@@ -1508,23 +1511,33 @@ class OfficeMembershipInactiveView(UpdateView):
 
 class OfficeOfficesInactiveView(UpdateView):
     model = Office
-    success_message = "Escritório desvinculado com sucesso!"
+    success_message = "Escritório {} desvinculado com sucesso!"
     
     def post(self, request, *args, **kwargs):        
-        if request.method == 'POST':
+        if request.method == 'POST':            
             pks = request.POST.getlist('selection')
             try:
                 for record in self.model.objects.filter(pk__in=pks):
-                    if not Task.objects.filter(filter_status_query_task(),
-                                               parent = self.kwargs['office_pk'],
+                    if not Task.objects.filter(~Q(Q(task_status=TaskStatus.RETURN) |
+                                                  Q(task_status=TaskStatus.OPEN) |
+                                                  Q(task_status=TaskStatus.ACCEPTED) |
+                                                  Q(task_status=TaskStatus.DONE)),                                               
+                                               parent__office = self.kwargs['office_pk'],
                                                office = record.pk):
                         current_office = Office.objects.get(pk=self.kwargs['office_pk'])
                         current_office.offices.remove(record)                        
                         current_office.save()
+
+                        service_price_table = ServicePriceTable.objects.filter(
+                            office=self.kwargs['office_pk'],
+                            office_correspondent = record.pk)
+                        if service_price_table:
+                            service_price_table.update(is_active = False)
+                        
+                        messages.success(self.request, self.success_message.format(record))
                     else:
                         messages.error(self.request, "O escritório {} não pode ser desvinculado, uma vez que"
-                                                     " ainda existem OS a serem cumpridas por ele".format(record))
-                messages.success(self.request, self.success_message)
+                                                     " ainda existem OS a serem cumpridas por ele".format(record))                
             except ProtectedError as e:
                 qs = e.protected_objects.first()
                 messages.error(self.request,

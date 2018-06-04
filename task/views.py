@@ -419,8 +419,12 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         court_district = self.object.movement.law_suit.court_district
         state = self.object.movement.law_suit.court_district.state
         client = self.object.movement.law_suit.folder.person_customer
+        offices_related = self.object.office.offices.all()
         context['correspondents_table'] = ServicePriceTableTaskTable(
             ServicePriceTable.objects.filter(Q(office=self.object.office) | Q(office__public_office=True), Q(Q(type_task=type_task) | Q(type_task=None) ),
+                                             Q(is_active=True),
+                                             Q(office_correspondent__in=offices_related),
+                                             Q(office_correspondent__is_active=True),                                             
                                              Q(Q(court_district=court_district) | Q(court_district=None)),
                                              Q(Q(state=state) | Q(state=None)),
                                              Q(Q(client=client) | Q(client=None)))
