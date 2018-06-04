@@ -43,8 +43,7 @@ from core.models import Person, Address, City, State, Country, AddressType, Offi
     InviteOffice, OfficeMembership, ContactMechanism
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
-    InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, \
-    OfficeMembershipOfficeTable
+    InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable
 from core.utils import login_log, logout_log, get_office_session
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
@@ -966,19 +965,22 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
     success_message = UPDATE_SUCCESS_MESSAGE
     object_list_url = 'office_list'
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs):        
         kwargs.update({
             'table': AddressOfficeTable(self.object.get_address()),
             'table_members': OfficeMembershipTable(
                 self.object.officemembership_set.filter(is_active=True, person__auth_user__isnull=False,
                                                         person__auth_user__is_superuser=False)
                     .exclude(person__auth_user=self.request.user)),
+            'table_offices': OfficeTable(
+                Office.objects.get(pk=self.kwargs.get('pk')).offices.all().order_by('legal_name')), 
             'table_contact_mechanism': ContactMechanismOfficeTable(self.object.contactmechanism_set.all()),
         })
         data = super().get_context_data(**kwargs)
         data['inviteofficeform'] = InviteForm(self.request.POST) \
             if InviteForm(self.request.POST).is_valid() else InviteForm()
         RequestConfig(self.request, paginate={'per_page': 10}).configure(kwargs.get('table_members'))
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(kwargs.get('table_offices'))
         return data
 
 
@@ -1458,6 +1460,11 @@ class TypeaHeadInviteOfficeSearch(TypeaHeadGenericSearch):
             data.append({'id': office.id, 'data-value-txt': office.legal_name})
         return list(data)
 
+def filter_status_query_task():
+    return ~Q(Q(task_status=TaskStatus.FINISHED) |
+        Q(task_status=TaskStatus.REFUSED) |
+        Q(task_status=TaskStatus.REFUSED_SERVICE) |
+        Q(task_status=TaskStatus.BLOCKEDPAYMENT))
 
 class OfficeMembershipInactiveView(UpdateView):
     model = OfficeMembership
@@ -1469,10 +1476,7 @@ class OfficeMembershipInactiveView(UpdateView):
 
             try:
                 for record in self.model.objects.filter(pk__in=pks):
-                    if not Task.objects.filter(~Q(Q(task_status=TaskStatus.FINISHED) |
-                                                  Q(task_status=TaskStatus.REFUSED) |
-                                                  Q(task_status=TaskStatus.REFUSED_SERVICE) |
-                                                  Q(task_status=TaskStatus.BLOCKEDPAYMENT)),
+                    if not Task.objects.filter(filter_status_query_task(),
                                                Q(Q(person_asked_by=record.person) |
                                                  Q(person_executed_by=record.person) |
                                                  Q(person_distributed_by=record.person))):
@@ -1502,6 +1506,40 @@ class OfficeMembershipInactiveView(UpdateView):
         return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})
 
 
+class OfficeOfficesInactiveView(UpdateView):
+    model = Office
+    success_message = "Escritório desvinculado com sucesso!"
+    
+    def post(self, request, *args, **kwargs):        
+        if request.method == 'POST':
+            pks = request.POST.getlist('selection')
+            try:
+                for record in self.model.objects.filter(pk__in=pks):
+                    if not Task.objects.filter(filter_status_query_task(),
+                                               parent = self.kwargs['office_pk'],
+                                               office = record.pk):
+                        current_office = Office.objects.get(pk=self.kwargs['office_pk'])
+                        current_office.offices.remove(record)                        
+                        current_office.save()
+                    else:
+                        messages.error(self.request, "O escritório {} não pode ser desvinculado, uma vez que"
+                                                     " ainda existem OS a serem cumpridas por ele".format(record))
+                messages.success(self.request, self.success_message)
+            except ProtectedError as e:
+                qs = e.protected_objects.first()
+                messages.error(self.request,
+                               delete_error_protected(str(self.model._meta.verbose_name),
+                                                      qs.__str__()))
+        
+        if self.success_url:
+            return HttpResponseRedirect(self.success_url)
+        else:
+            return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})
+
+   
 class TagsInputPermissionsView(View):
     def get(self, request, office_pk, *args, **kwargs):
         groups = Office.objects.get(pk=office_pk).office_groups.all()
