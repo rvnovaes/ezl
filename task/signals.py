@@ -171,58 +171,18 @@ def send_task_emails(sender, instance, created, **kwargs):
         if not instance._mail_attrs:
             persons_to_receive = []
             custom_text = ''
-            # short_message_dict = {TaskStatus.REQUESTED: 'foi solicitada', TaskStatus.ACCEPTED_SERVICE: 'foi aceita ',
-            #                       TaskStatus.REFUSED_SERVICE: 'foi recusada ', TaskStatus.ACCEPTED: 'foi aceita',
-            #                       TaskStatus.BLOCKEDPAYMENT: 'foi glosada', TaskStatus.DONE: 'foi cumprida',
-            #                       TaskStatus.FINISHED: 'foi finalizada', TaskStatus.OPEN: 'foi aberta',
-            #                       TaskStatus.REFUSED: 'foi recusada', TaskStatus.RETURN: 'foi retornada'}
             short_message_dict = {TaskStatus.REFUSED_SERVICE: 'foi recusada ',
                                   TaskStatus.REFUSED: 'foi recusada',
                                   TaskStatus.RETURN: 'foi retornada'}
             short_message = short_message_dict.get(instance.status, '')
 
-            # if instance.task_status in [TaskStatus.REQUESTED] and instance.parent:
-            #     custom_text = ' pelo escritório ' + str(instance.parent.office.__str__()).title()
-            #     persons_to_receive = [instance.office]
-
-            # if instance.task_status in [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REFUSED_SERVICE]:
-            #     custom_text = ' pelo(a) contratante ' + str(instance.person_distributed_by).title()
-            #     persons_to_receive = [instance.person_asked_by]
-
             if instance.task_status in [TaskStatus.REFUSED_SERVICE]:
                 custom_text = ' pelo(a) contratante ' + str(instance.person_distributed_by).title()
                 persons_to_receive = [instance.person_asked_by]
 
-            # elif instance.task_status in [TaskStatus.OPEN]:
-            #     custom_text = ' pelo(a) contratante ' + str(instance.person_distributed_by).title()
-            #     persons_to_receive = [instance.person_executed_by, instance.person_distributed_by]
-
-            # elif instance.task_status in [TaskStatus.ACCEPTED, TaskStatus.REFUSED]:
-            #     custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
-            #     persons_to_receive = [instance.person_distributed_by]
-
             elif instance.task_status in [TaskStatus.REFUSED]:
                 custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
                 persons_to_receive = [instance.person_distributed_by]
-
-            # elif instance.task_status in [TaskStatus.DONE]:
-            #     custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
-            #     persons_to_receive = [instance.person_distributed_by]
-            #
-            # elif instance.task_status in [TaskStatus.FINISHED]:
-            #     custom_text = ' pelo(a) solicitante ' + str(
-            #         instance.person_asked_by).title() if instance.person_asked_by else ' pelo(a) contratante ' + str(
-            #         instance.person_distributed_by).title()
-            #
-            #     persons_to_receive = [instance.person_executed_by, instance.person_asked_by]
-            #     if instance.get_child:
-            #         custom_text_office = ' pelo escritório ' + str(instance.office.__str__()).title()
-            #         mails = instance.get_child.office.emails.split(' | ')
-            #         mail_list_office = []
-            #         for mail in mails:
-            #             mail_list_office.append(mail)
-            #         task_send_mail(instance.get_child, instance.get_child.task_number, project_link, short_message,
-            #                        custom_text_office, mail_list_office)
 
             elif instance.task_status in [TaskStatus.RETURN]:
                 custom_text = ' pelo(a) contratante ' + str(instance.person_distributed_by).title()
@@ -230,19 +190,6 @@ def send_task_emails(sender, instance, created, **kwargs):
                 if instance.person_executed_by:
                     if instance.person_executed_by.emails != '':
                         persons_to_receive = [instance.person_executed_by, instance.person_distributed_by]
-
-
-            # elif instance.task_status in [TaskStatus.BLOCKEDPAYMENT]:
-            #     custom_text = ' pelo(a) contratante ' + str(instance.person_distributed_by).title()
-            #     persons_to_receive = [instance.person_executed_by]
-            #     if instance.get_child:
-            #         custom_text_office = ' pelo escritório ' + str(instance.office.__str__()).title()
-            #         mails = instance.get_child.office.emails.split(' | ')
-            #         mail_list_office = []
-            #         for mail in mails:
-            #             mail_list_office.append(mail)
-            #         task_send_mail(instance.get_child, instance.get_child.task_number, project_link, short_message,
-            #                        custom_text_office, mail_list_office)
 
             persons_to_receive = [x for x in persons_to_receive if x is not None]
             for person in persons_to_receive:
