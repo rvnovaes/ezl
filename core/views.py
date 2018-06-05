@@ -1517,13 +1517,20 @@ class OfficeOfficesInactiveView(UpdateView):
         if request.method == 'POST':            
             pks = request.POST.getlist('selection')
             try:
-                for record in self.model.objects.filter(pk__in=pks):
-                    if not Task.objects.filter(~Q(Q(task_status=TaskStatus.RETURN) |
+                for record in self.model.objects.filter(pk__in=pks):                    
+                    if not Task.objects.filter((Q(Q(task_status=TaskStatus.REQUESTED) |
+                                                  Q(task_status=TaskStatus.ACCEPTED_SERVICE) |
+                                                  Q(task_status=TaskStatus.RETURN) |
                                                   Q(task_status=TaskStatus.OPEN) |
                                                   Q(task_status=TaskStatus.ACCEPTED) |
-                                                  Q(task_status=TaskStatus.DONE)),                                               
-                                               parent__office = self.kwargs['office_pk'],
-                                               office = record.pk):
+                                                  Q(task_status=TaskStatus.DONE)) |
+                                                 Q(Q(parent__task_status=TaskStatus.OPEN) |
+                                                   Q(parent__task_status=TaskStatus.ACCEPTED) |
+                                                   Q(parent__task_status=TaskStatus.REQUESTED) |
+                                                   Q(parent__task_status=TaskStatus.DONE)
+                                                  )),                                               
+                                                parent__office = self.kwargs['office_pk'],
+                                                office = record.pk):
                         current_office = Office.objects.get(pk=self.kwargs['office_pk'])
                         current_office.offices.remove(record)                        
                         current_office.save()
