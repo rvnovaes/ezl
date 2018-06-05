@@ -104,7 +104,7 @@
                             <th>Comarca</th>
                             <th>Cliente</th>
                             <th>Parte Adversa</th>
-                            <th>Cod. Legado</th>
+                            <th>OS Original</th>
                             <th>Recebida</th>
                             <th>Valor</th>
                         </tr>
@@ -121,7 +121,7 @@
                                     <td>{{ task.court_district }}</td>
                                     <td>{{ task.client }}</td>
                                     <td>{{ task.opposing_party }}</td>
-                                    <td>{{ tasl.legacy_code }}</td>
+                                    <td>{{ task.origin_code }}</td>
                                     <td>{{ task.receipt_date|date:"d/m/Y" }}</td>
                                     <td>{{ task.amount }}</td>
                                 </tr>
@@ -140,7 +140,7 @@
                             <th>Comarca</th>
                             <th>Cliente</th>
                             <th>Parte Adversa</th>
-                            <th>Cod. Legado</th>
+                            <th>OS Original</th>
                             <th>Recebida</th>
                             <th>Valor</th>
                         </tr>
@@ -165,7 +165,7 @@
                                     <td>{{ task.court_district }}</td>
                                     <td>{{ task.client }}</td>
                                     <td>{{ task.opposing_party }}</td>
-                                    <td>{{ tasl.legacy_code }}</td>
+                                    <td>{{ task.origin_code }}</td>
                                     <td>{{ task.receipt_date|date:"d/m/Y" }}</td>
                                     <td class="text-center">R$ {{ task.amount }}</td>
                                 </tr>

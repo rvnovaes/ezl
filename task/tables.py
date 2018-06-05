@@ -61,7 +61,7 @@ class DashboardStatusTable(tables.Table):
     class Meta:
         model = DashboardViewModel
         fields = ['task_number', 'final_deadline_date', 'type_service', 'lawsuit_number', 'client',
-                  'opposing_party', 'delegation_date', 'legacy_code']
+                  'opposing_party', 'delegation_date', 'origin_code']
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {
             'data_new_href': lambda record: '/dashboard/' + str(record.pk) + '/'

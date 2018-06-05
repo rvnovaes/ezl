@@ -300,6 +300,13 @@ class Task(Audit, LegacyCode, OfficeMixin):
         return get_next_value('office_{office_pk}_{name}'.format(office_pk=self.office.pk,
                                                                  name=self.TASK_NUMBER_SEQUENCE))
 
+    @property
+    def origin_code(self):        
+        if self.parent:
+            return self.parent.task_number
+        else:
+            return self.legacy_code
+
 
 class TaskFeedback(models.Model):
     feedback_date = models.DateTimeField(auto_now_add=True)
@@ -437,6 +444,8 @@ class DashboardViewModel(Audit, OfficeMixin):
     lawsuit_number = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='Número do Processo')
     opposing_party = models.CharField(null=True, verbose_name=u'Parte adversa', max_length=255)
+    parent_task_number = models.PositiveIntegerField(default=0, verbose_name='OS Original')
+    
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
 
@@ -491,6 +500,13 @@ class DashboardViewModel(Audit, OfficeMixin):
     def folder_number(self):
         folder = Folder.objects.get(folders__law_suits__task__exact=self)
         return folder.folder_number
+    
+    @property
+    def origin_code(self):                     
+        if self.parent_task_number:
+            return self.parent_task_number
+        else:
+            return self.legacy_code
 
 
 class Filter(Audit):
