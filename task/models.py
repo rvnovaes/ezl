@@ -300,6 +300,12 @@ class Task(Audit, LegacyCode, OfficeMixin):
         return get_next_value('office_{office_pk}_{name}'.format(office_pk=self.office.pk,
                                                                  name=self.TASK_NUMBER_SEQUENCE))
 
+    @property
+    def allow_attachment(self):        
+        return not (self.status == TaskStatus.REFUSED or
+                self.status == TaskStatus.REFUSED_SERVICE or 
+                self.status == TaskStatus.BLOCKEDPAYMENT or 
+                self.status == TaskStatus.FINISHED)
 
 class TaskFeedback(models.Model):
     feedback_date = models.DateTimeField(auto_now_add=True)
