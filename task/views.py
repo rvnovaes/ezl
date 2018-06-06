@@ -32,7 +32,7 @@ from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixi
 from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
-from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter
+from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation
@@ -212,12 +212,17 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
     filter_class = None
     datetime_field = None
 
-    def get_context_data(self, *args, **kwargs):
+    def get_context_data(self, *args, **kwargs):                                 
         context = super().get_context_data(*args, **kwargs)
-
         self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
-        context['filter'] = self.task_filter
-        context['offices'] = self.get_os_grouped_by_office()
+        context['filter'] = self.task_filter        
+        context['group_by_tasks_for_office'] = True
+        try:
+            context['group_by_tasks_for_office'] = self.request.GET['group_by_tasks'] == OFFICE        
+            context['offices'] = self.get_os_grouped_by_office() \
+                if context['group_by_tasks_for_office'] else self.get_os_grouped_by_client()
+        except:            
+            context['offices'] = self.get_os_grouped_by_office()         
         context['total'] = sum(map(lambda x: x['total'], context['offices']))
         return context
 
@@ -290,6 +295,31 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
 
         return offices
 
+    def get_os_grouped_by_client(self):
+        offices = []
+        offices_map = {}
+        tasks = self.get_queryset()
+        for task in tasks:
+            client = self._get_related_client(task)
+            if client not in offices_map:
+                offices_map[client] = []
+            offices_map[client].append(task)                        
+        
+        for client, tasks in offices_map.items():            
+            if type(self) is ToReceiveTaskReportView:
+                tasks.sort(key=lambda x: x.parent.office.legal_name)
+            else:
+                tasks.sort(key=lambda x: x.office.legal_name)            
+            offices.append({
+                "name": client.name,
+                "tasks": tasks,
+                "total": sum(map(lambda x: x.amount, tasks))
+                })
+
+        return offices 
+    
+    def _get_related_client(self, task):
+        return task.client
 
 class ToReceiveTaskReportView(TaskReportBase):
     template_name = 'task/reports/to_receive.html'

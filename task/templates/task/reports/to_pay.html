@@ -66,6 +66,12 @@
                                         }
                                     });                                                                        
                                 </script>
+                            </div>                            
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Agrupar por: " %}
+                                {% bootstrap_field filter.form.group_by_tasks form_group_class="" bound_css_class='' show_label=False %}
                             </div>
                         </div>
                     </fieldset>
@@ -93,12 +99,20 @@
                     <thead>
                         <tr>
                             <th>OS</th>
-                            <th>Escritório</th>
+                            {% if group_by_tasks_for_office %}
+                                <th>Escritório</th>
+                            {% else %}
+                                <th>Cliente</th>
+                            {% endif %}
                             <th>Finalização</th>
                             <th>Serviço</th>
                             <th>Processo</th>
                             <th>Comarca</th>
-                            <th>Cliente</th>
+                            {% if group_by_tasks_for_office %}
+                                <th>Cliente</th>
+                            {% else %}
+                                <th>Escritório Correspondente</th>
+                            {% endif %}
                             <th>Parte Adversa</th>
                             <th>Cod. Legado</th>
                             <th>Faturada</th>
@@ -109,13 +123,17 @@
                           {% for office in offices %}
                             {% for task in office.tasks %}
                                 <tr>
-                                    <td>{{ task.parent.id }}</td>
-                                    <td>{{ office.name }}</td>
+                                    <td>{{ task.parent.id }}</td>                                    
+                                    <td>{{ office.name }}</td>                                    
                                     <td>{{ task.finished_date|date:"d/m/Y H:i" }}</td>
                                     <td>{{ task.type_task }}</td>
                                     <td>{{ task.lawsuit_number }}</td>
-                                    <td>{{ task.court_district }}</td>
-                                    <td>{{ task.client }}</td>
+                                    <td>{{ task.court_district }}</td>                                    
+                                    {% if group_by_tasks_for_office %}
+                                        <td>{{ task.client }}</td>
+                                    {% else %}
+                                        <td>{{ task.office.legal_name }}</td>
+                                    {% endif %}
                                     <td>{{ task.opposing_party }}</td>
                                     <td>{{ tasl.legacy_code }}</td>
                                     <td>{{ task.billing_date|date:"d/m/Y" }}</td>
@@ -134,7 +152,11 @@
                             <th>Serviço</th>
                             <th>Processo</th>
                             <th>Comarca</th>
-                            <th>Cliente</th>
+                            {% if group_by_tasks_for_office %}
+                                <th>Cliente</th>
+                            {% else %}
+                                <th>Escritório Correspondente</th>
+                            {% endif %}
                             <th>Parte Adversa</th>
                             <th>Cod. Legado</th>
                             <th>Faturada</th>
@@ -159,7 +181,11 @@
                                     <td>{{ task.type_task }}</td>
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.court_district }}</td>
-                                    <td>{{ task.client }}</td>
+                                    {% if group_by_tasks_for_office %}
+                                        <td>{{ task.client }}</td>
+                                    {% else %}
+                                        <td>{{ task.office.legal_name }}</td>
+                                    {% endif %}
                                     <td>{{ task.opposing_party }}</td>
                                     <td>{{ tasl.legacy_code }}</td>
                                     <td>{{ task.billing_date|date:"d/m/Y" }}</td>
