@@ -152,6 +152,7 @@ class TypeTask(Audit, LegacyCode):
     def __str__(self):
         return self.name
 
+
 class Task(Audit, LegacyCode, OfficeMixin):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
@@ -162,7 +163,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
                                  verbose_name='Movimentação')
-    person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
+    person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=True,
                                         related_name='%(class)s_asked_by',
                                         verbose_name='Solicitante')
     person_executed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True,
@@ -202,6 +203,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
+    _mail_attrs = None  # atributo transiente
 
     objects = OfficeManager()
 

@@ -47,6 +47,7 @@ try:
     email_port = os.environ.get('EMAIL_PORT', source['email_port'])
     email_host_user = source['email_host_user']
     email_host_password = source['email_host_password']
+    email_default_from_email = source['email_default_from_email']
     linux_password = source_etl['linux_password']
     linux_user = source_etl['linux_user']
 
@@ -282,12 +283,12 @@ EMAIL_HOST = email_host
 EMAIL_PORT = email_port
 EMAIL_HOST_USER = email_host_user
 EMAIL_HOST_PASSWORD = email_host_password
-DEFAULT_FROM_EMAIL = email_host_user
+DEFAULT_FROM_EMAIL = email_default_from_email
 
 
 INTERNAL_IPS = '127.0.0.1'
 PROJECT_NAME = 'Easy Lawyer'
-PROJECT_LINK = 'https://ezl.mtostes.com.br'
+PROJECT_LINK = 'https://ezl.ezlawyer.com.br'
 
 LINK_TO_RESTORE_DB_DEMO = 'http://13.68.213.60:8001'
 

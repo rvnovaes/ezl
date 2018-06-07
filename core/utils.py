@@ -147,8 +147,8 @@ def get_office_session(request):
 
 def get_domain(request):
     try:
-        if request.META.get('HTTP_X_FORWARDED_HOST'):
-            return '{}://{}'.format(request.scheme, request.META.get('HTTP_X_FORWARDED_HOST'))
+        if request.META.get('HTTP_X_FORWARDED_HOST') or request.META.get('HTTP_HOST'):
+            return '{}://{}'.format(request.scheme, request.META.get('HTTP_X_FORWARDED_HOST', request.META.get('HTTP_HOST')))
         return request.META.get('HTTP_REFERER')[:-1]
     except:
         return '{}://{}'.format(request.scheme, request.get_host())
