@@ -85,7 +85,6 @@ class LawsuitETL(GenericETL):
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):
         for row in rows:
-            print(rows_count)
             rows_count -= 1
 
             try:

@@ -69,7 +69,6 @@ class AddressETL(GenericETL):
         :param rows_count: Quantidade de dados que foram lidos do advwin
         """
         for row in rows:
-            print(rows_count)
             rows_count -= 1
             try:
                 legacy_code = row['legacy_code']
