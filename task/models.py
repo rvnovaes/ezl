@@ -299,8 +299,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     @property
     def allow_attachment(self):        
-        return not (self.status == TaskStatus.REFUSED or
-                self.status == TaskStatus.REFUSED_SERVICE or 
+        return not (self.status == TaskStatus.REFUSED or                 
                 self.status == TaskStatus.BLOCKEDPAYMENT or 
                 self.status == TaskStatus.FINISHED)
 
