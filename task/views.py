@@ -774,8 +774,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     task_dynamic_query.add(Q(movement__law_suit__law_suit_number=data['law_suit_number']), Q.AND)
                 if data['task_number']:
                     task_dynamic_query.add(Q(task_number=data['task_number']), Q.AND)
-                if data['task_legacy_code']:
-                    task_dynamic_query.add(Q(legacy_code=data['task_legacy_code']), Q.AND)
+                if data['task_origin_code']:
+                    task_dynamic_query.add(Q(Q(legacy_code=data['task_origin_code'])|\
+                        Q(parent_task_number=data['task_origin_code'])), Q.AND)
                 if data['person_executed_by']:
                     task_dynamic_query.add(Q(person_executed_by=data['person_executed_by']), Q.AND)
                 if data['person_asked_by']:

@@ -50,6 +50,7 @@ class DashboardStatusTable(tables.Table):
         self.base_columns['type_service'].verbose_name = type_service
         self.base_columns['opposing_party'].verbose_name = opposing_party
         self.base_columns['task_number'].verbose_name = 'Nº da OS'
+        self.base_columns['origin_code'].verbose_name = 'OS Original'
         self.title = title
         self.status = status
 
