@@ -38,10 +38,11 @@ from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardV
     TaskGeolocation
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable
+from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
 from survey.models import SurveyPermissions
 from financial.tables import ServicePriceTableTaskTable
-from core.utils import get_office_session
+from core.utils import get_office_session, get_domain
 from ecm.models import DefaultAttachmentRule, Attachment
 from task.utils import get_task_attachment
 from decimal import Decimal
@@ -66,12 +67,14 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         task = form.instance
         form.instance.movement_id = self.request.POST['movement']
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
-        form.instance.__server = self.request.META['HTTP_HOST']
+        form.instance.__server = get_domain(self.request)
         response = super(TaskBulkCreateView, self).form_valid(form)
 
         if form.cleaned_data['documents']:
             for document in form.cleaned_data['documents']:
+                file_name = document.name.replace(' ', '_')
                 task.ecm_set.create(path=document,
+                                    exhibition_name=file_name,
                                     create_user=task.create_user)
 
         form.delete_temporary_files()
@@ -119,12 +122,14 @@ class TaskCreateView(AuditFormMixin, CreateView):
         task = form.instance
         form.instance.movement_id = self.kwargs.get('movement')
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
-        form.instance.__server = self.request.META['HTTP_HOST']
-        response = super(TaskCreateView, self).form_valid(form)
+        form.instance.__server = get_domain(self.request)
 
+        response = super(TaskCreateView, self).form_valid(form)
         if form.cleaned_data['documents']:
             for document in form.cleaned_data['documents']:
+                file_name = document.name.replace(' ', '_')
                 task.ecm_set.create(path=document,
+                                    exhibition_name=file_name,
                                     create_user=task.create_user)
 
         form.delete_temporary_files()
@@ -185,9 +190,19 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
         return kw
 
     def form_valid(self, form):
+        task = form.instance
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
-        form.instance.__server = self.request.META['HTTP_HOST']
+        form.instance.__server = get_domain(self.request)
         super(TaskUpdateView, self).form_valid(form)
+
+        if form.cleaned_data['documents']:
+            for document in form.cleaned_data['documents']:
+                file_name = document.name.replace(' ', '_')
+                task.ecm_set.create(path=document,
+                                    exhibition_name=file_name,
+                                    create_user=task.create_user)
+
+        form.delete_temporary_files()
         return HttpResponseRedirect(self.success_url)
 
     def get_context_data(self, **kwargs):
@@ -212,17 +227,17 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
     filter_class = None
     datetime_field = None
 
-    def get_context_data(self, *args, **kwargs):        
+    def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
-        context['filter'] = self.task_filter        
-        try:            
+        context['filter'] = self.task_filter
+        try:
             if self.request.GET['group_by_tasks'] == OFFICE:
                 office_list, total =  self.get_os_grouped_by_office()
             else:
                 office_list, total =  self.get_os_grouped_by_client()
-        except:            
-            office_list, total = self.get_os_grouped_by_office()         
+        except:
+            office_list, total = self.get_os_grouped_by_office()
         context['offices'] = office_list
         context['total'] = total
         return context
@@ -251,20 +266,20 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
 
             if data['client']:
                 query.add(Q(movement__law_suit__folder__person_customer__legal_name__unaccent__icontains=data['client']), Q.AND)
-            
+
             if data['office']:
                 if isinstance(self, ToReceiveTaskReportView):
                     query.add(Q(parent__office__name__unaccent__icontains=data['office']), Q.AND)
                 else:
                     query.add(Q(office__name__unaccent__icontains=data['office']), Q.AND)
-            
+
             if data['finished_in']:
                 if data['finished_in'].start:
                     finished_query.add(
                         Q(finished_date__gte=data['finished_in'].start.replace(hour=0, minute=0)), Q.AND)
                 if data['finished_in'].stop:
                     finished_query.add(
-                        Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)            
+                        Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
             else:
                 # O filtro padrão para finished_date é do dia 01 do mês atual e o dia corrente como data final
                 finished_query.add(
@@ -277,23 +292,23 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
         return queryset
 
     def get_os_grouped_by_office(self):
-        offices = []        
+        offices = []
         offices_map = {}
         tasks = self.get_queryset()
-        total = 0        
+        total = 0
         for task in tasks:
             correspondent = self._get_related_office(task)
             if correspondent not in offices_map:
                 offices_map[correspondent] = {}
-            client = self._get_related_client(task)    
+            client = self._get_related_client(task)
             if client not in offices_map[correspondent]:
                 offices_map[correspondent][client] = []
-            offices_map[correspondent][client].append(task)        
+            offices_map[correspondent][client].append(task)
 
-        offices_map_total = {}     
+        offices_map_total = {}
         for office, clients in offices_map.items():
-            office_total = 0            
-            for client, tasks in clients.items():                                
+            office_total = 0
+            for client, tasks in clients.items():
                 client_total = sum(map(lambda x: x.amount, tasks))
                 office_total = office_total + client_total
                 offices.append({
@@ -305,14 +320,14 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
                 })
             offices_map_total[office.name] = office_total
             total = total + office_total
-        
+
         for item in offices:
-            item['office_total'] = offices_map_total[item['office_name']]        
+            item['office_total'] = offices_map_total[item['office_name']]
 
         return offices, total
 
     def get_os_grouped_by_client(self):
-        clients = []        
+        clients = []
         clients_map = {}
         tasks = self.get_queryset()
         total = 0
@@ -323,12 +338,12 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
             correspondent = self._get_related_office(task)
             if correspondent not in clients_map[client]:
                 clients_map[client][correspondent] = []
-            clients_map[client][correspondent].append(task)                
-                                
-        clients_map_total = {}             
+            clients_map[client][correspondent].append(task)
+
+        clients_map_total = {}
         for client, offices in clients_map.items():
-            client_total = 0            
-            for office, tasks in offices.items():                                
+            client_total = 0
+            for office, tasks in offices.items():
                 office_total = sum(map(lambda x: x.amount, tasks))
                 client_total = client_total + office_total
                 # necessário manter a mesma estrutura do get_os_grouped_by_office para não mexer no template.
@@ -340,13 +355,13 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
                     "office_total": 0,
                 })
             clients_map_total[client.name] = client_total
-            total = total + client_total                
+            total = total + client_total
 
         for item in clients:
-            item['office_total'] = clients_map_total[item['office_name']]                
-        
+            item['office_total'] = clients_map_total[item['office_name']]
+
         return clients, total
-    
+
     def _get_related_client(self, task):
         return task.client
 
@@ -389,7 +404,7 @@ class ToPayTaskReportView(TaskReportBase):
     datetime_field = 'billing_date'
 
     def get_queryset(self):
-        office = get_office_session(self.request)        
+        office = get_office_session(self.request)
         queryset = Task.objects.filter(
             parent__office=office,
             task_status=TaskStatus.FINISHED,
@@ -414,7 +429,6 @@ class ToPayTaskReportView(TaskReportBase):
 
         messages.add_message(self.request, messages.INFO, "OS's faturadas com sucesso.")
         return JsonResponse({"status": "ok"})
-
 
 
 class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
@@ -594,7 +608,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
 
         send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
                                        execution_date=execution_date, survey_result=survey_result)
-        form.instance.__server = self.request.META['HTTP_HOST']
+        form.instance.__server = get_domain(self.request)
         if form.instance.task_status == TaskStatus.ACCEPTED_SERVICE:
             form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.REFUSED_SERVICE:
@@ -660,12 +674,16 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.legacy_code = None
         new_task.system_prefix = None
         new_task.pk = new_task.task_number = None
+        new_task.person_asked_by = None
+        new_task.person_executed_by = None
+        new_task.person_distributed_by = None
         new_task.office = office_correspondent
         new_task.task_status = TaskStatus.REQUESTED
         new_task.parent = object_parent
         new_type_task = TypeTask.objects.filter(
             name=object_parent.type_task.name, survey=object_parent.type_task.survey).latest('pk')
         new_task.type_task = new_type_task
+        new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
         new_task.save()
         for ecm in object_parent.ecm_set.all():
             if Path(ecm.path.path).is_file():
@@ -673,6 +691,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 new_file.name = os.path.basename(ecm.path.name)
                 new_ecm = copy.copy(ecm)
                 new_ecm.pk = None
+                new_ecm.exhibition_name = new_file.name
                 new_ecm.task = new_task
                 new_ecm.path = new_file
                 new_ecm.save()
@@ -697,31 +716,23 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
                 'message': exception_create()}
 
         for file in files:
-            file_name = file._name
+            file_name = file._name.replace(' ', '_')
             obj_task = Task.objects.get(id=task)
             ecm = Ecm(path=file,
                       task=obj_task,
+                      exhibition_name=file_name,
                       create_user_id=str(request.user.id),
                       create_date=timezone.now())
 
             try:
                 ecm.save()
-                if obj_task.parent:
-                    # Salva o anexo na os pai
-                    ecm_parent = copy.copy(ecm)
-                    ecm_parent.pk = None
-                    ecm_parent.task = obj_task.parent
-                    new_file = ContentFile(ecm.path.read())
-                    new_file.name = file_name
-                    ecm_parent.path = new_file
-                    ecm_parent.save()
                 data = {'success': True,
                         'id': ecm.id,
                         'name': str(file),
                         'user': str(self.request.user),
                         'username': str(self.request.user.first_name + ' ' +
                                         self.request.user.last_name),
-                        'filename': str(os.path.basename(ecm.path.path)),
+                        'filename': str(ecm.exhibition_name),
                         'task_id': str(task),
                         'message': success_sent()
                         }
@@ -1107,7 +1118,7 @@ def ajax_get_ecms(request):
             'url': ecm.path.name,
             'filename': ecm.filename,
             'user': ecm.create_user.username,
-            'data': ecm.create_date.strftime('%d/%m/%Y %H:%M'),
+            'data': timezone.localtime(ecm.create_date).strftime('%d/%m/%Y %H:%M'),
             'state': ecm.task.get_task_status_display(),
         })
     data = {

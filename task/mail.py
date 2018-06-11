@@ -4,11 +4,10 @@ from django.template.loader import render_to_string
 from django.conf import settings
 
 
-
 class SendMail:
     subject = None
     message = None
-    from_mail = settings.EMAIL_HOST_USER
+    from_mail = settings.DEFAULT_FROM_EMAIL
     to_mail = [None]
 
     class Meta:
@@ -18,11 +17,3 @@ class SendMail:
         msg = EmailMultiAlternatives(self.subject, 'teste', self.from_mail, self.to_mail)
         msg.attach_alternative(self.message, "text/html")
         msg.send()
-
-        # send_mail(
-        #     self.subject,
-        #     self.from_mail,
-        #     self.to_mail,
-        #     html_message=True,
-        #     fail_silently=False,
-        # )

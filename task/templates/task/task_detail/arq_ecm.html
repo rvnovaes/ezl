@@ -40,7 +40,8 @@
                 </div>
             </div>
         </div>
-        {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'DONE' or form.instance.status.name == 'RETURN' %}
+
+        {% if form.instance.allow_attachment %}
             <div class="panel-footer">
                 <button type="button" class="btn btn-sm btn-info js-upload-files">
                     <i class="icon-cloud-upload"></i> Enviar arquivo(s)
