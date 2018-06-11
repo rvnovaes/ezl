@@ -103,20 +103,12 @@
                     <thead>
                         <tr>
                             <th>OS</th>
-                            {% if group_by_tasks_for_office %}
-                                <th>Escritório</th>
-                            {% else %}
-                                <th>Cliente</th>
-                            {% endif %}
+                            <th>Escritório</th>
                             <th>Finalização</th>
                             <th>Serviço</th>
                             <th>Processo</th>
                             <th>Comarca</th>
-                            {% if group_by_tasks_for_office %}
-                                <th>Cliente</th>
-                            {% else %}
-                                <th>Escritório Contratante</th>
-                            {% endif %}
+                            <th>Cliente</th>
                             <th>Parte Adversa</th>
                             <th>Cod. Legado</th>
                             <th>Recebida</th>
@@ -127,17 +119,13 @@
                           {% for office in offices %}
                             {% for task in office.tasks %}
                                 <tr>
-                                    <td>{{ task.id }}</td>
-                                    <td>{{ office.name }}</td>
+                                    <td>{{ task.task_number }}</td>
+                                    <td>{{ office.office_name }}</td>
                                     <td>{{ task.finished_date|date:"d/m/Y H:i" }}</td>
                                     <td>{{ task.type_task }}</td>
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.court_district }}</td>
-                                    {% if group_by_tasks_for_office %}
-                                        <td>{{ task.client }}</td>
-                                    {% else %}
-                                        <td>{{ task.parent.office.legal_name }}</td>
-                                    {% endif %}
+                                    <td>{{ task.client }}</td>
                                     <td>{{ task.opposing_party }}</td>
                                     <td>{{ tasl.legacy_code }}</td>
                                     <td>{{ task.receipt_date|date:"d/m/Y" }}</td>
@@ -151,16 +139,13 @@
                     <thead>
                         <tr role="row">
                             <th><input type="checkbox" id="checkAll" title="Marcar ou desmarcar todos"/></th>
+                            <th></th>
+                            <th></th>
                             <th>O.S.</th>
                             <th>Finalização</th>
                             <th>Serviço</th>
                             <th>Processo</th>
                             <th>Comarca</th>
-                            {% if group_by_tasks_for_office %}
-                                <th>Cliente</th>
-                            {% else %}
-                                <th>Escritório Contratante</th>
-                            {% endif %}
                             <th>Parte Adversa</th>
                             <th>Cod. Legado</th>
                             <th>Recebida</th>
@@ -169,31 +154,39 @@
                     </thead>
                     <tbody id="os-table-body">
                         {% for office in offices %}
-                            <tr>
-                                <th colspan="10"><center>{{ office.name }}</center></th>
-                                <th><center>R$ {{office.total}}</center></th>
-                            </tr>
+                            {% ifchanged office.office_name %}
+                                <tr>
+                                    <th colspan="10">{{ office.office_name }}</th>
+                                    <th></th>
+                                    <th><center>R$ {{office.office_total}}</center></th>
+                                </tr>
+                            {% endifchanged %}
+
+                            {% ifchanged office.client_name or office.office_name %}
+                                <tr>
+                                    <th></th>
+                                    <th colspan="10">{{ office.client_name }}</th>
+                                    <th><center>R$ {{office.client_total}}</center></th>
+                                </tr>
+                            {% endifchanged %}
                             {% for task in office.tasks %}
                                 <tr role="row">
+                                    <td></td>
+                                    <td></td>
                                     <td>
                                         {% if not task.receipt_date %}
                                             <input type="checkbox" value="{{ task.id }}"/>
                                         {% endif %}
                                     </td>
-                                    <td><a href="{% url 'task_detail' task.id %}" target="_new">{{ task.id }}</a></td>
+                                    <td><a href="{% url 'task_detail' task.id %}" target="_new">{{ task.task_number }}</a></td>
                                     <td>{{ task.finished_date|date:"d/m/Y H:i" }}</td>
                                     <td>{{ task.type_task }}</td>
                                     <td>{{ task.lawsuit_number }}</td>
-                                    <td>{{ task.court_district }}</td>
-                                    {% if group_by_tasks_for_office %}
-                                        <td>{{ task.client }}</td>
-                                    {% else %}
-                                        <td>{{ task.parent.office.legal_name }}</td>
-                                    {% endif %}
+                                    <td>{{ task.court_district }}</td>  
                                     <td>{{ task.opposing_party }}</td>
                                     <td>{{ tasl.legacy_code }}</td>
                                     <td>{{ task.receipt_date|date:"d/m/Y" }}</td>
-                                    <td class="text-center">R$ {{ task.amount }}</td>
+                                    <td class="text-center"><center>R$ {{ task.amount }}</center></td>
                                 </tr>
                             {% endfor %}
                         {% empty %}
@@ -201,9 +194,10 @@
                                 <td colspan="11">Nenhuma OS encontrada com os filtros especificados.</td>
                             </tr>
                         {% endfor %}
-                        {% if offices %}
+                        {% if total %}                        
                             <tr class="total-container">
                                 <th colspan="10" class="text-center" >Total Geral</th>
+                                <th></th>
                                 <th class="text-center">R$ {{total}}</th>
                             </tr>
                         {% endif %}
@@ -249,6 +243,7 @@
         dom: 'Bfrtip',
         paging: false,
         searching: false,
+        order: [[ "0", "asc" ]],
         buttons: [
             'copy', 'csv', 'excel', 'pdf', 'print'
         ],

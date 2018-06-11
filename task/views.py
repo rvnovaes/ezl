@@ -212,18 +212,19 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
     filter_class = None
     datetime_field = None
 
-    def get_context_data(self, *args, **kwargs):                                 
+    def get_context_data(self, *args, **kwargs):        
         context = super().get_context_data(*args, **kwargs)
         self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
         context['filter'] = self.task_filter        
-        context['group_by_tasks_for_office'] = True
-        try:
-            context['group_by_tasks_for_office'] = self.request.GET['group_by_tasks'] == OFFICE        
-            context['offices'] = self.get_os_grouped_by_office() \
-                if context['group_by_tasks_for_office'] else self.get_os_grouped_by_client()
+        try:            
+            if self.request.GET['group_by_tasks'] == OFFICE:
+                office_list, total =  self.get_os_grouped_by_office()
+            else:
+                office_list, total =  self.get_os_grouped_by_client()
         except:            
-            context['offices'] = self.get_os_grouped_by_office()         
-        context['total'] = sum(map(lambda x: x['total'], context['offices']))
+            office_list, total = self.get_os_grouped_by_office()         
+        context['offices'] = office_list
+        context['total'] = total
         return context
 
     def get_queryset(self):
@@ -276,47 +277,75 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
         return queryset
 
     def get_os_grouped_by_office(self):
-        offices = []
+        offices = []        
         offices_map = {}
         tasks = self.get_queryset()
+        total = 0        
         for task in tasks:
             correspondent = self._get_related_office(task)
             if correspondent not in offices_map:
-                offices_map[correspondent] = []
-            offices_map[correspondent].append(task)
+                offices_map[correspondent] = {}
+            client = self._get_related_client(task)    
+            if client not in offices_map[correspondent]:
+                offices_map[correspondent][client] = []
+            offices_map[correspondent][client].append(task)        
 
-        for office, tasks in offices_map.items():
-            tasks.sort(key=lambda x: x.client.name)
-            offices.append({
-                "name": office.name,
-                "tasks": tasks,
-                "total": sum(map(lambda x: x.amount, tasks))
+        offices_map_total = {}     
+        for office, clients in offices_map.items():
+            office_total = 0            
+            for client, tasks in clients.items():                                
+                client_total = sum(map(lambda x: x.amount, tasks))
+                office_total = office_total + client_total
+                offices.append({
+                    'office_name': office.name,
+                    'client_name': client.name,
+                    'tasks': tasks,
+                    "client_total": client_total,
+                    "office_total": 0,
                 })
+            offices_map_total[office.name] = office_total
+            total = total + office_total
+        
+        for item in offices:
+            item['office_total'] = offices_map_total[item['office_name']]        
 
-        return offices
+        return offices, total
 
     def get_os_grouped_by_client(self):
-        offices = []
-        offices_map = {}
+        clients = []        
+        clients_map = {}
         tasks = self.get_queryset()
+        total = 0
         for task in tasks:
             client = self._get_related_client(task)
-            if client not in offices_map:
-                offices_map[client] = []
-            offices_map[client].append(task)                        
-        
-        for client, tasks in offices_map.items():            
-            if type(self) is ToReceiveTaskReportView:
-                tasks.sort(key=lambda x: x.parent.office.legal_name)
-            else:
-                tasks.sort(key=lambda x: x.office.legal_name)            
-            offices.append({
-                "name": client.name,
-                "tasks": tasks,
-                "total": sum(map(lambda x: x.amount, tasks))
+            if client not in clients_map:
+                clients_map[client] = {}
+            correspondent = self._get_related_office(task)
+            if correspondent not in clients_map[client]:
+                clients_map[client][correspondent] = []
+            clients_map[client][correspondent].append(task)                
+                                
+        clients_map_total = {}             
+        for client, offices in clients_map.items():
+            client_total = 0            
+            for office, tasks in offices.items():                                
+                office_total = sum(map(lambda x: x.amount, tasks))
+                client_total = client_total + office_total
+                # necessário manter a mesma estrutura do get_os_grouped_by_office para não mexer no template.
+                clients.append({
+                    'office_name': client.name,
+                    'client_name': office.name,
+                    'tasks': tasks,
+                    "client_total": office_total,
+                    "office_total": 0,
                 })
+            clients_map_total[client.name] = client_total
+            total = total + client_total                
 
-        return offices 
+        for item in clients:
+            item['office_total'] = clients_map_total[item['office_name']]                
+        
+        return clients, total
     
     def _get_related_client(self, task):
         return task.client
