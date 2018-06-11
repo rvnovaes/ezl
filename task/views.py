@@ -72,7 +72,9 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
 
         if form.cleaned_data['documents']:
             for document in form.cleaned_data['documents']:
+                file_name = document.name.replace(' ', '_')
                 task.ecm_set.create(path=document,
+                                    exhibition_name=file_name,
                                     create_user=task.create_user)
 
         form.delete_temporary_files()
@@ -125,7 +127,9 @@ class TaskCreateView(AuditFormMixin, CreateView):
         response = super(TaskCreateView, self).form_valid(form)
         if form.cleaned_data['documents']:
             for document in form.cleaned_data['documents']:
+                file_name = document.name.replace(' ', '_')
                 task.ecm_set.create(path=document,
+                                    exhibition_name=file_name,
                                     create_user=task.create_user)
 
         form.delete_temporary_files()
@@ -186,9 +190,19 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
         return kw
 
     def form_valid(self, form):
+        task = form.instance
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
         form.instance.__server = get_domain(self.request)
         super(TaskUpdateView, self).form_valid(form)
+
+        if form.cleaned_data['documents']:
+            for document in form.cleaned_data['documents']:
+                file_name = document.name.replace(' ', '_')
+                task.ecm_set.create(path=document,
+                                    exhibition_name=file_name,
+                                    create_user=task.create_user)
+
+        form.delete_temporary_files()
         return HttpResponseRedirect(self.success_url)
 
     def get_context_data(self, **kwargs):
@@ -618,6 +632,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 new_file.name = os.path.basename(ecm.path.name)
                 new_ecm = copy.copy(ecm)
                 new_ecm.pk = None
+                new_ecm.exhibition_name = new_file.name
                 new_ecm.task = new_task
                 new_ecm.path = new_file
                 new_ecm.save()
@@ -642,31 +657,23 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
                 'message': exception_create()}
 
         for file in files:
-            file_name = file._name
+            file_name = file._name.replace(' ', '_')
             obj_task = Task.objects.get(id=task)
             ecm = Ecm(path=file,
                       task=obj_task,
+                      exhibition_name=file_name,
                       create_user_id=str(request.user.id),
                       create_date=timezone.now())
 
             try:
                 ecm.save()
-                if obj_task.parent:
-                    # Salva o anexo na os pai
-                    ecm_parent = copy.copy(ecm)
-                    ecm_parent.pk = None
-                    ecm_parent.task = obj_task.parent
-                    new_file = ContentFile(ecm.path.read())
-                    new_file.name = file_name
-                    ecm_parent.path = new_file
-                    ecm_parent.save()
                 data = {'success': True,
                         'id': ecm.id,
                         'name': str(file),
                         'user': str(self.request.user),
                         'username': str(self.request.user.first_name + ' ' +
                                         self.request.user.last_name),
-                        'filename': str(os.path.basename(ecm.path.path)),
+                        'filename': str(ecm.exhibition_name),
                         'task_id': str(task),
                         'message': success_sent()
                         }
@@ -1052,7 +1059,7 @@ def ajax_get_ecms(request):
             'url': ecm.path.name,
             'filename': ecm.filename,
             'user': ecm.create_user.username,
-            'data': ecm.create_date.strftime('%d/%m/%Y %H:%M'),
+            'data': timezone.localtime(ecm.create_date).strftime('%d/%m/%Y %H:%M'),
             'state': ecm.task.get_task_status_display(),
         })
     data = {

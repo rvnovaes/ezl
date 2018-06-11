@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
-from django.db.models.signals import post_init, pre_save, post_save
+from django.db import transaction
+from django.db.models.signals import post_init, pre_save, post_save, post_delete
 from django.core.signals import request_finished
 from django.dispatch import receiver, Signal
 from django.utils import timezone
@@ -9,7 +10,7 @@ from advwin_models.tasks import export_ecm, export_task, export_task_history
 from core.models import ContactMechanism, ContactMechanismType, Person
 from django.conf import settings
 from task.models import Task, TaskStatus, TaskHistory, Ecm
-from task.utils import task_send_mail
+from task.utils import task_send_mail, copy_ecm
 from task.workflow import get_parent_status, get_child_status, get_parent_fields, get_child_recipients, get_parent_recipients
 from chat.models import Chat, UserByChat
 from lawsuit.models import CourtDistrict
@@ -21,6 +22,27 @@ send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'executi
 def export_ecm_path(sender, instance, created, **kwargs):
     if created and instance.legacy_code is None:
         export_ecm.delay(instance.id)
+
+
+@receiver(post_save, sender=Ecm)
+def copy_ecm_related(sender, instance, created, **kwargs):
+    if created and instance.task.parent:
+        transaction.on_commit(lambda: copy_ecm(instance, instance.task.parent))
+    if created and instance.task.get_child:
+        transaction.on_commit(lambda: copy_ecm(instance, instance.task.get_child))
+
+
+@receiver(post_delete, sender=Ecm)
+def delete_related_ecm(sender, instance, **kwargs):
+    tasks = []
+    if instance.task.parent:
+        tasks.append(instance.task.parent.id)
+
+    if instance.task.get_child:
+        tasks.append(instance.task.get_child.id)
+    if tasks:
+        transaction.on_commit(lambda: Ecm.objects.filter(task_id__in=tasks,
+                                                         exhibition_name=instance.exhibition_name).delete())
 
 
 @receiver(post_init, sender=Task)

@@ -347,6 +347,9 @@ class Ecm(Audit, LegacyCode):
     path = models.FileField(upload_to=get_dir_name, max_length=255, null=False)
     task = models.ForeignKey(Task, blank=False, null=False, on_delete=models.PROTECT)
     updated = models.BooleanField(default=True, null=False)
+    exhibition_name = models.CharField(
+        verbose_name="Nome de Exibição", max_length=255, null=False, blank=False
+    )
 
     objects = EcmManager()
 
