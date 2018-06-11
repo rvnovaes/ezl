@@ -82,18 +82,7 @@ class TaskETL(GenericETL):
                     a.Status = '0' AND -- STATUS ATIVO
                     (p.Status = 'Ativa' OR p.Status = 'Especial') AND
                     (a.SubStatus = 10 OR a.SubStatus = 11) AND
-                    (
-                      (
-                        p.Cliente IN ('{cliente}') AND
-                        p.Unidade IN ('11') -- Unidade BH-Centro
-                      ) 
-                      OR
-                      (
-                        p.Cliente IN ('17155730000164') AND
-                        p.Unidade IN ('01') -- Unidade Savassi
-                      )
-                    )
-
+                    p.Cliente IN ('{cliente}')
     """
     model = Task
     advwin_table = 'Jurid_agenda_table'
