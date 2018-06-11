@@ -127,7 +127,7 @@
                                     <td>{{ task.court_district }}</td>
                                     <td>{{ task.client }}</td>
                                     <td>{{ task.opposing_party }}</td>
-                                    <td>{{ tasl.legacy_code }}</td>
+                                    <td>{{ task.legacy_code|default_if_none:''}}</td>
                                     <td>{{ task.receipt_date|date:"d/m/Y" }}</td>
                                     <td>{{ task.amount }}</td>
                                 </tr>
@@ -184,7 +184,7 @@
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.court_district }}</td>  
                                     <td>{{ task.opposing_party }}</td>
-                                    <td>{{ tasl.legacy_code }}</td>
+                                    <td>{{ task.legacy_code|default_if_none:''}}</td>
                                     <td>{{ task.receipt_date|date:"d/m/Y" }}</td>
                                     <td class="text-center"><center>R$ {{ task.amount }}</center></td>
                                 </tr>
