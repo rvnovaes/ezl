@@ -31031,17 +31031,6 @@
         <field name="name" type="CharField">Aperibe</field>
         <field name="state" rel="ManyToOneRel" to="core.state">20</field>
     </object>
-    <object model="lawsuit.courtdistrict" pk="2824">
-        <field name="create_date" type="DateTimeField">2018-03-02T13:21:55.226733+00:00</field>
-        <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>
-        <field name="alter_date" type="DateTimeField">2018-03-02T13:21:55.226777+00:00</field>
-        <field name="alter_user" rel="ManyToOneRel" to="auth.user"><None></None></field>
-        <field name="legacy_code" type="CharField"><None></None></field>
-        <field name="system_prefix" type="CharField"><None></None></field>
-        <field name="is_active" type="BooleanField">True</field>
-        <field name="name" type="CharField">Bom Jesus de Itabapoana</field>
-        <field name="state" rel="ManyToOneRel" to="core.state">20</field>
-    </object>
     <object model="lawsuit.courtdistrict" pk="2825">
         <field name="create_date" type="DateTimeField">2018-03-02T13:22:11.694211+00:00</field>
         <field name="create_user" rel="ManyToOneRel" to="auth.user">2</field>

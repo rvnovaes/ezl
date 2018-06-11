@@ -1,0 +1,12 @@
+<strong>Nome:</strong>
+    {{ abstract_person.legal_name|capfirst|default_if_none:"---" }}
+<br>
+    <strong>Telefone:</strong>
+    {{ abstract_person.phones|default_if_none:'' }}
+<br>
+    <strong>E-mail:</strong>
+    {{ abstract_person.emails|default_if_none:'' }}
+<br>
+    <strong>Endereço:</strong>
+    {{ abstract_person.address_set.first|default_if_none:'' }}
+<br>

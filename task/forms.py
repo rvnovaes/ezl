@@ -45,6 +45,7 @@ class TaskForm(BaseForm):
                                   widget=forms.Textarea(
                                       attrs={'class': 'form-control', 'rows': '5',
                                              'id': 'details_id'}))
+    documents = MultipleUploadedFileField(required=False)
 
     def __init__(self, *args, **kwargs):        
         super().__init__(*args, **kwargs)        

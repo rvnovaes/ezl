@@ -8,6 +8,7 @@ local_settings.py
 venv/**
 staticfiles/**
 luigi_targets/*
+celerybeat*
 
 config/general.ini
 etl/advwin_ezl/tmp/**
