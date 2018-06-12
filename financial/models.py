@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager, Office
 from decimal import Decimal
@@ -89,3 +90,23 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         verbose_name = 'Tabela de preço de serviços'
         verbose_name_plural = 'Tabelas de preço de serviços'
         unique_together = (("office", "office_correspondent", "type_task", "client", "court_district", "state"),)
+
+
+def get_dir_name(instance, filename):
+    path = os.path.join('media', 'service_price_table')
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return 'service_price_table/{0}'.format(filename)
+
+class ImportServicePriceTable(Audit, OfficeMixin):
+    file_xls = models.FileField('Arquivo', upload_to=get_dir_name)        
+    log = models.TextField('Log', null=True)
+    start = models.DateTimeField('Início processo')
+    end = models.DateTimeField('Fim processo', null=True)
+
+    def __str__(self):
+        return self.file_xls.file.name + ' - ' + 'Início: ' + str(self.start) + ' - ' + 'Fim: ' + str(self.end)
+
+    class Meta:
+        verbose_name = 'Arquivos Importados de Tabela de Preços'
+        
