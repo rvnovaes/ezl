@@ -9,7 +9,6 @@ from django.db.models import Q
 from django.core.files.base import ContentFile
 
 
-
 def get_task_attachment(self, form):
     attachmentrules = DefaultAttachmentRule.objects.filter(
         Q(office=get_office_session(self.request)),
@@ -23,16 +22,23 @@ def get_task_attachment(self, form):
     for rule in attachmentrules:
         attachments = Attachment.objects.filter(model_name='ecm.defaultattachmentrule').filter(object_id=rule.id)
         for attachment in attachments:
+
             obj = Ecm(path=attachment.file,
                       task=Task.objects.get(id=form.instance.id),
                       create_user_id=self.request.user.id,
-                      create_date=timezone.now())
+                      create_date=timezone.now(),
+                      exhibition_name=attachment.file.name
+            )
             obj.save()
 
 
 def copy_ecm(ecm, task):
     file_name = os.path.basename(ecm.path.name)
-    if not Ecm.objects.filter(task=task, exhibition_name=file_name):
+    ecm_related = ecm.ecm_related
+    if not ecm_related:
+        ecm_related = ecm
+    if not Ecm.objects.filter(Q(task=task), Q(ecm_related=ecm_related)) \
+            and not task == ecm_related.task:
         new_ecm = copy.copy(ecm)
         new_ecm.pk = None
         new_ecm.task = task
@@ -40,6 +46,7 @@ def copy_ecm(ecm, task):
         new_file.name = file_name
         new_ecm.path = new_file
         new_ecm.exhibition_name = file_name
+        new_ecm.ecm_related = ecm_related
         new_ecm.save()
 
 
