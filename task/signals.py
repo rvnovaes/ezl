@@ -37,8 +37,9 @@ def delete_related_ecm(sender, instance, **kwargs):
     ecm_related = instance.ecm_related_id
     if not ecm_related:
         ecm_related = instance.pk
-    transaction.on_commit(lambda: Ecm.objects.filter(Q(pk=ecm_related)
-                                                     | Q(ecm_related_id=ecm_related)).delete())
+    if ecm_related:
+        transaction.on_commit(lambda: Ecm.objects.filter(Q(pk=ecm_related)
+                                                         | Q(ecm_related_id=ecm_related)).delete())
 
 
 @receiver(post_init, sender=Task)
@@ -65,7 +66,6 @@ def new_task(sender, instance, created, **kwargs):
                                    create_user=user,
                                    status=instance.task_status,
                                    create_date=instance.create_date, notes=notes)
-
 
 
 @receiver(pre_save, sender=Task)

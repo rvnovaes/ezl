@@ -331,6 +331,7 @@ def get_dir_name(instance, filename):
         os.makedirs(path)
     return 'ECM/{0}/{1}'.format(instance.task.pk, filename)
 
+
 class EcmQuerySet(models.QuerySet):
     def delete(self):
         # Não podemos apagar os ECMs que possuam legacy_code
@@ -358,7 +359,7 @@ class Ecm(Audit, LegacyCode):
     # Retorna o nome do arquivo no Path, para renderizar no tamplate
     @property
     def filename(self):
-        return os.path.basename(self.path.path)
+        return os.path.basename(self.path.path) if self.path else None
 
     @property
     def user(self):
