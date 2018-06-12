@@ -64,7 +64,8 @@
                             elem.style.width = width + '%';
                             
                             if (!response.imported)
-                                title.innerHTML = "Importação de Tabela de Preços. Planilha: " + response.worksheet_in_process;                            
+                                title.innerHTML = "Importação de Tabela de Preços.<br>Arquivo: {{ file_name }}"+
+                                    "<br>Planilha: " + response.worksheet_in_process;                            
                             
                             if ((response.imported) || (response.error_process))
                             {
