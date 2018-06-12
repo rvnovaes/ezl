@@ -152,6 +152,7 @@ class TypeTask(Audit, LegacyCode):
     def __str__(self):
         return self.name
 
+
 class Task(Audit, LegacyCode, OfficeMixin):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
@@ -162,7 +163,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
                                  verbose_name='Movimentação')
-    person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
+    person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=True,
                                         related_name='%(class)s_asked_by',
                                         verbose_name='Solicitante')
     person_executed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True,
@@ -202,6 +203,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
+    _mail_attrs = None  # atributo transiente
 
     objects = OfficeManager()
 
@@ -300,6 +302,11 @@ class Task(Audit, LegacyCode, OfficeMixin):
         return get_next_value('office_{office_pk}_{name}'.format(office_pk=self.office.pk,
                                                                  name=self.TASK_NUMBER_SEQUENCE))
 
+    @property
+    def allow_attachment(self):        
+        return not (self.status == TaskStatus.REFUSED or                 
+                self.status == TaskStatus.BLOCKEDPAYMENT or 
+                self.status == TaskStatus.FINISHED)
 
 class TaskFeedback(models.Model):
     feedback_date = models.DateTimeField(auto_now_add=True)
@@ -340,6 +347,9 @@ class Ecm(Audit, LegacyCode):
     path = models.FileField(upload_to=get_dir_name, max_length=255, null=False)
     task = models.ForeignKey(Task, blank=False, null=False, on_delete=models.PROTECT)
     updated = models.BooleanField(default=True, null=False)
+    exhibition_name = models.CharField(
+        verbose_name="Nome de Exibição", max_length=255, null=False, blank=False
+    )
 
     objects = EcmManager()
 

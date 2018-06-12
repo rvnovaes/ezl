@@ -248,7 +248,7 @@ class AbstractPerson(Audit, LegacyCode):
         return self.contact_mechanism_by_type('telefone')
 
     def get_emails(self):
-        emails = set(self.contact_mechanism_by_type('email', formated=False))
+        emails = set(self.contact_mechanism_by_type('e-mail', formated=False))
         if (self.auth_user and self.auth_user.email and
                 self.auth_user.email.strip()):
             emails.add(self.auth_user.email.strip())
