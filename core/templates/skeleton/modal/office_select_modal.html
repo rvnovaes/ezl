@@ -26,4 +26,9 @@
         </div>
     </div>
 </div>
+<script>
+    $('#office-select-modal').on('shown.bs.modal', function (event) {
+        $('#filter_office_legal_name').focus()
+    });
+</script>
 {% endblock %}
