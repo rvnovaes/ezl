@@ -4,6 +4,7 @@ from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.utils import get_message_log_default, save_error_log
 
+
 class PersonETL(GenericETL):
     model = Person
     import_query = """
@@ -133,7 +134,7 @@ class PersonETL(GenericETL):
                                        'is_active',
                                        'is_customer',
                                        'is_supplier'])
-                    if not default_office.persons.filter(cpf_cnpj=instance.cpf_cnpj):
+                    if not default_office.persons.filter(pk=instance.pk):
                         OfficeMembership.objects.update_or_create(person=instance,
                                                                   office=default_office,
                                                                   defaults={'create_user': user,
@@ -153,7 +154,7 @@ class PersonETL(GenericETL):
                                      system_prefix=LegacySystem.ADVWIN.value)
 
                     obj.save()
-                    if not default_office.persons.filter(cpf_cnpj=obj.cpf_cnpj):
+                    if not default_office.persons.filter(obj=obj.pk):
                         OfficeMembership.objects.create(person=obj,
                                                         office=default_office,
                                                         create_user=user,
