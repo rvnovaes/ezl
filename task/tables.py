@@ -50,6 +50,7 @@ class DashboardStatusTable(tables.Table):
         self.base_columns['type_service'].verbose_name = type_service
         self.base_columns['opposing_party'].verbose_name = opposing_party
         self.base_columns['task_number'].verbose_name = 'Nº da OS'
+        self.base_columns['origin_code'].verbose_name = 'OS Original'
         self.title = title
         self.status = status
 
@@ -61,7 +62,7 @@ class DashboardStatusTable(tables.Table):
     class Meta:
         model = DashboardViewModel
         fields = ['task_number', 'final_deadline_date', 'type_service', 'lawsuit_number', 'client',
-                  'opposing_party', 'delegation_date', 'legacy_code']
+                  'opposing_party', 'delegation_date', 'origin_code']
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {
             'data_new_href': lambda record: '/dashboard/' + str(record.pk) + '/'

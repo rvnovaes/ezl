@@ -439,7 +439,6 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         checker = ObjectPermissionChecker(person.auth_user)
         if not office_session:
             return []
-
         if checker.has_perm('can_access_general_data', office_session) or checker.has_perm('group_admin',
                                                                                            office_session):
             return_list.append(DashboardErrorStatusTable(error,
@@ -786,8 +785,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     task_dynamic_query.add(Q(movement__law_suit__law_suit_number=data['law_suit_number']), Q.AND)
                 if data['task_number']:
                     task_dynamic_query.add(Q(task_number=data['task_number']), Q.AND)
-                if data['task_legacy_code']:
-                    task_dynamic_query.add(Q(legacy_code=data['task_legacy_code']), Q.AND)
+                if data['task_origin_code']:
+                    task_dynamic_query.add(Q(Q(legacy_code=data['task_origin_code'])|\
+                        Q(parent_task_number=data['task_origin_code'])), Q.AND)
                 if data['person_executed_by']:
                     task_dynamic_query.add(Q(person_executed_by=data['person_executed_by']), Q.AND)
                 if data['person_asked_by']:
@@ -1015,7 +1015,7 @@ def ajax_get_task_data_table(request):
                     x.task.client.name,
                     x.task.opposing_party,
                     timezone.localtime(x.task.delegation_date).strftime('%d/%m/%Y %H:%M') if x.task.delegation_date else '',
-                    x.task.legacy_code,
+                    x.task.origin_code,
                     x.inconsistency,
                     x.solution,
                 ], query_error)
@@ -1035,7 +1035,7 @@ def ajax_get_task_data_table(request):
                     x.client,
                     x.opposing_party,
                     timezone.localtime(x.delegation_date).strftime('%d/%m/%Y %H:%M') if x.delegation_date else '',
-                    x.legacy_code,
+                    x.origin_code,
                     '',
                     '',
                 ], query)

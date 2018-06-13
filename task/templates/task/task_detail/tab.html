@@ -27,7 +27,7 @@
                     <li>
                         <a href="#sec-contr" class="sticon mdi mdi-receipt"><span>Contratante</span></a>
                     </li>
-                    <li><a href="#sec-sis-leg" class="sticon mdi mdi-cash-multiple"><span>Sistema Legado</span></a></li>
+                    <li><a href="#sec-sis-leg" class="sticon mdi mdi-cash-multiple"><span>Dados de Origem</span></a></li>
                 </ul>
             </nav>
             <div class="content-wrap">
@@ -64,7 +64,7 @@
                         <tr>
                             <th>N° da OS</th>
                             <td>
-                                {{ form.instance.legacy_code|default_if_none:'' }}
+                                {{ form.instance.origin_code|default_if_none:'' }}
                             </td>
                         </tr>
                         </tbody>
