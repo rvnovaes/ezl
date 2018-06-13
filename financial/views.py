@@ -152,12 +152,12 @@ def import_service_price_table(request):
                 file_xls.office = get_office_session(request)
                 file_xls.create_user = request.user 
                 file_xls.start = timezone.now()               
-                file_xls.save()                                              
+                file_xls.save()
                 
                 import_xls_service_price_table.delay(file_xls.pk)
                 context['show_modal_progress'] = True
                 context['file_xls'] = file_xls
-                context['file_name'] = request.FILES['file_xls'].name                
+                context['file_name'] = request.FILES['file_xls'].name           
         else:
             if not form.instance.file_xls:
                 messages.error(request, 'Arquivo para importação não informado.')
