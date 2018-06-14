@@ -308,6 +308,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
                 self.status == TaskStatus.BLOCKEDPAYMENT or 
                 self.status == TaskStatus.FINISHED)
 
+
 class TaskFeedback(models.Model):
     feedback_date = models.DateTimeField(auto_now_add=True)
     task = models.ForeignKey('Task', verbose_name='OS')
@@ -330,6 +331,7 @@ def get_dir_name(instance, filename):
         os.makedirs(path)
     return 'ECM/{0}/{1}'.format(instance.task.pk, filename)
 
+
 class EcmQuerySet(models.QuerySet):
     def delete(self):
         # Não podemos apagar os ECMs que possuam legacy_code
@@ -350,13 +352,14 @@ class Ecm(Audit, LegacyCode):
     exhibition_name = models.CharField(
         verbose_name="Nome de Exibição", max_length=255, null=False, blank=False
     )
+    ecm_related = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='child')
 
     objects = EcmManager()
 
     # Retorna o nome do arquivo no Path, para renderizar no tamplate
     @property
     def filename(self):
-        return os.path.basename(self.path.path)
+        return os.path.basename(self.path.path) if self.path else None
 
     @property
     def user(self):
@@ -384,7 +387,7 @@ class TaskHistory(AuditCreate):
 
 class TaskGeolocation(Audit):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, blank=False, null=False,
-                            related_name='geolocation')
+                             related_name='geolocation')
     date = models.DateTimeField(null=True, verbose_name='Data de Início')
     checkpointtype = models.CharField(null=True, verbose_name='Tipo de Marcação', max_length=10,
                                       choices=((x.value, x.name.title()) for x in CheckPointType),
@@ -392,7 +395,7 @@ class TaskGeolocation(Audit):
     latitude = models.DecimalField(null=True, blank=True, verbose_name='Latitude',
                                    max_digits=9, decimal_places=6)
     longitude = models.DecimalField(null=True, blank=True, verbose_name='Longitude',
-                                   max_digits=9, decimal_places=6)
+                                    max_digits=9, decimal_places=6)
 
     class Meta:
         verbose_name = 'Geolocalização da Providência'

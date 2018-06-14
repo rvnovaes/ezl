@@ -175,7 +175,6 @@ class TaskETL(GenericETL):
                     task.requested_date = requested_date
                     task.final_deadline_date = final_deadline_date
                     task.description = description
-                    task.task_status = status_code_advwin
                     task.type_task = type_task
                     task.alter_user = user
                     task.person_asked_by = person_asked_by

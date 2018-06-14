@@ -79,7 +79,7 @@ services:
 
   flower:
     image: ezl:latest
-    command: celery flower --broker=amqp://guest:guest@queues:5672/ --port=8083 --basic_auth=ezl:flower@ezl
+    command: celery flower --broker=amqp://guest:guest@queues:5672/ --port=5555 --basic_auth=ezl:flower@ezl
     volumes:
       - .:/app
     depends_on:
