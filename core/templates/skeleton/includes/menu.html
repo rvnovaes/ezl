@@ -103,6 +103,10 @@
                     <span class="hide-menu">Escritórios</span>
                 </a>
             </li>
+            <li>
+                <a href="{% url 'team_list' %}" target="_self">
+                    <span class="hide-menu">Equipes</span>
+            </li>
             {% if request.user.is_superuser %}
                 <li> <!-- QUESTIONARIOS -->
                     <a href="{% url 'survey_list' %}" target="_self">

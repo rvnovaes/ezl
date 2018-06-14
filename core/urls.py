@@ -126,5 +126,9 @@ urlpatterns = [
 
     url(r'^escritorios/(?P<office_pk>[0-9]+)/contatos/excluir/$',
         views.ContactMechanismOfficeDeleteView.as_view(),
-        name='contact_mechanism_office_delete'),
+        name='contact_mechanism_office_delete'),    
+    url(r'^teams/$', login_required(views.TeamListView.as_view()), name='team_list'), 
+    url(r'^teams/create/$', login_required(views.TeamCreateView.as_view()), name='team_add'), 
+    url(r'^teams/(?P<pk>[0-9]+)/$', login_required(views.TeamUpdateView.as_view()), name='team_update'),
+    url(r'^teams/delete$', login_required(views.TeamDeleteView.as_view()), name='team_delete'),
 ]

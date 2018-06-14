@@ -496,3 +496,13 @@ class ContactUs(Audit):
 
 class ModelExportHistory(models.Model):
     model = models.CharField(max_length=255, unique=True, null=False)
+
+
+class Team(Audit, OfficeMixin):
+    name = models.CharField(max_length=255, unique=True, verbose_name='Equipe')
+    users = models.ManyToManyField(User)
+
+
+    def __str__(self):
+        return self.name
+

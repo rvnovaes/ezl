@@ -20,7 +20,7 @@ from allauth.utils import build_absolute_uri
 
 from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, City, ContactMechanism, ContactMechanismType, AddressType, \
-    LegalType, Office, Invite, InviteOffice
+    LegalType, Office, Invite, InviteOffice, Team
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session, get_domain
 from core.widgets import TypeaHeadWidget
 from core.widgets import TypeaHeadForeignKeyWidget
@@ -543,3 +543,13 @@ class InviteOfficeForm(BaseForm):
         model = InviteOffice
         fields = ['office', 'office_invite']
         exclude = ['is_active']
+
+
+class TeamForm(BaseForm):
+    class Meta:
+        model = Team
+        fields = ['office', 'name', 'users']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)        
