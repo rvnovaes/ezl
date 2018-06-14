@@ -232,8 +232,8 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
 
         self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
         context['filter'] = self.task_filter
-        context['offices'] = self.get_os_grouped_by_office()
-        context['total'] = sum(map(lambda x: x['total'], context['offices']))
+        context['offices_report'] = self.get_os_grouped_by_office()
+        context['total'] = sum(map(lambda x: x['total'], context['offices_report']))
         return context
 
     def get_queryset(self):
@@ -344,7 +344,7 @@ class ToPayTaskReportView(TaskReportBase):
     filter_class = TaskToPayFilter
     datetime_field = 'billing_date'
 
-    def get_queryset(self):
+    def get_queryset(self):        
         office = get_office_session(self.request)
         queryset = Task.objects.filter(
             parent__office=office,
