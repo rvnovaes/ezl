@@ -500,8 +500,8 @@ class ModelExportHistory(models.Model):
 
 class Team(Audit, OfficeMixin):
     name = models.CharField(max_length=255, unique=True, verbose_name='Equipe')
-    users = models.ManyToManyField(User)
-
+    members = models.ManyToManyField(User, related_name='team_members')
+    supervisors = models.ManyToManyField(User, related_name='team_supervisors')
 
     def __str__(self):
         return self.name

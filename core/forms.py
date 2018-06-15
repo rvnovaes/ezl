@@ -548,7 +548,7 @@ class InviteOfficeForm(BaseForm):
 class TeamForm(BaseForm):
     class Meta:
         model = Team
-        fields = ['office', 'name', 'users']
+        fields = ['office', 'name', 'members', 'supervisors']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -1,13 +1,33 @@
 {% extends 'skeleton/forms/base.html' %}
 {% load static %}
+{% block form %}
+    {% load staticfiles bootstrap3 %}
+
+
+    <div class="row">
+    	{% bootstrap_field form.office form_group_class="form-group col-sm-4" %}
+        {% bootstrap_field form.name form_group_class="form-group col-sm-4" %}        
+    </div>
+    <div class="row">    	
+    	{% bootstrap_field form.members form_group_class="form-group col-md-12" %}            	
+    </div>
+
+    <div class="row">    	
+    	{% bootstrap_field form.supervisors form_group_class="form-group col-md-12" %}            	
+    </div>    
+
+{% endblock %}
 
 {% block extra_stylesheets %}
-	<link rel="stylesheet" type="text/css" href="{% static 'skeleton/plugins/bower_components/multiselect/css/multi-select.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'skeleton/plugins/bower_components/multiselect/css/multi-select.css' %}">	
 
 	<style type="text/css">
 		.search-input {			
 			width: 100%;
 			margin-bottom: 5px;
+		}
+		.ms-container {
+			width: 100% !important; 
 		}		
 	</style>
 {% endblock %}
@@ -18,9 +38,9 @@
 	<script src="{% static 'skeleton/plugins/bower_components/jquery.quicksearch/dist/jquery.quicksearch.js' %}"></script>	
 	<script type="text/javascript">
 		$(document).ready(function() {
-		  $('#id_users').multiSelect({
-		    selectableHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='Pesquisar...'>",
-		    selectionHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='Pesquisar...'>",
+		  $('#id_members').multiSelect({
+		    selectableHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='Pesquisar usuários disponíveis...'>",
+		    selectionHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='Pesquisar usuários selecionados...'>",
 		    afterInit: function(ms) {
 		      var that = this,		      
 		        $selectableSearch = that.$selectableUl.prev(),
@@ -52,5 +72,8 @@
 		    }
 		  })
 		})
+
+
+
 	</script>
 {% endblock %}
