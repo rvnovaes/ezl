@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import transaction
-from django.db.models.signals import post_init, pre_save, post_save, post_delete
+from django.db.models.signals import post_init, pre_save, post_save, post_delete, pre_delete
 from django.core.signals import request_finished
 from django.dispatch import receiver, Signal
 from django.utils import timezone
@@ -34,15 +34,11 @@ def copy_ecm_related(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=Ecm)
 def delete_related_ecm(sender, instance, **kwargs):
-    tasks = []
-    if instance.task.parent:
-        tasks.append(instance.task.parent.id)
-
-    if instance.task.get_child:
-        tasks.append(instance.task.get_child.id)
-    if tasks:
-        transaction.on_commit(lambda: Ecm.objects.filter(task_id__in=tasks,
-                                                         exhibition_name=instance.exhibition_name).delete())
+    ecm_related = instance.ecm_related_id
+    if not ecm_related:
+        ecm_related = instance.pk
+    transaction.on_commit(lambda: Ecm.objects.filter(Q(pk=ecm_related)
+                                                     | Q(ecm_related_id=ecm_related)).delete())
 
 
 @receiver(post_init, sender=Task)

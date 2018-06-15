@@ -635,6 +635,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 new_ecm.exhibition_name = new_file.name
                 new_ecm.task = new_task
                 new_ecm.path = new_file
+                new_ecm.ecm_related = ecm
                 new_ecm.save()
 
     def dispatch(self, request, *args, **kwargs):
@@ -1058,6 +1059,7 @@ def ajax_get_ecms(request):
             'pk': ecm.pk,
             'url': ecm.path.name,
             'filename': ecm.filename,
+            'exhibition_name': ecm.exhibition_name if ecm.exhibition_name else ecm.filename,
             'user': ecm.create_user.username,
             'data': timezone.localtime(ecm.create_date).strftime('%d/%m/%Y %H:%M'),
             'state': ecm.task.get_task_status_display(),

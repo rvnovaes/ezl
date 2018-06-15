@@ -308,6 +308,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
                 self.status == TaskStatus.BLOCKEDPAYMENT or 
                 self.status == TaskStatus.FINISHED)
 
+
 class TaskFeedback(models.Model):
     feedback_date = models.DateTimeField(auto_now_add=True)
     task = models.ForeignKey('Task', verbose_name='OS')
@@ -350,6 +351,7 @@ class Ecm(Audit, LegacyCode):
     exhibition_name = models.CharField(
         verbose_name="Nome de Exibição", max_length=255, null=False, blank=False
     )
+    ecm_related = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='child')
 
     objects = EcmManager()
 
@@ -384,7 +386,7 @@ class TaskHistory(AuditCreate):
 
 class TaskGeolocation(Audit):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, blank=False, null=False,
-                            related_name='geolocation')
+                             related_name='geolocation')
     date = models.DateTimeField(null=True, verbose_name='Data de Início')
     checkpointtype = models.CharField(null=True, verbose_name='Tipo de Marcação', max_length=10,
                                       choices=((x.value, x.name.title()) for x in CheckPointType),
@@ -392,7 +394,7 @@ class TaskGeolocation(Audit):
     latitude = models.DecimalField(null=True, blank=True, verbose_name='Latitude',
                                    max_digits=9, decimal_places=6)
     longitude = models.DecimalField(null=True, blank=True, verbose_name='Longitude',
-                                   max_digits=9, decimal_places=6)
+                                    max_digits=9, decimal_places=6)
 
     class Meta:
         verbose_name = 'Geolocalização da Providência'
