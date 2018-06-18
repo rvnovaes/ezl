@@ -27,7 +27,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
     DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
-from core.models import Person
+from core.models import Person, Team
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
@@ -402,7 +402,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
 
     def get_data(self, person):
         checker = ObjectPermissionChecker(person.auth_user)
-        dynamic_query = self.get_dynamic_query(person, checker)
+        dynamic_query = self.get_dynamic_query(person, checker)        
         data = []
         data_error = []
         office_session = get_office_session(self.request)
@@ -421,7 +421,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
     def get_list_tables(data, data_error, person, office_session):
         grouped = dict()
         for obj in data:
-            grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
+            grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)        
         returned = grouped.get(TaskStatus.RETURN) or {}
         accepted = grouped.get(TaskStatus.ACCEPTED) or {}
         opened = grouped.get(TaskStatus.OPEN) or {}
@@ -431,7 +431,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         finished = grouped.get(TaskStatus.FINISHED) or {}
         requested = grouped.get(TaskStatus.REQUESTED) or {}
         accepted_service = grouped.get(TaskStatus.ACCEPTED_SERVICE) or {}
-        refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}
+        refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}        
         #  Necessario filtrar as inconsistencias pelos ids das tasks pelo fato das instancias de error serem de DashboardTaskView
         error = InconsistencyETL.objects.filter(is_active=True, task__id__in=[task.pk for task in data_error]) or {}
 
@@ -508,7 +508,15 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         return Q(task_status=TaskStatus.REQUESTED) | Q(task_status=TaskStatus.ERROR) | Q(
             person_distributed_by=person.id)
 
-    def get_dynamic_query(self, person, checker):
+    @staticmethod
+    def get_query_team_tasks(person):        
+        teams = Team.objects.filter(supervisors=person.auth_user)        
+        members = Team.objects.none()
+        for team in teams:
+            members |= team.members.all()
+        return Q(person_asked_by__auth_user__in=members) | Q(person_distributed_by__auth_user__in=members) | Q(person_executed_by__auth_user__in=members)
+
+    def get_dynamic_query(self, person, checker):        
         dynamic_query = Q()
         office_session = get_office_session(self.request)
         if office_session:
@@ -518,7 +526,8 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
                 'view_all_tasks': self.get_query_all_tasks,
                 'view_delegated_tasks': self.get_query_delegated_tasks,
                 'view_distributed_tasks': self.get_query_distributed_tasks,
-                'view_requested_tasks': self.get_query_requested_tasks
+                'view_requested_tasks': self.get_query_requested_tasks,
+                'can_see_tasks_from_team_members': self.get_query_team_tasks, 
             }
             for permission in checker.get_perms(office_session):
                 if permission in permissions_to_check.keys():
@@ -996,7 +1005,7 @@ def ajax_get_task_data_table(request):
     checker = ObjectPermissionChecker(request.user)
     dash = DashboardView()
     dash.request = request
-    dynamic_query = dash.get_dynamic_query(request.user.person, checker)
+    dynamic_query = dash.get_dynamic_query(request.user.person, checker)    
     query = DashboardViewModel.objects.filter(dynamic_query).filter(is_active=True, task_status=status,
                                                                     office=get_office_session(request))
     if status == str(TaskStatus.ERROR):
