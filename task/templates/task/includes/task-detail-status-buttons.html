@@ -23,15 +23,15 @@
                 class="text-white btn btn-ezl-open {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
             <span class="btn-label"><i class="mdi mdi-account-location"></i></span> Delegar
         </button>
-        {% if form.instance.status.name == 'OPEN' or form.instance.status.name == 'ACCEPTED'%}
+        {% if form.instance.status.name == 'OPEN' or form.instance.status.name == 'ACCEPTED' %}
             {% with form.instance.get_child as child %}
                 {% if child.task_status|valid_status %}
                 <button type="button" id="REQUESTED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                         class="text-white btn btn-ezl-refused">
                     <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Recusar
                 </button>
-                {% else %}
-                <p>Essa OS não pode ser recusada, pois encontra-se no status {{ child.task_status }} no escritório correspondente.</p>
+                {% elif child %}
+                    <p>Essa OS não pode ser recusada, pois encontra-se no status {{ child.task_status }} no escritório correspondente.</p>
                 {% endif %}
             {% endwith %}
         {% endif %}

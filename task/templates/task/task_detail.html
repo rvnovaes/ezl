@@ -1,6 +1,6 @@
 {% extends 'skeleton/base.html' %}
 {% load static %}
-{% load core_filters %}
+{% load core_filters task_filters %}
 {% load render_table from django_tables2 %}
 {% load tz %}
 {% load djmoney %}
@@ -95,7 +95,7 @@
                             <i class="mdi mdi-close"></i> Cancelar
                         </button>
                         {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                            {% if form.instance.type_task.survey %}
+                            {% if form.instance.type_task.survey and not form.instance.get_child.task_status|valid_status %}
                                 <button id="actionButton"
                                         type="submit"
                                         onclick="beforeSubmit()"

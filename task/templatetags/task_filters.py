@@ -8,5 +8,7 @@ register = template.Library()
 
 @register.filter
 def valid_status(status):
-    return TaskStatus(status) in [TaskStatus.REQUESTED, TaskStatus.ACCEPTED_SERVICE, TaskStatus.OPEN,
-                                  TaskStatus.ACCEPTED]
+    if status:
+        return TaskStatus(status) in [TaskStatus.REQUESTED, TaskStatus.ACCEPTED_SERVICE, TaskStatus.OPEN,
+                                      TaskStatus.ACCEPTED]
+    return False
