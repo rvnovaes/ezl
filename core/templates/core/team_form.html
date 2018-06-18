@@ -5,17 +5,13 @@
 
 
     <div class="row">
-    	{% bootstrap_field form.office form_group_class="form-group col-sm-4" %}
-        {% bootstrap_field form.name form_group_class="form-group col-sm-4" %}        
+    	{% bootstrap_field form.office form_group_class="form-group col-sm-6" %}
+        {% bootstrap_field form.name form_group_class="form-group col-sm-6" %}        
     </div>
     <div class="row">    	
-    	{% bootstrap_field form.members form_group_class="form-group col-md-12" %}            	
+		{% bootstrap_field form.supervisors form_group_class="form-group col-md-6" %}    	
+    	{% bootstrap_field form.members form_group_class="form-group col-md-6" %}            	    	            
     </div>
-
-    <div class="row">    	
-    	{% bootstrap_field form.supervisors form_group_class="form-group col-md-12" %}            	
-    </div>    
-
 {% endblock %}
 
 {% block extra_stylesheets %}
@@ -38,9 +34,10 @@
 	<script src="{% static 'skeleton/plugins/bower_components/jquery.quicksearch/dist/jquery.quicksearch.js' %}"></script>	
 	<script type="text/javascript">
 		$(document).ready(function() {
-		  $('#id_members').multiSelect({
-		    selectableHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='Pesquisar usuários disponíveis...'>",
-		    selectionHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='Pesquisar usuários selecionados...'>",
+		  var setMultSelect = function(id_select, placeholderSelectable, placeholderSelection) {
+		  	$('#'+id_select).multiSelect({
+		    selectableHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='"+placeholderSelectable+"'>",
+		    selectionHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='"+placeholderSelection+"'>",
 		    afterInit: function(ms) {
 		      var that = this,		      
 		        $selectableSearch = that.$selectableUl.prev(),
@@ -71,9 +68,9 @@
 		      this.qs2.cache();
 		    }
 		  })
-		})
-
-
-
+		};
+		setMultSelect('id_members', 'Pesquisar usuários disponíveis', 'Pesquisar usuários selecionados...');
+		setMultSelect('id_supervisors', 'Pesquisar supervisores disponíveis', 'Pesquisar supervisores selecionados');
+	})
 	</script>
 {% endblock %}
