@@ -503,6 +503,7 @@ class Team(Audit, OfficeMixin):
     members = models.ManyToManyField(User, related_name='team_members', verbose_name='Membros')
     supervisors = models.ManyToManyField(User, related_name='team_supervisors', verbose_name='Supervisores')
     objects = OfficeManager()
+    use_upload = False
 
     def __str__(self):
         return self.name
