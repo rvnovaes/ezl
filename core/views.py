@@ -828,8 +828,23 @@ class UserCreateView(AuditFormMixin, CreateView):
                     member.is_active=True
                     member.save()
 
+            default_office = form.cleaned_data['office']
+            obj = DefaultOffice.objects.filter(auth_user=form.instance).first()
+            if obj:
+                obj.office = default_office
+                obj.alter_user = self.request.user
+                obj.save()
+            else:
+                DefaultOffice.objects.create(auth_user=form.instance, office=default_office,
+                                             create_user=self.request.user)
+
         super(UserCreateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class UserUpdateView(AuditFormMixin, UpdateView):
