@@ -44,7 +44,7 @@ from core.models import Person, Address, City, State, Country, AddressType, Offi
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable
-from core.utils import login_log, logout_log, get_office_session
+from core.utils import login_log, logout_log, get_office_session, get_domain
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task, TaskStatus
@@ -862,21 +862,22 @@ class UserUpdateView(AuditFormMixin, UpdateView):
     def form_valid(self, form):
         form.save(commit=False)
         checker = ObjectPermissionChecker(self.request.user)
-        if form.is_valid:
-            have_group = True
+        if form.is_valid:            
             for office in form.instance.person.offices.all():
-                if checker.has_perm('can_access_general_data', office):
-                    have_group = False
+                if checker.has_perm('can_access_general_data', office):                    
                     groups = self.request.POST.getlist('office_' + str(office.id), '')
+                    if not groups:                    
+                        messages.error(
+                            self.request,
+                            "O usuário deve pertencer a pelo menos um grupo. Verifique as permissões do escritório %s" % office)
+                        return self.form_invalid(form)
+
                     for group_office in office.office_groups.all():
                         if str(group_office.group.id) in groups:
-                            group_office.group.user_set.add(form.instance)
-                            have_group = True
+                            group_office.group.user_set.add(form.instance)                            
                         else:
                             group_office.group.user_set.remove(form.instance)
-            if not have_group:
-                messages.error(self.request, "O usuário deve pertencer a pelo menos um grupo")
-                return self.form_invalid(form)
+
 
             form.save()
             default_office = form.cleaned_data['office']
@@ -950,8 +951,11 @@ class OfficeListView(CustomLoginRequiredView, SingleTableViewMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['table'] = self.table_class(
-            context['table'].data.data.filter(pk__in=self.request.user.person.offices.active_offices()))
+        pks = []
+        for office in self.request.user.person.offices.active_offices():
+            if self.request.user.has_perm('can_access_general_data', office):
+                pks.append(office.pk)
+        context['table'] = self.table_class(context['table'].data.data.filter(pk__in=pks))
         RequestConfig(self.request, paginate={'per_page': 10}).configure(context['table'])
         return context
 
@@ -994,6 +998,16 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
             if InviteForm(self.request.POST).is_valid() else InviteForm()
         RequestConfig(self.request, paginate={'per_page': 10}).configure(kwargs.get('table_members'))
         return data
+
+    def dispatch(self, request, *args, **kwargs):
+        office_instance = Office.objects.filter(pk=int(kwargs.get('pk', None))).first()
+        if not self.request.user.has_perm('can_access_general_data', office_instance):
+            messages.error(self.request, "Você não possui permissão para editar o escritório selecionado."
+                                         " Favor selecionar o escritório correto")
+            del self.request.session['custom_session_user']
+            self.request.session.modified = True
+            return HttpResponseRedirect(reverse('office_instance'))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class OfficeDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
@@ -1204,7 +1218,7 @@ class InviteCreateView(AuditFormMixin, CreateView):
             form.instance.person = Person.objects.filter(pk=person).first() if person else None
             form.instance.office = Office.objects.get(pk=office)
             form.instance.email = email
-            form.instance.__host = '{}://{}'.format(request.scheme, request.META.get('HTTP_X_FORWARDED_HOST', request.META.get('HTTP_HOST')))
+            form.instance.__host = get_domain(request)
             form.instance.save()
         return JsonResponse({'status': 'ok'})
 
@@ -1366,11 +1380,12 @@ class TypeaHeadGenericSearch(View):
     Responsavel por gerar os filtros do campo typeahead
     """
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):             
         module = importlib.import_module(self.request.GET.get('module'))
         model = getattr(module, self.request.GET.get('model'))
         field = request.GET.get('field')
         q = request.GET.get('q')
+        extra_params = json.loads(self.request.GET.get('extra_params', {}))
         office = get_office_session(self.request)
         forward = request.GET.get('forward') if request.GET.get('forward') != 'undefined' else None
         forward_value = request.GET.get('forwardValue')
@@ -1381,12 +1396,12 @@ class TypeaHeadGenericSearch(View):
         if forward and int(forward_value):
             forward_params = {
                 '{}'.format(forward): forward_value,
-            }
-        data = self.get_data(module, model, field, q, office, forward_params)
+            }        
+        data = self.get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs)
         return JsonResponse(data, safe=False)
 
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params):
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
         params = {
             '{}__unaccent__icontains'.format(field): q,
         }
@@ -1398,7 +1413,7 @@ class TypeaHeadGenericSearch(View):
 
 class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params):
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
         data = []
         for user in User.objects.filter(
                 Q(person__legal_name__unaccent__icontains=q) | Q(username__unaccent__icontains=q)
@@ -1410,7 +1425,7 @@ class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
 
 class CityAutoCompleteView(TypeaHeadGenericSearch):
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params):
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
         data = []
         for city in City.objects.filter(Q(name__unaccent__icontains=q) |
                                         Q(state__initials__exact=q) |
@@ -1422,7 +1437,7 @@ class CityAutoCompleteView(TypeaHeadGenericSearch):
 class ClientAutocomplete(TypeaHeadGenericSearch):
 
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params):
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
         data = []
         for client in Person.objects.filter(Q(legal_name__unaccent__icontains=q),
                                             Q(is_customer=True, ),
@@ -1431,10 +1446,21 @@ class ClientAutocomplete(TypeaHeadGenericSearch):
         return list(data)
 
 
-class CorrespondentAutocomplete(TypeaHeadGenericSearch):
+class OfficeAutocomplete(TypeaHeadGenericSearch):
 
     @staticmethod
     def get_data(module, model, field, q, office, forward_params):
+        data = []
+        for item in Office.objects.filter(Q(name__unaccent__icontains=q),
+                                            Q(offices=office)):
+            data.append({'id': item.id, 'data-value-txt': item.__str__()})
+        return list(data)
+
+
+class CorrespondentAutocomplete(TypeaHeadGenericSearch):
+
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
         data = []
         for correspondent in Person.objects.active().correspondents().filter(Q(legal_name__unaccent__icontains=q),
                                                                              Q(offices=office)):
@@ -1445,7 +1471,7 @@ class CorrespondentAutocomplete(TypeaHeadGenericSearch):
 class RequesterAutocomplete(TypeaHeadGenericSearch):
 
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params):
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
         data = []
         for requester in Person.objects.active().requesters().filter(Q(legal_name__unaccent__icontains=q),
                                                                      Q(offices=office)):
@@ -1456,7 +1482,7 @@ class RequesterAutocomplete(TypeaHeadGenericSearch):
 class ServiceAutocomplete(TypeaHeadGenericSearch):
 
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params):
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
         data = []
         for service in Person.objects.active().services().filter(Q(legal_name__unaccent__icontains=q),
                                                                  Q(offices=office)):
@@ -1466,7 +1492,7 @@ class ServiceAutocomplete(TypeaHeadGenericSearch):
 
 class TypeaHeadInviteOfficeSearch(TypeaHeadGenericSearch):
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params):
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
         data = []
         for office in Office.objects.filter(Q(legal_name__unaccent__icontains=q)):
             data.append({'id': office.id, 'data-value-txt': office.legal_name})

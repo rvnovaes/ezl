@@ -4,13 +4,13 @@
             <i class="mdi mdi-av-timer fa-fw"></i>
             <span class="hide-menu">Dashboard</span>
         </a>
-    </li>
+    </li>    
     <li> <!-- DASHBOARD -->
         <a href="{% url 'task_search' %}" class="waves-effect">
             <i class="mdi mdi-magnify fa-fw"></i>
             <span class="hide-menu">Pesquisar</span>
         </a>
-    </li>
+    </li>    
     {% if 'can_access_general_data' in office_session_perms %}
     <li> <!-- CADASTROS -->
         <a href="javascript:void(0)" class="waves-effect">
@@ -69,6 +69,28 @@
 
         </ul>
     </li>
+    {% if perms.core.view_all_tasks %}
+    <li>
+        <a href="javascript:void(0)" class="waves-effect">
+            <i class="mdi mdi-chart-bar fa-fw"></i>
+            <span class="hide-menu">Relatórios<span class="fa arrow"></span></span>
+        </a>
+        <ul class="nav nav-second-level">
+            <li>
+                <a href="{% url 'task_report_to_pay' %}" target="_self">
+                    <i class="fa fa-dollar fa-fw"></i>
+                    <span class="hide-menu">OS's a pagar</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'task_report_to_receive' %}" target="_self">
+                    <i class="fa fa-dollar fa-fw"></i>
+                    <span class="hide-menu">OS's a receber</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    {% endif %}
     <li> <!-- ADMINISTRAÇÃO -->
         <a href="javascript:void(0)" class="waves-effect">
             <i class="fa fa-folder-o fa-fw" data-icon="v"></i>

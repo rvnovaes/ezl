@@ -66,7 +66,6 @@ class PersonETL(GenericETL):
         correspondent_group, nil = Group.objects.get_or_create(name=Person.CORRESPONDENT_GROUP)
 
         for row in rows:
-            print(rows_count)
             rows_count -= 1
             try:
                 legal_name = row['legal_name'] or row['name']

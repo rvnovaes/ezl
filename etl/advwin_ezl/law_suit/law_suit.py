@@ -57,17 +57,7 @@ class LawsuitETL(GenericETL):
                           p.Cliente IS NOT NULL AND p.Cliente <> '' AND
                           (a.SubStatus = 10 OR a.SubStatus = 11) AND
                           a.Status = '0' AND -- STATUS ATIVO
-                          (
-                            (
-                              p.Cliente IN ('{cliente}') AND
-                              p.Unidade IN ('11') -- Unidade BH-Centro
-                            ) 
-                            OR
-                            (
-                              p.Cliente IN ('17155730000164') AND
-                              p.Unidade IN ('01') -- Unidade Savassi
-                            )
-                          )
+                          p.Cliente IN ('{cliente}')
                           AND
                           ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
                            (d.Codigo_Comp IS NOT NULL AND d.Codigo_Comp <> '')) AND
@@ -85,7 +75,6 @@ class LawsuitETL(GenericETL):
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):
         for row in rows:
-            print(rows_count)
             rows_count -= 1
 
             try:

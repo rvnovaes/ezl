@@ -466,7 +466,7 @@
                                                 {% if task.status.name != 'OPEN' %}
                                                     A providência <strong>{{ number }}</strong> {{ short_message }} no <strong>{{ project_name }}</strong>{{ custom_text }}.
                                                 {% endif %}
-                                                {% if task.status.name == 'OPEN' %}
+                                                {% if task.status.name == 'OPEN' or task.status.name == 'REQUESTED' %}
                                                     <div>
                                                         <br><h2>Dados da providência:</h2>
                                                             <strong>Nº da providência:</strong>
@@ -509,38 +509,29 @@
                                                             <strong>Comarca:</strong>
                                                             {{ task.movement.law_suit.court_district|default_if_none:'' }}
                                                         <br>
-                                                        <br><h2>Dados do solicitante</h2>
-                                                            <strong>Nome:</strong>
-                                                            {{ task.person_asked_by|default_if_none:'' }}
-                                                        <br>
-                                                            <strong>Telefone:</strong>
-                                                            {{ task.person_asked_by.phones|default_if_none:'' }}
-                                                        <br>
-                                                            <strong>E-mail:</strong>
-                                                            {{ task.person_asked_by.emails|default_if_none:'' }}
-                                                        <br>
-                                                            <strong>Endereço:</strong>
-                                                            {{ task.person_asked_by.address_set.first|default_if_none:'' }}
-                                                        <br>
-                                                        <br><h2>Dados do correspondente</h2>
-                                                            <strong>Nome:</strong>
-                                                            {{ task.person_executed_by|default_if_none:'' }}
-                                                        <br>
-                                                            <strong>Telefone:</strong>
-                                                            {{ task.person_executed_by.phones|default_if_none:'' }}
-                                                        <br>
-                                                            <strong>E-mail:</strong>
-                                                            {{ task.person_executed_by.emails|default_if_none:'' }}
-                                                        <br>
-                                                            <strong>Endereço:</strong>
-                                                            {{ task.person_executed_by.address_set.first|default_if_none:'' }}
-                                                        <br>
+                                                        {% if task.parent %}
+                                                            <br><h2>Escritório solicitante</h2>
+                                                            {% include 'mail/abstract_person_info.html' with abstract_person=task.parent.office %}
+                                                        {% else %}
+                                                            <br><h2>Dados do solicitante</h2>
+                                                            {% include 'mail/abstract_person_info.html' with abstract_person=task.person_asked_by %}
+                                                        {% endif %}
+                                                        {% if task.get_child %}
+                                                            <br><h2>Escritório contratado</h2>
+                                                            {% include 'mail/abstract_person_info.html' with abstract_person=task.get_child.office %}
+                                                        {% else %}
+                                                            <br><h2>Dados do correspondente</h2>
+                                                            {% include 'mail/abstract_person_info.html' with abstract_person=task.person_executed_by %}
+                                                        {% endif %}
+
+                                                        {% if task.legacy_code %}
                                                         <br><h2>Dados do sistema legado</h2>
                                                             <strong>Nº da pasta:</strong>
                                                             {{ task.movement.law_suit.folder.folder_number|default_if_none:'' }}
                                                         <br>
                                                             <strong>Nº da OS:</strong>
                                                             {{ task.legacy_code|default_if_none:'' }}
+                                                        {% endif %}
                                                     </div>
                                                 {% endif %}
 

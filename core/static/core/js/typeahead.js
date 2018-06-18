@@ -1,6 +1,7 @@
+var typeaheadAditionalParams;
 $(document).ready(function () {
-    $('.twitter-typeahead').each(function (el) {
-        console.debug($(this).attr('data-url'));
+    typeaheadAditionalParams = {};
+    $('.twitter-typeahead').each(function (el) {        
         var module = $(this).attr('data-module');
         var model = $(this).attr('data-model');
         var field = $(this).attr('name');
@@ -15,8 +16,7 @@ $(document).ready(function () {
             remote: {
                 url: $(this).attr('data-url'),
                 wildcard: '%QUERY',
-                filter: function (data) {
-                    console.debug(data);
+                filter: function (data) {                    
                     return data;
                 },
                 replace: function (url, query) {
@@ -25,8 +25,9 @@ $(document).ready(function () {
                         if (forwardValue == ''){
                             forwardValue = 0;
                         }
-                    }
-                    var params = '?module=' + module + '&model=' + model + '&field=' + field + '&forward=' + forward + '&forwardValue=' + forwardValue + '&q=' + query;
+                    }                    
+                    var form = $('form')
+                    var params = '?module=' + module + '&model=' + model + '&field=' + field + '&forward=' + forward + '&forwardValue=' + forwardValue + '&q=' + query + '&extra_params=' + JSON.stringify(typeaheadAditionalParams);
                     return url + params;
                 }
             }
