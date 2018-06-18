@@ -553,7 +553,7 @@ class TeamMultipleChoiceField(forms.ModelMultipleChoiceField):
 
 class TeamForm(BaseForm):
     members = TeamMultipleChoiceField(queryset=User.objects.all())
-    supervisors = TeamMultipleChoiceField(queryset=User.objects.all())
+    supervisors = TeamMultipleChoiceField(queryset=User.objects.filter(groups__name__contains='Supervisor'))
     class Meta:
         model = Team
         fields = ['office', 'name', 'members', 'supervisors']
