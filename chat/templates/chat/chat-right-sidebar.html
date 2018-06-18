@@ -73,7 +73,7 @@
             <div class="chat-box" id="chatBox">
               <div class="chat-list" style="overflow: hidden;" tabindex="5005" id="messageList">
                 <div class="slimscroll" ng-if="$ctrl.in_office_list">
-                  <div ng-repeat="office in $ctrl.offices track by office.office_pk">
+                  <div ng-repeat="office in $ctrl.offices">
                     <a href="#" style="color:#000;text-decoration: none;" ng-click="$ctrl.getMessages(office.chat)" class="get-message">
                       <div class="row">
                         <div class="col-md-2">

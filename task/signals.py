@@ -234,18 +234,16 @@ def send_task_emails(sender, instance, created, **kwargs):
         instance.__previous_status = TaskStatus(instance.task_status)
 
 
-def create_or_update_user_by_chat(task, fields):
-    users = []
+def create_or_update_user_by_chat(task, task_to_fields, fields):        
     for field in fields:
         user = None
-        if getattr(task, field, False):
-            user = getattr(getattr(task, field), 'auth_user', False)
+        if getattr(task_to_fields, field, False):
+            user = getattr(getattr(task_to_fields, field), 'auth_user', False)
         if user:
             user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
                 'create_user': user, 'user_by_chat': user, 'chat': task.chat
             })
             user = user.user_by_chat
-        users.append(user)
 
 
 @receiver(post_save, sender=Task)
@@ -275,11 +273,11 @@ def create_or_update_chat(sender, instance, created, **kwargs):
     )
     instance.chat = chat
     instance.chat.offices.add(instance.office)
-    create_or_update_user_by_chat(instance,[
+    create_or_update_user_by_chat(instance, instance, [
         'person_asked_by', 'person_executed_by', 'person_distributed_by'])
     if instance.parent:
         instance.chat.offices.add(instance.parent.office)
-        create_or_update_user_by_chat(instance.parent, [
+        create_or_update_user_by_chat(instance, instance.parent, [
             'person_asked_by', 'person_executed_by', 'person_distributed_by'
         ])
     post_save.disconnect(create_or_update_chat, sender=sender)
