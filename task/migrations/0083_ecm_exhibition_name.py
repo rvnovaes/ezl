@@ -17,7 +17,7 @@ def get_exhibition_name(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0083_dashboardviewmodel_parent_task_number'),
+        ('task', '0082_auto_20180521_1718'),
     ]
 
     operations = [
