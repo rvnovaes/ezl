@@ -232,8 +232,8 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
 
         self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
         context['filter'] = self.task_filter
-        context['offices'] = self.get_os_grouped_by_office()
-        context['total'] = sum(map(lambda x: x['total'], context['offices']))
+        context['offices_report'] = self.get_os_grouped_by_office()
+        context['total'] = sum(map(lambda x: x['total'], context['offices_report']))
         return context
 
     def get_queryset(self):
@@ -344,7 +344,7 @@ class ToPayTaskReportView(TaskReportBase):
     filter_class = TaskToPayFilter
     datetime_field = 'billing_date'
 
-    def get_queryset(self):
+    def get_queryset(self):        
         office = get_office_session(self.request)
         queryset = Task.objects.filter(
             parent__office=office,
@@ -634,6 +634,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 new_ecm.exhibition_name = new_file.name
                 new_ecm.task = new_task
                 new_ecm.path = new_file
+                new_ecm.ecm_related = ecm
                 new_ecm.save()
 
     def dispatch(self, request, *args, **kwargs):
@@ -1058,6 +1059,7 @@ def ajax_get_ecms(request):
             'pk': ecm.pk,
             'url': ecm.path.name,
             'filename': ecm.filename,
+            'exhibition_name': ecm.exhibition_name if ecm.exhibition_name else ecm.filename,
             'user': ecm.create_user.username,
             'data': timezone.localtime(ecm.create_date).strftime('%d/%m/%Y %H:%M'),
             'state': ecm.task.get_task_status_display(),

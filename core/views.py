@@ -249,9 +249,9 @@ class CustomLoginRequiredView(LoginRequiredMixin):
         :param args:
         :param kwargs:
         :return:
-        """
-        res = super().dispatch(request, *args, **kwargs)
+        """                
         set_office_session(request)
+        res = super().dispatch(request, *args, **kwargs)        
         return res
 
 

@@ -106,7 +106,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                          {% for office in offices %}
+                          {% for office in offices_report %}
                             {% for task in office.tasks %}
                                 <tr>
                                     <td>{{ task.parent.task_number }}</td>
@@ -150,10 +150,10 @@
                         </tr>
                     </thead>
                     <tbody id="os-table-body">
-                        {% for office in offices %}
+                        {% for office in offices_report %}
                             <tr>
                                 <th colspan="10"><center>{{ office.name }}</center></th>
-                                <th><center>R$ {{office.total}}</center></th>
+                                <th><center>R$ {{office.total}}</center></th>                                
                             </tr>
                             {% for task in office.tasks %}
                                 <tr role="row">
@@ -187,7 +187,7 @@
                                 <td colspan="11">Nenhuma OS encontrada com os filtros especificados.</td>
                             </tr>
                         {% endfor %}
-                        {% if offices %}
+                        {% if offices_report %}
                             <tr class="total-container">
                                 <th colspan="10" class="text-center" >Total Geral</th>
                                 <th class="text-center">R$ {{total}}</th>
@@ -197,7 +197,7 @@
                 </table>
             </div>
             <div class="text-center">
-                {% if offices %}
+                {% if offices_report %}
                 <button class="btn btn-success" id="btn-faturar">Faturar</button>
                 {% endif %}
             </div>            
