@@ -333,6 +333,11 @@ LOGGING = {
         },
     },
     'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+        },    
         'console': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
@@ -399,7 +404,14 @@ LOGGING = {
         'py.warnings': {
             'handlers': ['development_logfile'],
         },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },        
     }
 }
 
 UPLOAD_DIRECTORY = 'uploads'
+ADMINS = [('THIAGO', 'thiago.ar17@gmail.com'), ('Iasmini', 'iasmini.gomes@mtostes.com.br'), ('Rafael', 'rafael.maciel@mtostes.com.br')]
+MANAGERS = ADMINS
