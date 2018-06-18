@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0083_ecm_exhibition_name'),
+        ('task', '0084_ecm_exhibition_name'),
     ]
 
     operations = [
