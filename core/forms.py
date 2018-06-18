@@ -327,6 +327,11 @@ class UserCreateForm(BaseForm, UserCreationForm):
         fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2',
                   'groups', 'is_active']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
+        self.fields['office'].label = 'Escritório padrão'
+
 
 class UserUpdateForm(UserChangeForm):
     first_name = forms.CharField(

@@ -15,3 +15,7 @@
         }
     </style>
 {% endblock %}
+{% block script_document_ready %}
+    {{ block.super }}
+    $('#filter_office_legal_name').focus()
+{% endblock %}
