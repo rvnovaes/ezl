@@ -544,8 +544,16 @@ class InviteOfficeForm(BaseForm):
         fields = ['office', 'office_invite']
         exclude = ['is_active']
 
+class TeamMultipleChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):        
+        if hasattr(obj, 'person'):
+            return obj.person.legal_name
+        return obj.username
+
 
 class TeamForm(BaseForm):
+    members = TeamMultipleChoiceField(queryset=User.objects.all())
+    supervisors = TeamMultipleChoiceField(queryset=User.objects.all())
     class Meta:
         model = Team
         fields = ['office', 'name', 'members', 'supervisors']
