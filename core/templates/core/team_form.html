@@ -9,8 +9,11 @@
         {% bootstrap_field form.name form_group_class="form-group col-sm-6" %}        
     </div>
     <div class="row">    	
-		{% bootstrap_field form.supervisors form_group_class="form-group col-md-6" %}    	
-    	{% bootstrap_field form.members form_group_class="form-group col-md-6" %}            	    	            
+		{% bootstrap_field form.supervisors form_group_class="form-group col-md-12" %}    	
+    	
+    </div>
+    <div class="row">
+    	{% bootstrap_field form.members form_group_class="form-group col-md-12" %}            	    	            
     </div>
 {% endblock %}
 
