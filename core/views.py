@@ -1711,7 +1711,7 @@ class ContactMechanismOfficeDeleteView(ContactMechanismDeleteView):
         return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})
 
 
-class TeamListView(CustomLoginRequiredView, SingleTableView):
+class TeamListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Team
     table_class = TeamTable
 

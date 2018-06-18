@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User, Group
@@ -32,7 +33,7 @@ class BaseModelForm(FileFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)        
         if self.request:
             self.set_office_queryset()
         usermodel = self._meta.model._meta.app_label == 'auth'
@@ -49,7 +50,7 @@ class BaseModelForm(FileFormMixin, forms.ModelForm):
         return self._meta.model._meta.verbose_name
 
     def set_office_queryset(self):
-        if get_office_session(self.request) and self.request.method == 'GET':
+        if get_office_session(self.request) and self.request.method == 'GET':            
             for field in self.fields:
                 if hasattr(self.fields[field], 'queryset'):
                     if issubclass(self.fields[field].queryset.model, OfficeMixin):
@@ -561,3 +562,9 @@ class TeamForm(BaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)        
+        self.fields['supervisors'].queryset = self.fields['supervisors'].queryset.filter(
+                Q(person__offices=get_office_session(request=self.request)), 
+                ~Q(username__in=['admin', 'invalid_user']))
+        self.fields['members'].queryset = self.fields['members'].queryset.filter(
+                Q(person__offices=get_office_session(request=self.request)), 
+                ~Q(username__in=['admin', 'invalid_user']))

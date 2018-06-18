@@ -502,6 +502,7 @@ class Team(Audit, OfficeMixin):
     name = models.CharField(max_length=255, unique=True, verbose_name='Equipe')
     members = models.ManyToManyField(User, related_name='team_members', verbose_name='Membros')
     supervisors = models.ManyToManyField(User, related_name='team_supervisors', verbose_name='Supervisores')
+    objects = OfficeManager()
 
     def __str__(self):
         return self.name
