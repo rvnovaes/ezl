@@ -26,10 +26,11 @@ def export_ecm_path(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Ecm)
 def copy_ecm_related(sender, instance, created, **kwargs):
-    if created and instance.task.parent:
-        transaction.on_commit(lambda: copy_ecm(instance, instance.task.parent))
-    if created and instance.task.get_child:
-        transaction.on_commit(lambda: copy_ecm(instance, instance.task.get_child))
+    if created and instance.path:
+        if instance.task.parent:
+            transaction.on_commit(lambda: copy_ecm(instance, instance.task.parent))
+        if instance.task.get_child:
+            transaction.on_commit(lambda: copy_ecm(instance, instance.task.get_child))
 
 
 @receiver(post_delete, sender=Ecm)
