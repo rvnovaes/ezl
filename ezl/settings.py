@@ -414,4 +414,4 @@ LOGGING = {
 }
 
 UPLOAD_DIRECTORY = 'uploads'
-ADMINS = [('THIAGO', 'thiago.ar17@gmail.com'), ('Iasmini', 'iasmini.gomes@mtostes.com.br'), ('Rafael', 'rafael.maciel@mtostes.com.br')]
+ADMINS = [('EZL Erros', 'erros.ezlawyer@gmail.com')]
