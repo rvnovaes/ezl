@@ -8,7 +8,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0083_ecm_exhibition_name'),
+        ('task', '0084_ecm_ecm_related'),
     ]
 
     operations = [

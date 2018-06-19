@@ -233,8 +233,8 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
 
         self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
         context['filter'] = self.task_filter
-        context['offices'] = self.get_os_grouped_by_office()
-        context['total'] = sum(map(lambda x: x['total'], context['offices']))
+        context['offices_report'] = self.get_os_grouped_by_office()
+        context['total'] = sum(map(lambda x: x['total'], context['offices_report']))
         return context
 
     def get_queryset(self):
@@ -402,9 +402,9 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         self.count_task = len(data) + len(data_error)
 
     def get_data(self, person):
-        checker = ObjectPermissionChecker(person.auth_user)        
+        checker = ObjectPermissionChecker(person.auth_user)
         rule_view = RuleViewTask(request=self.request)
-        dynamic_query = rule_view.get_dynamic_query(person, checker)        
+        dynamic_query = rule_view.get_dynamic_query(person, checker)
         data = []
         data_error = []
         office_session = get_office_session(self.request)
@@ -423,7 +423,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
     def get_list_tables(data, data_error, person, office_session):
         grouped = dict()
         for obj in data:
-            grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)        
+            grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
         returned = grouped.get(TaskStatus.RETURN) or {}
         accepted = grouped.get(TaskStatus.ACCEPTED) or {}
         opened = grouped.get(TaskStatus.OPEN) or {}
@@ -433,7 +433,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         finished = grouped.get(TaskStatus.FINISHED) or {}
         requested = grouped.get(TaskStatus.REQUESTED) or {}
         accepted_service = grouped.get(TaskStatus.ACCEPTED_SERVICE) or {}
-        refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}        
+        refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}
         #  Necessario filtrar as inconsistencias pelos ids das tasks pelo fato das instancias de error serem de DashboardTaskView
         error = InconsistencyETL.objects.filter(is_active=True, task__id__in=[task.pk for task in data_error]) or {}
 
@@ -441,7 +441,6 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         checker = ObjectPermissionChecker(person.auth_user)
         if not office_session:
             return []
-
         if checker.has_perm('can_access_general_data', office_session) or checker.has_perm('group_admin',
                                                                                            office_session):
             return_list.append(DashboardErrorStatusTable(error,
@@ -603,6 +602,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 new_ecm.exhibition_name = new_file.name
                 new_ecm.task = new_task
                 new_ecm.path = new_file
+                new_ecm.ecm_related = ecm
                 new_ecm.save()
 
     def dispatch(self, request, *args, **kwargs):
@@ -742,7 +742,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 if data['type_task']:
                     task_dynamic_query.add(Q(type_task=data['type_task']), Q.AND)
                 if data['court']:
-                    task_dynamic_query.add(Q(movement__law_suit__organ=data['court']), Q.AND)                
+                    task_dynamic_query.add(Q(movement__law_suit__organ=data['court']), Q.AND)
                 if data['cost_center']:
                     task_dynamic_query.add(Q(movement__law_suit__folder__cost_center=data['cost_center']), Q.AND)
                 if data['folder_number']:
@@ -755,18 +755,19 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     task_dynamic_query.add(Q(movement__law_suit__law_suit_number=data['law_suit_number']), Q.AND)
                 if data['task_number']:
                     task_dynamic_query.add(Q(task_number=data['task_number']), Q.AND)
-                if data['task_parent_number']:                    
+                if data['task_parent_number']:
                     task_dynamic_query.add(Q(parent__task_number=data['task_parent_number'], office=get_office_session(self.request)), Q.AND)
-                if data['task_legacy_code']:
-                    task_dynamic_query.add(Q(legacy_code=data['task_legacy_code']), Q.AND)
+                if data['task_origin_code']:
+                    task_dynamic_query.add(Q(Q(legacy_code=data['task_origin_code'])|\
+                        Q(parent_task_number=data['task_origin_code'])), Q.AND)
                 if data['person_executed_by']:
                     task_dynamic_query.add(Q(person_executed_by=data['person_executed_by']), Q.AND)
                 if data['person_asked_by']:
                     task_dynamic_query.add(Q(person_asked_by=data['person_asked_by']), Q.AND)
                 if data['person_distributed_by']:
                     task_dynamic_query.add(Q(person_distributed_by=data['person_distributed_by']), Q.AND)
-                if data['team']:                    
-                    rule_view = RuleViewTask(self.request)                    
+                if data['team']:
+                    rule_view = RuleViewTask(self.request)
                     team_dynamic_query.add(rule_view.get_query_team_tasks([data['team']]), Q.AND)
                 if data['requested_in']:
                     if data['requested_in'].start:
@@ -971,8 +972,8 @@ def ajax_get_task_data_table(request):
     checker = ObjectPermissionChecker(request.user)
     dash = DashboardView()
     dash.request = request
-    rule_view = RuleViewTask(request=request)    
-    dynamic_query = rule_view.get_dynamic_query(request.user.person, checker)    
+    rule_view = RuleViewTask(request=request)
+    dynamic_query = rule_view.get_dynamic_query(request.user.person, checker)
     query = DashboardViewModel.objects.filter(dynamic_query).filter(is_active=True, task_status=status,
                                                                     office=get_office_session(request))
     if status == str(TaskStatus.ERROR):
@@ -991,7 +992,7 @@ def ajax_get_task_data_table(request):
                     x.task.client.name,
                     x.task.opposing_party,
                     timezone.localtime(x.task.delegation_date).strftime('%d/%m/%Y %H:%M') if x.task.delegation_date else '',
-                    x.task.legacy_code,
+                    x.task.origin_code,
                     x.inconsistency,
                     x.solution,
                 ], query_error)
@@ -1011,7 +1012,7 @@ def ajax_get_task_data_table(request):
                     x.client,
                     x.opposing_party,
                     timezone.localtime(x.delegation_date).strftime('%d/%m/%Y %H:%M') if x.delegation_date else '',
-                    x.legacy_code,
+                    x.origin_code,
                     '',
                     '',
                 ], query)
@@ -1034,6 +1035,7 @@ def ajax_get_ecms(request):
             'pk': ecm.pk,
             'url': ecm.path.name,
             'filename': ecm.filename,
+            'exhibition_name': ecm.exhibition_name if ecm.exhibition_name else ecm.filename,
             'user': ecm.create_user.username,
             'data': timezone.localtime(ecm.create_date).strftime('%d/%m/%Y %H:%M'),
             'state': ecm.task.get_task_status_display(),

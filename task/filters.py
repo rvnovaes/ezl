@@ -31,13 +31,14 @@ class TaskFilter(FilterSet):
     court = ModelChoiceFilter(queryset=filter_valid_choice_form(Organ.objects.filter(is_active=True)),
                               label="Órgão")
     team = ModelChoiceFilter(queryset=filter_valid_choice_form(Team.objects.filter(is_active=True)),
-                              label="Equipe")    
+                              label="Equipe")
     folder_number = NumberFilter(label=u"Nº da pasta")
     folder_legacy_code = CharFilter(label=u"Nº da pasta de origem")
     law_suit_number = CharFilter(label=u"Nº do processo")
     task_number = NumberFilter(label=u"Nº da OS")
     task_parent_number = NumberFilter(label='Nº da OS pai')
-    task_legacy_code = CharFilter(label=u"Nº da OS de origem")    
+    task_legacy_code = CharFilter(label=u"Nº da OS de origem")
+    task_origin_code = CharFilter(label=u"Nº da OS de origem")
     client = CharFilter(label="Cliente",
                         required=False,
                         widget=TypeaHeadForeignKeyWidget(model=Person,
@@ -85,7 +86,7 @@ class TaskFilter(FilterSet):
 
     def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
         super(TaskFilter, self).__init__(data, queryset, prefix, strict, request)
-        self.filters['custom_filter'].queryset = Filter.objects.filter(create_user=self.request.user).order_by('name')        
+        self.filters['custom_filter'].queryset = Filter.objects.filter(create_user=self.request.user).order_by('name')
         self.filters['team'].queryset = Team.objects.filter(office=get_office_session(self.request))
 
     class Meta:

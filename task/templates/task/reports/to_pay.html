@@ -100,24 +100,32 @@
                             <th>Comarca</th>
                             <th>Cliente</th>
                             <th>Parte Adversa</th>
-                            <th>Cod. Legado</th>
+                            <th>OS Original</th>
                             <th>Faturada</th>
                             <th>Valor</th>
                         </tr>
                     </thead>
                     <tbody>
-                          {% for office in offices %}
+                          {% for office in offices_report %}
                             {% for task in office.tasks %}
                                 <tr>
-                                    <td>{{ task.parent.id }}</td>
+                                    <td>{{ task.parent.task_number }}</td>
                                     <td>{{ office.name }}</td>
                                     <td>{{ task.finished_date|date:"d/m/Y H:i" }}</td>
                                     <td>{{ task.type_task }}</td>
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.court_district }}</td>
                                     <td>{{ task.client }}</td>
-                                    <td>{{ task.opposing_party }}</td>
-                                    <td>{{ tasl.legacy_code }}</td>
+                                    <td>{{ task.opposing_party }}</td>                                    
+                                    {% if task.parent %}
+                                        {% if task.parent.parent %}
+                                            <td>{{ task.parent.task_number }}</td>
+                                        {% else %}
+                                            <td>{{ task.parent.legacy_code }}</td>
+                                        {% endif %}
+                                    {% else %}
+                                        <td>{{ task.legacy_code }}</td>
+                                    {% endif %}
                                     <td>{{ task.billing_date|date:"d/m/Y" }}</td>
                                     <td>{{ task.amount }}</td>
                                 </tr>
@@ -136,16 +144,16 @@
                             <th>Comarca</th>
                             <th>Cliente</th>
                             <th>Parte Adversa</th>
-                            <th>Cod. Legado</th>
+                            <th>OS Original</th>
                             <th>Faturada</th>
                             <th>Valor</th>
                         </tr>
                     </thead>
                     <tbody id="os-table-body">
-                        {% for office in offices %}
+                        {% for office in offices_report %}
                             <tr>
                                 <th colspan="10"><center>{{ office.name }}</center></th>
-                                <th><center>R$ {{office.total}}</center></th>
+                                <th><center>R$ {{office.total}}</center></th>                                
                             </tr>
                             {% for task in office.tasks %}
                                 <tr role="row">
@@ -154,14 +162,22 @@
                                             <input type="checkbox" value="{{ task.id }}"/>
                                         {% endif %}
                                     </td>
-                                    <td><a href="{% url 'task_detail' task.parent.id %}" target="_new">{{ task.parent.id }}</a></td>
+                                    <td><a href="{% url 'task_detail' task.parent.id %}" target="_new">{{ task.parent.task_number|stringformat:"05d" }}</a></td>
                                     <td>{{ task.finished_date|date:"d/m/Y H:i" }}</td>
                                     <td>{{ task.type_task }}</td>
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.court_district }}</td>
                                     <td>{{ task.client }}</td>
                                     <td>{{ task.opposing_party }}</td>
-                                    <td>{{ tasl.legacy_code }}</td>
+                                    {% if task.parent %}
+                                        {% if task.parent.parent %}
+                                            <td>{{ task.parent.task_number }}</td>
+                                        {% else %}
+                                            <td>{{ task.parent.legacy_code }}</td>
+                                        {% endif %}
+                                    {% else %}
+                                        <td>{{ task.legacy_code }}</td>
+                                    {% endif %}
                                     <td>{{ task.billing_date|date:"d/m/Y" }}</td>
                                     <td class="text-center">R$ {{ task.amount }}</td>
                                 </tr>
@@ -171,7 +187,7 @@
                                 <td colspan="11">Nenhuma OS encontrada com os filtros especificados.</td>
                             </tr>
                         {% endfor %}
-                        {% if offices %}
+                        {% if offices_report %}
                             <tr class="total-container">
                                 <th colspan="10" class="text-center" >Total Geral</th>
                                 <th class="text-center">R$ {{total}}</th>
@@ -181,7 +197,7 @@
                 </table>
             </div>
             <div class="text-center">
-                {% if offices %}
+                {% if offices_report %}
                 <button class="btn btn-success" id="btn-faturar">Faturar</button>
                 {% endif %}
             </div>            

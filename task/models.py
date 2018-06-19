@@ -304,10 +304,18 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                                                  name=self.TASK_NUMBER_SEQUENCE))
 
     @property
-    def allow_attachment(self):        
-        return not (self.status == TaskStatus.REFUSED or                 
-                self.status == TaskStatus.BLOCKEDPAYMENT or 
+    def allow_attachment(self):
+        return not (self.status == TaskStatus.REFUSED or
+                self.status == TaskStatus.BLOCKEDPAYMENT or
                 self.status == TaskStatus.FINISHED)
+    @property
+    def origin_code(self):
+        if self.parent:
+            return self.parent.task_number
+        else:
+            return self.legacy_code
+
+
 
 class TaskFeedback(models.Model):
     feedback_date = models.DateTimeField(auto_now_add=True)
@@ -331,6 +339,7 @@ def get_dir_name(instance, filename):
         os.makedirs(path)
     return 'ECM/{0}/{1}'.format(instance.task.pk, filename)
 
+
 class EcmQuerySet(models.QuerySet):
     def delete(self):
         # Não podemos apagar os ECMs que possuam legacy_code
@@ -351,13 +360,14 @@ class Ecm(Audit, LegacyCode):
     exhibition_name = models.CharField(
         verbose_name="Nome de Exibição", max_length=255, null=False, blank=False
     )
+    ecm_related = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='child')
 
     objects = EcmManager()
 
     # Retorna o nome do arquivo no Path, para renderizar no tamplate
     @property
     def filename(self):
-        return os.path.basename(self.path.path)
+        return os.path.basename(self.path.path) if self.path else None
 
     @property
     def user(self):
@@ -385,7 +395,7 @@ class TaskHistory(AuditCreate):
 
 class TaskGeolocation(Audit):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, blank=False, null=False,
-                            related_name='geolocation')
+                             related_name='geolocation')
     date = models.DateTimeField(null=True, verbose_name='Data de Início')
     checkpointtype = models.CharField(null=True, verbose_name='Tipo de Marcação', max_length=10,
                                       choices=((x.value, x.name.title()) for x in CheckPointType),
@@ -393,7 +403,7 @@ class TaskGeolocation(Audit):
     latitude = models.DecimalField(null=True, blank=True, verbose_name='Latitude',
                                    max_digits=9, decimal_places=6)
     longitude = models.DecimalField(null=True, blank=True, verbose_name='Longitude',
-                                   max_digits=9, decimal_places=6)
+                                    max_digits=9, decimal_places=6)
 
     class Meta:
         verbose_name = 'Geolocalização da Providência'
@@ -449,6 +459,8 @@ class DashboardViewModel(Audit, OfficeMixin):
     lawsuit_number = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='Número do Processo')
     opposing_party = models.CharField(null=True, verbose_name=u'Parte adversa', max_length=255)
+    parent_task_number = models.PositiveIntegerField(default=0, verbose_name='OS Original')
+
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
 
@@ -503,6 +515,13 @@ class DashboardViewModel(Audit, OfficeMixin):
     def folder_number(self):
         folder = Folder.objects.get(folders__law_suits__task__exact=self)
         return folder.folder_number
+
+    @property
+    def origin_code(self):
+        if self.parent_task_number:
+            return self.parent_task_number
+        else:
+            return self.legacy_code
 
 
 class Filter(Audit):

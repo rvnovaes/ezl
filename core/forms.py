@@ -328,6 +328,11 @@ class UserCreateForm(BaseForm, UserCreationForm):
         fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2',
                   'groups', 'is_active']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
+        self.fields['office'].label = 'Escritório padrão'
+
 
 class UserUpdateForm(UserChangeForm):
     first_name = forms.CharField(
@@ -415,11 +420,14 @@ class ResetPasswordFormMixin(forms.Form):
         for user in self.users:
             temp_key = token_generator.make_token(user)
 
-            # send the password reset email
-            base_url = get_domain(request)
+            # send the password reset email            
+            try:
+                base_url = request.META.get('HTTP_REFERER')[:-1]                
+            except: 
+                base_url = get_domain(request)
             path = reverse("account_reset_password_from_key",
                            kwargs=dict(uidb36=user_pk_to_url_str(user),
-                                       key=temp_key))
+                                       key=temp_key))            
             url = '{}{}'.format(base_url, path)
 
             context = {"current_site": current_site,
