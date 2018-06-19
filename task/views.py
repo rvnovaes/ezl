@@ -610,6 +610,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         :param office_correspondent: Escritorio responsavel pela nova task
         :return:
         """
+        if object_parent.get_child:
+            if TaskStatus(object_parent.get_child.task_status) not in [TaskStatus.REFUSED, TaskStatus.REFUSED_SERVICE,
+                                                                       TaskStatus.FINISHED]:
+                return False
         new_task = copy.copy(object_parent)
         new_task.legacy_code = None
         new_task.system_prefix = None
@@ -626,16 +630,17 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
         new_task.save()
         for ecm in object_parent.ecm_set.all():
-            if Path(ecm.path.path).is_file():
-                new_file = ContentFile(ecm.path.read())
-                new_file.name = os.path.basename(ecm.path.name)
-                new_ecm = copy.copy(ecm)
-                new_ecm.pk = None
-                new_ecm.exhibition_name = new_file.name
-                new_ecm.task = new_task
-                new_ecm.path = new_file
-                new_ecm.ecm_related = ecm
-                new_ecm.save()
+            if ecm.path:
+                if Path(ecm.path.path).is_file():
+                    new_file = ContentFile(ecm.path.read())
+                    new_file.name = os.path.basename(ecm.path.name)
+                    new_ecm = copy.copy(ecm)
+                    new_ecm.pk = None
+                    new_ecm.exhibition_name = new_file.name
+                    new_ecm.task = new_task
+                    new_ecm.path = new_file
+                    new_ecm.ecm_related = ecm
+                    new_ecm.save()
 
     def dispatch(self, request, *args, **kwargs):        
         res = super().dispatch(request, *args, **kwargs)        
