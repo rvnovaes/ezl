@@ -1,0 +1,34 @@
+{% load static %}
+    {% block title %}
+    <h4 class="modal-title">Selecione o Escritório</h4>
+    <div class="row m-t-15 m-b-15">
+        <div class="col-md-12">
+            <input type="text" class="form-control form-inline" data-session="true" autocomplete="off" placeholder="Procurar..." id="filter_office_legal_name">
+        </div>
+    </div>
+    {% endblock %}
+    {% block body %}
+        {% for office in offices %}
+            <div class="col-md-4 col-sm-12" id="office-{{ office.id }}">
+                <div class="white-box color-bordered-table muted-bordered-table p-10 office-card" onclick="updateSession('current_office', '{{office.pk}}', '{{csrf_token}}')" >
+                    <div class="row">
+                        <div class="col-md-4 col-sm-4 text-center">
+                            <button type="button" class="btn btn-default btn-circle btn-xl">
+                                <i class="fa fa-building-o"></i>
+                            </button>
+                        </div>
+                        <div class="col-md-8 col-sm-8" style="overflow-y: auto; overflow-x:hidden;">
+                            <h3 class="box-title office-legal-name">{{office.legal_name}}</h3>
+                            <small><strong>CPF/CNPJ: </strong>{{ office.cpf_cnpj | default_if_none:'' }}</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 office-select-button">
+                            <button class="btn btn-custom btn-block btn-rounded btn-block m-t-10"><i class="fa fa-sign-in"></i>
+                                Selecionar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endblock %}

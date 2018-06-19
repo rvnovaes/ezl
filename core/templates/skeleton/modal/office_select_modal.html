@@ -1,0 +1,34 @@
+{% extends 'core/widgets/office_select.html' %}
+{% load static %}
+{% block title %}
+    <div id="office-select-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    {{ block.super }}
+            </div>
+            <div class="modal-body p-l-20 bg-light" style="max-height: 350px">
+                <div class="row">
+                </div>
+{% endblock %}
+{% block body %}
+    {% if not offices %}
+        {% with offices=request.user.person.offices.active_offices %}
+            {{ block.super }}
+        {% endwith %}
+    {% else %}
+        {{ block.super }}
+    {% endif %}
+           </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success waves-effect" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#office-select-modal').on('shown.bs.modal', function (event) {
+        $('#filter_office_legal_name').focus()
+    });
+</script>
+{% endblock %}

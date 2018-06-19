@@ -1,0 +1,294 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'skeleton/images/favicon.png' %}">
+    <title>EZL</title>
+    <!-- Bootstrap Core CSS -->
+    <link href="{% static 'skeleton/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- animation CSS -->
+    <link href="{% static 'skeleton/css/animate.css' %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'skeleton/css/style.css' %}" rel="stylesheet">
+    <!-- color CSS -->
+    <link href="{% static 'skeleton/css/colors/blue.css' %}" id="theme" rel="stylesheet">
+
+    <link href="{% static 'libs/toastr/build/toastr.min.css' %}" rel="stylesheet">
+    <!--alerts CSS -->
+    <link href="{% static 'skeleton/plugins/bower_components/sweetalert/sweetalert.css' %}" rel="stylesheet" type="text/css">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+
+<![endif]-->
+    <style type="text/css">/*
+ * contextMenu.js v 1.4.0
+ * Author: Sudhanshu Yadav
+ * s-yadav.github.com
+ * Copyright (c) 2013 Sudhanshu Yadav.
+ * Dual licensed under the MIT and GPL licenses
+**/
+    #wrapper {
+        width: 100%;
+    }
+
+    .login-register {
+        background: url("{% static 'skeleton/images/login-register.jpg' %}") center center/cover no-repeat !important;
+        height: 100%;
+        position: fixed;
+    }
+
+    .iw-contextMenu {
+        box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.10);
+        border: 1px solid #c8c7cc;
+        border-radius: 11px;
+        display: none;
+        z-index: 1000000132;
+        max-width: 300px;
+    }
+
+    .iw-cm-menu {
+        background: #fff;
+        color: #000;
+        margin: 0px;
+        padding: 0px;
+    }
+
+    .iw-curMenu {
+    }
+
+    .iw-cm-menu li {
+        font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, Ubuntu, sans-serif;
+        list-style: none;
+        padding: 10px;
+        padding-right: 20px;
+        border-bottom: 1px solid #c8c7cc;
+        cursor: pointer;
+        position: relative;
+        font-size: 14px;
+        margin: 0;
+        line-height: inherit;
+    }
+
+    .iw-cm-menu li:first-child {
+        border-top-left-radius: 11px;
+        border-top-right-radius: 11px;
+    }
+
+    .iw-cm-menu li:last-child {
+        border-bottom-left-radius: 11px;
+        border-bottom-right-radius: 11px;
+        border-bottom: none;
+    }
+
+    .iw-mOverlay {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0px;
+        left: 0px;
+        background: #FFF;
+        opacity: .5;
+    }
+
+    .iw-contextMenu li.iw-mDisable {
+        opacity: 0.3;
+        cursor: default;
+    }
+
+    .iw-mSelected {
+        background-color: #F6F6F6;
+    }
+
+    .iw-cm-arrow-right {
+        width: 0;
+        height: 0;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 5px solid #000;
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        margin-top: -5px;
+    }
+
+    .iw-mSelected > .iw-cm-arrow-right {
+    }
+
+    /*context menu css end */</style>
+    <style type="text/css">@-webkit-keyframes load4 {
+                               0%,
+                               100% {
+                                   box-shadow: 0 -3em 0 0.2em, 2em -2em 0 0em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 0;
+                               }
+                               12.5% {
+                                   box-shadow: 0 -3em 0 0, 2em -2em 0 0.2em, 3em 0 0 0, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em;
+                               }
+                               25% {
+                                   box-shadow: 0 -3em 0 -0.5em, 2em -2em 0 0, 3em 0 0 0.2em, 2em 2em 0 0, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em;
+                               }
+                               37.5% {
+                                   box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 0, 2em 2em 0 0.2em, 0 3em 0 0em, -2em 2em 0 -1em, -3em 0em 0 -1em, -2em -2em 0 -1em;
+                               }
+                               50% {
+                                   box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 0em, 0 3em 0 0.2em, -2em 2em 0 0, -3em 0em 0 -1em, -2em -2em 0 -1em;
+                               }
+                               62.5% {
+                                   box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 0, -2em 2em 0 0.2em, -3em 0 0 0, -2em -2em 0 -1em;
+                               }
+                               75% {
+                                   box-shadow: 0em -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0.2em, -2em -2em 0 0;
+                               }
+                               87.5% {
+                                   box-shadow: 0em -3em 0 0, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em;
+                               }
+                           }
+
+    @keyframes load4 {
+        0%,
+        100% {
+            box-shadow: 0 -3em 0 0.2em, 2em -2em 0 0em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 0;
+        }
+        12.5% {
+            box-shadow: 0 -3em 0 0, 2em -2em 0 0.2em, 3em 0 0 0, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em;
+        }
+        25% {
+            box-shadow: 0 -3em 0 -0.5em, 2em -2em 0 0, 3em 0 0 0.2em, 2em 2em 0 0, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em;
+        }
+        37.5% {
+            box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 0, 2em 2em 0 0.2em, 0 3em 0 0em, -2em 2em 0 -1em, -3em 0em 0 -1em, -2em -2em 0 -1em;
+        }
+        50% {
+            box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 0em, 0 3em 0 0.2em, -2em 2em 0 0, -3em 0em 0 -1em, -2em -2em 0 -1em;
+        }
+        62.5% {
+            box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 0, -2em 2em 0 0.2em, -3em 0 0 0, -2em -2em 0 -1em;
+        }
+        75% {
+            box-shadow: 0em -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0.2em, -2em -2em 0 0;
+        }
+        87.5% {
+            box-shadow: 0em -3em 0 0, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em;
+        }
+    }</style>
+    <style type="text/css">/* This is not a zero-length file! */</style>
+</head>
+<body class="">
+<!-- Preloader -->
+<div class="preloader" style="display: none;">
+    <div class="cssload-speeding-wheel"></div>
+</div>
+<section id="wrapper" class="login-register">
+    <div class="login-box login-sidebar">
+        <div class="white-box">
+            <form method="POST" class="form-horizontal form-material" id="loginform"
+                  action="{% url 'account_login' %}">{% csrf_token %}
+                <a href="javascript:void(0)" class="text-center db"><img
+                        src="{% static 'img/logo_ezl.png'%}" alt="Home" width="80%">
+                </a>
+
+                <div class="form-group m-t-40">
+                    <div class="col-xs-12">
+                        <input class="form-control" required="" placeholder="Usuário" type="text" name="login">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-xs-12">
+                        <input class="form-control" required="" placeholder="Senha" type="password" name="password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <a href="javascript:void(0)" id="to-recover" class="text-dark pull-right"><i
+                                class="fa fa-lock m-r-5"></i> Recuperar a senha</a></div>
+                </div>
+
+                {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}"
+                           value="{{ redirect_field_value }}"/>
+                {% endif %}
+
+                <div class="form-group text-center m-t-20">
+                    <div class="col-xs-12">
+                        <button class="btn btn-info btn-lg btn-block text-uppercase waves-effect waves-light"
+                                type="submit">ENTRAR
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group m-b-0">
+                    <div class="col-sm-12 text-center">
+                        <p>Você ainda não tem uma conta? <a href="{% url 'register_user' %}" class="text-primary m-l-5"><b>Cadastre-se</b></a>
+                        </p>
+                    </div>
+                </div>
+            </form>
+            <form class="form-horizontal" id="recoverform" action="{% url 'account_reset_password' %}" method="POST">{% csrf_token %}
+                <div class="form-group ">
+                    <div class="col-xs-12">
+                        <h3>Recupere sua senha</h3>
+                        <p class="text-muted">Digite seu usuário e as instruções serão enviadas para você</p>
+                    </div>
+                </div>
+                <div class="form-group ">
+                    <div class="col-xs-12">
+                        <input class="form-control" required="" placeholder="Usuário" type="text" name="username">
+                    </div>
+                </div>
+                <div class="form-group text-center m-t-20">
+                    <div class="col-xs-12">
+                        <button class="btn btn-info btn-lg btn-block text-uppercase waves-effect waves-light"
+                                type="submit">Enviar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<!-- jQuery -->
+<script src="{% static 'skeleton/plugins/bower_components/jquery/dist/jquery.min.js' %}"></script>
+<!--Toast-->
+<script src="{% static 'libs/toastr/build/toastr.min.js' %}"></script>
+<!-- Bootstrap Core JavaScript -->
+<script src="{% static 'skeleton/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+<!-- Menu Plugin JavaScript -->
+<script src="{% static 'skeleton/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js' %}"></script>
+
+<!--slimscroll JavaScript -->
+<script src="{% static 'skeleton/js/jquery.slimscroll.js' %}"></script>
+<!--Wave Effects -->
+<script src="{% static 'skeleton/js/waves.js' %}"></script>
+<!-- Custom Theme JavaScript -->
+<script src="{% static 'skeleton/js/custom.min.js' %}"></script>
+<!--Style Switcher -->
+<script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
+<!-- Sweet-Alert  -->
+<script src="{% static 'skeleton/plugins/bower_components/sweetalert/sweetalert.min.js' %}"></script>
+<script src="{% static 'skeleton/plugins/bower_components/sweetalert/jquery.sweet-alert.custom.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        {% if form.errors %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    toastr.error('{{ error }}', 'Erro ao efetuar o login', {timeOut: 5000});
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                toastr.error('{{ error }}', 'Erro ao efetuar o login', {timeOut: 5000});
+            {% endfor %}
+        {% endif %}
+        {% for message in messages %}
+            {% if message.tags == 'add_new_user success' %}
+            swal('Cadastro Finalizado', '{{ message }}');
+            {% endif %}
+        {% endfor %}
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+{% load staticfiles %}
+
+{% block content %}
+    {% load bootstrap3 %}
+    <script id="inline-script">
+        window.survey = new Survey.Model({{ survey_data|safe }});
+        window.survey2 = new Survey.Model({{ survey_data|safe }});
+    </script>
+        <div id="survey" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div id=" modal modalHeader">
+                    <h4 style="text-align: center" class="panel-header panel-title panel-heading DONE">
+                        <i class="fa fa-align-justify"></i>
+                        Formulário de Cumprimento </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group" style="margin: auto">
+                        <div id="surveyElement">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        setInterval(function(){
+            $('#survey input[type=file]').each(function(){
+                var $el = $(this),
+                    id = $el.attr('id').replace('i', ''),
+                    $button = $('<button type="button" class="btn btn-sm btn-primary btn-raised" style="color: #fff !important;"><i class="icon-cloud-upload"></i> &nbsp; Enviar arquivo(s)<div class="ripple-container"></div></button>'),
+                    $parent = $el.parent();
+
+                if ($parent.find('button').length == 0){
+                    $parent.append($button);
+                    $el.hide();
+                    $button.click(function(){
+                        SurveyUploadDatabase.currentField = id;
+                        SurveyUploadDatabase.inProgress = true;
+                        $('.js-upload-files').click();
+                        return false;
+                    });
+                }
+            });
+        }, 1000);
+
+
+        //Função para retornar o método submit default
+        function submitSurvey() {
+            $('#task_detail').unbind('submit').submit();
+
+        }
+
+        // Retorna as respostas da pesquisa formatadas corretamente
+        function getSurveyResult(result){
+            var data = {};
+            $.each(result.getAllQuestions(), function(i, question){
+                if (question.visible && question.getType() != "file") {
+                    data[question.title] = question.value || "";
+                }
+            });
+            return data;
+        }
+
+        Survey.Survey.cssType = "bootstrapmaterial";
+        Survey.defaultBootstrapMaterialCss.navigationButton = "btn btn-sm btn-raised btn-primary";
+
+        survey.onComplete.add(function (result) {
+            var surveyResponse = JSON.stringify(getSurveyResult(result));
+            var surveyResult = document.getElementsByName('survey_result').item(0);
+            surveyResult.value = surveyResponse;
+            document.getElementById('id_survey_result').innerHTML = surveyResponse;
+            $('<input name="action" value="DONE">').appendTo($('#task_detail'));
+            submitSurvey();
+        });
+        survey.locale = "pt";
+        Survey.JsonObject.metaData.addProperty("dropdown", {
+            name: "dateFormat",
+            default: "mm/dd/yy",
+            choices: ["mm/dd/yy", "yy-mm-dd", "d M, y", "d MM, y", "DD, d MM, yy", "'day' d 'of' MM 'in the year' yy"]
+        });
+
+
+        var widget = {
+            name: "datepicker",
+            htmlTemplate: "<input class='widget-datepicker form-control' type='text' style='width: 100%;'>",
+            isFit: function (question) {
+                return question.getType() === 'text' && question.inputType === 'date';
+            },
+            afterRender: function (question, el) {
+                var $el;
+
+                var $el = $(el).find(".widget-datepicker");
+
+                var widget = $el.datepicker({
+                    dateFormat: 'dd/mm/yy',
+                    onSelect: function (dateText) {
+                        question.value = dateText;
+                    },
+                    dayNames: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+                    dayNamesMin: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S', 'D'],
+                    dayNamesShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                    monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+                    monthNamesShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                    nextText: 'Próximo',
+                    prevText: 'Anterior'
+                });
+                question.valueChangedCallback = function () {
+                    widget.datepicker('setDate', new Date(question.value));
+                }
+                question.valueChangedCallback();
+                question.value = new Date();
+            },
+            willUnmount: function (question, el) {
+
+                $(el).find('.widget-datepicker').datepicker("destroy");
+
+            }
+        }
+
+
+        Survey.CustomWidgetCollection.Instance.addCustomWidget(widget);
+
+        $("#surveyElement").Survey({model: survey});
+
+        var footer = document.querySelector("#surveyElement").querySelector('.panel-footer')
+        var cancelBtn = document.createElement("button");
+
+        {#        cancelBtn.onclick = function () {#}
+        {#            if (confirm("Deseja cancelar o preenchimento do formulário? (Todas as repostas serão perdidas)")) {#}
+        {#                $("#surveyElement").Survey({model: survey});#}
+        {#                return false;#}
+        {#            }#}
+        {#        };#}
+        footer.className = "row align-center";
+        footer.style = "text-align: center;";
+
+        cancelBtn.innerHTML = "Cancelar";
+        cancelBtn.className = "btn btn-sm btn-raised btn-error";
+        cancelBtn.type = "";
+        cancelBtn.name = "action";
+
+        cancelBtn.setAttribute("data-dismiss", "modal");
+
+
+        footer.appendChild(cancelBtn);
+
+    </script>
+
+{% endblock %}

@@ -1,0 +1,131 @@
+{% load core_filters tz %}
+<div class="table-responsive">
+    <table class="table table-hover">
+        <tbody>
+        <tr>
+            <th>Serviço solicitado</th>
+            <td>
+                {{ form.instance.type_task|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Parte adversa</th>
+            <td>
+                {{ form.instance.movement.law_suit.opposing_party|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Descrição do serviço</th>
+            <td>
+                <p class="text-justify">{{ form.instance.description.strip|default:"---" }}</p>
+            </td>
+        </tr>
+        <tr>
+            <th>Prazo</th>
+            <td>
+                {{ form.instance.final_deadline_date|localtime|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Recebida em</th>
+            <td>
+                {{ form.instance.delegation_date|localtime|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Cliente</th>
+            <td>
+                {{ form.instance.client|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Processo</th>
+            <td>
+                {{ form.instance.movement.law_suit.law_suit_number |default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Comarca</th>
+            <td>
+                {{ form.instance.court_district|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>UF</th>
+            <td>
+                {{ form.instance.court_district.state|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Vara</th>
+            <td>
+                {{ form.instance.court_division|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Órgão</th>
+            <td>
+                {{ form.instance.court|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Endereço</th>
+            <td>
+                {{ form.instance.address|default:"---"|capfirst }}
+            </td>
+        </tr>
+        <tr>
+            <th>N° da pasta</th>
+            <td>
+                {{ form.instance.movement.law_suit.folder.folder_number|default_if_none:'' }}
+            </td>
+        </tr>
+        <tr>
+            <th>Centro de Custo</th>
+            <td>
+                {{ form.instance.movement.law_suit.folder.cost_center|default:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Registro de atendimento</th>
+            <td id="CheckinPosition">
+                {% if form.instance.geolocation.first %}
+                    Atendimento iniciado em: {{ form.instance.geolocation.all.0.date|localtime }}
+                    ({{ form.instance.geolocation.all.0.position }})
+                    {% if form.instance.geolocation.all.1 %}
+                        <br>Atendimento finalizado em: {{ form.instance.geolocation.all.1.date|localtime }}
+                        ({{ form.instance.geolocation.all.1.position }})
+                    {% endif %}
+                    <div class="panel panel-default">
+                        <a href="#" data-perform="panel-collapse">Ver mapa</a>
+                        <div class="panel-wrapper collapse" aria-expanded="false">
+                            <div id="map" style="height: 400px;width: 100%;"></div>
+                            <!-- Replace the value of the key parameter with your own API key. -->
+                            <script>
+                                function initMap() {
+                                    var latitude = "{{ form.instance.geolocation.all.0.latitude }}";
+                                    var longitude = "{{ form.instance.geolocation.all.0.longitude }}";
+                                    var center = {lat: parseFloat(latitude.replace(',','.')), lng: parseFloat(longitude.replace(',','.'))};
+                                    var map = new google.maps.Map(document.getElementById('map'), {
+                                        zoom: 16, center: center });
+                                    {% for marker in form.instance.geolocation.all %}
+                                        latitude = "{{ marker.latitude }}";
+                                        longitude = "{{ marker.longitude }}";
+                                        var {{ marker.checkpointtype }}{{ marker.id }} = {lat: parseFloat(latitude.replace(',','.')), lng: parseFloat(longitude.replace(',','.'))};
+                                        var marker = new google.maps.Marker({ position: {{ marker.checkpointtype }}{{ marker.id }},
+                                                                              title: "{{ marker.checkpointtype }}",
+                                                                              map: map });
+                                    {% endfor %}
+                                }
+                            </script>
+                            <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAgCSmxoG93hw-yel6ZhAzX9F5cdn5evGw&callback=initMap"> </script>
+                        </div>
+                    </div>
+                {% else %}
+                    Registro de atendimento não realizado
+                {% endif %}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

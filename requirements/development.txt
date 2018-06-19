@@ -1,0 +1,12 @@
+-r production.txt
+
+# Para usar tunnel
+git+https://github.com/mauler/sshtunnel.git@master
+
+# Dependências para executar testes (Usar sempre as versões mais recentes)
+pytest
+pytest-cov
+pytest-django
+pytest-sugar
+coverage
+model-mommy

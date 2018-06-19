@@ -1,0 +1,79 @@
+<script>
+    var tmplRowUpload = '<tr class="zoomInDown animated">\n' +
+                        '    <td style="width: 50px;">\n' +
+                        '       <div class="circle circle-sm bg-info di"> <i class="fa fa-user"></i></div>\n' +
+                        '    </td>\n' +
+                        '    <td>\n' +
+                        '       <span class="font-bold">${user}</span><br>\n' +
+                        '       <small class="text-muted">${data}</small>\n' +
+                        '    </td>\n' +
+                        '    <td class="text-left" style="max-width: 65%;">\n' +
+                        '       <h4><i class="fa fa-file-o"></i> ${exhibition_name}</h4>\n' +
+                        '    </td>\n' +
+                        '    <td class="text-right">\n' +
+                        '       <button onclick="window.open(\'/media/${url}\', \'_new\')" data-toggle="tooltip" title="Baixar arquivo"  type="button" class="btn btn-info btn-outline btn-circle btn-sm m-r-5"><i class="icon-cloud-download"></i></button>\n' +
+                        '       <button onclick="deleteFile(${task_id}, ${pk}, \'${filename}\')" data-toggle="modal" type="button" class="btn btn-danger btn-outline btn-circle btn-sm m-r-5"\n' +
+                        '               data-type="deleteFile" data-pk="${pk}" data-filename="${filename}">\n' +
+                        '           <i class="icon-trash"></i>\n' +
+                        '       </button>\n'+
+                        '    </td>\n' +
+                        '</tr>';
+
+    function get_ecms(task_id) {
+        $.ajax({
+            url: "/providencias/ajax_get_ecms/",
+            data: {
+                'task_id': task_id
+            },
+            dataType: 'json',
+            success: function (data) {
+                $('#containnerUploads').html('');
+                $('#totalAttachments').html('(' + data.total_ecms + ')')
+                if (data.total_ecms) {
+                    $('#no-providence').addClass('hide')
+                } else {
+                    $('#no-providence').removeClass('show')
+                };
+                $.each(data.ecms, function( index, value ) {
+                    $.tmpl(tmplRowUpload, value).appendTo('#containnerUploads');
+                })
+            }
+        });
+    }
+
+    function deleteFile(task_id, pk, file) {
+        swal({
+            title: file,
+            text: "Deseja excluir o arquivo?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Sim, excluir o arquivo.",
+            cancelButtonText: "Cancelar",
+            closeOnConfirm: false
+        }, function(){
+            $('#deleting').modal('show');
+            $.ajax({
+                url: '/providencias/ecm/' + pk + '/excluir',
+                dataType: 'json',
+
+                success: function (data) {
+                    if (data.is_deleted) {
+                        $('#deleting').modal('hide');
+                        get_ecms(task_id);
+                        swal("Sucesso", data.message, "success")
+                    }
+                    else {
+                        $('#deleting').modal('hide');
+                        swal("Erro", data.message, "error")
+                    }
+                    console.log('data.num_ged', data.num_ged);
+                    if (!data.num_ged) {
+                        $('#deleting').modal('hide');
+                        $('#no-providence').removeClass('hide')
+                    }
+                }
+            })
+        });
+    }
+</script>

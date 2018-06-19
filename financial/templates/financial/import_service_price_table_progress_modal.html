@@ -1,0 +1,133 @@
+{% load staticfiles %}
+
+{% block extra_stylesheets %}
+    <style>
+            #myProgress {
+                width: 100%;
+                background-color: grey;
+            }
+            #myBar {
+                width: 1%;
+                height: 30px;
+                background-color: green;
+            }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="progressBarImportServicePriceTableAction" class="modal fade "
+        tabindex="-1" role="alert" aria-labelledby="modalTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg ">
+            <div class="modal-content">
+                <div id="modalHeader" class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 id="modalTitle" class="modal-title">
+                        <i id="icon" class="mdi-24px"></i>
+                            <span id="title-progressbar">Importação de Tabela de Preços.<br>Arquivo: {{ file_name }}</span> </h4><span id="percent"></span>
+                </div>
+                <div class="modal-body p-30">
+                    <div id="myProgress">                        
+                        <div id="myBar"></div>
+                    </div>
+                </div>                                            
+                <div class="modal-footer" id="div-footer" style="display: none"> 
+                    <a href="#" class="btn btn-default" data-dismiss="modal" 
+                        id="btn-close">
+                        <i class="mdi mdi-close">Fechar</i></a>
+                </div>                
+            </div>
+        </div>
+    </div>
+    <script>
+        var setImported;
+        var width;
+        var process_interval;
+        var finish_process=false;        
+        $(document).ready(function(){            
+            setImported = function(){
+                if ("{{form.instance.pk}}" !== "None") {
+                    $.ajax({
+                        method: 'GET', 
+                        url: "/financeiro/import_service_price_table_status/{{form.instance.pk}}/", 
+                        data: {},
+                        dataType: 'json', 
+                        success: function(response) {      
+                            var elem = document.getElementById("myBar");
+                            var percent = document.getElementById("percent")
+                            var title = document.getElementById("title-progressbar")
+                            
+                            width = response.percent;
+                            if (response.imported_worksheet)
+                                width = 100;
+                            percent.innerHTML = width + '%';
+                            elem.style.width = width + '%';
+                            
+                            if (!response.imported)
+                                title.innerHTML = "Importação de Tabela de Preços.<br>Arquivo: {{ file_name }}"+
+                                    "<br>Planilha: " + response.worksheet_in_process;                            
+                            
+                            if ((response.imported) || (response.error_process))
+                            {
+                                $("#div-footer").show();                                                                   
+
+                                if (response.process_have_log)
+                                {
+
+                                    $("#div-log-table").show();
+                                    $.ajax({
+                                        method: 'GET', 
+                                        url: "/financeiro/ajax_get_log_import_service_price_table_data_table?pk={{form.instance.pk}}", 
+                                        data: {},
+                                        dataType: 'json',
+                                        success: function(response) {
+                                            var table = $('#LogTable');
+                                            response.data.forEach(function(d){
+                                                table.append('<tr><td>' + d + '</td></tr>')
+                                            })
+                                            table.DataTable({
+                                                pageLength: 10,
+                                                dom: 'Bfrtip',                                                
+                                                buttons: [
+                                                    'copy', 'csv', 'excel', 'pdf', 'print'
+                                                ],
+                                                language: {
+                                                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                                                },
+                                            });                                             
+                                        },
+                                    })
+                                } 
+                                
+                                if (response.imported)
+                                {                                    
+                                    showToast('success', 'Importação de Tabela de Preços finalizada com sucesso.', '', 3000, true);
+                                }
+                                else
+                                {
+                                    showToast('error', 'Importação de Tabela de Preços finalizada sem sucesso. Favor verificar log do processo.', 
+                                        'Erro', 3000, true);                                    
+                                }
+                                
+                                finish_process = true;
+                                clearInterval(process_interval);
+                            }
+                        }, 
+                        beforeSend: function (xhr, settings) {
+                            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                        },
+                    })
+                }
+            }
+            process_interval = setInterval(setImported, 3000)
+        }); 
+
+
+        $('#progressBarImportServicePriceTableAction').on('hidden.bs.modal', function () {
+            if (!finish_process)
+            {
+                swal("Atenção...", "Processo de importação de tabela de preços continuará sendo executado em segundo plano.", "warning")
+            }
+        });    
+    </script>    
+{% endblock %}

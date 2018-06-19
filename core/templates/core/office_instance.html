@@ -1,0 +1,21 @@
+{% extends 'skeleton/base.html' %}
+{% load static %}
+{% block sidebar %}
+{% endblock %}
+{% block containner %}
+    {% include 'core/widgets/office_select.html' with offices=request.user.person.offices.active_offices %}
+{% endblock %}
+{% block extra_stylesheets %}
+    <style>
+        #page-wrapper{
+            margin-left: 0!important;
+        }
+        .modal-title{
+            margin-top: 15px !important;
+        }
+    </style>
+{% endblock %}
+{% block script_document_ready %}
+    {{ block.super }}
+    $('#filter_office_legal_name').focus()
+{% endblock %}
