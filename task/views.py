@@ -637,15 +637,17 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 new_ecm.ecm_related = ecm
                 new_ecm.save()
 
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):        
+        res = super().dispatch(request, *args, **kwargs)        
         office_session = get_office_session(request)
         if office_session != Task.objects.filter(pk=kwargs.get('pk')).first().office:
             messages.error(self.request, "A OS que está tentando acessar, não pertence ao escritório selecionado."
                                          " Favor selecionar o escritório correto")
-            del request.session['custom_session_user']
-            request.session.modified = True
+            if request.session.get('custom_session_user'):
+                del request.session['custom_session_user']
+                request.session.modified = True
             return HttpResponseRedirect(reverse('office_instance'))
-        return super().dispatch(request, *args, **kwargs)
+        return res
 
 
 class EcmCreateView(CustomLoginRequiredView, CreateView):
