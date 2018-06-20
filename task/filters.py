@@ -38,7 +38,7 @@ class TaskFilter(FilterSet):
     task_number = NumberFilter(label=u"Nº da OS")
     task_parent_number = NumberFilter(label='Nº da OS pai')
     task_legacy_code = CharFilter(label=u"Nº da OS de origem")
-    task_origin_code = CharFilter(label=u"Nº da OS de origem")
+    task_origin_code = NumberFilter(label=u"Nº da OS de origem")
     client = CharFilter(label="Cliente",
                         required=False,
                         widget=TypeaHeadForeignKeyWidget(model=Person,
