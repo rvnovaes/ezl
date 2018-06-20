@@ -217,7 +217,7 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteVi
     model = Task
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
-    def post(self, request, *args, **kwargs):
+    def post(selfTaskReportBase, request, *args, **kwargs):
         self.success_url = urlparse(request.META.get('HTTP_REFERER')).path
         return super(TaskDeleteView, self).post(request, *args, **kwargs)
 
@@ -345,7 +345,7 @@ class ToPayTaskReportView(TaskReportBase):
     filter_class = TaskToPayFilter
     datetime_field = 'billing_date'
 
-    def get_queryset(self):        
+    def get_queryset(self):
         office = get_office_session(self.request)
         queryset = Task.objects.filter(
             parent__office=office,
@@ -591,10 +591,12 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         court_district = self.object.movement.law_suit.court_district
         state = self.object.movement.law_suit.court_district.state
         client = self.object.movement.law_suit.folder.person_customer
+        offices_related = self.object.office.offices.all()
         context['correspondents_table'] = ServicePriceTableTaskTable(
-            ServicePriceTable.objects.filter(Q(office=self.object.office) | Q(office__public_office=True),
+            ServicePriceTable.objects.filter(Q(office=self.object.office) | Q(office__public_office=True), Q(Q(type_task=type_task) | Q(type_task=None) ),
+                                             Q(is_active=True),
+                                             Q(office_correspondent__in=offices_related),
                                              Q(office_correspondent__is_active=True),
-                                             Q(Q(type_task=type_task) | Q(type_task=None)),
                                              Q(Q(court_district=court_district) | Q(court_district=None)),
                                              Q(Q(state=state) | Q(state=None)),
                                              Q(Q(client=client) | Q(client=None)))
@@ -643,8 +645,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                     new_ecm.ecm_related = ecm
                     new_ecm.save()
 
-    def dispatch(self, request, *args, **kwargs):        
-        res = super().dispatch(request, *args, **kwargs)        
+    def dispatch(self, request, *args, **kwargs):
+        res = super().dispatch(request, *args, **kwargs)
         office_session = get_office_session(request)
         if office_session != Task.objects.filter(pk=kwargs.get('pk')).first().office:
             messages.error(self.request, "A OS que está tentando acessar, não pertence ao escritório selecionado."
@@ -1019,8 +1021,7 @@ def ajax_get_task_data_table(request):
     query = DashboardViewModel.objects.filter(dynamic_query).filter(is_active=True, task_status=status,
                                                                     office=get_office_session(request))
     if status == str(TaskStatus.ERROR):
-        query_error = InconsistencyETL.objects.filter(is_active=True,
-                                                      task__id__in=list(query.values_list('id', flat=True)))
+        query_error = InconsistencyETL.objects.filter(is_active=True, task__id__in=list(query.values_list('id', flat=True)))
         xdata.append(
             list(
                 map(lambda x: [
