@@ -507,7 +507,7 @@ class Team(Audit, OfficeMixin):
 
     class Meta:
         verbose_name = 'Equipe'
-        verbose_name = 'Equipes'
+        verbose_name_plural = 'Equipes'
         unique_together = (('office', 'name'),)        
 
     def __str__(self):
