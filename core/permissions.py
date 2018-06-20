@@ -4,7 +4,7 @@ from core.models import Person, OfficeRelGroup
 from task.models import Permissions
 from survey.models import SurveyPermissions
 from core.models import CorePermissions
-from guardian.shortcuts import assign_perm
+from guardian.shortcuts import assign_perm, remove_perm
 
 
 GROUP_PERMISSIONS = {
@@ -21,15 +21,16 @@ GROUP_PERMISSIONS = {
         CorePermissions.group_admin
     ),
 
-    Person.SUPERVISOR_GROUP: (
-        Permissions.view_all_tasks,
-        Permissions.return_all_tasks,
-        Permissions.validate_all_tasks,
+    Person.SUPERVISOR_GROUP: (                        
         Permissions.block_payment_tasks,
         Permissions.can_access_general_data,
         SurveyPermissions.can_edit_surveys,
         SurveyPermissions.can_view_survey_results,
-        Permissions.can_distribute_tasks
+        Permissions.can_distribute_tasks,
+        Permissions.view_distributed_tasks, 
+        Permissions.view_requested_tasks, 
+        Permissions.view_delegated_tasks, 
+        Permissions.can_see_tasks_from_team_members
     ),
 
     Person.SERVICE_GROUP: (
@@ -65,6 +66,9 @@ def create_permission(office):
         group_name = '{}-{}-{}'.format(group_name, office.id, office.legal_name)
         group, nil = Group.objects.get_or_create(name=group_name)
         group.permissions.clear()
+        OfficeRelGroup.objects.filter(group=group).delete()
+        for permission in Permissions:
+            remove_perm(permission.name, group, office)
         for codename in permissions:
             permission, nil = Permission.objects.get_or_create(
                 codename=codename.name,

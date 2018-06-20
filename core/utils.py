@@ -134,7 +134,7 @@ def get_office_session(request):
     :return: Office object or False
     """
     from core.models import Office
-    office = Office.objects.none()
+    office = Office.objects.none()    
     if request:
         if request.session.get('custom_session_user'):
             custom_session_user = list(request.session.get('custom_session_user').values())

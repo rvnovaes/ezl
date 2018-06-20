@@ -28,7 +28,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
     DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
-from core.models import Person
+from core.models import Person, Team
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
@@ -39,6 +39,7 @@ from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardV
     TaskGeolocation
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable
+from task.rules import RuleViewTask
 from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
 from survey.models import SurveyPermissions
@@ -403,7 +404,8 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
 
     def get_data(self, person):
         checker = ObjectPermissionChecker(person.auth_user)
-        dynamic_query = self.get_dynamic_query(person, checker)
+        rule_view = RuleViewTask(request=self.request)
+        dynamic_query = rule_view.get_dynamic_query(person, checker)
         data = []
         data_error = []
         office_session = get_office_session(self.request)
@@ -490,40 +492,6 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
                                                 status=TaskStatus.BLOCKEDPAYMENT))
 
         return return_list
-
-    @staticmethod
-    def get_query_all_tasks(person):
-        return Q()
-
-    @staticmethod
-    def get_query_delegated_tasks(person):
-        return Q(person_executed_by=person.id)
-
-    @staticmethod
-    def get_query_requested_tasks(person):
-        return Q(person_asked_by=person.id)
-
-    @staticmethod
-    def get_query_distributed_tasks(person):
-        return Q(task_status=TaskStatus.REQUESTED) | Q(task_status=TaskStatus.ERROR) | Q(
-            person_distributed_by=person.id)
-
-    def get_dynamic_query(self, person, checker):
-        dynamic_query = Q()
-        office_session = get_office_session(self.request)
-        if office_session:
-            if checker.has_perm('view_all_tasks', office_session):
-                return self.get_query_all_tasks(person)
-            permissions_to_check = {
-                'view_all_tasks': self.get_query_all_tasks,
-                'view_delegated_tasks': self.get_query_delegated_tasks,
-                'view_distributed_tasks': self.get_query_distributed_tasks,
-                'view_requested_tasks': self.get_query_requested_tasks
-            }
-            for permission in checker.get_perms(office_session):
-                if permission in permissions_to_check.keys():
-                    dynamic_query |= permissions_to_check.get(permission)(person)
-        return dynamic_query
 
 
 class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
@@ -779,6 +747,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 done_dynamic_query = Q()
                 blocked_payment_dynamic_query = Q()
                 finished_dynamic_query = Q()
+                team_dynamic_query = Q()
 
                 if not checker.has_perm('can_distribute_tasks', office_session):
                     if checker.has_perm('view_delegated_tasks', office_session):
@@ -806,6 +775,8 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     task_dynamic_query.add(Q(movement__law_suit__law_suit_number=data['law_suit_number']), Q.AND)
                 if data['task_number']:
                     task_dynamic_query.add(Q(task_number=data['task_number']), Q.AND)
+                if data['task_parent_number']:
+                    task_dynamic_query.add(Q(parent__task_number=data['task_parent_number'], office=get_office_session(self.request)), Q.AND)
                 if data['task_origin_code']:
                     task_dynamic_query.add(Q(Q(legacy_code=data['task_origin_code'])|\
                         Q(parent_task_number=data['task_origin_code'])), Q.AND)
@@ -815,6 +786,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     task_dynamic_query.add(Q(person_asked_by=data['person_asked_by']), Q.AND)
                 if data['person_distributed_by']:
                     task_dynamic_query.add(Q(person_distributed_by=data['person_distributed_by']), Q.AND)
+                if data['team']:
+                    rule_view = RuleViewTask(self.request)
+                    team_dynamic_query.add(rule_view.get_query_team_tasks([data['team']]), Q.AND)
                 if data['requested_in']:
                     if data['requested_in'].start:
                         requested_dynamic_query.add(
@@ -894,6 +868,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
                 person_dynamic_query.add(Q(client_query), Q.AND) \
                     .add(Q(task_dynamic_query), Q.AND) \
+                    .add(Q(team_dynamic_query), Q.AND) \
                     .add(Q(requested_dynamic_query), Q.AND) \
                     .add(Q(accepted_service_dynamic_query), Q.AND) \
                     .add(Q(refused_service_query), Q.AND) \
@@ -1017,7 +992,8 @@ def ajax_get_task_data_table(request):
     checker = ObjectPermissionChecker(request.user)
     dash = DashboardView()
     dash.request = request
-    dynamic_query = dash.get_dynamic_query(request.user.person, checker)
+    rule_view = RuleViewTask(request=request)
+    dynamic_query = rule_view.get_dynamic_query(request.user.person, checker)
     query = DashboardViewModel.objects.filter(dynamic_query).filter(is_active=True, task_status=status,
                                                                     office=get_office_session(request))
     if status == str(TaskStatus.ERROR):

@@ -11,13 +11,14 @@ import task.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0084_ecm_ecm_related'),
+        ('task', '0085_auto_20180618_0329'),
     ]
 
     operations = []
 
     sql = """
         CREATE OR REPLACE VIEW dashboard_view AS SELECT task.id,
+            task.parent_id,
             task.task_number,
             task.create_date,
             task.alter_date,

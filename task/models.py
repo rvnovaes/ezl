@@ -26,6 +26,7 @@ class Permissions(Enum):
     can_access_general_data = 'Can access general data screens'
     view_distributed_tasks = 'Can view tasks distributed by the user'
     can_distribute_tasks = 'Can distribute tasks to another user'
+    can_see_tasks_from_team_members ='Can see tasks from your team members'
 
 
 # Dicionário para retornar o icone referente ao status da providencia
@@ -414,6 +415,7 @@ class TaskGeolocation(Audit):
 
 
 class DashboardViewModel(Audit, OfficeMixin):
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='child')    
     legacy_code = models.CharField(max_length=255, blank=True, null=True,
                                    verbose_name='Código legado')
     task_number = models.PositiveIntegerField(default=0, verbose_name='Número da Providência')

@@ -25,9 +25,10 @@
                             {% bootstrap_field filter.form.court_district form_group_class="form-group col-sm-6" bound_css_class='' %}
                         </div>
                         <div class="row">
-                            {% bootstrap_field filter.form.type_task form_group_class="form-group col-sm-4" bound_css_class='' %}
-                            {% bootstrap_field filter.form.cost_center form_group_class="form-group col-sm-4" bound_css_class='' %}
-                            {% bootstrap_field filter.form.court form_group_class="form-group col-sm-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.type_task form_group_class="form-group col-md-3" bound_css_class='' %}
+                            {% bootstrap_field filter.form.cost_center form_group_class="form-group col-md-3" bound_css_class='' %}
+                            {% bootstrap_field filter.form.court form_group_class="form-group col-md-3" bound_css_class='' %}
+                            {% bootstrap_field filter.form.team form_group_class="form-group col-md-3" bound_css_class='' %}
                         </div>
                         <div class="row">
                             {% bootstrap_field filter.form.law_suit_number form_group_class="form-group col-sm-6" bound_css_class='' %}
@@ -38,8 +39,9 @@
                             {% bootstrap_field filter.form.folder_legacy_code form_group_class="form-group col-sm-6" bound_css_class='' %}
                         </div>
                         <div class="row">
-                            {% bootstrap_field filter.form.task_number form_group_class="form-group col-sm-6" bound_css_class='' %}
-                            {% bootstrap_field filter.form.task_origin_code form_group_class="form-group col-sm-6" bound_css_class='' %}
+                            {% bootstrap_field filter.form.task_number form_group_class="form-group col-sm-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.task_parent_number form_group_class="form-group col-sm-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.task_origin_code form_group_class="form-group col-sm-4" bound_css_class='' %}
                         </div>
                         <div class="row">
                             {% bootstrap_field filter.form.person_executed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}
@@ -170,7 +172,7 @@
                             {% block table.tbody.row %}
                                 <tr class="{% cycle "odd" "even" %}" data-new-href="{{ row.attrs.data_new_href }}">
                                     {% for column, cell in row.items %}
-                                        <td {{ column.attrs.td.as_html }}>{{ cell }}</td>                                        
+                                        <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                                     {% endfor %}
                                 </tr>
                             {% endblock table.tbody.row %}
