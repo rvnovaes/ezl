@@ -116,16 +116,22 @@ class ChatsByOfficeView(CustomLoginRequiredView, View):
         return JsonResponse(data, safe=False)
 
 class ChatMenssage(CustomLoginRequiredView, View):
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):        
         chat = Chat.objects.get(pk=int(request.GET.get('chat')))
         messages = list(chat.messages.all().values('message', 'create_user__username', 'create_user_id', 'create_date'))
-        office = get_office_session(request)
-        task = chat.task_set.filter(office=office).first()
+        office = get_office_session(request)        
+        task = chat.task_set.filter(pk=chat.label.split('-')[1]).first()                
+        if task.parent and task.parent.office == office:
+            task_id = task.parent.pk
+        elif task.get_child and task.get_child.office == office:
+            task_id = task.get_child.pk
+        else:
+            task_id = task.pk
         data = {
             "messages": messages,
             "request_user_id": request.user.id,
             "chat": model_to_dict(chat, fields=([field.name for field in chat._meta.fields])),
-            "task": task.pk
+            "task": task_id
         }
         return  JsonResponse(data, safe=False)
 
