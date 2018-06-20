@@ -73,14 +73,21 @@ class EcmEtl(GenericETL):
                 tasks = Task.objects.filter(legacy_code=row['task_legacy_code'])
                 for task in tasks:
                     try:
-                        self.model.objects.get_or_create(task=task,
-                                                         legacy_code=row['ecm_legacy_code'],
-                                                         system_prefix=LegacySystem.ADVWIN.value,
-                                                         defaults={'is_active': True,
-                                                                   'path': path,
-                                                                   'create_user': user,
-                                                                   'alter_user': user,
-                                                                   'updated': False})
+                        """
+                        fazemos um select antes pelo path e pela task, já que um arquivo criado por um usuário, é 
+                        exportado para o advwin, e lá ganha um legacy_code. Então, se checarmos pelo legacy_code os 
+                        arquivos acabam sendo duplicados
+                        https://mttech.atlassian.net/browse/EZL-828
+                        """
+                        if not self.model.objects.filter(task=task, path=path):
+                            self.model.objects.create(task=task,
+                                                      legacy_code=row['ecm_legacy_code'],
+                                                      system_prefix=LegacySystem.ADVWIN.value,
+                                                      is_active=True,
+                                                      path=path,
+                                                      create_user=user,
+                                                      alter_user=user,
+                                                      updated=False)
                         self.debug_logger.debug(
                             'ECM,%s,%s,%s,%s' % (
                                 str(row['ecm_legacy_code']), str(row['task_legacy_code']),

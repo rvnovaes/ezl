@@ -55,7 +55,7 @@ def export_ecm(ecm_id, ecm=None, execute=True):
                 JuridGedMain.__table__.c.Codigo_OR == ecm.task.legacy_code,
                 JuridGedMain.__table__.c.Nome == file_name)
             )
-            for row in get_advwin_engine().execute(stmt).__dict__:
+            for row in get_advwin_engine().execute(stmt):
                 id_doc = row['ID_doc']
                 export_ecm_related_folter_to_task(ecm, id_doc)
         except Exception as exc:
@@ -94,6 +94,51 @@ def export_ecm_related_folter_to_task(ecm, id_doc, execute=True):
         finally:
             LOGGER.info('ECM %s: relacionamento criado entre Pasta e Agenda', ecm)
             return result.__dict__
+
+
+@shared_task()
+def delete_ecm(ecm_id, path, execute=True):
+    ecm = Ecm.objects.filter(pk=ecm_id).first()
+    new_path = ecm_path_ezl2advwin(ecm.path.name)
+    file_name = get_ecm_file_name(ecm.path.name)
+    values = {
+        'Tabela_OR': 'Agenda',
+        'Codigo_OR': ecm.task.legacy_code,
+        'Link': new_path,
+        'Data': timezone.localtime(ecm.create_date),
+        'Nome': file_name,
+        'Responsavel': ecm.create_user.username,
+        'Arq_Status': 'Guardado',
+        'Arq_nick': file_name,
+        'Descricao': file_name
+    }
+    stmt = JuridGedMain.__table__.select().where(and_(
+        JuridGedMain.__table__.c.Tabela_OR == values['Tabela_OR'],
+        JuridGedMain.__table__.c.Codigo_OR == values['Codigo_OR'],
+        JuridGedMain.__table__.c.Data == values['Data'],
+        JuridGedMain.__table__.c.Link == values['Link'],
+        JuridGedMain.__table__.c.Nome == values['Nome'])
+    )
+    if execute:
+        LOGGER.debug('Excluindo ECM %d-%s ', ecm.id, ecm)
+        result = None
+        try:
+            result = get_advwin_engine().execute(stmt)
+            for row in result:
+                id_doc = row['ID_doc']
+                stmt = JuridGedMain.__table__.delete().where(JuridGedMain.__table__.c.ID_doc == id_doc)
+                deleted_ecm = get_advwin_engine().execute(stmt)
+        except Exception as exc:
+            LOGGER.warning('Não foi possível excluir o ECM: %d-%s\n%s',
+                           ecm.id,
+                           ecm,
+                           exc,
+                           exc_info=(type(exc), exc, exc.__traceback__))
+        finally:
+            LOGGER.info('ECM %s: excluído', ecm)
+            return result.__dict__
+    else:
+        return stmt
 
 
 def get_folder_to_related(task):
