@@ -22,6 +22,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
+from django.core.exceptions import ValidationError
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
@@ -702,25 +703,35 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
 
 
 @login_required
-def delete_ecm(request, pk):
-    query = Ecm.objects.filter(id=pk)
-    task = query.values('task_id').first()
-
-    try:
-        query.delete()
-        num_ged = Ecm.objects.filter(task_id=task['task_id']).count()
+def delete_ecm(request, pk):    
+    try:                       
+        ecm = Ecm.objects.get(id=pk)     
+        task_id = ecm.task.pk
+        ecm.delete()
+        num_ged = Ecm.objects.filter(task_id=task_id).count()
         data = {'is_deleted': True,
                 'num_ged': num_ged,
                 'message': success_delete()
                 }
-
     except IntegrityError:
-        data = {'is_deleted': False,
+        data = {'is_deleted': False,                
+                'num_ged': 1,
                 'message': integrity_error_delete()
                 }
-    except Exception:
-        data = {'is_deleted': False,
-                'message': DELETE_EXCEPTION_MESSAGE,
+    except Ecm.DoesNotExist:
+        data = {'is_deleted': False,                
+                'num_ged': 1,
+                'message': "Anexo já foi excluído ou não existe.",
+                }
+    except ValidationError as error:
+        data = {'is_deleted': False,                
+                'num_ged': 1,
+                'message': error.args[0],
+                } 
+    except Exception as ex:
+        data = {'is_deleted': False,                
+                'num_ged': 1,
+                'message': DELETE_EXCEPTION_MESSAGE + '\n' + ex.args[0],
                 }
 
     return JsonResponse(data)
