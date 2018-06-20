@@ -98,6 +98,7 @@ def get_dir_name(instance, filename):
         os.makedirs(path)
     return 'service_price_table/{0}'.format(filename)
 
+
 class ImportServicePriceTable(Audit, OfficeMixin):
     file_xls = models.FileField('Arquivo', upload_to=get_dir_name)        
     log = models.TextField('Log', null=True)
@@ -109,4 +110,3 @@ class ImportServicePriceTable(Audit, OfficeMixin):
 
     class Meta:
         verbose_name = 'Arquivos Importados de Tabela de Preços'
-        

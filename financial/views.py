@@ -9,8 +9,6 @@ from django.views.generic import View
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
-from celery.task.control import revoke
-from celery.result import AsyncResult
 from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
                            DELETE_SUCCESS_MESSAGE)
 from core.models import Office, ContactMechanismType, EMAIL
