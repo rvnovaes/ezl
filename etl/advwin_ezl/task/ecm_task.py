@@ -4,7 +4,7 @@ from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.utils import ecm_path_advwin2ezl, get_message_log_default, save_error_log, \
     get_clients_to_import
-from task.models import Ecm, Task
+from task.models import Ecm, Task, TaskStatus
 
 
 class EcmEtl(GenericETL):
@@ -20,15 +20,7 @@ class EcmEtl(GenericETL):
                         ON A.Pasta = P.Codigo_Comp
                       INNER JOIN Jurid_CodMov AS cm
                         ON A.CodMov = cm.Codigo
-                    WHERE G.Tabela_OR = 'Agenda'
-                          AND G.Link <> ''
-                          AND G.Link IS NOT NULL
-                          AND cm.UsarOS = 1
-                          AND (P.Status = 'Ativa' OR P.Status = 'Especial' OR p.Dt_Saida IS NULL)
-                          AND (a.SubStatus = 10 OR a.SubStatus = 11) AND
-                          p.Cliente IN ('{cliente}') AND
-                          a.Status = '0' AND -- STATUS ATIVO
-                          p.Unidade IN ('11') -- Unidade BH-Centro
+                    WHERE {task_list}
                     UNION
                     SELECT DISTINCT
                       G.ID_doc AS ecm_legacy_code,
@@ -43,31 +35,25 @@ class EcmEtl(GenericETL):
                         ON A.Pasta = P.Codigo_Comp
                       INNER JOIN Jurid_CodMov AS cm
                         ON A.CodMov = cm.Codigo
-                    WHERE GL.Id_tabela_or = 'Agenda'
-                          AND (p.Status = 'Ativa' OR p.Status = 'Especial')
-                          AND G.Link <> ''
-                          AND G.Link IS NOT NULL
-                          AND cm.UsarOS = 1
-                          AND (a.SubStatus = 10 OR a.SubStatus = 11) AND
-                          a.Status = '0' AND -- STATUS ATIVO
-                          (
-                            (
-                              p.Cliente IN ('{cliente}') AND
-                              p.Unidade IN ('11') -- Unidade BH-Centro
-                            ) 
-                            OR
-                            (
-                              p.Cliente IN ('17155730000164') AND
-                              p.Unidade IN ('01') -- Unidade Savassi
-                            )
-                          )
+                    WHERE {task_list}
                           """
     model = Ecm
     field_check = 'ecm_legacy_code'
 
+    @staticmethod
+    def list_chunks(l, n):
+        for i in range(0, len(l), n):
+            yield l[i:i + n]
+
     @property
     def import_query(self):
-        return self._import_query.format(cliente="','".join(get_clients_to_import()))
+        status_list = [TaskStatus.DONE, TaskStatus.FINISHED, TaskStatus.REFUSED, TaskStatus.BLOCKEDPAYMENT,
+                       TaskStatus.REFUSED_SERVICE]
+        legacy_code_list = list(Task.objects.filter(legacy_code__isnull=False).exclude(legacy_code='REGISTRO-INVÁLIDO')
+                                .exclude(task_status__in=status_list).values_list('legacy_code', flat=True))
+        legacy_code_list = list(self.list_chunks(legacy_code_list, 10))
+        legacy_code_list_str = ''.join(map(lambda x: ' A.Ident IN (' + ', '.join(x) + ') OR', legacy_code_list))
+        return self._import_query.format(task_list=legacy_code_list_str[:len(legacy_code_list_str) - 3])
 
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):
@@ -82,7 +68,6 @@ class EcmEtl(GenericETL):
         EX: sudo ln -s /mnt/windows_ecm/Agenda/ ./ECM
         """
         for row in rows:
-            print(row)
             try:
                 path = ecm_path_advwin2ezl(row['path'])
                 tasks = Task.objects.filter(legacy_code=row['task_legacy_code'])

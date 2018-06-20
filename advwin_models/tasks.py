@@ -55,7 +55,7 @@ def export_ecm(ecm_id, ecm=None, execute=True):
                 JuridGedMain.__table__.c.Codigo_OR == ecm.task.legacy_code,
                 JuridGedMain.__table__.c.Nome == file_name)
             )
-            for row in get_advwin_engine().execute(stmt).fetchall():
+            for row in get_advwin_engine().execute(stmt).__dict__:
                 id_doc = row['ID_doc']
                 export_ecm_related_folter_to_task(ecm, id_doc)
         except Exception as exc:
@@ -66,7 +66,7 @@ def export_ecm(ecm_id, ecm=None, execute=True):
                            exc_info=(type(exc), exc, exc.__traceback__))
         finally:
             LOGGER.info('ECM %s: exportado', ecm)
-            return result
+            return result.__dict__
     else:
         return stmt
 
@@ -93,7 +93,7 @@ def export_ecm_related_folter_to_task(ecm, id_doc, execute=True):
                            exc_info=(type(e), e, e.__traceback__))
         finally:
             LOGGER.info('ECM %s: relacionamento criado entre Pasta e Agenda', ecm)
-            return result
+            return result.__dict__
 
 
 def get_folder_to_related(task):
@@ -161,7 +161,7 @@ def insert_advwin_history(task_history, values, execute=True):
             LOGGER.info('Histórico de OS %d-%d: exportado com sucesso.',
                         task_history.task.id,
                         task_history.id)
-        return result
+        return result.__dict__
     else:
         return stmt
 
@@ -320,7 +320,7 @@ def update_advwin_task(task, values, execute=True):
         else:
             LOGGER.info('OS %s: exportada com  status %s', task, task.task_status)
         finally:
-            return result
+            return result.__dict__
     else:
         return stmt
 

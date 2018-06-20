@@ -48,7 +48,7 @@ services:
       - "8082:8082"
   flower:
     ports:
-      - "8083:8083"
+      - "5555:5555"
     environment:
       ENV: development
   tasks:
@@ -60,6 +60,13 @@ services:
       - db
       - tunnel
       - queues
+
+  tasks-schedule:
+    environment:
+      ENV: development
+      PYTHONPATH: /app
+    depends_on:
+      - tasks
 
   tunnel:
     image: ezl:latest

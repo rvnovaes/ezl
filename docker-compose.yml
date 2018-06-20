@@ -19,6 +19,7 @@ services:
     image: ezl:latest
     volumes:
       - .:/app
+      - ./media/service_price_table:/app/media/service_price_table
       - web-static:/app/staticfiles
       - web-media:/app/media
       - ezl-logs:/var/log/ezl
@@ -62,15 +63,25 @@ services:
     command: celery -A ezl worker -l debug --concurrency 10 -P eventlet
     volumes:
       - .:/app
+      - ./media/service_price_table:/app/media/service_price_table
       - ezl-logs:/var/log/ezl
     depends_on:
       - builder
       - db
       - queues
 
+  tasks-schedule:
+    image: ezl:latest
+    command: celery -A ezl beat -l info
+    volumes:
+      - .:/app
+      - ezl-logs:/var/log/ezl
+    depends_on:
+      - tasks
+
   flower:
     image: ezl:latest
-    command: celery flower --broker=amqp://guest:guest@queues:5672/ --port=8083 --basic_auth=ezl:flower@ezl
+    command: celery flower --broker=amqp://guest:guest@queues:5672/ --port=5555 --basic_auth=ezl:flower@ezl
     volumes:
       - .:/app
     depends_on:

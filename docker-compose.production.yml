@@ -69,7 +69,7 @@ services:
       - "8082:8082"
   flower:
     ports:
-      - "8083:8083"
+      - "5555:5555"
     environment:
       ENV: production
   certbot:
@@ -89,6 +89,13 @@ services:
       - builder
       - db
       - queues
+
+  tasks-schedule:
+    environment:
+      ENV: production
+      PYTHONPATH: /app
+    depends_on:
+      - tasks
 
   pgweb:
     build:

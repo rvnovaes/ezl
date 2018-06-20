@@ -14,6 +14,7 @@ PARENT_STATUS = {
 }
 
 CHILD_STATUS = {
+    TaskStatus.OPEN: TaskStatus.REQUESTED,
     TaskStatus.RETURN: TaskStatus.RETURN,
 }
 
@@ -26,6 +27,21 @@ PARENT_FIELDS = {
     TaskStatus.RETURN: ['acceptance_date'],
     TaskStatus.BLOCKEDPAYMENT: ['execution_date'],
     TaskStatus.FINISHED: ['execution_date'],
+}
+
+PARENT_RECIPIENTS = {
+    TaskStatus.REFUSED_SERVICE: {'persons_to_receive': ['person_distributed_by'],
+                                 'short_message': 'foi recusada ',
+                                 'office': 'child'},
+    TaskStatus.REFUSED: {'persons_to_receive': ['person_distributed_by'],
+                         'short_message': 'foi recusada ',
+                         'office': 'child'},
+}
+
+CHILD_RECIPIENTS = {
+    TaskStatus.RETURN: {'persons_to_receive': ['office'],
+                        'short_message': 'foi retornada ',
+                        'office': 'parent'},
 }
 
 
@@ -59,3 +75,21 @@ def get_parent_fields(child_status):
     :return: lista de string com nomes de campos
     """
     return PARENT_FIELDS.get(child_status, [])
+
+
+def get_parent_recipients(child_status):
+    """
+    Retorna os destinatários da OS pai que receberam e-mail, de acordo com o status da Os filha
+    :param child_status: status da OS filha
+    :return:
+    """
+    return PARENT_RECIPIENTS.get(child_status, {})
+
+
+def get_child_recipients(parent_status):
+    """
+    Retorna os destinatários da OS filha que receberam e-mail, de acordo com o status da OS pai
+    :param parent_status: status da OS pai
+    :return:
+    """
+    return CHILD_RECIPIENTS.get(parent_status, {})

@@ -53,8 +53,6 @@ class UserETL(GenericETL):
         for row in rows:
             created = False
             person_id = None
-
-            print(rows_count)
             rows_count -= 1
             try:
                 # todas as senhas serão importadas como 1 e o usuário terá que alterar futuramente

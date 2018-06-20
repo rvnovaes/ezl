@@ -702,21 +702,23 @@ class OrganListView(SuccessMessageMixin, SingleTableViewMixin):
 class OrganAutocompleteView(TypeaHeadGenericSearch):
 
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params):
-        data = []
-        for organ in Organ.objects.filter((Q(legal_name__unaccent__icontains=q) |
-                                           Q(court_district__name__icontains=q)),
-                                          Q(is_active=True),
-                                          Q(office=office)):
-            data.append({'id': organ.id, 'data-value-txt': organ.__str__()})
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):                        
+        data = []        
+        court_district = extra_params.get('court_district')
+        if court_district:
+            for organ in Organ.objects.filter(legal_name__unaccent__icontains=q,
+                                              court_district_id=court_district,
+                                              is_active=True,
+                                              office=office):
+                data.append({'id': organ.id, 'data-value-txt': organ.legal_name})
         return list(data)
 
 
 class CourtDistrictAutocomplete(TypeaHeadGenericSearch):
 
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params):
-        data = []
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):        
+        data = []            
         court_districts = CourtDistrict.objects.filter(
             **forward_params) if forward_params else CourtDistrict.objects.all()
         court_districts = court_districts.filter(
@@ -729,7 +731,7 @@ class CourtDistrictAutocomplete(TypeaHeadGenericSearch):
 
 class FolderAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params):
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
         data = []
         for folder in Folder.objects.filter(Q(office=office),
                                             Q(Q(person_customer__legal_name__unaccent__istartswith=q) |
@@ -781,7 +783,7 @@ class AddressOrganDeleteView(AddressDeleteView):
 
 class TypeaHeadCourtDistrictSearch(TypeaHeadGenericSearch):
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params):
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
         data = []
         court_districts = CourtDistrict.objects.filter(**forward_params) if forward_params else CourtDistrict.objects.all()
         court_districts = court_districts.filter(

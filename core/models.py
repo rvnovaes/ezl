@@ -12,6 +12,28 @@ from guardian.shortcuts import get_perms
 
 INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'), ('E', 'EXTERNAL'))
 INVITE_FROM = (('P', 'PERSON'), ('O', 'OFFICE'))
+INVALIDO = 1
+PHONE = 2
+EMAIL = 3
+SKYPE = 4
+WHATSAPP = 5
+FACEBOOK = 6
+SITE = 7
+LINKEDIN = 8
+INSTAGRAM = 9
+SNAPCHAT = 10
+CONTACT_MECHANISM_TYPE = (    
+    (INVALIDO, 'INVÁLIDO'),
+    (PHONE, 'TELEFONE'),
+    (EMAIL, 'E-MAIL'),
+    (SKYPE, 'SKYPE'),
+    (WHATSAPP, 'WHATSAPP'),
+    (FACEBOOK, 'FACEBOOK'),
+    (SITE, 'SITE'),
+    (LINKEDIN, 'LINKEDIN'),
+    (INSTAGRAM, 'INSTAGRAM'),
+    (SNAPCHAT, 'SNAPCHAT'))
+
 
 class CorePermissions(Enum):
     group_admin = 'Group Administrator'
@@ -226,7 +248,7 @@ class AbstractPerson(Audit, LegacyCode):
         return self.contact_mechanism_by_type('telefone')
 
     def get_emails(self):
-        emails = set(self.contact_mechanism_by_type('email', formated=False))
+        emails = set(self.contact_mechanism_by_type('e-mail', formated=False))
         if (self.auth_user and self.auth_user.email and
                 self.auth_user.email.strip()):
             emails.add(self.auth_user.email.strip())
@@ -423,28 +445,6 @@ class Address(Audit):
 
 
 class ContactMechanismType(Audit):
-    INVALIDO = 1
-    PHONE = 2
-    EMAIL = 3
-    SKYPE = 4
-    WHATSAPP = 5
-    FACEBOOK = 6
-    SITE = 7
-    LINKEDIN = 8
-    INSTAGRAM = 9
-    SNAPCHAT = 10
-    CONTACT_MECHANISM_TYPE = (    
-        (INVALIDO, 'INVÁLIDO'),
-        (PHONE, 'TELEFONE'),
-        (EMAIL, 'E-MAIL'),
-        (SKYPE, 'SKYPE'),
-        (WHATSAPP, 'WHATSAPP'),
-        (FACEBOOK, 'FACEBOOK'),
-        (SITE, 'SITE'),
-        (LINKEDIN, 'LINKEDIN'),
-        (INSTAGRAM, 'INSTAGRAM'),
-        (SNAPCHAT, 'SNAPCHAT'))
-
     type_contact_mechanism_type = models.IntegerField(
         choices=CONTACT_MECHANISM_TYPE,        
         verbose_name='Tipo',
@@ -453,7 +453,7 @@ class ContactMechanismType(Audit):
     name = models.CharField(max_length=255, null=False, unique=True)    
 
     def is_email(self):        
-        return self.type_contact_mechanism_type == self.EMAIL
+        return self.type_contact_mechanism_type == EMAIL
 
     class Meta:
         db_table = 'contact_mechanism_type'
