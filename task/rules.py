@@ -1,6 +1,8 @@
 from core.models import Team
 from django.db.models import Q
 from core.utils import get_office_session
+from task.models import TaskStatus
+
 
 class RuleViewTask(object):
     """
@@ -30,7 +32,7 @@ class RuleViewTask(object):
 
     @staticmethod
     def get_query_team_tasks_to_user(person):        
-        teams = Team.objects.filter(supervisors=person.auth_user)                            
+        teams = Team.objects.filter(supervisors=person.auth_user, is_active=True)                            
         members = Team.objects.none()                
         for team in teams:
             members |= team.members.all()        
