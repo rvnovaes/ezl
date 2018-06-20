@@ -119,10 +119,13 @@ class ChatMenssage(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
         chat = Chat.objects.get(pk=int(request.GET.get('chat')))
         messages = list(chat.messages.all().values('message', 'create_user__username', 'create_user_id', 'create_date'))
+        office = get_office_session(request)
+        task = chat.task_set.filter(office=office).first()
         data = {
             "messages": messages,
             "request_user_id": request.user.id,
-            "chat": model_to_dict(chat, fields=([field.name for field in chat._meta.fields]))
+            "chat": model_to_dict(chat, fields=([field.name for field in chat._meta.fields])),
+            "task": task.pk
         }
         return  JsonResponse(data, safe=False)
 
