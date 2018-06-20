@@ -1,0 +1,124 @@
+{
+    "pages": [
+        {
+            "name": "page1",
+            "elements": [
+                {
+                    "type": "radiogroup",
+                    "name": "alvaraRetiradoAutos",
+                    "title": "Alvará retirado dos autos?",
+                    "isRequired": true,
+                    "choices": [
+                        {
+                            "value": "Sim",
+                            "text": "Sim"
+                        },
+                        {
+                            "value": "Não",
+                            "text": "Não"
+                        }
+                    ]
+                },
+                {
+                    "isRequired": true,
+                    "type": "text",
+                    "name": "Justificativa de Alvará não retirado: ",
+                    "visible": false,
+                    "visibleIf": "{alvaraRetiradoAutos} = 'Não'"
+                },
+                {
+                    "isRequired": true,
+                    "type": "radiogroup",
+                    "name": "viaOriginalEnviada",
+                    "visible": false,
+                    "visibleIf": "{alvaraRetiradoAutos} = 'Sim'",
+                    "title": "Via original encaminhada ? ",
+                    "choices": [
+                        {
+                            "value": "Sim",
+                            "text": "Sim"
+                        },
+                        {
+                            "value": "Não",
+                            "text": "Não"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "name": "dataRetiradoAutos",
+                    "visible": false,
+                    "visibleIf": "{alvaraRetiradoAutos} = 'Sim'",
+                    "title": "Data da retirada do Alvará : ",
+                    "inputType": "date",
+                    "isRequired": true
+                },
+                {
+                    "type": "radiogroup",
+                    "name": "alvaraLevadoBanco",
+                    "title": "Alvará levantado junto ao banco ? ",
+                    "isRequired": true,
+                    "choices": [
+                        {
+                            "value": "Sim",
+                            "text": "Sim"
+                        },
+                        {
+                            "value": "Não",
+                            "text": "Não"
+                        }
+                    ]
+                },
+                {
+                    "isRequired": true,
+                    "type": "text",
+                    "name": "vlrLevantadoBanco",
+                    "visible": false,
+                    "visibleIf": "{alvaraLevadoBanco} = 'Sim'",
+                    "title": "Valor levantado : ",
+                    "inputType": "number"
+                },
+                {
+                    "isRequired": true,
+                    "type": "text",
+                    "name": "contaLevantamento",
+                    "visible": false,
+                    "visibleIf": "{alvaraLevadoBanco} = 'Sim'",
+                    "title": "Conta Bancária : "
+                },
+                {
+                    "isRequired": true,
+                    "type": "text",
+                    "name": "justAlvaraNLevantado",
+                    "visible": false,
+                    "visibleIf": "{alvaraLevadoBanco} = 'Não'",
+                    "title": "Justificativa Alvará não retirado: "
+                },
+                {
+                    "isRequired": true,
+                    "type": "radiogroup",
+                    "name": "despReembolsaveis",
+                    "title": "Despesas reembolsáveis ? ",
+                    "choices": [
+                        {
+                            "value": "Sim",
+                            "text": "Sim"
+                        },
+                        {
+                            "value": "Não",
+                            "text": "Não"
+                        }
+                    ]
+                },
+                {
+                    "isRequired": false,
+                    "type": "text",
+                    "name": "obsRelevante",
+                    "visible": false,
+                    "visibleIf": "{despReembolsaveis} = 'Sim'",
+                    "title": "Observações relevantes: "
+                }
+            ]
+        }
+    ]
+}

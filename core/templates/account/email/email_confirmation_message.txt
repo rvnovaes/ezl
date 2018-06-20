@@ -1,0 +1,8 @@
+{% load account %}{% user_display user as user_display %}{% load i18n %}{% autoescape off %}{% blocktrans with site_name=current_site.name site_domain=current_site.domain %}Prezado(a),
+
+Você está recebendo esse e-mail porque o usuário {{ user_display }} em {{ site_domain }} forneceu o seu e-mail para se conectar.
+
+Para confirmar, acesse {{ activate_url }}
+{% endblocktrans %}{% endautoescape %}
+{% blocktrans with site_name=current_site.name site_domain=current_site.domain %}Agradecemos por usar {{ site_name }}!
+{{ site_domain }}{% endblocktrans %}

@@ -1,0 +1,16 @@
+{% load staticfiles %}
+<script src="{% static 'skeleton/js/jquery.mask.min.js' %}"></script>
+<script src="{% static 'skeleton/js/jquery.maskMoney.min.js' %}"></script>
+<script src="{% static "js/masks.js" %}"></script>
+<script type="text/javascript">
+    $(function () {
+        $('#id_legal_type').on('change', function () {
+            if ($(this).val() === 'F') {
+                $("#id_cpf_cnpj").mask('000.000.000-00', {reverse: true});
+            }
+            else {
+                $('#id_cpf_cnpj').mask('00.000.000/0000-00', {reverse: true});
+            }
+        }).change();
+    })
+</script>

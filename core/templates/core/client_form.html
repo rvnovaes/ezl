@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{# Don't forget that one ! #}
+{{ form.media }}
+{% load static %}
+
+{% block content %}
+    {{ form.media }}
+    <div>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit"/>
+        </form>
+    </div>
+
+{% endblock content %}
+
+
+

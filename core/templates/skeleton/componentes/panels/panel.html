@@ -1,0 +1,18 @@
+<div class="panel panel-{{ class }}">
+    <div class="panel-heading">{{title}}
+        <div class="panel-action">
+            <a href="#" data-perform="panel-collapse"><i class="ti-minus"></i></a>
+            {% if show_close %}
+                <a href="#" data-perform="panel-dismiss"><i class="ti-close"></i></a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="panel-wrapper collapse in" aria-expanded="true">
+        <div class="panel-body">
+            {% block body %}{% endblock %}
+        </div>
+        {% if show_footer %}
+        <div class="panel-footer">{% block footer %}{% endblock %}</div>
+        {% endif %}
+    </div>
+</div>

@@ -1,0 +1,8 @@
+{% extends "core/base_form.html" %}
+
+{% block title %}{{person_name}} Confirm delete?{% endblock %}
+
+{% block form_container %}
+    <h3>Tem certeza?</h3>
+    <p>Você irá apagar o registro {{ object }}. Por favor confirme.</p>
+{% endblock %}

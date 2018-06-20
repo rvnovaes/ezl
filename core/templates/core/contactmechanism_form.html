@@ -1,0 +1,27 @@
+{% extends "skeleton/forms/base.html" %}
+
+{% load staticfiles %}
+
+{% block form %}
+    {% load staticfiles bootstrap3 %}
+
+
+    <div class="row">
+        {% bootstrap_field form.contact_mechanism_type form_group_class="form-group col-sm-4" %}
+        {% bootstrap_field form.description form_group_class="form-group col-sm-8" %}        
+    </div>
+    <div class="row">
+        {% bootstrap_field form.notes form_group_class="form-group col-sm-12" %}
+    </div>
+    <div class="row">
+        <div class="form-group col-sm-6">
+            <div class="checkbox checkbox-success p-t-20">
+                {{ form.is_active }}
+                {{ form.is_active.label_tag }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_content %}
+    {% include 'core/mask_selector.html' %}
+{% endblock extra_content %}

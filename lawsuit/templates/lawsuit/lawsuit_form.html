@@ -1,0 +1,38 @@
+{% extends 'skeleton/base.htmll' %}
+{% load core_filters %}
+{% block content %}
+    <form action="" method="post">{% csrf_token %}
+        <div class="col-lg-12">
+            <fieldset>
+                <div class="form-row">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h1 class="panel-title">{{ form.title }}</h1>
+                        </div>
+                        <div class="panel-body">
+                            {% for field in form %}
+                                <div class="form-group">
+                                    <label>
+                                        {{ field | append_ast_if_req  | label_capitalizer }}{{ field }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                            <div class="form-row  text-center">
+                                <a class="btn btn-raised btn-default"
+                                   href="{% url 'folder_update' view.kwargs.folder %}"><i
+                                        class="material-icons left">clear</i>
+                                    Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-raised btn-primary"><i
+                                        class="material-icons left">done</i>
+                                    Salvar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+    </form>
+{% endblock content %}

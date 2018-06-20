@@ -1,0 +1,81 @@
+<div class="white-box">
+    <!-- Tabstyle start -->
+    <div class="ezl-text-{{ form.instance.status.name|lower }} panel-title font-bolder font-20">
+        {{ form.instance.task_number|stringformat:"05d" }} - {{ form.instance.type_task }}
+        <span class="font-15 badge pull-right ezl-bg-{{form.instance.status.name|lower}} p-10"><i class="font-15 {{ form.instance.status.get_icon }}"></i> {{ form.instance.status }}</span>
+    </div>
+    <hr>
+    <section>
+        <div class="sttabs tabs-style-iconbox">
+            <nav>
+                <ul>
+                    <li>
+                        <a href="#sec-prov" class="sticon mdi mdi-archive"><span>Providência</span></a>
+                    </li>
+                    <li>
+                        <a href="#sec-corres" class="sticon mdi mdi-wallet-travel"><span>
+                            {% if form.instance.get_child %}
+                                Escritório Contratado
+                            {% else %}
+                                Correspondente
+                            {% endif %}
+                        </span></a>
+                    </li>
+                    <li>
+                        <a href="#sec-solic" class="sticon mdi mdi-account-card-details"><span>Solicitante</span></a>
+                    </li>
+                    <li>
+                        <a href="#sec-contr" class="sticon mdi mdi-receipt"><span>Contratante</span></a>
+                    </li>
+                    <li><a href="#sec-sis-leg" class="sticon mdi mdi-cash-multiple"><span>Dados de Origem</span></a></li>
+                </ul>
+            </nav>
+            <div class="content-wrap">
+                <section id="sec-prov" style="padding: 0 0 0 0">
+                    {% include 'task/task_detail/data-prov.html' %}
+                    <hr>
+                </section>
+                <section id="sec-corres" style="padding: 0 0 0 0">
+                    {% if form.instance.get_child %}
+                        {% include 'task/office_info.html' with office=form.instance.get_child.office %}
+                    {% else %}
+                        {% include 'task/person_info.html' with person=form.instance.person_executed_by %}
+                    {% endif %}
+                </section>
+                <section id="sec-solic" style="padding: 0 0 0 0">
+                    {% if form.instance.parent %}
+                        {% include 'task/office_info.html' with office=form.instance.parent.office %}
+                    {% else %}
+                        {% include 'task/person_info.html' with person=form.instance.person_asked_by %}
+                    {% endif %}
+                </section>
+                <section id="sec-contr" style="padding: 0 0 0 0">
+                    {% include 'task/person_info.html' with person=form.instance.person_distributed_by %}
+                </section>
+                <section id="sec-sis-leg" style="padding: 0 0 0 0">
+                    <table class="table table-hover">
+                        <tbody>
+                        <tr>
+                            <th>N° da pasta</th>
+                            <td>
+                                {{ form.instance.movement.law_suit.folder.legacy_code|default_if_none:'' }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>N° da OS</th>
+                            <td>
+                                {{ form.instance.origin_code|default_if_none:'' }}
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+            <!-- /content -->
+        </div>
+        <!-- /tabs -->
+    </section>
+    <div class="text-center align-middle">
+        {% include 'task/includes/task-detail-status-buttons.html' %}
+    </div>
+</div>

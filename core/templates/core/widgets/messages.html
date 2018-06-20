@@ -1,0 +1,20 @@
+<script type="text/javascript">
+{% if form.errors %}
+
+        {% for field in form %}
+            {% for error in field.errors %}
+                showToast('error', '{{ error|escape }}', '{{ field.label|escape }}', 0, false);
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            showToast('error', '{{ error|escape }}', 'Atenção!', 0, false);
+        {% endfor %}
+
+{% endif %}
+{% if messages %}
+    {% for message in messages %}
+        showToast('{{ message.tags }}', '{{ message.message }}', '', 3000, true);
+    {% endfor %}
+{% endif %}
+
+</script>
