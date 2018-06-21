@@ -101,17 +101,24 @@ class ChatOfficeContactView(CustomLoginRequiredView, View):
 class ChatsByOfficeView(CustomLoginRequiredView, View):
     @staticmethod
     def add_count_unread_message(user, chats):
+        # Pegamos todos os chats do usuário que possuem mensagens não lidas
+        unread_chats = UnreadMessage.objects.filter(
+            user_by_message__user_by_chat=user,
+        ).values('message__chat').annotate(count=Count('id'))
+
+        unread_chats_dict = dict({(item['message__chat'], item['count']) for item in unread_chats})
         for chat in chats:
-            unread_message_quanty = UnreadMessage.objects.filter(
-                user_by_message__user_by_chat=user,
-                message__chat_id=chat.get('id')).count()
-            chat['unread_message_quanty'] = unread_message_quanty
+            if chat['id'] in unread_chats_dict:
+                chat['unread_message_quanty'] = unread_chats_dict[chat['id']]
+            else:
+                chat['unread_message_quanty'] = 0
         return chats
 
     def get(self, request, *args, **kwargs):
         office = Office.objects.get(pk=int(request.GET.get('office')))
         chats = office.chats.filter(users__user_by_chat=self.request.user,
             users__is_active=True)
+
         data = self.add_count_unread_message(request.user, list(chats.values()))
         return JsonResponse(data, safe=False)
 
