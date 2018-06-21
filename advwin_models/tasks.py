@@ -96,18 +96,51 @@ def export_ecm_related_folter_to_task(ecm, id_doc, execute=True):
             raise e
 
 
+def delete_ecm_related_folder_to_task(ecm_id, id_doc, task_id, ecm_create_date, ecm_create_user, execute=True):
+    task = Task.objects.get(pk=task_id)
+    values = {
+        'Id_tabela_or': 'Pastas',
+        'Id_codigo_or': get_folder_to_related(task=task),
+        'Id_id_doc': id_doc,
+        'id_ID_or': 0,
+        'dt_inserido': ecm_create_date,
+        'usuario_insercao': ecm_create_user
+    }
+    stmt = JuridGEDLig.__table__.select().where(and_(
+        JuridGEDLig.__table__.c.Id_tabela_or == values['Id_tabela_or'],
+        JuridGEDLig.__table__.c.Id_codigo_or == values['Id_codigo_or'],
+        JuridGEDLig.__table__.c.Id_id_doc == values['Id_id_doc'],
+        JuridGEDLig.__table__.c.id_ID_or == values['id_ID_or'])
+    )
+    if execute:
+        result = None
+        try:
+            result = get_advwin_engine().execute(stmt)
+            for row in result:
+                id_lig = row['ID_lig']
+                stmt = JuridGEDLig.__table__.delete().where(JuridGedMain.__table__.c.ID_lig == id_lig)
+                deleted_ecm = get_advwin_engine().execute(stmt)
+        except Exception as e:
+            LOGGER.warning('Não foi possíve excluir o relacionamento do ECM entre Agenda e Pasta: %d\n%s',
+                           ecm_id,
+                           e,
+                           exc_info=(type(e), e, e.__traceback__))
+            raise e
+
 
 @shared_task()
-def delete_ecm(ecm_id, path_name, task_legacy_code, ecm_create_date, ecm_create_user,  execute=True):
-    new_path = ecm_path_ezl2advwin(path_name)
-    file_name = get_ecm_file_name(path_name)
+def delete_ecm(ecm_id, task_legacy_code, task_id, execute=True):
+    ecm = Ecm.objects.get(pk=ecm_id)
+    new_path = ecm_path_ezl2advwin(ecm.path.name)
+    file_name = get_ecm_file_name(ecm.path.name)
+    ecm_create_date = timezone.localtime(ecm.create_date)
     values = {
         'Tabela_OR': 'Agenda',
         'Codigo_OR': task_legacy_code,
         'Link': new_path,
         'Data': ecm_create_date,
         'Nome': file_name,
-        'Responsavel': ecm_create_user,
+        'Responsavel': ecm.create_user.username,
         'Arq_Status': 'Guardado',
         'Arq_nick': file_name,
         'Descricao': file_name
@@ -120,13 +153,14 @@ def delete_ecm(ecm_id, path_name, task_legacy_code, ecm_create_date, ecm_create_
         JuridGedMain.__table__.c.Nome == values['Nome'])
     )
     if execute:
-        LOGGER.debug('Excluindo ECM %d-%s ', ecm_id)
+        LOGGER.debug('Excluindo ECM %d ', ecm_id)
         try:
             result = get_advwin_engine().execute(stmt)
             for row in result:
                 id_doc = row['ID_doc']
                 stmt = JuridGedMain.__table__.delete().where(JuridGedMain.__table__.c.ID_doc == id_doc)
                 deleted_ecm = get_advwin_engine().execute(stmt)
+                delete_ecm_related_folder_to_task(ecm_id, id_doc, task_id, ecm_create_date, ecm.create_user.username)
             LOGGER.info('ECM %s: excluído', ecm_id)
             return '{} Registros afetados'.format(result.rowcount)
         except Exception as exc:
