@@ -380,11 +380,13 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         'per_page': 5
     }
     count_task = 0
+    count_tasks_with_error = 0
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         person = Person.objects.get(auth_user=self.request.user)
         context['task_count'] = self.count_task
+        context['count_tasks_with_error'] = self.count_tasks_with_error
 
         if not self.request.user.get_all_permissions():
             context['messages'] = [
@@ -400,7 +402,8 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         return tables
 
     def set_count_task(self, data, data_error):
-        self.count_task = len(data) + len(data_error)
+        self.count_task = len(data)
+        self.count_tasks_with_error = len(data_error)
 
     def get_data(self, person):
         checker = ObjectPermissionChecker(person.auth_user)
