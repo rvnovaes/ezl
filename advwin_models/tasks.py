@@ -97,17 +97,16 @@ def export_ecm_related_folter_to_task(ecm, id_doc, execute=True):
 
 
 @shared_task()
-def delete_ecm(ecm_id, execute=True):
-    ecm = Ecm.objects.filter(pk=ecm_id).first()
-    new_path = ecm_path_ezl2advwin(ecm.path.name)
-    file_name = get_ecm_file_name(ecm.path.name)
+def delete_ecm(ecm_id, path_name, task_legacy_code, ecm_create_date, ecm_create_user,  execute=True):
+    new_path = ecm_path_ezl2advwin(path_name)
+    file_name = get_ecm_file_name(path_name)
     values = {
         'Tabela_OR': 'Agenda',
-        'Codigo_OR': ecm.task.legacy_code,
+        'Codigo_OR': task_legacy_code,
         'Link': new_path,
-        'Data': timezone.localtime(ecm.create_date),
+        'Data': ecm_create_date,
         'Nome': file_name,
-        'Responsavel': ecm.create_user.username,
+        'Responsavel': ecm_create_user,
         'Arq_Status': 'Guardado',
         'Arq_nick': file_name,
         'Descricao': file_name
@@ -120,7 +119,7 @@ def delete_ecm(ecm_id, execute=True):
         JuridGedMain.__table__.c.Nome == values['Nome'])
     )
     if execute:
-        LOGGER.debug('Excluindo ECM %d-%s ', ecm.id, ecm)
+        LOGGER.debug('Excluindo ECM %d-%s ', ecm_id)
         result = None
         try:
             result = get_advwin_engine().execute(stmt)
@@ -130,12 +129,11 @@ def delete_ecm(ecm_id, execute=True):
                 deleted_ecm = get_advwin_engine().execute(stmt)
         except Exception as exc:
             LOGGER.warning('Não foi possível excluir o ECM: %d-%s\n%s',
-                           ecm.id,
-                           ecm,
+                           ecm_id,
                            exc,
                            exc_info=(type(exc), exc, exc.__traceback__))
         finally:
-            LOGGER.info('ECM %s: excluído', ecm)
+            LOGGER.info('ECM %s: excluído', ecm_id)
             return result.__dict__
     else:
         return stmt
