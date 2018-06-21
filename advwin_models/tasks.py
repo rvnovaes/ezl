@@ -97,7 +97,7 @@ def export_ecm_related_folter_to_task(ecm, id_doc, execute=True):
 
 
 @shared_task()
-def delete_ecm(ecm_id, path, execute=True):
+def delete_ecm(ecm_id, execute=True):
     ecm = Ecm.objects.filter(pk=ecm_id).first()
     new_path = ecm_path_ezl2advwin(ecm.path.name)
     file_name = get_ecm_file_name(ecm.path.name)
