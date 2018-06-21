@@ -375,7 +375,7 @@ class Ecm(Audit, LegacyCode):
 
     def delete(self, *args, **kwargs):
         if self.legacy_code:
-            raise ValidationError("Você não pode apagar um GED cadastrado em um sistema legado")
+            raise ValidationError("Não é possível apagar um arquivo que foi vinculado a outro sistema.")
         return super().delete(*args, **kwargs)
 
 

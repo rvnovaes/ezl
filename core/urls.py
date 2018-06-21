@@ -52,6 +52,10 @@ urlpatterns = [
     url(r'^escritorios/(?P<office_pk>[0-9]+)/usuarios/desvincular/$',
         views.OfficeMembershipInactiveView.as_view(),
         name='office_membership_inactive'),
+    
+    url(r'^escritorios/(?P<office_pk>[0-9]+)/escritorios/desvincular/$',
+        views.OfficeOfficesInactiveView.as_view(),
+        name='office_offices_inactive'),
 
     # Person views
     url(r'^pessoas/$', views.PersonListView.as_view(), name='person_list'),

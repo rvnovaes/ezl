@@ -22,6 +22,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
+from django.core.exceptions import ValidationError
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
@@ -217,7 +218,7 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteVi
     model = Task
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
-    def post(self, request, *args, **kwargs):
+    def post(selfTaskReportBase, request, *args, **kwargs):
         self.success_url = urlparse(request.META.get('HTTP_REFERER')).path
         return super(TaskDeleteView, self).post(request, *args, **kwargs)
 
@@ -558,10 +559,12 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         court_district = self.object.movement.law_suit.court_district
         state = self.object.movement.law_suit.court_district.state
         client = self.object.movement.law_suit.folder.person_customer
+        offices_related = self.object.office.offices.all()
         context['correspondents_table'] = ServicePriceTableTaskTable(
-            ServicePriceTable.objects.filter(Q(office=self.object.office) | Q(office__public_office=True),
+            ServicePriceTable.objects.filter(Q(office=self.object.office) | Q(office__public_office=True), Q(Q(type_task=type_task) | Q(type_task=None) ),
+                                             Q(is_active=True),
+                                             Q(office_correspondent__in=offices_related),
                                              Q(office_correspondent__is_active=True),
-                                             Q(Q(type_task=type_task) | Q(type_task=None)),
                                              Q(Q(court_district=court_district) | Q(court_district=None)),
                                              Q(Q(state=state) | Q(state=None)),
                                              Q(Q(client=client) | Q(client=None)))
@@ -610,8 +613,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                     new_ecm.ecm_related = ecm
                     new_ecm.save()
 
-    def dispatch(self, request, *args, **kwargs):        
-        res = super().dispatch(request, *args, **kwargs)        
+    def dispatch(self, request, *args, **kwargs):
+        res = super().dispatch(request, *args, **kwargs)
         office_session = get_office_session(request)
         if office_session != Task.objects.filter(pk=kwargs.get('pk')).first().office:
             messages.error(self.request, "A OS que está tentando acessar, não pertence ao escritório selecionado."
@@ -670,25 +673,35 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
 
 
 @login_required
-def delete_ecm(request, pk):
-    query = Ecm.objects.filter(id=pk)
-    task = query.values('task_id').first()
-
-    try:
-        query.delete()
-        num_ged = Ecm.objects.filter(task_id=task['task_id']).count()
+def delete_ecm(request, pk):    
+    try:                       
+        ecm = Ecm.objects.get(id=pk)     
+        task_id = ecm.task.pk
+        ecm.delete()
+        num_ged = Ecm.objects.filter(task_id=task_id).count()
         data = {'is_deleted': True,
                 'num_ged': num_ged,
                 'message': success_delete()
                 }
-
     except IntegrityError:
-        data = {'is_deleted': False,
+        data = {'is_deleted': False,                
+                'num_ged': 1,
                 'message': integrity_error_delete()
                 }
-    except Exception:
-        data = {'is_deleted': False,
-                'message': DELETE_EXCEPTION_MESSAGE,
+    except Ecm.DoesNotExist:
+        data = {'is_deleted': False,                
+                'num_ged': 1,
+                'message': "Anexo já foi excluído ou não existe.",
+                }
+    except ValidationError as error:
+        data = {'is_deleted': False,                
+                'num_ged': 1,
+                'message': error.args[0],
+                } 
+    except Exception as ex:
+        data = {'is_deleted': False,                
+                'num_ged': 1,
+                'message': DELETE_EXCEPTION_MESSAGE + '\n' + ex.args[0],
                 }
 
     return JsonResponse(data)
@@ -984,8 +997,7 @@ def ajax_get_task_data_table(request):
     query = DashboardViewModel.objects.filter(dynamic_query).filter(is_active=True, task_status=status,
                                                                     office=get_office_session(request))
     if status == str(TaskStatus.ERROR):
-        query_error = InconsistencyETL.objects.filter(is_active=True,
-                                                      task__id__in=list(query.values_list('id', flat=True)))
+        query_error = InconsistencyETL.objects.filter(is_active=True, task__id__in=list(query.values_list('id', flat=True)))
         xdata.append(
             list(
                 map(lambda x: [

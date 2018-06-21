@@ -6,7 +6,7 @@ from django.dispatch import receiver, Signal
 from django.utils import timezone
 from django.urls import reverse
 from django.db.models import Q
-from advwin_models.tasks import export_ecm, export_task, export_task_history
+from advwin_models.tasks import export_ecm, export_task, export_task_history, delete_ecm
 from core.models import ContactMechanism, ContactMechanismType, Person
 from django.conf import settings
 from task.models import Task, TaskStatus, TaskHistory, Ecm
@@ -41,6 +41,13 @@ def delete_related_ecm(sender, instance, **kwargs):
     if ecm_related:
         transaction.on_commit(lambda: Ecm.objects.filter(Q(pk=ecm_related)
                                                          | Q(ecm_related_id=ecm_related)).delete())
+
+
+@receiver(pre_delete, sender=Ecm)
+def delete_ecm_advwin(sender, instance, **kwargs):
+    if not instance.legacy_code and instance.task.legacy_code:
+        delete_ecm.delay(instance.id, instance.path.name, instance.task.legacy_code,
+                         timezone.localtime(instance.create_date), instance.create_user.username, True)
 
 
 @receiver(post_init, sender=Task)

@@ -1,7 +1,6 @@
 from django import forms
-from task.models import TypeTask
 from material import Layout, Row
-from core.models import Person, State, Office
+from core.models import Person, State
 from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field
 from lawsuit.models import CourtDistrict
 from task.models import TypeTask
@@ -68,7 +67,8 @@ class ServicePriceTableForm(BaseModelForm):
 
     class Meta:
         model = ServicePriceTable
-        fields = ('office', 'office_correspondent', 'client', 'type_task', 'state', 'court_district', 'value')
+        fields = ('office', 'office_correspondent', 'client', 'type_task', 'state', 'court_district', 'value',
+                  'is_active')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'
