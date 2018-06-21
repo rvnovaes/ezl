@@ -48,7 +48,6 @@ def export_ecm(ecm_id, ecm=None, execute=True):
     stmt = JuridGedMain.__table__.insert().values(**values)
     if execute:
         LOGGER.debug('Exportando ECM %d-%s ', ecm.id, ecm)
-        result = None
         try:
             result = get_advwin_engine().execute(stmt)
             stmt = JuridGedMain.__table__.select().where(and_(
@@ -58,15 +57,16 @@ def export_ecm(ecm_id, ecm=None, execute=True):
             for row in get_advwin_engine().execute(stmt):
                 id_doc = row['ID_doc']
                 export_ecm_related_folter_to_task(ecm, id_doc)
+            LOGGER.info('ECM %s: exportado', ecm)
+            return '{} Registros afetados'.format(result.rowcount)
         except Exception as exc:
             LOGGER.warning('Não foi possível exportar ECM: %d-%s\n%s',
                            ecm.id,
                            ecm,
                            exc,
                            exc_info=(type(exc), exc, exc.__traceback__))
-        finally:
-            LOGGER.info('ECM %s: exportado', ecm)
-            return result.__dict__
+            raise exc
+
     else:
         return stmt
 
@@ -85,29 +85,29 @@ def export_ecm_related_folter_to_task(ecm, id_doc, execute=True):
         result = None
         try:
             result = get_advwin_engine().execute(stmt)
+            LOGGER.info('ECM %s: relacionamento criado entre Pasta e Agenda', ecm)
+            return '{} Registros afetados'.format(result.rowcount)
         except Exception as e:
             LOGGER.warning('Não foi possíve relacionar o ECM entre Agenda e Pasta: %d-%s\n%s',
                            ecm.id,
                            ecm,
                            e,
                            exc_info=(type(e), e, e.__traceback__))
-        finally:
-            LOGGER.info('ECM %s: relacionamento criado entre Pasta e Agenda', ecm)
-            return result.__dict__
+            raise e
+
 
 
 @shared_task()
-def delete_ecm(ecm_id, path, execute=True):
-    ecm = Ecm.objects.filter(pk=ecm_id).first()
-    new_path = ecm_path_ezl2advwin(ecm.path.name)
-    file_name = get_ecm_file_name(ecm.path.name)
+def delete_ecm(ecm_id, path_name, task_legacy_code, ecm_create_date, ecm_create_user,  execute=True):
+    new_path = ecm_path_ezl2advwin(path_name)
+    file_name = get_ecm_file_name(path_name)
     values = {
         'Tabela_OR': 'Agenda',
-        'Codigo_OR': ecm.task.legacy_code,
+        'Codigo_OR': task_legacy_code,
         'Link': new_path,
-        'Data': timezone.localtime(ecm.create_date),
+        'Data': ecm_create_date,
         'Nome': file_name,
-        'Responsavel': ecm.create_user.username,
+        'Responsavel': ecm_create_user,
         'Arq_Status': 'Guardado',
         'Arq_nick': file_name,
         'Descricao': file_name
@@ -120,23 +120,21 @@ def delete_ecm(ecm_id, path, execute=True):
         JuridGedMain.__table__.c.Nome == values['Nome'])
     )
     if execute:
-        LOGGER.debug('Excluindo ECM %d-%s ', ecm.id, ecm)
-        result = None
+        LOGGER.debug('Excluindo ECM %d-%s ', ecm_id)
         try:
             result = get_advwin_engine().execute(stmt)
             for row in result:
                 id_doc = row['ID_doc']
                 stmt = JuridGedMain.__table__.delete().where(JuridGedMain.__table__.c.ID_doc == id_doc)
                 deleted_ecm = get_advwin_engine().execute(stmt)
+            LOGGER.info('ECM %s: excluído', ecm_id)
+            return '{} Registros afetados'.format(result.rowcount)
         except Exception as exc:
             LOGGER.warning('Não foi possível excluir o ECM: %d-%s\n%s',
-                           ecm.id,
-                           ecm,
+                           ecm_id,
                            exc,
                            exc_info=(type(exc), exc, exc.__traceback__))
-        finally:
-            LOGGER.info('ECM %s: excluído', ecm)
-            return result.__dict__
+            raise exc
     else:
         return stmt
 
@@ -195,18 +193,17 @@ def insert_advwin_history(task_history, values, execute=True):
         LOGGER.debug('Exportando Histórico de OS %d-%d ', task_history.task.id, task_history.id)
         try:
             result = get_advwin_engine().execute(stmt)
+            LOGGER.info('Histórico de OS %d-%d: exportado com sucesso.',
+                        task_history.task.id,
+                        task_history.id)
+            return '{} Registros afetados'.format(result.rowcount)
         except Exception as exc:
-            result = None
             LOGGER.warning('Não foi possíve exportar Histórico de OS: %d-%d\n%s',
                            task_history.task.id,
                            task_history.id,
                            exc,
                            exc_info=(type(exc), exc, exc.__traceback__))
-        else:
-            LOGGER.info('Histórico de OS %d-%d: exportado com sucesso.',
-                        task_history.task.id,
-                        task_history.id)
-        return result.__dict__
+            raise exc
     else:
         return stmt
 
@@ -221,9 +218,10 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
         username = task_history.create_user.username[:20]
 
     task = task_history.task
+    person_executed_by = task.person_executed_by.legacy_code if task.person_executed_by else ''
     if task_history.status == TaskStatus.ACCEPTED.value:
         values = {
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 50,
@@ -237,7 +235,7 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
 
     elif task_history.status == TaskStatus.DONE.value:
         values = {
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 70,
@@ -251,7 +249,7 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
 
     elif task_history.status == TaskStatus.REFUSED.value:
         values = {
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 20,
@@ -264,7 +262,7 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.FINISHED.value:
         values = {
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 100,
@@ -277,7 +275,7 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.RETURN.value:
         values = {
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 80,
@@ -289,7 +287,7 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.BLOCKEDPAYMENT.value:
         values = {
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 90,
@@ -332,7 +330,7 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'ident_agenda': task.legacy_code,
             'codigo_adv_solicitante': task.person_asked_by.legacy_code,
             'codigo_adv_origem': task.person_distributed_by.legacy_code,
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by,
             'SubStatus': 30,
             'status': 0,
             'data_operacao': timezone.localtime(task_history.create_date),
@@ -354,18 +352,16 @@ def update_advwin_task(task, values, execute=True):
         LOGGER.debug('Exportando OS %d-%s ', task.id, task)
         try:
             result = get_advwin_engine().execute(stmt)
+            LOGGER.info('OS %s: exportada com  status %s', task, task.task_status)
+            return '{} Registros atualizados'.format(result.rowcount)
         except Exception as exc:
-            result = None
             LOGGER.warning('Não foi possível exportar OS: %d-%s com status %s\n%s',
                            task.id,
                            task,
                            task.task_status,
                            exc,
                            exc_info=(type(exc), exc, exc.__traceback__))
-        else:
-            LOGGER.info('OS %s: exportada com  status %s', task, task.task_status)
-        finally:
-            return result.__dict__
+            raise exc
     else:
         return stmt
 
