@@ -162,6 +162,9 @@ def update_status_child_task(sender, instance, **kwargs):
         setattr(instance, '_skip_signal', True)
     if instance.get_child and status:
         child = instance.get_child
+        if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
+            setattr(child, '__notes', 'A OS {} foi recusada pelo escritório contratante {} pelo motivo {}'.format(
+                child.task_number, instance.office.legal_name, getattr(instance, '__notes', '')))
         child.task_status = status
         child._mail_attrs = get_child_recipients(instance.task_status)
         setattr(child, '_TaskDetailView__server', getattr(instance, '_TaskDetailView__server', None))

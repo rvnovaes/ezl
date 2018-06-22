@@ -14,6 +14,7 @@ PARENT_STATUS = {
 }
 
 CHILD_STATUS = {
+    TaskStatus.REQUESTED: TaskStatus.REFUSED,
     TaskStatus.OPEN: TaskStatus.REQUESTED,
     TaskStatus.RETURN: TaskStatus.RETURN,
 }
