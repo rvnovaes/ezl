@@ -63,8 +63,7 @@ def create_permission(office):
     content_type = ContentType.objects.get_for_model(Office)
     for group_name, permissions in GROUP_PERMISSIONS.items():        
         name='{}-{}'.format(group_name, office.id)        
-        group, nil = create_group(name)  
-        print(group, nil)
+        group, nil = create_group(name)          
         if office.legal_name == 'Marcelo Tostes Advogados Associados' and office.pk == 1:
             update_groups(group_name, group_name, office)
         update_groups(group_name, '{}-{}-{}'.format(group_name, office.id, office.legal_name), office)
