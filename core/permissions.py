@@ -63,7 +63,13 @@ def create_permission(office):
     from core.models import Office
     content_type = ContentType.objects.get_for_model(Office)
     for group_name, permissions in GROUP_PERMISSIONS.items():
-        group_name = '{}-{}-{}'.format(group_name, office.id, office.legal_name)
+        group_name = '{}-{}'.format(group_name, office.id)
+        # O codigo a baixo e necessario pois grupos foi necessario renomer o nome dos grupos
+        # devido o tamanho permitido no campo name da classe Group
+        group = Group.objects.filter(name__icontains='{}-{}'.format(office.pk, office.legal_name)).first()
+        if group:
+            group.name = '{}-{}'.format(group_name, office.id)
+            group.save()
         group, nil = Group.objects.get_or_create(name=group_name)
         group.permissions.clear()
         OfficeRelGroup.objects.filter(group=group).delete()

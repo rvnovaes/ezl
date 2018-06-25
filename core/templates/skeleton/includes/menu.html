@@ -4,14 +4,13 @@
             <i class="mdi mdi-av-timer fa-fw"></i>
             <span class="hide-menu">Dashboard</span>
         </a>
-    </li>    
-    {% if 'can_access_general_data' in office_session_perms %}
+    </li>
     <li> <!-- DASHBOARD -->
         <a href="{% url 'task_search' %}" class="waves-effect">
             <i class="mdi mdi-magnify fa-fw"></i>
             <span class="hide-menu">Pesquisar</span>
         </a>
-    </li>
+    </li>    {% if 'can_access_general_data' in office_session_perms %}
     <li> <!-- CADASTROS -->
         <a href="javascript:void(0)" class="waves-effect">
             <i class="fa fa-pencil-square-o fa-fw" data-icon="v"></i>

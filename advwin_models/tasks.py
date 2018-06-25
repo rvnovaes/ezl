@@ -96,16 +96,45 @@ def export_ecm_related_folter_to_task(ecm, id_doc, execute=True):
             raise e
 
 
+def delete_ecm_related_folder_to_task(ecm_id, id_doc, task_id, ecm_create_user, execute=True):
+    task = Task.objects.get(pk=task_id)
+    values = {
+        'Id_tabela_or': 'Pastas',
+        'Id_codigo_or': get_folder_to_related(task=task),
+        'Id_id_doc': id_doc,
+        'id_ID_or': 0,
+        'usuario_insercao': ecm_create_user
+    }
+    stmt = JuridGEDLig.__table__.select().where(and_(
+        JuridGEDLig.__table__.c.Id_tabela_or == values['Id_tabela_or'],
+        JuridGEDLig.__table__.c.Id_codigo_or == values['Id_codigo_or'],
+        JuridGEDLig.__table__.c.Id_id_doc == values['Id_id_doc'],
+        JuridGEDLig.__table__.c.id_ID_or == values['id_ID_or'])
+    )
+    if execute:
+        result = None
+        try:
+            result = get_advwin_engine().execute(stmt)
+            for row in result:
+                id_lig = row['ID_lig']
+                stmt = JuridGEDLig.__table__.delete().where(JuridGedMain.__table__.c.ID_lig == id_lig)
+                deleted_ecm = get_advwin_engine().execute(stmt)
+        except Exception as e:
+            LOGGER.warning('Não foi possíve excluir o relacionamento do ECM entre Agenda e Pasta: %d\n%s',
+                           ecm_id,
+                           e,
+                           exc_info=(type(e), e, e.__traceback__))
+            raise e
+
 
 @shared_task()
-def delete_ecm(ecm_id, path_name, task_legacy_code, ecm_create_date, ecm_create_user,  execute=True):
-    new_path = ecm_path_ezl2advwin(path_name)
-    file_name = get_ecm_file_name(path_name)
+def delete_ecm(ecm_id, ecm_path_name, ecm_create_user, task_legacy_code, task_id, execute=True):
+    new_path = ecm_path_ezl2advwin(ecm_path_name)
+    file_name = get_ecm_file_name(ecm_path_name)
     values = {
         'Tabela_OR': 'Agenda',
         'Codigo_OR': task_legacy_code,
         'Link': new_path,
-        'Data': ecm_create_date,
         'Nome': file_name,
         'Responsavel': ecm_create_user,
         'Arq_Status': 'Guardado',
@@ -115,18 +144,18 @@ def delete_ecm(ecm_id, path_name, task_legacy_code, ecm_create_date, ecm_create_
     stmt = JuridGedMain.__table__.select().where(and_(
         JuridGedMain.__table__.c.Tabela_OR == values['Tabela_OR'],
         JuridGedMain.__table__.c.Codigo_OR == values['Codigo_OR'],
-        JuridGedMain.__table__.c.Data == values['Data'],
         JuridGedMain.__table__.c.Link == values['Link'],
         JuridGedMain.__table__.c.Nome == values['Nome'])
     )
     if execute:
-        LOGGER.debug('Excluindo ECM %d-%s ', ecm_id)
+        LOGGER.debug('Excluindo ECM %d ', ecm_id)
         try:
             result = get_advwin_engine().execute(stmt)
             for row in result:
                 id_doc = row['ID_doc']
                 stmt = JuridGedMain.__table__.delete().where(JuridGedMain.__table__.c.ID_doc == id_doc)
                 deleted_ecm = get_advwin_engine().execute(stmt)
+                delete_ecm_related_folder_to_task(ecm_id, id_doc, task_id, ecm_create_user)
             LOGGER.info('ECM %s: excluído', ecm_id)
             return '{} Registros afetados'.format(result.rowcount)
         except Exception as exc:
@@ -218,10 +247,17 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
         username = task_history.create_user.username[:20]
 
     task = task_history.task
-    person_executed_by = task.person_executed_by.legacy_code if task.person_executed_by else ''
+    person_executed_by_legacy_code = None
+    person_executed_by_legal_name = None
+    if task.get_child:
+        person_executed_by_legacy_code = None
+        person_executed_by_legal_name = task.get_child.office.legal_name
+    elif task.person_executed_by:
+        person_executed_by_legacy_code = task.person_executed_by.legacy_code
+        person_executed_by_legal_name = task.person_executed_by.legal_name
     if task_history.status == TaskStatus.ACCEPTED.value:
         values = {
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 50,
@@ -229,13 +265,13 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Aceita por correspondente: {}'.format(
-                task.person_executed_by.legal_name),
+                person_executed_by_legal_name),
         }
         return insert_advwin_history(task_history, values, execute)
 
     elif task_history.status == TaskStatus.DONE.value:
         values = {
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 70,
@@ -243,13 +279,13 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Cumprida por correspondente: {}'.format(
-                task.person_executed_by.legal_name),
+                person_executed_by_legal_name),
         }
         return insert_advwin_history(task_history, values, execute)
 
     elif task_history.status == TaskStatus.REFUSED.value:
         values = {
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 20,
@@ -257,12 +293,12 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Recusada por correspondente: {}'.format(
-                task.person_executed_by.legal_name),
+                person_executed_by_legal_name),
         }
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.FINISHED.value:
         values = {
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 100,
@@ -270,12 +306,12 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Diligência devidamente cumprida por: {}'.format(
-                task.person_executed_by.legal_name),
+                person_executed_by_legal_name),
         }
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.RETURN.value:
         values = {
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 80,
@@ -287,7 +323,7 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.BLOCKEDPAYMENT.value:
         values = {
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 90,
@@ -308,7 +344,7 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Aceita por Back Office: {}'.format(
-                task.person_executed_by.legal_name),
+                task.person_distributed_by.legal_name),
         }
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.REFUSED_SERVICE.value:
@@ -322,7 +358,7 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Recusada por Back Office: {}'.format(
-                task.person_executed_by.legal_name),
+                task.person_distributed_by.legal_name),
         }
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.OPEN.value:
@@ -330,13 +366,13 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'ident_agenda': task.legacy_code,
             'codigo_adv_solicitante': task.person_asked_by.legacy_code,
             'codigo_adv_origem': task.person_distributed_by.legacy_code,
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'SubStatus': 30,
             'status': 0,
             'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
-            'descricao': 'Solicitada ao correspondente ('+task.person_executed_by.legal_name +
+            'descricao': 'Solicitada ao correspondente ('+person_executed_by_legal_name +
                          ') por BackOffice: {}'.format(
                 task.person_distributed_by.legal_name),
         }

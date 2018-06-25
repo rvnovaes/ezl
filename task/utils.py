@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.core.files.base import ContentFile
 
 
-def get_task_attachment(self, form):
+def get_task_attachment(self, form):        
     attachmentrules = DefaultAttachmentRule.objects.filter(
         Q(office=get_office_session(self.request)),
         Q(Q(type_task=form.instance.type_task) | Q(type_task=None)),
@@ -18,6 +18,9 @@ def get_task_attachment(self, form):
         Q(Q(state=form.instance.court_district.state) | Q(state=None)),
         Q(Q(court_district=form.instance.court_district) | Q(court_district=None)),
         Q(Q(city=(form.instance.movement.law_suit.organ.address_set.first().city if
+                  form.instance.movement and
+                  form.instance.movement.law_suit and
+                  form.instance.movement.law_suit.organ and 
                   form.instance.movement.law_suit.organ.address_set.first() else None)) | Q(city=None)))
 
     for rule in attachmentrules:
