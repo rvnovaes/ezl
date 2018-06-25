@@ -1,0 +1,15 @@
+.panel-survey-container{
+	margin-top: -45px;
+}
+.panel-survey-question{
+	margin: -25px 25px 25px 0px;
+}
+.panel-survey-question .panel-body{
+	padding: 5px 25px;
+	background-color: #EEE;
+}
+
+.panel-survey-question .panel-heading{
+	padding: 25px 25px 10px 25px;
+	cursor: no-drop;
+}

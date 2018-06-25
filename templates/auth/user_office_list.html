@@ -1,0 +1,77 @@
+{% load core_filters core_match %}
+{% load guardian_tags %}
+<div class="panel panel-default">
+    <div class="panel-heading">Permissões</div>
+    <div class="panel-wrapper collapse in">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Escritório</th>
+                    <th>Perfis</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if not object.id %}
+                    {% with request|get_office_session_pk as office_session_id %}
+                        {% get_model_instance 'core' 'office' office_session_id as office_session %}
+                        <tr>
+                            <td style="vertical-align: middle;">
+                                {{ office_session.legal_name }}
+                            </td>
+                            <td>
+                                <select class="select2 m-b-10 select2-multiple"
+                                        multiple="multiple"
+                                        name="office_{{ office_session.id }}"
+                                        id="office-group-{{ office_session.pk }}"
+                                        office="{{ office_session.pk }}"
+                                        data-placeholder="Selecione...">
+                                    {% for office_group in office_session.office_groups.all %}
+                                        <option value="{{ office_group.group.id }}">
+                                            {{ office_group.group.name|get_permission_label }}
+                                        </option>
+                                    {% endfor %}
+
+                               </select>
+                           </td>
+                       </tr>
+                    {% endwith %}
+                {% else %}
+                    {% for office in object.person.offices.all %}
+                        {% get_obj_perms request.user for office as "office_perms" %}
+                        {% if 'can_access_general_data' in office_perms %}
+                            <tr>
+                                <td style="vertical-align: middle;">
+                                    {{ office.legal_name }}
+                                </td>
+                                <td>
+                                    {% get_obj_perms request.user for office as "office_perms" %}
+                                    {% if 'can_access_general_data' in office_perms %}
+                                        <select class="select2 m-b-10 select2-multiple"
+                                                multiple="multiple"
+                                                name="office_{{ office.id }}"
+                                                id="office-group-{{ office.pk }}"
+                                                office="{{ office.pk }}"
+                                                data-placeholder="Selecione...">
+                                            {% for office_group in office.office_groups.all %}
+                                                <option value="{{ office_group.group.id }}"
+                                                    {{ object|get_selected_state_group:office_group.group }}>
+                                                    {{ office_group.group.name|get_permission_label }}
+                                                </option>
+                                            {% endfor %}
+                                           </select>
+                                    {% else %}
+                                        {% for office_group in office.office_groups.all %}
+                                            {% if object|get_selected_state_group:office_group.group == 'selected' %}
+                                                <span class="label label-success">{{ office_group.group.name|get_permission_label }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                               </td>
+                           </tr>
+                       {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,35 @@
+<script>
+$(document).on('ready', function() {
+        $(function () {
+        $('#{{ widget.name }}').datetimepicker({
+            {#            locale: 'pt-br',#}
+            tooltips: {
+                selectTime: 'seleciona horas e minutos',
+                selectYear: 'seleciona o ano',
+                selectMonth: 'seleciona o mês',
+                clear: 'Limpar data e hora'
+            },
+            ignoreReadonly: true,
+            showClear: true,
+            format: '{{ widget.format }}',
+            {% if widget.min_date %}
+                minDate: moment("{{ widget.min_date }}", "DD_MM_YYYY").tz("America/Sao_Paulo").format(),
+            {% elif widget.value %}
+                minDate: moment("{{ widget.value }}", "DD_MM_YYYY").tz("America/Sao_Paulo").format(),
+            {% endif %}
+
+            {% if widget.value %}
+                date: moment("{{ widget.value }}", "DD_MM_YYYY").tz("America/Sao_Paulo").format(),
+            {% endif %}
+        })
+        ;
+    });
+})
+</script>
+<div class="input-group">
+    <input type="text" class="form-control" id="{{ widget.name }}"
+           {% if widget.value != None %} value="{{ widget.value }}" {% endif %}>
+    <span class="input-group-addon">
+        <i class="icon-calender"></i>
+    </span>
+</div>

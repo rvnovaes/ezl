@@ -1,0 +1,34 @@
+{% extends "skeleton/forms/base.html" %}
+{% load static   %}
+{% block extra_form %}
+    {% include 'core/mask_selector.html' %} 
+{% endblock %}
+
+{% block button_cancel %}
+    {% include 'core/widgets/cancel_button.html'  with link_list='person_list' %}
+{% endblock %}
+{% block extra_scripts %}
+
+    {% if view.model.use_upload %}
+        <!-- UPLOADS SCRIPTS  -->
+        {% if form.documents %}
+            <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
+            <script src="{% static "file_form/file_form.js" %}"></script>
+            <script>
+               $(function() {
+                   initUploadFields($('#object_form'));
+               });
+            </script>
+        {% else %}
+            {% include 'ecm/javascripts.html' %}
+
+            <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+            <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+            <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+            <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
+                 a medida que for adicionando novos arquivos -->
+            <div id="scripts">
+            </div>
+        {% endif %}        
+    {% endif %}
+{% endblock %}

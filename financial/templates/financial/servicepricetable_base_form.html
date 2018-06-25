@@ -1,0 +1,13 @@
+{% load staticfiles bootstrap3 %}
+
+
+<div class="row">
+    {% bootstrap_field form.office_correspondent form_group_class="form-group col-sm-4" %}
+    {% bootstrap_field form.type_task form_group_class="form-group col-sm-4" %}
+    {% bootstrap_field form.value form_group_class="form-group col-sm-4" %}
+</div>
+<div class="row">
+    {% bootstrap_field form.client form_group_class="form-group col-sm-4" %}
+    {% bootstrap_field form.state form_group_class="form-group col-sm-4" %}
+    {% bootstrap_field form.court_district form_group_class="form-group col-sm-4" %}
+</div>

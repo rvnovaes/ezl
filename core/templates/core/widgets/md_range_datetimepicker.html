@@ -1,0 +1,19 @@
+    {% for widget in widget.subwidgets %}
+        <div class="col-sm-12 col-md-5">
+            <div class="input-group date">
+                <input id="{{ widget.name }}" class="form-control datepicker-autoclose" type="text"
+                       name="{{ widget.name }}" data-toggle="tooltip" data-placement="top"                       
+                        {% if widget.value != None %}
+                            value="{{ widget.value }}"
+                        {% endif %}
+
+                        {% if forloop.first %}
+                            print placeholder="Data inicial"
+                        {% else %}
+                            print placeholder="Data final"
+                        {% endif %}
+                />
+                <span class="input-group-addon"><i class="icon-calender"></i></span>
+            </div>
+        </div>
+    {% endfor %}

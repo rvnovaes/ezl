@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+  <object model="auth.group" pk="1">
+    <field name="name" type="CharField">Administrador</field>
+    <field name="permissions" rel="ManyToManyRel" to="auth.permission"><object pk="82"></object><object pk="83"></object><object pk="84"></object><object pk="85"></object><object pk="86"></object><object pk="87"></object><object pk="1"></object><object pk="2"></object><object pk="3"></object><object pk="4"></object><object pk="5"></object><object pk="6"></object><object pk="7"></object><object pk="8"></object><object pk="9"></object><object pk="10"></object><object pk="11"></object><object pk="12"></object><object pk="13"></object><object pk="14"></object><object pk="15"></object><object pk="37"></object><object pk="38"></object><object pk="39"></object><object pk="28"></object><object pk="29"></object><object pk="30"></object><object pk="25"></object><object pk="26"></object><object pk="27"></object><object pk="40"></object><object pk="41"></object><object pk="42"></object><object pk="22"></object><object pk="23"></object><object pk="24"></object><object pk="43"></object><object pk="44"></object><object pk="45"></object><object pk="31"></object><object pk="32"></object><object pk="33"></object><object pk="88"></object><object pk="89"></object><object pk="90"></object><object pk="19"></object><object pk="20"></object><object pk="21"></object><object pk="34"></object><object pk="35"></object><object pk="36"></object><object pk="91"></object><object pk="92"></object><object pk="93"></object><object pk="52"></object><object pk="53"></object><object pk="54"></object><object pk="49"></object><object pk="50"></object><object pk="51"></object><object pk="46"></object><object pk="47"></object><object pk="48"></object><object pk="64"></object><object pk="65"></object><object pk="66"></object><object pk="55"></object><object pk="56"></object><object pk="57"></object><object pk="58"></object><object pk="59"></object><object pk="60"></object><object pk="61"></object><object pk="62"></object><object pk="63"></object><object pk="16"></object><object pk="17"></object><object pk="18"></object><object pk="79"></object><object pk="80"></object><object pk="81"></object><object pk="70"></object><object pk="71"></object><object pk="72"></object><object pk="76"></object><object pk="99"></object><object pk="77"></object><object pk="78"></object><object pk="96"></object><object pk="97"></object><object pk="95"></object><object pk="94"></object><object pk="98"></object><object pk="67"></object><object pk="68"></object><object pk="69"></object><object pk="73"></object><object pk="74"></object><object pk="75"></object></field>
+  </object>
+  <object model="auth.group" pk="2">
+    <field name="name" type="CharField">Correspondente</field>
+    <field name="permissions" rel="ManyToManyRel" to="auth.permission"><object pk="94"></object></field>
+  </object>
+  <object model="auth.group" pk="3">
+    <field name="name" type="CharField">Coordenador</field>
+    <field name="permissions" rel="ManyToManyRel" to="auth.permission"><object pk="99"></object><object pk="96"></object><object pk="97"></object><object pk="95"></object></field>
+  </object>
+  <object model="auth.group" pk="4">
+    <field name="name" type="CharField">Supervisor</field>
+    <field name="permissions" rel="ManyToManyRel" to="auth.permission"><object pk="99"></object><object pk="100"></object><object pk="96"></object><object pk="97"></object><object pk="95"></object></field>
+  </object>
+  <object model="auth.group" pk="5">
+    <field name="name" type="CharField">Solicitante</field>
+    <field name="permissions" rel="ManyToManyRel" to="auth.permission"><object pk="96"></object><object pk="97"></object><object pk="98"></object></field>
+  </object>
+  <object model="auth.group" pk="6">
+    <field name="name" type="CharField">Service</field>
+    <field name="permissions" rel="ManyToManyRel" to="auth.permission"><object pk="96"></object><object pk="97"></object><object pk="95"></object></field>
+  </object>
+</django-objects>

@@ -1,0 +1,144 @@
+
+{% extends 'skeleton/base.html' %}
+{% load static core_match %}
+
+{% block extra_stylesheets %}
+    <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        table.dataTable.row-border tbody tr:first-child th, table.dataTable.row-border tbody tr:first-child td, table.dataTable.display tbody tr:first-child th, table.dataTable.display tbody tr:first-child td {
+            font-size: small !important;
+            cursor: pointer;
+        }
+        tr {
+            cursor: pointer;
+        }
+        #taskeTable {
+            overflow: auto;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    {% include 'core/widgets/messages.html' %}
+    {% for message in messages %}
+    {%endfor%}
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <div class="white-box">
+                    <h3 class="box-title m-b-0">Total</h3>
+                    <h1 class="m-b-0 m-t-0 font-medium">{{ task_count }}</h1>
+                </div>
+            </div>
+            {% for table in tables %}
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                <a {% if table.length %}href="#modal-view-task-table" data-toggle="modal"{% else %}href="javascript:swal('Não há dados para exibir.')"{% endif %} data-status="{{ table.status }}">
+                <div class="white-box">
+                    <h5 class="font-bold ezl-text-{{ table.status.name|lower }}">{{ table.title }}</h5>
+                    <div class="text-left">
+                        <h1>
+                            <sup>
+                                <i class="{{ table.status.get_icon }} ezl-text-{{ table.status.name|lower }} font-30"></i>
+                            </sup>
+                            <span class="pull-right">{{ table.length }}</span>
+                        </h1>
+                    </div>{% get_percent table.length task_count as percent %}
+                    <span class="text-success">{{ percent|stringformat:".02f" }}%</span> <div class="progress m-b-0">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{ percent|stringformat:"d" }}" aria-valuemin="0" aria-valuemax="100" style="width:{{ percent|stringformat:"d" }}%;">
+                        <span class="sr-only">{{ percent|stringformat:".02d" }}% Complete</span> </div>
+                    </div>
+                </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+    <!-- start - This is for export functionality only -->
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.flash.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
+    <!-- plugin para classificar por data -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+    <script src="//cdn.datatables.net/plug-ins/1.10.16/sorting/datetime-moment.js"></script>
+{% endblock %}
+
+{% block script_document_ready %}
+        $('#modal-view-task-table').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var status = button.data('status');
+            $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm' );
+
+            if (status == 'Erro no sistema de origem') {
+                var columns = [{ "targets": [ 0 ], "visible": false, "searchable": false }]
+            } else {
+                var columns = [
+                    { "targets": [ 0 ], "visible": false, "searchable": false },
+                    { "targets": [ 11 ], "visible": false, "searchable": false },
+                    { "targets": [ 12 ], "visible": false, "searchable": false }
+                ]
+            }
+
+            var table = $('#taskeTable').DataTable({
+                pageLength: 5,
+                dom: 'Bfrtip',
+                ajax: '{% url 'ajax_get_task_data_table' %}?status=' + status,
+                buttons: [
+                    'copy', 'csv', 'excel', 'pdf', 'print'
+                ],
+                language: {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                },
+                columnDefs: columns
+            });
+            table
+                .order([ 2, 'asc' ])
+                .draw();
+            $('#taskeTable tbody').on( 'click', 'tr', function () {
+                var pk = table.row( this ).data()[0];
+                window.open('/dashboard/' + pk,'_blank');
+            });
+        });
+        /* Ao fechar o modal, limpar a tabela */
+        $('#modal-view-task-table').on('hide.bs.modal', function (event) {
+            $('#taskeTable').empty();
+            $('#taskeTable').DataTable().clear().destroy();
+        });
+        /* verificar novas tasks */
+        var tasks = [];
+        $('[data-task]').each(function(){
+            var task = $(this),
+                status = task.attr('data-task-status'),
+                id = parseInt(task.attr('data-task-id'));
+            tasks.push([id, status]);
+        });
+
+        setInterval(function(){
+            $.ajax({
+                type: "POST",
+                url: "/dashboard/verificar_status/",
+                data: {"tasks": JSON.stringify(tasks)},
+                success: function(response){
+                    if (response.has_changed) {
+                        location.reload();
+                    }
+                },
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                dataType: "json"
+            });
+        }, 1000);
+{% endblock %}
+
+{% block extra_modal %}
+    {% include 'task/modal/view-task-table.html' %}
+{% endblock %}

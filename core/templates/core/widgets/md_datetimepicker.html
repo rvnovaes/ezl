@@ -1,0 +1,34 @@
+<script>
+$(window).on('load', function(){
+    $(function () {
+        $('#{{ widget.name }}').datetimepicker({
+            defaultDate: '',
+            tooltips: {
+                selectTime: 'seleciona horas e minutos',
+                selectYear: 'seleciona o ano',
+                selectMonth: 'seleciona o mês',
+                clear: 'Limpar data e hora'
+            },
+            ignoreReadonly: true,
+            showClear: true,
+            {% if widget.min_date %}
+                {#minDate: moment("{{ widget.min_date }}", "DD_MM_YYYY HH:mm").tz("America/Sao_Paulo").format(),#}
+            {% endif %}
+            {% if widget.max_date %}
+                {#maxDate: moment().tz("America/Sao_Paulo").format(),#}
+            {% endif %}
+            format: "{{ widget.format }}"
+        })
+        ;
+    });
+})
+</script>
+
+<div class="input-group">
+    <input type="text" class="form-control" id="{{ widget.name }}" name="{{ widget.name }}"
+           {% if widget.value != None %} value="{{ widget.value }}" {% endif %}>
+    <span class="input-group-addon">
+        <i class="icon-calender"></i>
+    </span>
+</div>
+

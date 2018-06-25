@@ -1,0 +1,10 @@
+{% extends "skeleton/forms/base.html" %}
+
+{% load staticfiles %}
+
+{% block form %}
+    {% include 'core/address_base_form.html' %}
+{% endblock %}
+{% block extra_content %}
+    {% include 'core/mask_selector.html' %}
+{% endblock extra_content %}

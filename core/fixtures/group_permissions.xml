@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+  <object model="auth.group_permissions" pk="1">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">1</field>
+  </object>
+  <object model="auth.group_permissions" pk="2">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">2</field>
+  </object>
+  <object model="auth.group_permissions" pk="3">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">3</field>
+  </object>
+  <object model="auth.group_permissions" pk="4">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">4</field>
+  </object>
+  <object model="auth.group_permissions" pk="5">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">5</field>
+  </object>
+  <object model="auth.group_permissions" pk="6">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">6</field>
+  </object>
+  <object model="auth.group_permissions" pk="7">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">7</field>
+  </object>
+  <object model="auth.group_permissions" pk="8">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">8</field>
+  </object>
+  <object model="auth.group_permissions" pk="9">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">9</field>
+  </object>
+  <object model="auth.group_permissions" pk="10">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">10</field>
+  </object>
+  <object model="auth.group_permissions" pk="11">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">11</field>
+  </object>
+  <object model="auth.group_permissions" pk="12">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">12</field>
+  </object>
+  <object model="auth.group_permissions" pk="13">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">13</field>
+  </object>
+  <object model="auth.group_permissions" pk="14">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">14</field>
+  </object>
+  <object model="auth.group_permissions" pk="15">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">15</field>
+  </object>
+  <object model="auth.group_permissions" pk="16">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">16</field>
+  </object>
+  <object model="auth.group_permissions" pk="17">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">17</field>
+  </object>
+  <object model="auth.group_permissions" pk="18">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">18</field>
+  </object>
+  <object model="auth.group_permissions" pk="19">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">19</field>
+  </object>
+  <object model="auth.group_permissions" pk="20">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">20</field>
+  </object>
+  <object model="auth.group_permissions" pk="21">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">21</field>
+  </object>
+  <object model="auth.group_permissions" pk="22">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">22</field>
+  </object>
+  <object model="auth.group_permissions" pk="23">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">23</field>
+  </object>
+  <object model="auth.group_permissions" pk="24">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">24</field>
+  </object>
+  <object model="auth.group_permissions" pk="25">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">25</field>
+  </object>
+  <object model="auth.group_permissions" pk="26">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">26</field>
+  </object>
+  <object model="auth.group_permissions" pk="27">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">27</field>
+  </object>
+  <object model="auth.group_permissions" pk="28">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">28</field>
+  </object>
+  <object model="auth.group_permissions" pk="29">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">29</field>
+  </object>
+  <object model="auth.group_permissions" pk="30">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">30</field>
+  </object>
+  <object model="auth.group_permissions" pk="31">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">31</field>
+  </object>
+  <object model="auth.group_permissions" pk="32">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">32</field>
+  </object>
+  <object model="auth.group_permissions" pk="33">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">33</field>
+  </object>
+  <object model="auth.group_permissions" pk="34">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">34</field>
+  </object>
+  <object model="auth.group_permissions" pk="35">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">35</field>
+  </object>
+  <object model="auth.group_permissions" pk="36">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">36</field>
+  </object>
+  <object model="auth.group_permissions" pk="37">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">37</field>
+  </object>
+  <object model="auth.group_permissions" pk="38">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">38</field>
+  </object>
+  <object model="auth.group_permissions" pk="39">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">39</field>
+  </object>
+  <object model="auth.group_permissions" pk="40">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">40</field>
+  </object>
+  <object model="auth.group_permissions" pk="41">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">41</field>
+  </object>
+  <object model="auth.group_permissions" pk="42">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">42</field>
+  </object>
+  <object model="auth.group_permissions" pk="43">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">43</field>
+  </object>
+  <object model="auth.group_permissions" pk="44">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">44</field>
+  </object>
+  <object model="auth.group_permissions" pk="45">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">45</field>
+  </object>
+  <object model="auth.group_permissions" pk="46">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">46</field>
+  </object>
+  <object model="auth.group_permissions" pk="47">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">47</field>
+  </object>
+  <object model="auth.group_permissions" pk="48">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">48</field>
+  </object>
+  <object model="auth.group_permissions" pk="49">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">49</field>
+  </object>
+  <object model="auth.group_permissions" pk="50">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">50</field>
+  </object>
+  <object model="auth.group_permissions" pk="51">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">51</field>
+  </object>
+  <object model="auth.group_permissions" pk="52">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">52</field>
+  </object>
+  <object model="auth.group_permissions" pk="53">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">53</field>
+  </object>
+  <object model="auth.group_permissions" pk="54">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">54</field>
+  </object>
+  <object model="auth.group_permissions" pk="55">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">55</field>
+  </object>
+  <object model="auth.group_permissions" pk="56">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">56</field>
+  </object>
+  <object model="auth.group_permissions" pk="57">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">57</field>
+  </object>
+  <object model="auth.group_permissions" pk="58">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">58</field>
+  </object>
+  <object model="auth.group_permissions" pk="59">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">59</field>
+  </object>
+  <object model="auth.group_permissions" pk="60">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">60</field>
+  </object>
+  <object model="auth.group_permissions" pk="61">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">61</field>
+  </object>
+  <object model="auth.group_permissions" pk="62">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">62</field>
+  </object>
+  <object model="auth.group_permissions" pk="63">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">63</field>
+  </object>
+  <object model="auth.group_permissions" pk="64">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">64</field>
+  </object>
+  <object model="auth.group_permissions" pk="65">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">65</field>
+  </object>
+  <object model="auth.group_permissions" pk="66">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">66</field>
+  </object>
+  <object model="auth.group_permissions" pk="67">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">67</field>
+  </object>
+  <object model="auth.group_permissions" pk="68">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">68</field>
+  </object>
+  <object model="auth.group_permissions" pk="69">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">69</field>
+  </object>
+  <object model="auth.group_permissions" pk="70">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">70</field>
+  </object>
+  <object model="auth.group_permissions" pk="71">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">71</field>
+  </object>
+  <object model="auth.group_permissions" pk="72">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">72</field>
+  </object>
+  <object model="auth.group_permissions" pk="73">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">73</field>
+  </object>
+  <object model="auth.group_permissions" pk="74">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">74</field>
+  </object>
+  <object model="auth.group_permissions" pk="75">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">75</field>
+  </object>
+  <object model="auth.group_permissions" pk="76">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">76</field>
+  </object>
+  <object model="auth.group_permissions" pk="77">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">77</field>
+  </object>
+  <object model="auth.group_permissions" pk="78">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">78</field>
+  </object>
+  <object model="auth.group_permissions" pk="79">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">79</field>
+  </object>
+  <object model="auth.group_permissions" pk="80">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">80</field>
+  </object>
+  <object model="auth.group_permissions" pk="81">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">81</field>
+  </object>
+  <object model="auth.group_permissions" pk="82">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">82</field>
+  </object>
+  <object model="auth.group_permissions" pk="83">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">83</field>
+  </object>
+  <object model="auth.group_permissions" pk="84">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">84</field>
+  </object>
+  <object model="auth.group_permissions" pk="85">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">85</field>
+  </object>
+  <object model="auth.group_permissions" pk="86">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">86</field>
+  </object>
+  <object model="auth.group_permissions" pk="87">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">87</field>
+  </object>
+  <object model="auth.group_permissions" pk="88">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">88</field>
+  </object>
+  <object model="auth.group_permissions" pk="89">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">89</field>
+  </object>
+  <object model="auth.group_permissions" pk="90">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">90</field>
+  </object>
+  <object model="auth.group_permissions" pk="91">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">91</field>
+  </object>
+  <object model="auth.group_permissions" pk="92">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">92</field>
+  </object>
+  <object model="auth.group_permissions" pk="93">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">93</field>
+  </object>
+  <object model="auth.group_permissions" pk="94">
+    <field name="group" rel="ManyToOneRel" to="auth.group">2</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">94</field>
+  </object>
+  <object model="auth.group_permissions" pk="95">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">96</field>
+  </object>
+  <object model="auth.group_permissions" pk="96">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">97</field>
+  </object>
+  <object model="auth.group_permissions" pk="97">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">98</field>
+  </object>
+  <object model="auth.group_permissions" pk="98">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">99</field>
+  </object>
+  <object model="auth.group_permissions" pk="99">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">94</field>
+  </object>
+  <object model="auth.group_permissions" pk="100">
+    <field name="group" rel="ManyToOneRel" to="auth.group">1</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">95</field>
+  </object>
+  <object model="auth.group_permissions" pk="101">
+    <field name="group" rel="ManyToOneRel" to="auth.group">5</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">98</field>
+  </object>
+  <object model="auth.group_permissions" pk="102">
+    <field name="group" rel="ManyToOneRel" to="auth.group">4</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">96</field>
+  </object>
+  <object model="auth.group_permissions" pk="103">
+    <field name="group" rel="ManyToOneRel" to="auth.group">4</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">97</field>
+  </object>
+  <object model="auth.group_permissions" pk="104">
+    <field name="group" rel="ManyToOneRel" to="auth.group">4</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">99</field>
+  </object>
+  <object model="auth.group_permissions" pk="105">
+    <field name="group" rel="ManyToOneRel" to="auth.group">4</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">100</field>
+  </object>
+  <object model="auth.group_permissions" pk="106">
+    <field name="group" rel="ManyToOneRel" to="auth.group">4</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">95</field>
+  </object>
+  <object model="auth.group_permissions" pk="107">
+    <field name="group" rel="ManyToOneRel" to="auth.group">3</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">96</field>
+  </object>
+  <object model="auth.group_permissions" pk="108">
+    <field name="group" rel="ManyToOneRel" to="auth.group">3</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">97</field>
+  </object>
+  <object model="auth.group_permissions" pk="109">
+    <field name="group" rel="ManyToOneRel" to="auth.group">3</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">99</field>
+  </object>
+  <object model="auth.group_permissions" pk="110">
+    <field name="group" rel="ManyToOneRel" to="auth.group">3</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">95</field>
+  </object>
+  <object model="auth.group_permissions" pk="111">
+    <field name="group" rel="ManyToOneRel" to="auth.group">5</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">96</field>
+  </object>
+  <object model="auth.group_permissions" pk="112">
+    <field name="group" rel="ManyToOneRel" to="auth.group">5</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">97</field>
+  </object>
+  <object model="auth.group_permissions" pk="113">
+    <field name="group" rel="ManyToOneRel" to="auth.group">6</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">96</field>
+  </object>
+  <object model="auth.group_permissions" pk="114">
+    <field name="group" rel="ManyToOneRel" to="auth.group">6</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">97</field>
+  </object>
+  <object model="auth.group_permissions" pk="115">
+    <field name="group" rel="ManyToOneRel" to="auth.group">6</field>
+    <field name="permission" rel="ManyToOneRel" to="auth.permission">95</field>
+  </object>
+</django-objects>

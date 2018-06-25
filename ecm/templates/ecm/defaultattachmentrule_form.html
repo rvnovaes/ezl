@@ -1,0 +1,9 @@
+{% extends "skeleton/forms/base.html" %}
+{% load static %}
+{% load core_filters %}
+{% load staticfiles %}
+
+{% block extra_stylesheets %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static "fileuploader.css" %}">
+{% endblock %}
