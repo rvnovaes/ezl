@@ -252,11 +252,14 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
         username = task_history.create_user.username[:20]
 
     task = task_history.task
-    person_executed_by_legacy_code = task.person_executed_by.legacy_code
-    person_executed_by_legal_name = child.person_executed_by.legal_name
+    person_executed_by_legacy_code = None
+    person_executed_by_legal_name = None
     if task.get_child:
         person_executed_by_legacy_code = None
-        person_executed_by_legal_name = child.office.legal_name
+        person_executed_by_legal_name = task.get_child.office.legal_name
+    elif task.person_executed_by:
+        person_executed_by_legacy_code = task.person_executed_by.legacy_code
+        person_executed_by_legal_name = task.person_executed_by.legal_name
     if task_history.status == TaskStatus.ACCEPTED.value:
         values = {
             'codigo_adv_correspondente': person_executed_by_legacy_code,
