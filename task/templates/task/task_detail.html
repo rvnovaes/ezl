@@ -207,13 +207,13 @@
             var servicepricetable_id = $('input[name=servicepricetable_id]').val();
             var selected_office = $("#office-"+servicepricetable_id);
             var public_office = (selected_office.data('office-public') == "True");
+            $('#task_detail').submit(function (e) {
+                e.preventDefault();
+            });
             if (servicepricetable_id === ""){
                 $("#alert-correspondent").remove();
                 $("#servicepricetable-alert").removeClass("hidden");
                 $('#actionButton').removeAttr('disabled')
-                $('#task_detail').submit(function (e) {
-                    e.preventDefault();
-                });
             }else if (public_office){
                 var text_public_office = "Para a contratação dos serviços do EZLog deve ser feita a transferência do" +
                     " valor " + selected_office.data('formated-value') + " para a conta abaixo:" +
@@ -242,9 +242,6 @@
                         $('#task_detail').unbind('submit').submit();
                     }else{
                         $('#actionButton').removeAttr('disabled')
-                        $('#task_detail').submit(function (e) {
-                            e.preventDefault();
-                        });
                     }
                 });
             }else{
