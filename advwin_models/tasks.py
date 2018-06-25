@@ -252,10 +252,14 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
         username = task_history.create_user.username[:20]
 
     task = task_history.task
-    person_executed_by = task.person_executed_by.legacy_code if task.person_executed_by else ''
+    person_executed_by_legacy_code = task.person_executed_by.legacy_code
+    person_executed_by_legal_name = child.person_executed_by.legal_name
+    if task.get_child:
+        person_executed_by_legacy_code = None
+        person_executed_by_legal_name = child.office.legal_name
     if task_history.status == TaskStatus.ACCEPTED.value:
         values = {
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 50,
@@ -263,13 +267,13 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Aceita por correspondente: {}'.format(
-                task.person_executed_by.legal_name),
+                person_executed_by_legal_name),
         }
         return insert_advwin_history(task_history, values, execute)
 
     elif task_history.status == TaskStatus.DONE.value:
         values = {
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 70,
@@ -277,13 +281,13 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Cumprida por correspondente: {}'.format(
-                task.person_executed_by.legal_name),
+                person_executed_by_legal_name),
         }
         return insert_advwin_history(task_history, values, execute)
 
     elif task_history.status == TaskStatus.REFUSED.value:
         values = {
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 20,
@@ -291,12 +295,12 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Recusada por correspondente: {}'.format(
-                task.person_executed_by.legal_name),
+                person_executed_by_legal_name),
         }
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.FINISHED.value:
         values = {
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 100,
@@ -304,12 +308,12 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Diligência devidamente cumprida por: {}'.format(
-                task.person_executed_by.legal_name),
+                person_executed_by_legal_name),
         }
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.RETURN.value:
         values = {
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 80,
@@ -321,7 +325,7 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.BLOCKEDPAYMENT.value:
         values = {
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 90,
@@ -342,7 +346,7 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Aceita por Back Office: {}'.format(
-                task.person_executed_by.legal_name),
+                task.person_distributed_by.legal_name),
         }
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.REFUSED_SERVICE.value:
@@ -356,7 +360,7 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Recusada por Back Office: {}'.format(
-                task.person_executed_by.legal_name),
+                task.person_distributed_by.legal_name),
         }
         return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.OPEN.value:
@@ -364,13 +368,13 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'ident_agenda': task.legacy_code,
             'codigo_adv_solicitante': task.person_asked_by.legacy_code,
             'codigo_adv_origem': task.person_distributed_by.legacy_code,
-            'codigo_adv_correspondente': person_executed_by,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'SubStatus': 30,
             'status': 0,
             'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
-            'descricao': 'Solicitada ao correspondente ('+task.person_executed_by.legal_name +
+            'descricao': 'Solicitada ao correspondente ('+person_executed_by_legal_name +
                          ') por BackOffice: {}'.format(
                 task.person_distributed_by.legal_name),
         }
