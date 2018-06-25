@@ -1,0 +1,518 @@
+{% extends 'skeleton/base.html' %}
+{% load static %}
+{% load core_filters %}
+{% load render_table from django_tables2 %}
+{% load tz %}
+{% load djmoney %}
+
+{% block extra_stylesheets %}
+    <!-- DataTables -->
+    <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        table.dataTable.row-border tbody tr:first-child th, table.dataTable.row-border tbody tr:first-child td, table.dataTable.display tbody tr:first-child th, table.dataTable.display tbody tr:first-child td {
+            font-size: small !important;
+            cursor: pointer;
+        }
+        tr {
+            cursor: pointer;
+        }
+        #taskTable {
+            overflow: auto;
+        }
+    </style>
+{% endblock %}
+
+{% block right-sidebar-chat %}
+    {% include 'chat/chat-right-sidebar.html' %}
+{% endblock %}
+{% block content %}    
+    <link href="{% static 'skeleton/css/step-bar.css' %}" rel="stylesheet">
+    <link href="{% static 'libs/bootstrap-rating/bootstrap-rating.css' %}" rel="stylesheet">
+
+    {% include 'task/task_to_assign.html' with task=task %}
+    <form id="task_detail" action="" method="post">{% csrf_token %}
+        {% include 'task/task_detail/tab.html' %}
+        <div class="panel-group" role="tablist" aria-multiselectable="true">
+            <!-- Arquivos ECM -->
+            {% include 'task/task_detail/arq_ecm.html' %}
+            {% include 'task/task_detail/historico.html' %}
+        </div>
+        <!-- CONFIRMAR AÇÃO -->
+        <div id="confirmAction" class="modal fade "
+            tabindex="-1" role="alert" aria-labelledby="modalTitle"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg ">
+                <div class="modal-content">
+                    <div id="modalHeader" class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 id="modalTitle" class="modal-title">
+                            <i id="icon" class="mdi-24px"></i>
+                             Deseja <span id="actionText">aceitar</span> o prazo? </h4>
+                    </div>
+                    <div class="modal-body p-30">
+                        {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
+                            {{ form.servicepricetable_id }}
+                            <div class="form-group" style="margin: auto">
+                                <label>Tipo de Serviço: </label>
+                                {{ form.instance.type_task }}
+                            </div>
+                            <div id="servicepricetable" class="table-responsive" style="margin: auto">
+                                {% render_table correspondents_table %}
+                                <div id="servicepricetable-alert" class="alert alert-danger alert hidden">
+                                Favor selecionar um escritório correspondente. </div>
+                                <b>Avaliação*:</b> A avaliação é composta pela média móvel dos últimos 3 meses.
+                            </div>
+                            <br>
+                            <div class="form-group" style="margin: auto">
+                                <label>{{ form.amount.label }}</label>
+                                {{ form.amount }}
+                            </div>
+                            <br>
+                        {% endif %}
+                        <div class="form-group" style="margin: auto">
+                            <label> {{ form.notes.label }}</label>
+                            {{ form.notes }}
+                        </div>
+                        <div class="rating-container">
+                            <h4 class="panel-title text-center text-danger">
+                                <i class="fa fa-star"></i>
+                                <b> Avalie o atendimento do correspondente</b>
+                            </h4>
+                            <div class="form-group text-center" style="margin: auto">
+                                {{ form.feedback_rating }}
+                            </div>
+                            <div class="form-group" style="margin: auto">
+                                <label> {{ form.feedback_comment.label }}</label>
+                                <div>{{ form.feedback_comment }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button style="width: 100px!important;" onClick="resetForm(this)"
+                                class="btn btn-default"
+                                data-dismiss="modal">
+                            <i class="mdi mdi-close"></i> Cancelar
+                        </button>
+                                <button id="actionButton"
+                                        type="submit"
+                                        onclick="submit_task_detail(this)"
+                                        survey={% if form.instance.type_task.survey %}true{% else %}''{% endif %}
+                                        style="width: 100px!important;"
+                                        class="btn btn-raised btn-success">Sim
+                                </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    {% include 'core/mask_selector.html' %}
+{% endblock %}
+
+{% block extra_scripts %}
+    <!-- UPLOADS SCRIPTS  -->
+    {% include 'task/includes/upload.html' %}
+    <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
+    <script src="{% static 'libs/bootstrap-rating/bootstrap-rating.min.js' %}"></script>
+    <!--Style Switcher -->
+    <script src="{% static 'skeleton/js/cbpFWTabs.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+
+    <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>
+    <script src="{% static 'task/task-detail.js' %}"></script>
+
+    <!-- datatables -->
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+
+    <script type="text/javascript">
+        (function() {
+            [].slice.call(document.querySelectorAll('.sttabs')).forEach(function(el) {
+                new CBPFWTabs(el);
+            });
+        })();
+    </script>
+    {% include 'questionnaire/generic_survey.html' %}
+
+    <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
+         a medida que for adicionando novos arquivos -->
+    <div id="scripts">
+    </div>
+
+    <script>
+        var expanded = false;
+
+        function toggleArrowHist() {
+
+            if (expanded) {
+                expanded = false;
+                document.getElementById("up_hist").style.display = "none";
+                document.getElementById("down_hist").style.display = "block";
+            }
+            else {
+                expanded = true;
+                document.getElementById("up_hist").style.display = "block";
+                document.getElementById("down_hist").style.display = "none";
+            }
+        }
+    </script>
+
+    <script>
+        var expanded = false;
+
+        function toggleArrow() {
+
+            if (expanded) {
+                expanded = false;
+                document.getElementById("up").style.display = "none";
+                document.getElementById("down").style.display = "block";
+            }
+            else {
+                expanded = true;
+                document.getElementById("up").style.display = "block";
+                document.getElementById("down").style.display = "none";
+            }
+        }
+
+    </script>
+
+    <script type="text/javascript">
+
+        $(function () {
+            $("input[name=execution_date]").attr({'required': true,
+                'placeholder': 'Data de Cumprimento'});
+        });
+
+        function toogleModals(modalToClose, modalToOpen) {
+            $(modalToClose).one('hidden.bs.modal', function() {
+                $(modalToOpen).modal('show');
+            }).modal('hide');
+        }
+
+        //Função para exibir modal do survey
+        function beforeSubmit() {
+            toogleModals('#confirmAction', '#survey')
+            $('#task_detail').submit(function (e) {
+                e.preventDefault();
+            });
+            $('#actionButton').removeAttr('disabled')
+        }
+
+        //Função para verificar se foi selecionado um escritório antes de delegar
+        function checkDelegationOffice() {
+            var servicepricetable_id = $('input[name=servicepricetable_id]').val();
+            var selected_office = $("#office-"+servicepricetable_id);
+            var public_office = (selected_office.data('office-public') == "True");
+            $('#task_detail').submit(function (e) {
+                e.preventDefault();
+            });
+            if (servicepricetable_id === ""){
+                $("#alert-correspondent").remove();
+                $("#servicepricetable-alert").removeClass("hidden");
+                $('#actionButton').removeAttr('disabled')
+            }else if (public_office){
+                var text_public_office = "Para a contratação dos serviços do EZLog deve ser feita a transferência do" +
+                    " valor " + selected_office.data('formated-value') + " para a conta abaixo:" +
+                    "\nBanco Bradesco" +
+                    "\nAgência: 2146-6" +
+                    "\nConta corrente: 40930-8" +
+                    "\nSílex Sistemas Ltda." +
+                    "\n04.170.575-0001-03" +
+                    "\nTelefone de contato: 31 2538-7869";
+                swal({
+                    title: "Importante",
+                    text: text_public_office,
+                    type: "warning",
+                    showCancelButton: true,
+                    cancelButtonText: "Cancelar",
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Delegar",
+                    closeOnConfirm: false
+                }, function(isConfirm){
+                    if (isConfirm) {
+                        $('<input />').attr('type', 'hidden')
+                            .attr('name', 'action')
+                            .attr('value', 'OPEN')
+                            .appendTo('#task_detail');
+                        toogleModals('#confirmAction', '#procssing')
+                        $('#task_detail').unbind('submit').submit();
+                    }else{
+                        $('#actionButton').removeAttr('disabled')
+                    }
+                });
+            }else{
+                $('<input />').attr('type', 'hidden')
+                    .attr('name', 'action')
+                    .attr('value', 'OPEN')
+                    .appendTo('#task_detail');
+                $('#task_detail').unbind('submit').submit();
+                toogleModals('#confirmAction', '#procssing')
+            }
+        }
+
+        function submit_task_detail(actionButton) {
+
+            var task_status = actionButton.value;
+            var have_survey = actionButton.getAttribute('survey');
+            actionButton.disabled = true;
+            {#toogleModals('#confirmAction', '#procssing')#}
+            if (task_status === 'DONE' && have_survey){
+                beforeSubmit();
+            }else if(task_status === 'OPEN'){
+                checkDelegationOffice();
+            }else{
+                ret = true;
+                $('#task_detail [required]').each(function(index) {
+                    if (!Boolean($( this ).val())){
+                        actionButton.disabled = false;
+                        ret = false;
+                    }
+                });
+                if (ret) {
+                    $('<input name="action" value="'+ task_status +'">').appendTo($('#task_detail'));
+                    toogleModals('#confirmAction', '#procssing');
+                    $('#task_detail').unbind('submit').submit();
+                }
+            }
+
+        }
+
+        var nextState = {
+            ACCEPTED_SERVICE: {text: "aceitar", icon: "mdi mdi-thumb-up-outline"},
+            REFUSED_SERVICE: {text: "recusar", icon: "mdi mdi-thumb-down-outline"},
+            OPEN: {text: "delegar", icon: "mdi mdi-account-location"},
+            ACCEPTED: {text: "aceitar", icon: "mdi mdi-calendar-clock"},
+            REFUSED: {text: "recusar", icon: "mdi mdi-clipboard-alert"},
+            DELEGATED: {text: "delegar", icon: "assignment_returned"},
+            DONE: {text: "Cumprir", icon: "mdi mdi-checkbox-marked-circle-outline"},
+            FINISHED: {text: "Finalizar", icon: "mdi mdi-gavel"},
+            BLOCKEDPAYMENT: {text: "Glosar", icon: "mdi mdi-currency-usd-off"},
+            RETURN: {text: "Retornar", icon: "mdi mdi-backburger"}
+        };
+
+        function resetForm(el){
+            el.form.reset();
+            if ($('#id_feedback_rating').length > 0) {
+                $('#id_feedback_rating').rating('rate', '');
+            }
+        }
+
+        function getId(value) {
+            var task_status = value.id;
+
+            if (value.id == "BLOCKEDPAYMENT" || value.id == "FINISHED"){
+                $('.rating-container').show();
+            } else {
+                $('.rating-container').hide();
+                $('#id_feedback_rating').rating('rate', '');
+                $('#id_feedback_comment').val('');
+            }
+
+            var $input = $("input[name=execution_date]");
+            if ($input.length > 0) {
+                var input = $input.get(0);
+                if (! input.checkValidity()) {
+                    input.reportValidity();
+                    return false
+                }
+            }
+
+            $('#confirmAction').modal('show');
+
+            $("#servicepricetable-alert").addClass("hidden");
+
+            // $("#confirmAction").on('shown.bs.modal', function () {
+            var actionButton = document.getElementById("actionButton");
+            var nextText = document.getElementById("actionText");
+            var modalHeader = document.getElementById("modalHeader");
+            nextText.innerHTML = nextState[task_status]['text'];
+            $('#icon').addClass(nextState[task_status]['icon']);
+            actionButton.innerHTML = "<i class='"+nextState[task_status]['icon']+"'></i> "+
+                nextState[task_status]['text'].replace(nextState[task_status]['text'][0],
+                    nextState[task_status]['text'][0].toUpperCase());
+
+            actionButton.setAttribute("name", "action");
+            actionButton.setAttribute("value", task_status);
+
+            {# Apenas estes status devem possuir notes como required, alem de nao poder #}
+            {# espacos em branco #}
+
+            var notes = $('textarea[id=notes_id]');
+            notes.removeAttr('required');
+            ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN', 'REFUSED_SERVICE'].forEach(function (status) {
+                if (task_status === status) {
+                    notes.attr('required', true).change(function () {
+                        notes.val(notes.val().trim())
+                    });
+                }
+            });
+
+            return true;
+        }
+    </script>
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                $('#locating').modal('show');
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                console.log("Geolocalização não é suportada pelo browser.");
+            }
+        }
+        function showPosition(position) {
+            var data = {};
+            var checkpointtype = $('#GEOLOCATION').data("checkpointtype");
+            data['latitude'] = position.coords.latitude;
+            data['longitude'] = position.coords.longitude;
+            data['task_id'] = {{ form.instance.pk }};
+            data['checkpointtype'] = checkpointtype;
+            var url = $('#GEOLOCATION').data("url");
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: data,
+                success: function (result) {
+                    console.log(result);
+                    if (result.ok){
+                        location.reload();
+                        $('#locating').modal('hide');
+                    }else{
+                        $('#locating').modal('hide');
+                        showToast('error', 'Atenção', "Localização não registrada", 0, false);
+                    }
+                },
+                error: function (request, status, error) {
+                },
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                },
+                dataType: 'json'
+            })
+        }
+        function showError(error) {
+            $('#locating').modal('hide');
+            var msg = ''
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    msg = "O usuário negou o acesso à Geolocalização.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    msg = "Informação de localização não disponível.";
+                    break;
+                case error.TIMEOUT:
+                    msg = "Tempo limite atingido para o pedido de localização.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    msg = "Ocorreu um erro desconhecido.";
+                    break;
+            }
+            showToast('error', 'Atenção', msg, 0, false);
+        }
+        </script>
+    <script type="text/javascript">
+        $("#correspondents-table tbody tr").click(function(){
+            $("#servicepricetable-alert").addClass("hidden");
+            id = $(this).data('id');
+            amount = $(this).data('value').toString();
+            $('input[name=servicepricetable_id]').val(id);
+            $('input[name=amount]').val(amount.replace(".", ","));
+            $(this).addClass("ezl-bg-open");
+            $(this).siblings().removeClass("ezl-bg-open");
+            $('input[name=amount]').focus();
+        });
+
+        $('input[id=id_amount]').keypress(function(e) {
+            if(e.which == 13) {
+              e.preventDefault();
+            }
+        });
+    </script>
+{% endblock %}
+{% block script_window_load %}
+    {{ block.super }}
+    get_ecms({{form.instance.pk}});
+{% endblock %}
+
+{% block extra_modal %}
+    <!-- Janela modal para mostrar progresso de deleção do arquivo -->
+    <div id="deleting" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center;">
+                    Excluindo arquivo ...
+                </div>
+                <div class="modal-footer">
+                    <div class="progress progress-striped active">
+                        <div class="progress-bar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Janela modal para mostrar progresso do envio de arquivos -->
+    <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" style="text-align: center">Enviando ...</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="progress progress-lg">
+                        <div class="progress-bar progress-bar-info active progress-bar-striped" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" style="width: 0%" role="progressbar">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Janela modal para mostrar enquanto processa a geolocalização -->
+    <div id="locating" class="modal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center;">
+                    <h1>Aguarde...</h1>
+                    <p class="h1"><i class="fa fa-spin fa-map-marker"></i></p>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Janela modal para mostrar enquanto faz submit do form -->
+    <div id="procssing" class="modal" data-keyboard="false">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center;">
+                    <h1>Aguarde...</h1>
+                    <p class="h1"><i class="fa fa-spin fa-spinner"></i></p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script_document_ready %}
+    {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
+        $('#confirmAction').on('show.bs.modal', function (event) {
+            var table = $('#correspondents-table').DataTable({
+                paging: false,
+                order: [[4, 'asc']],
+                dom: 'frti',
+                buttons: [],
+                language: {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                },
+            });
+            $('#actionButton').removeAttr('disabled')
+        });
+        /* Ao fechar o modal, limpar a tabela */
+        $('#confirmAction').on('hide.bs.modal', function (event) {
+            $('#servicePriceTableTable').empty();
+            $('#servicePriceTableTable').DataTable().clear().destroy();
+        });
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,64 @@
+.chat-main  {
+  background-color: #fff !important;
+  padding: 5px;
+  margin: 10px;
+}
+
+.chat-main-box .chat-right-aside .chat-list {
+  overflow-y: auto !important;
+}
+
+.chat-list-a {
+  padding: 2px !important;
+}
+
+div.chat-title {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+
+.chatonline {
+  overflow: scroll !important;
+  height: 90% !important;
+}
+
+.list-chat {
+  margin-bottom: 20px !important;
+}
+
+.r-panel-body {
+  padding: 1px !important;
+}
+
+.chat-image {
+  min-width: 200px !important;
+}
+
+.chat-body {
+  margin-right: 2px !important;
+}
+
+.chat-box .slimScrollDiv {
+  min-height: 403px !important;
+}
+
+.chat-box .chat-list {
+  height: 100% !important;
+}
+
+.chat-image {
+  width: 100% !important;
+}
+.chat-text {
+  width: 100% !important;
+}
+
+.non-odd > .chat-image {
+  text-align: left;
+}
+
+.odd > .chat-image {
+  text-align: right;
+}

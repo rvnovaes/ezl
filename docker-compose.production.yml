@@ -1,0 +1,106 @@
+version: "3"
+networks:
+  default:
+services:
+  builder:
+    build:
+      context: .
+      dockerfile: containers/web/Dockerfile
+      args:
+        requirements_file: production.txt
+    image: ezl:latest
+    command: date
+    environment:
+      ENV: production
+
+  db:
+    ports:
+      - "57002:5432"
+    volumes:
+      - "db-data:/var/lib/postgresql/data"
+      - "./containers/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
+      - "./containers/db/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf"
+  nginx:
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+      - certbot
+    labels:
+      - "traefik.backend=ezl-production"
+      - "traefik.frontend.rule=Host:mtostes.ezlawyer.com.br"
+      - "traefik.docker.network=traefik_webgateway"
+  web:
+    build:
+      context: .
+      dockerfile: containers/web/Dockerfile
+      args:
+        requirements_file: production.txt
+    image: ezl:latest
+    command: uwsgi --ini /app/config/uwsgi/uwsgi.ini
+    volumes:
+      - .:/app
+      - web-static:/app/staticfiles
+      - web-media:/app/media
+      - ezl-logs:/var/log/ezl
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas
+    environment:
+      ENV: production
+  ws:
+    image: ezl:latest
+    volumes:
+      - .:/app
+      - ezl-logs:/var/log/ezl
+    ports:
+      - '8002:8002'
+    command: daphne -b 0.0.0.0 -p 8002 --ws-protocol "graphql-ws" --proxy-headers ezl.asgi:channel_layer
+  ws-worker:
+    image: ezl:latest
+    volumes:
+      - .:/app
+      - ezl-logs:/var/log/ezl
+    command: python manage.py runworker
+  luigi:
+    environment:
+      ENV: production
+    ports:
+      - "8082:8082"
+  flower:
+    ports:
+      - "5555:5555"
+    environment:
+      ENV: production
+  certbot:
+    build:
+      context: .
+      dockerfile: containers/certbot/Dockerfile
+    image: local_certbot:latest
+    volumes:
+      - letsencrypt-www:/tmp/www
+      - letsencrypt-etc:/etc/letsencrypt
+
+  tasks:
+    environment:
+      ENV: production
+      PYTHONPATH: /app
+    depends_on:
+      - builder
+      - db
+      - queues
+
+  tasks-schedule:
+    environment:
+      ENV: production
+      PYTHONPATH: /app
+    depends_on:
+      - tasks
+
+  pgweb:
+    build:
+      context: .
+      dockerfile: containers/pgweb/Dockerfile
+    command: pgweb --url postgres://ezl:ezl@db:5432/ezl?sslmode=disable --bind 0.0.0.0 --auth-user=admin --auth-pass=dev@2016
+    ports:
+    - "9002:8081"

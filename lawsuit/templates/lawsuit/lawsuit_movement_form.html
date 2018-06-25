@@ -1,0 +1,14 @@
+{% include 'core/widgets/generic_multiple_form.html' with delete='movement_delete' create='movement_add' previous_page='folder_update' param1=view.kwargs.folder %}
+
+{% block extra_scripts %} 
+    <script>
+        $(document).ready(function(){
+        	typeaheadAditionalParams.court_district = $('#court_district').attr('data-value')
+			$('#court_district').on('change', function(){
+				typeaheadAditionalParams.court_district = $(this).attr('data-value')				
+				$('#organ').val(null)
+				$('#organ').attr('data-value', "")
+			})			        	
+        })
+    </script>
+{% endblock %}

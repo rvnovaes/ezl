@@ -1,0 +1,78 @@
+<table class="table table-hover">
+    <tbody>
+        <tr>
+            <th>
+                Nome
+            </th>
+            <td>
+                {{ office.legal_name|capfirst|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Endereço
+            </th>
+            <td>
+                {% with addresses=office.get_address %}
+                {% if addresses %}
+                    {% if addresses|length == 1 %}
+                        {{ addresses.0|capfirst }}
+                    {% else %}
+                        <ul>
+                        {% for address in addresses %}
+                            <li>{{ address|capfirst }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% else %}
+                    ---
+                {% endif %}
+                {% endwith %}
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Email
+            </th>
+            <td>
+                {% with emails=office.get_emails %}
+                {% if emails %}
+                    {% if emails|length == 1 %}
+                        {{ emails.0 }}
+                    {% else %}
+                        <ul>
+                        {% for email in emails %}
+                            <li>{{ email }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% else %}
+                    ---
+                {% endif %}
+                {% endwith %}
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Telefone
+            </th>
+            <td>
+                {% with phones=office.get_phones %}
+                {% if phones %}
+                    {% if phones|length == 1 %}
+                        {{ phones.0 }}
+                    {% else %}
+                        <ul>
+                        {% for phone in phones %}
+                            <li>{{ phone }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% else %}
+                    ---
+                {% endif %}
+                {% endwith %}
+            </td>
+        </tr>
+    </tbody>
+</table>

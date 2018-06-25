@@ -1,0 +1,75 @@
+version: "3"
+services:
+  builder:
+    build:
+      context: .
+      dockerfile: containers/web/Dockerfile
+      args:
+        requirements_file: production.txt
+    image: ezl:latest
+    command: date
+    environment:
+      ENV: development
+
+  nginx:
+    labels:
+      - "traefik.backend=ezl-teste"
+      - "traefik.frontend.rule=Host:teste.ezlawyer.com.br"
+      - "traefik.docker.network=traefik_webgateway"
+    volumes:
+      - ./containers/nginx/conf.d/ezl_teste.conf:/etc/nginx/conf.d/default.conf
+      - web-static:/usr/share/nginx/html/static
+      - web-media:/usr/share/nginx/html/media
+      - letsencrypt-www:/usr/share/nginx/html/certbot
+      - letsencrypt-etc:/etc/letsencrypt
+    depends_on:
+      - web
+      - certbot
+
+  web:
+    command: uwsgi --ini /app/config/uwsgi/uwsgi.ini
+    environment:
+      ENV: development
+  ws:
+    image: ezl:latest
+    volumes:
+      - .:/app
+      - ezl-logs:/var/log/ezl
+    command: daphne -b 0.0.0.0 -p 8002 --ws-protocol "graphql-ws" --proxy-headers ezl.asgi:channel_layer
+  ws-worker:
+    image: ezl:latest
+    volumes:
+      - .:/app
+      - ezl-logs:/var/log/ezl
+    command: python manage.py runworker
+  luigi:
+    command: luigid
+    environment:
+      ENV: development
+  flower:
+    environment:
+      ENV: development
+  tasks:
+    environment:
+      ENV: development
+      PYTHONPATH: /app
+    depends_on:
+      - builder
+      - db
+      - tunnel
+      - queues
+
+  tunnel:
+    image: ezl:latest
+    command: python -m sshtunnel -U dev -P dev@2016 -L 0.0.0.0:2000 -R 172.27.155.22:1433 -p 22 201.86.113.86
+    volumes:
+      - .:/app
+
+  certbot:
+    build:
+      context: .
+      dockerfile: containers/certbot/Dockerfile
+    image: local_certbot:latest
+    volumes:
+      - letsencrypt-www:/tmp/www
+      - letsencrypt-etc:/etc/letsencrypt
