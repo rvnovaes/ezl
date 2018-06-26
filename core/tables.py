@@ -204,7 +204,7 @@ class TeamTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
     class Meta:
         model = Team
-        fields = ['selection', 'name']
+        fields = ['selection', 'name', 'is_active']
         attrs = {"class": "table-striped table-bordered"}
         row_attrs = {
             'data_href': lambda record: '/teams/' + str(record.pk) + '/'

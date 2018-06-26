@@ -20,7 +20,7 @@ send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'executi
 
 @receiver(post_save, sender=Ecm)
 def export_ecm_path(sender, instance, created, **kwargs):
-    if created and instance.legacy_code is None:
+    if created and instance.legacy_code is None and instance.task.legacy_code:
         export_ecm.delay(instance.id)
 
 
@@ -46,8 +46,8 @@ def delete_related_ecm(sender, instance, **kwargs):
 @receiver(pre_delete, sender=Ecm)
 def delete_ecm_advwin(sender, instance, **kwargs):
     if not instance.legacy_code and instance.task.legacy_code:
-        delete_ecm.delay(instance.id, instance.path.name, instance.task.legacy_code,
-                         timezone.localtime(instance.create_date), instance.create_user.username, True)
+        delete_ecm.delay(instance.id, instance.path.name, instance.create_user.username,
+                         instance.task.legacy_code, instance.task.id)
 
 
 @receiver(post_init, sender=Task)

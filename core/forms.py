@@ -11,19 +11,16 @@ from django.forms.models import inlineformset_factory
 from django.utils.translation import ugettext_lazy as _
 from django.urls.base import reverse
 from django.core.exceptions import FieldDoesNotExist
-from dal import autocomplete
 from localflavor.br.forms import BRCPFField, BRCNPJField
 from material import Layout, Row
 
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, user_email
-from allauth.utils import build_absolute_uri
 
 from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, City, ContactMechanism, ContactMechanismType, AddressType, \
     LegalType, Office, Invite, InviteOffice, Team
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session, get_domain
-from core.widgets import TypeaHeadWidget
 from core.widgets import TypeaHeadForeignKeyWidget
 from core.models import OfficeMixin
 from django_file_form.forms import MultipleUploadedFileField, FileFormMixin
@@ -553,6 +550,7 @@ class InviteOfficeForm(BaseForm):
         fields = ['office', 'office_invite']
         exclude = ['is_active']
 
+
 class TeamMultipleChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):        
         if hasattr(obj, 'person'):
@@ -563,9 +561,10 @@ class TeamMultipleChoiceField(forms.ModelMultipleChoiceField):
 class TeamForm(BaseForm):
     members = TeamMultipleChoiceField(queryset=User.objects.all())
     supervisors = TeamMultipleChoiceField(queryset=User.objects.filter(groups__name__contains='Supervisor'))
+
     class Meta:
         model = Team
-        fields = ['office', 'name', 'members', 'supervisors']
+        fields = ['office', 'name', 'members', 'supervisors', 'is_active']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
