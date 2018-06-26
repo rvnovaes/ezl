@@ -76,14 +76,12 @@ def validate_import(f):
         debug_logger = etl.debug_logger
         error_logger = etl.error_logger
         name_class = etl.model._meta.verbose_name
-        try:
-            field_check = etl.field_check
+        try:            
+            field_check = etl.EZL_LEGACY_CODE_FIELD if not etl.field_check else etl.field_check
             advwin_values = [str(i[field_check]) for i in rows]
-
-            params = {'{}__in'.format(etl.EZL_LEGACY_CODE_FIELD): advwin_values}
+            params = {'{}__in'.format(field_check): advwin_values}            
             qset = etl.model.objects.filter(**params)
-
-            parts = etl.EZL_LEGACY_CODE_FIELD.split('__')
+            parts = field_check.split('__')
             chain = parts[:-1]
             related = '__'.join(chain)
             if related:
