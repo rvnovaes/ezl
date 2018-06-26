@@ -1,6 +1,8 @@
 from core.models import Team
 from django.db.models import Q
 from core.utils import get_office_session
+from task.models import TaskStatus
+
 
 class RuleViewTask(object):
     """
