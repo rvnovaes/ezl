@@ -23,6 +23,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute=0, hour=2)
     },
 }
+CELERY_SEND_TASK_EMAILS = False
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

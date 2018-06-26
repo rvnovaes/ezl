@@ -22,13 +22,17 @@ DO_SOMETHING_SUCCESS_MESSAGE = 'Do Something successful!'
 
 DO_SOMETHING_ERROR_MESSAGE = 'ERROR during do something: {}'
 
+MAX_RETRIES = 10
+
+BASE_COUNTDOWN = 2
+
 
 class TaskObservation(Enum):
     DONE = 'Ordem de serviço cumprida por'
 
 
-@shared_task()
-def export_ecm(ecm_id, ecm=None, execute=True):
+@shared_task(bind=True, max_retries=MAX_RETRIES)
+def export_ecm(self, ecm_id, ecm=None, execute=True):
     if ecm is None:
         ecm = Ecm.objects.get(pk=ecm_id)
 
@@ -48,30 +52,32 @@ def export_ecm(ecm_id, ecm=None, execute=True):
     stmt = JuridGedMain.__table__.insert().values(**values)
     if execute:
         LOGGER.debug('Exportando ECM %d-%s ', ecm.id, ecm)
-        result = None
         try:
             result = get_advwin_engine().execute(stmt)
-            stmt = JuridGedMain.__table__.select().where(and_(
-                JuridGedMain.__table__.c.Codigo_OR == ecm.task.legacy_code,
-                JuridGedMain.__table__.c.Nome == file_name)
-            )
-            for row in get_advwin_engine().execute(stmt).__dict__:
-                id_doc = row['ID_doc']
-                export_ecm_related_folter_to_task(ecm, id_doc)
         except Exception as exc:
+            self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
             LOGGER.warning('Não foi possível exportar ECM: %d-%s\n%s',
                            ecm.id,
                            ecm,
                            exc,
                            exc_info=(type(exc), exc, exc.__traceback__))
-        finally:
-            LOGGER.info('ECM %s: exportado', ecm)
-            return result.__dict__
+            raise exc
+        stmt = JuridGedMain.__table__.select().where(and_(
+            JuridGedMain.__table__.c.Codigo_OR == ecm.task.legacy_code,
+            JuridGedMain.__table__.c.Nome == file_name)
+        )
+        for row in get_advwin_engine().execute(stmt):
+            id_doc = row['ID_doc']
+            export_ecm_related_folter_to_task.delay(ecm.id, id_doc)
+        LOGGER.info('ECM %s: exportado', ecm)
+        return '{} Registros afetados'.format(result.rowcount)
     else:
         return stmt
 
 
-def export_ecm_related_folter_to_task(ecm, id_doc, execute=True):
+@shared_task(bind=True, max_retries=MAX_RETRIES)
+def export_ecm_related_folter_to_task(self, ecm_id, id_doc, execute=True):
+    ecm = Ecm.objects.get(pk=ecm_id)
     values = {
         'Id_tabela_or': 'Pastas',
         'Id_codigo_or': get_folder_to_related(task=ecm.task),
@@ -85,15 +91,92 @@ def export_ecm_related_folter_to_task(ecm, id_doc, execute=True):
         result = None
         try:
             result = get_advwin_engine().execute(stmt)
-        except Exception as e:
+            LOGGER.info('ECM %s: relacionamento criado entre Pasta e Agenda', ecm)
+            return '{} Registros afetados'.format(result.rowcount)
+        except Exception as exc:
+            self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
             LOGGER.warning('Não foi possíve relacionar o ECM entre Agenda e Pasta: %d-%s\n%s',
                            ecm.id,
                            ecm,
-                           e,
-                           exc_info=(type(e), e, e.__traceback__))
-        finally:
-            LOGGER.info('ECM %s: relacionamento criado entre Pasta e Agenda', ecm)
-            return result.__dict__
+                           exc,
+                           exc_info=(type(exc), exc, exc.__traceback__))
+            raise exc
+
+
+@shared_task(bind=True, max_retries=10)
+def delete_ecm_related_folder_to_task(self, ecm_id, id_doc, task_id, ecm_create_user, execute=True):
+    task = Task.objects.get(pk=task_id)
+    values = {
+        'Id_tabela_or': 'Pastas',
+        'Id_codigo_or': get_folder_to_related(task=task),
+        'Id_id_doc': id_doc,
+        'id_ID_or': 0,
+        'usuario_insercao': ecm_create_user
+    }
+    stmt = JuridGEDLig.__table__.select().where(and_(
+        JuridGEDLig.__table__.c.Id_tabela_or == values['Id_tabela_or'],
+        JuridGEDLig.__table__.c.Id_codigo_or == values['Id_codigo_or'],
+        JuridGEDLig.__table__.c.Id_id_doc == values['Id_id_doc'],
+        JuridGEDLig.__table__.c.id_ID_or == values['id_ID_or'])
+    )
+    if execute:
+        result = None
+        try:
+            result = get_advwin_engine().execute(stmt)
+        except Exception as exc:
+            self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
+            LOGGER.warning('Não foi possíve excluir o relacionamento do ECM entre Agenda e Pasta: %d\n%s',
+                           ecm_id,
+                           exc,
+                           exc_info=(type(exc), exc, exc.__traceback__))
+            raise exc
+        for row in result:
+            id_lig = row['ID_lig']
+            stmt = JuridGEDLig.__table__.delete().where(JuridGedMain.__table__.c.ID_lig == id_lig)
+            deleted_ecm = get_advwin_engine().execute(stmt)
+        return '{} Registros afetados'.format(result.rowcount)
+
+
+@shared_task(bind=True, max_retries=10)
+def delete_ecm(self, ecm_id, ecm_path_name, ecm_create_user, task_legacy_code, task_id, execute=True):
+    new_path = ecm_path_ezl2advwin(ecm_path_name)
+    file_name = get_ecm_file_name(ecm_path_name)
+    values = {
+        'Tabela_OR': 'Agenda',
+        'Codigo_OR': task_legacy_code,
+        'Link': new_path,
+        'Nome': file_name,
+        'Responsavel': ecm_create_user,
+        'Arq_Status': 'Guardado',
+        'Arq_nick': file_name,
+        'Descricao': file_name
+    }
+    stmt = JuridGedMain.__table__.select().where(and_(
+        JuridGedMain.__table__.c.Tabela_OR == values['Tabela_OR'],
+        JuridGedMain.__table__.c.Codigo_OR == values['Codigo_OR'],
+        JuridGedMain.__table__.c.Link == values['Link'],
+        JuridGedMain.__table__.c.Nome == values['Nome'])
+    )
+    if execute:
+        LOGGER.debug('Excluindo ECM %d ', ecm_id)
+        try:
+            result = get_advwin_engine().execute(stmt)
+            for row in result:
+                id_doc = row['ID_doc']
+                stmt = JuridGedMain.__table__.delete().where(JuridGedMain.__table__.c.ID_doc == id_doc)
+                deleted_ecm = get_advwin_engine().execute(stmt)
+                delete_ecm_related_folder_to_task.delay(ecm_id, id_doc, task_id, ecm_create_user)
+            LOGGER.info('ECM %s: excluído', ecm_id)
+            return '{} Registros afetados'.format(result.rowcount)
+        except Exception as exc:
+            self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
+            LOGGER.warning('Não foi possível excluir o ECM: %d-%s\n%s',
+                           ecm_id,
+                           exc,
+                           exc_info=(type(exc), exc, exc.__traceback__))
+            raise exc
+    else:
+        return stmt
 
 
 def get_folder_to_related(task):
@@ -150,24 +233,23 @@ def insert_advwin_history(task_history, values, execute=True):
         LOGGER.debug('Exportando Histórico de OS %d-%d ', task_history.task.id, task_history.id)
         try:
             result = get_advwin_engine().execute(stmt)
+            LOGGER.info('Histórico de OS %d-%d: exportado com sucesso.',
+                        task_history.task.id,
+                        task_history.id)
+            return '{} Registros afetados'.format(result.rowcount)
         except Exception as exc:
-            result = None
             LOGGER.warning('Não foi possíve exportar Histórico de OS: %d-%d\n%s',
                            task_history.task.id,
                            task_history.id,
                            exc,
                            exc_info=(type(exc), exc, exc.__traceback__))
-        else:
-            LOGGER.info('Histórico de OS %d-%d: exportado com sucesso.',
-                        task_history.task.id,
-                        task_history.id)
-        return result.__dict__
+            raise exc
     else:
         return stmt
 
 
-@shared_task()
-def export_task_history(task_history_id, task_history=None, execute=True, **kwargs):
+@shared_task(bind=True, max_retries=10)
+def export_task_history(self, task_history_id, task_history=None, execute=True, **kwargs):
     if task_history is None:
         task_history = TaskHistory.objects.get(pk=task_history_id)
 
@@ -176,9 +258,18 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
         username = task_history.create_user.username[:20]
 
     task = task_history.task
+    person_executed_by_legacy_code = None
+    person_executed_by_legal_name = None
+    values = {}
+    if task.get_child:
+        person_executed_by_legacy_code = None
+        person_executed_by_legal_name = task.get_child.office.legal_name
+    elif task.person_executed_by:
+        person_executed_by_legacy_code = task.person_executed_by.legacy_code
+        person_executed_by_legal_name = task.person_executed_by.legal_name
     if task_history.status == TaskStatus.ACCEPTED.value:
         values = {
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 50,
@@ -186,13 +277,11 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Aceita por correspondente: {}'.format(
-                task.person_executed_by.legal_name),
+                person_executed_by_legal_name),
         }
-        return insert_advwin_history(task_history, values, execute)
-
     elif task_history.status == TaskStatus.DONE.value:
         values = {
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 70,
@@ -200,13 +289,11 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Cumprida por correspondente: {}'.format(
-                task.person_executed_by.legal_name),
+                person_executed_by_legal_name),
         }
-        return insert_advwin_history(task_history, values, execute)
-
     elif task_history.status == TaskStatus.REFUSED.value:
         values = {
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 20,
@@ -214,12 +301,11 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Recusada por correspondente: {}'.format(
-                task.person_executed_by.legal_name),
+                person_executed_by_legal_name),
         }
-        return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.FINISHED.value:
         values = {
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 100,
@@ -227,12 +313,11 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Diligência devidamente cumprida por: {}'.format(
-                task.person_executed_by.legal_name),
+                person_executed_by_legal_name),
         }
-        return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.RETURN.value:
         values = {
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 80,
@@ -241,10 +326,9 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'usuario': username,
             'descricao': 'Diligência delegada ao correspondente para complementação:'
         }
-        return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.BLOCKEDPAYMENT.value:
         values = {
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 90,
@@ -253,7 +337,6 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'usuario': username,
             'descricao': 'Diligência não cumprida - pagamento glosado'
         }
-        return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.ACCEPTED_SERVICE.value:
         values = {
             'ident_agenda': task.legacy_code,
@@ -265,9 +348,8 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Aceita por Back Office: {}'.format(
-                task.person_executed_by.legal_name),
+                task.person_distributed_by.legal_name),
         }
-        return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.REFUSED_SERVICE.value:
         values = {
             'ident_agenda': task.legacy_code,
@@ -279,25 +361,30 @@ def export_task_history(task_history_id, task_history=None, execute=True, **kwar
             'justificativa': task_history.notes,
             'usuario': username,
             'descricao': 'Recusada por Back Office: {}'.format(
-                task.person_executed_by.legal_name),
+                task.person_distributed_by.legal_name),
         }
-        return insert_advwin_history(task_history, values, execute)
     elif task_history.status == TaskStatus.OPEN.value:
         values = {
             'ident_agenda': task.legacy_code,
             'codigo_adv_solicitante': task.person_asked_by.legacy_code,
             'codigo_adv_origem': task.person_distributed_by.legacy_code,
-            'codigo_adv_correspondente': task.person_executed_by.legacy_code,
+            'codigo_adv_correspondente': person_executed_by_legacy_code,
             'SubStatus': 30,
             'status': 0,
             'data_operacao': timezone.localtime(task_history.create_date),
             'justificativa': task_history.notes,
             'usuario': username,
-            'descricao': 'Solicitada ao correspondente ('+task.person_executed_by.legal_name +
+            'descricao': 'Solicitada ao correspondente ('+person_executed_by_legal_name +
                          ') por BackOffice: {}'.format(
                 task.person_distributed_by.legal_name),
         }
-        return insert_advwin_history(task_history, values, execute)
+    if values:
+        try:
+            ret = insert_advwin_history(task_history, values, execute)
+            return ret
+        except Exception as exc:
+            self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
+            raise exc
 
 
 def update_advwin_task(task, values, execute=True):
@@ -309,28 +396,27 @@ def update_advwin_task(task, values, execute=True):
         LOGGER.debug('Exportando OS %d-%s ', task.id, task)
         try:
             result = get_advwin_engine().execute(stmt)
+            LOGGER.info('OS %s: exportada com  status %s', task, task.task_status)
+            return '{} Registros atualizados'.format(result.rowcount)
         except Exception as exc:
-            result = None
             LOGGER.warning('Não foi possível exportar OS: %d-%s com status %s\n%s',
                            task.id,
                            task,
                            task.task_status,
                            exc,
                            exc_info=(type(exc), exc, exc.__traceback__))
-        else:
-            LOGGER.info('OS %s: exportada com  status %s', task, task.task_status)
-        finally:
-            return result.__dict__
+            raise exc
     else:
         return stmt
 
 
-@shared_task()
-def export_task(task_id, task=None, execute=True):
+@shared_task(bind=True, max_retries=10)
+def export_task(self, task_id, task=None, execute=True):
     if task is None:
         task = Task.objects.get(pk=task_id)
 
     table = JuridAgendaTable.__table__
+    values = {}
 
     if task.task_status == TaskStatus.ACCEPTED_SERVICE.value:
         values = {
@@ -341,7 +427,6 @@ def export_task(task_id, task=None, execute=True):
             'envio_alerta': 0,
             'Obs': get_task_observation(task, 'Aceita por Back Office:', 'acceptance_service_date'),
         }
-        return update_advwin_task(task, values, execute)
     elif task.task_status == TaskStatus.REFUSED_SERVICE.value:
         values = {
             'SubStatus': 20,
@@ -351,7 +436,6 @@ def export_task(task_id, task=None, execute=True):
             'envio_alerta': 0,
             'Obs': get_task_observation(task, 'Recusada por Back Office', 'refused_service_date'),
         }
-        return update_advwin_task(task, values, execute)
     elif task.task_status == TaskStatus.RETURN.value:
         values = {
             'SubStatus': 80,
@@ -365,7 +449,6 @@ def export_task(task_id, task=None, execute=True):
                 task, 'Diligência delegada ao correspondente para complementação por',
                 'return_date')
         }
-        return update_advwin_task(task, values, execute)
     elif task.task_status == TaskStatus.OPEN.value:
         advwin_advogado = None
         if task.child.exists():
@@ -387,7 +470,6 @@ def export_task(task_id, task=None, execute=True):
             'Data_delegacao': task.delegation_date,
             'Obs': get_task_observation(task, 'Ordem de Serviço delegada para:' + delegated_to + ' por ', 'delegation_date'),
         }
-        return update_advwin_task(task, values, execute)
     elif task.task_status == TaskStatus.ACCEPTED.value:
         values = {
             'SubStatus': 50,
@@ -398,7 +480,6 @@ def export_task(task_id, task=None, execute=True):
             'Data_correspondente': timezone.localtime(task.acceptance_date),
             'Obs': get_task_observation(task, 'Ordem de serviço aceita por', 'acceptance_date'),
         }
-        return update_advwin_task(task, values, execute)
     elif task.task_status == TaskStatus.DONE.value:
         values = {
             'SubStatus': 70,
@@ -411,16 +492,6 @@ def export_task(task_id, task=None, execute=True):
             'Data_correspondente': timezone.localtime(task.acceptance_date),
             'Obs': get_task_observation(task, TaskObservation.DONE.value, 'execution_date'),
         }
-
-        result = update_advwin_task(task, values, execute)
-
-        stmts = result
-
-        if execute:
-            return result
-
-        return stmts
-
     elif task.task_status == TaskStatus.REFUSED.value:
         values = {
             'SubStatus': 40,
@@ -429,7 +500,6 @@ def export_task(task_id, task=None, execute=True):
             'Data_correspondente': task.refused_date,
             'Obs': get_task_observation(task, 'Ordem de serviço recusada por', 'refused_date'),
         }
-        return update_advwin_task(task, values, execute)
     elif task.task_status == TaskStatus.BLOCKEDPAYMENT.value:
         values = {
             'SubStatus': 90,
@@ -443,7 +513,6 @@ def export_task(task_id, task=None, execute=True):
                                         'Diligência não cumprida - pagamento glosado por',
                                         'blocked_payment_date')
         }
-        return update_advwin_task(task, values, execute)
     elif task.task_status == TaskStatus.FINISHED.value:
         values = {
             'SubStatus': 100,
@@ -454,4 +523,10 @@ def export_task(task_id, task=None, execute=True):
             'Obs': get_task_observation(task, 'Diligência devidamente cumprida por',
                                         'finished_date')
         }
-        return update_advwin_task(task, values, execute)
+    if values:
+        try:
+            ret = update_advwin_task(task, values, execute)
+            return ret
+        except Exception as exc:
+            self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
+            raise exc
