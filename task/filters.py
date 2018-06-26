@@ -2,13 +2,14 @@ from django.forms import Select, Textarea, RadioSelect
 from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter
 from django import forms
 
-from core.models import Person, State, Office
+from core.models import Person, State, Office, Team
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
 from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ
 from task.models import TypeTask, Task, Filter
 from .models import DashboardViewModel
+from core.utils import get_office_session
 
 
 class TaskFilter(FilterSet):
@@ -29,10 +30,13 @@ class TaskFilter(FilterSet):
                                     label="Setor")
     court = ModelChoiceFilter(queryset=filter_valid_choice_form(Organ.objects.filter(is_active=True)),
                               label="Órgão")
+    team = ModelChoiceFilter(queryset=filter_valid_choice_form(Team.objects.filter(is_active=True)),
+                              label="Equipe")
     folder_number = NumberFilter(label=u"Nº da pasta")
     folder_legacy_code = CharFilter(label=u"Nº da pasta de origem")
     law_suit_number = CharFilter(label=u"Nº do processo")
     task_number = NumberFilter(label=u"Nº da OS")
+    task_legacy_code = CharFilter(label=u"Nº da OS de origem")
     task_origin_code = NumberFilter(label=u"Nº da OS de origem")
     client = CharFilter(label="Cliente",
                         required=False,
@@ -82,6 +86,7 @@ class TaskFilter(FilterSet):
     def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
         super(TaskFilter, self).__init__(data, queryset, prefix, strict, request)
         self.filters['custom_filter'].queryset = Filter.objects.filter(create_user=self.request.user).order_by('name')
+        self.filters['team'].queryset = Team.objects.filter(office=get_office_session(self.request))
 
     class Meta:
         model = DashboardViewModel
