@@ -54,15 +54,6 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
         LOGGER.debug('Exportando ECM %d-%s ', ecm.id, ecm)
         try:
             result = get_advwin_engine().execute(stmt)
-            stmt = JuridGedMain.__table__.select().where(and_(
-                JuridGedMain.__table__.c.Codigo_OR == ecm.task.legacy_code,
-                JuridGedMain.__table__.c.Nome == file_name)
-            )
-            for row in get_advwin_engine().execute(stmt):
-                id_doc = row['ID_doc']
-                export_ecm_related_folter_to_task.delay(ecm.id, id_doc)
-            LOGGER.info('ECM %s: exportado', ecm)
-            return '{} Registros afetados'.format(result.rowcount)
         except Exception as exc:
             self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
             LOGGER.warning('Não foi possível exportar ECM: %d-%s\n%s',
@@ -71,7 +62,15 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
                            exc,
                            exc_info=(type(exc), exc, exc.__traceback__))
             raise exc
-
+        stmt = JuridGedMain.__table__.select().where(and_(
+            JuridGedMain.__table__.c.Codigo_OR == ecm.task.legacy_code,
+            JuridGedMain.__table__.c.Nome == file_name)
+        )
+        for row in get_advwin_engine().execute(stmt):
+            id_doc = row['ID_doc']
+            export_ecm_related_folter_to_task.delay(ecm.id, id_doc)
+        LOGGER.info('ECM %s: exportado', ecm)
+        return '{} Registros afetados'.format(result.rowcount)
     else:
         return stmt
 
@@ -124,10 +123,6 @@ def delete_ecm_related_folder_to_task(self, ecm_id, id_doc, task_id, ecm_create_
         result = None
         try:
             result = get_advwin_engine().execute(stmt)
-            for row in result:
-                id_lig = row['ID_lig']
-                stmt = JuridGEDLig.__table__.delete().where(JuridGedMain.__table__.c.ID_lig == id_lig)
-                deleted_ecm = get_advwin_engine().execute(stmt)
         except Exception as exc:
             self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
             LOGGER.warning('Não foi possíve excluir o relacionamento do ECM entre Agenda e Pasta: %d\n%s',
@@ -135,6 +130,11 @@ def delete_ecm_related_folder_to_task(self, ecm_id, id_doc, task_id, ecm_create_
                            exc,
                            exc_info=(type(exc), exc, exc.__traceback__))
             raise exc
+        for row in result:
+            id_lig = row['ID_lig']
+            stmt = JuridGEDLig.__table__.delete().where(JuridGedMain.__table__.c.ID_lig == id_lig)
+            deleted_ecm = get_advwin_engine().execute(stmt)
+        return '{} Registros afetados'.format(result.rowcount)
 
 
 @shared_task(bind=True, max_retries=10)
