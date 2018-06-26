@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User, Group
@@ -10,19 +11,16 @@ from django.forms.models import inlineformset_factory
 from django.utils.translation import ugettext_lazy as _
 from django.urls.base import reverse
 from django.core.exceptions import FieldDoesNotExist
-from dal import autocomplete
 from localflavor.br.forms import BRCPFField, BRCNPJField
 from material import Layout, Row
 
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, user_email
-from allauth.utils import build_absolute_uri
 
 from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, City, ContactMechanism, ContactMechanismType, AddressType, \
-    LegalType, Office, Invite, InviteOffice
+    LegalType, Office, Invite, InviteOffice, Team
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session, get_domain
-from core.widgets import TypeaHeadWidget
 from core.widgets import TypeaHeadForeignKeyWidget
 from core.models import OfficeMixin
 from django_file_form.forms import MultipleUploadedFileField, FileFormMixin
@@ -32,7 +30,7 @@ class BaseModelForm(FileFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)        
         if self.request:
             self.set_office_queryset()
         usermodel = self._meta.model._meta.app_label == 'auth'
@@ -49,7 +47,7 @@ class BaseModelForm(FileFormMixin, forms.ModelForm):
         return self._meta.model._meta.verbose_name
 
     def set_office_queryset(self):
-        if get_office_session(self.request) and self.request.method == 'GET':
+        if get_office_session(self.request) and self.request.method == 'GET':            
             for field in self.fields:
                 if hasattr(self.fields[field], 'queryset'):
                     if issubclass(self.fields[field].queryset.model, OfficeMixin):
@@ -551,3 +549,29 @@ class InviteOfficeForm(BaseForm):
         model = InviteOffice
         fields = ['office', 'office_invite']
         exclude = ['is_active']
+
+
+class TeamMultipleChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):        
+        if hasattr(obj, 'person'):
+            return obj.person.legal_name
+        return obj.username
+
+
+class TeamForm(BaseForm):
+    members = TeamMultipleChoiceField(queryset=User.objects.all())
+    supervisors = TeamMultipleChoiceField(queryset=User.objects.filter(groups__name__contains='Supervisor'))
+
+    class Meta:
+        model = Team
+        fields = ['office', 'name', 'members', 'supervisors', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)        
+        self.fields['supervisors'].queryset = self.fields['supervisors'].queryset.filter(
+                Q(person__offices=get_office_session(request=self.request)), 
+                ~Q(username__in=['admin', 'invalid_user']))
+        self.fields['members'].queryset = self.fields['members'].queryset.filter(
+                Q(person__offices=get_office_session(request=self.request)), 
+                ~Q(username__in=['admin', 'invalid_user']))

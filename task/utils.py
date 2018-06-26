@@ -5,6 +5,7 @@ from ecm.models import DefaultAttachmentRule, Attachment
 from task.models import *
 from task.mail import SendMail
 from core.utils import get_office_session
+from core.models import Team
 from django.db.models import Q
 from django.core.files.base import ContentFile
 
