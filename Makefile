@@ -30,7 +30,10 @@ load_fixtures:
 	docker-compose run web python manage.py ezl_create_groups_and_permissions
 
 create_groups_and_permissions: 
-	docker-compose run web python manage.py ezl_create_groups_and_permissions	
+	docker-compose run web python manage.py ezl_create_groups_and_permissions
+	
+adjust_contact_mechanism:
+	docker-compose run web python manage.py adjust_contact_mechanism
 ps:
 	docker-compose ps
 
