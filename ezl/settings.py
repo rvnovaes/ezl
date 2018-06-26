@@ -339,7 +339,7 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler',
             'include_html': True,
             'filters': ['require_debug_false'],
-        },    
+        },
         'console': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],

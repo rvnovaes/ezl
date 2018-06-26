@@ -1,6 +1,6 @@
 {% extends 'skeleton/base.html' %}
 {% load static %}
-{% load core_filters %}
+{% load core_filters task_filters %}
 {% load render_table from django_tables2 %}
 {% load tz %}
 {% load djmoney %}
@@ -94,13 +94,13 @@
                                 data-dismiss="modal">
                             <i class="mdi mdi-close"></i> Cancelar
                         </button>
-                                <button id="actionButton"
-                                        type="submit"
-                                        onclick="submit_task_detail(this)"
-                                        survey={% if form.instance.type_task.survey %}true{% else %}''{% endif %}
-                                        style="width: 100px!important;"
-                                        class="btn btn-raised btn-success">Sim
-                                </button>
+                        <button id="actionButton"
+                            type="submit"
+                            onclick="submit_task_detail(this)"
+                            survey={% if form.instance.type_task.survey %}true{% else %}''{% endif %}
+                            style="width: 100px!important;"
+                            class="btn btn-raised btn-success">Sim
+                        </button>
                     </div>
                 </div>
             </div>
@@ -282,6 +282,7 @@
         }
 
         var nextState = {
+            REQUESTED: {text: "recusar", icon: "mdi mdi-clipboard-alert"},
             ACCEPTED_SERVICE: {text: "aceitar", icon: "mdi mdi-thumb-up-outline"},
             REFUSED_SERVICE: {text: "recusar", icon: "mdi mdi-thumb-down-outline"},
             OPEN: {text: "delegar", icon: "mdi mdi-account-location"},
@@ -343,7 +344,7 @@
 
             var notes = $('textarea[id=notes_id]');
             notes.removeAttr('required');
-            ['REFUSED', 'BLOCKEDPAYMENT', 'RETURN', 'REFUSED_SERVICE'].forEach(function (status) {
+            ['REQUESTED', 'REFUSED', 'BLOCKEDPAYMENT', 'RETURN', 'REFUSED_SERVICE'].forEach(function (status) {
                 if (task_status === status) {
                     notes.attr('required', true).change(function () {
                         notes.val(notes.val().trim())
