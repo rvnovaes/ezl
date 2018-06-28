@@ -1,5 +1,5 @@
 {% load static %}
-<nav class="navbar navbar-default navbar-static-top m-b-0">
+<nav class="navbar navbar-default navbar-static-top m-b-0" id="id_navbar">
             <div class="navbar-header">
                 <div class="top-left-part">
                     <!-- Logo -->
@@ -25,9 +25,9 @@
                         <a href="javascript:void(0)" class="open-close waves-effect waves-light">
                         <i class="ti-menu"></i>
                         </a>
-                    </li>
+                    </li>                    
                     {% if office_session_id %}
-                        <li class="dropdown">
+                        <li class="dropdown" id="id_notificacoes"> 
                             <a class="dropdown-toggle waves-effect waves-light" data-toggle="dropdown" href="#">
                                 <i class="mdi mdi-bell-outline"></i>
                                 <div class="notify hide" id="request-notify">
@@ -42,7 +42,7 @@
                             </ul>
                             <!-- /.dropdown-messages -->
                         </li>
-                        <li class="dropdown">
+                        <li class="dropdown" id="id_chat">
                             <a class="dropdown-toggle waves-effect waves-light" data-toggle="dropdown" href="#">
                                 <i class="mdi mdi-comment-text-outline"></i>
                                 <div class="notify hide" id="chat-notify">
@@ -61,7 +61,7 @@
                             <!-- /.dropdown-messages -->
                         </li>
                         {% if 'can_access_general_data' in office_session_perms %}
-                            <li class="open">
+                            <li class="open" id="id_create_task">
                                 <a href="{% url 'task_add' %}" class="waves-effect waves-lightact create-os-active">
                                     <i class="mdi mdi-plus-circle-outline"></i><span class="hidden-sm hidden-xs"> Criar OS</span>
                                 </a>
@@ -71,7 +71,7 @@
                 </ul>
                 <ul class="nav navbar-top-links navbar-right pull-right">
                     {% if office_session_id %}
-                    <li class="dropdown">
+                    <li class="dropdown" id="id_office_session_id">
                         <a href="#office-select-modal" class="waves-effect" data-toggle="modal">
                             <i class="fa fa-building-o">&nbsp;</i>
                             <span id="current_office" class="hidden-sm hidden-xs"></span>
@@ -79,7 +79,7 @@
                         </a>
                     </li>
                     {% endif %}
-                    <li class="dropdown">
+                    <li class="dropdown" id="id_user_menu">
                         <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#">
                             <img src="{% static 'skeleton/no-profile.jpeg' %}" alt="user-img" width="36" class="img-circle">
                             <b class="hidden-xs">{{ request.user }}</b>

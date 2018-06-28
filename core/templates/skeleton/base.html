@@ -19,7 +19,7 @@
     <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment-timezone.min.js' %}"></script>
     <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/locale-pt-br.js' %}"></script>
     <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment-with-locales.js' %}"></script>
-    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js' %}"></script>   
     <!-- Stylesheets block -->
     {% block extra_stylesheets %}
         {% comment %}
@@ -74,6 +74,8 @@
                     <!-- Left Sidebar - style you can find in sidebar.scss  -->
                     {% include 'skeleton/includes/sidebar.html' %}
                 {% endblock %}
+                                
+                {% include 'skeleton/includes/tour.html' %}
         {% endwith %}
         <!-- End Left Sidebar -->
 
@@ -189,7 +191,7 @@
             Utilize esse bloco para adicionar scripts em páginas
             específicas que extendem esse template
         {% endcomment %}
-    {% endblock extra_scripts %}
+    {% endblock extra_scripts %}    
     <!-- End Javascript Block  -->
     <!-- ============================================================== -->
 </body>

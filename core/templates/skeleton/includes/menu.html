@@ -1,17 +1,18 @@
 <ul class="nav" id="side-menu">
-    <li> <!-- DASHBOARD -->
+    <li id="id_dashboard"> <!-- DASHBOARD -->
         <a href="{% url 'dashboard' %}" class="waves-effect">
             <i class="mdi mdi-av-timer fa-fw"></i>
             <span class="hide-menu">Dashboard</span>
         </a>
     </li>
-    <li> <!-- DASHBOARD -->
+    <li id="id_task_seach"> <!-- DASHBOARD -->
         <a href="{% url 'task_search' %}" class="waves-effect">
             <i class="mdi mdi-magnify fa-fw"></i>
             <span class="hide-menu">Pesquisar</span>
         </a>
-    </li>    {% if 'can_access_general_data' in office_session_perms %}
-    <li> <!-- CADASTROS -->
+    </li>    
+    {% if 'can_access_general_data' in office_session_perms %}
+    <li id="id_cadastros"> <!-- CADASTROS -->
         <a href="javascript:void(0)" class="waves-effect">
             <i class="fa fa-pencil-square-o fa-fw" data-icon="v"></i>
             <span class="hide-menu">Cadastros<span class="fa arrow"></span></span>
@@ -69,7 +70,7 @@
         </ul>
     </li>
     {% if perms.core.view_all_tasks %}
-    <li>
+    <li id="id_relatorios">
         <a href="javascript:void(0)" class="waves-effect">
             <i class="mdi mdi-chart-bar fa-fw"></i>
             <span class="hide-menu">Relatórios<span class="fa arrow"></span></span>
@@ -90,7 +91,7 @@
         </ul>
     </li>
     {% endif %}
-    <li> <!-- ADMINISTRAÇÃO -->
+    <li id="id_administracao"> <!-- ADMINISTRAÇÃO -->
         <a href="javascript:void(0)" class="waves-effect">
             <i class="fa fa-folder-o fa-fw" data-icon="v"></i>
             <span class="hide-menu">Administração<span class="fa arrow"></span></span>
@@ -154,6 +155,18 @@
                 <a href="#about-modal" class="waves-effect" data-toggle="modal">
                     <i class="mdi mdi-information-outline"></i>
                     <span class="hide-menu">Sobre</span>
+                </a>
+            </li>
+            <li> <!-- Tour -->
+                <a href="{% url 'dashboard' %}" class="waves-effect" data-toggle="modal" id="id_btn_tour">
+                    <i class="mdi mdi-map"></i>
+                    <span class="hide-menu">Tour</span>
+                    <script>
+                        $('#id_btn_tour').on('click', function(e) {
+                            var tour_enabled_for_user_key = '{{ request.user }}_tour_enabled_for_user';
+                            localStorage[tour_enabled_for_user_key] = true;
+                        });
+                    </script>
                 </a>
             </li>
         </ul>
