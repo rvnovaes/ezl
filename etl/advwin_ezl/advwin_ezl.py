@@ -88,7 +88,7 @@ def validate_import(f):
                 qset = qset.select_related(related)
 
             for entry in qset:
-                debug_logger.debug('{}: REGISTROSALVO - {}'.format(name_class, entry))
+                debug_logger.debug('{}: REGISTRO SALVO - {}'.format(name_class, entry))
 
             ezl_values = [reduce(getattr, parts, entry) for entry in qset]
 
