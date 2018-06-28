@@ -32,7 +32,7 @@ class RuleViewTask(object):
 
     @staticmethod
     def get_query_team_tasks_to_user(person):        
-        teams = Team.objects.filter(supervisors=person.auth_user, is_active=True)                            
+        teams = Team.objects.filter(supervisors=person.auth_user, is_active=True)
         members = Team.objects.none()                
         for team in teams:
             members |= team.members.all()        

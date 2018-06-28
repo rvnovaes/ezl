@@ -1786,7 +1786,7 @@ class TeamListView(CustomLoginRequiredView, SingleTableViewMixin):
 class TeamCreateView(AuditFormMixin, CreateView):
     model = Team
     form_class = TeamForm
-    success_url = reverse_lazy('team_list')    
+    success_url = reverse_lazy('team_list')
     success_message = CREATE_SUCCESS_MESSAGE
 
     def get_form_kwargs(self):
@@ -1795,7 +1795,7 @@ class TeamCreateView(AuditFormMixin, CreateView):
         return kw
 
 
-class TeamUpdateView(CustomLoginRequiredView, UpdateView): 
+class TeamUpdateView(CustomLoginRequiredView, UpdateView):
     model = Team
     form_class = TeamForm
     success_url = reverse_lazy('team_list')
@@ -1805,11 +1805,11 @@ class TeamUpdateView(CustomLoginRequiredView, UpdateView):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
-        
+
 
 class TeamDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
     model = Team
-    success_url = reverse_lazy('team_list') 
+    success_url = reverse_lazy('team_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
