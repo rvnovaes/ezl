@@ -41,12 +41,12 @@ class TaskTable(tables.Table):
 
 class DashboardStatusTable(tables.Table):
     def __init__(self, *args, delegation_date='Delegação', client="Cliente",
-                 lawsuit_number="Processo", type_service="Serviço", opposing_party="Parte adversa",
+                 law_suit_number="Processo", type_service="Serviço", opposing_party="Parte adversa",
                  title="", status="", **kwargs):
         super().__init__(*args, **kwargs)
         self.base_columns['delegation_date'].verbose_name = delegation_date
         self.base_columns['client'].verbose_name = client
-        self.base_columns['lawsuit_number'].verbose_name = lawsuit_number
+        self.base_columns['law_suit_number'].verbose_name = law_suit_number
         self.base_columns['type_service'].verbose_name = type_service
         self.base_columns['opposing_party'].verbose_name = opposing_party
         self.base_columns['task_number'].verbose_name = 'Nº da OS'
@@ -57,11 +57,13 @@ class DashboardStatusTable(tables.Table):
         self.length = self.rows.__len__()
 
     client = tables.Column(orderable=True)
-    type_service = tables.Column(orderable=True)
+    type_service = tables.Column(orderable=True)    
+    opposing_party = tables.Column(accessor='movement.law_suit.opposing_party')    
+    origin_code = tables.Column(order_by=('parent_task_number', 'legacy_code'))
 
     class Meta:
         model = DashboardViewModel
-        fields = ['task_number', 'final_deadline_date', 'type_service', 'lawsuit_number', 'client',
+        fields = ['task_number', 'final_deadline_date', 'type_service', 'law_suit_number', 'client',
                   'opposing_party', 'delegation_date', 'origin_code']
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {

@@ -68,7 +68,7 @@
                                     </div>
                                   </div>
                                   <div class="col-md-10 chat-title">
-                                    <span id="chat-title">
+                                    <span id="chat-title">                                      
                                       {{chat.title}}
                                       <div class="row">
                                         <div class="col-md-6">
@@ -100,8 +100,8 @@
           <div class="chat-main-header">
               <div class="p-10 b-b">
                   <div class="row">
-                    <div class="col-md-10">
-                      <h3 class="box-title">{{chat.title}}</h3>
+                    <div class="col-md-10">                      
+                      <h3 class="box-title"><a href="/dashboard/{{task}}">{{chat.title}}</a></h3>
                       <span class="heading-description text-wrap">{{ chat.description }}</span>
                     </div>
                     <div class="col-md-2" ng-if="!existsUnread">

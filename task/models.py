@@ -456,9 +456,8 @@ class DashboardViewModel(Audit, OfficeMixin):
     client = models.CharField(null=True, verbose_name='Cliente', max_length=255)
     type_service = models.CharField(null=True, verbose_name='Serviço', max_length=255)
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
-    lawsuit_number = models.CharField(max_length=255, blank=True, null=True,
-                                      verbose_name='Número do Processo')
-    opposing_party = models.CharField(null=True, verbose_name=u'Parte adversa', max_length=255)
+    law_suit_number = models.CharField(max_length=255, blank=True, null=True,
+                                      verbose_name='Número do Processo')    
     parent_task_number = models.PositiveIntegerField(default=0, verbose_name='OS Original')
 
     __previous_status = None  # atributo transient
@@ -496,11 +495,7 @@ class DashboardViewModel(Audit, OfficeMixin):
         organ = self.movement.law_suit.organ
         if organ:
             address = organ.address_set.first()
-        return address
-
-    @property
-    def lawsuit_number(self):
-        return self.movement.law_suit.law_suit_number
+        return address    
 
     @property
     def opposing_party(self):
