@@ -101,9 +101,10 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     $scope.inMessage = true;
     $location.hash('bottom')
     $anchorScroll()
-    $scope.chat = chat
+    $scope.chat = chat    
     chatApiService.getMessages(chat.id).then(function(data){
       $scope.messages = data
+      $scope.task = data.task
       var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
       if (!$scope.sockets[chat.id] ||
         ($scope.sockets[chat.id] && $scope.sockets[chat.id].readyState !=WebSocket.OPEN)){

@@ -26,6 +26,7 @@ class Permissions(Enum):
     can_access_general_data = 'Can access general data screens'
     view_distributed_tasks = 'Can view tasks distributed by the user'
     can_distribute_tasks = 'Can distribute tasks to another user'
+    can_see_tasks_from_team_members ='Can see tasks from your team members'
 
 
 # Dicionário para retornar o icone referente ao status da providencia
@@ -414,17 +415,18 @@ class TaskGeolocation(Audit):
 
 
 class DashboardViewModel(Audit, OfficeMixin):
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='child')    
     legacy_code = models.CharField(max_length=255, blank=True, null=True,
                                    verbose_name='Código legado')
     task_number = models.PositiveIntegerField(default=0, verbose_name='Número da Providência')
 
     movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
                                  verbose_name='Movimentação')
-    person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
+    person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=True,
                                         related_name='%(class)s_asked_by',
                                         verbose_name='Solicitante')
     person_executed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False,
-                                           null=False,
+                                           null=True,
                                            related_name='%(class)s_executed_by',
                                            verbose_name='Correspondente')
     person_distributed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False,
@@ -454,9 +456,8 @@ class DashboardViewModel(Audit, OfficeMixin):
     client = models.CharField(null=True, verbose_name='Cliente', max_length=255)
     type_service = models.CharField(null=True, verbose_name='Serviço', max_length=255)
     survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
-    lawsuit_number = models.CharField(max_length=255, blank=True, null=True,
-                                      verbose_name='Número do Processo')
-    opposing_party = models.CharField(null=True, verbose_name=u'Parte adversa', max_length=255)
+    law_suit_number = models.CharField(max_length=255, blank=True, null=True,
+                                      verbose_name='Número do Processo')    
     parent_task_number = models.PositiveIntegerField(default=0, verbose_name='OS Original')
 
     __previous_status = None  # atributo transient
@@ -494,11 +495,7 @@ class DashboardViewModel(Audit, OfficeMixin):
         organ = self.movement.law_suit.organ
         if organ:
             address = organ.address_set.first()
-        return address
-
-    @property
-    def lawsuit_number(self):
-        return self.movement.law_suit.law_suit_number
+        return address    
 
     @property
     def opposing_party(self):

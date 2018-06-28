@@ -20,7 +20,7 @@ send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'executi
 
 @receiver(post_save, sender=Ecm)
 def export_ecm_path(sender, instance, created, **kwargs):
-    if created and instance.legacy_code is None:
+    if created and instance.legacy_code is None and instance.task.legacy_code:
         export_ecm.delay(instance.id)
 
 
@@ -46,7 +46,8 @@ def delete_related_ecm(sender, instance, **kwargs):
 @receiver(pre_delete, sender=Ecm)
 def delete_ecm_advwin(sender, instance, **kwargs):
     if not instance.legacy_code and instance.task.legacy_code:
-        delete_ecm.delay(instance.id, instance.path, True)
+        delete_ecm.delay(instance.id, instance.path.name, instance.create_user.username,
+                         instance.task.legacy_code, instance.task.id)
 
 
 @receiver(post_init, sender=Task)
@@ -162,6 +163,9 @@ def update_status_child_task(sender, instance, **kwargs):
         setattr(instance, '_skip_signal', True)
     if instance.get_child and status:
         child = instance.get_child
+        if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
+            setattr(child, '__notes', 'A OS {} foi recusada pelo escritório contratante {} pelo motivo {}'.format(
+                child.task_number, instance.office.legal_name, getattr(instance, '__notes', '')))
         child.task_status = status
         child._mail_attrs = get_child_recipients(instance.task_status)
         setattr(child, '_TaskDetailView__server', getattr(instance, '_TaskDetailView__server', None))

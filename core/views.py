@@ -1,6 +1,5 @@
 import importlib
 import json
-import string
 from abc import abstractproperty
 from functools import wraps
 from django import forms
@@ -8,7 +7,6 @@ from django.forms.utils import ErrorList
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout, password_validation
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User, Group
@@ -16,7 +14,6 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.core.exceptions import ValidationError
 from django.db.models import ProtectedError, Q, F
 from django.db import transaction, IntegrityError
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
@@ -29,20 +26,17 @@ from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
-    ResetPasswordFormMixin, AddressFormSet, \
-    OfficeForm, InviteForm, InviteOfficeFormSet, InviteOfficeForm, \
-    ContactMechanismForm
+    ResetPasswordFormMixin, OfficeForm, InviteForm, InviteOfficeForm, ContactMechanismForm, TeamForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
-    record_from_wrong_office, DELETE_SUCCESS_MESSAGE, ADDRESS_UPDATE_ERROR_MESSAGE, ADDRESS_UPDATE_SUCCESS_MESSAGE, \
+    DELETE_SUCCESS_MESSAGE, ADDRESS_UPDATE_ERROR_MESSAGE, ADDRESS_UPDATE_SUCCESS_MESSAGE, \
     USER_CREATE_SUCCESS_MESSAGE
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
-    OfficeMixin, \
-    InviteOffice, OfficeMembership, ContactMechanism
+    OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
-    InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable
+    InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
 from core.utils import login_log, logout_log, get_office_session, get_domain
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
@@ -1782,3 +1776,44 @@ class ContactMechanismOfficeDeleteView(ContactMechanismDeleteView):
 
     def get_success_url(self):
         return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})
+
+
+class TeamListView(CustomLoginRequiredView, SingleTableViewMixin):
+    model = Team
+    table_class = TeamTable
+
+
+class TeamCreateView(AuditFormMixin, CreateView):
+    model = Team
+    form_class = TeamForm
+    success_url = reverse_lazy('team_list')
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+
+class TeamUpdateView(CustomLoginRequiredView, UpdateView):
+    model = Team
+    form_class = TeamForm
+    success_url = reverse_lazy('team_list')
+    success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+
+class TeamDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
+    model = Team
+    success_url = reverse_lazy('team_list')
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+
+
+
+
+
+

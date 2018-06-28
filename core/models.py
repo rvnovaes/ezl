@@ -496,3 +496,20 @@ class ContactUs(Audit):
 
 class ModelExportHistory(models.Model):
     model = models.CharField(max_length=255, unique=True, null=False)
+
+
+class Team(Audit, OfficeMixin):
+    name = models.CharField(max_length=255, verbose_name='Nome')
+    members = models.ManyToManyField(User, related_name='team_members', verbose_name='Membros')
+    supervisors = models.ManyToManyField(User, related_name='team_supervisors', verbose_name='Supervisores')
+    objects = OfficeManager()
+    use_upload = False
+
+    class Meta:
+        verbose_name = 'Equipe'
+        verbose_name_plural = 'Equipes'
+        unique_together = (('office', 'name'),)        
+
+    def __str__(self):
+        return self.name
+

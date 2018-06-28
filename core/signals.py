@@ -66,9 +66,8 @@ def office_post_save(sender, instance, created, **kwargs):
                 instance.create_user.groups.add(group)
     else:
         for group in get_groups_with_perms(instance):
-            group.name = '{}-{}-{}'.format(group.name.split('-')[0],
-                                           instance.pk,
-                                           instance.legal_name)
+            group.name = '{}-{}'.format(group.name.split('-')[0],
+                                           instance.pk)
             group.save()
 
 

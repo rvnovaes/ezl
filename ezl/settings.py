@@ -23,6 +23,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute=0, hour=2)
     },
 }
+CELERY_SEND_TASK_EMAILS = False
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -338,7 +339,7 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler',
             'include_html': True,
             'filters': ['require_debug_false'],
-        },    
+        },
         'console': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
