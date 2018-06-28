@@ -1,5 +1,5 @@
 {% load guardian_tags %}
-{% load core_filters core_match %}
+{% load core_filters core_match task_filters %}
 {% with request|get_office_session_pk as office_session_id %}
     {% get_model_instance 'core' 'office' office_session_id as office_session %}
     {% get_obj_perms request.user for office_session as "office_session_perms" %}
@@ -29,16 +29,18 @@
                 class="text-white btn btn-ezl-accepted {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
             <span class="btn-label"><i class="mdi mdi-calendar-clock"></i></span> Aceitar
         </button>
-        <button type="button" id="REFUSED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                class="text-white btn btn-ezl-refused {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
-            <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Recusar
-        </button>
     {% endif %}
-    {% if 'delegate_tasks' in office_session_perms %}
-        <button type="button" id="DELEGATE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                class="text-white btn btn-ezl-delegate {% if not form.instance.status.name == 'DELEGATE' %}hidden{% endif %}">
-            <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Delegar
-        </button>
+    {% if 'view_delegated_tasks' in office_session_perms or 'can_distribute_tasks' in office_session_perms %}
+        {% with request.user|get_refused_action:form.instance as refused_acton %}
+            {% if refused_acton == 'REFUSED' or refused_acton == 'REQUESTED' %}
+            <button type="button" id="{{ refused_acton }}" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                    class="text-white btn btn-ezl-refused">
+                <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Recusar
+            </button>
+            {% elif refused_acton == 'INVALID_CHILD_STATUS' %}
+                <p>Essa OS não pode ser recusada, pois encontra-se no status {{ form.instance.get_child.task_status|lower }} no escritório correspondente.</p>
+            {% endif %}
+        {% endwith %}
     {% endif %}
     {% if 'block_payment_tasks' in office_session_perms %}
         <button type="button" id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle="" data-target="#confirmAction"

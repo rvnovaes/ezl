@@ -1028,7 +1028,7 @@ def ajax_get_task_data_table(request):
                     x.task_number,
                     timezone.localtime(x.final_deadline_date).strftime('%d/%m/%Y %H:%M') if x.final_deadline_date else '',
                     x.type_service,
-                    x.lawsuit_number,
+                    x.law_suit_number,
                     x.court_district.name,
                     x.court_district.state.initials,
                     x.client,
