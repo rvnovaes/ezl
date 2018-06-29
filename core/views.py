@@ -579,11 +579,45 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
         return reverse('person_update', args=(self.object.id,))
 
 
-class PersonDeleteView(AuditFormMixin, MultiDeleteViewMixin):
+class PersonDeleteView(AuditFormMixin, DeleteView):
     model = Person
     success_url = reverse_lazy('person_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
     object_list_url = 'person_list'
+
+    def delete(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            pks = request.POST.getlist('selection')
+
+            with transaction.atomic():
+                try:
+                    # self.model.objects.filter(pk__in=pks).delete()                    
+                    user_pk = None
+                    for pk in pks:
+                        person = Person.objects.get(pk=pk)
+                        if person.auth_user:
+                            user_pk = person.auth_user.pk
+                            person.auth_user = None                    
+                        person.officemembership_set.all().delete()
+                        person.invites.clear()
+                        person.delete() 
+                        if user_pk:
+                            User.objects.get(pk=user_pk).delete()
+                    attachments_multi_delete(self.model, pks=pks)
+                    messages.success(self.request, self.success_message)
+                except ProtectedError as e: 
+                    import pdb; pdb.set_trace()               
+                    qs = e.protected_objects.first()
+                    # type = type('Task')
+                    messages.error(self.request,
+                                delete_error_protected(str(self.model._meta.verbose_name),
+                                                        qs.__str__()))
+
+        # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
+        if self.success_url:
+            return HttpResponseRedirect(self.success_url)
+        else:
+            return HttpResponseRedirect(self.get_success_url())
 
 
 class GenericAutocompleteForeignKey(autocomplete.Select2QuerySetView):

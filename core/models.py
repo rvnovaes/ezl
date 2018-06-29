@@ -426,7 +426,7 @@ class Address(Audit):
                               verbose_name='Estado')
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False,
                                 verbose_name='País')
-    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True)
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, blank=True, null=True)
     office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)    
 
     class Meta:
@@ -468,7 +468,7 @@ class ContactMechanism(Audit):
         verbose_name="Tipo")
     description = models.CharField(max_length=255, null=False, verbose_name="Descrição")
     notes = models.CharField(max_length=400, blank=True, verbose_name="Observações")
-    person = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True)
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, blank=True, null=True)
     office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True, null=True)    
     
     class Meta:
