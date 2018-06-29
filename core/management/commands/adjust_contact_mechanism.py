@@ -11,7 +11,7 @@ class Command(BaseCommand):
 		ContactMechanism.objects.filter(contact_mechanism_type__name__iexact='telefone').delete()
 		ContactMechanism.objects.filter(Q(person__is_customer=True) | Q(person__is_supplier=True)).delete()	
 		for contact in ContactMechanism.objects.filter(
-				contact_mechanism_type__name__in=['E-mail' 'email']):			
+				contact_mechanism_type__name__in=['E-mail', 'email']):			
 			if contact.description.split('@')[-1] != 'mtostes.com.br':
 				contact.delete()
 		print ('{0} Mecanismos de contato restantes'.format(ContactMechanism.objects.count()))          
