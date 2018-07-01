@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.views.generic import ListView
 from chat.models import Chat, UnreadMessage, Message
 from core.views import CustomLoginRequiredView
@@ -115,26 +116,34 @@ class ChatsByOfficeView(CustomLoginRequiredView, View):
                 "title": chat.title,
                 "alter_date": chat.alter_date if not last_message else last_message.create_date,
                 "label": chat.label,
+                "has_messages": chat.messages.exists()
             }
             items.append(item)
-        return items
+        return list(reversed(sorted(items, key=lambda x: x['alter_date'])))
 
     def get(self, request, *args, **kwargs):
-        from django.utils import timezone
-        from datetime import timedelta, datetime
-
-        office = Office.objects.get(pk=int(request.GET.get('office')))
-        chats = office.chats.filter(
-                users__user_by_chat=self.request.user,
-                users__is_active=True,
-                messages__isnull=False
-            )
+        filters = {
+            "users__user_by_chat": self.request.user,
+            "users__is_active": True,
+        }
+        office_id = int(request.GET.get('office'))
         since = request.GET.get('since')
+        exclude_empty = request.GET.get('exclude_empty', False) == 'true'
+
+        if exclude_empty:
+            filters["messages__isnull"] = False
+
         if since:
             since = datetime.strptime(since.split(".")[0], "%Y-%m-%dT%H:%M:%S")
-            print(since)
-            chats = chats.filter(alter_date__gt=since, messages__create_date__gt=since)
-        chats = chats.prefetch_related('messages').order_by('-messages__create_date')
+            filters["alter_date__gt"] = since
+            filters["messages__create_date__gt"] = since
+
+        office = Office.objects.get(pk=office_id)
+        chats = office.chats.filter(**filters)\
+                    .distinct('id')\
+                    .prefetch_related('messages')\
+                    .order_by('id')
+        #            .order_by('-messages__create_date', 'id')
         data = self.add_count_unread_message(request.user, chats)
         return JsonResponse(data, safe=False)
 

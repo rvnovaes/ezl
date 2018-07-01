@@ -26,6 +26,12 @@
             </div>
               <div class="form-material">
                 <input class="form-control p-20" placeholder="Pesquisar..." type="text" ng-model="search"/>
+                <div class="text-center" ng-show="!listOffices">
+                <label>
+                    <input type="checkbox" ng-model="hideEmptyChats">
+                    <span>Não exibir chats vazios</span>
+                  </label>
+                </div>
               </div>
               <div>
                 <ul class="chatonline style-none" style="overflow: hidden; width: auto; height: 100%;" ng-if="listOffices">
@@ -80,7 +86,7 @@
                                       <div class="row">
                                         <div class="col-md-6">
                                           <small class="text-muted">
-                                            <i class="fa fa-clock-o"></i>{{chat.alter_date|date:"HH:mm"}}
+                                            <i class="fa fa-clock-o"></i>{{chat.alter_date|date:"dd/MM/yy HH:mm"}}
                                           </small>
                                         </div>
                                         <div class="col-md-6">

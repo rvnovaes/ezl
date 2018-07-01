@@ -6,13 +6,13 @@ angular.module('app').factory('chatApiService', function($http){
 
   }
 
-  var _getChats = function(office_id, since){
+  var _getChats = function(office_id, exclude_empty, since){
     if (since === undefined){
       since = "";
     } else {
       since = since.getFullYear() + "-" + (since.getMonth()+1) + "-" + since.getDate() + "T" + since.getHours() + ":" + since.getMinutes() + ":" + since.getSeconds();
     }
-    return $http.get('/chat/chats_by_office/', {params: {office:office_id, since: since}}).then(function(response){
+    return $http.get('/chat/chats_by_office/', {params: {office:office_id, since: since, exclude_empty: exclude_empty}}).then(function(response){
       return response.data
     })
   }

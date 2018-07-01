@@ -3,6 +3,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
 
   $('.bg-title').css('display', 'none')
   $scope.inMessage = false;
+  $scope.hideEmptyChats = true;
   $scope.realContacts = [];
   $scope.contacts = [];
   $scope.chat = {}
@@ -50,6 +51,10 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     }
   });
 
+  $scope.$watch('hideEmptyChats', function(newValue, oldValue) {
+    getChats();
+  });
+
   $scope.unreadMessage = function(chat){
     data = {
       chat: chat.id
@@ -84,12 +89,13 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
 
   var getChats = function(){
     if ($scope.office_id && !$scope.listOffices) {
+      $scope.office_id_since = new Date();
       $scope.chatsLoading = true;
       $scope.chats = [];
       $scope.allChats = [];
       $scope.currentChatPage = 0;
 
-      chatApiService.getChats($scope.office_id).then(function(data){
+      chatApiService.getChats($scope.office_id, $scope.hideEmptyChats).then(function(data){
         $scope.chatsLoading = false;
         $scope.allChats = data;
         if (!$scope.search.length) {
@@ -109,29 +115,33 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
       if(! $scope.office_id_since) {
         return false;
       }
-      chatApiService.getChats($scope.office_id, $scope.office_id_since).then(function(data){
+      chatApiService.getChats($scope.office_id, $scope.hideEmptyChats, $scope.office_id_since).then(function(data){
         if (data.length > 0) {
           $scope.office_id_since = new Date();
           var moveChatsToTop = function(data, source){
             // Coloca os chats que tiveram atualização no topo da lista
-            $(data).each(function(new_index, new_item){
-                for (var x=0; x < source.length; x++){
-                    source_item = source[x];
+            for (var x=0; x < data.length; x++){
+                var new_item = data[x];
+                for (var y=0; y < source.length; y++){
+                    var source_item = source[y];
                     if (source_item.id == new_item.id){
                         // Remove o item da posição atual na lista
-                        source.splice(source_item, 1);
+                        source.splice(y, 1);
                     }
 
                 }
                 // Adiciona o item no topo da lista
                 source.unshift(new_item);
-            });
+            }
           };
           moveChatsToTop(data, $scope.allChats);
 
           // Precisamos atualizar a lista que está sendo exibida até a paginação atual
-          var index_to = $scope.currentChatPage * $scope.chatPageSize;
-          $scope.chats = $scope.allChats.slice(0, index_to);
+          // Fazemos isso apenas quando a busca não está sendo realizada
+          if(!$scope.search.length) {
+              var index_to = $scope.currentChatPage * $scope.chatPageSize;
+              $scope.chats = $scope.allChats.slice(0, index_to);
+          }
         }
       });
   };
@@ -158,7 +168,6 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
 
   $scope.getChats = function(office_id) {
     $scope.office_id = office_id;
-    $scope.office_id_since = new Date();
     $scope.listOffices = false;
     $scope.search = "";
     getChats()
