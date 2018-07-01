@@ -23,6 +23,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute=0, hour=2)
     },
 }
+CELERY_SEND_TASK_EMAILS = False
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -195,10 +196,14 @@ CHANNEL_LAYERS = {
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(tempfile.gettempdir(), 'django_cache'),
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://redis:6379/1',
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }        
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -329,6 +334,12 @@ LOGGING = {
         },
     },
     'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+            'filters': ['require_debug_false'],
+        },    
         'console': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
@@ -395,7 +406,13 @@ LOGGING = {
         'py.warnings': {
             'handlers': ['development_logfile'],
         },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },        
     }
 }
 
 UPLOAD_DIRECTORY = 'uploads'
+ADMINS = [('EZL Erros', 'erros.ezlawyer@gmail.com')]

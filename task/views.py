@@ -22,6 +22,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
+from django.core.exceptions import ValidationError
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
@@ -216,7 +217,7 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteVi
     model = Task
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
-    def post(self, request, *args, **kwargs):
+    def post(selfTaskReportBase, request, *args, **kwargs):
         self.success_url = urlparse(request.META.get('HTTP_REFERER')).path
         return super(TaskDeleteView, self).post(request, *args, **kwargs)
 
@@ -232,8 +233,8 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
 
         self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
         context['filter'] = self.task_filter
-        context['offices'] = self.get_os_grouped_by_office()
-        context['total'] = sum(map(lambda x: x['total'], context['offices']))
+        context['offices_report'] = self.get_os_grouped_by_office()
+        context['total'] = sum(map(lambda x: x['total'], context['offices_report']))
         return context
 
     def get_queryset(self):
@@ -439,7 +440,6 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         checker = ObjectPermissionChecker(person.auth_user)
         if not office_session:
             return []
-
         if checker.has_perm('can_access_general_data', office_session) or checker.has_perm('group_admin',
                                                                                            office_session):
             return_list.append(DashboardErrorStatusTable(error,
@@ -591,10 +591,12 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         court_district = self.object.movement.law_suit.court_district
         state = self.object.movement.law_suit.court_district.state
         client = self.object.movement.law_suit.folder.person_customer
+        offices_related = self.object.office.offices.all()
         context['correspondents_table'] = ServicePriceTableTaskTable(
-            ServicePriceTable.objects.filter(Q(office=self.object.office) | Q(office__public_office=True),
+            ServicePriceTable.objects.filter(Q(office=self.object.office) | Q(office__public_office=True), Q(Q(type_task=type_task) | Q(type_task=None) ),
+                                             Q(is_active=True),
+                                             Q(office_correspondent__in=offices_related),
                                              Q(office_correspondent__is_active=True),
-                                             Q(Q(type_task=type_task) | Q(type_task=None)),
                                              Q(Q(court_district=court_district) | Q(court_district=None)),
                                              Q(Q(state=state) | Q(state=None)),
                                              Q(Q(client=client) | Q(client=None)))
@@ -611,6 +613,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         :param office_correspondent: Escritorio responsavel pela nova task
         :return:
         """
+        if object_parent.get_child:
+            if TaskStatus(object_parent.get_child.task_status) not in [TaskStatus.REFUSED, TaskStatus.REFUSED_SERVICE,
+                                                                       TaskStatus.FINISHED]:
+                return False
         new_task = copy.copy(object_parent)
         new_task.legacy_code = None
         new_task.system_prefix = None
@@ -627,25 +633,29 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
         new_task.save()
         for ecm in object_parent.ecm_set.all():
-            if Path(ecm.path.path).is_file():
-                new_file = ContentFile(ecm.path.read())
-                new_file.name = os.path.basename(ecm.path.name)
-                new_ecm = copy.copy(ecm)
-                new_ecm.pk = None
-                new_ecm.exhibition_name = new_file.name
-                new_ecm.task = new_task
-                new_ecm.path = new_file
-                new_ecm.save()
+            if ecm.path:
+                if Path(ecm.path.path).is_file():
+                    new_file = ContentFile(ecm.path.read())
+                    new_file.name = os.path.basename(ecm.path.name)
+                    new_ecm = copy.copy(ecm)
+                    new_ecm.pk = None
+                    new_ecm.exhibition_name = new_file.name
+                    new_ecm.task = new_task
+                    new_ecm.path = new_file
+                    new_ecm.ecm_related = ecm
+                    new_ecm.save()
 
     def dispatch(self, request, *args, **kwargs):
+        res = super().dispatch(request, *args, **kwargs)
         office_session = get_office_session(request)
         if office_session != Task.objects.filter(pk=kwargs.get('pk')).first().office:
             messages.error(self.request, "A OS que está tentando acessar, não pertence ao escritório selecionado."
                                          " Favor selecionar o escritório correto")
-            del request.session['custom_session_user']
-            request.session.modified = True
+            if request.session.get('custom_session_user'):
+                del request.session['custom_session_user']
+                request.session.modified = True
             return HttpResponseRedirect(reverse('office_instance'))
-        return super().dispatch(request, *args, **kwargs)
+        return res
 
 
 class EcmCreateView(CustomLoginRequiredView, CreateView):
@@ -695,25 +705,35 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
 
 
 @login_required
-def delete_ecm(request, pk):
-    query = Ecm.objects.filter(id=pk)
-    task = query.values('task_id').first()
-
-    try:
-        query.delete()
-        num_ged = Ecm.objects.filter(task_id=task['task_id']).count()
+def delete_ecm(request, pk):    
+    try:                       
+        ecm = Ecm.objects.get(id=pk)     
+        task_id = ecm.task.pk
+        ecm.delete()
+        num_ged = Ecm.objects.filter(task_id=task_id).count()
         data = {'is_deleted': True,
                 'num_ged': num_ged,
                 'message': success_delete()
                 }
-
     except IntegrityError:
-        data = {'is_deleted': False,
+        data = {'is_deleted': False,                
+                'num_ged': 1,
                 'message': integrity_error_delete()
                 }
-    except Exception:
-        data = {'is_deleted': False,
-                'message': DELETE_EXCEPTION_MESSAGE,
+    except Ecm.DoesNotExist:
+        data = {'is_deleted': False,                
+                'num_ged': 1,
+                'message': "Anexo já foi excluído ou não existe.",
+                }
+    except ValidationError as error:
+        data = {'is_deleted': False,                
+                'num_ged': 1,
+                'message': error.args[0],
+                } 
+    except Exception as ex:
+        data = {'is_deleted': False,                
+                'num_ged': 1,
+                'message': DELETE_EXCEPTION_MESSAGE + '\n' + ex.args[0],
                 }
 
     return JsonResponse(data)
@@ -786,8 +806,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     task_dynamic_query.add(Q(movement__law_suit__law_suit_number=data['law_suit_number']), Q.AND)
                 if data['task_number']:
                     task_dynamic_query.add(Q(task_number=data['task_number']), Q.AND)
-                if data['task_legacy_code']:
-                    task_dynamic_query.add(Q(legacy_code=data['task_legacy_code']), Q.AND)
+                if data['task_origin_code']:
+                    task_dynamic_query.add(Q(Q(legacy_code=data['task_origin_code'])|\
+                        Q(parent_task_number=data['task_origin_code'])), Q.AND)
                 if data['person_executed_by']:
                     task_dynamic_query.add(Q(person_executed_by=data['person_executed_by']), Q.AND)
                 if data['person_asked_by']:
@@ -1000,8 +1021,7 @@ def ajax_get_task_data_table(request):
     query = DashboardViewModel.objects.filter(dynamic_query).filter(is_active=True, task_status=status,
                                                                     office=get_office_session(request))
     if status == str(TaskStatus.ERROR):
-        query_error = InconsistencyETL.objects.filter(is_active=True,
-                                                      task__id__in=list(query.values_list('id', flat=True)))
+        query_error = InconsistencyETL.objects.filter(is_active=True, task__id__in=list(query.values_list('id', flat=True)))
         xdata.append(
             list(
                 map(lambda x: [
@@ -1015,7 +1035,7 @@ def ajax_get_task_data_table(request):
                     x.task.client.name,
                     x.task.opposing_party,
                     timezone.localtime(x.task.delegation_date).strftime('%d/%m/%Y %H:%M') if x.task.delegation_date else '',
-                    x.task.legacy_code,
+                    x.task.origin_code,
                     x.inconsistency,
                     x.solution,
                 ], query_error)
@@ -1035,7 +1055,7 @@ def ajax_get_task_data_table(request):
                     x.client,
                     x.opposing_party,
                     timezone.localtime(x.delegation_date).strftime('%d/%m/%Y %H:%M') if x.delegation_date else '',
-                    x.legacy_code,
+                    x.origin_code,
                     '',
                     '',
                 ], query)
@@ -1058,6 +1078,7 @@ def ajax_get_ecms(request):
             'pk': ecm.pk,
             'url': ecm.path.name,
             'filename': ecm.filename,
+            'exhibition_name': ecm.exhibition_name if ecm.exhibition_name else ecm.filename,
             'user': ecm.create_user.username,
             'data': timezone.localtime(ecm.create_date).strftime('%d/%m/%Y %H:%M'),
             'state': ecm.task.get_task_status_display(),

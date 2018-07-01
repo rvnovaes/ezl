@@ -1,12 +1,12 @@
 from django.contrib.auth.models import User
 from django.db import transaction
-from django.db.models.signals import post_init, pre_save, post_save, post_delete
+from django.db.models.signals import post_init, pre_save, post_save, post_delete, pre_delete
 from django.core.signals import request_finished
 from django.dispatch import receiver, Signal
 from django.utils import timezone
 from django.urls import reverse
 from django.db.models import Q
-from advwin_models.tasks import export_ecm, export_task, export_task_history
+from advwin_models.tasks import export_ecm, export_task, export_task_history, delete_ecm
 from core.models import ContactMechanism, ContactMechanismType, Person
 from django.conf import settings
 from task.models import Task, TaskStatus, TaskHistory, Ecm
@@ -20,29 +20,33 @@ send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'executi
 
 @receiver(post_save, sender=Ecm)
 def export_ecm_path(sender, instance, created, **kwargs):
-    if created and instance.legacy_code is None:
+    if created and instance.legacy_code is None and instance.task.legacy_code:
         export_ecm.delay(instance.id)
 
 
 @receiver(post_save, sender=Ecm)
 def copy_ecm_related(sender, instance, created, **kwargs):
-    if created and instance.task.parent:
-        transaction.on_commit(lambda: copy_ecm(instance, instance.task.parent))
-    if created and instance.task.get_child:
-        transaction.on_commit(lambda: copy_ecm(instance, instance.task.get_child))
+    if created and instance.path:
+        if instance.task.parent:
+            transaction.on_commit(lambda: copy_ecm(instance, instance.task.parent))
+        if instance.task.get_child:
+            transaction.on_commit(lambda: copy_ecm(instance, instance.task.get_child))
 
 
 @receiver(post_delete, sender=Ecm)
 def delete_related_ecm(sender, instance, **kwargs):
-    tasks = []
-    if instance.task.parent:
-        tasks.append(instance.task.parent.id)
+    ecm_related = instance.ecm_related_id
+    if not ecm_related:
+        ecm_related = instance.pk
+    if ecm_related:
+        transaction.on_commit(lambda: Ecm.objects.filter(Q(pk=ecm_related)
+                                                         | Q(ecm_related_id=ecm_related)).delete())
 
-    if instance.task.get_child:
-        tasks.append(instance.task.get_child.id)
-    if tasks:
-        transaction.on_commit(lambda: Ecm.objects.filter(task_id__in=tasks,
-                                                         exhibition_name=instance.exhibition_name).delete())
+
+@receiver(pre_delete, sender=Ecm)
+def delete_ecm_advwin(sender, instance, **kwargs):
+    if not instance.legacy_code and instance.task.legacy_code:
+        delete_ecm.delay(instance.id, instance.task.legacy_code, instance.task.id)
 
 
 @receiver(post_init, sender=Task)
@@ -69,7 +73,6 @@ def new_task(sender, instance, created, **kwargs):
                                    create_user=user,
                                    status=instance.task_status,
                                    create_date=instance.create_date, notes=notes)
-
 
 
 @receiver(pre_save, sender=Task)
@@ -238,18 +241,16 @@ def send_task_emails(sender, instance, created, **kwargs):
         instance.__previous_status = TaskStatus(instance.task_status)
 
 
-def create_or_update_user_by_chat(task, fields):
-    users = []
+def create_or_update_user_by_chat(task, task_to_fields, fields):        
     for field in fields:
         user = None
-        if getattr(task, field, False):
-            user = getattr(getattr(task, field), 'auth_user', False)
+        if getattr(task_to_fields, field, False):
+            user = getattr(getattr(task_to_fields, field), 'auth_user', False)
         if user:
             user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
                 'create_user': user, 'user_by_chat': user, 'chat': task.chat
             })
             user = user.user_by_chat
-        users.append(user)
 
 
 @receiver(post_save, sender=Task)
@@ -279,11 +280,11 @@ def create_or_update_chat(sender, instance, created, **kwargs):
     )
     instance.chat = chat
     instance.chat.offices.add(instance.office)
-    create_or_update_user_by_chat(instance,[
+    create_or_update_user_by_chat(instance, instance, [
         'person_asked_by', 'person_executed_by', 'person_distributed_by'])
     if instance.parent:
         instance.chat.offices.add(instance.parent.office)
-        create_or_update_user_by_chat(instance.parent, [
+        create_or_update_user_by_chat(instance, instance.parent, [
             'person_asked_by', 'person_executed_by', 'person_distributed_by'
         ])
     post_save.disconnect(create_or_update_chat, sender=sender)

@@ -1,11 +1,10 @@
 from django import forms
-from task.models import TypeTask
 from material import Layout, Row
-from core.models import Person, State, Office
+from core.models import Person, State
 from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field
 from lawsuit.models import CourtDistrict
 from task.models import TypeTask
-from .models import CostCenter, ServicePriceTable
+from .models import CostCenter, ServicePriceTable, ImportServicePriceTable
 from decimal import Decimal
 from core.forms import BaseModelForm
 from core.widgets import TypeaHeadForeignKeyWidget
@@ -68,7 +67,8 @@ class ServicePriceTableForm(BaseModelForm):
 
     class Meta:
         model = ServicePriceTable
-        fields = ('office', 'office_correspondent', 'client', 'type_task', 'state', 'court_district', 'value')
+        fields = ('office', 'office_correspondent', 'client', 'type_task', 'state', 'court_district', 'value',
+                  'is_active')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'
@@ -96,3 +96,10 @@ class ServicePriceTableForm(BaseModelForm):
         self.fields['office_correspondent'].label = u"Escritório Correspondente"
         self.fields['office_correspondent'].required = True
         self.fields['office'].required = True
+
+
+class ImportServicePriceTableForm(forms.ModelForm):    
+
+    class Meta:
+        model = ImportServicePriceTable
+        fields = ('file_xls', )

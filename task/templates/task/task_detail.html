@@ -94,34 +94,13 @@
                                 data-dismiss="modal">
                             <i class="mdi mdi-close"></i> Cancelar
                         </button>
-                        {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                            {% if form.instance.type_task.survey %}
                                 <button id="actionButton"
                                         type="submit"
-                                        onclick="beforeSubmit()"
+                                        onclick="submit_task_detail(this)"
+                                        survey={% if form.instance.type_task.survey %}true{% else %}''{% endif %}
                                         style="width: 100px!important;"
-                                        class="btn btn-success">Sim
+                                        class="btn btn-raised btn-success">Sim
                                 </button>
-                            {% else %}
-                                <button id="actionButton"
-                                        type="submit"
-                                        style="width: 100px!important;"
-                                        class="btn btn-success">Sim
-                                </button>
-                            {% endif %}
-                        {% elif form.instance.status.name == 'ACCEPTED_SERVICE' %}
-                            <button id="actionButton"
-                                    style="width: 100px!important;"
-                                    type="button"
-                                    onclick="checkDelegationOffice()"
-                                    class="btn btn-raised btn-success">Sim
-                            </button>
-                        {% else %}
-                            <button id="actionButton"
-                                    style="width: 100px!important;"
-                                    type="submit" class="btn btn-raised btn-success">Sim
-                            </button>
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -208,13 +187,19 @@
                 'placeholder': 'Data de Cumprimento'});
         });
 
-        //Função para tratar erro ao enviar formulário com justificativa de cumprimento em branco
+        function toogleModals(modalToClose, modalToOpen) {
+            $(modalToClose).one('hidden.bs.modal', function() {
+                $(modalToOpen).modal('show');
+            }).modal('hide');
+        }
+
+        //Função para exibir modal do survey
         function beforeSubmit() {
+            toogleModals('#confirmAction', '#survey')
             $('#task_detail').submit(function (e) {
                 e.preventDefault();
-                $('#confirmAction').modal('hide');
-                $('#survey').modal('show');
             });
+            $('#actionButton').removeAttr('disabled')
         }
 
         //Função para verificar se foi selecionado um escritório antes de delegar
@@ -225,6 +210,10 @@
             if (servicepricetable_id === ""){
                 $("#alert-correspondent").remove();
                 $("#servicepricetable-alert").removeClass("hidden");
+                $('#actionButton').removeAttr('disabled')
+                $('#task_detail').submit(function (e) {
+                    e.preventDefault();
+                });
             }else if (public_office){
                 var text_public_office = "Para a contratação dos serviços do EZLog deve ser feita a transferência do" +
                     " valor " + selected_office.data('formated-value') + " para a conta abaixo:" +
@@ -249,7 +238,13 @@
                             .attr('name', 'action')
                             .attr('value', 'OPEN')
                             .appendTo('#task_detail');
-                        $('#task_detail').submit();
+                        toogleModals('#confirmAction', '#procssing')
+                        $('#task_detail').unbind('submit').submit();
+                    }else{
+                        $('#actionButton').removeAttr('disabled')
+                        $('#task_detail').submit(function (e) {
+                            e.preventDefault();
+                        });
                     }
                 });
             }else{
@@ -257,8 +252,36 @@
                     .attr('name', 'action')
                     .attr('value', 'OPEN')
                     .appendTo('#task_detail');
-                $('#task_detail').submit();
+                $('#task_detail').unbind('submit').submit();
+                toogleModals('#confirmAction', '#procssing')
             }
+        }
+
+        function submit_task_detail(actionButton) {
+
+            var task_status = actionButton.value;
+            var have_survey = actionButton.getAttribute('survey');
+            actionButton.disabled = true;
+            {#toogleModals('#confirmAction', '#procssing')#}
+            if (task_status === 'DONE' && have_survey){
+                beforeSubmit();
+            }else if(task_status === 'OPEN'){
+                checkDelegationOffice();
+            }else{
+                ret = true;
+                $('#task_detail [required]').each(function(index) {
+                    if (!Boolean($( this ).val())){
+                        actionButton.disabled = false;
+                        ret = false;
+                    }
+                });
+                if (ret) {
+                    $('<input name="action" value="'+ task_status +'">').appendTo($('#task_detail'));
+                    toogleModals('#confirmAction', '#procssing');
+                    $('#task_detail').unbind('submit').submit();
+                }
+            }
+
         }
 
         var nextState = {
@@ -463,6 +486,17 @@
             </div>
         </div>
     </div>
+    <!-- Janela modal para mostrar enquanto faz submit do form -->
+    <div id="procssing" class="modal" data-keyboard="false">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content ">
+                <div class="modal-body" style="text-align: center;">
+                    <h1>Aguarde...</h1>
+                    <p class="h1"><i class="fa fa-spin fa-spinner"></i></p>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 {% block script_document_ready %}
     {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
@@ -476,6 +510,7 @@
                     "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
                 },
             });
+            $('#actionButton').removeAttr('disabled')
         });
         /* Ao fechar o modal, limpar a tabela */
         $('#confirmAction').on('hide.bs.modal', function (event) {

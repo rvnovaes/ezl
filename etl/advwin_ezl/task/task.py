@@ -169,13 +169,12 @@ class TaskETL(GenericETL):
                     status_code_advwin = TaskStatus.ERROR
                     inconsistencies.append({"inconsistency": Inconsistencies.MOVEMENTLESSPROCESS,
                                             "solution": Inconsistencies.get_solution(
-                                                Inconsistencies.MOVEMENTLESSPROCESS)})
+                                                Inconsistencies.MOVEMENTLESSPROCESS)})                
 
                 if task:
                     task.requested_date = requested_date
                     task.final_deadline_date = final_deadline_date
                     task.description = description
-                    task.task_status = status_code_advwin
                     task.type_task = type_task
                     task.alter_user = user
                     task.person_asked_by = person_asked_by
@@ -186,7 +185,9 @@ class TaskETL(GenericETL):
                     task.blocked_payment_date = blocked_payment_date
                     task.finished_date = finished_date
                     task.requested_date = requested_date
-                    task.movement = movement
+                    task.movement = movement                    
+                    if task.task_status == TaskStatus.ERROR.value and status_code_advwin != TaskStatus.ERROR:
+                        task.task_status = status_code_advwin
 
                     update_fields = ['requested_date', 'final_deadline_date', 'description',
                                      'task_status', 'alter_user', 'person_asked_by',

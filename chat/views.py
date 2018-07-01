@@ -184,10 +184,11 @@ class InternalChatOffices(CustomLoginRequiredView, View):
 
 
 class UnreadMessageView(CustomLoginRequiredView, View):
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):        
         chat_id = json.loads(request.body).get('chat')
         chat = Chat.objects.get(pk=chat_id)
-        user_by_chat = chat.users.filter(user_by_chat=request.user).first()
-        UnreadMessage.objects.create(
-            create_user=request.user, message=chat.messages.latest('pk'), user_by_message=user_by_chat)
+        if (chat.messages.exists()):
+            user_by_chat = chat.users.filter(user_by_chat=request.user).first()            
+            UnreadMessage.objects.create(
+                create_user=request.user, message=chat.messages.latest('pk'), user_by_message=user_by_chat)
         return JsonResponse({'status': 'ok'})
