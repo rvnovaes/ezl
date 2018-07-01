@@ -105,21 +105,28 @@ class ChatsByOfficeView(CustomLoginRequiredView, View):
         unread_chats = UnreadMessage.objects.filter(
             user_by_message__user_by_chat=user,
         ).values('message__chat').annotate(count=Count('id'))
-
+        items = []
         unread_chats_dict = dict({(item['message__chat'], item['count']) for item in unread_chats})
         for chat in chats:
-            if chat['id'] in unread_chats_dict:
-                chat['unread_message_quanty'] = unread_chats_dict[chat['id']]
-            else:
-                chat['unread_message_quanty'] = 0
-        return chats
+            last_message = chat.messages.last()
+            item = {
+                "id": chat.id,
+                "unread_message_quanty": unread_chats_dict[chat.id] if chat.id in unread_chats_dict else 0,
+                "title": chat.title,
+                "alter_date": chat.alter_date if not last_message else last_message.create_date,
+                "label": chat.label,
+            }
+            items.append(item)
+        return items
 
     def get(self, request, *args, **kwargs):
         office = Office.objects.get(pk=int(request.GET.get('office')))
-        chats = office.chats.filter(users__user_by_chat=self.request.user,
-            users__is_active=True)
-
-        data = self.add_count_unread_message(request.user, list(chats.values()))
+        chats = office.chats.filter(
+                users__user_by_chat=self.request.user,
+                users__is_active=True,
+                messages__isnull=False
+            ).prefetch_related('messages').order_by('-messages__create_date')
+        data = self.add_count_unread_message(request.user, chats)
         return JsonResponse(data, safe=False)
 
 class ChatMenssage(CustomLoginRequiredView, View):
