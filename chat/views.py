@@ -120,12 +120,21 @@ class ChatsByOfficeView(CustomLoginRequiredView, View):
         return items
 
     def get(self, request, *args, **kwargs):
+        from django.utils import timezone
+        from datetime import timedelta, datetime
+
         office = Office.objects.get(pk=int(request.GET.get('office')))
         chats = office.chats.filter(
                 users__user_by_chat=self.request.user,
                 users__is_active=True,
                 messages__isnull=False
-            ).prefetch_related('messages').order_by('-messages__create_date')
+            )
+        since = request.GET.get('since')
+        if since:
+            since = datetime.strptime(since.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+            print(since)
+            chats = chats.filter(alter_date__gt=since, messages__create_date__gt=since)
+        chats = chats.prefetch_related('messages').order_by('-messages__create_date')
         data = self.add_count_unread_message(request.user, chats)
         return JsonResponse(data, safe=False)
 
