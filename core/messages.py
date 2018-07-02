@@ -23,7 +23,7 @@ def delete_error_protected(model_name, related_model):
     return ('Não é possível excluir o(s) registros de ' +
             model_name +
             ' porque existem registros '
-            'associados em outra parte do sistema ('+ related_model +')!'
+            'associados em outra parte do sistema!'
             ' A exclusão será cancelada.')
 
 

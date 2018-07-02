@@ -588,16 +588,15 @@ class PersonDeleteView(AuditFormMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         if request.method == 'POST':
             pks = request.POST.getlist('selection')
-
-            with transaction.atomic():
-                try:
-                    # self.model.objects.filter(pk__in=pks).delete()                    
+            
+            try:
+                with transaction.atomic():                                       
                     user_pk = None
-                    for pk in pks:
-                        person = Person.objects.get(pk=pk)
+                    persons = Person.objects.filter(pk__in=pks)
+                    for person in persons:                        
                         if person.auth_user:
-                            user_pk = person.auth_user.pk
-                            person.auth_user = None                    
+                            user_pk = person.auth_user
+                            person.auth_user = None
                         person.officemembership_set.all().delete()
                         person.invites.clear()
                         person.delete() 
@@ -605,13 +604,15 @@ class PersonDeleteView(AuditFormMixin, DeleteView):
                             User.objects.get(pk=user_pk).delete()
                     attachments_multi_delete(self.model, pks=pks)
                     messages.success(self.request, self.success_message)
-                except ProtectedError as e: 
-                    import pdb; pdb.set_trace()               
-                    qs = e.protected_objects.first()
-                    # type = type('Task')
-                    messages.error(self.request,
-                                delete_error_protected(str(self.model._meta.verbose_name),
-                                                        qs.__str__()))
+            except ProtectedError as e:                        
+                qs = e.protected_objects.first()                
+                msg_error = 'Não é possível excluir o registro selecionado porque existem ' \
+                +'registros associados na tabela %s para a pessoa %s.' % (qs._meta.object_name, person.name)
+                
+                # delete_error_protected(str(self.model._meta.verbose_name), qs.__str__()) \
+                # +' Favor verificar no sistema informações vinculadas a pessoa: ' + person.name \
+                # +' Informação vinculada: ' + qs._meta.verbose_name
+                messages.error(self.request, msg_error)
 
         # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
         if self.success_url:
