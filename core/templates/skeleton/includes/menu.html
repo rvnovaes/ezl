@@ -115,12 +115,6 @@
                     <span class="hide-menu">Equipes</span>
                 </a>
             </li>
-            <li>
-                <a href="{% url 'team_list' %}" target="_self">
-                    <i class="fa fa-group"></i>
-                    <span class="hide-menu">Equipes</span>
-                </a>
-            </li>
             {% if request.user.is_superuser %}
                 <li> <!-- QUESTIONARIOS -->
                     <a href="{% url 'survey_list' %}" target="_self">
