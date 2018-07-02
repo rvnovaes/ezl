@@ -39,8 +39,9 @@
                             {% bootstrap_field filter.form.folder_legacy_code form_group_class="form-group col-sm-6" bound_css_class='' %}
                         </div>
                         <div class="row">
-                            {% bootstrap_field filter.form.task_number form_group_class="form-group col-sm-6" bound_css_class='' %}
-                            {% bootstrap_field filter.form.task_origin_code form_group_class="form-group col-sm-6" bound_css_class='' %}
+                            {% bootstrap_field filter.form.task_number form_group_class="form-group col-sm-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.task_parent_number form_group_class="form-group col-sm-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.task_origin_code form_group_class="form-group col-sm-4" bound_css_class='' %}
                         </div>
                         <div class="row">
                             {% bootstrap_field filter.form.person_executed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}

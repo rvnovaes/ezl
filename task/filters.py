@@ -36,6 +36,7 @@ class TaskFilter(FilterSet):
     folder_legacy_code = CharFilter(label=u"Nº da pasta de origem")
     law_suit_number = CharFilter(label=u"Nº do processo")
     task_number = NumberFilter(label=u"Nº da OS")
+    task_parent_number = NumberFilter(label=u"Nº da OS pai")
     task_legacy_code = CharFilter(label=u"Nº da OS de origem")
     task_origin_code = NumberFilter(label=u"Nº da OS de origem")
     client = CharFilter(label="Cliente",
