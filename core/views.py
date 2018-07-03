@@ -991,8 +991,8 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
         data = super().get_context_data(**kwargs)
         data['inviteofficeform'] = InviteForm(self.request.POST) \
             if InviteForm(self.request.POST).is_valid() else InviteForm()
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(kwargs.get('table_members'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(kwargs.get('table_offices'))
+        RequestConfig(self.request, paginate=False).configure(kwargs.get('table_members'))
+        RequestConfig(self.request, paginate=False).configure(kwargs.get('table_offices'))
         return data
 
     def dispatch(self, request, *args, **kwargs):

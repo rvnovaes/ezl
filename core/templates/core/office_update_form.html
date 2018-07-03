@@ -12,6 +12,9 @@
               rel="stylesheet"/>
     {% endblock %}
     {% block extra_stylesheets %}
+        <!-- DataTables -->
+        <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
+        <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />    
         <style>
             .btn.btn-outline.btn-success.btn-rounded {
                 color: #53e69d;
@@ -278,7 +281,7 @@
                 <form action="{% url 'office_membership_inactive' office_pk=object.pk %}" method="post"
                         id="membersForm">{% csrf_token %}
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover" paginate-fixed>
+                        <table class="table table-striped table-hover">
                             {% block table_members.thead %}
                                 <thead>
                                 <tr>
@@ -324,13 +327,6 @@
                                 <tfoot></tfoot>
                             {% endblock table_members.tfoot %}
                         </table>
-                    </div>
-                    <div class="pagination-fixed">
-                        {% if table_members.page %}
-                            {% block pagination %}
-                                {% bootstrap_pagination table_members.page url=request.get_full_path %}
-                            {% endblock pagination %}
-                        {% endif %}
                     </div>
                     <div class="text-right" style="">
                         <div class="text-right" style="">
@@ -475,13 +471,6 @@
                                 <tfoot></tfoot>
                             {% endblock table_offices.tfoot %}
                         </table>
-                    </div>
-                    <div class="pagination-fixed">
-                        {% if table_offices.page %}
-                            {% block pagination_offices %}
-                                {% bootstrap_pagination table_offices.page url=request.get_full_path %}
-                            {% endblock pagination_offices %}
-                        {% endif %}
                     </div>
                     <div class="text-right" style="">
                         <div class="text-right" style="">
@@ -664,8 +653,23 @@
             }
 
         })
-
-
+    </script>
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>            
+    <script>
+        $(document).ready(function(){
+            $('table').each(function(){
+                try {
+                    $(this).DataTable({
+                            language: {
+                                "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                            }})                
+                } catch {
+                    console.log($(this).DataTable())                
+                }
+                
+            })
+        })
     </script>
 {% endblock %}
 {% block extra_modal %}
