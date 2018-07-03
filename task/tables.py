@@ -63,7 +63,7 @@ class DashboardStatusTable(tables.Table):
 
     class Meta:
         model = DashboardViewModel
-        fields = ['task_number', 'final_deadline_date', 'type_service', 'law_suit_number', 'client',
+        fields = ['status', 'task_number', 'final_deadline_date', 'type_service', 'law_suit_number', 'client',
                   'opposing_party', 'delegation_date', 'origin_code']
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {
