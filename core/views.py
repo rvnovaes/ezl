@@ -155,7 +155,7 @@ def logout_user(request):
 
 
 class MultiDeleteViewMixin(DeleteView):
-    success_message = None
+    success_message = None        
 
     def delete(self, request, *args, **kwargs):
         if request.method == 'POST':
@@ -165,9 +165,8 @@ class MultiDeleteViewMixin(DeleteView):
                 self.model.objects.filter(pk__in=pks).delete()
                 attachments_multi_delete(self.model, pks=pks)
                 messages.success(self.request, self.success_message)
-            except ProtectedError as e:
-                qs = e.protected_objects.first()
-                # type = type('Task')
+            except ProtectedError as e:                
+                qs = e.protected_objects.first()                
                 messages.error(self.request,
                                delete_error_protected(str(self.model._meta.verbose_name),
                                                       qs.__str__()))
@@ -178,6 +177,34 @@ class MultiDeleteViewMixin(DeleteView):
         else:
             return HttpResponseRedirect(self.get_success_url())
 
+
+class MultiDeleteView(DeleteView):
+    success_message = None
+    error_message = 'Não é possível fazer exclusão do(s) registro(s) selecionado(s) porque existe(m) ' \
+                    +'informações associadas na tabela %s para o registro %s.'
+
+    def delete(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            pks = request.POST.getlist('selection')            
+            with transaction.atomic():
+                try:                
+                    for item in self.model.objects.filter(pk__in=pks):
+                        item.delete()                        
+                    attachments_multi_delete(self.model, pks=pks)
+                    messages.success(self.request, self.success_message)
+                except ProtectedError as e:                
+                    qs = e.protected_objects.first()                
+                    if self.error_message:
+                        msg_error = self.error_message % (qs._meta.object_name, item)
+                    else:
+                        delete_error_protected(str(self.model._meta.verbose_name), qs.__str__())
+                    messages.error(self.request, msg_error)
+
+        # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
+        if self.success_url:
+            return HttpResponseRedirect(self.success_url)
+        else:
+            return HttpResponseRedirect(self.get_success_url())
 
 def remove_invalid_registry(f):
     """
@@ -579,46 +606,11 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
         return reverse('person_update', args=(self.object.id,))
 
 
-class PersonDeleteView(AuditFormMixin, DeleteView):
+class PersonDeleteView(AuditFormMixin, MultiDeleteView):
     model = Person
     success_url = reverse_lazy('person_list')
-    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)        
     object_list_url = 'person_list'
-
-    def delete(self, request, *args, **kwargs):
-        if request.method == 'POST':
-            pks = request.POST.getlist('selection')
-            
-            try:
-                with transaction.atomic():                                       
-                    user_pk = None
-                    persons = Person.objects.filter(pk__in=pks)
-                    for person in persons:                        
-                        if person.auth_user:
-                            user_pk = person.auth_user
-                            person.auth_user = None
-                        person.officemembership_set.all().delete()
-                        person.invites.clear()
-                        person.delete() 
-                        if user_pk:
-                            User.objects.get(pk=user_pk).delete()
-                    attachments_multi_delete(self.model, pks=pks)
-                    messages.success(self.request, self.success_message)
-            except ProtectedError as e:                        
-                qs = e.protected_objects.first()                
-                msg_error = 'Não é possível excluir o registro selecionado porque existem ' \
-                +'registros associados na tabela %s para a pessoa %s.' % (qs._meta.object_name, person.name)
-                
-                # delete_error_protected(str(self.model._meta.verbose_name), qs.__str__()) \
-                # +' Favor verificar no sistema informações vinculadas a pessoa: ' + person.name \
-                # +' Informação vinculada: ' + qs._meta.verbose_name
-                messages.error(self.request, msg_error)
-
-        # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
-        if self.success_url:
-            return HttpResponseRedirect(self.success_url)
-        else:
-            return HttpResponseRedirect(self.get_success_url())
 
 
 class GenericAutocompleteForeignKey(autocomplete.Select2QuerySetView):
@@ -953,7 +945,7 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         return kw
 
 
-class UserDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
+class UserDeleteView(CustomLoginRequiredView, MultiDeleteView):
     model = User
     success_url = reverse_lazy('user_list')
     success_message = DELETE_SUCCESS_MESSAGE.format('usuários')

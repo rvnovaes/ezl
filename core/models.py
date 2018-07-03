@@ -206,7 +206,7 @@ class AbstractPerson(Audit, LegacyCode):
                                   default=LegalType.JURIDICA)
     cpf_cnpj = models.CharField(max_length=255, blank=True, null=True,
                                 unique=True, verbose_name='CPF/CNPJ')
-    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                                      blank=True, null=True,
                                      verbose_name='Usuário do sistema')
     is_customer = models.BooleanField(null=False, default=False, verbose_name='É Cliente?')
@@ -364,7 +364,7 @@ class OfficeRelGroup(models.Model):
 
 
 class DefaultOffice(OfficeMixin, Audit):
-    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                                      blank=False, null=False,
                                      verbose_name='Usuário do sistema')
 
@@ -377,7 +377,7 @@ class DefaultOffice(OfficeMixin, Audit):
 
 class Invite(Audit):
     person = models.ForeignKey(Person, blank=True, null=True,
-                               on_delete=models.PROTECT, related_name='invites', verbose_name='Pessoa')
+                               on_delete=models.CASCADE, related_name='invites', verbose_name='Pessoa')
     office = models.ForeignKey(Office, blank=False, null=False,
                                on_delete=models.PROTECT, related_name='invites', verbose_name='Escritório')
     status = models.CharField(choices=INVITE_STATUS, default='N', max_length=1, verbose_name='Status')
