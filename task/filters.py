@@ -44,6 +44,8 @@ class TaskFilter(FilterSet):
                                                          field_related='legal_name',
                                                          name='client',
                                                          url='/client_form'))
+    office_executed_by = CharFilter(label='Escritório contrado', required=False, 
+      widget=TypeaHeadForeignKeyWidget(model=Office, field_related='legal_name', name='office_executed_by', url='/office_correspondent_form'))
     person_executed_by = CharFilter(label="Correspondente",
                         required=False,
                         widget=TypeaHeadForeignKeyWidget(model=Person,

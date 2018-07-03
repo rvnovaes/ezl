@@ -756,8 +756,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     if checker.has_perm('view_delegated_tasks', office_session):
                         person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
                     if checker.has_perm('view_requested_tasks', office_session):
-                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
-
+                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)                
+                if data['office_executed_by']:
+                    task_dynamic_query.add(Q(child__office_id=data['office_executed_by']), Q.AND)
                 if data['state']:
                     task_dynamic_query.add(Q(movement__law_suit__court_district__state=data['state']), Q.AND)
                 if data['court_district']:
