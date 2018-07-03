@@ -142,23 +142,18 @@ def import_service_price_table(request):
     if request.method == 'POST':                             
         form = ImportServicePriceTableForm(request.POST, request.FILES)        
         if form.is_valid():
-            if not request.FILES['file_xls'].name.endswith('.xlsx'):                
-                messages.error(request, 'Arquivo "%s" inválido para importação.' % 
-                    request.FILES['file_xls'].name)
-            else:
-                file_xls = form.save(commit=False)
-                file_xls.office = get_office_session(request)
-                file_xls.create_user = request.user 
-                file_xls.start = timezone.now()               
-                file_xls.save()
-                
-                import_xls_service_price_table.delay(file_xls.pk)
-                context['show_modal_progress'] = True
-                context['file_xls'] = file_xls
-                context['file_name'] = request.FILES['file_xls'].name           
+            file_xls = form.save(commit=False)
+            file_xls.office = get_office_session(request)
+            file_xls.create_user = request.user 
+            file_xls.start = timezone.now()               
+            file_xls.save()
+            
+            import_xls_service_price_table.delay(file_xls.pk)
+            context['show_modal_progress'] = True
+            context['file_xls'] = file_xls
+            context['file_name'] = request.FILES['file_xls'].name           
         else:
-            if not form.instance.file_xls:
-                messages.error(request, 'Arquivo para importação não informado.')
+            messages.error(request, form.errors)
         context['form'] = form
         return render(request, 'financial/import_service_price_table.html', context)         
     else:
