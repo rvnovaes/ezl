@@ -763,6 +763,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     task_dynamic_query.add(Q(movement__law_suit__court_district__state=data['state']), Q.AND)
                 if data['court_district']:
                     task_dynamic_query.add(Q(movement__law_suit__court_district=data['court_district']), Q.AND)
+                if data['task_status']:
+                    status = getattr(TaskStatus, data['task_status'])
+                    task_dynamic_query.add(Q(task_status=status), Q.AND)
                 if data['type_task']:
                     task_dynamic_query.add(Q(type_task=data['type_task']), Q.AND)
                 if data['court']:

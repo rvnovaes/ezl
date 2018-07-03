@@ -7,7 +7,7 @@ from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
 from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ
-from task.models import TypeTask, Task, Filter
+from task.models import TypeTask, Task, Filter, TaskStatus
 from .models import DashboardViewModel
 from core.utils import get_office_session
 
@@ -24,6 +24,8 @@ class TaskFilter(FilterSet):
                                                                  name='court_district',
                                                                  url='/processos/courtdistrict_autocomplete'))
 
+    task_status = ChoiceFilter(label="Status", required=False, empty_label="Selecione",
+        choices=[(task_status.name, task_status.value) for task_status in TaskStatus])
     type_task = ModelChoiceFilter(queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True)),
                                   label=u"Tipo de Serviço")
     cost_center = ModelChoiceFilter(queryset=filter_valid_choice_form(CostCenter.objects.filter(is_active=True)),

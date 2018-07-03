@@ -25,6 +25,7 @@
                             {% bootstrap_field filter.form.court_district form_group_class="form-group col-sm-6" bound_css_class='' %}
                         </div>
                         <div class="row">
+                            {% bootstrap_field filter.form.task_status form_group_class="form-group col-md-3" bound_css_class='' %}
                             {% bootstrap_field filter.form.type_task form_group_class="form-group col-md-3" bound_css_class='' %}
                             {% bootstrap_field filter.form.cost_center form_group_class="form-group col-md-3" bound_css_class='' %}
                             {% bootstrap_field filter.form.court form_group_class="form-group col-md-3" bound_css_class='' %}
@@ -101,7 +102,7 @@
                         <div class="row">
                             <div class="form-group col-sm-12 col-md-6">
                                 {% bootstrap_label "Prazo entre: " %}
-                                {% bootstrap_field filter.form.blocked_payment_in form_group_class="" bound_css_class='' show_label=False %}
+                                {% bootstrap_field filter.form.final_deadline_date_in form_group_class="" bound_css_class='' show_label=False %}
                             </div>
                         </div>                        
                     </fieldset>
