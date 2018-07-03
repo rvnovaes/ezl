@@ -10,9 +10,10 @@ from task.models import Ecm, Task, TaskStatus
 class EcmEtl(GenericETL):
     _import_query = """
                     SELECT
-                      G.ID_doc AS ecm_legacy_code,
+                      G.ID_doc AS legacy_code,
                       A.Ident  AS task_legacy_code,
-                      G.Link   AS path
+                      G.Link   AS path,
+                      G.Descricao as exhibition_name
                     FROM Jurid_Ged_Main AS G
                       INNER JOIN Jurid_agenda_table AS A
                         ON G.Codigo_OR = CAST(A.Ident AS VARCHAR(255))
@@ -23,9 +24,10 @@ class EcmEtl(GenericETL):
                     WHERE {task_list}
                     UNION
                     SELECT DISTINCT
-                      G.ID_doc AS ecm_legacy_code,
+                      G.ID_doc AS legacy_code,
                       A.Ident  AS task_legacy_code,
-                      G.Link   AS path
+                      G.Link   AS path,
+                      G.Descricao as exhibition_name
                     FROM Jurid_Ged_Main AS G
                       INNER JOIN Jurid_GEDLig AS GL
                         ON GL.Id_id_doc = G.ID_doc
@@ -38,7 +40,6 @@ class EcmEtl(GenericETL):
                     WHERE {task_list}
                           """
     model = Ecm
-    field_check = 'ecm_legacy_code'
 
     @staticmethod
     def list_chunks(l, n):
@@ -81,16 +82,17 @@ class EcmEtl(GenericETL):
                         """
                         if not self.model.objects.filter(task=task, path=path):
                             self.model.objects.create(task=task,
-                                                      legacy_code=row['ecm_legacy_code'],
+                                                      legacy_code=row['legacy_code'],
                                                       system_prefix=LegacySystem.ADVWIN.value,
                                                       is_active=True,
                                                       path=path,
                                                       create_user=user,
                                                       alter_user=user,
+                                                      exhibition_name=row['exhibition_name'],
                                                       updated=False)
                         self.debug_logger.debug(
                             'ECM,%s,%s,%s,%s' % (
-                                str(row['ecm_legacy_code']), str(row['task_legacy_code']),
+                                str(row['legacy_code']), str(row['task_legacy_code']),
                                 str(row['path']), self.timestr))
                     except IntegrityError as e:
                         msg = get_message_log_default(
