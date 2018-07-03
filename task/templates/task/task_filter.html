@@ -97,6 +97,12 @@
                                 {% bootstrap_field filter.form.finished_in form_group_class="" bound_css_class='' show_label=False %}
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Prazo entre: " %}
+                                {% bootstrap_field filter.form.blocked_payment_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                        </div>                        
                     </fieldset>
                      <div class="panel-footer text-center">
                          <button class="btn btn-default waves-effect waves-light" type="button"

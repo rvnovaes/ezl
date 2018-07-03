@@ -62,6 +62,7 @@ class TaskFilter(FilterSet):
                                                                   field_related='legal_name',
                                                                   name='person_distributed_by',
                                                                   url='/service_form'))
+    final_deadline_date_in = MDDateTimeRangeFilter(name='final_deadline_date_in', label='Prazo entre:')
     requested_in = MDDateTimeRangeFilter(name='requested_in', label=u"Solicitadas entre:")
     accepted_service_in = MDDateTimeRangeFilter(name='accepted_service_in', label="Aceitas pelo Service entre:")
     refused_service_in = MDDateTimeRangeFilter(name='refused_service_in', label="Recusadas pelo Service entre:")

@@ -866,6 +866,13 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     if data['finished_in'].stop:
                         finished_dynamic_query.add(
                             Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['final_deadline_date_in']:
+                    if data['final_deadline_date_in'].start:
+                        finished_dynamic_query.add(
+                            Q(final_deadline_date__gte=data['final_deadline_date_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['final_deadline_date_in'].stop:
+                        finished_dynamic_query.add(
+                            Q(final_deadline_date__lte=data['final_deadline_date_in'].stop.replace(hour=23, minute=59)), Q.AND)
 
                 person_dynamic_query.add(Q(client_query), Q.AND) \
                     .add(Q(task_dynamic_query), Q.AND) \
