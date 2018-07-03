@@ -138,7 +138,7 @@ class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):
 
 @login_required
 def import_service_price_table(request):   
-    context = { }    
+    context = {}
     if request.method == 'POST':                             
         form = ImportServicePriceTableForm(request.POST, request.FILES)        
         if form.is_valid():
@@ -214,6 +214,7 @@ class ImportServicePriceTableStatus(CustomLoginRequiredView, View):
             'error_process': error_process,
             'process_have_log': process_have_log            
         })
+
 
 @login_required
 def ajax_get_log_import_service_price_table_data_table(request):    

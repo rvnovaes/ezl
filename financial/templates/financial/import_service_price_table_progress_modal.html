@@ -84,7 +84,7 @@
                                             var table = $('#LogTable');
                                             response.data.forEach(function(d){
                                                 table.append('<tr><td>' + d + '</td></tr>')
-                                            })
+                                            });
                                             table.DataTable({
                                                 pageLength: 10,
                                                 dom: 'Bfrtip',                                                
@@ -118,8 +118,8 @@
                         },
                     })
                 }
-            }
-            process_interval = setInterval(setImported, 3000)
+            };
+            process_interval = setInterval(setImported, 300)
         }); 
 
 
