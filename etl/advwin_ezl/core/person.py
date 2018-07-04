@@ -23,11 +23,6 @@ class PersonETL(GenericETL):
                     WHERE  a1.status = 'Ativo'
                            AND a1.nome IS NOT NULL
                            AND a1.nome <> ''
-                           AND a1.codigo NOT IN (SELECT cf.codigo
-                                                 FROM   {clifor} AS cf
-                                                 WHERE  cf.status = 'Ativo'
-                                                        AND cf.razao IS NOT NULL
-                                                        AND cf.razao <> '')
                     UNION
                     SELECT cf.razao  AS legal_name,
                            cf.nome   AS name,
@@ -67,14 +62,14 @@ class PersonETL(GenericETL):
 
         for row in rows:
             rows_count -= 1
-            try:
+            try:                    
                 legal_name = row['legal_name'] or row['name']
                 name = row['name'] or row['legal_name']
                 legacy_code = row['legacy_code']
                 legal_type = row['legal_type']
                 customer_supplier = row['customer_supplier']
                 is_lawyer = row['is_lawyer']
-                cpf_cnpj = None
+                cpf_cnpj = None                
                 if legal_type != 'F' and legal_type != 'J':
                     if str(legacy_code).isnumeric():
                         # se for maior que 11 provavelmente é o cnpj
@@ -113,26 +108,27 @@ class PersonETL(GenericETL):
                 if instance:
                     # use update_fields to specify which fields to save
                     # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
+                    update_fields = ['alter_date',
+                                    'legal_name',
+                                    'name',                                       
+                                    'legal_type',
+                                    'cpf_cnpj',
+                                    'alter_user',
+                                    'is_active',
+                                    'is_customer',
+                                    'is_supplier']
                     instance.legal_name = legal_name
-                    instance.name = name
-                    instance.is_lawyer = is_lawyer
+                    instance.name = name                    
+                    if not instance.is_lawyer:
+                        instance.is_lawyer = is_lawyer
+                        update_fields.append('is_lawyer')
                     instance.legal_type = legal_type
                     instance.cpf_cnpj = cpf_cnpj
                     instance.alter_user = user
                     instance.is_customer = is_customer
                     instance.is_supplier = is_supplier
                     instance.is_active = is_active
-                    instance.save(
-                        update_fields=['alter_date',
-                                       'legal_name',
-                                       'name',
-                                       'is_lawyer',
-                                       'legal_type',
-                                       'cpf_cnpj',
-                                       'alter_user',
-                                       'is_active',
-                                       'is_customer',
-                                       'is_supplier'])
+                    instance.save(update_fields=update_fields)
                     if not default_office.persons.filter(pk=instance.pk):
                         OfficeMembership.objects.update_or_create(person=instance,
                                                                   office=default_office,
