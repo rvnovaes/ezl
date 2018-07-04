@@ -505,7 +505,7 @@ class RegisterNewUserForm(UserCreationForm):
 class OfficeForm(BaseModelForm):
     class Meta:
         model = Office
-        fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_active']
+        fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj', 'use_service', 'is_active']
 
     def clean(self):
         cleaned_data = super().clean()
