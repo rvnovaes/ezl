@@ -156,7 +156,7 @@ def import_xls_service_price_table(self, file_id):
     finally:        
         xls_file.end = timezone.now()
         xls_file.save()
-        delete_imported_xls_service_price_table.apply_async(([xls_file.pk]), countdown=5)
+        delete_imported_xls_service_price_table.apply_async(([xls_file.pk]), countdown=60)
 
 
 @shared_task(bind=True)
