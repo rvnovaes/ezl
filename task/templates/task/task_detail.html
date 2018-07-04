@@ -51,7 +51,8 @@
                              Deseja <span id="actionText">aceitar</span> o prazo? </h4>
                     </div>
                     <div class="modal-body p-30">
-                        {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
+                        {{form.instnace.status.name}}
+                        {% if form.instance.status.name == 'ACCEPTED_SERVICE' or  form.instance.status.name == 'REQUESTED' and not form.instance.office.use_service%}
                             {{ form.servicepricetable_id }}
                             <div class="form-group" style="margin: auto">
                                 <label>Tipo de Serviço: </label>
@@ -303,7 +304,6 @@
         }
 
         function getId(value) {
-            debugger;
             var task_status = value.id;
 
             if (value.id == "BLOCKEDPAYMENT" || value.id == "FINISHED"){

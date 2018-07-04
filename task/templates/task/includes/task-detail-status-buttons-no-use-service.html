@@ -1,0 +1,9 @@
+<button type="button" data-toggle="modal" data-target="#to-assign"
+        class="text-white btn btn-info {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
+    <span class="btn-label"><i class="mdi mdi-account-location"></i></span> Atribuir
+</button>
+
+<button type="button" id="OPEN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+        class="text-white btn btn-ezl-open {% if not form.instance.status.name == 'REQUESTED' 	%}hidden{% endif %}">
+    <span class="btn-label"><i class="mdi mdi-account-location"></i></span> Delegar
+</button>
