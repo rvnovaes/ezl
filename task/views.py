@@ -428,7 +428,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
-        returned = grouped.get(TaskStatus.RETURN) or {}
+        returned = grouped.get(TaskStatus.RETURN) or {}        
         accepted = grouped.get(TaskStatus.ACCEPTED) or {}
         opened = grouped.get(TaskStatus.OPEN) or {}
         done = grouped.get(TaskStatus.DONE) or {}
@@ -455,15 +455,16 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
             return_list.append(DashboardStatusTable(requested,
                                                     title='Solicitadas',
                                                     status=TaskStatus.REQUESTED))
-            # status 11 - Aceita pelo Service
-            return_list.append(DashboardStatusTable(accepted_service,
-                                                    title='Aceitas pelo Service',
-                                                    status=TaskStatus.ACCEPTED_SERVICE))
+            if office_session.use_service:
+                # status 11 - Aceita pelo Service
+                return_list.append(DashboardStatusTable(accepted_service,
+                                                        title='Aceitas pelo Service',
+                                                        status=TaskStatus.ACCEPTED_SERVICE))
 
-            # status 20 - Recusada pelo Sevice
-            return_list.append(DashboardStatusTable(refused_service,
-                                                    title='Recusadas pelo Service',
-                                                    status=TaskStatus.REFUSED_SERVICE))
+                # status 20 - Recusada pelo Sevice
+                return_list.append(DashboardStatusTable(refused_service,
+                                                        title='Recusadas pelo Service',
+                                                        status=TaskStatus.REFUSED_SERVICE))
 
         return_list.append(DashboardStatusTable(returned,
                                                 title='Retornadas',
