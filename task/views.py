@@ -152,9 +152,8 @@ class TaskToAssignView(AuditFormMixin, UpdateView):
 
     def form_valid(self, form):
         super().form_valid(form)
-        if form.is_valid():
-            if not form.instance.person_distributed_by:
-                form.instance.person_distributed_by = self.request.user.person
+        if form.is_valid():            
+            form.instance.person_distributed_by = self.request.user.person
             form.instance.task_status = TaskStatus.OPEN
             # TODO: rever processo de anexo, quando for trocar para o ECM Generico
             get_task_attachment(self, form)
