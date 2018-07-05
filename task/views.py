@@ -446,9 +446,10 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
             return []
         if checker.has_perm('can_access_general_data', office_session) or checker.has_perm('group_admin',
                                                                                            office_session):
-            return_list.append(DashboardErrorStatusTable(error,
-                                                         title='Erro no sistema de origem',
-                                                         status=TaskStatus.ERROR))
+            if office_session.use_etl:
+                return_list.append(DashboardErrorStatusTable(error,
+                                                             title='Erro no sistema de origem',
+                                                             status=TaskStatus.ERROR))
 
             # status 10 - Solicitada
             return_list.append(DashboardStatusTable(requested,
