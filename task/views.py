@@ -2,8 +2,10 @@ import json
 import csv
 import os
 import copy
-from urllib.parse import urlparse
 import pickle
+import io
+from urllib.parse import urlparse
+from zipfile import ZipFile
 from pathlib import Path
 from django.contrib import messages
 from django.core.cache import cache
@@ -1174,3 +1176,28 @@ class GeolocationTaskFinish(CustomLoginRequiredView, View):
             return JsonResponse({"ok": True,
                                  "finished_date": date_format(timezone.localtime(finished_date), 'DATETIME_FORMAT')})
         return JsonResponse({"ok": False})
+
+@login_required
+def ecm_batch_download(request, pk):
+    #https://stackoverflow.com/questions/12881294/django-create-a-zip-of-multiple-files-and-make-it-downloadable
+    #http://mypythondjango.blogspot.com/2018/01/how-to-zip-files-in-filefield-and.html    
+    ecms = Ecm.objects.filter(task_id=pk).select_related('task')
+    try:
+        buff = io.BytesIO()
+        zf = ZipFile(buff, mode='a')
+        zip_filename = None
+        for ecm in ecms:
+            output = io.BytesIO(ecm.path.read())
+            output.seek(0)
+            zf.writestr(ecm.path.name, output.getvalue())
+            if not zip_filename:
+                zip_filename = 'Anexos_OS_%s.zip' % (ecm.task.task_number)            
+        zf.close()
+        buff.seek(0)
+        data = buff.read()
+        resp = HttpResponse(data, content_type = "application/x-zip-compressed")    
+        resp['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
+        return resp
+    except Exception as e:
+        messages.error(request, 'Erro ao baixar todos arquivos.' + str(e))
+        return HttpResponseRedirect(ecm.task.get_absolute_url())    
