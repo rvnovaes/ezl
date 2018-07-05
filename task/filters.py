@@ -1,5 +1,5 @@
 from django.forms import Select, Textarea, RadioSelect
-from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter
+from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter
 from django import forms
 
 from core.models import Person, State, Office, Team
@@ -24,8 +24,8 @@ class TaskFilter(FilterSet):
                                                                  name='court_district',
                                                                  url='/processos/courtdistrict_autocomplete'))
 
-    task_status = ChoiceFilter(label="Status", required=False, empty_label="Selecione",
-        choices=[(task_status.name, task_status.value) for task_status in TaskStatus])
+    task_status = MultipleChoiceFilter(label="Status", required=False,
+      choices=[(task_status.name, task_status.value) for task_status in TaskStatus])
     type_task = ModelChoiceFilter(queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True)),
                                   label=u"Tipo de Serviço")
     cost_center = ModelChoiceFilter(queryset=filter_valid_choice_form(CostCenter.objects.filter(is_active=True)),
