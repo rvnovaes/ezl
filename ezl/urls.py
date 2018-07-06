@@ -24,7 +24,7 @@ urlpatterns = [
     url(r'^accounts/', include('allauth.urls')),
     url(r'^financeiro/', include('financial.urls'), name='financial'),
     url(r'^pesquisa/', include('survey.urls'), name='survey'),
-    url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),
+    url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),    
     url(r'^v1/lawsuit/', include('lawsuit.urls_api'), name='lawsuit_api'),
     url(r'^providencias/', include('task.urls'), name='task'),
     url(r'^dashboard/$', login_required(DashboardView.as_view()), name='dashboard'),

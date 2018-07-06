@@ -1,9 +1,16 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.views import View
-from .models import LawSuit, Movement
+from .models import LawSuit, Movement, CourtDistrict
+from .serializers import CourtDistrictSerializer
 from core.api import ApiViewMixin
 from task.models import Task
+from rest_framework import viewsets, mixins 
+
+
+class CourtDistrictViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+    queryset = CourtDistrict.objects.all()
+    serializer_class = CourtDistrictSerializer
 
 
 class LawsuitApiView(LoginRequiredMixin, ApiViewMixin):
