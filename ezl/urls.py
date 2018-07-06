@@ -80,6 +80,7 @@ urlpatterns = [
 
 
     url(r'^popup_success', PopupSuccessView.as_view(), name='popup_success'),
+    url(r'^api-auth/', include('rest_framework.urls'))
 
 ] + \
     static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static/')) + \

@@ -130,6 +130,7 @@ INSTALLED_APPS = [
     'guardian',
     'billing',
     'djmoney',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -416,3 +417,9 @@ LOGGING = {
 
 UPLOAD_DIRECTORY = 'uploads'
 ADMINS = [('EZL Erros', 'erros.ezlawyer@gmail.com')]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'   
+    ]    
+}
