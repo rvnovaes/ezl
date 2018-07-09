@@ -59,8 +59,9 @@ def get_court_district(row, xls_file, state):
     if row[2].value and state:
         court_district_name = remove_caracter_especial(str(row[2].value).strip())
         court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_name, state=state.pk).first()
-        if not court_district:
-            xls_file.log = xls_file.log + ('Comarca %s não encontrada' % court_district_name) + ";"            
+        if not court_district:            
+            msg_error = '%s - %s' % (court_district_name, state.initials) if state else '%s' % court_district_name
+            xls_file.log = xls_file.log + 'Comarca ' + msg_error +  ' não encontrada' + ";"            
     return court_district
 
 
