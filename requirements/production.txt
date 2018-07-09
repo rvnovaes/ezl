@@ -47,3 +47,6 @@ django-redis==4.9.0
 djangorestframework==3.8.2
 Markdown==2.6.11
 django-cors-headers==2.2.0
+
+# docs
+django-rest-swagger==2.2.0

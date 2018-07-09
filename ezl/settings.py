@@ -130,7 +130,8 @@ INSTALLED_APPS = [
     'guardian',
     'billing',
     'djmoney',
-    'rest_framework'
+    'rest_framework', 
+    'rest_framework_swagger'
 ]
 
 MIDDLEWARE = [
