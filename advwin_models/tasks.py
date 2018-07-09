@@ -34,7 +34,7 @@ class TaskObservation(Enum):
 
 def get_result_advwin(stmt):
     error = None
-    for attempt in range(10):
+    for attempt in range(MAX_RETRIES):
         try:
             return get_advwin_engine().execute(stmt)
         except Exception as e:
@@ -79,27 +79,29 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
             JuridGedMain.__table__.c.Nome == file_name)
         )
         result = get_result_advwin(stmt)
+        id_doc = []
         for row in result:
-            id_doc = row['ID_doc']
-            export_ecm_related_folter_to_task.delay(ecm.id, id_doc)
+            id_doc.append(row['ID_doc'])
         LOGGER.info('ECM %s: exportado', ecm)
-        return '{} Registros afetados'.format(result.rowcount)
+        return id_doc
     else:
         return stmt
 
 
 @shared_task(bind=True, max_retries=MAX_RETRIES)
-def export_ecm_related_folter_to_task(self, ecm_id, id_doc, execute=True):
+def export_ecm_related_folter_to_task(self, id_docs, ecm_id, execute=True):
     ecm = Ecm.objects.get(pk=ecm_id)
-    values = {
-        'Id_tabela_or': 'Pastas',
-        'Id_codigo_or': get_folder_to_related(task=ecm.task),
-        'Id_id_doc': id_doc,
-        'id_ID_or': 0,
-        'dt_inserido': timezone.localtime(ecm.create_date),
-        'usuario_insercao': ecm.create_user.username
-    }
-    stmt = JuridGEDLig.__table__.insert().values(**values)
+    values = []
+    for id_doc in id_docs:
+        values.append({
+            'Id_tabela_or': 'Pastas',
+            'Id_codigo_or': get_folder_to_related(task=ecm.task),
+            'Id_id_doc': id_doc,
+            'id_ID_or': 0,
+            'dt_inserido': timezone.localtime(ecm.create_date),
+            'usuario_insercao': ecm.create_user.username
+        })
+    stmt = JuridGEDLig.__table__.insert().values(*values)
     if execute:
         result = None
         try:
