@@ -1468,6 +1468,13 @@ class CorrespondentAutocomplete(TypeaHeadGenericSearch):
             data.append({'id': correspondent.id, 'data-value-txt': correspondent.__str__()})
         return list(data)
 
+class OfficeCorrespondentAutocomplete(TypeaHeadGenericSearch):
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
+        data = []
+        for office_correspondent in office.offices.filter(Q(legal_name__unaccent__icontains=q)):
+            data.append({'id': office_correspondent.id, 'data-value-txt': office_correspondent.__str__()})
+        return list(data)    
 
 class RequesterAutocomplete(TypeaHeadGenericSearch):
 
