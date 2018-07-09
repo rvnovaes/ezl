@@ -3,17 +3,13 @@ from django.contrib.auth.decorators import login_required
 from rest_framework import routers
 from . import views_api as views
 
-router = routers.DefaultRouter()
+router = routers.SimpleRouter()
 
-router.register(r'court_district', views.CourtDistrictViewSet)
-
+router.register(r'court_district', views.CourtDistrictViewSet, base_name='court_district')
+router.register(r'folder', views.FolderViewSet, base_name='folder')
 
 urlpatterns = [
-	url(r'^api/v1', include(router.urls)),
-    url(r'lawsuit$', login_required(views.LawsuitApiView.as_view()),
-        name='lawsuit_api'),
-    url(r'movement$', login_required(views.MovementApiView.as_view()),
-        name='movement_api'),
-    url(r'task$', login_required(views.TaskApiView.as_view()),
-        name='task_api'),
+
 ]
+
+

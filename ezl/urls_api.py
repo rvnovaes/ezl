@@ -1,10 +1,9 @@
 import os
-from rest_framework import routers
-import lawsuit.views_api as lawsuit_views
-import core.views_api as core_views
+from django.conf.urls import url, include
+from core.urls_api import router as router_core
+from lawsuit.urls_api import router as router_lawsuit
 
-
-router = routers.SimpleRouter()
-router.register(r'persons', core_views.PersonViewSet)
-router.register(r'court_district', lawsuit_views.CourtDistrictViewSet)
-urlpatterns = router.urls
+urlpatterns = [
+	url(r'^', include((router_lawsuit.urls, 'lawsuit'), namespace='lawsuit')),
+    url(r'^', include((router_core.urls, 'core'), namespace='core')),	
+]
