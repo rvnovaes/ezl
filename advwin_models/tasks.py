@@ -1,3 +1,4 @@
+import time
 from enum import Enum
 from json import loads
 from os import linesep
@@ -29,6 +30,17 @@ BASE_COUNTDOWN = 2
 
 class TaskObservation(Enum):
     DONE = 'Ordem de serviço cumprida por'
+
+
+def get_result_advwin(stmt):
+    error = None
+    for attempt in range(10):
+        try:
+            return get_advwin_engine().execute(stmt)
+        except Exception as e:
+            error = e
+            time.sleep(attempt ** BASE_COUNTDOWN)
+    raise error
 
 
 @shared_task(bind=True, max_retries=MAX_RETRIES)
@@ -66,7 +78,8 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
             JuridGedMain.__table__.c.Codigo_OR == ecm.task.legacy_code,
             JuridGedMain.__table__.c.Nome == file_name)
         )
-        for row in get_advwin_engine().execute(stmt):
+        result = get_result_advwin(stmt)
+        for row in result:
             id_doc = row['ID_doc']
             export_ecm_related_folter_to_task.delay(ecm.id, id_doc)
         LOGGER.info('ECM %s: exportado', ecm)
