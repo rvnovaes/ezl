@@ -8,3 +8,4 @@ class CourtDistrictFilter(filters.FilterSet):
 	name = filters.CharFilter(name='name', lookup_expr='icontains')
 	class Meta: 
 		model = CourtDistrict
+		fields = ['state', 'name']
