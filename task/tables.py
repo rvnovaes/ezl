@@ -60,10 +60,12 @@ class DashboardStatusTable(tables.Table):
     type_service = tables.Column(orderable=True)    
     opposing_party = tables.Column(accessor='movement.law_suit.opposing_party')    
     origin_code = tables.Column(order_by=('parent_task_number', 'legacy_code'))
+    status = tables.TemplateColumn(template_name="task/task_status_column.html",
+                               orderable=False)
 
     class Meta:
         model = DashboardViewModel
-        fields = ['task_number', 'final_deadline_date', 'type_service', 'law_suit_number', 'client',
+        fields = ['status', 'task_number', 'final_deadline_date', 'type_service', 'law_suit_number', 'client',
                   'opposing_party', 'delegation_date', 'origin_code']
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {

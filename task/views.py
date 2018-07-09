@@ -756,12 +756,16 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     if checker.has_perm('view_delegated_tasks', office_session):
                         person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
                     if checker.has_perm('view_requested_tasks', office_session):
-                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
-
+                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)                
+                if data['office_executed_by']:
+                    task_dynamic_query.add(Q(child__office_id=data['office_executed_by']), Q.AND)
                 if data['state']:
                     task_dynamic_query.add(Q(movement__law_suit__court_district__state=data['state']), Q.AND)
                 if data['court_district']:
                     task_dynamic_query.add(Q(movement__law_suit__court_district=data['court_district']), Q.AND)
+                if data['task_status']:
+                    status = [getattr(TaskStatus, s) for s in data['task_status']]
+                    task_dynamic_query.add(Q(task_status__in=status), Q.AND)
                 if data['type_task']:
                     task_dynamic_query.add(Q(type_task=data['type_task']), Q.AND)
                 if data['court']:
@@ -866,6 +870,13 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     if data['finished_in'].stop:
                         finished_dynamic_query.add(
                             Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['final_deadline_date_in']:
+                    if data['final_deadline_date_in'].start:
+                        finished_dynamic_query.add(
+                            Q(final_deadline_date__gte=data['final_deadline_date_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['final_deadline_date_in'].stop:
+                        finished_dynamic_query.add(
+                            Q(final_deadline_date__lte=data['final_deadline_date_in'].stop.replace(hour=23, minute=59)), Q.AND)
 
                 person_dynamic_query.add(Q(client_query), Q.AND) \
                     .add(Q(task_dynamic_query), Q.AND) \
