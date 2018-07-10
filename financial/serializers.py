@@ -1,4 +1,4 @@
-from .models import ServicePriceTable
+from .models import ServicePriceTable, CostCenter
 from rest_framework import serializers
 from .utils import valid_court_district, check_service_price_table_unique
 
@@ -22,3 +22,10 @@ class ServicePriceTableSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Os campos office, office_correspondent, type_task, client, "
                                               "court_district, state devem criar um set único.")
         return data
+
+
+class CostCenterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CostCenter
+        exclude = ('system_prefix',)
