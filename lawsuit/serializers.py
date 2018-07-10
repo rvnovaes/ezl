@@ -11,7 +11,7 @@ class CourtDistrictSerializer(serializers.ModelSerializer):
 class FolderSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Folder
-		fields = ('id', 'folder_number', 'person_customer', 'cost_center', 'office', 'create_user')
+		fields = ('id', 'office', 'folder_number', 'person_customer', 'cost_center', 'office', 'create_user', 'legacy_code')
 
 
 class InstanceSerializer(serializers.ModelSerializer):
