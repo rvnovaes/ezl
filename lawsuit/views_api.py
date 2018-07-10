@@ -6,7 +6,8 @@ from .serializers import CourtDistrictSerializer, FolderSerializer, InstanceSeri
     LawSuitSerializer
 from core.api import ApiViewMixin
 from task.models import Task
-from rest_framework import viewsets, mixins 
+from rest_framework import viewsets, mixins
+from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CourtDistrictFilter
