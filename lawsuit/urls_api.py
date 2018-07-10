@@ -8,6 +8,7 @@ router = routers.SimpleRouter()
 router.register(r'court_district', views.CourtDistrictViewSet, base_name='court_district')
 router.register(r'folder', views.FolderViewSet, base_name='folder')
 router.register(r'instance', views.InstanceViewSet, base_name='instance')
+router.register(r'lawsuit', views.LawSuitViewSet, base_name='lawsuit')
 
 urlpatterns = [
 
