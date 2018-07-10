@@ -5,15 +5,14 @@ from .models import LawSuit, Movement, CourtDistrict, Folder
 from .serializers import CourtDistrictSerializer, FolderSerializer
 from core.api import ApiViewMixin
 from task.models import Task
-from rest_framework import viewsets, mixins 
+from rest_framework import viewsets, mixins
+from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CourtDistrictFilter
 
 
-
-
-class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
+class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):  
     queryset = CourtDistrict.objects.all()
     serializer_class = CourtDistrictSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
@@ -24,7 +23,6 @@ class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
 class FolderViewSet(viewsets.ModelViewSet):
     queryset = Folder.objects.all()
     serializer_class = FolderSerializer
-
 
 
 # Todo: Alterar para rest-framework
