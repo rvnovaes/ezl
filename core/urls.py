@@ -9,11 +9,6 @@ urlpatterns = [
     url(r'city/autocomplete/$',
         login_required(views.CityAutoCompleteView.as_view()),
         name='city_autocomplete'),
-
-    url(r'^ajuda/manual-do-usuario/$',
-        RedirectView.as_view(url=settings.USER_MANUAL_URL, permanent=False),
-        name='user_manual'),
-
     url(r'^$', views.login, name='login'),
     url(r'^registrar/', views.RegisterNewUser.as_view(), name='register_user'),
     url(r'^logout/', views.logout_user, name='logout'),
