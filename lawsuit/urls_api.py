@@ -9,6 +9,7 @@ router.register(r'court_district', views.CourtDistrictViewSet, base_name='court_
 router.register(r'folder', views.FolderViewSet, base_name='folder')
 router.register(r'instance', views.InstanceViewSet, base_name='instance')
 router.register(r'lawsuit', views.LawSuitViewSet, base_name='lawsuit')
+router.register(r'court_division', views.CourtDivisionViewSet, base_name='court_division')
 
 urlpatterns = [
 

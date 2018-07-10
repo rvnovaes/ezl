@@ -1,4 +1,4 @@
-from .models import CourtDistrict, Folder, Instance, LawSuit
+from .models import CourtDistrict, Folder, Instance, LawSuit, CourtDivision
 from rest_framework import serializers
 
 
@@ -26,3 +26,9 @@ class LawSuitSerializer(serializers.ModelSerializer):
 		fields = ('id', 'folder', 'law_suit_number', 'opposing_party', 'court_district',
 			'instance', 'organ', 'court_division', 'person_lawyer', 'is_current_instance',
 			'is_active', 'office', 'create_user', 'legacy_code')
+
+
+class CourtDivisionSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = CourtDivision
+		fields = ('id', 'name', 'office', 'create_user', 'legacy_code')
