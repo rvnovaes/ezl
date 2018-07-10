@@ -1,9 +1,9 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.views import View
-from .models import LawSuit, Movement, CourtDistrict, Folder, Instance, LawSuit
+from .models import LawSuit, Movement, CourtDistrict, Folder, Instance, LawSuit, TypeMovement
 from .serializers import CourtDistrictSerializer, FolderSerializer, InstanceSerializer, \
-    LawSuitSerializer
+    LawSuitSerializer, TypeMovementSerializer
 from core.api import ApiViewMixin
 from task.models import Task
 from rest_framework import viewsets, mixins
@@ -42,6 +42,13 @@ class LawSuitViewSet(viewsets.ModelViewSet):
     serializer_class = LawSuitSerializer
     filter_backends = (SearchFilter,)
     search_fields = ('folder__id',)
+
+
+class TypeMovementViewSet(viewsets.ModelViewSet):
+    queryset = TypeMovement.objects.all()
+    serializer_class = TypeMovementSerializer
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
 
 
 # Todo: Alterar para rest-framework
