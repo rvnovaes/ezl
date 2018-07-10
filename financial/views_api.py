@@ -5,7 +5,7 @@ from rest_framework import viewsets, mixins
 
 class ServicePriceTableViewSet(viewsets.ModelViewSet):
     """
-    View responsável por listar os registros de Tabela de serviços de preços
+    Permite a manutenção do cadastro de Tabela de preços de serviços
     """
-    queryset = ServicePriceTable.objects.all()
+    queryset = ServicePriceTable.objects.all().order_by('office', 'office_correspondent')
     serializer_class = ServicePriceTableSerializer

@@ -1,8 +1,11 @@
 from django.core.cache import cache
+from lawsuit.models import CourtDistrict
+
 
 def clearCache(key_list):
     for key in key_list:
         cache.delete(key)
+
 
 def remove_caracter_especial(texto):
     d = {'À': 'A', 'Á': 'A', 'Ä': 'A', 'Â': 'A', 'Ã': 'A',
@@ -28,3 +31,9 @@ def remove_caracter_especial(texto):
         novo_texto = novo_texto + novo_caracter
 
     return novo_texto
+
+
+def valid_court_district(court_district, state):
+    if court_district.state != state:
+        return False
+    return True
