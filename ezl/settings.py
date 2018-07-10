@@ -425,3 +425,16 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 30,     
 
 }
+
+
+SWAGGER_SETTINGS = {
+    'LOGIN_URL': 'rest_framework:login',
+    'LOGOUT_URL': 'rest_framework:logout',
+    'USE_SESSION_AUTH': True,
+    'DOC_EXPANSION': 'list',
+    'APIS_SORTER': 'alpha',
+    'SECURITY_DEFINITIONS': None,
+    'JSON_EDITOR': True, 
+    'OPERATIONS_SORTER': 'method', 
+    'SHOW_REQUEST_HEADERS': True,     
+}
