@@ -1,5 +1,7 @@
 from django.core.cache import cache
 from lawsuit.models import CourtDistrict
+from django.db.models import Q
+from .models import ServicePriceTable
 
 
 def clearCache(key_list):
@@ -35,5 +37,17 @@ def remove_caracter_especial(texto):
 
 def valid_court_district(court_district, state):
     if court_district.state != state:
+        return False
+    return True
+
+
+def check_service_price_table_unique(office_correspondent, state, court_district, type_task, client):
+    office_correspondent_q = Q(office_correspondent=office_correspondent) if office_correspondent \
+        else Q(office_correspondent__isnull=True)
+    state_q = Q(state=state) if state else Q(state__isnull=True)
+    court_district_q = Q(court_district=court_district) if court_district else Q(court_district__isnull=True)
+    type_task_q = Q(type_task=type_task) if type_task else Q(type_task__isnull=True)
+    client_q = Q(client=client) if client else Q(client__isnull=True)
+    if ServicePriceTable.objects.filter(office_correspondent_q, state_q, court_district_q, type_task_q, client_q):
         return False
     return True
