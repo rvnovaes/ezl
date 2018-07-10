@@ -1,8 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.views import View
-from .models import LawSuit, Movement, CourtDistrict, Folder
-from .serializers import CourtDistrictSerializer, FolderSerializer
+from .models import LawSuit, Movement, CourtDistrict, Folder, Instance
+from .serializers import CourtDistrictSerializer, FolderSerializer, InstanceSerializer
 from core.api import ApiViewMixin
 from task.models import Task
 from rest_framework import viewsets, mixins
@@ -12,7 +12,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CourtDistrictFilter
 
 
-class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):  
+class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CourtDistrict.objects.all()
     serializer_class = CourtDistrictSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
@@ -23,6 +23,18 @@ class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
 class FolderViewSet(viewsets.ModelViewSet):
     queryset = Folder.objects.all()
     serializer_class = FolderSerializer
+
+
+class InstanceViewSet(mixins.CreateModelMixin,
+                   mixins.UpdateModelMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.ListModelMixin,
+                   viewsets.GenericViewSet):
+    """
+		Permite a manutenção do cadatro de Instâncias
+	"""
+    queryset = Instance.objects.all()
+    serializer_class = InstanceSerializer
 
 
 # Todo: Alterar para rest-framework
