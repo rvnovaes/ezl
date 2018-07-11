@@ -45,11 +45,13 @@
             </button>
         {% endif %}        
         {% if 'view_delegated_tasks' in office_session_perms %}
-            {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
+            {% if form.instance.status.name in 'ACCEPTED,RETURN,DONE' %}
                 <div class="col-sm-3">
                     {{ form.survey_result }}
                     <a>{{ form.execution_date }}</a>
                 </div>
+            {% endif %}
+            {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
                 {% if form.instance.geolocation.last.checkpointtype == 'Checkin' %}
                     <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
                             data-checkpointtype="Checkout" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
@@ -71,13 +73,3 @@
                 </button>
             {% endif %}
         {% endif %}
-
-
-
-{% block extra_scritps %} 
-    <script>
-        $("#FINISHED").on('click', function() {
-            alert('submit')
-        })
-    </script>
-{% endblock %}
