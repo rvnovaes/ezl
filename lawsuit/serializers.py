@@ -1,4 +1,5 @@
-from .models import CourtDistrict, Folder, Instance, LawSuit, CourtDivision, TypeMovement
+from .models import CourtDistrict, Folder, Instance, LawSuit, CourtDivision,\
+	TypeMovement, Movement
 from rest_framework import serializers
 
 
@@ -38,3 +39,9 @@ class TypeMovementSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = TypeMovement
 		fields = ('id', 'office', 'name', 'uses_wo', 'legacy_code', 'create_user')
+
+
+class MovementSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Movement
+		fields = ('id', 'type_movement', 'law_suit', 'folder', 'office', 'create_user', 'legacy_code')

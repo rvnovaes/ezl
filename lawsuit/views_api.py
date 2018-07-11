@@ -3,14 +3,14 @@ from django.http import JsonResponse
 from django.views import View
 from .models import LawSuit, Movement, CourtDistrict, Folder, Instance, LawSuit, CourtDivision, TypeMovement
 from .serializers import CourtDistrictSerializer, FolderSerializer, InstanceSerializer, \
-    LawSuitSerializer, CourtDivisionSerializer, TypeMovementSerializer
+    LawSuitSerializer, CourtDivisionSerializer, MovementSerializer, TypeMovementSerializer
 from core.api import ApiViewMixin
 from task.models import Task
 from rest_framework import viewsets, mixins
 from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from .filters import CourtDistrictFilter
+from .filters import CourtDistrictFilter, MovementFilter
 
 
 class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
@@ -41,7 +41,7 @@ class LawSuitViewSet(viewsets.ModelViewSet):
     queryset = LawSuit.objects.all()
     serializer_class = LawSuitSerializer
     filter_backends = (SearchFilter,)
-    search_fields = ('folder__id',)
+    search_fields = ('folder__legacycode',)
 
 
 class CourtDivisionViewSet(viewsets.ModelViewSet):
@@ -50,6 +50,17 @@ class CourtDivisionViewSet(viewsets.ModelViewSet):
     """
     queryset = CourtDivision.objects.all()
     serializer_class = CourtDivisionSerializer
+
+
+class MovementViewSet(viewsets.ModelViewSet):
+    """
+        Permite a manutenção do cadastro de Movimentações        
+    """
+    queryset = Movement.objects.all()
+    serializer_class = MovementSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filter_class = MovementFilter
+    search_fields = ('law_suit__legacycode', 'law_suit__law_suit_number', 'type_movement__legacycode')
 
 
 class TypeMovementViewSet(viewsets.ModelViewSet):

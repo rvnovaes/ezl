@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
-
+from core import views_api
 from core.views import (ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin,
     CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave, PopupSuccessView,
     OfficeAutocomplete)
@@ -16,7 +16,7 @@ from rest_framework_swagger.views import get_swagger_view
 
 schema_view = get_swagger_view(title='API para integração com o Ezlawyer')
 urlpatterns = [
-    url(r'^docs/', schema_view),
+    url(r'^docs/$', schema_view),
     url(r'^the-cool-upload-method/', include('django_file_form.urls')),
 
     url(r'^', include('core.urls')),
