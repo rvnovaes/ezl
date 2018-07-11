@@ -7,7 +7,7 @@ class ServicePriceTableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServicePriceTable
-        exclude = ('system_prefix',)
+        exclude = ('system_prefix', 'create_date', 'alter_date')
 
     def validate(self, data):
         court_district = data.get('court_district')
@@ -28,4 +28,4 @@ class CostCenterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CostCenter
-        exclude = ('system_prefix',)
+        exclude = ('system_prefix', 'create_date', 'alter_date')
