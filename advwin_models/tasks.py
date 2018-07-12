@@ -101,7 +101,7 @@ def export_ecm_related_folter_to_task(self, id_docs, ecm_id, execute=True):
             'dt_inserido': timezone.localtime(ecm.create_date),
             'usuario_insercao': ecm.create_user.username
         })
-    stmt = JuridGEDLig.__table__.insert().values(*values)
+    stmt = JuridGEDLig.__table__.insert().values(values)
     if execute:
         result = None
         try:
