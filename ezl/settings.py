@@ -131,7 +131,8 @@ INSTALLED_APPS = [
     'billing',
     'djmoney',
     'rest_framework', 
-    'rest_framework_swagger'
+    'rest_framework_swagger', 
+    'oauth2_provider'
 ]
 
 MIDDLEWARE = [
@@ -420,12 +421,18 @@ UPLOAD_DIRECTORY = 'uploads'
 ADMINS = [('EZL Erros', 'erros.ezlawyer@gmail.com')]
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ('oauth2_provider.contrib.rest_framework.OAuth2Authentication',),
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend', ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 30,     
 
 }
 
+OAUTH2_PROVIDER = {
+    # this is the list of available scopes
+    'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'},
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,
+}
 
 SWAGGER_SETTINGS = {
     'LOGIN_URL': 'rest_framework:login',
