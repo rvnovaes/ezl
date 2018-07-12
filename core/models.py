@@ -297,6 +297,13 @@ class Person(AbstractPerson):
 
     cpf_cnpj = models.CharField(max_length=255, blank=True, null=True, unique=False,
                                 verbose_name='CPF/CNPJ')
+    create_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                                related_name='%(class)s_create_user',
+                                verbose_name='Criado por')
+    alter_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True,
+                                   null=True,
+                                   related_name='%(class)s_alter_user',
+                                   verbose_name='Alterado por')
 
     class Meta:
         db_table = 'person'
