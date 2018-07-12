@@ -1,5 +1,5 @@
 from .models import CourtDistrict, Folder, Instance, LawSuit, CourtDivision,\
-	TypeMovement, Movement
+	TypeMovement, Movement, Organ
 from rest_framework import serializers
 
 
@@ -45,3 +45,10 @@ class MovementSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Movement
 		fields = ('id', 'type_movement', 'law_suit', 'folder', 'office', 'create_user', 'legacy_code')
+
+
+class OrganSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Organ
+		fields = ('id', 'legal_name', 'cpf_cnpj', 'court_district', 'is_active', 'legacy_code',
+			'office', 'create_user')

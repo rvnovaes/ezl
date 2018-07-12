@@ -1,9 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.views import View
-from .models import LawSuit, Movement, CourtDistrict, Folder, Instance, LawSuit, CourtDivision, TypeMovement
+from .models import LawSuit, Movement, CourtDistrict, Folder, Instance, LawSuit, CourtDivision, TypeMovement, \
+    Organ
 from .serializers import CourtDistrictSerializer, FolderSerializer, InstanceSerializer, \
-    LawSuitSerializer, CourtDivisionSerializer, MovementSerializer, TypeMovementSerializer
+    LawSuitSerializer, CourtDivisionSerializer, MovementSerializer, TypeMovementSerializer, \
+    OrganSerializer
 from core.api import ApiViewMixin
 from task.models import Task
 from rest_framework import viewsets, mixins
@@ -27,17 +29,11 @@ class FolderViewSet(viewsets.ModelViewSet):
 
 
 class InstanceViewSet(viewsets.ModelViewSet):
-    """
-		Permite a manutenção do cadatro de Instâncias
-	"""
     queryset = Instance.objects.all()
     serializer_class = InstanceSerializer
 
 
 class LawSuitViewSet(viewsets.ModelViewSet):
-    """
-		Permite a manutenção do cadatro de Processos
-	"""
     queryset = LawSuit.objects.all()
     serializer_class = LawSuitSerializer
     filter_backends = (SearchFilter,)
@@ -45,17 +41,11 @@ class LawSuitViewSet(viewsets.ModelViewSet):
 
 
 class CourtDivisionViewSet(viewsets.ModelViewSet):
-    """
-        Permite a manutenção do cadastro de Varas
-    """
     queryset = CourtDivision.objects.all()
     serializer_class = CourtDivisionSerializer
 
 
 class MovementViewSet(viewsets.ModelViewSet):
-    """
-        Permite a manutenção do cadastro de Movimentações        
-    """
     queryset = Movement.objects.all()
     serializer_class = MovementSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
@@ -68,6 +58,11 @@ class TypeMovementViewSet(viewsets.ModelViewSet):
     serializer_class = TypeMovementSerializer
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
+
+
+class OrganViewSet(viewsets.ModelViewSet):
+    queryset = Organ.objects.all()
+    serializer_class = OrganSerializer
 
 
 # Todo: Alterar para rest-framework
