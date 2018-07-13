@@ -31,13 +31,14 @@ from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
     DELETE_SUCCESS_MESSAGE, ADDRESS_UPDATE_ERROR_MESSAGE, ADDRESS_UPDATE_SUCCESS_MESSAGE, \
-    USER_CREATE_SUCCESS_MESSAGE
+    USER_CREATE_SUCCESS_MESSAGE, person_cpf_cnpj_already_exists
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
     OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
 from core.utils import login_log, logout_log, get_office_session, get_domain
+from core.view_validators import create_person_office_relation, person_exists
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task, TaskStatus
@@ -531,26 +532,20 @@ class PersonCreateView(AuditFormMixin, CreateView):
             form.instance.alter_date = timezone.now()
             form.instance.alter_user = self.request.user
             form.save()
-
+                        
         context = self.get_context_data()
-        with transaction.atomic():
-            self.object = form.save(commit=False)
+        with transaction.atomic():            
+            self.object = form.save(commit=False)                        
             office_session = get_office_session(self.request)
-            if self.object.cpf_cnpj is not None and \
-                    office_session.persons.filter(cpf_cnpj=self.object.cpf_cnpj).first():
+            if person_exists(self.object.cpf_cnpj, office_session):            
                 form._errors[forms.forms.NON_FIELD_ERRORS] = ErrorList([
-                    u'Já existe uma pessoa cadastrada com este CPF/CNPJ para este escritório'
+                    person_cpf_cnpj_already_exists()
                 ])
                 return self.form_invalid(form)
 
             self.object = form.save()
-            member, created = OfficeMembership.objects.get_or_create(
-                person=self.object, office=get_office_session(self.request),
-                defaults={'create_user': self.request.user, 'is_active': True})
-            if not created:
-                # Caso o relacionamento esteja apenas inativo
-                member.is_active = True
-                member.save()
+            create_person_office_relation(self.object, self.request.user, \
+                office_session)
         return super().form_valid(form)
 
 
