@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 from rest_framework_swagger import renderers
 
 
-class PersonViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class PersonViewSet(viewsets.ModelViewSet):
 
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
