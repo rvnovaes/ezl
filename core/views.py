@@ -1244,16 +1244,18 @@ class InviteOfficeCreateView(AuditFormMixin, CreateView):
 class InviteUpdateView(UpdateView):
     def post(self, request, *args, **kargs):
         invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
-        invite.status = request.POST.get('status')
+        invite.status = request.POST.get('status')        
         if invite.status == 'A':
             OfficeMembership.objects.update_or_create(person=invite.person,
                                                       office=invite.office,
                                                       defaults={'create_user': self.request.user,
-                                                                'is_active': True})
-            for group in {group for group, perms in
-                          get_groups_with_perms(invite.office, attach_perms=True).items() if 'view_delegated_tasks' in perms}:
-                if group not in invite.person.auth_user.groups.all():
-                    invite.person.auth_user.groups.add(group)            
+                                                                'is_active': True})            
+            groups_list = {group for group, perms in
+                          get_groups_with_perms(invite.office, attach_perms=True).items() if 'view_delegated_tasks' in perms} 
+            for group in groups_list:
+                if group not in invite.person.auth_user.groups.all() and \
+                    group.name.startswith(invite.office.CORRESPONDENT_GROUP):
+                        invite.person.auth_user.groups.add(group)
 
         invite.save()
         return HttpResponse('ok')
@@ -1522,7 +1524,7 @@ class OfficeMembershipInactiveView(UpdateView):
                         try:
                             DefaultOffice.objects.filter(auth_user=record.person.auth_user, office=record.office).delete()
                         except:
-                            pass
+                            pass                                                                       
                     else:
                         messages.error(self.request, "O usuário {} não pode ser desvinculado do escritório, uma vez que"
                                                      " ainda existem OS a serem cumpridas por ele".format(record.person))
