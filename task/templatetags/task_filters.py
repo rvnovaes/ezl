@@ -25,4 +25,6 @@ def get_refused_action(user, task):
             refused_action = 'REQUESTED'
         elif task.get_child:
             refused_action = 'REQUESTED' if valid_status(task.get_child.task_status) else 'INVALID_CHILD_STATUS'
+    if user.is_superuser and task.status.name == 'ERROR':
+        refused_action = 'REFUSED'
     return refused_action
