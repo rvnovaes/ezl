@@ -22,8 +22,8 @@ services:
       - "./containers/db/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf"
   nginx:
     ports:
-      - "80:80"
-      - "443:443"
+      - "80"
+      - "443"
     depends_on:
       - web
       - certbot
