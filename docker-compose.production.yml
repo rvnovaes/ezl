@@ -26,7 +26,7 @@ services:
       - certbot
     labels:
       - "traefik.backend=ezl-production"
-      - "traefik.frontend.rule=Host:mtostes.ezlawyer.com.br"
+      - "traefik.frontend.rule=Host:mtostes.ezlawyer.com.br,ezl.ezlawyer.com.br"
       - "traefik.docker.network=traefik_webgateway"
       - "traefik.enable=true"
   web:
