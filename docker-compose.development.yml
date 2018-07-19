@@ -65,8 +65,6 @@ services:
     environment:
       ENV: development
       PYTHONPATH: /app
-    depends_on:
-      - tasks
 
   tunnel:
     image: ezl:latest
