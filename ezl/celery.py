@@ -8,8 +8,8 @@ app = Celery('ezl')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 app.conf.update(
-    task_soft_time_limit=10,
-    task_time_limit=20,
+    task_soft_time_limit=60,
+    task_time_limit=90,
     worker_max_tasks_per_child=200,
     task_ignore_result=True
 )
