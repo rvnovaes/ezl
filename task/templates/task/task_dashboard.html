@@ -94,7 +94,15 @@
             var table = $('#taskeTable').DataTable({
                 pageLength: 5,
                 dom: 'Bfrtip',
-                ajax: '{% url 'ajax_get_task_data_table' %}?status=' + status,
+                processing: true,
+                serverSide: true,
+                ajax: {url: '{% url 'ajax_get_task_data_table' %}?status=' + status,
+                    data: function(d){
+                        d['order'].forEach(function(items, index) {
+                              d['order'][index]['column'] = d['columns'][items.column]['data'];
+                        });
+                        return {"data": JSON.stringify(d)};
+                    }},
                 buttons: [
                     'copy', 'csv', 'excel', 'pdf', 'print'
                 ],
