@@ -74,10 +74,14 @@ def new_task(sender, instance, created, **kwargs):
     notes = 'Nova providência' if created else getattr(instance, '__notes', '')
     user = instance.alter_user if instance.alter_user else instance.create_user
     if not getattr(instance, '_skip_signal') or created:
-        TaskHistory.objects.create(task=instance,
-                                   create_user=user,
-                                   status=instance.task_status,
-                                   create_date=instance.create_date, notes=notes)
+        task_history = TaskHistory()
+        skip_signal = True if created else False
+        task_history.task = instance
+        task_history.create_user = user
+        task_history.status = instance.task_status
+        task_history.create_date = instance.create_date
+        task_history.notes = notes
+        task_history.save(skip_signal=skip_signal)
 
 
 @receiver(pre_save, sender=Task)

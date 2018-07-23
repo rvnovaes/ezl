@@ -198,23 +198,25 @@ class TaskETL(GenericETL):
                     task.save(update_fields=update_fields, skip_signal=True)
 
                 else:
-                    task = self.model.objects.create(movement=movement,
-                                                     legacy_code=legacy_code,
-                                                     system_prefix=LegacySystem.ADVWIN.value,
-                                                     create_user=user,
-                                                     alter_user=user,
-                                                     person_asked_by=person_asked_by,
-                                                     person_executed_by=person_executed_by,
-                                                     type_task=type_task,
-                                                     final_deadline_date=final_deadline_date,
-                                                     description=description,
-                                                     refused_date=refused_date,
-                                                     execution_date=execution_date,
-                                                     blocked_payment_date=blocked_payment_date,
-                                                     finished_date=finished_date,
-                                                     task_status=status_code_advwin,
-                                                     requested_date=requested_date,
-                                                     office=default_office)
+                    task = Task()
+                    task.movement = movement
+                    task.legacy_code = legacy_code
+                    task.system_prefix = LegacySystem.ADVWIN.value
+                    task.create_user = user
+                    task.alter_user = user
+                    task.person_asked_by = person_asked_by
+                    task.person_executed_by = person_executed_by
+                    task.type_task = type_task
+                    task.final_deadline_date = final_deadline_date
+                    task.description = description
+                    task.refused_date = refused_date
+                    task.execution_date = execution_date
+                    task.blocked_payment_date = blocked_payment_date
+                    task.finished_date = finished_date
+                    task.task_status = status_code_advwin
+                    task.requested_date = requested_date
+                    task.office = default_office
+                    task.save(skip_signal=True)
 
                 if status_code_advwin == TaskStatus.ERROR:
                     for inconsistency in inconsistencies:
