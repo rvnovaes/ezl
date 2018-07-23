@@ -62,6 +62,7 @@
 
 {% block extra_scripts %}
     <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'task/task_dashboard.js' %}"></script>
     <!-- start - This is for export functionality only -->
     <script src="//cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.flash.min.js"></script>
@@ -79,17 +80,8 @@
         $('#modal-view-task-table').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
             var status = button.data('status');
+            var columnsDict = getColumns(status);
             $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm' );
-
-            if (status == 'Erro no sistema de origem') {
-                var columns = [{ "targets": [ 0 ], "visible": false, "searchable": false }]
-            } else {
-                var columns = [
-                    { "targets": [ 0 ], "visible": false, "searchable": false },
-                    { "targets": [ 11 ], "visible": false, "searchable": false },
-                    { "targets": [ 12 ], "visible": false, "searchable": false }
-                ]
-            }
 
             var table = $('#taskeTable').DataTable({
                 pageLength: 5,
@@ -109,11 +101,9 @@
                 language: {
                     "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
                 },
-                columnDefs: columns
+                columns: columnsDict.columns,
+                columnDefs: columnsDict.columnDefs
             });
-            table
-                .order([ 2, 'asc' ])
-                .draw();
             $('#taskeTable tbody').on( 'click', 'tr', function () {
                 var pk = table.row( this ).data()[0];
                 window.open('/dashboard/' + pk,'_blank');

@@ -13,7 +13,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
-from django.db.models import Q
+from django.db.models import Q, Case, When
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
@@ -993,8 +993,6 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
 @login_required
 def ajax_get_task_data_table(request):
     status = request.GET.get('status')
-    import pdb;
-    pdb.set_trace()
     data_dict = json.loads(request.GET.get('data'))
     draw = int(data_dict.get('draw', 0))
     start = int(data_dict.get('start', 0))
@@ -1002,25 +1000,33 @@ def ajax_get_task_data_table(request):
     search_dict = data_dict.get('search', [])
     columns = data_dict.get('columns')
     order_dict = data_dict.get('order', [])
-    xdata = []
     checker = ObjectPermissionChecker(request.user)
     dash = DashboardView()
     dash.request = request
     rule_view = RuleViewTask(request=request)
     dynamic_query = rule_view.get_dynamic_query(request.user.person, checker)
-    query = DashboardViewModel.objects.filter(dynamic_query).filter(is_active=True, task_status=status,
-                                                                    office=get_office_session(request))
+    import pdb;pdb.set_trace()
+    query = Task.objects.filter(dynamic_query).filter(is_active=True, task_status=status,
+                                                      office=get_office_session(request)).select_related(
+        'type_task', 'movement__law_suit', 'movement__law_suit__court_district',
+        'movement__law_suit__court_district__state', 'movement__law_suit__folder__person_customer', 'parent'
+    ).annotate(
+        task_original=Case(
+            When(parent_id__isnull=False, then='parent__task_number'),
+            default='legacy_code'
+        ),
+    ).values(
+        'pk', 'task_number', 'final_deadline_date', 'type_task__name', 'movement__law_suit__law_suit_number',
+        'movement__law_suit__court_district__name', 'movement__law_suit__court_district__state__initials',
+        'movement__law_suit__folder__person_customer__legal_name', 'movement__law_suit__opposing_party',
+        'delegation_date', 'task_original'
+    )
 
-    if status == str(TaskStatus.ERROR):
-        query = InconsistencyETL.objects.filter(is_active=True,
-                                                task__id__in=list(query.values_list('id', flat=True)))
-
-    # criando o filtro de busca a partir do valor enviado no campo de pesquisa
+        # criando o filtro de busca a partir do valor enviado no campo de pesquisa
     search_value = search_dict.get('value', None)
     reduced_filter = None
     if search_value:
         search_dict_query = {}
-        columns = data_dict.get('columns')
         for column in columns:
             if column.get('searchable'):
                 key = '{}__icontains'.format(column.get('data'))
@@ -1030,69 +1036,42 @@ def ajax_get_task_data_table(request):
     #criando lista de ordered
     ordered_list = list(map(lambda i: '{}{}'.format(mapOrder.get(i.get('dir')), i.get('column')), order_dict))
 
-    if status == str(TaskStatus.ERROR):
-        records_total = query.count()
-        if not ordered_list:
-            ordered_list = list('task__final_deadline_date')
-        if reduced_filter:
-            query = query.filter(reduced_filter).order_by(*ordered_list)
-        else:
-            query = query.order_by(*ordered_list)
-        xdata.append(
-            list(
-                map(lambda x: [
-                    x.task.pk,
-                    x.task.task_number,
-                    timezone.localtime(x.task.final_deadline_date).strftime(
-                        '%d/%m/%Y %H:%M') if x.task.final_deadline_date else '',
-                    x.task.type_task.name,
-                    x.task.lawsuit_number,
-                    x.task.court_district.name,
-                    x.task.court_district.state.initials,
-                    x.task.client.name,
-                    x.task.opposing_party,
-                    timezone.localtime(x.task.delegation_date).strftime(
-                        '%d/%m/%Y %H:%M') if x.task.delegation_date else '',
-                    x.task.origin_code,
-                    x.inconsistency,
-                    x.solution,
-                ], query[start:start + length])
-            )
-        )
+
+    records_total = query.count()
+    if not ordered_list:
+        ordered_list = list('final_deadline_date')
+    if reduced_filter:
+        query = query.filter(reduced_filter).order_by(*ordered_list)
     else:
-        records_total = query.count()
-        if not ordered_list:
-            ordered_list = list('final_deadline_date')
-        if reduced_filter:
-            query = query.filter(reduced_filter).order_by(*ordered_list)
-        else:
-            query = query.order_by(*ordered_list)
-        xdata.append(
-            list(
-                map(lambda x: [
-                    x.pk,
-                    x.task_number,
-                    timezone.localtime(x.final_deadline_date).strftime(
-                        '%d/%m/%Y %H:%M') if x.final_deadline_date else '',
-                    x.type_service,
-                    x.law_suit_number,
-                    x.court_district.name,
-                    x.court_district.state.initials,
-                    x.client,
-                    x.opposing_party,
-                    timezone.localtime(x.delegation_date).strftime('%d/%m/%Y %H:%M') if x.delegation_date else '',
-                    x.origin_code,
-                    '',
-                    '',
-                ], query[start:start + length])
-            )
-        )
-    records_filtered = len(xdata[0])
+        query = query.order_by(*ordered_list)
+
+    records_filtered = query.count()
+    xdata = [x for x in query[0:5]]
+    # xdata.append(
+    #     list(
+    #         map(lambda x: [
+    #             x.pk,
+    #             x.task_number,
+    #             timezone.localtime(x.final_deadline_date).strftime(
+    #                 '%d/%m/%Y %H:%M') if x.final_deadline_date else '',
+    #             x.type_task.name,
+    #             x.movement.law_suit.law_suit_number,
+    #             x.movement.law_suit.court_district.name,
+    #             x.movement.law_suit.court_district.state.initials,
+    #             x.movement.law_suit.folder.person_customer.legal_name,
+    #             x.movement.law_suit.opposing_party,
+    #             timezone.localtime(x.delegation_date).strftime('%d/%m/%Y %H:%M') if x.delegation_date else '',
+    #             x.parent.task_number if x.parent else x.legacy_code,
+    #             '',
+    #             '',
+    #         ], query[start:start + length])
+    #     )
+    # )
     data = {
         "draw": draw,
         "recordsTotal": records_total,
         "recordsFiltered": records_filtered,
-        "data": xdata[0]
+        "data": xdata
     }
     return JsonResponse(data)
 
