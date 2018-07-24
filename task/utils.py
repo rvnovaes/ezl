@@ -6,8 +6,10 @@ from task.models import *
 from task.mail import SendMail
 from core.utils import get_office_session
 from core.models import Team
+from core.tasks import send_mail
 from django.db.models import Q
 from django.core.files.base import ContentFile
+from django.conf import settings
 
 
 def get_task_attachment(self, form):        
@@ -41,7 +43,7 @@ def get_task_attachment(self, form):
 
 
 def copy_ecm(ecm, task):
-    if os.path.isfile(ecm.path.path):
+    try:
         file_name = os.path.basename(ecm.path.name)
         ecm_related = ecm.ecm_related
         if not ecm_related:
@@ -57,6 +59,14 @@ def copy_ecm(ecm, task):
             new_ecm.exhibition_name = file_name
             new_ecm.ecm_related = ecm_related
             new_ecm.save()
+    except Exception as e:
+        print(e)
+        subject = 'Erro ao copiar ECM {}'.format(ecm.id)
+        body = """Erro ao copiar ECM {} para a OS {}:
+            {}
+            {}""".format(ecm.id, task.id, e, e.__traceback__)
+        recipients = [admin[1] for admin in settings.ADMINS]
+        send_mail.delay(recipients, subject, body)
 
 
 def task_send_mail(instance, number, project_link, short_message, custom_text, mail_list):

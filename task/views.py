@@ -48,7 +48,7 @@ from survey.models import SurveyPermissions
 from financial.tables import ServicePriceTableTaskTable
 from core.utils import get_office_session, get_domain
 from ecm.models import DefaultAttachmentRule, Attachment
-from task.utils import get_task_attachment
+from task.utils import get_task_attachment, copy_ecm
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_groups_with_perms
@@ -607,16 +607,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.save()
         for ecm in object_parent.ecm_set.all():
             if ecm.path:
-                if Path(ecm.path.path).is_file():
-                    new_file = ContentFile(ecm.path.read())
-                    new_file.name = os.path.basename(ecm.path.name)
-                    new_ecm = copy.copy(ecm)
-                    new_ecm.pk = None
-                    new_ecm.exhibition_name = new_file.name
-                    new_ecm.task = new_task
-                    new_ecm.path = new_file
-                    new_ecm.ecm_related = ecm
-                    new_ecm.save()
+                copy_ecm(ecm, new_task)
 
     def dispatch(self, request, *args, **kwargs):
         res = super().dispatch(request, *args, **kwargs)
