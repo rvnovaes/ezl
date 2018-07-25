@@ -6,6 +6,7 @@ from django.dispatch import receiver, Signal
 from django.utils import timezone
 from django.urls import reverse
 from django.db.models import Q
+from django.core.exceptions import MultipleObjectsReturned
 from advwin_models.tasks import export_ecm, export_task, export_task_history, delete_ecm, \
     export_ecm_related_folter_to_task
 from core.models import ContactMechanism, ContactMechanismType, Person
@@ -249,20 +250,24 @@ def send_task_emails(sender, instance, created, **kwargs):
         instance.__previous_status = TaskStatus(instance.task_status)
 
 
-def create_or_update_user_by_chat(task, task_to_fields, fields):        
+def create_or_update_user_by_chat(task, task_to_fields, fields):    
     for field in fields:
         user = None
         if getattr(task_to_fields, field, False):
             user = getattr(getattr(task_to_fields, field), 'auth_user', False)
         if user:
-            user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
-                'create_user': user, 'user_by_chat': user, 'chat': task.chat
-            })
+            try:                            
+                user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
+                    'create_user': user, 'user_by_chat': user, 'chat': task.chat
+                })
+            except MultipleObjectsReturned:
+                #Tratamento específico para cenário da tarefa EZL-904
+                user = UserByChat.objects.filter(user_by_chat=user, chat=task.chat).first()
             user = user.user_by_chat
 
 
 @receiver(post_save, sender=Task)
-def create_or_update_chat(sender, instance, created, **kwargs):
+def create_or_update_chat(sender, instance, created, **kwargs):    
     opposing_party = ''
     if instance.movement and instance.movement.law_suit:
         opposing_party = instance.movement.law_suit.opposing_party
@@ -285,9 +290,9 @@ def create_or_update_chat(sender, instance, created, **kwargs):
             'title': title,
             'back_url': '/dashboard/{}'.format(instance.pk),
         }
-    )
+    )    
     instance.chat = chat
-    instance.chat.offices.add(instance.office)
+    instance.chat.offices.add(instance.office)    
     create_or_update_user_by_chat(instance, instance, [
         'person_asked_by', 'person_executed_by', 'person_distributed_by'])
     if instance.parent:
