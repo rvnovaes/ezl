@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.views.generic import ListView
 from chat.models import Chat, UnreadMessage, Message
 from core.views import CustomLoginRequiredView
@@ -101,18 +102,49 @@ class ChatOfficeContactView(CustomLoginRequiredView, View):
 class ChatsByOfficeView(CustomLoginRequiredView, View):
     @staticmethod
     def add_count_unread_message(user, chats):
+        # Pegamos todos os chats do usuário que possuem mensagens não lidas
+        unread_chats = UnreadMessage.objects.filter(
+            user_by_message__user_by_chat=user,
+        ).values('message__chat').annotate(count=Count('id'))
+        items = []
+        unread_chats_dict = dict({(item['message__chat'], item['count']) for item in unread_chats})
         for chat in chats:
-            unread_message_quanty = UnreadMessage.objects.filter(
-                user_by_message__user_by_chat=user,
-                message__chat_id=chat.get('id')).count()
-            chat['unread_message_quanty'] = unread_message_quanty
-        return chats
+            last_message = chat.messages.last()
+            item = {
+                "id": chat.id,
+                "unread_message_quanty": unread_chats_dict[chat.id] if chat.id in unread_chats_dict else 0,
+                "title": chat.title,
+                "alter_date": chat.alter_date if not last_message else last_message.create_date,
+                "label": chat.label,
+                "has_messages": chat.messages.exists()
+            }
+            items.append(item)
+        return list(reversed(sorted(items, key=lambda x: x['alter_date'])))
 
     def get(self, request, *args, **kwargs):
-        office = Office.objects.get(pk=int(request.GET.get('office')))
-        chats = office.chats.filter(users__user_by_chat=self.request.user,
-            users__is_active=True)
-        data = self.add_count_unread_message(request.user, list(chats.values()))
+        filters = {
+            "users__user_by_chat": self.request.user,
+            "users__is_active": True,
+        }
+        office_id = int(request.GET.get('office'))
+        since = request.GET.get('since')
+        exclude_empty = request.GET.get('exclude_empty', False) == 'true'
+
+        if exclude_empty:
+            filters["messages__isnull"] = False
+
+        if since:
+            since = datetime.strptime(since.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+            filters["alter_date__gt"] = since
+            filters["messages__create_date__gt"] = since
+
+        office = Office.objects.get(pk=office_id)
+        chats = office.chats.filter(**filters)\
+                    .distinct('id')\
+                    .prefetch_related('messages')\
+                    .order_by('id')
+        #            .order_by('-messages__create_date', 'id')
+        data = self.add_count_unread_message(request.user, chats)
         return JsonResponse(data, safe=False)
 
 class ChatMenssage(CustomLoginRequiredView, View):
