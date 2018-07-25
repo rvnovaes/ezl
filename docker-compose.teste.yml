@@ -27,7 +27,7 @@ services:
       - certbot
 
   web:
-    command: uwsgi --ini /app/config/uwsgi/uwsgi.ini
+    command: uwsgi --ini /app/config/uwsgi/uwsgi.ini -b 8192
     environment:
       ENV: development
   ws:
