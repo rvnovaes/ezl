@@ -90,7 +90,7 @@ setInterval(function () {
         },
         dataType: "json"
     });
-}, 5000);
+}, 5000000);
 
 
 var formatDate = function (strDate) {

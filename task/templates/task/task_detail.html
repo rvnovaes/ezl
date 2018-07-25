@@ -51,7 +51,8 @@
                              Deseja <span id="actionText">aceitar</span> o prazo? </h4>
                     </div>
                     <div class="modal-body p-30">
-                        {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
+                        {{form.instnace.status.name}}
+                        {% if form.instance.status.name == 'ACCEPTED_SERVICE' or  form.instance.status.name == 'REQUESTED' and not form.instance.office.use_service%}
                             {{ form.servicepricetable_id }}
                             <div class="form-group" style="margin: auto">
                                 <label>Tipo de Serviço: </label>
@@ -96,7 +97,7 @@
                         </button>
                         <button id="actionButton"
                             type="submit"
-                            onclick="submit_task_detail(this)"
+                            onclick="submit_task_detail(this, '{{form.instance.office.use_service}}')"
                             survey={% if form.instance.type_task.survey %}true{% else %}''{% endif %}
                             style="width: 100px!important;"
                             class="btn btn-raised btn-success">Sim
@@ -187,15 +188,16 @@
                 'placeholder': 'Data de Cumprimento'});
         });
 
-        function toogleModals(modalToClose, modalToOpen) {
+        function toogleModals(modalToClose, modalToOpen, task_status) {
             $(modalToClose).one('hidden.bs.modal', function() {
+                $('#survey').attr('data-status', task_status)
                 $(modalToOpen).modal('show');
             }).modal('hide');
         }
 
         //Função para exibir modal do survey
-        function beforeSubmit() {
-            toogleModals('#confirmAction', '#survey')
+        function beforeSubmit(task_status) {
+            toogleModals('#confirmAction', '#survey', task_status)
             $('#task_detail').submit(function (e) {
                 e.preventDefault();
             });
@@ -254,14 +256,13 @@
             }
         }
 
-        function submit_task_detail(actionButton) {
-
+        function submit_task_detail(actionButton, use_service) {
             var task_status = actionButton.value;
             var have_survey = actionButton.getAttribute('survey');
             actionButton.disabled = true;
             {#toogleModals('#confirmAction', '#procssing')#}
-            if (task_status === 'DONE' && have_survey){
-                beforeSubmit();
+            if ((task_status === 'DONE' || task_status === 'FINISHED' && use_service === 'False') && have_survey){
+                beforeSubmit(task_status);
             }else if(task_status === 'OPEN'){
                 checkDelegationOffice();
             }else{

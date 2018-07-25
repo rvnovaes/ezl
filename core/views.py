@@ -977,8 +977,7 @@ class OfficeCreateView(AuditFormMixin, CreateView):
 
 class OfficeUpdateView(AuditFormMixin, UpdateView):
     model = Office
-    form_class = OfficeForm
-    success_url = reverse_lazy('office_list')
+    form_class = OfficeForm    
     template_name_suffix = '_update_form'
     success_message = UPDATE_SUCCESS_MESSAGE
     object_list_url = 'office_list'
@@ -1010,6 +1009,9 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
             self.request.session.modified = True
             return HttpResponseRedirect(reverse('office_instance'))
         return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse('office_update', kwargs={'pk': self.kwargs['pk']})        
 
 
 class OfficeDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
