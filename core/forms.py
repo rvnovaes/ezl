@@ -13,10 +13,8 @@ from django.urls.base import reverse
 from django.core.exceptions import FieldDoesNotExist
 from localflavor.br.forms import BRCPFField, BRCNPJField
 from material import Layout, Row
-
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, user_email
-
 from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, City, ContactMechanism, ContactMechanismType, AddressType, \
     LegalType, Office, Invite, InviteOffice, Team
@@ -24,7 +22,8 @@ from core.utils import filter_valid_choice_form, get_office_field, get_office_se
 from core.widgets import TypeaHeadForeignKeyWidget
 from core.models import OfficeMixin
 from django_file_form.forms import MultipleUploadedFileField, FileFormMixin
-
+from core.utils import validate_xlsx_header
+from django.core.exceptions import ValidationError
 
 class BaseModelForm(FileFormMixin, forms.ModelForm):
 
@@ -575,3 +574,22 @@ class TeamForm(BaseForm):
         self.fields['members'].queryset = self.fields['members'].queryset.filter(
                 Q(person__offices=get_office_session(request=self.request)), 
                 ~Q(username__in=['admin', 'invalid_user']))
+
+
+class XlsxFileField(forms.FileField):
+    """
+    Field to validate xlsx extension and header 
+    """
+    def __init__(self, headers_to_check, *args, **kwargs):
+        self.headers_to_check = headers_to_check
+        super().__init__(*args, **kwargs)
+
+    def validate(self, value):
+        super().validate(value)
+        if not value.name.endswith('.xlsx'):
+            raise ValidationError(
+                    ('Extensão inválida'), code='invalid'
+                )
+        if not validate_xlsx_header(value, self.headers_to_check):
+            msg = 'Cabeçalho inválido. O arquivo deve conter por padrão o seguinte cabeçalho: {}'.format(' | '.join(self.headers_to_check))
+            raise ValidationError((msg), code='invalid')        

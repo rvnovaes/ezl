@@ -2,8 +2,10 @@ import json
 import csv
 import os
 import copy
-from urllib.parse import urlparse
 import pickle
+import io
+from urllib.parse import urlparse
+from zipfile import ZipFile
 from pathlib import Path
 from django.contrib import messages
 from django.core.cache import cache
@@ -756,12 +758,16 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     if checker.has_perm('view_delegated_tasks', office_session):
                         person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
                     if checker.has_perm('view_requested_tasks', office_session):
-                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
-
+                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)                
+                if data['office_executed_by']:
+                    task_dynamic_query.add(Q(child__office_id=data['office_executed_by']), Q.AND)
                 if data['state']:
                     task_dynamic_query.add(Q(movement__law_suit__court_district__state=data['state']), Q.AND)
                 if data['court_district']:
                     task_dynamic_query.add(Q(movement__law_suit__court_district=data['court_district']), Q.AND)
+                if data['task_status']:
+                    status = [getattr(TaskStatus, s) for s in data['task_status']]
+                    task_dynamic_query.add(Q(task_status__in=status), Q.AND)
                 if data['type_task']:
                     task_dynamic_query.add(Q(type_task=data['type_task']), Q.AND)
                 if data['court']:
@@ -866,6 +872,13 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     if data['finished_in'].stop:
                         finished_dynamic_query.add(
                             Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['final_deadline_date_in']:
+                    if data['final_deadline_date_in'].start:
+                        finished_dynamic_query.add(
+                            Q(final_deadline_date__gte=data['final_deadline_date_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['final_deadline_date_in'].stop:
+                        finished_dynamic_query.add(
+                            Q(final_deadline_date__lte=data['final_deadline_date_in'].stop.replace(hour=23, minute=59)), Q.AND)
 
                 person_dynamic_query.add(Q(client_query), Q.AND) \
                     .add(Q(task_dynamic_query), Q.AND) \
@@ -1174,3 +1187,28 @@ class GeolocationTaskFinish(CustomLoginRequiredView, View):
             return JsonResponse({"ok": True,
                                  "finished_date": date_format(timezone.localtime(finished_date), 'DATETIME_FORMAT')})
         return JsonResponse({"ok": False})
+
+@login_required
+def ecm_batch_download(request, pk):
+    #https://stackoverflow.com/questions/12881294/django-create-a-zip-of-multiple-files-and-make-it-downloadable
+    #http://mypythondjango.blogspot.com/2018/01/how-to-zip-files-in-filefield-and.html    
+    ecms = Ecm.objects.filter(task_id=pk).select_related('task')
+    try:
+        buff = io.BytesIO()
+        zf = ZipFile(buff, mode='a')
+        zip_filename = None
+        for ecm in ecms:
+            output = io.BytesIO(ecm.path.read())
+            output.seek(0)
+            zf.writestr(ecm.path.name, output.getvalue())
+            if not zip_filename:
+                zip_filename = 'Anexos_OS_%s.zip' % (ecm.task.task_number)            
+        zf.close()
+        buff.seek(0)
+        data = buff.read()
+        resp = HttpResponse(data, content_type = "application/x-zip-compressed")    
+        resp['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
+        return resp
+    except Exception as e:
+        messages.error(request, 'Erro ao baixar todos arquivos.' + str(e))
+        return HttpResponseRedirect(ecm.task.get_absolute_url())    

@@ -6,7 +6,7 @@ from lawsuit.models import CourtDistrict
 from task.models import TypeTask
 from .models import CostCenter, ServicePriceTable, ImportServicePriceTable
 from decimal import Decimal
-from core.forms import BaseModelForm
+from core.forms import BaseModelForm, XlsxFileField
 from core.widgets import TypeaHeadForeignKeyWidget
 
 
@@ -97,9 +97,9 @@ class ServicePriceTableForm(BaseModelForm):
         self.fields['office_correspondent'].required = True
         self.fields['office'].required = True
 
-
-class ImportServicePriceTableForm(forms.ModelForm):    
-
+class ImportServicePriceTableForm(forms.ModelForm):
+    file_xls = XlsxFileField(label='Arquivo', required=True, 
+        headers_to_check=['Correspondente', 'Serviço', 'Comarca', 'UF', 'Valor'])
     class Meta:
         model = ImportServicePriceTable
         fields = ('file_xls', )
