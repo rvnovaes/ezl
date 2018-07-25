@@ -60,7 +60,7 @@ services:
 
   tasks:
     image: ezl:latest
-    command: celery -A ezl worker -l debug --concurrency 10 -P eventlet
+    command: celery -A ezl worker -l debug --concurrency 10 -P eventlet -Ofair -n worker1@%h
     volumes:
       - .:/app
       - ./media/service_price_table:/app/media/service_price_table
@@ -81,17 +81,18 @@ services:
 
   flower:
     image: ezl:latest
-    command: celery flower --broker=amqp://guest:guest@queues:5672/ --port=5555 --basic_auth=ezl:flower@ezl
+    command: celery flower --broker=amqp://guest:guest@queues:5672// --broker_api=http://guest:guest@localhost:8083/api --port=5555 --inspect_timeout=60000 --basic_auth=ezl:flower@ezl
     volumes:
       - .:/app
     depends_on:
-      - builder
-      - db
-      - queues
+      - tasks
 
   queues:
     restart: unless-stopped
-    image: rabbitmq:latest
+    image: "rabbitmq:3-management"
+    ports:
+      - "8083:15672"
+      - "5672:5672"
 
   nginx:
     image: nginx:1.13

@@ -15,6 +15,7 @@ MUST_LOGIN = True
 
 CELERY_BROKER_URL = 'amqp://guest:guest@queues:5672/'
 CELERY_RESULT_BACKEND = 'amqp://guest:guest@queues:5672/'
+CELERY_ENABLE_UTC = False
 CELERY_TIMEZONE = 'America/Sao_Paulo'
 CELERY_TASK_ALWAYS_EAGER = False
 CELERY_BEAT_SCHEDULE = {
@@ -24,6 +25,7 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 CELERY_SEND_TASK_EMAILS = False
+CELERY_TASK_IGNORE_RESULT = True
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
