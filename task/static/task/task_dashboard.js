@@ -15,16 +15,25 @@ var getColumns = function(status) {
         {'data': 'task_original', 'name': 'task_original'},
         {'data': 'task_original', 'name': 'task_original'},
         {'data': 'task_original', 'name': 'task_original'},
-        {'data': '', 'name': ''},
-        {'data': '', 'name': ''},
     ];
     if (status === 'Erro no sistema de origem') {
         columnDefs = [{ 'targets': [ 0 ], 'visible': false, 'searchable': false, 'orderable': false  }];
+        columns[11] = {'data': 'inconsistencyetl__inconsistency', 'name': 'inconsistencyetl__inconsistency'};
+        columns[12] = {'data': 'inconsistencyetl__solution', 'name': 'inconsistencyetl__solution'};
     } else {
         columnDefs = [
             { 'targets': [ 0 ], 'visible': false, 'searchable': false, 'orderable': false  },
             { 'targets': [ 11 ], 'visible': false, 'searchable': false, 'orderable': false  },
-            { 'targets': [ 12 ], 'visible': false, 'searchable': false, 'orderable': false  }
+            { 'targets': [ 12 ], 'visible': false, 'searchable': false, 'orderable': false  },
+            { 'targets': [ 2, 9 ],
+                render: function ( data, type, row, meta ) {
+                    if(type === 'display'){
+                        data = moment(data).format('DD/MM/YYYY HH:mm');
+                    }
+
+                    return data;
+                }
+            }
         ];
     }
     return {

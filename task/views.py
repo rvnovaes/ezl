@@ -13,7 +13,9 @@ from django.contrib.auth.models import User, Group
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
-from django.db.models import Q, Case, When
+from django.db.models import Q, Case, When, CharField, IntegerField
+from django.db.models.expressions import RawSQL
+from django.db.models.functions import Cast
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
@@ -1005,24 +1007,26 @@ def ajax_get_task_data_table(request):
     dash.request = request
     rule_view = RuleViewTask(request=request)
     dynamic_query = rule_view.get_dynamic_query(request.user.person, checker)
-    import pdb;pdb.set_trace()
+    values_list = ['pk', 'task_number', 'final_deadline_date', 'type_task__name', 'movement__law_suit__law_suit_number',
+                   'movement__law_suit__court_district__name', 'movement__law_suit__court_district__state__initials',
+                   'movement__law_suit__folder__person_customer__legal_name', 'movement__law_suit__opposing_party',
+                   'delegation_date', 'task_original']
+    if status == 'Erro no sistema de origem':
+        values_list.extend(['inconsistencyetl__inconsistency', 'inconsistencyetl__solution'])
     query = Task.objects.filter(dynamic_query).filter(is_active=True, task_status=status,
                                                       office=get_office_session(request)).select_related(
         'type_task', 'movement__law_suit', 'movement__law_suit__court_district',
         'movement__law_suit__court_district__state', 'movement__law_suit__folder__person_customer', 'parent'
     ).annotate(
         task_original=Case(
-            When(parent_id__isnull=False, then='parent__task_number'),
-            default='legacy_code'
+            When(parent_id__isnull=False, then=Cast('parent__task_number', CharField(max_length=255))),
+            default=Cast('legacy_code', CharField(max_length=255)),
+            output_field=CharField(max_length=255),
         ),
-    ).values(
-        'pk', 'task_number', 'final_deadline_date', 'type_task__name', 'movement__law_suit__law_suit_number',
-        'movement__law_suit__court_district__name', 'movement__law_suit__court_district__state__initials',
-        'movement__law_suit__folder__person_customer__legal_name', 'movement__law_suit__opposing_party',
-        'delegation_date', 'task_original'
-    )
+    ).values(*values_list)
 
-        # criando o filtro de busca a partir do valor enviado no campo de pesquisa
+
+    # criando o filtro de busca a partir do valor enviado no campo de pesquisa
     search_value = search_dict.get('value', None)
     reduced_filter = None
     if search_value:
@@ -1046,7 +1050,7 @@ def ajax_get_task_data_table(request):
         query = query.order_by(*ordered_list)
 
     records_filtered = query.count()
-    xdata = [x for x in query[0:5]]
+    xdata = [x for x in query[start:start + length]]
     # xdata.append(
     #     list(
     #         map(lambda x: [
