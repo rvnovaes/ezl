@@ -1,6 +1,7 @@
 
 {% extends 'skeleton/base.html' %}
 {% load static core_match %}
+{% load task_filters %}
 
 {% block extra_stylesheets %}
     <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
@@ -27,7 +28,7 @@
             <div class="col-md-12 col-sm-12">
                 <div class="white-box">
                     <h3 class="box-title m-b-0">Total</h3>
-                    <h1 class="m-b-0 m-t-0 font-medium">{{ task_count }}</h1>
+                    <h1 id="total" class="m-b-0 m-t-0 font-medium">{{ task_count }}</h1>
                 </div>
             </div>
             {% for table in tables %}            
@@ -41,9 +42,9 @@
                                 <i class="{{ table.status.get_icon }} ezl-text-{{ table.status.name|lower }} font-30"></i>
                             </sup>                            
                             {% if table.status.name == 'ERROR' %} 
-                                <span class="pull-right">{{count_tasks_with_error}}</span>
+                                <span id="{{ table.status|remove_spaces_lower }}" class="pull-right">{{count_tasks_with_error}}</span>
                             {% else %}                                                            
-                                <span class="pull-right">{{ table.length }}</span>
+                                <span id="{{ table.status|remove_spaces_lower }}" class="pull-right">{{ table.length }}</span>
                             {% endif %}                            
                         </h1>
                     </div>{% get_percent table.length task_count as percent %}
@@ -126,13 +127,12 @@
         function verify_status() {
             return setInterval(function(){
                 $.ajax({
-                    type: "POST",
+                    type: "GET",
                     url: "/dashboard/verificar_status/",
-                    data: {"tasks": JSON.stringify(tasks)},
                     success: function(response){
-                        if (response.has_changed) {
-                            location.reload();
-                        }
+                        $.each(response, function (index, value) {
+                            $("#"+index).html(value);
+                        })
                     },
                     beforeSend: function (xhr, settings) {
                         xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");

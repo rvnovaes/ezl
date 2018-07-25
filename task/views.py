@@ -13,7 +13,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
-from django.db.models import Q, Case, When, CharField, IntegerField
+from django.db.models import Q, Case, When, CharField, IntegerField, Count
 from django.db.models.expressions import RawSQL
 from django.db.models.functions import Cast
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
@@ -973,23 +973,16 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
 class DashboardStatusCheckView(CustomLoginRequiredView, View):
 
-    def post(self, request, *args, **kwargs):
-        tasks_payload = request.POST.get('tasks')
-        if not tasks_payload:
-            return JsonResponse({"error": "tasks is required"}, status=400)
-
-        # Ordena as tasks para que possamos comparar o que está no banco com o que foi recebido
-        tasks = sorted(json.loads(tasks_payload), key=lambda x: x[0])
-
-        # Convertemos a lista para uma tupla de tuplas que é o formato que é retornado pelo banco
-        tasks = tuple(map(lambda x: (x[0], x[1]), tasks))
-        ids = map(lambda x: x[0], tasks)
-
-        db_tasks = Task.objects.filter(id__in=ids).order_by('id').values_list('id', 'task_status')
-
-        # Comparamos as tasks que foram enviadas com as que estão no banco para saber se houve mudanças
-        has_changed = tuple(db_tasks) != tasks
-        return JsonResponse({"has_changed": has_changed})
+    def get(self, request, *args, **kwargs):
+        status_totals = Task.objects.filter(office=get_office_session(request)).values('task_status').annotate(
+            total=Count('task_status')).order_by('task_status')
+        ret = {}
+        total = 0
+        for status in status_totals:
+            ret[status['task_status'].replace(' ', '_').lower()] = status['total']
+            total += status['total']
+        ret['total'] = total
+        return JsonResponse(ret)
 
 
 @login_required
@@ -1051,26 +1044,6 @@ def ajax_get_task_data_table(request):
 
     records_filtered = query.count()
     xdata = [x for x in query[start:start + length]]
-    # xdata.append(
-    #     list(
-    #         map(lambda x: [
-    #             x.pk,
-    #             x.task_number,
-    #             timezone.localtime(x.final_deadline_date).strftime(
-    #                 '%d/%m/%Y %H:%M') if x.final_deadline_date else '',
-    #             x.type_task.name,
-    #             x.movement.law_suit.law_suit_number,
-    #             x.movement.law_suit.court_district.name,
-    #             x.movement.law_suit.court_district.state.initials,
-    #             x.movement.law_suit.folder.person_customer.legal_name,
-    #             x.movement.law_suit.opposing_party,
-    #             timezone.localtime(x.delegation_date).strftime('%d/%m/%Y %H:%M') if x.delegation_date else '',
-    #             x.parent.task_number if x.parent else x.legacy_code,
-    #             '',
-    #             '',
-    #         ], query[start:start + length])
-    #     )
-    # )
     data = {
         "draw": draw,
         "recordsTotal": records_total,
