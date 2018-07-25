@@ -164,7 +164,7 @@ class OfficeMembershipTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        per_page = 10
+        paginate=False
         model = OfficeMembership
         fields = ('selection', 'person.legal_name', 'person.legal_type', 'person.cpf_cnpj', 'person.auth_user.username')
 
@@ -175,7 +175,6 @@ class OfficeMembershipOfficeTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        per_page = 10
         model = OfficeMembership
         fields = ('selection', 'office.legal_name', 'office.cpf_cnpj')
 
