@@ -36,7 +36,7 @@ services:
       args:
         requirements_file: production.txt
     image: ezl:latest
-    command: uwsgi --ini /app/config/uwsgi/uwsgi.ini
+    command: uwsgi --ini /app/config/uwsgi/uwsgi.ini -b 8192
     volumes:
       - .:/app
       - web-static:/app/staticfiles
