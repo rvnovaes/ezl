@@ -48,8 +48,8 @@
                             {% endif %}                            
                         </h1>
                     </div>{% get_percent table.length task_count as percent %}
-                    <span class="text-success">{{ percent|stringformat:".02f" }}%</span> <div class="progress m-b-0">
-                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{ percent|stringformat:"d" }}" aria-valuemin="0" aria-valuemax="100" style="width:{{ percent|stringformat:"d" }}%;">
+                    <span class="text-success" id="{{ table.status|remove_spaces_lower }}_percent">{{ percent|stringformat:".02f" }}%</span> <div class="progress m-b-0">
+                    <div id="{{ table.status|remove_spaces_lower }}_percent_bar" class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{ percent|stringformat:"d" }}" aria-valuemin="0" aria-valuemax="100" style="width:{{ percent|stringformat:"d" }}%;">
                         <span class="sr-only">{{ percent|stringformat:".02d" }}% Complete</span> </div>
                     </div>
                 </div>
@@ -111,17 +111,9 @@
             });
         });
         /* Ao fechar o modal, limpar a tabela */
-        $('#modal-view-task-table').on('hide.bs.modal', function (event) {
+        $('#modal-view-task-table').on('hidden.bs.modal', function (event) {
             $('#taskeTable').empty();
             $('#taskeTable').DataTable().clear().destroy();
-        });
-        /* verificar novas tasks */
-        var tasks = [];
-        $('[data-task]').each(function(){
-            var task = $(this),
-                status = task.attr('data-task-status'),
-                id = parseInt(task.attr('data-task-id'));
-            tasks.push([id, status]);
         });
 
         function verify_status() {
@@ -132,6 +124,11 @@
                     success: function(response){
                         $.each(response, function (index, value) {
                             $("#"+index).html(value);
+                            if(index !== 'total'){
+                                $("#"+index+"_percent").html(((value/response.total)*100).toFixed(2) + "%")
+                                $("#"+index+"_percent_bar").prop('aria-valuenow', Math.round((value/response.total)*100))
+                                $("#"+index+"_percent_bar").css('width', Math.round((value/response.total)*100)+'%')
+                            }
                         })
                     },
                     beforeSend: function (xhr, settings) {
