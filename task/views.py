@@ -1004,13 +1004,13 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
 @login_required
 def ajax_get_task_data_table(request):
     status = request.GET.get('status')
-    data_dict = json.loads(request.GET.get('data'))
+    data_dict = json.loads(request.GET.get('data', '{}'))
     draw = int(data_dict.get('draw', 0))
     start = int(data_dict.get('start', 0))
-    length = int(data_dict.get('length', 0))
-    search_dict = data_dict.get('search', [])
-    columns = data_dict.get('columns')
-    order_dict = data_dict.get('order', [])
+    length = int(data_dict.get('length', 5))
+    search_dict = data_dict.get('search', {})
+    columns = data_dict.get('columns', [])
+    order_dict = data_dict.get('order', {})
     checker = ObjectPermissionChecker(request.user)
     dash = DashboardView()
     dash.request = request
@@ -1051,8 +1051,9 @@ def ajax_get_task_data_table(request):
 
 
     records_total = query.count()
+    import pdb;pdb.set_trace()
     if not ordered_list:
-        ordered_list = list('final_deadline_date')
+        ordered_list = ['final_deadline_date']
     if reduced_filter:
         query = query.filter(reduced_filter).order_by(*ordered_list)
     else:
