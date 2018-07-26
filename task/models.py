@@ -316,7 +316,6 @@ class Task(Audit, LegacyCode, OfficeMixin):
             return self.legacy_code
 
 
-
 class TaskFeedback(models.Model):
     feedback_date = models.DateTimeField(auto_now_add=True)
     task = models.ForeignKey('Task', verbose_name='OS')

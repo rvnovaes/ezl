@@ -31,16 +31,15 @@
         </button>
     {% endif %}
     {% if 'view_delegated_tasks' in office_session_perms or 'can_distribute_tasks' in office_session_perms %}
-        {% with request.user|get_refused_action:form.instance as refused_acton %}
-            {% if refused_acton == 'REFUSED' or refused_acton == 'REQUESTED' %}
-            <button type="button" id="{{ refused_acton }}" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                    class="text-white btn btn-ezl-refused">
-                <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Recusar
-            </button>
-            {% elif refused_acton == 'INVALID_CHILD_STATUS' %}
-                <p>Essa OS não pode ser recusada, pois encontra-se no status {{ form.instance.get_child.task_status|lower }} no escritório correspondente.</p>
-            {% endif %}
-        {% endwith %}
+        {% get_refused_action request.user form.instance office_session_perms as refused_acton %}
+        {% if refused_acton == 'REFUSED' or refused_acton == 'REQUESTED' %}
+        <button type="button" id="{{ refused_acton }}" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                class="text-white btn btn-ezl-refused">
+            <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Recusar
+        </button>
+        {% elif refused_acton == 'INVALID_CHILD_STATUS' %}
+            <p>Essa OS não pode ser recusada, pois encontra-se no status {{ form.instance.get_child.task_status|lower }} no escritório correspondente.</p>
+        {% endif %}
     {% endif %}
     {% if 'block_payment_tasks' in office_session_perms %}
         <button type="button" id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle="" data-target="#confirmAction"

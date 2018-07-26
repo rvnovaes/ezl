@@ -14,8 +14,8 @@ def valid_status(status):
     return False
 
 
-@register.filter
-def get_refused_action(user, task):
+@register.simple_tag
+def get_refused_action(user, task, office_session_perms):
     refused_action = None
     if task.status.name == 'OPEN' or task.status.name == 'ACCEPTED':
         if task.person_executed_by == user.person:
@@ -25,6 +25,12 @@ def get_refused_action(user, task):
             refused_action = 'REQUESTED'
         elif task.get_child:
             refused_action = 'REQUESTED' if valid_status(task.get_child.task_status) else 'INVALID_CHILD_STATUS'
-    if user.is_superuser and task.status.name == 'ERROR':
+    if 'can_distribute_tasks' in office_session_perms and task.status.name == 'ERROR':
         refused_action = 'REFUSED'
     return refused_action
+
+
+@register.filter
+def remove_spaces_lower(status):
+    ret = status.value
+    return ret.replace(' ', '_').lower()
