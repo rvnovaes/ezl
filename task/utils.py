@@ -1,3 +1,4 @@
+import copy
 from django.template.loader import render_to_string
 from ecm.models import DefaultAttachmentRule, Attachment
 from task.models import *
