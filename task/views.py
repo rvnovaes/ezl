@@ -1051,7 +1051,6 @@ def ajax_get_task_data_table(request):
 
 
     records_total = query.count()
-    import pdb;pdb.set_trace()
     if not ordered_list:
         ordered_list = ['final_deadline_date']
     if reduced_filter:
