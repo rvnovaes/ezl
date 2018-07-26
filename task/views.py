@@ -990,7 +990,7 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
         checker = ObjectPermissionChecker(request.user)
         rule_view = RuleViewTask(request=request)
         dynamic_query = rule_view.get_dynamic_query(request.user.person, checker)        
-        status_totals = Task.objects.filter(dynamic_query).values('task_status').annotate(
+        status_totals = Task.objects.filter(dynamic_query).filter(is_active=True, office=get_office_session(request)).values('task_status').annotate(
             total=Count('task_status')).order_by('task_status')
         ret = {}
         total = 0
