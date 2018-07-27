@@ -45,7 +45,7 @@ from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
 from financial.tables import ServicePriceTableTaskTable
 from core.utils import get_office_session, get_domain
-from task.utils import get_task_attachment
+from task.utils import get_task_attachment, copy_ecm
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from django.core.files.base import ContentFile
@@ -613,16 +613,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.save()
         for ecm in object_parent.ecm_set.all():
             if ecm.path:
-                if Path(ecm.path.path).is_file():
-                    new_file = ContentFile(ecm.path.read())
-                    new_file.name = os.path.basename(ecm.path.name)
-                    new_ecm = copy.copy(ecm)
-                    new_ecm.pk = None
-                    new_ecm.exhibition_name = new_file.name
-                    new_ecm.task = new_task
-                    new_ecm.path = new_file
-                    new_ecm.ecm_related = ecm
-                    new_ecm.save()
+                copy_ecm(ecm, new_task)
 
     def dispatch(self, request, *args, **kwargs):
         res = super().dispatch(request, *args, **kwargs)
@@ -989,7 +980,7 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
         checker = ObjectPermissionChecker(request.user)
         rule_view = RuleViewTask(request=request)
-        dynamic_query = rule_view.get_dynamic_query(request.user.person, checker)        
+        dynamic_query = rule_view.get_dynamic_query(request.user.person, checker)
         status_totals = Task.objects.filter(dynamic_query).filter(is_active=True, office=get_office_session(request)).values('task_status').annotate(
             total=Count('task_status')).order_by('task_status')
         ret = {}
