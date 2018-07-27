@@ -46,8 +46,7 @@ def delete_related_ecm(sender, instance, **kwargs):
 @receiver(pre_delete, sender=Ecm)
 def delete_ecm_advwin(sender, instance, **kwargs):
     if not instance.legacy_code and instance.task.legacy_code:
-        delete_ecm.delay(instance.id, instance.path.name, instance.create_user.username,
-                         instance.task.legacy_code, instance.task.id)
+        delete_ecm.delay(instance.id)
 
 
 @receiver(post_init, sender=Task)
