@@ -2,7 +2,7 @@ from functools import wraps
 from itertools import groupby
 from datetime import datetime
 from django.contrib.auth.models import User
-
+from financial.utils import remove_caracter_especial
 
 def field_to_html_input(field):
     html_map = {
@@ -175,10 +175,11 @@ class GenericSearchForeignKey(GenericSearch):
         ids = self.get_related_values(value, param)
         return "{}__in={}".format(param, ids)
 
-    def get_related_values(self, value, param):
+    def get_related_values(self, value, param):        
         if value:
             model_query_set = 'self.model.{0}.get_queryset()'.format(param)
             return list(map(lambda x: x.id,
-                            list(filter(lambda i: value.lower() in i.__str__().lower(),
+                            list(filter(lambda i: remove_caracter_especial(value.lower()) in
+                                remove_caracter_especial(i.__str__().lower()),
                                         eval(model_query_set)))))
         return []
