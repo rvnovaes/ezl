@@ -50,6 +50,8 @@ services:
       - .:/app
       - ./containers/luigi/cron:/etc/cron.d/luigi
       - ezl-logs:/var/log/ezl
+      - /mnt/windows_ecm/Agenda:/usr/share/nginx/html/media/ECM
+      - /mnt/windows_ecm/Pastas:/usr/share/nginx/html/media/ECM/Pastas
     logging:
       driver: "json-file"
       options:
