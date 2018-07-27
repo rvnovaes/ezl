@@ -3,6 +3,7 @@
 {% block content %}
 <link href="{% static 'chat/css/chat.css' %}" rel="stylesheet">
 <script src="{% static 'chat/vendor/angular/angular.js' %}"></script>
+<script src="{% static 'chat/js/ng-chat-infinite-scroll.js' %}"></script>
 <script src="{% static 'chat/vendor/angular-ui-event/dist/event.min.js' %}"></script>
 <script src="{% static 'chat/js/app.js' %}"></script>
 <script src="{% static 'chat/js/controllers/chatCtrl.js' %}"></script>
@@ -25,6 +26,12 @@
             </div>
               <div class="form-material">
                 <input class="form-control p-20" placeholder="Pesquisar..." type="text" ng-model="search"/>
+                <div class="text-center" ng-show="!listOffices">
+                <label>
+                    <input type="checkbox" ng-model="hideEmptyChats">
+                    <span>Não exibir chats vazios</span>
+                  </label>
+                </div>
               </div>
               <div>
                 <ul class="chatonline style-none" style="overflow: hidden; width: auto; height: 100%;" ng-if="listOffices">
@@ -56,10 +63,16 @@
                       </li>
                     </div>
                   </ul>
+                 
+                
                   <ul class="chatonline style-none" ng-show="!listOffices">
                       <div id="list-chat-scroll">
-                        <li class="list-chat" ng-repeat="chat in chats"  ng-click="getMessages(chat)" scroll-bottom="scroll-bottom">
-                          <a class="chat-list-a" href="#" data-chat-label="{{chat.label}}">
+                         <div infinite-scroll='loadMoreChats()' infinite-scroll-distance='0'>
+                          <li class="text-center" ng-show="chatsLoading">
+                            Carregando...
+                          </li>
+                          <li class="list-chat" ng-repeat="chat in chats" ng-click="getMessages(chat)" scroll-bottom="scroll-bottom">
+<a class="chat-list-a" href="#" data-chat-label="{{chat.label}}">
                             <div>
                               <span class="label label-rouded label-primary pull-right hide" id="notify-1251" style="color:#fff"></span>
                                 <div class="row">
@@ -73,7 +86,7 @@
                                       <div class="row">
                                         <div class="col-md-6">
                                           <small class="text-muted">
-                                            <i class="fa fa-clock-o"></i>{{chat.alter_date|date:"HH:mm"}}
+                                            <i class="fa fa-clock-o"></i>{{chat.alter_date|date:"dd/MM/yy HH:mm"}}
                                           </small>
                                         </div>
                                         <div class="col-md-6">
@@ -85,9 +98,10 @@
                                 </div>
                               </div>
                           </a>
-                          <hr/>
+                          <hr/>                        
                         </li>
-                    </div>
+                      </div>
+                      </div>
                   </ul>
               <div class="slimScrollBar" style="background: rgb(220, 220, 220) none repeat scroll 0% 0%; width: 0px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 1px; height: 30px;"></div><div class="slimScrollRail" style="width: 0px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51) none repeat scroll 0% 0%; opacity: 0.2; z-index: 90; right: 1px;">
               </div>

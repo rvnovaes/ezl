@@ -23,9 +23,9 @@ DO_SOMETHING_SUCCESS_MESSAGE = 'Do Something successful!'
 
 DO_SOMETHING_ERROR_MESSAGE = 'ERROR during do something: {}'
 
-MAX_RETRIES = 10
+MAX_RETRIES = 5
 
-BASE_COUNTDOWN = 2
+BASE_COUNTDOWN = 2.0
 
 
 class TaskObservation(Enum):
@@ -101,7 +101,7 @@ def export_ecm_related_folter_to_task(self, id_docs, ecm_id, execute=True):
             'dt_inserido': timezone.localtime(ecm.create_date),
             'usuario_insercao': ecm.create_user.username
         })
-    stmt = JuridGEDLig.__table__.insert().values(*values)
+    stmt = JuridGEDLig.__table__.insert().values(values)
     if execute:
         result = None
         try:

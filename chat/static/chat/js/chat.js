@@ -1,4 +1,5 @@
-var resizeChat
+var resizeChat;
+window.interval_chat;
 $(document).ready(function() {
     resizeChat =  function(){
         var screen_len = $(window).height() -80 + "px";
@@ -6,15 +7,22 @@ $(document).ready(function() {
         var chatBoxHeight = $('.chat-main').height() - 190 + "px";
         var chatListHeight = $('.chat-main').height() - 100 + "px";
         $('.chat-box').css('height', chatBoxHeight); 
-	$('#list-chat-scroll').css('height', chatListHeight)       
-    }
+	$('#list-chat-scroll').css('height', chatListHeight);
+    };
 
     resizeChat();
 
     $(window).resize(function(){        
         resizeChat();
-    })
-})
+    });
+    window.interval_chat = count_message()
+    $(window).on('focus', function(){
+        window.interval_chat = count_message()
+    });
+    $(window).on('focusout', function(){
+        clearInterval(window.interval_chat);
+    });
+});
 
 
 var setBadgeItem = function (items) {
@@ -65,32 +73,34 @@ var chatUnreadMessage = function (chat_id, csrf_token) {
     })
 };
 
-setInterval(function () {
-    $.ajax({
-        type: "GET",
-        url: "/chat/count_message/?has_groups=" + false,
-        data: {},
-        success: function (response) {
-            if (response.all_messages > 0) {
-                $("#chat-notify").removeClass('hide');
-                $("#li-message-center").removeClass('hide');
-                $("#message-center").removeClass('hide');
+function count_message() {
+    return setInterval(function () {
+        $.ajax({
+            type: "GET",
+            url: "/chat/count_message/?has_groups=" + false,
+            data: {},
+            success: function (response) {
+                if (response.all_messages > 0) {
+                    $("#chat-notify").removeClass('hide');
+                    $("#li-message-center").removeClass('hide');
+                    $("#message-center").removeClass('hide');
 
-                if (response.all_messages == 1) {
-                    $("#drop-title").html(response.all_messages + ' mensagem não lida');
+                    if (response.all_messages == 1) {
+                        $("#drop-title").html(response.all_messages + ' mensagem não lida');
+                    } else {
+                        $("#drop-title").html(response.all_messages + ' mensagens não lidas');
+                    }
                 } else {
-                    $("#drop-title").html(response.all_messages + ' mensagens não lidas');
+                    $("#drop-title").html('0 mensagem não lida');
+                    $("#chat-notify").addClass('hide');
+                    $("#li-message-center").addClass('hide');
+                    $("#message-center").addClass('hide');
                 }
-            } else {
-                $("#drop-title").html('0 mensagem não lida');
-                $("#chat-notify").addClass('hide');
-                $("#li-message-center").addClass('hide');
-                $("#message-center").addClass('hide');
-            }
-        },
-        dataType: "json"
-    });
-}, 5000000);
+            },
+            dataType: "json"
+        });
+    }, 5000);
+}
 
 
 var formatDate = function (strDate) {
