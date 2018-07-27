@@ -154,7 +154,7 @@ def delete_ecm_related_folder_to_task(self, ecm_id, id_doc, task_id, ecm_create_
 
 
 @retry(stop_max_attempt_number=4, wait_fixed=1000)
-def delete_ecm(self, ecm_id, execute=True):    
+def delete_ecm(ecm_id, execute=True):    
     ecm = Ecm.objects.get(pk=ecm_id)    
 
     new_path = ecm_path_ezl2advwin(ecm.path.name)
