@@ -15,6 +15,7 @@ from task.models import Task, TaskStatus, TaskHistory, Ecm
 from sqlalchemy import and_
 from django.utils import timezone
 from guardian.shortcuts import get_users_with_perms
+from retrying import retry
 
 
 LOGGER = get_task_logger(__name__)
@@ -152,7 +153,7 @@ def delete_ecm_related_folder_to_task(self, ecm_id, id_doc, task_id, ecm_create_
         return '{} Registros afetados'.format(result.rowcount)
 
 
-@shared_task(bind=True, max_retries=10)
+@retry(stop_max_attempt_number=4, wait_fixed=1000)
 def delete_ecm(self, ecm_id, execute=True):    
     ecm = Ecm.objects.get(pk=ecm_id)    
 
@@ -185,8 +186,7 @@ def delete_ecm(self, ecm_id, execute=True):
                 delete_ecm_related_folder_to_task.delay(ecm_id, id_doc, ecm.task.id, ecm.create_user.username)
             LOGGER.info('ECM %s: excluído', ecm_id)
             return '{} Registros afetados'.format(result.rowcount)
-        except Exception as exc:
-            self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
+        except Exception as exc:            
             LOGGER.warning('Não foi possível excluir o ECM: %d-%s\n%s',
                            ecm_id,
                            exc,
