@@ -500,9 +500,15 @@ class PersonListView(CustomLoginRequiredView, SingleTableViewMixin):
         """
         context = super(PersonListView, self).get_context_data(**kwargs)
         office_session = get_office_session(request=self.request)
-        table = self.table_class(
-            context['table'].data.data.filter(offices=office_session, officemembership__is_active=True).exclude(
-                pk__in=Organ.objects.all()).order_by('-pk'))
+        only_linked_person =  True if self.request.GET.get("only_linked_person") else False
+        if only_linked_person:
+            table = self.table_class(
+                context['table'].data.data.filter(offices=office_session, officemembership__is_active=True).exclude(
+                    pk__in=Organ.objects.all()).order_by('-pk'))
+        else: 
+            table = self.table_class(
+                            context['table'].data.data.filter(offices=office_session).exclude(
+                                pk__in=Organ.objects.all()).order_by('-pk'))            
         context['table'] = table
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         return context
@@ -971,8 +977,7 @@ class OfficeCreateView(AuditFormMixin, CreateView):
 
 class OfficeUpdateView(AuditFormMixin, UpdateView):
     model = Office
-    form_class = OfficeForm
-    success_url = reverse_lazy('office_list')
+    form_class = OfficeForm    
     template_name_suffix = '_update_form'
     success_message = UPDATE_SUCCESS_MESSAGE
     object_list_url = 'office_list'
@@ -991,8 +996,8 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
         data = super().get_context_data(**kwargs)
         data['inviteofficeform'] = InviteForm(self.request.POST) \
             if InviteForm(self.request.POST).is_valid() else InviteForm()
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(kwargs.get('table_members'))
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(kwargs.get('table_offices'))
+        RequestConfig(self.request, paginate=False).configure(kwargs.get('table_members'))
+        RequestConfig(self.request, paginate=False).configure(kwargs.get('table_offices'))
         return data
 
     def dispatch(self, request, *args, **kwargs):
@@ -1004,6 +1009,9 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
             self.request.session.modified = True
             return HttpResponseRedirect(reverse('office_instance'))
         return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse('office_update', kwargs={'pk': self.kwargs['pk']})        
 
 
 class OfficeDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
@@ -1468,6 +1476,13 @@ class CorrespondentAutocomplete(TypeaHeadGenericSearch):
             data.append({'id': correspondent.id, 'data-value-txt': correspondent.__str__()})
         return list(data)
 
+class OfficeCorrespondentAutocomplete(TypeaHeadGenericSearch):
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
+        data = []
+        for office_correspondent in office.offices.filter(Q(legal_name__unaccent__icontains=q)):
+            data.append({'id': office_correspondent.id, 'data-value-txt': office_correspondent.__str__()})
+        return list(data)    
 
 class RequesterAutocomplete(TypeaHeadGenericSearch):
 

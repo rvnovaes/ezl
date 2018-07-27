@@ -97,12 +97,14 @@
             <span class="hide-menu">Administração<span class="fa arrow"></span></span>
         </a>
         <ul class="nav nav-second-level">
-            <li> <!-- ESCRIITORIOS -->
-                <a href="{% url 'office_list' %}" target="_self">
-                    <i class="fa fa-building-o fa-fw"></i>
-                    <span class="hide-menu">Escritórios</span>
-                </a>
-            </li>
+            {% if request.user.is_superuser%} 
+                <li> <!-- ESCRIITORIOS -->
+                    <a href="{% url 'office_list' %}" target="_self">
+                        <i class="fa fa-building-o fa-fw"></i>
+                        <span class="hide-menu">Escritórios</span>
+                    </a>
+                </li>
+            {%endif%}
             <li><!-- IMPORTAÇÃO TABELA DE PREÇO -->
                 <a href="{% url 'import_service_price_table' %}" target="_self">
                     <i class="fa fa-money fa-fw"></i>
@@ -146,7 +148,7 @@
         </a>
         <ul class="nav nav-second-level">
             <li> <!-- MANUAL DO USUARIO -->
-                <a href="{% url 'user_manual' %}" class="waves-effect" target="_blank">
+                <a href="https://mttech.atlassian.net/wiki/spaces/PUB/pages/55738374/Manual+do+usu+rio" class="waves-effect" target="_blank">
                     <i class="mdi mdi-file-pdf"></i>
                     <span class="hide-menu">Manual do Usuário</span>
                 </a>

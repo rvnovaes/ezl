@@ -2,8 +2,10 @@ import json
 import csv
 import os
 import copy
-from urllib.parse import urlparse
 import pickle
+import io
+from urllib.parse import urlparse
+from zipfile import ZipFile
 from pathlib import Path
 from django.contrib import messages
 from django.core.cache import cache
@@ -152,9 +154,8 @@ class TaskToAssignView(AuditFormMixin, UpdateView):
 
     def form_valid(self, form):
         super().form_valid(form)
-        if form.is_valid():
-            if not form.instance.person_distributed_by:
-                form.instance.person_distributed_by = self.request.user.person
+        if form.is_valid():            
+            form.instance.person_distributed_by = self.request.user.person
             form.instance.task_status = TaskStatus.OPEN
             # TODO: rever processo de anexo, quando for trocar para o ECM Generico
             get_task_attachment(self, form)
@@ -428,7 +429,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
-        returned = grouped.get(TaskStatus.RETURN) or {}
+        returned = grouped.get(TaskStatus.RETURN) or {}        
         accepted = grouped.get(TaskStatus.ACCEPTED) or {}
         opened = grouped.get(TaskStatus.OPEN) or {}
         done = grouped.get(TaskStatus.DONE) or {}
@@ -447,23 +448,25 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
             return []
         if checker.has_perm('can_access_general_data', office_session) or checker.has_perm('group_admin',
                                                                                            office_session):
-            return_list.append(DashboardErrorStatusTable(error,
-                                                         title='Erro no sistema de origem',
-                                                         status=TaskStatus.ERROR))
+            if office_session.use_etl:
+                return_list.append(DashboardErrorStatusTable(error,
+                                                             title='Erro no sistema de origem',
+                                                             status=TaskStatus.ERROR))
 
             # status 10 - Solicitada
             return_list.append(DashboardStatusTable(requested,
                                                     title='Solicitadas',
                                                     status=TaskStatus.REQUESTED))
-            # status 11 - Aceita pelo Service
-            return_list.append(DashboardStatusTable(accepted_service,
-                                                    title='Aceitas pelo Service',
-                                                    status=TaskStatus.ACCEPTED_SERVICE))
+            if office_session.use_service:
+                # status 11 - Aceita pelo Service
+                return_list.append(DashboardStatusTable(accepted_service,
+                                                        title='Aceitas pelo Service',
+                                                        status=TaskStatus.ACCEPTED_SERVICE))
 
-            # status 20 - Recusada pelo Sevice
-            return_list.append(DashboardStatusTable(refused_service,
-                                                    title='Recusadas pelo Service',
-                                                    status=TaskStatus.REFUSED_SERVICE))
+                # status 20 - Recusada pelo Sevice
+                return_list.append(DashboardStatusTable(refused_service,
+                                                        title='Recusadas pelo Service',
+                                                        status=TaskStatus.REFUSED_SERVICE))
 
         return_list.append(DashboardStatusTable(returned,
                                                 title='Retornadas',
@@ -756,12 +759,16 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     if checker.has_perm('view_delegated_tasks', office_session):
                         person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
                     if checker.has_perm('view_requested_tasks', office_session):
-                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
-
+                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)                
+                if data['office_executed_by']:
+                    task_dynamic_query.add(Q(child__office_id=data['office_executed_by']), Q.AND)
                 if data['state']:
                     task_dynamic_query.add(Q(movement__law_suit__court_district__state=data['state']), Q.AND)
                 if data['court_district']:
                     task_dynamic_query.add(Q(movement__law_suit__court_district=data['court_district']), Q.AND)
+                if data['task_status']:
+                    status = [getattr(TaskStatus, s) for s in data['task_status']]
+                    task_dynamic_query.add(Q(task_status__in=status), Q.AND)
                 if data['type_task']:
                     task_dynamic_query.add(Q(type_task=data['type_task']), Q.AND)
                 if data['court']:
@@ -778,11 +785,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     task_dynamic_query.add(Q(movement__law_suit__law_suit_number=data['law_suit_number']), Q.AND)
                 if data['task_number']:
                     task_dynamic_query.add(Q(task_number=data['task_number']), Q.AND)
-                if data['task_parent_number']:
-                    task_dynamic_query.add(Q(parent__task_number=data['task_parent_number'], office=get_office_session(self.request)), Q.AND)
                 if data['task_origin_code']:
-                    task_dynamic_query.add(Q(Q(legacy_code=data['task_origin_code'])|\
-                        Q(parent_task_number=data['task_origin_code'])), Q.AND)
+                    task_dynamic_query.add(Q(Q(legacy_code=data['task_origin_code'])
+                                             | Q(parent_task_number=data['task_origin_code'])), Q.AND)
                 if data['person_executed_by']:
                     task_dynamic_query.add(Q(person_executed_by=data['person_executed_by']), Q.AND)
                 if data['person_asked_by']:
@@ -868,6 +873,13 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     if data['finished_in'].stop:
                         finished_dynamic_query.add(
                             Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                if data['final_deadline_date_in']:
+                    if data['final_deadline_date_in'].start:
+                        finished_dynamic_query.add(
+                            Q(final_deadline_date__gte=data['final_deadline_date_in'].start.replace(hour=0, minute=0)), Q.AND)
+                    if data['final_deadline_date_in'].stop:
+                        finished_dynamic_query.add(
+                            Q(final_deadline_date__lte=data['final_deadline_date_in'].stop.replace(hour=23, minute=59)), Q.AND)
 
                 person_dynamic_query.add(Q(client_query), Q.AND) \
                     .add(Q(task_dynamic_query), Q.AND) \
@@ -1176,3 +1188,28 @@ class GeolocationTaskFinish(CustomLoginRequiredView, View):
             return JsonResponse({"ok": True,
                                  "finished_date": date_format(timezone.localtime(finished_date), 'DATETIME_FORMAT')})
         return JsonResponse({"ok": False})
+
+@login_required
+def ecm_batch_download(request, pk):
+    #https://stackoverflow.com/questions/12881294/django-create-a-zip-of-multiple-files-and-make-it-downloadable
+    #http://mypythondjango.blogspot.com/2018/01/how-to-zip-files-in-filefield-and.html    
+    ecms = Ecm.objects.filter(task_id=pk).select_related('task')
+    try:
+        buff = io.BytesIO()
+        zf = ZipFile(buff, mode='a')
+        zip_filename = None
+        for ecm in ecms:
+            output = io.BytesIO(ecm.path.read())
+            output.seek(0)
+            zf.writestr(ecm.path.name, output.getvalue())
+            if not zip_filename:
+                zip_filename = 'Anexos_OS_%s.zip' % (ecm.task.task_number)            
+        zf.close()
+        buff.seek(0)
+        data = buff.read()
+        resp = HttpResponse(data, content_type = "application/x-zip-compressed")    
+        resp['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
+        return resp
+    except Exception as e:
+        messages.error(request, 'Erro ao baixar todos arquivos.' + str(e))
+        return HttpResponseRedirect(ecm.task.get_absolute_url())    

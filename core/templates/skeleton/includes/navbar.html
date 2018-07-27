@@ -72,11 +72,25 @@
                 <ul class="nav navbar-top-links navbar-right pull-right">
                     {% if office_session_id %}
                     <li class="dropdown">
-                        <a href="#office-select-modal" class="waves-effect" data-toggle="modal">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="dropdown-office">
                             <i class="fa fa-building-o">&nbsp;</i>
                             <span id="current_office" class="hidden-sm hidden-xs"></span>
                             <span class="caret"></span>
-                        </a>
+                        </a>                        
+                        <ul class="dropdown-menu animated flipInX" aria-labelledby="dropdown-office">
+                            <li>                                
+                                <a class="dropdown-item" href="{% url 'office_update' office_session.pk %}">
+                                    <i class="fa fa-building-o">&nbsp;</i>
+                                    <span>Meu perfil</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#office-select-modal" class="waves-effect" data-toggle="modal">
+                                    <i class="fa fa-exchange">&nbsp;</i>
+                                    <span class="hidden-sm hidden-xs"> Trocar de escritório</span>
+                                </a>
+                            </li>                            
+                        </ul>
                     </li>
                     {% endif %}
                     <li class="dropdown">

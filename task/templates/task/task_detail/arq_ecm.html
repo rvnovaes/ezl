@@ -7,7 +7,7 @@
            aria-controls="collapseECM"><i class="panel-title mdi mdi-paperclip"></i> Anexos </a> </div>
     <div id="collapseECM" class="panel-collapse collapse" role="tabpanel" aria-labelledby="panelECM" aria-expanded="false" style="height: 0px;">
         <div class="panel-body">
-            <div id="no-providence" class="">
+            <div id="no-providence" class="">                    
                 <div class="alert alert-warning font-bold m-0">
                     Esta providência não possui nenhum arquivo em
                     anexo.
@@ -40,20 +40,24 @@
                 </div>
             </div>
         </div>
-
-        {% if form.instance.allow_attachment %}
-            <div class="panel-footer">
+        
+        <div class="panel-footer">
+            {% if form.instance.allow_attachment %}
                 <button type="button" class="btn btn-sm btn-info js-upload-files">
                     <i class="icon-cloud-upload"></i> Enviar arquivo(s)
                 </button>
 
                 <input id="fileupload" type="file" name="path" multiple
-                       style="display: none;"
-                       data-method="POST"
-                       enctype="multipart/form-data"
-                       data-url="{% url 'ecm_add' object.id %}"
-                       data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
-            </div>
-        {% endif %}
+                        style="display: none;"
+                        data-method="POST"
+                        enctype="multipart/form-data"
+                        data-url="{% url 'ecm_add' object.id %}"
+                        data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+            {% endif %}        
+                              
+            <a href="{% url 'ecm_batch_download' object.id %}" class="btn btn-sm btn-success js-batch-download-files">
+                <i class="icon-cloud-download"></i>
+                Baixar todos arquivo(s)</a>        
+        </div>
     </div>
 </div>
