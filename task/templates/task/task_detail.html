@@ -501,7 +501,7 @@
         $('#confirmAction').on('show.bs.modal', function (event) {
             var table_rows = {{ correspondents_table.rows|length }};
             if (table_rows > 0) {
-                var table = $('#correspondents-table').DataTable({
+                window.table = $('#correspondents-table').DataTable({
                     paging: false,
                     order: [[4, 'asc']],
                     dom: 'frti',
@@ -528,8 +528,7 @@
         /* Ao fechar o modal, limpar a tabela */
         {% if correspondents_table.rows %}
         $('#confirmAction').on('hide.bs.modal', function (event) {
-            $('#servicePriceTableTable').empty();
-            $('#servicePriceTableTable').DataTable().clear().destroy();
+            window.table.destroy();
         });
         {% endif %}
 
