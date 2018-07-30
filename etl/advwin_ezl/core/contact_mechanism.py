@@ -2,16 +2,25 @@ from core.models import ContactMechanism, Person, ContactMechanismType
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.utils import get_message_log_default, save_error_log
 
+UNIT_TO_CONTACT = {
+  '21': '31 2538-7830', 
+  '11': '31 2538-7760', 
+  '14': '48 3771-6812', 
+  '09': '11 4837-3400', 
+  '06': '21 2221-5797', 
+  '13': '11 3738-1763', 
+  '01': '31 4501-4100'
+}
 
 # noinspection SpellCheckingInspection
-class ContactMechanismETL(GenericETL):
-    model = ContactMechanism
+class ContactMechanismETL(GenericETL):  
+    model = ContactMechanism    
     import_query = """
-                
         SELECT *
                     FROM (
                            --       ADV_PHONE1
                            SELECT
+                             ADV_PHONE1.Unidade AS unit,
                              ADV_PHONE1.Codigo AS legacy_code,
                              'telefone'        AS contact_mechanism_type,
                              ADV_PHONE1.Fone1  AS description
@@ -32,6 +41,7 @@ class ContactMechanismETL(GenericETL):
                            UNION
                            --          ADV_PHONE2
                            SELECT
+                             ADV_PHONE2.Unidade AS unit,
                              ADV_PHONE2.Codigo AS legacy_code,
                              'telefone'        AS contact_mechanism_type,
                              ADV_PHONE2.Fone2  AS description
@@ -52,6 +62,7 @@ class ContactMechanismETL(GenericETL):
                            UNION
                            --   ADV_PHONE3
                            SELECT
+                             ADV_PHONE3.Unidade AS unit,
                              ADV_PHONE3.Codigo AS legacy_code,
                              'telefone'        AS contact_mechanism_type,
                              ADV_PHONE3.FONE3  AS description
@@ -71,6 +82,7 @@ class ContactMechanismETL(GenericETL):
                            --        ADV_EMAIL
                            UNION
                            SELECT DISTINCT
+                             '' AS unit,
                              ADV_EMAIL.Codigo AS legacy_code,
                              'email'          AS contact_mechanism_type,
                              ADV_EMAIL.E_mail AS description
@@ -91,6 +103,7 @@ class ContactMechanismETL(GenericETL):
                            UNION
                            --          CORSER_EMAIL
                            SELECT DISTINCT
+                           '' AS unit,
                              CORSER_EMAIL.CS_Advogado AS legacy_code,
                              'email'                  AS contact_mechanism_type,
                              CORSER_EMAIL.CS_Email    AS description
@@ -100,6 +113,7 @@ class ContactMechanismETL(GenericETL):
                            UNION
                            --          CORSER_MULTEMAIL
                            SELECT DISTINCT
+                             '' AS unit,
                              CORSER_MULTEMAIL.CS_Advogado      AS legacy_code,
                              'multemail'                       AS contact_mechanism_type,
                              CORSER_MULTEMAIL.CS_Outros_Emails AS description
@@ -110,6 +124,12 @@ class ContactMechanismETL(GenericETL):
                     """
     has_status = False    
     field_check = 'description'
+
+    @staticmethod
+    def get_unit_contact(row):
+      if row['contact_mechanism_type'] == 'telefone':               
+        return UNIT_TO_CONTACT.get(row['unit'], '')
+
 
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):
@@ -125,9 +145,10 @@ class ContactMechanismETL(GenericETL):
                                 defaults={'name': row['contact_mechanism_type'],
                                           'create_user': user},
                                 name__unaccent__iexact=row['contact_mechanism_type'])
-                            if contact_mechanism_type:
+                            if contact_mechanism_type:                                
+                                description = self.get_unit_contact(row) if row['contact_mechanism_type'] == 'telefone' else row['description']
                                 obj = self.model(contact_mechanism_type=contact_mechanism_type,
-                                                 description=row['description'], notes='', person=person,
+                                                 description=description, notes='', person=person,
                                                  create_user=user)
                                 obj.save()
                         else:

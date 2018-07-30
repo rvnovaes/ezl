@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^', include((router_core.urls, 'core'), namespace='core')),
     url(r'^', include((router_financial.urls, 'financial'), namespace='financial')),
     url(r'^', include((router_task.urls, 'task'), namespace='task')),       
+    url(r'^oauth2/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]

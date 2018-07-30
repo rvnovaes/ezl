@@ -8,6 +8,11 @@ fixture = 'type_task'
 
 
 def load_fixture(apps, schema_editor):
+    from django.contrib.auth.models import User
+
+    user = User.objects.filter(username='admin').first()
+    if not user:
+        return True
     call_command('loaddata', fixture, app_label='task')
 
 

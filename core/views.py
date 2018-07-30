@@ -12,6 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User, Group
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import ProtectedError, Q, F
@@ -1463,6 +1464,13 @@ class CorrespondentAutocomplete(TypeaHeadGenericSearch):
             data.append({'id': correspondent.id, 'data-value-txt': correspondent.__str__()})
         return list(data)
 
+class OfficeCorrespondentAutocomplete(TypeaHeadGenericSearch):
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
+        data = []
+        for office_correspondent in office.offices.filter(Q(legal_name__unaccent__icontains=q)):
+            data.append({'id': office_correspondent.id, 'data-value-txt': office_correspondent.__str__()})
+        return list(data)    
 
 class RequesterAutocomplete(TypeaHeadGenericSearch):
 

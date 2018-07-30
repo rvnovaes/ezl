@@ -1,5 +1,5 @@
 from django.forms import Select, Textarea, RadioSelect
-from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter
+from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter
 from django import forms
 
 from core.models import Person, State, Office, Team
@@ -7,7 +7,7 @@ from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
 from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ
-from task.models import TypeTask, Task, Filter
+from task.models import TypeTask, Task, Filter, TaskStatus
 from .models import DashboardViewModel
 from core.utils import get_office_session
 
@@ -29,6 +29,8 @@ class TaskFilter(FilterSet):
                                                                  name='court_district',
                                                                  url='/processos/courtdistrict_autocomplete'))
 
+    task_status = MultipleChoiceFilter(label="Status", required=False,
+      choices=[(task_status.name, task_status.value) for task_status in TaskStatus])
     type_task = ModelChoiceFilter(queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True)),
                                   label=u"Tipo de Serviço")
     cost_center = ModelChoiceFilter(queryset=filter_valid_choice_form(CostCenter.objects.filter(is_active=True)),
@@ -49,6 +51,8 @@ class TaskFilter(FilterSet):
                                                          field_related='legal_name',
                                                          name='client',
                                                          url='/client_form'))
+    office_executed_by = CharFilter(label='Escritório contrado', required=False, 
+      widget=TypeaHeadForeignKeyWidget(model=Office, field_related='legal_name', name='office_executed_by', url='/office_correspondent_form'))
     person_executed_by = CharFilter(label="Correspondente",
                         required=False,
                         widget=TypeaHeadForeignKeyWidget(model=Person,
@@ -67,6 +71,7 @@ class TaskFilter(FilterSet):
                                                                   field_related='legal_name',
                                                                   name='person_distributed_by',
                                                                   url='/service_form'))
+    final_deadline_date_in = MDDateTimeRangeFilter(name='final_deadline_date_in', label='Prazo entre:')
     requested_in = MDDateTimeRangeFilter(name='requested_in', label=u"Solicitadas entre:")
     accepted_service_in = MDDateTimeRangeFilter(name='accepted_service_in', label="Aceitas pelo Service entre:")
     refused_service_in = MDDateTimeRangeFilter(name='refused_service_in', label="Recusadas pelo Service entre:")

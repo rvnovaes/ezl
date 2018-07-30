@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 from core import views_api
 from core.views import (ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin,
     CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave, PopupSuccessView,
-    OfficeAutocomplete)
+    OfficeAutocomplete, OfficeCorrespondentAutocomplete)
 from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView
 from rest_framework_swagger.views import get_swagger_view
@@ -61,6 +61,8 @@ urlpatterns = [
     url(r'^correspondent_form',
         login_required(CorrespondentAutocomplete.as_view()),
         name='correspondent_autocomplete'),
+    url(r'^office_correspondent_form', login_required(OfficeCorrespondentAutocomplete.as_view()), 
+        name='office_correspondent_form'),
 
     url(r'^requester_form',
         login_required(RequesterAutocomplete.as_view()),
@@ -83,8 +85,7 @@ urlpatterns = [
 
     url(r'^popup_success', PopupSuccessView.as_view(), name='popup_success'),
     url(r'^api-auth/', include('rest_framework.urls')),
-    url(r'^api/v1/', include('ezl.urls_api')),
-    url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    url(r'^api/v1/', include('ezl.urls_api')),    
 ] + \
     static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static/')) + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

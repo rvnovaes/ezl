@@ -71,7 +71,7 @@ def validate_import(f):
     """
 
     @wraps(f)
-    def wrapper(etl, rows, user, rows_count, log, *args, **kwargs):
+    def wrapper(etl, rows, user, rows_count, *args, **kwargs):
         res = f(etl, rows, user, rows_count, *args, **kwargs)
         debug_logger = etl.debug_logger
         error_logger = etl.error_logger
