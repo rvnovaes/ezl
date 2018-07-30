@@ -153,15 +153,17 @@ def delete_ecm_related_folder_to_task(self, ecm_id, id_doc, task_id, ecm_create_
 
 
 @shared_task(bind=True, max_retries=10)
-def delete_ecm(self, ecm_id, ecm_path_name, ecm_create_user, task_legacy_code, task_id, execute=True):
-    new_path = ecm_path_ezl2advwin(ecm_path_name)
-    file_name = get_ecm_file_name(ecm_path_name)
+def delete_ecm(self, ecm_id, execute=True):    
+    ecm = Ecm.objects.get(pk=ecm_id)    
+
+    new_path = ecm_path_ezl2advwin(ecm.path.name)
+    file_name = get_ecm_file_name(ecm.path.name)
     values = {
         'Tabela_OR': 'Agenda',
-        'Codigo_OR': task_legacy_code,
+        'Codigo_OR': ecm.task.legacy_code,
         'Link': new_path,
         'Nome': file_name,
-        'Responsavel': ecm_create_user,
+        'Responsavel': ecm.create_user.username,
         'Arq_Status': 'Guardado',
         'Arq_nick': file_name,
         'Descricao': file_name
@@ -180,7 +182,7 @@ def delete_ecm(self, ecm_id, ecm_path_name, ecm_create_user, task_legacy_code, t
                 id_doc = row['ID_doc']
                 stmt = JuridGedMain.__table__.delete().where(JuridGedMain.__table__.c.ID_doc == id_doc)
                 deleted_ecm = get_advwin_engine().execute(stmt)
-                delete_ecm_related_folder_to_task.delay(ecm_id, id_doc, task_id, ecm_create_user)
+                delete_ecm_related_folder_to_task.delay(ecm_id, id_doc, ecm.task.id, ecm.create_user.username)
             LOGGER.info('ECM %s: excluído', ecm_id)
             return '{} Registros afetados'.format(result.rowcount)
         except Exception as exc:

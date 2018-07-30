@@ -46,8 +46,7 @@ def delete_related_ecm(sender, instance, **kwargs):
 @receiver(pre_delete, sender=Ecm)
 def delete_ecm_advwin(sender, instance, **kwargs):
     if not instance.legacy_code and instance.task.legacy_code:
-        delete_ecm.delay(instance.id, instance.path.name, instance.create_user.username,
-                         instance.task.legacy_code, instance.task.id)
+        delete_ecm.delay(instance.id)
 
 
 @receiver(post_init, sender=Task)
@@ -142,8 +141,8 @@ def update_status_parent_task(sender, instance, **kwargs):
                 and not getattr(instance, '_from_parent'):
             instance.parent.task_status = get_parent_status(instance.status)
             if instance.parent.task_status == TaskStatus.REQUESTED:
-                setattr(instance.parent, '__notes', 'O escritório {} recusou a OS {}'.format(instance.office.legal_name,
-                                                                                             instance.parent.task_number))
+                setattr(instance.parent, '__notes', 'O escritório {} recusou a OS {}. Motivo: {}'.format(instance.office.legal_name,
+                                                                                             instance.parent.task_number, getattr(instance, '__notes', '')))
             fields = get_parent_fields(instance.status)
             for field in fields:
                 setattr(instance.parent, field, getattr(instance, field)),

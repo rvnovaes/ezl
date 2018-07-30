@@ -157,9 +157,8 @@ class TaskToAssignView(AuditFormMixin, UpdateView):
 
     def form_valid(self, form):
         super().form_valid(form)
-        if form.is_valid():
-            if not form.instance.person_distributed_by:
-                form.instance.person_distributed_by = self.request.user.person
+        if form.is_valid():            
+            form.instance.person_distributed_by = self.request.user.person
             form.instance.task_status = TaskStatus.OPEN
             # TODO: rever processo de anexo, quando for trocar para o ECM Generico
             get_task_attachment(self, form)
@@ -435,7 +434,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
-        returned = grouped.get(TaskStatus.RETURN) or {}
+        returned = grouped.get(TaskStatus.RETURN) or {}        
         accepted = grouped.get(TaskStatus.ACCEPTED) or {}
         opened = grouped.get(TaskStatus.OPEN) or {}
         done = grouped.get(TaskStatus.DONE) or {}
@@ -454,23 +453,25 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
             return []
         if checker.has_perm('can_access_general_data', office_session) or checker.has_perm('group_admin',
                                                                                            office_session):
-            return_list.append(DashboardErrorStatusTable(error,
-                                                         title='Erro no sistema de origem',
-                                                         status=TaskStatus.ERROR))
+            if office_session.use_etl:
+                return_list.append(DashboardErrorStatusTable(error,
+                                                             title='Erro no sistema de origem',
+                                                             status=TaskStatus.ERROR))
 
             # status 10 - Solicitada
             return_list.append(DashboardStatusTable(requested,
                                                     title='Solicitadas',
                                                     status=TaskStatus.REQUESTED))
-            # status 11 - Aceita pelo Service
-            return_list.append(DashboardStatusTable(accepted_service,
-                                                    title='Aceitas pelo Service',
-                                                    status=TaskStatus.ACCEPTED_SERVICE))
+            if office_session.use_service:
+                # status 11 - Aceita pelo Service
+                return_list.append(DashboardStatusTable(accepted_service,
+                                                        title='Aceitas pelo Service',
+                                                        status=TaskStatus.ACCEPTED_SERVICE))
 
-            # status 20 - Recusada pelo Sevice
-            return_list.append(DashboardStatusTable(refused_service,
-                                                    title='Recusadas pelo Service',
-                                                    status=TaskStatus.REFUSED_SERVICE))
+                # status 20 - Recusada pelo Sevice
+                return_list.append(DashboardStatusTable(refused_service,
+                                                        title='Recusadas pelo Service',
+                                                        status=TaskStatus.REFUSED_SERVICE))
 
         return_list.append(DashboardStatusTable(returned,
                                                 title='Retornadas',

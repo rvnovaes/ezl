@@ -1,0 +1,10 @@
+{% extends 'core/widgets/generic_search_view.html' %}
+{% block custom_search_form_fields %} 
+	<div class="row">
+	    <div class="col-sm-6">
+	        <input type="checkbox" name="only_linked_person"
+	        {{ view.request.GET | get_check_box_format:search_field.name>
+	        <strong>Somente pessoas com vínculo ativo</strong>
+	    </div>
+	</div>
+{% endblock %}

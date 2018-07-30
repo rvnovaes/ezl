@@ -1,31 +1,13 @@
-{% load guardian_tags %}
 {% load core_filters core_match task_filters %}
-{% with request|get_office_session_pk as office_session_id %}
-    {% get_model_instance 'core' 'office' office_session_id as office_session %}
-    {% get_obj_perms request.user for office_session as "office_session_perms" %}
-    {% if not office_session.use_service %}
-        {% include 'task/includes/task-detail-status-buttons-no-use-service.html' with  office_session_perms=office_session_perms %}
-    {% else %}
-        {% if 'can_distribute_tasks' in office_session_perms %}
-            <button type="button" id="ACCEPTED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                    class="text-white btn btn-ezl-accepted_service align-middle {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
-                <span class="btn-label align-middle"><i class="mdi mdi-thumb-up-outline"></i></span> Aceitar Solicitação
-            </button>
+<button type="button" data-toggle="modal" data-target="#to-assign"
+        class="text-white btn btn-info {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
+    <span class="btn-label"><i class="mdi mdi-account-location"></i></span> Atribuir
+</button>
 
-            <button type="button" id="REFUSED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                    class="text-white btn btn-ezl-refused_service {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
-                <span class="btn-label"><i class="mdi mdi-thumb-down-outline"></i></span> Recusar Solicitação
-            </button>
-            <button type="button" data-toggle="modal" data-target="#to-assign"
-                    class="text-white btn btn-info {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
-                <span class="btn-label"><i class="mdi mdi-account-location"></i></span> Atribuir
-            </button>
-
-            <button type="button" id="OPEN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
-                    class="text-white btn btn-ezl-open {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
-                <span class="btn-label"><i class="mdi mdi-account-location"></i></span> Delegar
-            </button>
-        {% endif %}
+<button type="button" id="OPEN" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+        class="text-white btn btn-ezl-open {% if not form.instance.status.name == 'REQUESTED' 	%}hidden{% endif %}">
+    <span class="btn-label"><i class="mdi mdi-account-location"></i></span> Delegar
+</button>
         {% if 'view_delegated_tasks' in office_session_perms %}
             <button type="button" id="ACCEPTED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                     class="text-white btn btn-ezl-accepted {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
@@ -33,15 +15,16 @@
             </button>
         {% endif %}
         {% if 'view_delegated_tasks' in office_session_perms or 'can_distribute_tasks' in office_session_perms %}
-            {% get_refused_action request.user form.instance office_session_perms as refused_acton %}
-            {% if refused_acton == 'REFUSED' or refused_acton == 'REQUESTED' %}
+            {% with request.user|get_refused_action:form.instance as refused_acton %}
+                {% if refused_acton == 'REFUSED' or refused_acton == 'REQUESTED' %}
                 <button type="button" id="{{ refused_acton }}" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                         class="text-white btn btn-ezl-refused">
                     <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Recusar
                 </button>
-            {% elif refused_acton == 'INVALID_CHILD_STATUS' %}
-                <p>Essa OS não pode ser recusada, pois encontra-se no status {{ form.instance.get_child.task_status|lower }} no escritório correspondente.</p>
-            {% endif %}
+                {% elif refused_acton == 'INVALID_CHILD_STATUS' %}
+                    <p>Essa OS não pode ser recusada, pois encontra-se no status {{ form.instance.get_child.task_status|lower }} no escritório correspondente.</p>
+                {% endif %}
+            {% endwith %}
         {% endif %}
         {% if 'block_payment_tasks' in office_session_perms %}
             <button type="button" id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
@@ -60,13 +43,15 @@
                     class="text-white btn btn-ezl-return {% if not  form.instance.status.name == 'DONE' %}hidden{% endif %}">
                 <span class="btn-label"><i class="mdi mdi-backburger"></i></span> Retornar
             </button>
-        {% endif %}
+        {% endif %}        
         {% if 'view_delegated_tasks' in office_session_perms %}
-            {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
+            {% if form.instance.status.name in 'ACCEPTED,RETURN,DONE' %}
                 <div class="col-sm-3">
                     {{ form.survey_result }}
                     <a>{{ form.execution_date }}</a>
                 </div>
+            {% endif %}
+            {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
                 {% if form.instance.geolocation.last.checkpointtype == 'Checkin' %}
                     <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
                             data-checkpointtype="Checkout" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
@@ -81,8 +66,10 @@
                 <button type="button" onclick="getId(this)" id="DONE" type="submit" data-toggle="" data-target="#confirmAction"
                         class="text-white btn btn-ezl-done">
                     <span class="btn-label"><i class="mdi mdi-checkbox-marked-circle-outline"></i></span> Cumprir
+                </button>                
+                <button type="button" id="FINISHED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
+                        class="text-white btn btn-raised btn-ezl-finished">
+                    <span class="btn-label"><i class="mdi mdi-gavel"></i></span> Cumprir e Finalizar
                 </button>
             {% endif %}
         {% endif %}
-    {% endif %}
-{% endwith %}
