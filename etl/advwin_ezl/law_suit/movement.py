@@ -70,7 +70,7 @@ class MovementETL(GenericETL):
                     legacy_code=person_lawyer_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
 
                 folder = Folder.objects.filter(
-                    legacy_code=folder_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
+                    legacy_code=folder_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Folder)
 
                 # Conforme descrico no caso 0000486, nao existe person_lawyer na classe Movement, pois segundo analise da
                 # regra de negocios, identificou-se que o usuario que cria a movimentacao e o advogado
