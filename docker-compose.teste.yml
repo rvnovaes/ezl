@@ -30,6 +30,9 @@ services:
     command: uwsgi --ini /app/config/uwsgi/uwsgi.ini -b 8192
     environment:
       ENV: development
+      EMAIL_HOST: mail
+      EMAIL_PORT: 1025
+      EMAIL_USE_SSL: "false"
   ws:
     image: ezl:latest
     volumes:
@@ -73,3 +76,10 @@ services:
     volumes:
       - letsencrypt-www:/tmp/www
       - letsencrypt-etc:/etc/letsencrypt
+
+  mail:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
