@@ -5,6 +5,6 @@ from . import views_api as views
 
 
 router = routers.SimpleRouter()
-router.register(r'persons', views.PersonViewSet, base_name='persons')
+router.register(r'person', views.PersonViewSet, base_name='person')
 
 urlpatterns = []

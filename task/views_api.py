@@ -8,6 +8,7 @@ from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHa
 from rest_framework.decorators import permission_classes
 from core.views_api import ApplicationView
 
+@permission_classes((TokenHasReadWriteScope,))
 class TypeTaskViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = TypeTask.objects.filter(is_active=True, simple_service=True)
     serializer_class = TypeTaskSerializer
@@ -15,6 +16,7 @@ class TypeTaskViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ('name',)
 
 
+@permission_classes((TokenHasReadWriteScope,))
 class EcmTaskViewSet(viewsets.ModelViewSet):
     queryset = Ecm.objects.all()
     serializer_class = EcmTaskSerializer

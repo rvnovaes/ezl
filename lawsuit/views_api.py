@@ -13,8 +13,10 @@ from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CourtDistrictFilter, MovementFilter
+from rest_framework.decorators import permission_classes
+from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope, TokenHasReadWriteScope
 
-
+@permission_classes((TokenHasReadWriteScope,))
 class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CourtDistrict.objects.all()
     serializer_class = CourtDistrictSerializer
@@ -23,16 +25,19 @@ class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ('name', 'state__initials')
 
 
+@permission_classes((TokenHasReadWriteScope,))
 class FolderViewSet(viewsets.ModelViewSet):
     queryset = Folder.objects.all()
     serializer_class = FolderSerializer
 
 
+@permission_classes((TokenHasReadWriteScope,))
 class InstanceViewSet(viewsets.ModelViewSet):
     queryset = Instance.objects.all()
     serializer_class = InstanceSerializer
 
 
+@permission_classes((TokenHasReadWriteScope,))
 class LawSuitViewSet(viewsets.ModelViewSet):
     queryset = LawSuit.objects.all()
     serializer_class = LawSuitSerializer
@@ -40,11 +45,13 @@ class LawSuitViewSet(viewsets.ModelViewSet):
     search_fields = ('folder__legacycode',)
 
 
+@permission_classes((TokenHasReadWriteScope,))
 class CourtDivisionViewSet(viewsets.ModelViewSet):
     queryset = CourtDivision.objects.all()
     serializer_class = CourtDivisionSerializer
 
 
+@permission_classes((TokenHasReadWriteScope,))
 class MovementViewSet(viewsets.ModelViewSet):
     queryset = Movement.objects.all()
     serializer_class = MovementSerializer
@@ -53,6 +60,7 @@ class MovementViewSet(viewsets.ModelViewSet):
     search_fields = ('law_suit__legacycode', 'law_suit__law_suit_number', 'type_movement__legacycode')
 
 
+@permission_classes((TokenHasReadWriteScope,))
 class TypeMovementViewSet(viewsets.ModelViewSet):
     queryset = TypeMovement.objects.all()
     serializer_class = TypeMovementSerializer
@@ -60,6 +68,7 @@ class TypeMovementViewSet(viewsets.ModelViewSet):
     search_fields = ('name',)
 
 
+@permission_classes((TokenHasReadWriteScope,))
 class OrganViewSet(viewsets.ModelViewSet):
     queryset = Organ.objects.all()
     serializer_class = OrganSerializer
