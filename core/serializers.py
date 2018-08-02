@@ -36,7 +36,7 @@ class OfficeSerializerMixin(serializers.Serializer):
 
 
 
-class PersonSerializer(serializers.ModelSerializer):
+class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):
     
     def create(self, validated_data):
         #TODO - Implementação para correta identificação do office da seção depende

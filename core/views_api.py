@@ -24,3 +24,7 @@ class ApplicationView(object):
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
+
+
+    def get_queryset(self):
+    	return Person.objects.filter(offices=self.request.auth.application.office)
