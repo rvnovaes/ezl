@@ -27,6 +27,8 @@ class CostCenterETL(GenericETL):
                 name = row['Descricao']
                 instance = self.model.objects.filter(
                     legacy_code=legacy_code,
+                    legacy_code__isnull=False,
+                    office=default_office,
                     system_prefix=LegacySystem.ADVWIN.value).first()
                 if instance:
                     # use update_fields to specify which fields to save

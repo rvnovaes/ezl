@@ -1,6 +1,7 @@
 from core.models import ContactMechanism, Person, ContactMechanismType
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.utils import get_message_log_default, save_error_log
+from core.utils import LegacySystem
 
 UNIT_TO_CONTACT = {
   '21': '31 2538-7830', 
@@ -137,7 +138,11 @@ class ContactMechanismETL(GenericETL):
             rows_count -= 1
             try:
                 legacy_code = row['legacy_code']
-                persons = Person.objects.filter(legacy_code=legacy_code)
+                persons = Person.objects.filter(
+                  legacy_code=legacy_code, 
+                  legacy_code__isnull=False,
+                  offices=default_office, 
+                  system_prefix=LegacySystem.ADVWIN.value)
                 for person in persons:
                         description = ''
                         if row['contact_mechanism_type'] != 'multemail':

@@ -51,26 +51,48 @@ class MovementETL(GenericETL):
                 type_movement_legacy_code = row['type_movement_legacy_code']
                 folder_legacy_code = row['folder_legacy_code']
 
-                movement = self.model.objects.filter(legacy_code=legacy_code,
-                                                     system_prefix=LegacySystem.ADVWIN.value).first()
+                movement = self.model.objects.filter(
+                  legacy_code=legacy_code,
+                  legacy_code__isnull=False,
+                  office=default_office,
+                  system_prefix=LegacySystem.ADVWIN.value).first()
 
                 if law_suit_legacy_code:
                     lawsuit = LawSuit.objects.filter(
-                        legacy_code=law_suit_legacy_code).first() or InvalidObjectFactory.get_invalid_model(LawSuit)
+                        legacy_code=law_suit_legacy_code, 
+                        legacy_code__isnull=False,
+                        office=default_office,
+                        system_prefix=LegacySystem.ADVWIN.value
+                        ).first() or InvalidObjectFactory.get_invalid_model(LawSuit)
                 else:
                     lawsuit = None
-                    if LawSuit.objects.filter(folder__legacy_code=folder_legacy_code).first():
+                    if LawSuit.objects.filter(
+                      folder__legacy_code=folder_legacy_code, 
+                      folder__legacy_code__isnull=False,
+                      folder__office=default_office, 
+                      folder__system_prefix=LegacySystem.ADVWIN.value
+                      ).first():
                         lawsuit = InvalidObjectFactory.get_invalid_model(LawSuit)
 
                 type_movement = TypeMovement.objects.filter(
-                    legacy_code=type_movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
+                    legacy_code=type_movement_legacy_code, 
+                    legacy_code__isnull=False,
+                    office=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value
+                    ).first() or InvalidObjectFactory.get_invalid_model(
                     TypeMovement)
 
                 person_lawyer = Person.objects.filter(
-                    legacy_code=person_lawyer_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Person)
+                    legacy_code=person_lawyer_legacy_code, 
+                    legacy_code__isnull=False,
+                    offices=default_office, 
+                    system_prefix=LegacySystem.ADVWIN.value).first() or InvalidObjectFactory.get_invalid_model(Person)
 
                 folder = Folder.objects.filter(
-                    legacy_code=folder_legacy_code).first() or InvalidObjectFactory.get_invalid_model(Folder)
+                    legacy_code=folder_legacy_code, 
+                    legacy_code__isnull=False,
+                    office=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first() or InvalidObjectFactory.get_invalid_model(Folder)
 
                 # Conforme descrico no caso 0000486, nao existe person_lawyer na classe Movement, pois segundo analise da
                 # regra de negocios, identificou-se que o usuario que cria a movimentacao e o advogado

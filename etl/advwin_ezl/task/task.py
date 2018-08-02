@@ -121,18 +121,31 @@ class TaskETL(GenericETL):
 
                 description = row['description']
 
-                task = Task.objects.filter(legacy_code=legacy_code,
-                                           system_prefix=LegacySystem.ADVWIN.value).first()
+                task = Task.objects.filter(
+                    legacy_code=legacy_code,
+                    legacy_code__isnull=False,
+                    office=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first()
 
                 movement = Movement.objects.filter(
-                    legacy_code=movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
+                    legacy_code=movement_legacy_code,
+                    legacy_code__isnull=False,
+                    office=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first() or InvalidObjectFactory.get_invalid_model(
                     Movement)
-                person_asked_by = Person.objects.filter(Q(
-                    legacy_code=person_asked_by_legacy_code), ~Q(legacy_code=None),
-                    ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
+
+                person_asked_by = Person.objects.filter(
+                    legacy_code=person_asked_by_legacy_code,                     
+                    legacy_code__isnull=False,
+                    offices=default_office, 
+                    system_prefix=LegacySystem.ADVWIN.value).first() or InvalidObjectFactory.get_invalid_model(Person)
+
                 person_executed_by = Person.objects.filter(
-                    Q(legacy_code=person_executed_by_legacy_code), ~Q(legacy_code=None),
-                    ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
+                    legacy_code=person_executed_by_legacy_code, 
+                    legacy_code__isnull=False, 
+                    offices=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first() or InvalidObjectFactory.get_invalid_model(Person)
+
                 type_task = TypeTask.objects.filter(
                     legacy_code=type_task_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
                     TypeTask)
@@ -152,9 +165,13 @@ class TaskETL(GenericETL):
                     status_code_advwin = TaskStatus.ERROR
                     inconsistencies.append({"inconsistency": Inconsistencies.TASKLESSMOVEMENT,
                                             "solution": Inconsistencies.get_solution(Inconsistencies.TASKLESSMOVEMENT)})
-                if not Folder.objects.filter(legacy_code=folder_legacy_code,
-                                             person_customer__legacy_code=client,
-                                             system_prefix=LegacySystem.ADVWIN.value).first():
+                if not Folder.objects.filter(
+                    legacy_code=folder_legacy_code,
+                    legacy_code__isnull=False,
+                    person_customer__legacy_code=client,
+                    office=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first():
+
                     status_code_advwin = TaskStatus.ERROR
                     inconsistencies.append({"inconsistency": Inconsistencies.TASKINATIVEFOLDER,
                                             "solution": Inconsistencies.get_solution(

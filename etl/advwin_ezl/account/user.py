@@ -13,7 +13,7 @@ from etl.utils import get_message_log_default, save_error_log
 
 
 class UserETL(GenericETL):
-    EZL_LEGACY_CODE_FIELD = 'person__legacy_code'
+    field_check = 'username'
 
     advwin_table = 'ADVWeb_usuario'
     model = User
@@ -98,8 +98,11 @@ class UserETL(GenericETL):
                     person = Person.objects.filter(auth_user=instance).first()
                 else:
                     # tenta encontrar a pessoa pelo legacy_code
-                    person = Person.objects.filter(legacy_code=legacy_code,
-                                                   system_prefix=LegacySystem.ADVWIN.value).first()
+                    person = Person.objects.filter(
+                        legacy_code=legacy_code,
+                        legacy_code__isnull=False,
+                        offices=default_office,
+                        system_prefix=LegacySystem.ADVWIN.value).first()
 
                 if person:
                     person_id = person.id

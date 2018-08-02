@@ -1,14 +1,16 @@
 from core.models import Address, Person, AddressType, City, State, Country
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.utils import get_message_log_default, save_error_log
+from core.utils import LegacySystem
 
 
 # noinspection SpellCheckingInspection
 class AddressETL(GenericETL):
     model = Address
+    field_check = 'person__legacy_code'
     import_query = """
                     SELECT
-                      codigo      AS legacy_code,
+                      codigo      AS person__legacy_code,
                       endereco    AS street,
                       cidade      AS city,
                       bairro      AS city_region,
@@ -28,7 +30,7 @@ class AddressETL(GenericETL):
                           AND (endereco IS NOT NULL OR cidade IS NOT NULL OR bairro IS NOT NULL OR uf IS NOT NULL)
                     UNION
                     SELECT
-                      codigo      AS legacy_code,
+                      codigo      AS person__legacy_code,
                       endereco    AS street,
                       cidade      AS city,
                       bairro      AS city_region,
@@ -43,7 +45,7 @@ class AddressETL(GenericETL):
                           AND (endereco IS NOT NULL OR cidade IS NOT NULL OR bairro IS NOT NULL OR uf IS NOT NULL)
                     UNION
                     SELECT
-                      codigo          AS legacy_code,
+                      codigo          AS person__legacy_code,
                       Cob_endereco    AS street,
                       Cob_Cidade      AS city,
                       Cob_Bairro      AS city_region,
@@ -71,8 +73,12 @@ class AddressETL(GenericETL):
         for row in rows:
             rows_count -= 1
             try:
-                legacy_code = row['legacy_code']
-                persons = Person.objects.filter(legacy_code=legacy_code)
+                legacy_code = row['person__legacy_code']
+                persons = Person.objects.filter(
+                  legacy_code=legacy_code, 
+                  legacy_code__isnull=False,
+                  offices=default_office,
+                  system_prefix=LegacySystem.ADVWIN.value)
                 address_type_name = 'Cobrança'
                 if row['address_type'] == 'comercial':
                     address_type_name = 'Comercial'

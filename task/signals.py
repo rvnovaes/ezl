@@ -14,6 +14,7 @@ from task.workflow import get_parent_status, get_child_status, get_parent_fields
     get_parent_recipients
 from chat.models import Chat, UserByChat
 from lawsuit.models import CourtDistrict
+from core.utils import check_environ
 
 send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'execution_date'])
 
@@ -34,6 +35,7 @@ def copy_ecm_related(sender, instance, created, **kwargs):
 
 
 @receiver(post_delete, sender=Ecm)
+@check_environ
 def delete_related_ecm(sender, instance, **kwargs):
     ecm_related = instance.ecm_related_id
     if not ecm_related:
@@ -44,6 +46,7 @@ def delete_related_ecm(sender, instance, **kwargs):
 
 
 @receiver(pre_delete, sender=Ecm)
+@check_environ
 def delete_ecm_advwin(sender, instance, **kwargs):
     if not instance.legacy_code and instance.task.legacy_code:
         delete_ecm(instance.id)
@@ -113,14 +116,15 @@ def change_status(sender, instance, **kwargs):
 
         instance.alter_date = now_date
 
-
 @receiver(post_save, sender=Task)
+@check_environ
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
     if not getattr(instance, '_skip_signal', None) and instance.legacy_code:
         export_task.delay(instance.pk)
 
 
 @receiver(post_save, sender=TaskHistory)
+@check_environ
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
     if not getattr(instance, '_skip_signal', None) and instance.task.legacy_code:
         export_task_history.delay(instance.pk)

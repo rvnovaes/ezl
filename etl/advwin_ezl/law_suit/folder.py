@@ -57,11 +57,18 @@ class FolderETL(GenericETL):
                     except CostCenter.DoesNotExist:
                         pass
 
-                instance = self.model.objects.filter(legacy_code=legacy_code,
-                                                     system_prefix=LegacySystem.ADVWIN.value).first()
+                instance = self.model.objects.filter(
+                  legacy_code=legacy_code,
+                  legacy_code__isnull=False,
+                  office=default_office,
+                  system_prefix=LegacySystem.ADVWIN.value).first()
 
-                person_customer = Person.objects.filter(legacy_code=customer_code,
-                                                        system_prefix=LegacySystem.ADVWIN.value).first()
+                person_customer = Person.objects.filter(
+                  legacy_code=customer_code,
+                  legacy_code__isnull=False,
+                  offices=default_office,
+                  system_prefix=LegacySystem.ADVWIN.value).first()
+
                 if person_customer:
                     if instance:
                         # use update_fields to specify which fields to save
