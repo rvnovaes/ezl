@@ -7,6 +7,35 @@ from .messages import person_cpf_cnpj_already_exists, invalid_field
 from .utils import get_office_session
 
 
+class CreateUserDefault(object):
+    def set_context(self, serializer_field):
+        application = serializer_field.context['request'].auth.application
+        self.office = application.user or application.office.create_user
+
+    def __call__(self):
+        return self.office
+
+    def __repr__(self):
+        return unicode_to_repr('%s()' % self.__class__.__name__)
+
+class OfficeDefault(object):    
+    def set_context(self, serializer_field):
+        self.office = serializer_field.context['request'].auth.application.office
+
+    def __call__(self):
+        return self.office
+
+    def __repr__(self):
+        return unicode_to_repr('%s()' % self.__class__.__name__)
+
+class CreateUserSerializerMixin(serializers.Serializer):
+    create_user = serializers.HiddenField(default=CreateUserDefault())
+
+class OfficeSerializerMixin(serializers.Serializer):
+    office = serializers.HiddenField(default=OfficeDefault())
+
+
+
 class PersonSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):

@@ -9,6 +9,7 @@ from django.contrib.auth.models import User, Group
 from core.managers import PersonManager
 from core.utils import LegacySystem
 from guardian.shortcuts import get_perms
+from oauth2_provider.models import Application, AbstractApplication
 
 INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'), ('E', 'EXTERNAL'))
 INVITE_FROM = (('P', 'PERSON'), ('O', 'OFFICE'))
@@ -513,3 +514,9 @@ class Team(Audit, OfficeMixin):
     def __str__(self):
         return self.name
 
+# class OfficeApplication(models.Model):
+#     office = models.ForeignKey(Office, verbose_name='Escritório')
+#     # application = models.ForeignKey()
+
+class OfficeApplication(AbstractApplication):
+    office = models.ForeignKey(Office, verbose_name='Escritório')

@@ -143,7 +143,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'ezl.urls'
@@ -427,6 +427,8 @@ OAUTH2_PROVIDER = {
     'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'},
     'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,
 }
+
+OAUTH2_PROVIDER_APPLICATION_MODEL = 'core.OfficeApplication'
 
 SWAGGER_SETTINGS = {
     'LOGIN_URL': 'rest_framework:login',

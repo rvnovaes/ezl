@@ -13,6 +13,13 @@ from rest_framework.views import APIView
 from rest_framework_swagger import renderers
 
 
+class ApplicationView(object):
+	def __init__(self, request, *args, **kwargs):
+		import pdb; pdb.set_trace()
+		self.request = request
+		print(self.request)
+
+
 class PersonViewSet(viewsets.ModelViewSet):
 
     queryset = Person.objects.all()
