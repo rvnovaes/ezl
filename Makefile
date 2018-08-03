@@ -70,9 +70,6 @@ set_env_teste:
 
 set_env_demo:
 	@rm docker-compose.override.yml || true
-	cp docker-compose.teste.yml docker-compose.demo.yml
-	sed -i -e 's/teste\.ezlawyer\.com\.br/demo\.ezlawyer\.com\.br/g' docker-compose.demo.yml
-	sed -i -e 's/ezl-teste/ezl-demo/g' docker-compose.demo.yml
 	ln -s docker-compose.demo.yml docker-compose.override.yml
 
 shell:

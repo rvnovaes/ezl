@@ -13,8 +13,8 @@ services:
 
   nginx:
     labels:
-      - "traefik.backend=ezl-teste"
-      - "traefik.frontend.rule=Host:teste.ezlawyer.com.br"
+      - "traefik.backend=ezl-demo"
+      - "traefik.frontend.rule=Host:demo.ezlawyer.com.br"
       - "traefik.docker.network=traefik_webgateway"
     volumes:
       - ./containers/nginx/conf.d/ezl_teste.conf:/etc/nginx/conf.d/default.conf
@@ -31,7 +31,7 @@ services:
     environment:
       ENV: development
       EMAIL_HOST: mail
-      EMAIL_PORT: 1025
+      EMAIL_PORT: 1026
       EMAIL_USE_SSL: "false"
   ws:
     image: ezl:latest
@@ -50,8 +50,7 @@ services:
     environment:
       ENV: development
   flower:
-    ports:
-      - "5555:5555"
+    command: celery flower --broker=amqp://guest:guest@queues:5672// --port=5555 --inspect_timeout=60000 --basic_auth=ezl:flower@ezl
     environment:
       ENV: development
   tasks:
@@ -82,11 +81,5 @@ services:
   mail:
     image: mailhog/mailhog
     ports:
-      - "8025:8025"
-      - "1025:1025"
-
-  queues:
-    ports:
-      - "8083:15672"
-      - "5672:5672"
-
+      - "8026:8025"
+      - "1026:1025"
