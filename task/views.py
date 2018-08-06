@@ -34,7 +34,7 @@ from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixi
 from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
-from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter
+from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation
@@ -236,11 +236,17 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-
         self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
         context['filter'] = self.task_filter
-        context['offices_report'] = self.get_os_grouped_by_office()
-        context['total'] = sum(map(lambda x: x['total'], context['offices_report']))
+        try:
+            if self.request.GET['group_by_tasks'] == OFFICE:
+                office_list, total =  self.get_os_grouped_by_office()
+            else:
+                office_list, total =  self.get_os_grouped_by_client()
+        except:
+            office_list, total = self.get_os_grouped_by_office()
+        context['offices'] = office_list
+        context['total'] = total
         return context
 
     def get_queryset(self):
@@ -298,22 +304,75 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
         offices = []
         offices_map = {}
         tasks = self.get_queryset()
+        total = 0
         for task in tasks:
             correspondent = self._get_related_office(task)
             if correspondent not in offices_map:
-                offices_map[correspondent] = []
-            offices_map[correspondent].append(task)
+                offices_map[correspondent] = {}
+            client = self._get_related_client(task)
+            if client not in offices_map[correspondent]:
+                offices_map[correspondent][client] = []
+            offices_map[correspondent][client].append(task)
 
-        for office, tasks in offices_map.items():
-            tasks.sort(key=lambda x: x.client.name)
-            offices.append({
-                "name": office.name,
-                "tasks": tasks,
-                "total": sum(map(lambda x: x.amount, tasks))
-            })
+        offices_map_total = {}
+        for office, clients in offices_map.items():
+            office_total = 0
+            for client, tasks in clients.items():
+                client_total = sum(map(lambda x: x.amount, tasks))
+                office_total = office_total + client_total
+                offices.append({
+                    'office_name': office.name,
+                    'client_name': client.name,
+                    'tasks': tasks,
+                    "client_total": client_total,
+                    "office_total": 0,
+                })
+            offices_map_total[office.name] = office_total
+            total = total + office_total
 
-        return offices
+        for item in offices:
+            item['office_total'] = offices_map_total[item['office_name']]
 
+        return offices, total
+
+    def get_os_grouped_by_client(self):
+        clients = []
+        clients_map = {}
+        tasks = self.get_queryset()
+        total = 0
+        for task in tasks:
+            client = self._get_related_client(task)
+            if client not in clients_map:
+                clients_map[client] = {}
+            correspondent = self._get_related_office(task)
+            if correspondent not in clients_map[client]:
+                clients_map[client][correspondent] = []
+            clients_map[client][correspondent].append(task)
+
+        clients_map_total = {}
+        for client, offices in clients_map.items():
+            client_total = 0
+            for office, tasks in offices.items():
+                office_total = sum(map(lambda x: x.amount, tasks))
+                client_total = client_total + office_total
+                # necessário manter a mesma estrutura do get_os_grouped_by_office para não mexer no template.
+                clients.append({
+                    'office_name': client.name,
+                    'client_name': office.name,
+                    'tasks': tasks,
+                    "client_total": office_total,
+                    "office_total": 0,
+                })
+            clients_map_total[client.name] = client_total
+            total = total + client_total
+
+        for item in clients:
+            item['office_total'] = clients_map_total[item['office_name']]
+
+        return clients, total
+
+    def _get_related_client(self, task):
+        return task.client
 
 class ToReceiveTaskReportView(TaskReportBase):
     template_name = 'task/reports/to_receive.html'
@@ -755,7 +814,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     if checker.has_perm('view_delegated_tasks', office_session):
                         person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
                     if checker.has_perm('view_requested_tasks', office_session):
-                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)                
+                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
                 if data['office_executed_by']:
                     task_dynamic_query.add(Q(child__office_id=data['office_executed_by']), Q.AND)
                 if data['state']:
@@ -1193,7 +1252,7 @@ class GeolocationTaskFinish(CustomLoginRequiredView, View):
 @login_required
 def ecm_batch_download(request, pk):
     #https://stackoverflow.com/questions/12881294/django-create-a-zip-of-multiple-files-and-make-it-downloadable
-    #http://mypythondjango.blogspot.com/2018/01/how-to-zip-files-in-filefield-and.html    
+    #http://mypythondjango.blogspot.com/2018/01/how-to-zip-files-in-filefield-and.html
     ecms = Ecm.objects.filter(task_id=pk).select_related('task')
     try:
         buff = io.BytesIO()
@@ -1204,13 +1263,13 @@ def ecm_batch_download(request, pk):
             output.seek(0)
             zf.writestr(ecm.path.name, output.getvalue())
             if not zip_filename:
-                zip_filename = 'Anexos_OS_%s.zip' % (ecm.task.task_number)            
+                zip_filename = 'Anexos_OS_%s.zip' % (ecm.task.task_number)
         zf.close()
         buff.seek(0)
         data = buff.read()
-        resp = HttpResponse(data, content_type = "application/x-zip-compressed")    
+        resp = HttpResponse(data, content_type = "application/x-zip-compressed")
         resp['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
         return resp
     except Exception as e:
         messages.error(request, 'Erro ao baixar todos arquivos.' + str(e))
-        return HttpResponseRedirect(ecm.task.get_absolute_url())    
+        return HttpResponseRedirect(ecm.task.get_absolute_url())
