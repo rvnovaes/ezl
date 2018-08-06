@@ -19,6 +19,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='contactmechanismtype',
             name='type_contact_mechanism_type',
-            field=models.IntegerField(choices=[(1, 'INVÁLIDO'), (2, 'TELEFONE'), (3, 'E-MAIL'), (4, 'SKYPE'), (5, 'WHATSAPP'), (6, 'FACEBOOK'), (7, 'SITE'), (8, 'LINKEDIN'), (9, 'INSTAGRAM'), (10, 'SNAPCHAT')], default=2, verbose_name='Tipo'),
+            field=models.IntegerField(choices=[(1, 'INVÁLIDO'), (2, 'TELEFONE'), (3, 'E-MAIL'), (4, 'SKYPE'), (5, 'WHATSAPP'), (
+                6, 'FACEBOOK'), (7, 'SITE'), (8, 'LINKEDIN'), (9, 'INSTAGRAM'), (10, 'SNAPCHAT')], default=2, verbose_name='Tipo'),
         ),
     ]

@@ -4,7 +4,9 @@ from pycpfcnpj import cpfcnpj
 from .models import Person
 from .view_validators import create_person_office_relation, person_exists
 from .messages import person_cpf_cnpj_already_exists, invalid_field
-from .utils import get_office_session
+from .utils import get_office_session, get_office_api
+from .validators import CpfCnpjOfficeUniqueValidator
+from rest_framework.fields import SlugField
 
 
 class CreateUserDefault(object):
@@ -19,7 +21,7 @@ class CreateUserDefault(object):
         return unicode_to_repr('%s()' % self.__class__.__name__)
 
 
-class OfficeDefault(object):    
+class OfficeDefault(object):
     def set_context(self, serializer_field):
         self.office = serializer_field.context['request'].auth.application.office
 
@@ -39,24 +41,30 @@ class OfficeSerializerMixin(serializers.Serializer):
 
 
 class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):
-    
-    def create(self, validated_data):
-        # TODO - Implementação para correta identificação do office da seção depende da conclusão da tarefa EZL-873
-        office_session = get_office_session(self.context['request'])
-        with transaction.atomic():            
-            if person_exists(validated_data['cpf_cnpj'], office_session):
-                raise serializers.ValidationError(person_cpf_cnpj_already_exists())            
-            person = super().create(validated_data)            
-            create_person_office_relation(person, office_session.create_user, office_session)
-            return person
-    
+    cpf_cnpj = SlugField(
+        max_length=100,
+        validators=[
+            CpfCnpjOfficeUniqueValidator(
+                queryset=Person.objects.filter()
+            )
+        ]
+    )
+
+    def create(self, validate_data):
+        office_session = get_office_api(self.context.get('request'))
+        person = super().create(validate_data)
+        create_person_office_relation(
+            person, person.create_user, office_session)
+        return person
+
     def validate_cpf_cnpj(self, value):
         # https://github.com/matheuscas/pycpfcnpj
         if not cpfcnpj.validate(value):
             raise serializers.ValidationError(invalid_field('CPF/CNPJ'))
         return value
-    
+
     class Meta:
         model = Person
-        fields = ('id', 'name', 'legal_name', 'legal_type', 'cpf_cnpj', 'is_lawyer', 'is_customer', 'is_supplier',
-                  'is_active', 'import_from_legacy', 'auth_user', 'create_user', 'alter_user', 'legacy_code')
+        fields = ('id', 'name', 'legal_name', 'legal_type', 'cpf_cnpj',
+                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active', 'import_from_legacy',
+                  'auth_user', 'create_user', 'alter_user', 'legacy_code')

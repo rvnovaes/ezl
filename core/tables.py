@@ -44,7 +44,8 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         attrs = AttributeDict(default, **(specific or general or {}))
         attrs['id'] = record.id
         return mark_safe(
-            '<input name="selection" type="checkbox" %s onclick="showDeleteButton(this)"/>'% attrs.as_html()
+            '<input name="selection" type="checkbox" %s onclick="showDeleteButton(this)"/>' % attrs.as_html(
+            )
         )
 
 
@@ -56,7 +57,7 @@ class AddressTable(tables.Table):
         sequecence = (
             'selection', 'street', 'number', 'complement', 'city_region', 'zip_code',
             'city',
-              'state', 'country', 'notes', 'address_type', 'is_active')
+            'state', 'country', 'notes', 'address_type', 'is_active')
         model = Address
         fields = ['selection', 'street', 'number', 'complement', 'city_region', 'zip_code',
                   'city',
@@ -166,12 +167,14 @@ class OfficeMembershipTable(tables.Table):
     class Meta:
         per_page = 10
         model = OfficeMembership
-        fields = ('selection', 'person.legal_name', 'person.legal_type', 'person.cpf_cnpj', 'person.auth_user.username')
+        fields = ('selection', 'person.legal_name', 'person.legal_type',
+                  'person.cpf_cnpj', 'person.auth_user.username')
+
 
 class OfficeMembershipOfficeTable(tables.Table):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-    
+
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
@@ -179,18 +182,22 @@ class OfficeMembershipOfficeTable(tables.Table):
         model = OfficeMembership
         fields = ('selection', 'office.legal_name', 'office.cpf_cnpj')
 
+
 class ContactMechanismTable(tables.Table):
 
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequecence = ('selection', 'contact_mechanism_type', 'description', 'notes', 'is_active')
+        sequecence = ('selection', 'contact_mechanism_type',
+                      'description', 'notes', 'is_active')
         model = ContactMechanism
-        fields = ['selection', 'contact_mechanism_type', 'description', 'notes', 'is_active']
+        fields = ['selection', 'contact_mechanism_type',
+                  'description', 'notes', 'is_active']
         attrs = {"class": "table-striped table-bordered"}
         row_attrs = {
             'data_href': lambda record: '/pessoas/' + str(record.person.pk) + '/contatos/' + str(record.pk) + '/'
-            }
+        }
+
 
 class ContactMechanismOfficeTable(ContactMechanismTable):
     class Meta:
@@ -199,9 +206,9 @@ class ContactMechanismOfficeTable(ContactMechanismTable):
         }
 
 
-
 class TeamTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
+
     class Meta:
         model = Team
         fields = ['selection', 'name', 'is_active']

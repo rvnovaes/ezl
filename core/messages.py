@@ -54,8 +54,10 @@ def integrity_error_delete():
 def record_from_wrong_office():
     return 'Erro: este registro pertence a outro escritório.'
 
+
 def person_cpf_cnpj_already_exists():
     return 'Já existe uma pessoa cadastrada com este CPF/CNPJ para este escritório'
+
 
 def invalid_field(name_field):
     return '%s inválido' % name_field

@@ -21,7 +21,8 @@ class CustomBooleanField(Field):
 
     def validate(self, value):
         if not value and self.required:
-            raise ValidationError(self.error_messages['required'], code='required')
+            raise ValidationError(
+                self.error_messages['required'], code='required')
 
     def has_changed(self, initial, data):
         # Sometimes data or initial may be a string equivalent of a boolean

@@ -53,7 +53,8 @@ def send_invite_email(instance, sender, **kwargs):
         print('Você tentou mandar um e-mail')
 
 
-models.signals.post_save.connect(create_person, sender=User, dispatch_uid='create_person')
+models.signals.post_save.connect(
+    create_person, sender=User, dispatch_uid='create_person')
 
 
 @receiver(post_save, sender=Office)
@@ -67,7 +68,7 @@ def office_post_save(sender, instance, created, **kwargs):
     else:
         for group in get_groups_with_perms(instance):
             group.name = '{}-{}'.format(group.name.split('-')[0],
-                                           instance.pk)
+                                        instance.pk)
             group.save()
 
 
