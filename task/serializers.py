@@ -14,6 +14,7 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task        
         fields = '__all__'
 
+
 class TaskCreateSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
     class Meta:
         model = Task

@@ -16,6 +16,7 @@ from .filters import CourtDistrictFilter, MovementFilter
 from rest_framework.decorators import permission_classes
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope, TokenHasReadWriteScope
 
+
 @permission_classes((TokenHasReadWriteScope,))
 class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CourtDistrict.objects.all()
@@ -27,8 +28,10 @@ class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
 
 @permission_classes((TokenHasReadWriteScope,))
 class FolderViewSet(viewsets.ModelViewSet):
-    queryset = Folder.objects.all()
     serializer_class = FolderSerializer
+
+    def get_queryset(self):
+        return Folder.objects.filter(office=self.request.auth.application.office)
 
 
 @permission_classes((TokenHasReadWriteScope,))
