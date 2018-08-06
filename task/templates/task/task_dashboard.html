@@ -87,6 +87,7 @@
             var table = $('#taskeTable').DataTable({
                 pageLength: 5,
                 dom: 'Bfrtip',
+                order: [[2, 'asc']],
                 processing: true,
                 serverSide: true,
                 ajax: {url: '{% url 'ajax_get_task_data_table' %}?status=' + status,

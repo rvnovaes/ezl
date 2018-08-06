@@ -6,7 +6,7 @@
         window.survey = new Survey.Model({{ survey_data|safe }});
         window.survey2 = new Survey.Model({{ survey_data|safe }});
     </script>
-        <div id="survey" class="modal">
+        <div id="survey" class="modal" data-status="">
         <div class="modal-dialog">
             <div class="modal-content ">
                 <div id=" modal modalHeader">
@@ -73,7 +73,8 @@
             var surveyResult = document.getElementsByName('survey_result').item(0);
             surveyResult.value = surveyResponse;
             document.getElementById('id_survey_result').innerHTML = surveyResponse;
-            $('<input name="action" value="DONE">').appendTo($('#task_detail'));
+            let status = $('#survey').attr('data-status')
+            $(`<input name="action" value="${status}">`).appendTo($('#task_detail'));
             submitSurvey();
         });
         survey.locale = "pt";
