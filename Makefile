@@ -51,7 +51,8 @@ run: check_compose_override
 	docker-compose up -d
 
 restart:
-	docker-compose restart web nginx luigi tasks
+	docker-compose stop
+	docker-compose up -d
 
 restart_web:
 	docker-compose restart web ws ws-worker
