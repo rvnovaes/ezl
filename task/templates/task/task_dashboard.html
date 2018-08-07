@@ -1,6 +1,7 @@
 
 {% extends 'skeleton/base.html' %}
 {% load static core_match %}
+{% load task_filters %}
 
 {% block extra_stylesheets %}
     <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
@@ -27,7 +28,7 @@
             <div class="col-md-12 col-sm-12">
                 <div class="white-box">
                     <h3 class="box-title m-b-0">Total</h3>
-                    <h1 class="m-b-0 m-t-0 font-medium">{{ task_count }}</h1>
+                    <h1 id="total" class="m-b-0 m-t-0 font-medium">{{ task_count }}</h1>
                 </div>
             </div>
             {% for table in tables %}            
@@ -41,14 +42,14 @@
                                 <i class="{{ table.status.get_icon }} ezl-text-{{ table.status.name|lower }} font-30"></i>
                             </sup>                            
                             {% if table.status.name == 'ERROR' %} 
-                                <span class="pull-right">{{count_tasks_with_error}}</span>
+                                <span id="{{ table.status|remove_spaces_lower }}" class="pull-right">{{count_tasks_with_error}}</span>
                             {% else %}                                                            
-                                <span class="pull-right">{{ table.length }}</span>
+                                <span id="{{ table.status|remove_spaces_lower }}" class="pull-right">{{ table.length }}</span>
                             {% endif %}                            
                         </h1>
                     </div>{% get_percent table.length task_count as percent %}
-                    <span class="text-success">{{ percent|stringformat:".02f" }}%</span> <div class="progress m-b-0">
-                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{ percent|stringformat:"d" }}" aria-valuemin="0" aria-valuemax="100" style="width:{{ percent|stringformat:"d" }}%;">
+                    <span class="text-success" id="{{ table.status|remove_spaces_lower }}_percent">{{ percent|stringformat:".02f" }}%</span> <div class="progress m-b-0">
+                    <div id="{{ table.status|remove_spaces_lower }}_percent_bar" class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{ percent|stringformat:"d" }}" aria-valuemin="0" aria-valuemax="100" style="width:{{ percent|stringformat:"d" }}%;">
                         <span class="sr-only">{{ percent|stringformat:".02d" }}% Complete</span> </div>
                     </div>
                 </div>
@@ -62,6 +63,7 @@
 
 {% block extra_scripts %}
     <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'task/task_dashboard.js' %}"></script>
     <!-- start - This is for export functionality only -->
     <script src="//cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.flash.min.js"></script>
@@ -79,68 +81,74 @@
         $('#modal-view-task-table').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
             var status = button.data('status');
+            var columnsDict = getColumns(status);
             $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm' );
-
-            if (status == 'Erro no sistema de origem') {
-                var columns = [{ "targets": [ 0 ], "visible": false, "searchable": false }]
-            } else {
-                var columns = [
-                    { "targets": [ 0 ], "visible": false, "searchable": false },
-                    { "targets": [ 11 ], "visible": false, "searchable": false },
-                    { "targets": [ 12 ], "visible": false, "searchable": false }
-                ]
-            }
 
             var table = $('#taskeTable').DataTable({
                 pageLength: 5,
                 dom: 'Bfrtip',
-                ajax: '{% url 'ajax_get_task_data_table' %}?status=' + status,
+                processing: true,
+                serverSide: true,
+                ajax: {url: '{% url 'ajax_get_task_data_table' %}?status=' + status,
+                    data: function(d){
+                        d['order'].forEach(function(items, index) {
+                              d['order'][index]['column'] = d['columns'][items.column]['data'];
+                        });
+                        return {"data": JSON.stringify(d)};
+                    }},
                 buttons: [
                     'copy', 'csv', 'excel', 'pdf', 'print'
                 ],
                 language: {
                     "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
                 },
-                columnDefs: columns
+                columns: columnsDict.columns,
+                columnDefs: columnsDict.columnDefs
             });
-            table
-                .order([ 2, 'asc' ])
-                .draw();
             $('#taskeTable tbody').on( 'click', 'tr', function () {
-                var pk = table.row( this ).data()[0];
+                var pk = table.row( this ).data()['pk'];
                 window.open('/dashboard/' + pk,'_blank');
             });
         });
         /* Ao fechar o modal, limpar a tabela */
-        $('#modal-view-task-table').on('hide.bs.modal', function (event) {
+        $('#modal-view-task-table').on('hidden.bs.modal', function (event) {
             $('#taskeTable').empty();
             $('#taskeTable').DataTable().clear().destroy();
         });
-        /* verificar novas tasks */
-        var tasks = [];
-        $('[data-task]').each(function(){
-            var task = $(this),
-                status = task.attr('data-task-status'),
-                id = parseInt(task.attr('data-task-id'));
-            tasks.push([id, status]);
-        });
 
-        setInterval(function(){
-            $.ajax({
-                type: "POST",
-                url: "/dashboard/verificar_status/",
-                data: {"tasks": JSON.stringify(tasks)},
-                success: function(response){
-                    if (response.has_changed) {
-                        location.reload();
-                    }
-                },
-                beforeSend: function (xhr, settings) {
-                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-                },
-                dataType: "json"
+        function verify_status() {
+            return setInterval(function(){
+                $.ajax({
+                    type: "GET",
+                    url: "/dashboard/verificar_status/",
+                    success: function(response){
+                        $.each(response, function (index, value) {
+                            $("#"+index).html(value);
+                            if(index !== 'total'){
+                                $("#"+index+"_percent").html(((value/response.total)*100).toFixed(2) + "%")
+                                $("#"+index+"_percent_bar").prop('aria-valuenow', Math.round((value/response.total)*100))
+                                $("#"+index+"_percent_bar").css('width', Math.round((value/response.total)*100)+'%')
+                            }
+                        })
+                    },
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    dataType: "json"
+                });
+            }, 1000);
+        };
+
+        window.interval_status;
+        $(document).ready(function(){
+            window.interval_status = verify_status()
+            $(window).on('focus', function(){
+                window.interval_status = verify_status()
             });
-        }, 1000);
+            $(window).on('focusout', function(){
+                clearInterval(window.interval_status);
+            });
+        });
 {% endblock %}
 
 {% block extra_modal %}

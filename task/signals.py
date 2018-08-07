@@ -1,14 +1,12 @@
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models.signals import post_init, pre_save, post_save, post_delete, pre_delete
-from django.core.signals import request_finished
 from django.dispatch import receiver, Signal
 from django.utils import timezone
 from django.urls import reverse
 from django.db.models import Q
 from advwin_models.tasks import export_ecm, export_task, export_task_history, delete_ecm, \
     export_ecm_related_folter_to_task
-from core.models import ContactMechanism, ContactMechanismType, Person
 from django.conf import settings
 from task.models import Task, TaskStatus, TaskHistory, Ecm
 from task.utils import task_send_mail, copy_ecm
@@ -16,7 +14,7 @@ from task.workflow import get_parent_status, get_child_status, get_parent_fields
     get_parent_recipients
 from chat.models import Chat, UserByChat
 from lawsuit.models import CourtDistrict
-from celery import chain
+from core.utils import check_environ
 
 send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'execution_date'])
 
@@ -24,8 +22,7 @@ send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'executi
 @receiver(post_save, sender=Ecm)
 def export_ecm_path(sender, instance, created, **kwargs):
     if created and instance.legacy_code is None and instance.task.legacy_code:
-        res = chain(export_ecm.s(instance.id), export_ecm_related_folter_to_task.s(instance.id))()
-        res.get()
+        export_ecm.apply_async((instance.id,), link=export_ecm_related_folter_to_task.s(instance.id, ))
 
 
 @receiver(post_save, sender=Ecm)
@@ -38,6 +35,7 @@ def copy_ecm_related(sender, instance, created, **kwargs):
 
 
 @receiver(post_delete, sender=Ecm)
+@check_environ
 def delete_related_ecm(sender, instance, **kwargs):
     ecm_related = instance.ecm_related_id
     if not ecm_related:
@@ -48,10 +46,10 @@ def delete_related_ecm(sender, instance, **kwargs):
 
 
 @receiver(pre_delete, sender=Ecm)
+@check_environ
 def delete_ecm_advwin(sender, instance, **kwargs):
     if not instance.legacy_code and instance.task.legacy_code:
-        delete_ecm.delay(instance.id, instance.path.name, instance.create_user.username,
-                         instance.task.legacy_code, instance.task.id)
+        delete_ecm(instance.id)
 
 
 @receiver(post_init, sender=Task)
@@ -74,10 +72,14 @@ def new_task(sender, instance, created, **kwargs):
     notes = 'Nova providência' if created else getattr(instance, '__notes', '')
     user = instance.alter_user if instance.alter_user else instance.create_user
     if not getattr(instance, '_skip_signal') or created:
-        TaskHistory.objects.create(task=instance,
-                                   create_user=user,
-                                   status=instance.task_status,
-                                   create_date=instance.create_date, notes=notes)
+        task_history = TaskHistory()
+        skip_signal = True if created else False
+        task_history.task = instance
+        task_history.create_user = user
+        task_history.status = instance.task_status
+        task_history.create_date = instance.create_date
+        task_history.notes = notes
+        task_history.save(skip_signal=skip_signal)
 
 
 @receiver(pre_save, sender=Task)
@@ -114,14 +116,15 @@ def change_status(sender, instance, **kwargs):
 
         instance.alter_date = now_date
 
-
 @receiver(post_save, sender=Task)
+@check_environ
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
     if not getattr(instance, '_skip_signal', None) and instance.legacy_code:
         export_task.delay(instance.pk)
 
 
 @receiver(post_save, sender=TaskHistory)
+@check_environ
 def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
     if not getattr(instance, '_skip_signal', None) and instance.task.legacy_code:
         export_task_history.delay(instance.pk)

@@ -121,18 +121,31 @@ class TaskETL(GenericETL):
 
                 description = row['description']
 
-                task = Task.objects.filter(legacy_code=legacy_code,
-                                           system_prefix=LegacySystem.ADVWIN.value).first()
+                task = Task.objects.filter(
+                    legacy_code=legacy_code,
+                    legacy_code__isnull=False,
+                    office=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first()
 
                 movement = Movement.objects.filter(
-                    legacy_code=movement_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
+                    legacy_code=movement_legacy_code,
+                    legacy_code__isnull=False,
+                    office=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first() or InvalidObjectFactory.get_invalid_model(
                     Movement)
-                person_asked_by = Person.objects.filter(Q(
-                    legacy_code=person_asked_by_legacy_code), ~Q(legacy_code=None),
-                    ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
+
+                person_asked_by = Person.objects.filter(
+                    legacy_code=person_asked_by_legacy_code,                     
+                    legacy_code__isnull=False,
+                    offices=default_office, 
+                    system_prefix=LegacySystem.ADVWIN.value).first() or InvalidObjectFactory.get_invalid_model(Person)
+
                 person_executed_by = Person.objects.filter(
-                    Q(legacy_code=person_executed_by_legacy_code), ~Q(legacy_code=None),
-                    ~Q(legacy_code='')).first() or InvalidObjectFactory.get_invalid_model(Person)
+                    legacy_code=person_executed_by_legacy_code, 
+                    legacy_code__isnull=False, 
+                    offices=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first() or InvalidObjectFactory.get_invalid_model(Person)
+
                 type_task = TypeTask.objects.filter(
                     legacy_code=type_task_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
                     TypeTask)
@@ -152,9 +165,13 @@ class TaskETL(GenericETL):
                     status_code_advwin = TaskStatus.ERROR
                     inconsistencies.append({"inconsistency": Inconsistencies.TASKLESSMOVEMENT,
                                             "solution": Inconsistencies.get_solution(Inconsistencies.TASKLESSMOVEMENT)})
-                if not Folder.objects.filter(legacy_code=folder_legacy_code,
-                                             person_customer__legacy_code=client,
-                                             system_prefix=LegacySystem.ADVWIN.value).first():
+                if not Folder.objects.filter(
+                    legacy_code=folder_legacy_code,
+                    legacy_code__isnull=False,
+                    person_customer__legacy_code=client,
+                    office=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first():
+
                     status_code_advwin = TaskStatus.ERROR
                     inconsistencies.append({"inconsistency": Inconsistencies.TASKINATIVEFOLDER,
                                             "solution": Inconsistencies.get_solution(
@@ -198,23 +215,25 @@ class TaskETL(GenericETL):
                     task.save(update_fields=update_fields, skip_signal=True)
 
                 else:
-                    task = self.model.objects.create(movement=movement,
-                                                     legacy_code=legacy_code,
-                                                     system_prefix=LegacySystem.ADVWIN.value,
-                                                     create_user=user,
-                                                     alter_user=user,
-                                                     person_asked_by=person_asked_by,
-                                                     person_executed_by=person_executed_by,
-                                                     type_task=type_task,
-                                                     final_deadline_date=final_deadline_date,
-                                                     description=description,
-                                                     refused_date=refused_date,
-                                                     execution_date=execution_date,
-                                                     blocked_payment_date=blocked_payment_date,
-                                                     finished_date=finished_date,
-                                                     task_status=status_code_advwin,
-                                                     requested_date=requested_date,
-                                                     office=default_office)
+                    task = Task()
+                    task.movement = movement
+                    task.legacy_code = legacy_code
+                    task.system_prefix = LegacySystem.ADVWIN.value
+                    task.create_user = user
+                    task.alter_user = user
+                    task.person_asked_by = person_asked_by
+                    task.person_executed_by = person_executed_by
+                    task.type_task = type_task
+                    task.final_deadline_date = final_deadline_date
+                    task.description = description
+                    task.refused_date = refused_date
+                    task.execution_date = execution_date
+                    task.blocked_payment_date = blocked_payment_date
+                    task.finished_date = finished_date
+                    task.task_status = status_code_advwin
+                    task.requested_date = requested_date
+                    task.office = default_office
+                    task.save(skip_signal=True)
 
                 if status_code_advwin == TaskStatus.ERROR:
                     for inconsistency in inconsistencies:

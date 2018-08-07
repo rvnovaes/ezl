@@ -26,3 +26,9 @@ def get_refused_action(user, task):
         elif task.get_child:
             refused_action = 'REQUESTED' if valid_status(task.get_child.task_status) else 'INVALID_CHILD_STATUS'
     return refused_action
+
+
+@register.filter
+def remove_spaces_lower(status):
+    ret = status.value
+    return ret.replace(' ', '_').lower()

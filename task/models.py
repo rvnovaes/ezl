@@ -316,7 +316,6 @@ class Task(Audit, LegacyCode, OfficeMixin):
             return self.legacy_code
 
 
-
 class TaskFeedback(models.Model):
     feedback_date = models.DateTimeField(auto_now_add=True)
     task = models.ForeignKey('Task', verbose_name='OS')
@@ -335,8 +334,7 @@ class TaskFeedback(models.Model):
 
 def get_dir_name(instance, filename):
     path = os.path.join('media', 'ECM', str(instance.task_id))
-    if not os.path.exists(path):
-        os.makedirs(path)
+    os.makedirs(path, exist_ok=True)
     return 'ECM/{0}/{1}'.format(instance.task.pk, filename)
 
 

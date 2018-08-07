@@ -5,8 +5,10 @@ from core.models import Person, Office
 import logging
 import traceback
 
+
 ERROR_LOGGER = logging.getLogger('error_logger')
 ECM_PATH_ADVWIN2EZL = 'ERRO ao converter o path do ECM - {e}'
+
 
 def ecm_path_advwin2ezl(advwin_path):
     try:
@@ -61,10 +63,6 @@ def get_message_log_default(model_name, rows_count, error, time):
     msg = """Ocorreu o seguinte erro na importacao de {0}: {1}, {2}, {3}
             """.format(model_name, rows_count, str(error), str(time))
     return msg
-
-def save_error_log(log, create_user, message_error):
-    if log:
-        log.errors.create(create_user=create_user, error=message_error)
 
 
 def get_default_office():

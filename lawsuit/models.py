@@ -3,7 +3,7 @@ from core.models import Audit, Person, State, LegacyCode, OfficeMixin, OfficeMan
 from sequences import get_next_value
 from django.db import transaction
 from django.core.validators import ValidationError
-from django.core.exceptions import NON_FIELD_ERRORS
+from django.core.exceptions import NON_FIELD_ERRORS, ObjectDoesNotExist
 from django.db.models import Q
 
 
@@ -137,7 +137,6 @@ class Organ(Person, OfficeMixin):
         sejam validados
         :type exclude: ValidationError
         """
-        from django.core.exceptions import ObjectDoesNotExist
         res = super(Organ, self).validate_unique(exclude)
         try:
             if Organ.objects.filter(~Q(pk=self.pk), legal_name__iexact=self.legal_name,
@@ -189,8 +188,36 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
         ordering = ['-id']
         verbose_name = "Processo"
         verbose_name_plural = "Processos"
-        # cria constraint unique para a combinação de instancia e nr processo
-        unique_together = (('instance', 'law_suit_number', 'office'),)
+
+    def validate_unique(self, exclude=None):
+        """
+        Este metodo faz a validacao dos campos unicos do modelo. Ele esta sendo sobrescrito pela
+        necessidade de checar se existe um registro com os mesmos dados de instance, law_suit_number, office,
+        folder__folder_number, folder__person_customer.
+        (https://mttech.atlassian.net/browse/EZL-939).
+        obs.: unique_together nao funciona para esta classe porque seria necessário verificar campos de dois models
+        distintos, e isso não pode ser feito pelo SQL.
+        (https://stackoverflow.com/questions/4440010/django-unique-together-with-foreign-keys/4440189#4440189)
+        :param exclude: Argumento opcional que permite que os campos informados nesta lista, nao sejam validados
+        :type exclude: ValidationError
+        """
+        res = super(LawSuit, self).validate_unique(exclude)
+        try:
+            if LawSuit.objects.filter(~Q(pk=self.pk), instance=self.instance, law_suit_number=self.law_suit_number,
+                                      office=self.office, folder__folder_number=self.folder.folder_number,
+                                      folder__person_customer=self.folder.person_customer):
+                raise ValidationError({
+                    NON_FIELD_ERRORS: ['Processo com valores duplicados para os campos office, instance, '
+                                       'law_suit_number, folder__folder_number e folder__person_customer'
+                                       'DETAIL: Key(office, instance, law_suit_number, folder__folder_number, '
+                                       'folder__person_customer)=({}, {}, {}, {}, {})'.format(
+                        self.office, self.instance, self.law_suit_number, self.folder.folder_number,
+                        self.folder.person_customer
+                    )]
+                })
+        except ObjectDoesNotExist:
+            pass
+        return res
 
     def __str__(self):
         return "{} - {}".format(self.law_suit_number, self.person_lawyer.name)
@@ -198,6 +225,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
     def save(self, *args, **kwargs):
         if not self.law_suit_number:
             self.law_suit_number = get_lawsuit_number()
+        self.full_clean()
         super().save(*args, **kwargs)
 
 
