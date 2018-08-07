@@ -89,16 +89,37 @@ class LawsuitETL(GenericETL):
                 law_suit_number = row['law_suit_number']
                 is_current_instance = row['is_current_instance']
                 opposing_party = row['opposing_party']
-                folder = Folder.objects.filter(legacy_code=folder_legacy_code).first()
-                person_lawyer = Person.objects.filter(legacy_code=person_legacy_code).first()
-                instance = Instance.objects.filter(legacy_code=instance_legacy_code).first()
+                folder = Folder.objects.filter(
+                  legacy_code=folder_legacy_code, 
+                  legacy_code__isnull=False,
+                  office=default_office,
+                  system_prefix=LegacySystem.ADVWIN.value).first()
+                person_lawyer = Person.objects.filter(
+                  legacy_code=person_legacy_code, 
+                  legacy_code__isnull=False,
+                  offices=default_office, 
+                  system_prefix=LegacySystem.ADVWIN.value).first()
+                instance = Instance.objects.filter(
+                  legacy_code=instance_legacy_code, 
+                  legacy_code__isnull=False,
+                  office=default_office,
+                  system_prefix=LegacySystem.ADVWIN.value
+                  ).first()
                 state = State.objects.filter(initials=state_court_district_legacy_code).first()
                 # __iexact - Case-insensitive exact match.
                 # https://docs.djangoproject.com/en/1.11/ref/models/querysets/#std:fieldlookup-iexact
                 court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_legacy_code,
                                                               state=state).first()
-                organ = Organ.objects.filter(legacy_code=person_court_legacy_code).first()
-                court_division = CourtDivision.objects.filter(legacy_code=court_division_legacy_code).first()
+                organ = Organ.objects.filter(
+                  legacy_code=person_court_legacy_code, 
+                  legacy_code__isnull=False,
+                  office=default_office,
+                  system_prefix=LegacySystem.ADVWIN.value
+                  ).first()
+                court_division = CourtDivision.objects.filter(
+                  legacy_code=court_division_legacy_code,
+                  office=default_office, 
+                  system_prefix=LegacySystem.ADVWIN.value).first()
 
                 # se não encontrou o registro, busca o registro inválido
                 if not folder:
@@ -114,8 +135,11 @@ class LawsuitETL(GenericETL):
                 if not court_division:
                     court_division = InvalidObjectFactory.get_invalid_model(CourtDivision)
 
-                lawsuit = self.model.objects.filter(legacy_code=legacy_code,
-                                                    system_prefix=LegacySystem.ADVWIN.value).first()
+                lawsuit = self.model.objects.filter(
+                  legacy_code=legacy_code,
+                  legacy_code__isnull=False,
+                  office=default_office,
+                  system_prefix=LegacySystem.ADVWIN.value).first()
 
                 if lawsuit:
                     lawsuit.legacy_code = legacy_code
