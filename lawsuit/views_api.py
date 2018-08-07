@@ -42,10 +42,12 @@ class InstanceViewSet(viewsets.ModelViewSet):
 
 @permission_classes((TokenHasReadWriteScope,))
 class LawSuitViewSet(viewsets.ModelViewSet):
-    queryset = LawSuit.objects.all()
     serializer_class = LawSuitSerializer
     filter_backends = (SearchFilter,)
-    search_fields = ('folder__legacycode',)
+    search_fields = ('folder__legacy_code',)
+
+    def get_queryset(self):
+        return LawSuit.objects.filter(office=self.request.auth.application.office)
 
 
 @permission_classes((TokenHasReadWriteScope,))

@@ -14,7 +14,7 @@ class FolderSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, O
     class Meta:
         model = Folder
         fields = (
-        'id', 'office', 'folder_number', 'person_customer', 'cost_center', 'office', 'create_user', 'legacy_code')
+            'id', 'office', 'folder_number', 'person_customer', 'cost_center', 'office', 'create_user', 'legacy_code')
 
 
 class InstanceSerializer(serializers.ModelSerializer):
@@ -23,12 +23,13 @@ class InstanceSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'office', 'create_user', 'legacy_code')
 
 
-class LawSuitSerializer(serializers.ModelSerializer):
+class LawSuitSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
     class Meta:
         model = LawSuit
-        fields = ('id', 'folder', 'law_suit_number', 'opposing_party', 'court_district',
-                  'instance', 'organ', 'court_division', 'person_lawyer', 'is_current_instance',
-                  'is_active', 'office', 'create_user', 'legacy_code')
+        fields = (
+            'id', 'folder', 'law_suit_number', 'opposing_party', 'court_district', 'instance', 'organ',
+            'court_division', 'person_lawyer', 'is_current_instance', 'is_active', 'office', 'create_user',
+            'legacy_code')
 
 
 class CourtDivisionSerializer(serializers.ModelSerializer):
