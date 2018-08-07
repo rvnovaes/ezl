@@ -87,6 +87,22 @@ services:
       - builder
       - db
       - queues
+  tasks2:
+    environment:
+      ENV: production
+      PYTHONPATH: /app
+    depends_on:
+      - builder
+      - db
+      - queues
+  tasks3:
+    environment:
+      ENV: production
+      PYTHONPATH: /app
+    depends_on:
+      - builder
+      - db
+      - queues
 
   tasks-schedule:
     environment:

@@ -55,6 +55,9 @@ services:
   tasks:
     environment:
       ENV: development
+      EMAIL_HOST: mail
+      EMAIL_PORT: 1025
+      EMAIL_USE_SSL: "false"
       PYTHONPATH: /app
     depends_on:
       - builder
@@ -64,6 +67,21 @@ services:
   tasks2:
     environment:
       ENV: development
+      EMAIL_HOST: mail
+      EMAIL_PORT: 1025
+      EMAIL_USE_SSL: "false"
+      PYTHONPATH: /app
+    depends_on:
+      - builder
+      - db
+      - tunnel
+      - queues
+  tasks3:
+    environment:
+      ENV: development
+      EMAIL_HOST: mail
+      EMAIL_PORT: 1025
+      EMAIL_USE_SSL: "false"
       PYTHONPATH: /app
     depends_on:
       - builder
