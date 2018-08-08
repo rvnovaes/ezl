@@ -50,8 +50,11 @@ class OrganETL(GenericETL):
                 is_customer = False
                 is_supplier = True
                 is_active = True
-                instance = self.model.objects.filter(legacy_code=legacy_code,
-                                                     system_prefix=LegacySystem.ADVWIN.value).first()
+                instance = self.model.objects.filter(
+                    legacy_code=legacy_code,
+                    legacy_code__isnull=False,
+                    office=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first()
                 court_district = CourtDistrict.objects.filter(
                     name__unaccent__iexact=row[
                         'court_district']).first() or InvalidObjectFactory.get_invalid_model(

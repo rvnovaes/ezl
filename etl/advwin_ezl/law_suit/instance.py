@@ -30,7 +30,11 @@ class InstanceETL(GenericETL):
                 code = row['legacy_code']
                 name = row['Descicao']
 
-                instance = self.model.objects.filter(legacy_code=code, system_prefix=LegacySystem.ADVWIN.value).first()
+                instance = self.model.objects.filter(
+                  legacy_code=code, 
+                  legacy_code__isnull=False,
+                  office=default_office,
+                  system_prefix=LegacySystem.ADVWIN.value).first()
 
                 if instance:
                     instance.name = name

@@ -28,6 +28,8 @@ urlpatterns = [
 
     url(r'^ecm/(?P<pk>[0-9]+)/excluir$', views.delete_ecm, name='delete_ecm'),
 
+    url(r'^ecm/ecm_batch_download/(?P<pk>[0-9]+)/$', views.ecm_batch_download, name='ecm_batch_download'),
+
     url(r'^ajax_get_task_data_table/$', login_required(views.ajax_get_task_data_table),
         name='ajax_get_task_data_table'),
     url(r'^ajax_get_ecms/$', login_required(views.ajax_get_ecms),

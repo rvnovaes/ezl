@@ -21,16 +21,14 @@ services:
       - "./containers/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
       - "./containers/db/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf"
   nginx:
-    ports:
-      - "80:80"
-      - "443:443"
     depends_on:
       - web
       - certbot
     labels:
       - "traefik.backend=ezl-production"
-      - "traefik.frontend.rule=Host:mtostes.ezlawyer.com.br"
+      - "traefik.frontend.rule=Host:mtostes.ezlawyer.com.br,ezl.ezlawyer.com.br,algar.ezlawyer.com.br"
       - "traefik.docker.network=traefik_webgateway"
+      - "traefik.enable=true"
   web:
     build:
       context: .
@@ -38,7 +36,7 @@ services:
       args:
         requirements_file: production.txt
     image: ezl:latest
-    command: uwsgi --ini /app/config/uwsgi/uwsgi.ini
+    command: uwsgi --ini /app/config/uwsgi/uwsgi.ini -b 8192
     volumes:
       - .:/app
       - web-static:/app/staticfiles
@@ -89,13 +87,27 @@ services:
       - builder
       - db
       - queues
+  tasks2:
+    environment:
+      ENV: production
+      PYTHONPATH: /app
+    depends_on:
+      - builder
+      - db
+      - queues
+  tasks3:
+    environment:
+      ENV: production
+      PYTHONPATH: /app
+    depends_on:
+      - builder
+      - db
+      - queues
 
   tasks-schedule:
     environment:
       ENV: production
       PYTHONPATH: /app
-    depends_on:
-      - tasks
 
   pgweb:
     build:

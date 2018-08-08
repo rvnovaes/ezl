@@ -1,5 +1,5 @@
 from django.db.utils import IntegrityError
-
+import traceback
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.utils import ecm_path_advwin2ezl, get_message_log_default, save_error_log, \
@@ -70,7 +70,9 @@ class EcmEtl(GenericETL):
         for row in rows:
             try:
                 path = ecm_path_advwin2ezl(row['path'])
-                tasks = Task.objects.filter(legacy_code=row['task_legacy_code'])
+                tasks = Task.objects.filter(
+                  legacy_code=row['task_legacy_code'], 
+                  legacy_code__isnull=False)
                 for task in tasks:
                     try:
                         """
@@ -94,12 +96,12 @@ class EcmEtl(GenericETL):
                                 str(row['path']), self.timestr))
                     except IntegrityError as e:
                         msg = get_message_log_default(
-                            self.model._meta.verbose_name, rows_count, e,
+                            self.model._meta.verbose_name, rows_count, traceback.format_exc(),
                             self.timestr)
                         self.error_logger.error(msg)
                         save_error_log(log, user, msg)
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,
-                                              rows_count, e, self.timestr)
+                                              rows_count, traceback.format_exc(), self.timestr)
                 self.error_logger.error(msg)
                 save_error_log(log, user, msg)

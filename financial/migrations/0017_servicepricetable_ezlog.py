@@ -8,11 +8,14 @@ def create_service_price_table_ezlog(apps, schema_editor):
     from financial.models import ServicePriceTable
     from core.models import Office
     from django.contrib.auth.models import User
+    create_user = User.objects.filter(username='admin').first()
+    if not create_user:
+        return True
+
     price_filters = ServicePriceTable.objects.filter(office_id=1, client=None, value__gt=0).values('type_task',
                                                                                                    'court_district',
                                                                                                    'state')
     ezlog_office = Office.objects.filter(legal_name='EZLog').first()
-    create_user = User.objects.get(username='admin')
     for price_filter in price_filters:
         type_task_id = price_filter.get('type_task')
         court_district_id = price_filter.get('court_district')
