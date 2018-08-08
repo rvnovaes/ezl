@@ -19,7 +19,7 @@ class ApplicationView(object):
 		print(self.request)
 
 
-@permission_classes((TokenHasReadWriteScope,))
+# @permission_classes((TokenHasReadWriteScope,))
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
