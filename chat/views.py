@@ -139,7 +139,7 @@ class ChatsByOfficeView(CustomLoginRequiredView, View):
         if since:
             since = datetime.strptime(since.split(".")[0], "%Y-%m-%dT%H:%M:%S")
             filters["alter_date__gt"] = since
-            filters["messages__create_date__gt"] = since
+            filters["messages__alter_date__gt"] = since
 
         office = Office.objects.get(pk=office_id)
         chats = office.chats.filter(**filters)\
@@ -204,8 +204,10 @@ class UnreadMessageView(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):        
         chat_id = json.loads(request.body).get('chat')
         chat = Chat.objects.get(pk=chat_id)
+        chat.save()
         if (chat.messages.exists()):
             user_by_chat = chat.users.filter(user_by_chat=request.user).first()            
-            UnreadMessage.objects.create(
+            unread_message = UnreadMessage.objects.create(
                 create_user=request.user, message=chat.messages.latest('pk'), user_by_message=user_by_chat)
-        return JsonResponse({'status': 'ok'})
+            unread_message.message.save()
+        return JsonResponse({'status': 'ok' })
