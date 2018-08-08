@@ -40,9 +40,8 @@ class OfficeSerializerMixin(serializers.Serializer):
     office = serializers.HiddenField(default=OfficeDefault())
 
 
-class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):
-    cpf_cnpj = SlugField(
-        max_length=100,
+class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):    
+    cpf_cnpj = SlugField(        
         validators=[
             CpfCnpjOfficeUniqueValidator(
                 queryset=Person.objects.filter()
@@ -66,5 +65,5 @@ class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):
     class Meta:
         model = Person
         fields = ('id', 'name', 'legal_name', 'legal_type', 'cpf_cnpj',
-                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active', 'import_from_legacy',
-                  'auth_user', 'create_user', 'alter_user', 'legacy_code')
+                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active', 
+                  'legacy_code')        
