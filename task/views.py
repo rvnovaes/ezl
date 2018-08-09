@@ -1047,14 +1047,16 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
         checker = ObjectPermissionChecker(request.user)
         rule_view = RuleViewTask(request=request)
         dynamic_query = rule_view.get_dynamic_query(request.user.person, checker)
-        status_totals = Task.objects.filter(dynamic_query).filter(is_active=True, office=get_office_session(request)).values('task_status').annotate(
-            total=Count('task_status')).order_by('task_status')
+        task_object = Task.objects.filter(dynamic_query).filter(is_active=True, office=get_office_session(request))
+        status_totals = task_object.values('task_status').annotate(total=Count('task_status')).order_by('task_status')
         ret = {}
         total = 0
         for status in status_totals:
             ret[status['task_status'].replace(' ', '_').lower()] = status['total']
             total += status['total']
         ret['total'] = total
+        ret['total_solicitada_mes'] = task_object.filter(task_status=TaskStatus.REQUESTED,requested_date__year=datetime.today().year,
+            requested_date__month=datetime.today().month).count()
         return JsonResponse(ret)
 
 
