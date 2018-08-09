@@ -304,11 +304,29 @@ class AbstractPerson(Audit, LegacyCode):
         return self.legal_name or ''
 
 
+class Company(models.Model):
+    name = models.CharField(verbose_name='Empresa', max_length=255)
+
+    def __str__(self):
+        return self.name
+
+
+class CompanyUser(models.Model):
+    user = models.OneToOneField(User, verbose_name='Usuário')
+    company = models.ForeignKey(Company, verbose_name='Empresa', related_name='users')
+
+
+    def __str__(self):
+        return self.user.username
+
+
 class Person(AbstractPerson):
     objects = PersonManager()
 
     cpf_cnpj = models.CharField(max_length=255, blank=True, null=True, unique=False,
                                 verbose_name='CPF/CNPJ')
+
+    company = models.ForeignKey(Company, verbose_name='Compartilhar com empresa', null=True, blank=True)
 
     class Meta:
         db_table = 'person'
@@ -542,10 +560,12 @@ class Team(Audit, OfficeMixin):
     def __str__(self):
         return self.name
 
-# class OfficeApplication(models.Model):
-#     office = models.ForeignKey(Office, verbose_name='Escritório')
-#     # application = models.ForeignKey()
 
 
-class OfficeApplication(AbstractApplication):
-    office = models.ForeignKey(Office, verbose_name='Escritório')
+class ExternalApplication(AbstractApplication):
+    office = models.ForeignKey(
+        Office, verbose_name='Escritório', blank=True, null=True)
+    company = models.ForeignKey(
+        Company, verbose_name='Empresa', blank=True, null=True
+        )
+

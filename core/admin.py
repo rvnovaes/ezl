@@ -1,8 +1,16 @@
 from django.contrib import admin
 from core.models import AddressType, ContactMechanismType, ContactMechanism, Team
 # Todo: Remover office
-from core.models import Office, Invite, InviteOffice, OfficeRelGroup
+from core.models import Office, Invite, InviteOffice, OfficeRelGroup, Company, CompanyUser
 
+
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(CompanyUser)
+class CompanyUserAdmin(admin.ModelAdmin):
+    pass
 
 @admin.register(ContactMechanismType)
 class ContactMechanismTypeAdmin(admin.ModelAdmin):

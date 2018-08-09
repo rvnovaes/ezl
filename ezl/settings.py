@@ -71,6 +71,7 @@ else:
     DEBUG = False
 
 ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
 CSRF_TRUSTED_ORIGINS = ['.ezlawyer.com.br']
 
 # Application definition
@@ -136,6 +137,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -424,11 +426,12 @@ REST_FRAMEWORK = {
 
 OAUTH2_PROVIDER = {
     # this is the list of available scopes
+    'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore',
     'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'},
     'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,
 }
 
-OAUTH2_PROVIDER_APPLICATION_MODEL = 'core.OfficeApplication'
+OAUTH2_PROVIDER_APPLICATION_MODEL = 'core.ExternalApplication'
 
 SWAGGER_SETTINGS = {
     'LOGIN_URL': 'rest_framework:login',
