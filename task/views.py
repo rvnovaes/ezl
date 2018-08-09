@@ -34,7 +34,7 @@ from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixi
 from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
-from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter
+from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation
@@ -50,6 +50,7 @@ from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from django.core.files.base import ContentFile
 from functools import reduce
+from datetime import datetime
 import operator
 
 mapOrder = {
@@ -157,9 +158,8 @@ class TaskToAssignView(AuditFormMixin, UpdateView):
 
     def form_valid(self, form):
         super().form_valid(form)
-        if form.is_valid():
-            if not form.instance.person_distributed_by:
-                form.instance.person_distributed_by = self.request.user.person
+        if form.is_valid():            
+            form.instance.person_distributed_by = self.request.user.person
             form.instance.task_status = TaskStatus.OPEN
             # TODO: rever processo de anexo, quando for trocar para o ECM Generico
             get_task_attachment(self, form)
@@ -236,11 +236,17 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-
         self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
         context['filter'] = self.task_filter
-        context['offices_report'] = self.get_os_grouped_by_office()
-        context['total'] = sum(map(lambda x: x['total'], context['offices_report']))
+        try:
+            if self.request.GET['group_by_tasks'] == OFFICE:
+                office_list, total =  self.get_os_grouped_by_office()
+            else:
+                office_list, total =  self.get_os_grouped_by_client()
+        except:
+            office_list, total = self.get_os_grouped_by_office()
+        context['offices'] = office_list
+        context['total'] = total
         return context
 
     def get_queryset(self):
@@ -298,22 +304,75 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
         offices = []
         offices_map = {}
         tasks = self.get_queryset()
+        total = 0
         for task in tasks:
             correspondent = self._get_related_office(task)
             if correspondent not in offices_map:
-                offices_map[correspondent] = []
-            offices_map[correspondent].append(task)
+                offices_map[correspondent] = {}
+            client = self._get_related_client(task)
+            if client not in offices_map[correspondent]:
+                offices_map[correspondent][client] = []
+            offices_map[correspondent][client].append(task)
 
-        for office, tasks in offices_map.items():
-            tasks.sort(key=lambda x: x.client.name)
-            offices.append({
-                "name": office.name,
-                "tasks": tasks,
-                "total": sum(map(lambda x: x.amount, tasks))
-            })
+        offices_map_total = {}
+        for office, clients in offices_map.items():
+            office_total = 0
+            for client, tasks in clients.items():
+                client_total = sum(map(lambda x: x.amount, tasks))
+                office_total = office_total + client_total
+                offices.append({
+                    'office_name': office.name,
+                    'client_name': client.name,
+                    'tasks': tasks,
+                    "client_total": client_total,
+                    "office_total": 0,
+                })
+            offices_map_total[office.name] = office_total
+            total = total + office_total
 
-        return offices
+        for item in offices:
+            item['office_total'] = offices_map_total[item['office_name']]
 
+        return offices, total
+
+    def get_os_grouped_by_client(self):
+        clients = []
+        clients_map = {}
+        tasks = self.get_queryset()
+        total = 0
+        for task in tasks:
+            client = self._get_related_client(task)
+            if client not in clients_map:
+                clients_map[client] = {}
+            correspondent = self._get_related_office(task)
+            if correspondent not in clients_map[client]:
+                clients_map[client][correspondent] = []
+            clients_map[client][correspondent].append(task)
+
+        clients_map_total = {}
+        for client, offices in clients_map.items():
+            client_total = 0
+            for office, tasks in offices.items():
+                office_total = sum(map(lambda x: x.amount, tasks))
+                client_total = client_total + office_total
+                # necessário manter a mesma estrutura do get_os_grouped_by_office para não mexer no template.
+                clients.append({
+                    'office_name': client.name,
+                    'client_name': office.name,
+                    'tasks': tasks,
+                    "client_total": office_total,
+                    "office_total": 0,
+                })
+            clients_map_total[client.name] = client_total
+            total = total + client_total
+
+        for item in clients:
+            item['office_total'] = clients_map_total[item['office_name']]
+
+        return clients, total
+
+    def _get_related_client(self, task):
+        return task.client
 
 class ToReceiveTaskReportView(TaskReportBase):
     template_name = 'task/reports/to_receive.html'
@@ -388,12 +447,14 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
     }
     count_task = 0
     count_tasks_with_error = 0
+    count_tasks_requested_monthly = 0
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         person = Person.objects.get(auth_user=self.request.user)
         context['task_count'] = self.count_task
         context['count_tasks_with_error'] = self.count_tasks_with_error
+        context['count_tasks_requested_monthly'] = self.count_tasks_requested_monthly
 
         if not self.request.user.get_all_permissions():
             context['messages'] = [
@@ -411,6 +472,9 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
     def set_count_task(self, data, data_error):
         self.count_task = len(data)
         self.count_tasks_with_error = len(data_error)
+        self.count_tasks_requested_monthly = len(data.filter(task_status=TaskStatus.REQUESTED,
+                                                            requested_date__year=datetime.today().year,
+                                                            requested_date__month=datetime.today().month))
 
     def get_data(self, person):
         checker = ObjectPermissionChecker(person.auth_user)
@@ -435,7 +499,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
-        returned = grouped.get(TaskStatus.RETURN) or {}
+        returned = grouped.get(TaskStatus.RETURN) or {}        
         accepted = grouped.get(TaskStatus.ACCEPTED) or {}
         opened = grouped.get(TaskStatus.OPEN) or {}
         done = grouped.get(TaskStatus.DONE) or {}
@@ -454,23 +518,25 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
             return []
         if checker.has_perm('can_access_general_data', office_session) or checker.has_perm('group_admin',
                                                                                            office_session):
-            return_list.append(DashboardErrorStatusTable(error,
-                                                         title='Erro no sistema de origem',
-                                                         status=TaskStatus.ERROR))
+            if office_session.use_etl:
+                return_list.append(DashboardErrorStatusTable(error,
+                                                             title='Erro no sistema de origem',
+                                                             status=TaskStatus.ERROR))
 
             # status 10 - Solicitada
             return_list.append(DashboardStatusTable(requested,
                                                     title='Solicitadas',
                                                     status=TaskStatus.REQUESTED))
-            # status 11 - Aceita pelo Service
-            return_list.append(DashboardStatusTable(accepted_service,
-                                                    title='Aceitas pelo Service',
-                                                    status=TaskStatus.ACCEPTED_SERVICE))
+            if office_session.use_service:
+                # status 11 - Aceita pelo Service
+                return_list.append(DashboardStatusTable(accepted_service,
+                                                        title='Aceitas pelo Service',
+                                                        status=TaskStatus.ACCEPTED_SERVICE))
 
-            # status 20 - Recusada pelo Sevice
-            return_list.append(DashboardStatusTable(refused_service,
-                                                    title='Recusadas pelo Service',
-                                                    status=TaskStatus.REFUSED_SERVICE))
+                # status 20 - Recusada pelo Sevice
+                return_list.append(DashboardStatusTable(refused_service,
+                                                        title='Recusadas pelo Service',
+                                                        status=TaskStatus.REFUSED_SERVICE))
 
         return_list.append(DashboardStatusTable(returned,
                                                 title='Retornadas',
@@ -755,7 +821,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     if checker.has_perm('view_delegated_tasks', office_session):
                         person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
                     if checker.has_perm('view_requested_tasks', office_session):
-                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)                
+                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
                 if data['office_executed_by']:
                     task_dynamic_query.add(Q(child__office_id=data['office_executed_by']), Q.AND)
                 if data['state']:
@@ -1193,7 +1259,7 @@ class GeolocationTaskFinish(CustomLoginRequiredView, View):
 @login_required
 def ecm_batch_download(request, pk):
     #https://stackoverflow.com/questions/12881294/django-create-a-zip-of-multiple-files-and-make-it-downloadable
-    #http://mypythondjango.blogspot.com/2018/01/how-to-zip-files-in-filefield-and.html    
+    #http://mypythondjango.blogspot.com/2018/01/how-to-zip-files-in-filefield-and.html
     ecms = Ecm.objects.filter(task_id=pk).select_related('task')
     try:
         buff = io.BytesIO()
@@ -1204,13 +1270,13 @@ def ecm_batch_download(request, pk):
             output.seek(0)
             zf.writestr(ecm.path.name, output.getvalue())
             if not zip_filename:
-                zip_filename = 'Anexos_OS_%s.zip' % (ecm.task.task_number)            
+                zip_filename = 'Anexos_OS_%s.zip' % (ecm.task.task_number)
         zf.close()
         buff.seek(0)
         data = buff.read()
-        resp = HttpResponse(data, content_type = "application/x-zip-compressed")    
+        resp = HttpResponse(data, content_type = "application/x-zip-compressed")
         resp['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
         return resp
     except Exception as e:
         messages.error(request, 'Erro ao baixar todos arquivos.' + str(e))
-        return HttpResponseRedirect(ecm.task.get_absolute_url())    
+        return HttpResponseRedirect(ecm.task.get_absolute_url())
