@@ -50,6 +50,7 @@ from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from django.core.files.base import ContentFile
 from functools import reduce
+from datetime import datetime
 import operator
 
 mapOrder = {
@@ -446,12 +447,14 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
     }
     count_task = 0
     count_tasks_with_error = 0
+    count_tasks_requested_monthly = 0
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         person = Person.objects.get(auth_user=self.request.user)
         context['task_count'] = self.count_task
         context['count_tasks_with_error'] = self.count_tasks_with_error
+        context['count_tasks_requested_monthly'] = self.count_tasks_requested_monthly
 
         if not self.request.user.get_all_permissions():
             context['messages'] = [
@@ -469,6 +472,9 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
     def set_count_task(self, data, data_error):
         self.count_task = len(data)
         self.count_tasks_with_error = len(data_error)
+        self.count_tasks_requested_monthly = len(data.filter(task_status=TaskStatus.REQUESTED,
+                                                            requested_date__year=datetime.today().year,
+                                                            requested_date__month=datetime.today().month))
 
     def get_data(self, person):
         checker = ObjectPermissionChecker(person.auth_user)
