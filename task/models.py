@@ -136,6 +136,7 @@ class TypeTask(Audit, LegacyCode):
                             verbose_name='Tipo de Serviço')
     simple_service = models.BooleanField(verbose_name="Serviço simples",
         default=False)
+    is_audience = models.BooleanField(verbose_name='É audiência', default=False)
     survey = models.ForeignKey(
         'survey.Survey',
         null=True,

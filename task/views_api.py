@@ -3,10 +3,15 @@ from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerialize
 from .filters import TaskApiFilter
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from django_filters.rest_framework import DjangoFilterBackend
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope, TokenHasReadWriteScope
 from rest_framework.decorators import permission_classes
 from core.views_api import ApplicationView
+from lawsuit.models import Folder, Movement
+from django.utils import timezone
+
 
 @permission_classes((TokenHasReadWriteScope,))
 class TypeTaskViewSet(viewsets.ReadOnlyModelViewSet):
@@ -31,3 +36,26 @@ class TaskViewSet(viewsets.ModelViewSet, ApplicationView):
         if self.request.method == "POST":
             return TaskCreateSerializer
         return TaskSerializer
+
+@api_view(['GET'])
+@permission_classes((TokenHasReadWriteScope,))
+def list_audience_totals(request):    
+    company = request.auth.application.company
+    audience = {}
+    if company.users.filter(user=request.user).exists():
+        folders = Folder.objects.filter(person_customer__company=company)    
+        tasks = Task.objects.filter(movement__folder__in=folders)
+        audiences = tasks.filter(type_task__is_audience=True)
+        audiences_this_month = audiences.filter(
+            final_deadline_date__year=timezone.now().year,
+            final_deadline_date__month=timezone.now().month)
+        audiences_this_week = audiences_this_month.filter(
+            final_deadline_date__week=timezone.now().isocalendar()[1])        
+        audience['total_audience'] = audiences.count()
+        audience['total_audience_this_month'] = audiences_this_month.count()
+        audience['total_audience_this_week'] = audiences_this_week.count()
+    return Response(audience)
+
+# @api_view
+# @permission_classes((TokenHasReadWriteScope,))
+# def list
