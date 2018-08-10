@@ -103,6 +103,20 @@ services:
       - builder
       - db
       - queues
+  tasks4:
+    image: ezl:latest
+    environment:
+      ENV: production
+      PYTHONPATH: /app
+    command: celery -A ezl worker -l debug --concurrency 10 -P eventlet -Ofair -n worker4@%h
+    volumes:
+      - .:/app
+      - ./media/service_price_table:/app/media/service_price_table
+      - ezl-logs:/var/log/ezl
+    depends_on:
+      - builder
+      - db
+      - queues
 
   tasks-schedule:
     environment:

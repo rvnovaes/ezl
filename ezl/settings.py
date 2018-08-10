@@ -130,6 +130,7 @@ INSTALLED_APPS = [
     'guardian',
     'billing',
     'djmoney',
+    'django_dbconn_retry',
 ]
 
 MIDDLEWARE = [
