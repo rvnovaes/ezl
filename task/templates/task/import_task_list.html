@@ -1,0 +1,108 @@
+{% extends "skeleton/base.html" %}
+
+{% load staticfiles %}
+
+{% block extra_stylesheets %}
+<link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
+<link href="{% static 'skeleton/plugins/bower_components/dropify/dist/css/dropify.min.css' %}" rel="stylesheet" type="text/css" />
+<link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block content %}
+{% load staticfiles bootstrap3 %}
+    
+    {% include 'core/widgets/messages.html' %}
+    
+    <form id="import_task_list_form" action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+            <!--Campo para upload do arquivo -->            
+            <div class="form-group col-sm-12">
+                <label class="control-label" for="id_file_xls">Arquivo</label>
+                <div class="row bootstrap3-multi-input">
+                    <div class="col-xs-12" style="width: 400px;">
+                        <input type="file" name="file_xls" class="dropify" title="" required="" id="id_file_xls">
+                    </div>
+                </div>
+            </div>            
+        </div>
+
+        <br>
+        <button id="btn-submit"
+            style="width: 100px!important;"
+            type="button"
+            onclick="showMessages()"
+            class="btn btn-success waves-effect waves-light">Importar
+        </button>        
+        <script>
+            function showMessages()
+            {                                                                              
+                {% if type_contact_mechanism_type_EMAIL_is_empty %}
+                    swal(
+                        "Erro", 
+                        "Deve ser configurado o tipo de mecanismo de contato 'E-mail' corretamente para continuar importação.", 
+                        "error")                    
+                {% else %}
+                    var text_msg = "Ao iniciar o processo de importação de tabela de preços não será possível cancelá-lo. Deseja continuar?"                
+                    swal({
+                            title: "Importante",
+                            text: text_msg,
+                            type: "warning",
+                            showCancelButton: true,
+                            confirmButtonText: "Sim",
+                            cancelButtonText: "Não",
+                            confirmButtonColor: "#DD6B55",                        
+                            closeOnConfirm: false
+                        }, function(isConfirm){
+                            if (isConfirm) {                                                   
+                                $('#import_task_list_form').submit();
+                            }
+                        }
+                    );
+                {% endif %}                
+            }
+            
+            $(document).ready(function(){
+                {% if show_modal_progress %}
+                    $('#progressBarImportServicePriceTableAction').modal('show');
+                {% endif %}
+            })
+        </script>                
+        
+{#        {% include 'financial/import_service_price_table_progress_modal.html' %}#}
+    </form>
+    
+    <br>    
+    <div id="div-log-table" style="display: none">
+            <table id="LogTable">
+            <thead>
+                <tr>
+                    <th>Log do processo</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div> 
+{% endblock %}
+
+
+{% block extra_scripts %}
+    <script src="{% static 'skeleton/plugins/bower_components/dropify/dist/js/dropify.min.js' %}"></script>    
+    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+    <!-- start - This is for export functionality only -->
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.flash.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
+    <script>
+        $('document').ready(function(){
+            $('.dropify').attr('data-height', '200').attr('data-allowed-file-extensions', 'xlsx').dropify();
+        })
+    </script>
+{% endblock %}

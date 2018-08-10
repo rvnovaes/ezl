@@ -97,9 +97,11 @@ class ServicePriceTableForm(BaseModelForm):
         self.fields['office_correspondent'].required = True
         self.fields['office'].required = True
 
+
 class ImportServicePriceTableForm(forms.ModelForm):
-    file_xls = XlsxFileField(label='Arquivo', required=True, 
-        headers_to_check=['Correspondente', 'Serviço', 'Comarca', 'UF', 'Valor'])
+    file_xls = XlsxFileField(label='Arquivo', required=True,
+                             headers_to_check=['Correspondente', 'Serviço', 'Comarca', 'UF', 'Valor'])
+
     class Meta:
         model = ImportServicePriceTable
         fields = ('file_xls', )

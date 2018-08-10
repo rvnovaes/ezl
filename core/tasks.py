@@ -2,6 +2,7 @@ from django.template.loader import render_to_string
 from task.mail import SendMail
 from celery import shared_task
 from advwin_models.tasks import MAX_RETRIES, BASE_COUNTDOWN
+from core.models import ImportXlsFile
 
 
 @shared_task(bind=True, max_retries=MAX_RETRIES)
@@ -18,3 +19,8 @@ def send_mail(self, recipient_list, subject, mail_body):
         print(e)
         print('Você tentou mandar um e-mail')
         raise e
+
+
+@shared_task(bind=True)
+def delete_imported_xls(self, xls_file_pk):
+    ImportXlsFile.objects.filter(pk=xls_file_pk).delete()

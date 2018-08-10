@@ -46,4 +46,9 @@ urlpatterns = [
     url(r'^filtros/excluir$', login_required(views.FilterDeleteView.as_view()),
         name='filter_delete'),
 
+    # Filtros
+    url(r'^import_task_list/$',
+        login_required(views.ImportTaskList.as_view()),
+        name='import_task_list'),
+
 ]

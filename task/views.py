@@ -24,6 +24,7 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django.core.exceptions import ValidationError
+from django.shortcuts import render
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
@@ -35,11 +36,12 @@ from etl.models import InconsistencyETL
 from etl.tables import DashboardErrorStatusTable
 from lawsuit.models import Movement, CourtDistrict
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE
-from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm
+from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, ImportTaskListForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable
+from task.tasks import import_xls_task_list
 from task.rules import RuleViewTask
 from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
@@ -373,6 +375,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
     def _get_related_client(self, task):
         return task.client
 
+
 class ToReceiveTaskReportView(TaskReportBase):
     template_name = 'task/reports/to_receive.html'
     filter_class = TaskToReceiveFilter
@@ -493,7 +496,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
-        returned = grouped.get(TaskStatus.RETURN) or {}        
+        returned = grouped.get(TaskStatus.RETURN) or {}
         accepted = grouped.get(TaskStatus.ACCEPTED) or {}
         opened = grouped.get(TaskStatus.OPEN) or {}
         done = grouped.get(TaskStatus.DONE) or {}
@@ -503,7 +506,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         requested = grouped.get(TaskStatus.REQUESTED) or {}
         accepted_service = grouped.get(TaskStatus.ACCEPTED_SERVICE) or {}
         refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}
-        #  Necessario filtrar as inconsistencias pelos ids das tasks pelo fato das instancias de error serem de DashboardTaskView
+        # Necessario filtrar as inconsistencias pelos ids das tasks pelo fato das instancias de error serem de DashboardTaskView
         error = InconsistencyETL.objects.filter(is_active=True, task__id__in=[task.pk for task in data_error]) or {}
 
         return_list = []
@@ -1085,7 +1088,6 @@ def ajax_get_task_data_table(request):
         ),
     ).values(*values_list)
 
-
     # criando o filtro de busca a partir do valor enviado no campo de pesquisa
     search_value = search_dict.get('value', None)
     reduced_filter = None
@@ -1097,7 +1099,7 @@ def ajax_get_task_data_table(request):
                 search_dict_query[key] = search_value
         reduced_filter = reduce(operator.or_, (Q(**d) for d in [dict([i]) for i in search_dict_query.items()]))
 
-    #criando lista de ordered
+    # criando lista de ordered
     ordered_list = list(map(lambda i: '{}{}'.format(mapOrder.get(i.get('dir')), i.get('column')), order_dict))
 
 
@@ -1250,10 +1252,11 @@ class GeolocationTaskFinish(CustomLoginRequiredView, View):
                                  "finished_date": date_format(timezone.localtime(finished_date), 'DATETIME_FORMAT')})
         return JsonResponse({"ok": False})
 
+
 @login_required
 def ecm_batch_download(request, pk):
-    #https://stackoverflow.com/questions/12881294/django-create-a-zip-of-multiple-files-and-make-it-downloadable
-    #http://mypythondjango.blogspot.com/2018/01/how-to-zip-files-in-filefield-and.html
+    # https://stackoverflow.com/questions/12881294/django-create-a-zip-of-multiple-files-and-make-it-downloadable
+    # http://mypythondjango.blogspot.com/2018/01/how-to-zip-files-in-filefield-and.html
     ecms = Ecm.objects.filter(task_id=pk).select_related('task')
     try:
         buff = io.BytesIO()
@@ -1274,3 +1277,30 @@ def ecm_batch_download(request, pk):
     except Exception as e:
         messages.error(request, 'Erro ao baixar todos arquivos.' + str(e))
         return HttpResponseRedirect(ecm.task.get_absolute_url())
+
+
+class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView, TemplateView):
+    permission_required = ('core.group_admin',)
+    template_name = 'task/import_task_list.html'
+    form_class = ImportTaskListForm
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data(*args, **kwargs)
+        form = self.form_class(request.POST, request.FILES)
+        import pdb;
+        pdb.set_trace()
+        if form.is_valid():
+            file_xls = form.save(commit=False)
+            file_xls.office = get_office_session(request)
+            file_xls.create_user = request.user
+            file_xls.start = timezone.now()
+            file_xls.save()
+
+            import_xls_task_list(file_xls.pk)
+            # self.context['show_modal_progress'] = True
+            # context['file_xls'] = file_xls
+            # context['file_name'] = request.FILES['file_xls'].name
+        else:
+            messages.error(request, form.errors)
+
+        return render(request, self.template_name, context)
