@@ -14,7 +14,7 @@ create_certificate:
 create_certificate_teste:
 	docker-compose run certbot certbot certonly --webroot -w /tmp/www -d teste.ezlawyer.com.br -m contato@ezlawyer.com.br --agree-tos
 
-deploy: check_compose_override build restart run migrate collectstatic load_fixtures
+deploy: check_compose_override build restart migrate collectstatic load_fixtures
 
 local_sqlserver:
 	ln -s docker-compose.sqlserver.yml docker-compose.override.yml
@@ -51,7 +51,8 @@ run: check_compose_override
 	docker-compose up -d
 
 restart:
-	docker-compose restart web nginx luigi tasks
+	docker-compose stop
+	docker-compose up -d
 
 restart_web:
 	docker-compose restart web ws ws-worker

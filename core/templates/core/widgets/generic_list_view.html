@@ -163,7 +163,7 @@
 
         $('#delete_button').click(function(){
             {% if on_delete == 'CASCADE' %}
-                var text = "Ao excluir excluir o(s) registro(s) selecionado(s), todos os seus " +
+                var text = "Ao excluir o(s) registro(s) selecionado(s), todos os seus " +
                     "vínculos também serão excluídos! Essa ação é irreversível";
             {% else %}
                 var text = "Tem certeza que deseja excluir o(s) registro(s) selecionado(s)? " +

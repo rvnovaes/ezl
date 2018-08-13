@@ -71,6 +71,28 @@ services:
       - builder
       - db
       - queues
+  tasks2:
+    image: ezl:latest
+    command: celery -A ezl worker -l debug --concurrency 10 -P eventlet -Ofair -n worker2@%h
+    volumes:
+      - .:/app
+      - ./media/service_price_table:/app/media/service_price_table
+      - ezl-logs:/var/log/ezl
+    depends_on:
+      - builder
+      - db
+      - queues
+  tasks3:
+    image: ezl:latest
+    command: celery -A ezl worker -l debug --concurrency 10 -P eventlet -Ofair -n worker3@%h
+    volumes:
+      - .:/app
+      - ./media/service_price_table:/app/media/service_price_table
+      - ezl-logs:/var/log/ezl
+    depends_on:
+      - builder
+      - db
+      - queues
 
   tasks-schedule:
     image: ezl:latest
