@@ -22,8 +22,37 @@ $(document).ready(function() {
     $(window).on('focusout', function(){
         clearInterval(window.interval_chat);
     });
+    $("#btn-unread-message").on('click', function(){
+        getCountMessages();
+    });
 });
 
+var getCountMessages = function (){
+    $.ajax({
+        type: "GET",
+        url: "/chat/count_message/?has_groups=" + false,
+        data: {},
+        success: function (response) {
+            if (response.all_messages > 0) {
+                $("#chat-notify").removeClass('hide');
+                $("#li-message-center").removeClass('hide');
+                $("#message-center").removeClass('hide');
+
+                if (response.all_messages == 1) {
+                    $("#drop-title").html(response.all_messages + ' mensagem não lida');
+                } else {
+                    $("#drop-title").html(response.all_messages + ' mensagens não lidas');
+                }
+            } else {
+                $("#drop-title").html('0 mensagem não lida');
+                $("#chat-notify").addClass('hide');
+                $("#li-message-center").addClass('hide');
+                $("#message-center").addClass('hide');
+            }
+        },
+        dataType: "json"
+    });
+}
 
 var setBadgeItem = function (items) {
     items.forEach(function (item) {
@@ -56,7 +85,6 @@ var chatReadMessage = function (chat_id, csrf_token) {
 };
 
 var chatUnreadMessage = function (chat_id, csrf_token) {
-    console.log("AQI");
     $.ajax({
         type: 'GET',
         url: '/chat/chat_unread_messages',
@@ -74,32 +102,7 @@ var chatUnreadMessage = function (chat_id, csrf_token) {
 };
 
 function count_message() {
-    return setInterval(function () {
-        $.ajax({
-            type: "GET",
-            url: "/chat/count_message/?has_groups=" + false,
-            data: {},
-            success: function (response) {
-                if (response.all_messages > 0) {
-                    $("#chat-notify").removeClass('hide');
-                    $("#li-message-center").removeClass('hide');
-                    $("#message-center").removeClass('hide');
-
-                    if (response.all_messages == 1) {
-                        $("#drop-title").html(response.all_messages + ' mensagem não lida');
-                    } else {
-                        $("#drop-title").html(response.all_messages + ' mensagens não lidas');
-                    }
-                } else {
-                    $("#drop-title").html('0 mensagem não lida');
-                    $("#chat-notify").addClass('hide');
-                    $("#li-message-center").addClass('hide');
-                    $("#message-center").addClass('hide');
-                }
-            },
-            dataType: "json"
-        });
-    }, 5000);
+    return setInterval(getCountMessages , 5000);
 }
 
 
