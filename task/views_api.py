@@ -26,9 +26,10 @@ class EcmTaskViewSet(viewsets.ModelViewSet):
     queryset = Ecm.objects.all()
     serializer_class = EcmTaskSerializer
 
+
 @permission_classes((TokenHasReadWriteScope,))
 class TaskViewSet(viewsets.ModelViewSet, ApplicationView):
-    queryset = Task.objects.all()    
+    queryset = Task.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_class = TaskApiFilter
 
@@ -37,25 +38,25 @@ class TaskViewSet(viewsets.ModelViewSet, ApplicationView):
             return TaskCreateSerializer
         return TaskSerializer
 
+
 @api_view(['GET'])
 @permission_classes((TokenHasReadWriteScope,))
-def list_audience_totals(request):    
+def list_audience_totals(request):
     company = request.auth.application.company
     audience = {}
     if company.users.filter(user=request.user).exists():
-        folders = Folder.objects.filter(person_customer__company=company)    
+        folders = Folder.objects.filter(person_customer__company=company)
         tasks = Task.objects.filter(movement__folder__in=folders)
         audiences = tasks.filter(type_task__is_audience=True)
         audiences_this_month = audiences.filter(
             final_deadline_date__year=timezone.now().year,
             final_deadline_date__month=timezone.now().month)
+        agreement_this_month = audiences_this_month.filter(
+            **{'survey_result__Acordo realizado?': 'Sim'})
         audiences_this_week = audiences_this_month.filter(
-            final_deadline_date__week=timezone.now().isocalendar()[1])        
+            final_deadline_date__week=timezone.now().isocalendar()[1])
         audience['total_audience'] = audiences.count()
         audience['total_audience_this_month'] = audiences_this_month.count()
         audience['total_audience_this_week'] = audiences_this_week.count()
+        audience['agreement_this_month'] = agreement_this_month.count()
     return Response(audience)
-
-# @api_view
-# @permission_classes((TokenHasReadWriteScope,))
-# def list
