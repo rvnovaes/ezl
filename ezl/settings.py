@@ -128,6 +128,8 @@ INSTALLED_APPS = [
     'channels',
     'chat',
     'ecm',
+    'dashboard',
+    'codemirror',
     'guardian',
     'billing',
     'djmoney',

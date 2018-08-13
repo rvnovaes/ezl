@@ -49,6 +49,7 @@ djangorestframework==3.8.2
 Markdown==2.6.11
 django-cors-headers==2.2.0
 pycpfcnpj==1.5
+django-codemirror-widget==0.4.1
 
 # docs
 django-rest-swagger==2.2.0
@@ -56,3 +57,4 @@ django-rest-swagger==2.2.0
 # Oauth
 django-oauth-toolkit==1.1.2
 rest-condition==1.0.3
+
