@@ -12,6 +12,7 @@ class Card(models.Model):
 	title = models.CharField(verbose_name='Título', max_length=255)
 	subtitle = models.CharField(verbose_name='Subtitle', max_length=255)
 	value = models.TextField(verbose_name='Valor')
+	percent = models.TextField(verbose_name='Percentual', blank=True, null=True)
 	dashboards = models.ManyToManyField(Dashboard, related_name='cards')
 
 

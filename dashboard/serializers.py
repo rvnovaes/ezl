@@ -1,21 +1,23 @@
 from rest_framework import serializers
 from .models import Dashboard, Card
+from .utils import exec_code
 from core.models import Company
+from django.db import transaction
+
 
 class CardSerializer(serializers.ModelSerializer):
 	value = serializers.SerializerMethodField()
+	percent = serializers.SerializerMethodField()
 	class Meta: 
 		model = Card
-		fields = ('id', 'title', 'subtitle', 'value')
+		fields = ('id', 'title', 'subtitle', 'value', 'percent')
+
 
 	def get_value(self, obj):	
-		try:			
-			company = Company.objects.first() # Todo: Ajustar		
-			exec(obj.value)
-			return locals().get('value')
-		except:
-			return ''
+		return exec_code(self, obj, 'value')
 
+	def get_percent(self, obj):				
+		return exec_code(self, obj, 'percent')
 
 
 class DashboardSerializer(serializers.ModelSerializer):
