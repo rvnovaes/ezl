@@ -1,6 +1,26 @@
 from functools import wraps
+from dashboard.models import Dashboard
 from django.db import transaction
+from django.utils import timezone
 
+MONTHS = {
+	1: 'Janeiro', 
+	2 : 'Fevereiro', 
+	3: 'Março', 
+	4: 'Abril', 
+	5: 'Maio', 
+	6: 'Junho',
+	7: 'Julho', 
+	8: 'Agosto', 
+	9: 'Setembro', 
+	10: 'Outubro', 
+	11: 'Novembro', 
+	12: 'Dezembro'
+}
+
+
+def get_month():
+	return MONTHS.get(timezone.now().month)
 
 def no_commit(f):
 	@wraps(f)
@@ -15,8 +35,8 @@ def no_commit(f):
 def set_company(f):
 	@wraps(f)
 	def wrapper(self, obj, attr):
-		try:		
-			self.company = self.context.get('request').auth.application.company
+		try:								
+			self.company = Dashboard.objects.get(**self.context['view'].kwargs).company
 		except AttributeError as e:
 			pass
 		finally:
@@ -27,8 +47,8 @@ def set_company(f):
 @no_commit
 @set_company
 def exec_code(self, obj, attr):
-	try:								
+	try:									
 		exec(getattr(obj, attr))			
-		return locals().get('value')
+		return locals().get('result')
 	except:
 		return ''

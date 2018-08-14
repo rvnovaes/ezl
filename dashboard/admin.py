@@ -8,12 +8,12 @@ class CardsInline(admin.TabularInline):
 
 @admin.register(Dashboard)
 class DashboardModelAdmin(admin.ModelAdmin):
-	fields = ['company']
+	fields = ['company', 'refresh']
 	inlines = [
 		CardsInline
 	]
 
 @admin.register(Card)
 class CardModelAdmin(admin.ModelAdmin):
-	list_display = ['title', 'subtitle']
+	list_display = ['name', 'code']
 	form=CardForm

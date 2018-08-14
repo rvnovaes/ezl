@@ -9,3 +9,7 @@ class DashboardViewSet(viewsets.ReadOnlyModelViewSet):
 	pagination_class = None
 	filter_backends = (DjangoFilterBackend,)
 	filter_fields = ('company', )
+
+	def get_queryset(self):
+		user = self.request.user
+		return Dashboard.objects.filter(company__in=user.companys.all().values_list('company', flat=True))

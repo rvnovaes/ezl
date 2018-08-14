@@ -312,7 +312,7 @@ class Company(models.Model):
 
 
 class CompanyUser(models.Model):
-    user = models.OneToOneField(User, verbose_name='Usuário')
+    user = models.ForeignKey(User, verbose_name='Usuário', related_name='companys')
     company = models.ForeignKey(Company, verbose_name='Empresa', related_name='users')
 
 

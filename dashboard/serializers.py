@@ -6,22 +6,22 @@ from django.db import transaction
 
 
 class CardSerializer(serializers.ModelSerializer):
-	value = serializers.SerializerMethodField()
-	percent = serializers.SerializerMethodField()
+	code = serializers.SerializerMethodField()
 	class Meta: 
 		model = Card
-		fields = ('id', 'title', 'subtitle', 'value', 'percent')
+		fields = ('id', 'code')
 
-
-	def get_value(self, obj):	
-		return exec_code(self, obj, 'value')
-
-	def get_percent(self, obj):				
-		return exec_code(self, obj, 'percent')
+	def get_code(self, obj):
+		return exec_code(self, obj, 'code')
 
 
 class DashboardSerializer(serializers.ModelSerializer):
 	cards = CardSerializer(many=True, read_only=True)
+	company_name = serializers.SerializerMethodField()
+
 	class Meta:
 		model = Dashboard
-		fields = ('id', 'company', 'cards')
+		fields = ('id', 'company', 'refresh', 'cards', 'company_name')
+
+	def get_company_name(self, obj):
+		return obj.company.name

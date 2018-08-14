@@ -3,20 +3,19 @@ from core.models import Company
 
 class Dashboard(models.Model):
 	company = models.ForeignKey(Company, verbose_name='Empresa')
+	refresh = models.IntegerField(verbose_name='Refresh por millesegundo', blank=True, null=True)	
 
 	def __str__(self):
 		return self.company.name
 
 
-class Card(models.Model):
-	title = models.CharField(verbose_name='Título', max_length=255)
-	subtitle = models.CharField(verbose_name='Subtitle', max_length=255)
-	value = models.TextField(verbose_name='Valor')
-	percent = models.TextField(verbose_name='Percentual', blank=True, null=True)
-	dashboards = models.ManyToManyField(Dashboard, related_name='cards')
+class Card(models.Model):		
+	name = models.CharField(verbose_name='Nome', max_length=255, blank=True, null=True)
+	code = models.TextField(verbose_name='Codigo', blank=True, null=True)	
+	dashboards = models.ManyToManyField(Dashboard, related_name='cards', null=True, blank=True)	
 
 
 	def __str__(self):
-		return self.title
+		return self.name
 
 

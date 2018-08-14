@@ -17,8 +17,7 @@ code_mirror = CodeMirrorTextarea(
 		)
 
 class CardForm(forms.ModelForm):
-	value = forms.CharField(label="Valor", widget=code_mirror)
-	percent = forms.CharField(label="Percentual", widget=code_mirror)
+	code = forms.CharField(label="Código", widget=code_mirror)
 	class Meta:
 		model = Card
 		fields = '__all__'

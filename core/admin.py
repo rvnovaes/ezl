@@ -10,7 +10,7 @@ class CompanyAdmin(admin.ModelAdmin):
 
 @admin.register(CompanyUser)
 class CompanyUserAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['company', 'user']
 
 @admin.register(ContactMechanismType)
 class ContactMechanismTypeAdmin(admin.ModelAdmin):
