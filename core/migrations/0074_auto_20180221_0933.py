@@ -15,8 +15,7 @@ def remove_persons_from_office(apps, schema_editor):
     User = apps.get_model('auth', 'User')
     admin = User.objects.filter(username='admin').first()
     if admin:
-        Office = apps.get_model('core', 'Office')
-        # Office.objects.all().delete()
+        from core.models import Office
         Office(create_user=admin,
                cpf_cnpj='03.482.042/0001-02',
                name='Marcelo Tostes Advogados Associados',
