@@ -18,7 +18,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import ProtectedError, Q, F
 from django.db import transaction, IntegrityError
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
@@ -43,7 +43,7 @@ from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable
 from core.utils import login_log, logout_log, get_office_session, get_domain
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
-from task.models import Task, TaskStatus, Ecm
+from task.models import Task, TaskStatus
 from task.metrics import get_correspondent_metrics
 from ecm.forms import AttachmentForm
 from ecm.utils import attachment_form_valid, attachments_multi_delete
