@@ -1,16 +1,19 @@
-from django.template.loader import render_to_string
-import os
 import copy
+from django.template.loader import render_to_string
 from ecm.models import DefaultAttachmentRule, Attachment
 from task.models import *
 from task.mail import SendMail
 from core.utils import get_office_session
 from core.models import Team
+from core.tasks import send_mail
 from django.db.models import Q
 from django.core.files.base import ContentFile
+from django.conf import settings
+from retrying import retry
+import traceback
 
 
-def get_task_attachment(self, form):        
+def get_task_attachment(self, form):
     attachmentrules = DefaultAttachmentRule.objects.filter(
         Q(office=get_office_session(self.request)),
         Q(Q(type_task=form.instance.type_task) | Q(type_task=None)),
@@ -20,7 +23,7 @@ def get_task_attachment(self, form):
         Q(Q(city=(form.instance.movement.law_suit.organ.address_set.first().city if
                   form.instance.movement and
                   form.instance.movement.law_suit and
-                  form.instance.movement.law_suit.organ and 
+                  form.instance.movement.law_suit.organ and
                   form.instance.movement.law_suit.organ.address_set.first() else None)) | Q(city=None)))
 
     for rule in attachmentrules:
@@ -37,13 +40,15 @@ def get_task_attachment(self, form):
                               create_user_id=self.request.user.id,
                               create_date=timezone.now(),
                               exhibition_name=file_name
-                    )
+                              )
                     obj.save()
 
 
+@retry(stop_max_attempt_number=4, wait_fixed=1000)
 def copy_ecm(ecm, task):
     new_file = get_file_content_copy(ecm.path)
     if new_file:
+        file_name = os.path.basename(ecm.path.name)
         ecm_related = ecm.ecm_related
         if not ecm_related:
             ecm_related = ecm
@@ -59,6 +64,13 @@ def copy_ecm(ecm, task):
             new_ecm.ecm_related = ecm_related
             new_ecm.save()
             return new_ecm
+    else:
+        subject = 'Erro ao copiar ECM {}'.format(ecm.id)
+        body = """Erro ao copiar ECM {} para a OS {}:
+        {}
+        {} does not exists""".format(ecm.id, task.id, e, str(ecm.path))
+        recipients = [admin[1] for admin in settings.ADMINS]
+        send_mail.delay(recipients, subject, body)
 
 
 def get_file_content_copy(filefield):

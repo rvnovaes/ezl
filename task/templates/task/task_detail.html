@@ -499,21 +499,38 @@
 {% block script_document_ready %}
     {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
         $('#confirmAction').on('show.bs.modal', function (event) {
-            var table = $('#correspondents-table').DataTable({
-                paging: false,
-                order: [[4, 'asc']],
-                dom: 'frti',
-                buttons: [],
-                language: {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-                },
-            });
-            $('#actionButton').removeAttr('disabled')
+            var table_rows = {{ correspondents_table.rows|length }};
+            if (table_rows > 0) {
+                window.table = $('#correspondents-table').DataTable({
+                    paging: false,
+                    order: [[4, 'asc']],
+                    dom: 'frti',
+                    buttons: [],
+                    language: {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                    },
+                });
+                $('#actionButton').removeAttr('disabled');
+            } else {
+                event.preventDefault();
+                event.stopPropagation();
+                swal({
+                    title: "Atenção",
+                    text: "Não existem tabelas de preço que atendam aos critérios desta OS",
+                    type: "warning",
+                    showCancelButton: false,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "OK",
+                    closeOnConfirm: true
+                });
+            }
         });
         /* Ao fechar o modal, limpar a tabela */
+        {% if correspondents_table.rows %}
         $('#confirmAction').on('hide.bs.modal', function (event) {
-            $('#servicePriceTableTable').empty();
-            $('#servicePriceTableTable').DataTable().clear().destroy();
+            window.table.destroy();
         });
+        {% endif %}
+
     {% endif %}
 {% endblock %}

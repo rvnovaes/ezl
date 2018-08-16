@@ -108,8 +108,9 @@ class PersonETL(GenericETL):
 
                 instance = self.model.objects.filter(
                     legacy_code=legacy_code,
+                    legacy_code__isnull=False,
+                    offices=default_office,
                     system_prefix=LegacySystem.ADVWIN.value).first()
-
                 if instance:
                     # use update_fields to specify which fields to save
                     # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
@@ -152,8 +153,8 @@ class PersonETL(GenericETL):
                                      legacy_code=legacy_code,
                                      system_prefix=LegacySystem.ADVWIN.value)
 
-                    obj.save()
-                    if not default_office.persons.filter(obj=obj.pk):
+                    obj.save()                    
+                    if not default_office.persons.filter(pk=obj.pk):
                         OfficeMembership.objects.create(person=obj,
                                                         office=default_office,
                                                         create_user=user,

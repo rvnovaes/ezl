@@ -10,7 +10,7 @@ AWS_ACCESS_KEY=AKIAJINMQ4YYIYXTH62A
 AWS_SECRET_KEY=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
 TIME=`date +%Y-%m-%d-%H%M`
 TAR_FILENAME=$DB_NAME-$TIME.tar.gz
-BACKUP_WORKDIR=/tmp/_db_backup/
+BACKUP_WORKDIR=/dados/ezl/backup/_db_backup
 
 echo "Iniciando backup para $BUCKET às $(date)";
 
@@ -34,5 +34,3 @@ tar -czf $TAR_FILENAME ezl.sql
 aws s3 cp $TAR_FILENAME $S3_LOCATION
 
 echo "Backup finalizado para $BUCKET às $(date)"
-cd $PROJECT_WORKDIR
-rm -rf $BACKUP_WORKDIR

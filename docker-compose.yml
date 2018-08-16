@@ -50,6 +50,8 @@ services:
       - .:/app
       - ./containers/luigi/cron:/etc/cron.d/luigi
       - ezl-logs:/var/log/ezl
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas
     logging:
       driver: "json-file"
       options:
@@ -60,7 +62,29 @@ services:
 
   tasks:
     image: ezl:latest
-    command: celery -A ezl worker -l debug --concurrency 10 -P eventlet
+    command: celery -A ezl worker -l debug --concurrency 10 -P eventlet -Ofair -n worker1@%h
+    volumes:
+      - .:/app
+      - ./media/service_price_table:/app/media/service_price_table
+      - ezl-logs:/var/log/ezl
+    depends_on:
+      - builder
+      - db
+      - queues
+  tasks2:
+    image: ezl:latest
+    command: celery -A ezl worker -l debug --concurrency 10 -P eventlet -Ofair -n worker2@%h
+    volumes:
+      - .:/app
+      - ./media/service_price_table:/app/media/service_price_table
+      - ezl-logs:/var/log/ezl
+    depends_on:
+      - builder
+      - db
+      - queues
+  tasks3:
+    image: ezl:latest
+    command: celery -A ezl worker -l debug --concurrency 10 -P eventlet -Ofair -n worker3@%h
     volumes:
       - .:/app
       - ./media/service_price_table:/app/media/service_price_table
@@ -81,17 +105,15 @@ services:
 
   flower:
     image: ezl:latest
-    command: celery flower --broker=amqp://guest:guest@queues:5672/ --port=5555 --basic_auth=ezl:flower@ezl
+    command: celery flower --broker=amqp://guest:guest@queues:5672// --broker_api=http://guest:guest@localhost:8083/api --port=5555 --inspect_timeout=60000 --basic_auth=ezl:flower@ezl
     volumes:
       - .:/app
     depends_on:
-      - builder
-      - db
-      - queues
+      - tasks
 
   queues:
     restart: unless-stopped
-    image: rabbitmq:latest
+    image: "rabbitmq:3-management"
 
   nginx:
     image: nginx:1.13
