@@ -17,3 +17,4 @@ class DashboardModelAdmin(admin.ModelAdmin):
 class CardModelAdmin(admin.ModelAdmin):
 	list_display = ['name', 'code']
 	form=CardForm
+	fields = ('name', 'schema', 'code')

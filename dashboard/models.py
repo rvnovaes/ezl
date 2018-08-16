@@ -1,5 +1,11 @@
 from django.db import models
 from core.models import Company
+from django.contrib.postgres.fields import JSONField
+import json
+from .schemas import *
+
+
+
 
 class Dashboard(models.Model):
 	company = models.ForeignKey(Company, verbose_name='Empresa')
@@ -12,8 +18,8 @@ class Dashboard(models.Model):
 class Card(models.Model):		
 	name = models.CharField(verbose_name='Nome', max_length=255, blank=True, null=True)
 	code = models.TextField(verbose_name='Codigo', blank=True, null=True)	
-	dashboards = models.ManyToManyField(Dashboard, related_name='cards', null=True, blank=True)	
-
+	dashboards = models.ManyToManyField(Dashboard, related_name='cards', null=True, blank=True)
+	schema = JSONField(verbose_name=u'Schema', blank=True, null=True, default=json.dumps(CARD))
 
 	def __str__(self):
 		return self.name
