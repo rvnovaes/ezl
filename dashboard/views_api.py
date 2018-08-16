@@ -3,13 +3,14 @@ from .models import Dashboard
 from .serializers import DashboardSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 
-class DashboardViewSet(viewsets.ReadOnlyModelViewSet):
-	serializer_class = DashboardSerializer
-	queryset = Dashboard.objects.all()
-	pagination_class = None
-	filter_backends = (DjangoFilterBackend,)
-	filter_fields = ('company', )
 
-	def get_queryset(self):
-		user = self.request.user
-		return Dashboard.objects.filter(company__in=user.companys.all().values_list('company', flat=True))
+class DashboardViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = DashboardSerializer
+    queryset = Dashboard.objects.all()
+    pagination_class = None
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('company', )
+
+    def get_queryset(self):
+        user = self.request.user
+        return Dashboard.objects.filter(company__in=user.companys.all().values_list('company', flat=True))

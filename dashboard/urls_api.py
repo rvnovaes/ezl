@@ -7,5 +7,5 @@ router = routers.SimpleRouter()
 router.register(r'dashboard', views.DashboardViewSet, base_name='dashboard')
 
 urlpatterns = [
-	
+
 ]

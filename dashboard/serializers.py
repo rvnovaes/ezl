@@ -6,23 +6,24 @@ from django.db import transaction
 
 
 class DashboardCardSerializer(serializers.ModelSerializer):
-	code = serializers.SerializerMethodField()
-	class Meta:
-		model = DashboardCard
-		fields = ('sequence', 'code')
+    code = serializers.SerializerMethodField()
 
-	def get_code(self, obj):
-		return exec_code(self, obj.card, 'code')
+    class Meta:
+        model = DashboardCard
+        fields = ('sequence', 'code')
+
+    def get_code(self, obj):
+        return exec_code(self, obj.card, 'code')
 
 
-class DashboardSerializer(serializers.ModelSerializer):	
-	company_name = serializers.SerializerMethodField()
-	dashboardcard_set = DashboardCardSerializer(many=True, read_only=True)
+class DashboardSerializer(serializers.ModelSerializer):
+    company_name = serializers.SerializerMethodField()
+    dashboardcard_set = DashboardCardSerializer(many=True, read_only=True)
 
-	class Meta:
-		model = Dashboard
-		list_serializer_class = DashboardCardSerializer
-		fields = ('id', 'company', 'refresh', 'company_name', 'dashboardcard_set')
+    class Meta:
+        model = Dashboard
+        fields = ('id', 'company', 'logo', 'refresh', 
+                  'company_name', 'dashboardcard_set')
 
-	def get_company_name(self, obj):
-		return obj.company.name
+    def get_company_name(self, obj):
+        return obj.company.name
