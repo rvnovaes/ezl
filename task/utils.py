@@ -67,8 +67,7 @@ def copy_ecm(ecm, task):
     else:
         subject = 'Erro ao copiar ECM {}'.format(ecm.id)
         body = """Erro ao copiar ECM {} para a OS {}:
-        {}
-        {} does not exists""".format(ecm.id, task.id, e, str(ecm.path))
+        {} does not exists""".format(ecm.id, task.id, str(ecm.path))
         recipients = [admin[1] for admin in settings.ADMINS]
         send_mail.delay(recipients, subject, body)
 
