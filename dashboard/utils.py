@@ -2,6 +2,8 @@ from functools import wraps
 from dashboard.models import Dashboard
 from django.db import transaction
 from django.utils import timezone
+import json
+
 
 MONTHS = {
     1: 'Janeiro',
@@ -53,5 +55,5 @@ def exec_code(self, obj, attr):
     try:
         exec(getattr(obj, attr))
         return locals().get('result')
-    except:
-        return ''
+    except Exception as e:
+        return json.dumps([{'error': str(e)}])
