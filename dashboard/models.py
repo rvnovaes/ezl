@@ -29,3 +29,7 @@ class Card(models.Model):
 class DashboardCard(models.Model):
     dashboard = models.ForeignKey(Dashboard, on_delete=models.CASCADE, blank=True)
     card = models.ForeignKey(Card, on_delete=models.CASCADE, blank=True)
+    sequence = models.IntegerField('Sequencia')
+
+    class Meta:
+    	ordering = ['sequence']
