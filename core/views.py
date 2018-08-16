@@ -1,7 +1,9 @@
-import importlib
-import json
 from abc import abstractproperty
 from functools import wraps
+import importlib
+import json
+import os
+from urllib.parse import urljoin
 from django import forms
 from django.forms.utils import ErrorList
 from django.conf import settings
@@ -16,13 +18,14 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import ProtectedError, Q, F
 from django.db import transaction, IntegrityError
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.views import View
 from django.views.generic import ListView, TemplateView
 from allauth.account.views import LoginView, PasswordResetView
+from django.views.static import serve as static_serve_view
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
@@ -40,7 +43,7 @@ from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable
 from core.utils import login_log, logout_log, get_office_session, get_domain
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
-from task.models import Task, TaskStatus
+from task.models import Task, TaskStatus, Ecm
 from task.metrics import get_correspondent_metrics
 from ecm.forms import AttachmentForm
 from ecm.utils import attachment_form_valid, attachments_multi_delete
@@ -1828,7 +1831,9 @@ class TeamDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
 
+class MediaFileView(LoginRequiredMixin, View):
 
-
-
-
+    def get(self, request, path):
+        if os.path.exists(os.path.join(settings.MEDIA_ROOT, path)):
+            return static_serve_view(self.request, path, document_root=settings.MEDIA_ROOT)
+        return HttpResponseRedirect(urljoin(settings.AWS_STORAGE_BUCKET_URL, path))

@@ -22,6 +22,7 @@ django-material==1.0.0
 django-querysetsequence==0.7.2
 django-tables2==1.10.0
 django-sequences==2.2
+django-storages==1.6
 
 # Django channels
 channels==1.1.8
@@ -44,3 +45,4 @@ django-guardian==1.4.9
 django-money==0.13.2
 openpyxl==2.5.3
 django-redis==4.9.0
+boto==2.49

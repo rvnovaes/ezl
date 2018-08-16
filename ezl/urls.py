@@ -83,9 +83,7 @@ urlpatterns = [
 
     url(r'^popup_success', PopupSuccessView.as_view(), name='popup_success'),
 
-] + \
-    static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static/')) + \
-    static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static/'))
 
 if settings.DEBUG:
     import debug_toolbar

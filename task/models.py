@@ -355,6 +355,7 @@ class EcmManager(models.Manager):
 
 class Ecm(Audit, LegacyCode):
     path = models.FileField(upload_to=get_dir_name, max_length=255, null=False)
+    size = models.PositiveIntegerField(null=True, blank=True)
     task = models.ForeignKey(Task, blank=False, null=False, on_delete=models.PROTECT)
     updated = models.BooleanField(default=True, null=False)
     exhibition_name = models.CharField(
@@ -364,10 +365,19 @@ class Ecm(Audit, LegacyCode):
 
     objects = EcmManager()
 
+    def save(self, *args, **kwargs):
+        if not self.size:
+            try:
+                self.size = self.path.size
+            except:
+                # Skip errors when file does not exists
+                pass
+        return super().save(*args, **kwargs)
+
     # Retorna o nome do arquivo no Path, para renderizar no tamplate
     @property
     def filename(self):
-        return os.path.basename(self.path.path) if self.path else None
+        return os.path.basename(self.path.name) if self.path else None
 
     @property
     def user(self):
