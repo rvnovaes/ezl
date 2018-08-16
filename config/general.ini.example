@@ -17,7 +17,7 @@ environment = development
 email_use_ssl = True
 email_host = 'smtp.zoho.com'
 email_port = 465
-email_host_user = 'ezlawyer@mttech.com.br'
+email_host_user = 'contato@ezlawyer.com.br'
 email_host_password = 'ezlmta@578'
 
 [etl]
