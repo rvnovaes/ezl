@@ -11,6 +11,18 @@ from task.models import TypeTask, Task, Filter, TaskStatus
 from .models import DashboardViewModel
 from core.utils import get_office_session
 
+OFFICE = 'E'
+CLIENT = 'C'
+GROUP_BY_TASK_TO_PAY_TYPE = (
+    (OFFICE, 'Por Escritório Correspondente'),
+    (CLIENT, 'Por Cliente'),
+)
+
+GROUP_BY_TASK_TO_RECEIVE_TYPE = (
+    (OFFICE, 'Por Escritório Contratante'),
+    (CLIENT, 'Por Cliente'),
+)
+
 
 class TaskFilter(FilterSet):
     state = ModelChoiceFilter(queryset=filter_valid_choice_form(
@@ -120,6 +132,10 @@ class TaskToPayFilter(TaskReportFilterBase):
             ('false', 'Somente não faturadas'),
             )
         )
+    group_by_tasks = ChoiceFilter(
+        empty_label=None,
+        choices= GROUP_BY_TASK_TO_PAY_TYPE
+    )
 
 class TaskToReceiveFilter(TaskReportFilterBase):
     status = ChoiceFilter(
@@ -129,3 +145,7 @@ class TaskToReceiveFilter(TaskReportFilterBase):
             ('false', 'Somente não recebidas'),
             )
         )
+    group_by_tasks = ChoiceFilter(
+        empty_label=None,
+        choices = GROUP_BY_TASK_TO_RECEIVE_TYPE
+    )

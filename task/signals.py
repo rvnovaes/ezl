@@ -146,8 +146,8 @@ def update_status_parent_task(sender, instance, **kwargs):
                 and not getattr(instance, '_from_parent'):
             instance.parent.task_status = get_parent_status(instance.status)
             if instance.parent.task_status == TaskStatus.REQUESTED:
-                setattr(instance.parent, '__notes', 'O escritório {} recusou a OS {}'.format(instance.office.legal_name,
-                                                                                             instance.parent.task_number))
+                setattr(instance.parent, '__notes', 'O escritório {} recusou a OS {}. Motivo: {}'.format(instance.office.legal_name,
+                                                                                             instance.parent.task_number, getattr(instance, '__notes', '')))
             fields = get_parent_fields(instance.status)
             for field in fields:
                 setattr(instance.parent, field, getattr(instance, field)),
