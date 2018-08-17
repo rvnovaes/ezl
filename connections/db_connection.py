@@ -1,6 +1,7 @@
 from enum import Enum
 
 from sqlalchemy import create_engine
+from sqlalchemy.pool import NullPool
 import pymssql
 
 from config.config import get_parser
@@ -47,7 +48,7 @@ def connect_db(config_parser, config_session):
                                    port=port)
 
         engine = create_engine(
-            'mssql+pymssql://', creator=connect)
+            'mssql+pymssql://', creator=connect, poolclass=NullPool)
 
         assert engine.connect()
 
