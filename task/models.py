@@ -386,6 +386,14 @@ class Ecm(Audit, LegacyCode):
             raise ValidationError("Não é possível apagar um arquivo que foi vinculado a outro sistema.")
         return super().delete(*args, **kwargs)
 
+    def download(self):
+        """Baixamos o arquivo do S3 caso ele não exista localmente"""
+        local_file_path = os.path.join(settings.MEDIA_ROOT, self.path.name)
+        if not os.path.exists(local_file_path):
+            with open(local_file_path, 'wb') as local_file:
+                local_file.write(self.path.read())
+        return local_file_path
+
 
 class TaskHistory(AuditCreate):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, blank=False, null=False)
