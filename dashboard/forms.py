@@ -1,5 +1,5 @@
 from django import forms
-from .models import Dashboard, Card
+from .models import Dashboard, Card, DoughnutChart
 from codemirror import CodeMirrorTextarea
 import json
 from .schemas import *
@@ -27,11 +27,23 @@ code_mirror_schema = CodeMirrorTextarea(
 )
 
 
-class CardForm(forms.ModelForm):
+class ComponentForm(forms.ModelForm):
     code = forms.CharField(label="Código", widget=code_mirror)
+
+
+class CardForm(ComponentForm):
     schema = forms.CharField(
         label="Schema", widget=code_mirror_schema, initial=json.dumps(CARD))
 
     class Meta:
         model = Card
+        fields = '__all__'
+
+
+class DoughnutChartForm(ComponentForm):
+    schema = forms.CharField(
+        label="Schema", widget=code_mirror_schema, initial=json.dumps(DOUGHNUT))
+
+    class Meta:
+        model = DoughnutChart
         fields = '__all__'

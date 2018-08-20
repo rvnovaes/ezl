@@ -5,3 +5,9 @@ CARD = {
     "percent": "string",
     "direction": "string"
 }
+
+DOUGHNUT = {
+	"title": "string",
+	"labels": "list", 
+	"values": "list",
+}
