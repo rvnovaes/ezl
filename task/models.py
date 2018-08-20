@@ -1,7 +1,6 @@
 import os
 from enum import Enum
 from django.db import transaction
-
 import pickle
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -14,6 +13,8 @@ from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, Off
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
 from decimal import Decimal
+from django.contrib.postgres.fields import JSONField
+
 
 
 class Permissions(Enum):
@@ -136,6 +137,7 @@ class TypeTask(Audit, LegacyCode):
                             verbose_name='Tipo de Serviço')
     simple_service = models.BooleanField(verbose_name="Serviço simples",
         default=False)
+    is_audience = models.BooleanField(verbose_name='É audiência', default=False)
     survey = models.ForeignKey(
         'survey.Survey',
         null=True,
@@ -194,7 +196,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
     task_status = models.CharField(null=False, verbose_name=u'', max_length=30,
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
                                    default=TaskStatus.REQUESTED)
-    survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    survey_result = JSONField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
     amount = models.DecimalField(null=False, blank=False, verbose_name='Valor',
                                  max_digits=9, decimal_places=2, default=Decimal('0.00'))
     chat = models.ForeignKey(Chat, verbose_name='Chat', on_delete=models.SET_NULL, null=True,
@@ -452,8 +454,7 @@ class DashboardViewModel(Audit, OfficeMixin):
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
                                    default=TaskStatus.OPEN)
     client = models.CharField(null=True, verbose_name='Cliente', max_length=255)
-    type_service = models.CharField(null=True, verbose_name='Serviço', max_length=255)
-    survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    type_service = models.CharField(null=True, verbose_name='Serviço', max_length=255)    
     law_suit_number = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='Número do Processo')    
     parent_task_number = models.PositiveIntegerField(default=0, verbose_name='OS Original')

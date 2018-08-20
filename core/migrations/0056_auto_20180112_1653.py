@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='person',
             name='import_from_legacy',
-            field=models.BooleanField(default=False, verbose_name='Importar OSs do sistema de origem para esse cliente'),
+            field=models.BooleanField(
+                default=False, verbose_name='Importar OSs do sistema de origem para esse cliente'),
         ),
     ]

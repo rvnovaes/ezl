@@ -1,12 +1,21 @@
 from django.contrib import admin
 from core.models import AddressType, ContactMechanismType, ContactMechanism, Team
-#Todo: Remover office
-from core.models import Office, Invite, InviteOffice, OfficeRelGroup
+# Todo: Remover office
+from core.models import Office, Invite, InviteOffice, OfficeRelGroup, Company, CompanyUser
 
+
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(CompanyUser)
+class CompanyUserAdmin(admin.ModelAdmin):
+    list_display = ['company', 'user']
 
 @admin.register(ContactMechanismType)
 class ContactMechanismTypeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'create_user', 'create_date', 'alter_user', 'alter_date']
+    list_display = ['name', 'create_user',
+                    'create_date', 'alter_user', 'alter_date']
     search_fields = ['name']
     list_filter = ['name']
 
@@ -48,8 +57,10 @@ class InviteOfficeAdmin(admin.ModelAdmin):
 class OfficeRelGroupAdmin(admin.ModelAdmin):
     list_display = ['pk', 'office', 'group']
 
+
 @admin.register(Team)
 class TeamAdmin(admin.ModelAdmin):
     list_display = ['pk', 'name']
+
 
 admin.site.register(AddressType)

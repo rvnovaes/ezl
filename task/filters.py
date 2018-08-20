@@ -12,6 +12,11 @@ from .models import DashboardViewModel
 from core.utils import get_office_session
 
 
+class TaskApiFilter(FilterSet):
+  class Meta:
+    model = Task
+    fields = ['legacy_code', 'task_number']
+
 class TaskFilter(FilterSet):
     state = ModelChoiceFilter(queryset=filter_valid_choice_form(
         State.objects.filter(is_active=True)),
