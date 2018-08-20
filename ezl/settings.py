@@ -131,6 +131,7 @@ INSTALLED_APPS = [
     'billing',
     'djmoney',
     'import_export',
+    'django_dbconn_retry',
 ]
 
 MIDDLEWARE = [

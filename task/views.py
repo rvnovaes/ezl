@@ -159,7 +159,7 @@ class TaskToAssignView(AuditFormMixin, UpdateView):
 
     def form_valid(self, form):
         super().form_valid(form)
-        if form.is_valid():            
+        if form.is_valid():
             form.instance.person_distributed_by = self.request.user.person
             form.instance.task_status = TaskStatus.OPEN
             # TODO: rever processo de anexo, quando for trocar para o ECM Generico
@@ -816,9 +816,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
                 if not checker.has_perm('can_distribute_tasks', office_session):
                     if checker.has_perm('view_delegated_tasks', office_session):
-                        person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+                        person_dynamic_query.add(Q(person_executed_by=person.id), Q.OR)
                     if checker.has_perm('view_requested_tasks', office_session):
-                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.OR)
                 if data['office_executed_by']:
                     task_dynamic_query.add(Q(child__office_id=data['office_executed_by']), Q.AND)
                 if data['state']:
