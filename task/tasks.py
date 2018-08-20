@@ -8,7 +8,9 @@ from djmoney.money import Money
 from core.models import ImportXlsFile, Office, State
 from core.tasks import delete_imported_xls
 from task.models import TypeTask
+from task.resources import TaskResource
 from lawsuit.models import CourtDistrict
+from tablib import Dataset
 # from .utils import remove_caracter_especial, clearCache
 import time
 
@@ -22,9 +24,11 @@ ERROR_PROCESS = 'ERROR_PROCESS_'
 @shared_task(bind=True)
 def import_xls_task_list(self, file_id):
     try:
-        self.update_state(state="PROGRESS")
+        # self.update_state(state="PROGRESS")
         xls_file = ImportXlsFile.objects.get(pk=file_id)
         xls_file.log = " "
+        task_resource = TaskResource()
+        dataset = Dataset()
         # chaves para acessar dados em cache
         imported_cache_key = IMPORTED_IMPORT_SERVICE_PRICE_TABLE + str(xls_file.pk)
         imported_worksheet_key = IMPORTED_WORKSHEET + str(xls_file.pk)
@@ -52,9 +56,9 @@ def import_xls_task_list(self, file_id):
                 #     value = get_service_value(row, xls_file, office_correspondent, court_district, state)
                 #     update_or_create_service_price_table(xls_file, office_session, user_session, office_correspondent,
                 #         type_task, court_district, state, value)
-                    i = i + 1
-                    process_percent = int(100 * float(i) / float(total))            
-                    cache.set(percent_imported_cache_key, process_percent, timeout=None)            
+                i = i + 1
+                process_percent = int(100 * float(i) / float(total))
+                cache.set(percent_imported_cache_key, process_percent, timeout=None)
             cache.set(imported_worksheet_key, True, timeout=None)                                
         cache.set(imported_cache_key, True, timeout=None)
     except FileNotFoundError as ex:
