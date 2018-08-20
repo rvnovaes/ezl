@@ -1287,8 +1287,6 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(*args, **kwargs)
         form = self.form_class(request.POST, request.FILES)
-        import pdb;
-        pdb.set_trace()
         if form.is_valid():
             file_xls = form.save(commit=False)
             file_xls.office = get_office_session(request)
