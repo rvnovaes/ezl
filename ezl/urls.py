@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 
 from core.views import (ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin,
     CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave, PopupSuccessView,
-    OfficeAutocomplete)
+    OfficeAutocomplete, OfficeCorrespondentAutocomplete)
 from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView
 
@@ -59,6 +59,8 @@ urlpatterns = [
     url(r'^correspondent_form',
         login_required(CorrespondentAutocomplete.as_view()),
         name='correspondent_autocomplete'),
+    url(r'^office_correspondent_form', login_required(OfficeCorrespondentAutocomplete.as_view()), 
+        name='office_correspondent_form'),
 
     url(r'^requester_form',
         login_required(RequesterAutocomplete.as_view()),

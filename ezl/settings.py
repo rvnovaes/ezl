@@ -15,6 +15,7 @@ MUST_LOGIN = True
 
 CELERY_BROKER_URL = 'amqp://guest:guest@queues:5672/'
 CELERY_RESULT_BACKEND = 'amqp://guest:guest@queues:5672/'
+CELERY_ENABLE_UTC = False
 CELERY_TIMEZONE = 'America/Sao_Paulo'
 CELERY_TASK_ALWAYS_EAGER = False
 CELERY_BEAT_SCHEDULE = {
@@ -24,11 +25,10 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 CELERY_SEND_TASK_EMAILS = False
+CELERY_TASK_IGNORE_RESULT = True
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-USER_MANUAL_URL = '/static/downloads/manual-correspondentes.pdf'
-
 DATETIME_FORMAT = '%d/%m/%Y %H:%M'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -130,6 +130,7 @@ INSTALLED_APPS = [
     'guardian',
     'billing',
     'djmoney',
+    'django_dbconn_retry',
 ]
 
 MIDDLEWARE = [
@@ -295,12 +296,6 @@ INTERNAL_IPS = '127.0.0.1'
 PROJECT_NAME = 'Easy Lawyer'
 PROJECT_LINK = 'https://ezl.ezlawyer.com.br'
 
-LINK_TO_RESTORE_DB_DEMO = 'http://13.68.213.60:8001'
-
-# RAVEN_CONFIG = {
-#     'dsn': ('https://8117af934e9c436c8ad81a66fd875912'
-#             ':d00c54e22db046b19a7dcae5677126db@sentry.io/224925'),
-# }
 
 LUIGI_TARGET_PATH = os.path.join(BASE_DIR, 'luigi_targets')
 

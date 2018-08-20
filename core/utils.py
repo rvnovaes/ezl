@@ -1,10 +1,25 @@
 from enum import Enum
+from config.config import get_parser
 from django.db.models import Q
 import logging
+from functools import wraps
+from openpyxl import load_workbook
+import os
 from functools import wraps
 
 EZL_LOGGER = logging.getLogger('ezl')
 
+
+def check_environ(f):    
+    @wraps(f)
+    def wrapper(*args, **kwargs):        
+        parser = get_parser()
+        source = dict(parser.items('etl'))
+        connection_name = source['connection_name']        
+        if  connection_name == 'advwin_connection' and os.environ['ENV'] == 'development':
+            return 'NAO E PERMITIDO EXECUTAR ESTA OPERACAO NO BANCO ADVWIN DE PRODUCAO COM O AMBIENTE DEVELOPMENT'
+        return f(*args, **kwargs)
+    return wrapper
 
 # enumerador usado para integracao entre sistemas
 class LegacySystem(Enum):
@@ -152,3 +167,11 @@ def get_domain(request):
         return request.META.get('HTTP_REFERER')[:-1]
     except:
         return '{}://{}'.format(request.scheme, request.get_host())
+
+
+def validate_xlsx_header(xls_file, headers):
+    if headers:
+        wb = load_workbook(xls_file, data_only=True)
+        headers_in_file = list(map(lambda header:header.value, [list(sheet.rows)[0] for sheet in wb.worksheets][0]))
+        header_is_valid = set(headers).issubset(set(headers_in_file))
+    return header_is_valid

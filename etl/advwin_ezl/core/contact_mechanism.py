@@ -1,21 +1,34 @@
 from core.models import ContactMechanism, Person, ContactMechanismType
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.utils import get_message_log_default, save_error_log
+from core.utils import LegacySystem
 
+UNIT_TO_CONTACT = {
+  '21': '31 2538-7830', 
+  '11': '31 2538-7760', 
+  '14': '48 3771-6812', 
+  '09': '11 4837-3400', 
+  '06': '21 2221-5797', 
+  '13': '11 3738-1763', 
+  '01': '31 4501-4100'
+}
 
 # noinspection SpellCheckingInspection
-class ContactMechanismETL(GenericETL):
-    model = ContactMechanism
+class ContactMechanismETL(GenericETL):  
+    model = ContactMechanism    
     import_query = """
-                    SELECT *
+        SELECT *
                     FROM (
                            --       ADV_PHONE1
                            SELECT
+                             ADV_PHONE1.Unidade AS unit,
                              ADV_PHONE1.Codigo AS legacy_code,
                              'telefone'        AS contact_mechanism_type,
                              ADV_PHONE1.Fone1  AS description
                            FROM Jurid_Advogado AS ADV_PHONE1
                            WHERE ADV_PHONE1.Status = 'Ativo'
+                               AND Unidade IN ('21', '11', '14', '24', '09', '06', '13', '01')
+                               AND ADV_PHONE1.Fone1 IS NOT NULL
                                  AND ADV_PHONE1.Nome IS NOT NULL
                                  AND ADV_PHONE1.Nome <> ''
                                  AND ADV_PHONE1.Codigo NOT IN (
@@ -29,11 +42,14 @@ class ContactMechanismETL(GenericETL):
                            UNION
                            --          ADV_PHONE2
                            SELECT
+                             ADV_PHONE2.Unidade AS unit,
                              ADV_PHONE2.Codigo AS legacy_code,
                              'telefone'        AS contact_mechanism_type,
                              ADV_PHONE2.Fone2  AS description
                            FROM Jurid_Advogado AS ADV_PHONE2
                            WHERE ADV_PHONE2.Status = 'Ativo'
+                               AND Unidade IN ('21', '11', '14', '24', '09', '06', '13', '01')
+                               AND ADV_PHONE2.Fone2 IS NOT NULL                           
                                  AND ADV_PHONE2.Nome IS NOT NULL
                                  AND ADV_PHONE2.Nome <> ''
                                  AND ADV_PHONE2.Codigo NOT IN (
@@ -47,11 +63,14 @@ class ContactMechanismETL(GenericETL):
                            UNION
                            --   ADV_PHONE3
                            SELECT
+                             ADV_PHONE3.Unidade AS unit,
                              ADV_PHONE3.Codigo AS legacy_code,
                              'telefone'        AS contact_mechanism_type,
                              ADV_PHONE3.FONE3  AS description
                            FROM Jurid_Advogado AS ADV_PHONE3
                            WHERE ADV_PHONE3.Status = 'Ativo'
+                               AND Unidade IN ('21', '11', '14', '24', '09', '06', '13', '01')
+                               AND ADV_PHONE3.Fone3 IS NOT NULL                           
                                  AND ADV_PHONE3.Nome IS NOT NULL
                                  AND ADV_PHONE3.Nome <> ''
                                  AND ADV_PHONE3.Codigo NOT IN (
@@ -61,32 +80,16 @@ class ContactMechanismETL(GenericETL):
                                    AND CF.Razao IS NOT NULL
                                    AND CF.Razao <> ''
                            )
-                           UNION
-                           --   ADV_FAX
-                           SELECT
-                             ADV_FAX.Codigo AS legacy_code,
-                             'telefone'     AS contact_mechanism_type,
-                             ADV_FAX.Fax    AS description
-                           FROM Jurid_Advogado AS ADV_FAX
-                           WHERE ADV_FAX.Status = 'Ativo'
-                                 AND ADV_FAX.Nome IS NOT NULL
-                                 AND ADV_FAX.Nome <> ''
-                                 AND ADV_FAX.Codigo NOT IN (
-                             SELECT CF.Codigo
-                             FROM Jurid_CliFor AS CF
-                             WHERE CF.Status = 'Ativo'
-                                   AND CF.Razao IS NOT NULL
-                                   AND CF.Razao <> ''
-                                   AND CF.Fax IS NOT NULL
-                           )
                            --        ADV_EMAIL
                            UNION
-                           SELECT
+                           SELECT DISTINCT
+                             '' AS unit,
                              ADV_EMAIL.Codigo AS legacy_code,
                              'email'          AS contact_mechanism_type,
                              ADV_EMAIL.E_mail AS description
                            FROM Jurid_Advogado AS ADV_EMAIL
                            WHERE ADV_EMAIL.Status = 'Ativo'
+                                 AND LOWER(ADV_EMAIL.E_mail) like '%@mtostes.com.br' 
                                  AND ADV_EMAIL.Nome IS NOT NULL
                                  AND ADV_EMAIL.Nome <> ''
                                  AND ADV_EMAIL.Codigo NOT IN (
@@ -97,81 +100,37 @@ class ContactMechanismETL(GenericETL):
                                    AND CF.Razao <> ''
                                    AND CF.E_mail IS NOT NULL
                            )
-                           UNION
-                           --          CLIFOR_PHONE1
-                           SELECT
-                             CLIFOR_PHONE1.Codigo AS legacy_code,
-                             'telefone'           AS contact_mechanism_type,
-                             CLIFOR_PHONE1.Fone1  AS description
-                           FROM Jurid_CliFor AS CLIFOR_PHONE1
-                           WHERE CLIFOR_PHONE1.Status = 'Ativo' AND CLIFOR_PHONE1.Razao IS NOT NULL AND CLIFOR_PHONE1.Razao <> ''
-                    
-                           UNION
-                           --          CLIFOR_PHONE2
-                           SELECT
-                             CLIFOR_PHONE2.Codigo AS legacy_code,
-                             'telefone'           AS contact_mechanism_type,
-                             CLIFOR_PHONE2.Fone2  AS description
-                           FROM Jurid_CliFor AS CLIFOR_PHONE2
-                           WHERE CLIFOR_PHONE2.Status = 'Ativo' AND CLIFOR_PHONE2.Razao IS NOT NULL AND CLIFOR_PHONE2.Razao <> ''
-                    
-                           UNION
-                           --          CLIFOR_FAX
-                           SELECT
-                             CLIFOR_FAX.Codigo AS legacy_code,
-                             'telefone'        AS contact_mechanism_type,
-                             CLIFOR_FAX.Fax    AS description
-                           FROM Jurid_CliFor AS CLIFOR_FAX
-                           WHERE CLIFOR_FAX.Status = 'Ativo' AND CLIFOR_FAX.Razao IS NOT NULL AND CLIFOR_FAX.Razao <> ''
-                    
-                           UNION
-                           --          CLIFOR_EMAIL
-                           SELECT
-                             CLIFOR_EMAIL.Codigo AS legacy_code,
-                             'email'             AS contact_mechanism_type,
-                             CLIFOR_EMAIL.E_mail AS description
-                           FROM Jurid_CliFor AS CLIFOR_EMAIL
-                           WHERE CLIFOR_EMAIL.Status = 'Ativo' AND CLIFOR_EMAIL.Razao IS NOT NULL AND CLIFOR_EMAIL.Razao <> ''
-                    
-                           UNION
-                           --          CLIFOR_EMAILNFE
-                           SELECT
-                             CLIFOR_EMAILNFE.Codigo     AS legacy_code,
-                             'email'                    AS contact_mechanism_type,
-                             CLIFOR_EMAILNFE.email_nfse AS description
-                           FROM Jurid_CliFor AS CLIFOR_EMAILNFE
-                           WHERE CLIFOR_EMAILNFE.Status = 'Ativo' AND CLIFOR_EMAILNFE.Razao IS NOT NULL AND CLIFOR_EMAILNFE.Razao <> ''
-                    
-                           UNION
-                           --          CLIFOR_SITE
-                           SELECT
-                             CLIFOR_SITE.Codigo AS legacy_code,
-                             'email'            AS contact_mechanism_type,
-                             CLIFOR_SITE.site   AS description
-                           FROM Jurid_CliFor AS CLIFOR_SITE
-                           WHERE CLIFOR_SITE.Status = 'Ativo' AND CLIFOR_SITE.Razao IS NOT NULL AND CLIFOR_SITE.Razao <> ''
                     
                            UNION
                            --          CORSER_EMAIL
-                           SELECT
+                           SELECT DISTINCT
+                           '' AS unit,
                              CORSER_EMAIL.CS_Advogado AS legacy_code,
                              'email'                  AS contact_mechanism_type,
                              CORSER_EMAIL.CS_Email    AS description
                            FROM Jurid_Corresp_Servico CORSER_EMAIL
+                           WHERE LOWER(CORSER_EMAIL.CS_Email) LIKE '%@mtostes.com.br'  
                     
                            UNION
                            --          CORSER_MULTEMAIL
-                           SELECT
+                           SELECT DISTINCT
+                             '' AS unit,
                              CORSER_MULTEMAIL.CS_Advogado      AS legacy_code,
                              'multemail'                       AS contact_mechanism_type,
                              CORSER_MULTEMAIL.CS_Outros_Emails AS description
                            FROM Jurid_Corresp_Servico CORSER_MULTEMAIL
-                    
+                           WHERE LOWER(CORSER_MULTEMAIL.CS_Outros_Emails) LIKE '%@mtostes.com.br%' -- Necessario tratar no codigo pois vem mais de um email no campo
                          ) AS TMP
                     WHERE description IS NOT NULL AND description <> ''
                     """
-    has_status = False
+    has_status = False    
     field_check = 'description'
+
+    @staticmethod
+    def get_unit_contact(row):
+      if row['contact_mechanism_type'] == 'telefone':               
+        return UNIT_TO_CONTACT.get(row['unit'], '')
+
 
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):
@@ -179,7 +138,11 @@ class ContactMechanismETL(GenericETL):
             rows_count -= 1
             try:
                 legacy_code = row['legacy_code']
-                persons = Person.objects.filter(legacy_code=legacy_code)
+                persons = Person.objects.filter(
+                  legacy_code=legacy_code, 
+                  legacy_code__isnull=False,
+                  offices=default_office, 
+                  system_prefix=LegacySystem.ADVWIN.value)
                 for person in persons:
                         description = ''
                         if row['contact_mechanism_type'] != 'multemail':
@@ -187,9 +150,10 @@ class ContactMechanismETL(GenericETL):
                                 defaults={'name': row['contact_mechanism_type'],
                                           'create_user': user},
                                 name__unaccent__iexact=row['contact_mechanism_type'])
-                            if contact_mechanism_type:
+                            if contact_mechanism_type:                                
+                                description = self.get_unit_contact(row) if row['contact_mechanism_type'] == 'telefone' else row['description']
                                 obj = self.model(contact_mechanism_type=contact_mechanism_type,
-                                                 description=row['description'], notes='', person=person,
+                                                 description=description, notes='', person=person,
                                                  create_user=user)
                                 obj.save()
                         else:
@@ -199,7 +163,7 @@ class ContactMechanismETL(GenericETL):
                                 name__unaccent__iexact = 'email')
                             if contact_mechanism_type:
                                 for description in row['description'].split(';'):
-                                    if description:
+                                    if '@mtostes.com.br' in description.lower():
                                         obj = self.model(contact_mechanism_type=contact_mechanism_type,
                                                          description=description, notes='', person=person,
                                                          create_user=user)

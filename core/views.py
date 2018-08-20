@@ -12,6 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User, Group
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import ProtectedError, Q, F
@@ -155,7 +156,7 @@ def logout_user(request):
 
 
 class MultiDeleteViewMixin(DeleteView):
-    success_message = None
+    success_message = None        
 
     def delete(self, request, *args, **kwargs):
         if request.method == 'POST':
@@ -165,9 +166,8 @@ class MultiDeleteViewMixin(DeleteView):
                 self.model.objects.filter(pk__in=pks).delete()
                 attachments_multi_delete(self.model, pks=pks)
                 messages.success(self.request, self.success_message)
-            except ProtectedError as e:
-                qs = e.protected_objects.first()
-                # type = type('Task')
+            except ProtectedError as e:                
+                qs = e.protected_objects.first()                
                 messages.error(self.request,
                                delete_error_protected(str(self.model._meta.verbose_name),
                                                       qs.__str__()))
@@ -178,6 +178,34 @@ class MultiDeleteViewMixin(DeleteView):
         else:
             return HttpResponseRedirect(self.get_success_url())
 
+
+class MultiDeleteView(DeleteView):
+    success_message = None
+    error_message = 'Não é possível fazer exclusão do(s) registro(s) selecionado(s) porque existe(m) ' \
+                    +'informações associadas na tabela %s para o registro %s.'
+
+    def delete(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            pks = request.POST.getlist('selection')            
+            with transaction.atomic():
+                try:                
+                    for item in self.model.objects.filter(pk__in=pks):
+                        item.delete()                        
+                    attachments_multi_delete(self.model, pks=pks)
+                    messages.success(self.request, self.success_message)
+                except ProtectedError as e:                
+                    qs = e.protected_objects.first()                
+                    if self.error_message:
+                        msg_error = self.error_message % (qs._meta.object_name, item)
+                    else:
+                        delete_error_protected(str(self.model._meta.verbose_name), qs.__str__())
+                    messages.error(self.request, msg_error)
+
+        # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
+        if self.success_url:
+            return HttpResponseRedirect(self.success_url)
+        else:
+            return HttpResponseRedirect(self.get_success_url())
 
 def remove_invalid_registry(f):
     """
@@ -590,10 +618,10 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
         return reverse('person_update', args=(self.object.id,))
 
 
-class PersonDeleteView(AuditFormMixin, MultiDeleteViewMixin):
+class PersonDeleteView(AuditFormMixin, MultiDeleteView):
     model = Person
     success_url = reverse_lazy('person_list')
-    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
+    success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)        
     object_list_url = 'person_list'
 
 
@@ -929,7 +957,7 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         return kw
 
 
-class UserDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
+class UserDeleteView(CustomLoginRequiredView, MultiDeleteView):
     model = User
     success_url = reverse_lazy('user_list')
     success_message = DELETE_SUCCESS_MESSAGE.format('usuários')
@@ -1255,16 +1283,18 @@ class InviteOfficeCreateView(AuditFormMixin, CreateView):
 class InviteUpdateView(UpdateView):
     def post(self, request, *args, **kargs):
         invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
-        invite.status = request.POST.get('status')
+        invite.status = request.POST.get('status')        
         if invite.status == 'A':
             OfficeMembership.objects.update_or_create(person=invite.person,
                                                       office=invite.office,
                                                       defaults={'create_user': self.request.user,
-                                                                'is_active': True})
-            for group in {group for group, perms in
-                          get_groups_with_perms(invite.office, attach_perms=True).items() if 'view_delegated_tasks' in perms}:
-                if group not in invite.person.auth_user.groups.all():
-                    invite.person.auth_user.groups.add(group)            
+                                                                'is_active': True})            
+            groups_list = {group for group, perms in
+                          get_groups_with_perms(invite.office, attach_perms=True).items() if 'view_delegated_tasks' in perms} 
+            for group in groups_list:
+                if group not in invite.person.auth_user.groups.all() and \
+                    group.name.startswith(invite.office.CORRESPONDENT_GROUP):
+                        invite.person.auth_user.groups.add(group)
 
         invite.save()
         return HttpResponse('ok')
@@ -1479,6 +1509,13 @@ class CorrespondentAutocomplete(TypeaHeadGenericSearch):
             data.append({'id': correspondent.id, 'data-value-txt': correspondent.__str__()})
         return list(data)
 
+class OfficeCorrespondentAutocomplete(TypeaHeadGenericSearch):
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
+        data = []
+        for office_correspondent in office.offices.filter(Q(legal_name__unaccent__icontains=q)):
+            data.append({'id': office_correspondent.id, 'data-value-txt': office_correspondent.__str__()})
+        return list(data)    
 
 class RequesterAutocomplete(TypeaHeadGenericSearch):
 
@@ -1533,7 +1570,7 @@ class OfficeMembershipInactiveView(UpdateView):
                         try:
                             DefaultOffice.objects.filter(auth_user=record.person.auth_user, office=record.office).delete()
                         except:
-                            pass
+                            pass                                                                       
                     else:
                         messages.error(self.request, "O usuário {} não pode ser desvinculado do escritório, uma vez que"
                                                      " ainda existem OS a serem cumpridas por ele".format(record.person))

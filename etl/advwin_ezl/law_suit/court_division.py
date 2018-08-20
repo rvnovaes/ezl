@@ -27,8 +27,11 @@ class CourtDivisionETL(GenericETL):
                 name = row['descricao']
 
                 # tem que verificar se é novo antes para não salvar o create_user ao fazer update
-                instance = self.model.objects.filter(legacy_code=code,
-                                                     system_prefix=LegacySystem.ADVWIN.value).first()
+                instance = self.model.objects.filter(
+                  legacy_code=code,
+                  legacy_code__isnull=False,
+                  office=office,
+                  system_prefix=LegacySystem.ADVWIN.value).first()
                 if instance:
                     instance.name = name
                     instance.alter_user = user

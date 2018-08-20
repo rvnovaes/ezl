@@ -30,9 +30,11 @@
                 $('#containnerUploads').html('');
                 $('#totalAttachments').html('(' + data.total_ecms + ')')
                 if (data.total_ecms) {
-                    $('#no-providence').addClass('hide')
+                    $('#no-providence').addClass('hide')                    
+                    $('.js-batch-download-files').show()
                 } else {
                     $('#no-providence').removeClass('show')
+                    $('.js-batch-download-files').hide()
                 };
                 $.each(data.ecms, function( index, value ) {
                     $.tmpl(tmplRowUpload, value).appendTo('#containnerUploads');
@@ -71,6 +73,7 @@
                     if (!data.num_ged) {
                         $('#deleting').modal('hide');
                         $('#no-providence').removeClass('hide')
+                        $('.js-batch-download-files').show()
                     }
                 }
             })

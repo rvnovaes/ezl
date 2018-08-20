@@ -1,3 +1,4 @@
+import time
 from enum import Enum
 from json import loads
 from os import linesep
@@ -14,6 +15,7 @@ from task.models import Task, TaskStatus, TaskHistory, Ecm
 from sqlalchemy import and_
 from django.utils import timezone
 from guardian.shortcuts import get_users_with_perms
+from retrying import retry
 
 
 LOGGER = get_task_logger(__name__)
@@ -22,13 +24,24 @@ DO_SOMETHING_SUCCESS_MESSAGE = 'Do Something successful!'
 
 DO_SOMETHING_ERROR_MESSAGE = 'ERROR during do something: {}'
 
-MAX_RETRIES = 10
+MAX_RETRIES = 5
 
-BASE_COUNTDOWN = 2
+BASE_COUNTDOWN = 2.0
 
 
 class TaskObservation(Enum):
     DONE = 'Ordem de serviço cumprida por'
+
+
+def get_result_advwin(stmt):
+    error = None
+    for attempt in range(MAX_RETRIES):
+        try:
+            return get_advwin_engine().execute(stmt)
+        except Exception as e:
+            error = e
+            time.sleep(attempt ** BASE_COUNTDOWN)
+    raise error
 
 
 @shared_task(bind=True, max_retries=MAX_RETRIES)
@@ -54,6 +67,7 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
         LOGGER.debug('Exportando ECM %d-%s ', ecm.id, ecm)
         try:
             result = get_advwin_engine().execute(stmt)
+            result.close()
         except Exception as exc:
             self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
             LOGGER.warning('Não foi possível exportar ECM: %d-%s\n%s',
@@ -66,33 +80,39 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
             JuridGedMain.__table__.c.Codigo_OR == ecm.task.legacy_code,
             JuridGedMain.__table__.c.Nome == file_name)
         )
-        for row in get_advwin_engine().execute(stmt):
-            id_doc = row['ID_doc']
-            export_ecm_related_folter_to_task.delay(ecm.id, id_doc)
+        result = get_result_advwin(stmt)
+        id_doc = []
+        for row in result:
+            id_doc.append(row['ID_doc'])
+        result.close()
         LOGGER.info('ECM %s: exportado', ecm)
-        return '{} Registros afetados'.format(result.rowcount)
+        return id_doc
     else:
         return stmt
 
 
 @shared_task(bind=True, max_retries=MAX_RETRIES)
-def export_ecm_related_folter_to_task(self, ecm_id, id_doc, execute=True):
+def export_ecm_related_folter_to_task(self, id_docs, ecm_id, execute=True):
     ecm = Ecm.objects.get(pk=ecm_id)
-    values = {
-        'Id_tabela_or': 'Pastas',
-        'Id_codigo_or': get_folder_to_related(task=ecm.task),
-        'Id_id_doc': id_doc,
-        'id_ID_or': 0,
-        'dt_inserido': timezone.localtime(ecm.create_date),
-        'usuario_insercao': ecm.create_user.username
-    }
-    stmt = JuridGEDLig.__table__.insert().values(**values)
+    values = []
+    for id_doc in id_docs:
+        values.append({
+            'Id_tabela_or': 'Pastas',
+            'Id_codigo_or': get_folder_to_related(task=ecm.task),
+            'Id_id_doc': id_doc,
+            'id_ID_or': 0,
+            'dt_inserido': timezone.localtime(ecm.create_date),
+            'usuario_insercao': ecm.create_user.username
+        })
+    stmt = JuridGEDLig.__table__.insert().values(values)
     if execute:
         result = None
         try:
             result = get_advwin_engine().execute(stmt)
+            total_afected = result.rowcount
+            result.close()
             LOGGER.info('ECM %s: relacionamento criado entre Pasta e Agenda', ecm)
-            return '{} Registros afetados'.format(result.rowcount)
+            return '{} Registros afetados'.format(total_afected)
         except Exception as exc:
             self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
             LOGGER.warning('Não foi possíve relacionar o ECM entre Agenda e Pasta: %d-%s\n%s',
@@ -134,19 +154,24 @@ def delete_ecm_related_folder_to_task(self, ecm_id, id_doc, task_id, ecm_create_
             id_lig = row['ID_lig']
             stmt = JuridGEDLig.__table__.delete().where(JuridGedMain.__table__.c.ID_lig == id_lig)
             deleted_ecm = get_advwin_engine().execute(stmt)
-        return '{} Registros afetados'.format(result.rowcount)
+            deleted_ecm.close()
+        total_afected = result.rowcount
+        result.close()
+        return '{} Registros afetados'.format(total_afected)
 
 
-@shared_task(bind=True, max_retries=10)
-def delete_ecm(self, ecm_id, ecm_path_name, ecm_create_user, task_legacy_code, task_id, execute=True):
-    new_path = ecm_path_ezl2advwin(ecm_path_name)
-    file_name = get_ecm_file_name(ecm_path_name)
+@retry(stop_max_attempt_number=4, wait_fixed=1000)
+def delete_ecm(ecm_id, execute=True):    
+    ecm = Ecm.objects.get(pk=ecm_id)    
+
+    new_path = ecm_path_ezl2advwin(ecm.path.name)
+    file_name = get_ecm_file_name(ecm.path.name)
     values = {
         'Tabela_OR': 'Agenda',
-        'Codigo_OR': task_legacy_code,
+        'Codigo_OR': ecm.task.legacy_code,
         'Link': new_path,
         'Nome': file_name,
-        'Responsavel': ecm_create_user,
+        'Responsavel': ecm.create_user.username,
         'Arq_Status': 'Guardado',
         'Arq_nick': file_name,
         'Descricao': file_name
@@ -165,11 +190,12 @@ def delete_ecm(self, ecm_id, ecm_path_name, ecm_create_user, task_legacy_code, t
                 id_doc = row['ID_doc']
                 stmt = JuridGedMain.__table__.delete().where(JuridGedMain.__table__.c.ID_doc == id_doc)
                 deleted_ecm = get_advwin_engine().execute(stmt)
-                delete_ecm_related_folder_to_task.delay(ecm_id, id_doc, task_id, ecm_create_user)
+                delete_ecm_related_folder_to_task.delay(ecm_id, id_doc, ecm.task.id, ecm.create_user.username)
             LOGGER.info('ECM %s: excluído', ecm_id)
-            return '{} Registros afetados'.format(result.rowcount)
-        except Exception as exc:
-            self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
+            total_afected = result.rowcount
+            result.close()
+            return '{} Registros afetados'.format(total_afected)
+        except Exception as exc:            
             LOGGER.warning('Não foi possível excluir o ECM: %d-%s\n%s',
                            ecm_id,
                            exc,
@@ -186,12 +212,14 @@ def get_folder_to_related(task):
             stmt = JuridAgendaTable.__table__.select().where(and_(
                 JuridAgendaTable.__table__.c.Ident == task.legacy_code
             ))
-            result = get_advwin_engine().execute(stmt).fetchone()['Pasta']
+            result = get_advwin_engine().execute(stmt)
+            folder_to_related = result.fetchone()['Pasta']
+            result.close()
         except Exception as e:
             LOGGER.warning('Não foi possíve encontrar pasta para a Providencia: %d-%s\n%s',
                            task.legacy_code, exc_info=(type(e), e, e.__traceback__))
         finally:
-            return result
+            return folder_to_related
     return task.movement.law_suit.folder.legacy_code
 
 
@@ -236,7 +264,9 @@ def insert_advwin_history(task_history, values, execute=True):
             LOGGER.info('Histórico de OS %d-%d: exportado com sucesso.',
                         task_history.task.id,
                         task_history.id)
-            return '{} Registros afetados'.format(result.rowcount)
+            total_afected = result.rowcount
+            result.close()
+            return '{} Registros afetados'.format(total_afected)
         except Exception as exc:
             LOGGER.warning('Não foi possíve exportar Histórico de OS: %d-%d\n%s',
                            task_history.task.id,
@@ -397,7 +427,9 @@ def update_advwin_task(task, values, execute=True):
         try:
             result = get_advwin_engine().execute(stmt)
             LOGGER.info('OS %s: exportada com  status %s', task, task.task_status)
-            return '{} Registros atualizados'.format(result.rowcount)
+            total_afected = result.rowcount
+            result.close()
+            return '{} Registros atualizados'.format(total_afected)
         except Exception as exc:
             LOGGER.warning('Não foi possível exportar OS: %d-%s com status %s\n%s',
                            task.id,

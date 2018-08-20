@@ -34,7 +34,7 @@ class PersonManagerQuerySet(QuerySet):
 
     def requesters(self, office_pk=False):        
         if office_pk:
-            return self.filter(auth_user__groups__name__startswith=self.model.REQUESTER_GROUP + '-' + str(office_pk) + '-').order_by(
+            return self.filter(auth_user__groups__name__startswith=self.model.REQUESTER_GROUP + '-' + str(office_pk)).order_by(
             'name', 'auth_user').distinct('name', 'auth_user')
 
         return self.filter(auth_user__groups__name__startswith=self.model.REQUESTER_GROUP + '-').order_by(
