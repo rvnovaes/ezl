@@ -22,7 +22,7 @@
     $(document).on('ready', function() {        
         var id_task_search_element = {
             target: "#id_task_seach",
-            content: "Ao acessar menu Pesquisar usuário consegue localizar uma ou várias OS.",
+            content: "Pesquise OS's por vários parâmetros, como, cliente, processo, data de solicitação, entre outros.",
             position: 'bottom',
             className: 'anno-width-200',
             buttons: [AnnoButton.DoneButton],
@@ -37,7 +37,7 @@
             anno_steps.push(
                 {
                     target: "#id_navbar",
-                    content: "Bem vindo. Deseja executar o Tour de primeiro acesso a aplicação?",
+                    content: "Seja bem vindo(a)! Deseja executar o tour de primeiro acesso ao Easy Lawyer?",
                     position: {
                         top: '20em',
                         left: '40em'
@@ -68,7 +68,8 @@
             anno_steps.push(
                 {
                     target: "#id_navbar",
-                    content: " Ao entrar na Easy Lawyer, é apresentado o Dashboard do escritório padrão ao qual o usuário está vinculado.",
+                    content: "Ao entrar no sistema é apresentado o Dashboard do escritório padrão ao qual o "+
+                    "usuário está vinculado.",
                     position: {
                         top: '20em',
                         left: '40em'
@@ -84,8 +85,8 @@
             anno_steps.push(
                 {
                     target: "#id_user_menu",
-                    content: "Ao acessar este menu clicando na seta ao lado do nome de usuário é possível acessar seus dados de perfil,"+
-                        "os escritórios dos quais usuário faz parte e convites de escritórios que estão pendentes de aceite.",
+                    content: "Clicando no nome do usuário é possível acessar seus dados de perfil, "+
+                        "os seus escritórios vinculados e os convites que estão pendentes de aceitação.",
                     position: 'left',
                     buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
                 }
@@ -96,7 +97,8 @@
             anno_steps.push(
                 {
                     target: "#id_office_session_id",
-                    content: "Aqui é possível verificar em qual escritório está trabalhando e alternar entre os escritórios .",                        
+                    content: "Verifique em qual escritório está trabalhando e alterne entre os que você "+
+                    "possui vínculo.",
                     position: 'left', 
                     buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
                 }
@@ -107,7 +109,8 @@
             anno_steps.push(
                 {
                     target: "#id_create_task",
-                    content: "Através deste menu é possível cadastrar novas OS. Para tal se faz necessário ter dados de cliente, processo e movimentação já cadastrados.",
+                    content: "Crie OS's avulsas. Para tal, é necessário ter os dados de cliente, nº do processo e "+
+                    "movimentação já cadastrados.",
                     position: 'right',
                     buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
                 }
@@ -118,7 +121,7 @@
             anno_steps.push(
                 {
                     target: "#id_chat",
-                    content: "Quando houver uma nova mensagem no Chat, o alerta vermelho piscará acima da caixa de diálogo.",                        
+                    content: "Quando houver uma nova mensagem no chat, o alerta vermelho piscará nesse ícone.",
                     position: "left",
                     buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
                 }
@@ -129,8 +132,8 @@
             anno_steps.push(
                 {
                     target: "#id_notificacoes",
-                    content: "Aqui são visualizados todos pedidos de conexão realizados por usuários ao seu escritório. Ao clicar aqui" +
-                            " será possível visualizar o número de solicitações e clicando no número será possível (pela tela de perfil) aceitá-las ou recusá-las.",                    
+                    content: "Quando houver uma nova solicitação de vínculo entre usuário e escritório, o alerta "+
+                    "vermelho piscará nesse ícone. Ao entrar, é possível aceitá-la ou recusá-la.",
                     position: "left",
                     buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
                 }
@@ -141,7 +144,7 @@
             anno_steps.push(
                 {
                     target: "#id_dashboard",
-                    content: "Menu Dashboard permite acessar a tela principal do sistema.",
+                    content: "Acesso à tela principal do sistema.",
                     className: 'anno-width-200',
                     buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
                 }
@@ -151,7 +154,7 @@
         {
             anno_steps.push({
                 target: "#id_total",
-                content: "Aqui é exibida a quantidade total de OS's vinculadas ao escritório dividas por status.",
+                content: "Esse quadro exibe a quantidade total de OS's pertencentes ao escritório selecionado.",
                 buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
             });
         }
@@ -159,7 +162,7 @@
         {
             anno_steps.push({
                 target: "#id_error",
-                content: "São OS’s importadas de um sistema externo à Easy Lawyer que possuem inconsistências de solicitação.",
+                content: "São OS’s importadas do sistema de gestão externo que possuem inconsistências na solicitação.",
                 buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
             });
         }
@@ -167,9 +170,10 @@
         {
             anno_steps.push({
                 target: "#id_requested",
-                content: "São as OS's solicitadas pelos advogados ao setor de gestão de providências, o Service. "+
-                "O Service deverá Aceitar ou Recusar essas OS’s em razão de erros na Solicitação. "+
-                "Feito isso as OS’s passam respectivamente aos status <b>Aceitas pelo Service</b> ou <b>Recusadas pelo Service</b>.",
+                content: "São as OS's solicitadas pelos advogados ao setor de gestão de providências. "+
+                "Esse setor deverá aceitá-las ou recusá-las em razão de erros na solicitação. "+
+                "Feito isso, as OS’s passam respectivamente aos status <b>Aceitas pelo Service</b> ou "+
+                "<b>Recusadas pelo Service</b>.",
                 position: 'left',
                 buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
             });
@@ -179,9 +183,9 @@
             anno_steps.push({
                 target: "#id_accepted_service",
                 content: "São OS’s que não possuem erros na solicitação e portanto estão aptas à contratação. "+
-                "Para tanto, o Service poderá <b>Atribuir</b> a OS para ser cumprida por um correspondente interno do"+
-                "escritório ou <b>Delegar</b> a OS para ser cumprida por um fornecedor de logística jurídica. "+
-                "Feito isso, as OS’s vão para o status Delegadas/Em aberto.",
+                "Para tanto, o usuário poderá <b>Atribuir</b> a OS para ser cumprida por um correspondente interno do"+
+                "escritório ou <b>Delegar</b> para ser cumprida por um fornecedor de logística jurídica. "+
+                "Feito isso, as OS’s vão para o status <b>Delegadas/Em aberto</b>.",
                 buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
             });
         }
@@ -189,8 +193,7 @@
         {
             anno_steps.push({
                 target: "#id_refused_service",
-                content: "São OS’s que possuem erros na solicitação e portanto, retornam aos respectivos solicitantes "+
-                "para que estes refaçam as solicitações corrigindo os erros apontados.",
+                content: "São OS’s que possuem erros na solicitação e, portanto, serão canceladas.",
                 buttons: [AnnoButton.BackButton, AnnoButton.NextButton] 
             });
         }
@@ -198,7 +201,8 @@
         {
             anno_steps.push({
                 target: "#id_return",
-                content: "Se verificar erros na devolução do ato, o advogado solicitante e/ou o Service poderão Retornar a OS para que o correspondente refaça o serviço.",
+                content: "Se for verificado erro no cumprimento da OS, o solicitante pode retorná-la para que o "+
+                "correspondente refaça o serviço.",
                 buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
             });
         }
@@ -206,10 +210,10 @@
         {
             anno_steps.push({
                 target: "#id_open",
-                content: "São todas as OS’s atribuídas ou delegadas, respectivamente, à correspondentes ou escritórios de logística jurídica. "+
-                "O correspondente, por sua vez, deverá  aceitar ou recusar a OS, de maneira a informar ao Service|Contratante se fará ou não o serviço."+
-                "É crucial para o Service|Contratante saber com a maior antecedência possível se o serviço foi recusado para delegar a outra logística "+
-                "jurídica. ",
+                content: "São todas as OS’s atribuídas ou delegadas, respectivamente, à equipe interna ou escritórios "+
+                 "de logística jurídica. O usuário que irá realizar a tarefa deverá  aceitá-la ou recusá-la, de modo "+
+                 "a informar ao contratante se realizará ou não o serviço. É crucial que o contratante seja avisado "+
+                 "com a maior antecedência possível para que tenha tempo hábil de delegar à outra logística jurídica.",
                 buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
             });
         }
@@ -225,9 +229,9 @@
         {
             anno_steps.push({
                 target: "#id_done",
-                content: "Após realizar o serviço, a OS vai para o status cumpridas."+
-                "<br>Para cumprir a OS deve-se informar a data de cumprimento do prazo, anexar o respectivo documento e clicar em Cumprir. "+
-                "Em seguida, deve-se preencher o formulário referente ao tipo de serviço prestado.",
+                content: "Após realizar o serviço, a OS deve ser encaminhada para o status <b>Cumprida</b>."+
+                "<br>Para cumpri-la, deve-se informar a data de cumprimento do prazo e anexar o respectivo documento, "
+                + "se for o caso.",
                 buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
             });
         }
@@ -235,7 +239,8 @@
         {
             anno_steps.push({
                 target: "#id_finished",
-                content: "Se o serviço foi prestado com êxito, o Service finaliza a OS. As OSs Finalizadas entram no fluxo de pagamento.",
+                content: "Se o serviço foi prestado com êxito, o contratante finaliza a OS. As OS's finalizadas "+
+                "entram no fluxo de pagamento.",
                 buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
             });
         }
@@ -243,7 +248,8 @@
         {
             anno_steps.push({
                 target: "#id_refused",
-                content: "Se verificar erros na devolução do ato, o advogado solicitante e/ou o Service poderão Retornar a OS para que o correspondente refaça o serviço.",
+                content: "Se verificar erros no cumprimento do ato, o solicitante ou o contratante poderão retornar a "+
+                 "mesma para que o correspondente refaça o serviço.",
                 buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
             });
         }
@@ -251,7 +257,8 @@
         {
             anno_steps.push({
                 target: "#id_blockedpayment",
-                content: "Já as OSs <b>Glosadas</b> são aquelas que por alguma razão, erro no cumprimento, não serão pagas.",
+                content: "Já as OS's glosada são aquelas que, por alguma razão (geralmente erro do correspondente), "+
+                "não serão pagas.",
                 buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
             });
         }                
@@ -266,7 +273,7 @@
             {
                 anno_steps.push({
                     target: "#id_cadastros",
-                    content: "No menu Cadastros usuário tem acesso aos cadastros do sistema como Pessoa, Tabela de Preços, entre outros. ",
+                    content: "Acesso aos cadastros do sistema como Pessoa, Tabela de Preços, entre outros.",
                     position: 'bottom',
                     className: 'anno-width-200',
                     buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
@@ -277,7 +284,7 @@
                 {
                     anno_steps.push({
                         target: "#id_relatorios",
-                        content: " No menu Relatórios usuário tem acesso aos relatórios disponíveis. ",
+                        content: "Aqui você encontra relatórios de OS's a pagar e a receber.",
                         position: 'bottom',
                         className: 'anno-width-200',
                         buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
@@ -288,7 +295,8 @@
             {
                 anno_steps.push({
                     target: "#id_administracao",
-                    content: "No menu Administração usuário tem acesso ao cadastro de Escritórios, Usuários entre outros.",
+                    content: "Faça importação de tabela de preços, configure suas equipes, questionários, "+
+                    "regras para anexos e muito mais.",
                     position: 'bottom',
                     className: 'anno-width-200',
                     buttons: [AnnoButton.DoneButton],
