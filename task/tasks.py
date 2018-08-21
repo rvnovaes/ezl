@@ -17,7 +17,10 @@ import time
 
 
 def int_formatter(cell_value):
-    return int(cell_value)
+    try:
+        return int(cell_value)
+    except:
+        return cell_value
 
 
 @shared_task(bind=True)
@@ -28,7 +31,6 @@ def import_xls_task_list(self, file_id):
         dataset = Dataset()
 
         imported_data = dataset.load(xls_file.file_xls.read())
-        imported_data.add_formater
         params = {'create_user': xls_file.create_user,
                   'office': xls_file.office}
         result = task_resource.import_data(imported_data, dry_run=True, **params)
