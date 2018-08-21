@@ -1054,7 +1054,7 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
             ret[status['task_status'].replace(' ', '_').lower()] = status['total']
             total += status['total']
         ret['total'] = total
-        ret['total_solicitada_mes'] = task_object.filter(task_status=TaskStatus.REQUESTED,requested_date__year=datetime.today().year,
+        ret['total_solicitada_mes'] = task_object.filter(requested_date__year=datetime.today().year,
             requested_date__month=datetime.today().month).count()
         return JsonResponse(ret)
 
