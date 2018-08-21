@@ -258,7 +258,9 @@ class LoginCustomView(LoginView):
 
 
 def set_first_login_user(request):    
-    obj, created = ControlFirstAccessUser.objects.get_or_create(auth_user=request.user)
+    created = False
+    if request.user.is_authenticated:
+        obj, created = ControlFirstAccessUser.objects.get_or_create(auth_user=request.user)    
     request.session['first_login_user'] = created
 
 
