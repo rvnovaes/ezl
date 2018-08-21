@@ -3,6 +3,7 @@ from task.models import Task
 
 
 class TaskResource(resources.ModelResource):
+    folder_number =
     class Meta:
         model = Task
 

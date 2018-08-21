@@ -144,9 +144,9 @@ class TaskToAssignForm(BaseForm):
 
 class ImportTaskListForm(forms.ModelForm):
     file_xls = XlsxFileField(label='Arquivo', required=True,
-                             headers_to_check=['Cliente', 'Nº do processo', 'Comarca', 'UF', 'Instância', 'Advogado',
-                                               'Vara', 'Tipo de movimentação', 'Solicitante', 'Tipo de serviço',
-                                               'Prazo fatal'])
+                             headers_to_check=['folder_number', 'law_suit_number', 'court_district',
+                                               'court_district_state', 'instance', 'person_lawyer', 'court_division',
+                                               'type_movement', 'person_asked_by', 'type_task', 'final_deadline_date'])
 
     class Meta:
         model = ImportXlsFile
