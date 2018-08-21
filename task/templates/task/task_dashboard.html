@@ -26,7 +26,7 @@
     <div class="col-md-12">
         <div class="row">
             <div class="row">
-                <div class="col-md-6 col-sm-6">
+                <div class="col-md-6 col-sm-6" id="id_total">
                     <div class="white-box">
                         <h3 class="box-title m-b-0">Total</h3>
                         <h1 id="total" class="m-b-0 m-t-0 font-medium">{{ task_count }}</h1>
@@ -40,7 +40,7 @@
                 </div>
             </div>
             {% for table in tables %}            
-            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12" id="id_{{ table.status.name|lower }}">
                 <a {% if table.length %}href="#modal-view-task-table" data-toggle="modal"{% else %}href="javascript:swal('Não há dados para exibir.')"{% endif %} data-status="{{ table.status }}">
                 <div class="white-box">
                     <h5 class="font-bold ezl-text-{{ table.status.name|lower }}">{{ table.title }}</h5>

@@ -1,0 +1,323 @@
+{% load static %}
+<script src="{% static 'libs/anno/anno.js' %}" type="text/javascript"></script>
+<script src="{% static 'libs/anno/jquery.scrollintoview.min.js' %}" type="text/javascript"></script>
+<link href="{% static 'libs/anno/anno.css' %}" rel="stylesheet" type="text/css" />
+
+<script>
+    var tour_enabled_for_user_key = '{{ request.user }}_tour_enabled_for_user';
+
+    var finish_tour_enabled_for_user = function(){
+        localStorage[tour_enabled_for_user_key] = false;
+    }
+    var set_background = function(id){
+        var color_background = "#0d3c55";
+        if (document.getElementById(id))
+            document.getElementById(id).style.background = color_background;    
+    }
+    set_background("id_office_session_id");
+    set_background("id_user_menu");
+    set_background("id_chat");    
+    set_background("id_notificacoes"); 
+
+    $(document).on('ready', function() {        
+        var id_task_search_element = {
+            target: "#id_task_seach",
+            content: "Pesquise OS's por vários parâmetros, como, cliente, processo, data de solicitação, entre outros.",
+            position: 'bottom',
+            className: 'anno-width-200',
+            buttons: [AnnoButton.DoneButton],
+            onHide: function() {
+                finish_tour_enabled_for_user();
+            }
+        };
+        
+        anno_steps = [];
+        if (document.getElementById("id_create_task"))
+        {
+            anno_steps.push(
+                {
+                    target: "#id_navbar",
+                    content: "Seja bem vindo(a)! Deseja executar o tour de primeiro acesso ao Easy Lawyer?",
+                    position: {
+                        top: '20em',
+                        left: '40em'
+                    },
+                    className: 'anno-width-400',
+                    arrowPosition: '',
+                    buttons: [
+                        {
+                            text: 'Sim',
+                            click: function(anno, evt){                                    
+                                anno.switchToChainNext();                            
+                            }
+                        },
+                        {
+                            text: 'Não',
+                            className: 'anno-btn-low-importance',
+                            click: function(anno){                                                                                        
+                                finish_tour_enabled_for_user();
+                                anno.hide()                                
+                            }
+                        }
+                    ]                    
+                }
+            );
+        }
+        if (document.getElementById("id_navbar"))
+        {
+            anno_steps.push(
+                {
+                    target: "#id_navbar",
+                    content: "Ao entrar no sistema é apresentado o Dashboard do escritório padrão ao qual o "+
+                    "usuário está vinculado.",
+                    position: {
+                        top: '20em',
+                        left: '40em'
+                    },
+                    className: 'anno-width-400',
+                    arrowPosition: '',
+                    buttons: [AnnoButton.NextButton]
+                }
+            );
+        }
+        if (document.getElementById("id_user_menu"))
+        {
+            anno_steps.push(
+                {
+                    target: "#id_user_menu",
+                    content: "Clicando no nome do usuário é possível acessar seus dados de perfil, "+
+                        "os seus escritórios vinculados e os convites que estão pendentes de aceitação.",
+                    position: 'left',
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                }
+            );            
+        }
+        if (document.getElementById("id_office_session_id"))
+        {
+            anno_steps.push(
+                {
+                    target: "#id_office_session_id",
+                    content: "Verifique em qual escritório está trabalhando e alterne entre os que você "+
+                    "possui vínculo.",
+                    position: 'left', 
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                }
+            );
+        }
+        if (document.getElementById("id_create_task")) 
+        {                                       
+            anno_steps.push(
+                {
+                    target: "#id_create_task",
+                    content: "Crie OS's avulsas. Para tal, é necessário ter os dados de cliente, nº do processo e "+
+                    "movimentação já cadastrados.",
+                    position: 'right',
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                }
+            );                                                             
+        } 
+        if (document.getElementById("id_chat"))
+        {
+            anno_steps.push(
+                {
+                    target: "#id_chat",
+                    content: "Quando houver uma nova mensagem no chat, o alerta vermelho piscará nesse ícone.",
+                    position: "left",
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                }
+            );
+        }
+        if (document.getElementById("id_notificacoes"))
+        {
+            anno_steps.push(
+                {
+                    target: "#id_notificacoes",
+                    content: "Quando houver uma nova solicitação de vínculo entre usuário e escritório, o alerta "+
+                    "vermelho piscará nesse ícone. Ao entrar, é possível aceitá-la ou recusá-la.",
+                    position: "left",
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                }
+            );
+        }
+        if (document.getElementById("id_dashboard"))
+        {
+            anno_steps.push(
+                {
+                    target: "#id_dashboard",
+                    content: "Acesso à tela principal do sistema.",
+                    className: 'anno-width-200',
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                }
+            );
+        }                 
+        if (document.getElementById("id_total"))
+        {
+            anno_steps.push({
+                target: "#id_total",
+                content: "Esse quadro exibe a quantidade total de OS's pertencentes ao escritório selecionado.",
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+            });
+        }
+        if (document.getElementById("id_error"))
+        {
+            anno_steps.push({
+                target: "#id_error",
+                content: "São OS’s importadas do sistema de gestão externo que possuem inconsistências na solicitação.",
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+            });
+        }
+        if (document.getElementById("id_requested"))
+        {
+            anno_steps.push({
+                target: "#id_requested",
+                content: "São as OS's solicitadas pelos advogados ao setor de gestão de providências. "+
+                "Esse setor deverá aceitá-las ou recusá-las em razão de erros na solicitação. "+
+                "Feito isso, as OS’s passam respectivamente aos status <b>Aceitas pelo Service</b> ou "+
+                "<b>Recusadas pelo Service</b>.",
+                position: 'left',
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+            });
+        }
+        if (document.getElementById("id_accepted_service"))
+        {
+            anno_steps.push({
+                target: "#id_accepted_service",
+                content: "São OS’s que não possuem erros na solicitação e portanto estão aptas à contratação. "+
+                "Para tanto, o usuário poderá <b>Atribuir</b> a OS para ser cumprida por um correspondente interno do"+
+                "escritório ou <b>Delegar</b> para ser cumprida por um fornecedor de logística jurídica. "+
+                "Feito isso, as OS’s vão para o status <b>Delegadas/Em aberto</b>.",
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+            });
+        }
+        if (document.getElementById("id_refused_service"))
+        {
+            anno_steps.push({
+                target: "#id_refused_service",
+                content: "São OS’s que possuem erros na solicitação e, portanto, serão canceladas.",
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton] 
+            });
+        }
+        if (document.getElementById("id_return"))
+        {
+            anno_steps.push({
+                target: "#id_return",
+                content: "Se for verificado erro no cumprimento da OS, o solicitante pode retorná-la para que o "+
+                "correspondente refaça o serviço.",
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+            });
+        }
+        if (document.getElementById("id_open"))
+        {
+            anno_steps.push({
+                target: "#id_open",
+                content: "São todas as OS’s atribuídas ou delegadas, respectivamente, à equipe interna ou escritórios "+
+                 "de logística jurídica. O usuário que irá realizar a tarefa deverá  aceitá-la ou recusá-la, de modo "+
+                 "a informar ao contratante se realizará ou não o serviço. É crucial que o contratante seja avisado "+
+                 "com a maior antecedência possível para que tenha tempo hábil de delegar à outra logística jurídica.",
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+            });
+        }
+        if (document.getElementById("id_accepted"))
+        {
+            anno_steps.push({
+                target: "#id_accepted",
+                content: "São as OS’s aceitas pelo correspondente e que devem ser cumpridas por ele.",
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+            });
+        }
+        if (document.getElementById("id_done"))
+        {
+            anno_steps.push({
+                target: "#id_done",
+                content: "Após realizar o serviço, a OS deve ser encaminhada para o status <b>Cumprida</b>."+
+                "<br>Para cumpri-la, deve-se informar a data de cumprimento do prazo e anexar o respectivo documento, "
+                + "se for o caso.",
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+            });
+        }
+        if (document.getElementById("id_finished"))
+        {
+            anno_steps.push({
+                target: "#id_finished",
+                content: "Se o serviço foi prestado com êxito, o contratante finaliza a OS. As OS's finalizadas "+
+                "entram no fluxo de pagamento.",
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+            });
+        }
+        if (document.getElementById("id_refused"))
+        {
+            anno_steps.push({
+                target: "#id_refused",
+                content: "Se verificar erros no cumprimento do ato, o solicitante ou o contratante poderão retornar a "+
+                 "mesma para que o correspondente refaça o serviço.",
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+            });
+        }
+        if (document.getElementById("id_blockedpayment"))
+        {
+            anno_steps.push({
+                target: "#id_blockedpayment",
+                content: "Já as OS's glosada são aquelas que, por alguma razão (geralmente erro do correspondente), "+
+                "não serão pagas.",
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+            });
+        }                
+
+        {% if 'can_access_general_data' in office_session_perms %}                   
+            if (document.getElementById("id_task_seach"))
+            {                
+                id_task_search_element.buttons = [AnnoButton.BackButton, AnnoButton.NextButton];
+                anno_steps.push(id_task_search_element);
+            }
+            if (document.getElementById("id_cadastros"))
+            {
+                anno_steps.push({
+                    target: "#id_cadastros",
+                    content: "Acesso aos cadastros do sistema como Pessoa, Tabela de Preços, entre outros.",
+                    position: 'bottom',
+                    className: 'anno-width-200',
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                });
+            }
+            {% if perms.core.view_all_tasks %}
+                if (document.getElementById("id_relatorios"))
+                {
+                    anno_steps.push({
+                        target: "#id_relatorios",
+                        content: "Aqui você encontra relatórios de OS's a pagar e a receber.",
+                        position: 'bottom',
+                        className: 'anno-width-200',
+                        buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                    });
+                }
+            {% endif %}
+            if (document.getElementById("id_administracao"))
+            {
+                anno_steps.push({
+                    target: "#id_administracao",
+                    content: "Faça importação de tabela de preços, configure suas equipes, questionários, "+
+                    "regras para anexos e muito mais.",
+                    position: 'bottom',
+                    className: 'anno-width-200',
+                    buttons: [AnnoButton.DoneButton],
+                    onHide: function() {
+                        finish_tour_enabled_for_user();
+                    }
+
+                });
+            }
+        {% else %}
+            if (document.getElementById("id_task_seach"))
+                {
+                    anno_steps.push(id_task_search_element);
+                }
+        {% endif %}                
+        tour_aplication = new Anno(anno_steps);        
+        {% if request.session.first_login_user %}
+            tour_aplication.show();
+        {% else %}
+            if (localStorage[tour_enabled_for_user_key] == "true")
+                tour_aplication.show();
+        {% endif %}
+    });   
+</script>

@@ -34,7 +34,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     DELETE_SUCCESS_MESSAGE, ADDRESS_UPDATE_ERROR_MESSAGE, ADDRESS_UPDATE_SUCCESS_MESSAGE, \
     USER_CREATE_SUCCESS_MESSAGE
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
-    OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team
+    OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team, ControlFirstAccessUser
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
@@ -249,6 +249,17 @@ class LoginCustomView(LoginView):
         :param form:
         """
         return super(LoginCustomView, self).form_valid(form)
+    
+    
+    def dispatch(self, request, *args, **kwargs):
+        res = super().dispatch(request, *args, **kwargs)
+        set_first_login_user(request)
+        return res
+
+
+def set_first_login_user(request):    
+    obj, created = ControlFirstAccessUser.objects.get_or_create(auth_user=request.user)
+    request.session['first_login_user'] = created
 
 
 def set_office_session(request):
