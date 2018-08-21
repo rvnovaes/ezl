@@ -158,7 +158,7 @@ class TaskToAssignView(AuditFormMixin, UpdateView):
 
     def form_valid(self, form):
         super().form_valid(form)
-        if form.is_valid():            
+        if form.is_valid():
             form.instance.person_distributed_by = self.request.user.person
             form.instance.task_status = TaskStatus.OPEN
             # TODO: rever processo de anexo, quando for trocar para o ECM Generico
@@ -472,8 +472,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
     def set_count_task(self, data, data_error):
         self.count_task = len(data)
         self.count_tasks_with_error = len(data_error)
-        self.count_tasks_requested_monthly = len(data.filter(task_status=TaskStatus.REQUESTED,
-                                                            requested_date__year=datetime.today().year,
+        self.count_tasks_requested_monthly = len(data.filter(requested_date__year=datetime.today().year,
                                                             requested_date__month=datetime.today().month))
 
     def get_data(self, person):
@@ -499,7 +498,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
-        returned = grouped.get(TaskStatus.RETURN) or {}        
+        returned = grouped.get(TaskStatus.RETURN) or {}
         accepted = grouped.get(TaskStatus.ACCEPTED) or {}
         opened = grouped.get(TaskStatus.OPEN) or {}
         done = grouped.get(TaskStatus.DONE) or {}
