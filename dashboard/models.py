@@ -16,8 +16,7 @@ class Dashboard(models.Model):
 
 
 class Component(models.Model):
-    name = models.CharField(verbose_name='Nome',
-                            max_length=255, blank=True, null=True)
+    name = models.CharField(verbose_name='Nome', max_length=255)
     code = models.TextField(verbose_name='Codigo', blank=True, null=True)
 
     class Meta:
@@ -32,6 +31,13 @@ class Card(Component):
         Dashboard, related_name='cards', through='DashboardCard', blank=True)
     schema = JSONField(verbose_name=u'Schema', blank=True,
                        null=True, default=json.dumps(CARD))
+
+
+class LineChart(Component):
+    dashboards = models.ManyToManyField(
+        Dashboard, related_name='line_charts', through='DashboardLineChart', blank=True)
+    schema = JSONField(verbose_name=u'Schema', blank=True,
+                       null=True, default=json.dumps(LINE))
 
 
 class DoughnutChart(Component):
@@ -49,6 +55,10 @@ class DashboardComponent(models.Model):
     class Meta:
         ordering = ['sequence']
         abstract = True
+
+
+class DashboardLineChart(DashboardComponent):
+    line_chart = models.ForeignKey(LineChart, on_delete=models.CASCADE, blank=True)
 
 
 class DashboardCard(DashboardComponent):

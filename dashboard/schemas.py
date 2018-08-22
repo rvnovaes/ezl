@@ -11,3 +11,7 @@ DOUGHNUT = {
 	"labels": "list", 
 	"values": "list",
 }
+
+LINE = {
+	
+}

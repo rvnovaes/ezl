@@ -1,5 +1,5 @@
 from django import forms
-from .models import Dashboard, Card, DoughnutChart
+from .models import Dashboard, Card, DoughnutChart, LineChart
 from codemirror import CodeMirrorTextarea
 import json
 from .schemas import *
@@ -42,8 +42,18 @@ class CardForm(ComponentForm):
 
 class DoughnutChartForm(ComponentForm):
     schema = forms.CharField(
-        label="Schema", widget=code_mirror_schema, initial=json.dumps(DOUGHNUT))
+        label="Schema", widget=code_mirror_schema, initial=json.dumps(
+            DOUGHNUT))
 
     class Meta:
         model = DoughnutChart
+        fields = '__all__'
+
+
+class LineChartForm(ComponentForm):
+    schema = forms.CharField(
+        label="Schema", widget=code_mirror_schema, initial=json.dumps(LINE))
+
+    class Meta:
+        model = LineChart
         fields = '__all__'
