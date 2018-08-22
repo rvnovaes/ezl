@@ -23,6 +23,17 @@ def int_formatter(cell_value):
         return cell_value
 
 
+# def temporária
+def get_test_file(file_id):
+    xls_file = ImportXlsFile.objects.get(pk=file_id)
+    task_resource = TaskResource()
+    dataset = Dataset()
+
+    imported_data = dataset.load(xls_file.file_xls.read())
+    params = {'create_user': xls_file.create_user, 'office': xls_file.office}
+    return task_resource.import_data(imported_data, dry_run=True, **params)
+
+
 @shared_task(bind=True)
 def import_xls_task_list(self, file_id):
     try:
@@ -31,8 +42,7 @@ def import_xls_task_list(self, file_id):
         dataset = Dataset()
 
         imported_data = dataset.load(xls_file.file_xls.read())
-        params = {'create_user': xls_file.create_user,
-                  'office': xls_file.office}
+        params = {'create_user': xls_file.create_user,'office': xls_file.office}
         result = task_resource.import_data(imported_data, dry_run=True, **params)
         if not result.has_errors():
             result = task_resource.import_data(imported_data, dry_run=False, **params)

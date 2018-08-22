@@ -2,11 +2,26 @@ import datetime
 from core.models import Person
 from django.utils.timezone import make_aware
 from import_export import resources
+from import_export.fields import Field
+from import_export.widgets import Widget, IntegerWidget
 from lawsuit.models import Folder, LawSuit, Movement
 from task.models import Task, TypeTask
 
 
+class FolderNumberWidget(Widget):
+    """
+    Widget for validate folder_number field.
+    """
+
+    def clean(self, value, row=None, *args, **kwargs):
+        # if self.is_empty(value):
+        #     raise ValueError("Campo Número da pasta não pode ser vazio.")
+        raise ValueError("Estaria certo, mas sou chato.") # return int(float(value))
+
+
 class TaskResource(resources.ModelResource):
+    movement = Field(attribute='movement', column_name='movement', widget=FolderNumberWidget())
+
     class Meta:
         model = Task
 
@@ -18,7 +33,8 @@ class TaskResource(resources.ModelResource):
         dataset.insert_col(3, col=["", ] * dataset.height, header="movement")
 
     def before_import_row(self, row, **kwargs):
-        import pdb; pdb.set_trace()
+        from pudb import set_trace;
+        set_trace()
         folder_number = int(row['folder_number'])
         office = row['office']
         type_movement_name = row['type_movement']
