@@ -52,18 +52,6 @@
                                         
                                         $('#finished_in_0').datepicker(config);
                                         $('#finished_in_1').datepicker(config);
-
-                                        var date = new Date();
-                                        var dtini = $("#finished_in_0").datepicker("getDate");
-                                        if (dtini == null) {
-                                            startDate = new Date(date.getFullYear(), date.getMonth(), 1);                                                                                                                           
-                                            $('#finished_in_0').datepicker("update", startDate);
-                                        }
-                                        
-                                        var dtfim = $("#finished_in_1").datepicker("getDate");
-                                        if (dtfim == null) {
-                                            $('#finished_in_1').datepicker("update", date);
-                                        }
                                     });                                                                        
                                 </script>
                             </div>
@@ -116,7 +104,7 @@
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.court_district }}</td>
                                     <td>{{ task.client }}</td>
-                                    <td>{{ task.opposing_party }}</td>                                    
+                                    <td>{{ task.opposing_party }}</td>
                                     {% if task.parent %}
                                         {% if task.parent.parent %}
                                             <td>{{ task.parent.task_number }}</td>
@@ -153,7 +141,7 @@
                         {% for office in offices_report %}
                             <tr>
                                 <th colspan="10"><center>{{ office.name }}</center></th>
-                                <th><center>R$ {{office.total}}</center></th>                                
+                                <th><center>R$ {{office.total}}</center></th>
                             </tr>
                             {% for task in office.tasks %}
                                 <tr role="row">

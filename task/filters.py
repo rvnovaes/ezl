@@ -99,7 +99,6 @@ class TaskFilter(FilterSet):
         order_by = ['final_deadline_date']
 
 
-
 class TaskReportFilterBase(FilterSet):
     finished_in = MDDateTimeRangeFilter(name='finished_in')
 
@@ -107,6 +106,7 @@ class TaskReportFilterBase(FilterSet):
                         required=False)
     office = CharFilter(label="Escritório Correspondente",
                         required=False)
+
     class Meta:
         model = Task
         fields = []
@@ -120,6 +120,7 @@ class TaskToPayFilter(TaskReportFilterBase):
             ('false', 'Somente não faturadas'),
             )
         )
+
 
 class TaskToReceiveFilter(TaskReportFilterBase):
     status = ChoiceFilter(
