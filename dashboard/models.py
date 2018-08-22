@@ -30,21 +30,21 @@ class Card(Component):
     dashboards = models.ManyToManyField(
         Dashboard, related_name='cards', through='DashboardCard', blank=True)
     schema = JSONField(verbose_name=u'Schema', blank=True,
-                       null=True, default=json.dumps(CARD))
+                       null=True, default=json.dumps(CARD, indent=4))
 
 
 class LineChart(Component):
     dashboards = models.ManyToManyField(
         Dashboard, related_name='line_charts', through='DashboardLineChart', blank=True)
     schema = JSONField(verbose_name=u'Schema', blank=True,
-                       null=True, default=json.dumps(LINE))
+                       null=True, default=json.dumps(LINE, indent=4))
 
 
 class DoughnutChart(Component):
     dashboards = models.ManyToManyField(
         Dashboard, related_name='doughnut_charts', through='DashboardDoughnutChart', blank=True)
     schema = JSONField(verbose_name=u'Schema', blank=True,
-                       null=True, default=json.dumps(DOUGHNUT))
+                       null=True, default=json.dumps(DOUGHNUT, indent=4))
 
 
 class DashboardComponent(models.Model):

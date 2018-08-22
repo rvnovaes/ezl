@@ -136,7 +136,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_swagger',
     'oauth2_provider',
-    'django_dbconn_retry',
+    'django_dbconn_retry'
 ]
 
 MIDDLEWARE = [

@@ -33,7 +33,8 @@ class ComponentForm(forms.ModelForm):
 
 class CardForm(ComponentForm):
     schema = forms.CharField(
-        label="Schema", widget=code_mirror_schema, initial=json.dumps(CARD))
+        label="Schema", widget=code_mirror_schema, initial=json.dumps(
+            CARD, indent=4))
 
     class Meta:
         model = Card
@@ -43,7 +44,7 @@ class CardForm(ComponentForm):
 class DoughnutChartForm(ComponentForm):
     schema = forms.CharField(
         label="Schema", widget=code_mirror_schema, initial=json.dumps(
-            DOUGHNUT))
+            DOUGHNUT, indent=4))
 
     class Meta:
         model = DoughnutChart
@@ -52,7 +53,7 @@ class DoughnutChartForm(ComponentForm):
 
 class LineChartForm(ComponentForm):
     schema = forms.CharField(
-        label="Schema", widget=code_mirror_schema, initial=json.dumps(LINE))
+        label="Schema", widget=code_mirror_schema, initial=json.dumps(LINE, indent=4))
 
     class Meta:
         model = LineChart
