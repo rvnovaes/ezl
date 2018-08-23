@@ -144,9 +144,10 @@ class TaskToAssignForm(BaseForm):
 
 class ImportTaskListForm(forms.ModelForm):
     file_xls = XlsxFileField(label='Arquivo', required=True,
-                             headers_to_check=['folder_number', 'law_suit_number', 'court_district',
-                                               'court_district_state', 'instance', 'person_lawyer', 'court_division',
-                                               'type_movement', 'person_asked_by', 'type_task', 'final_deadline_date'])
+                             headers_to_check=[
+                                 'folder_number', 'folder_legacy_code', 'law_suit_number', 'instance',
+                                 'lawsuit_legacy_code', 'type_movement', 'movement_legacy_code', 'person_asked_by',
+                                 'type_task', 'final_deadline_date'])
 
     class Meta:
         model = ImportXlsFile
