@@ -782,7 +782,8 @@ class GenericFormOneToMany(FormView, SingleTableView):
         else:
             table = self.table_class(self.related_model.objects.none())
             if related_model_id:
-                lookups = {'{}__id'.format(field_related.name): related_model_id}
+                lookups = {'{}__id'.format(field_related.name): related_model_id,
+                           'office__id': get_office_session(self.request).id}
                 qs = self.related_model.objects.filter(**lookups)
 
                 if self.related_ordering:
