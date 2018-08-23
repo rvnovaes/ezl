@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ecm', '0005_auto_20180509_0946'),
+        ('ecm', '0006_defaultattachmentrule'),
     ]
 
     operations = [
