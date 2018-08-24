@@ -109,9 +109,5 @@ class TaskResource(resources.ModelResource):
 
         if movement:
             row['movement'] = movement.id
-            # final_deadline = row['final_deadline_date']
-            # seconds = int(round((final_deadline - 25569) * 86400.0))
-            # final_deadline = make_aware(datetime.datetime.utcfromtimestamp(seconds))
-            # row['final_deadline_date'] = final_deadline
         if row_errors:
             raise Exception(row_errors)
