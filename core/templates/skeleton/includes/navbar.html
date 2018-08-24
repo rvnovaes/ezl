@@ -28,7 +28,7 @@
                     </li>
                     {% if office_session_id %}
                         <li class="dropdown" id="id_notificacoes">
-                            <a class="dropdown-toggle waves-effect waves-light" data-toggle="dropdown" href="#">
+                            <a class="dropdown-toggle waves-effect waves-light ezl-tooltip" data-toggle="dropdown" href="#" title="Notifica&ccedil;&otilde;es">
                                 <i class="mdi mdi-bell-outline"></i>
                                 <div class="notify hide" id="request-notify">
                                     <span class="heartbit"></span>
@@ -43,7 +43,7 @@
                             <!-- /.dropdown-messages -->
                         </li>
                         <li class="dropdown" id="id_chat">
-                            <a class="dropdown-toggle waves-effect waves-light" data-toggle="dropdown" href="#">
+                            <a class="dropdown-toggle waves-effect waves-light ezl-tooltip" data-toggle="dropdown" href="#" title="Chat">
                                 <i class="mdi mdi-comment-text-outline"></i>
                                 <div class="notify hide" id="chat-notify">
                                     <span class="heartbit"></span>
@@ -59,6 +59,11 @@
                                 </li>
                             </ul>
                             <!-- /.dropdown-messages -->
+                        </li>
+                        <li>
+                            <a href="http://suporte.ezlawyer.com.br" class="waves-effect waves-light ezl-tooltip" target="_blank" title="Suporte">
+                                <i class="fa fa-life-ring"></i>
+                            </a>
                         </li>
                         {% if 'can_access_general_data' in office_session_perms %}
                             <li class="open" id="id_create_task">

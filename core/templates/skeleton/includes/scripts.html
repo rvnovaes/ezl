@@ -74,6 +74,8 @@
 
         $(window).ready(set);
         $(window).bind("resize", set);
+
+        $('.navbar').find('.ezl-tooltip').tooltip({placement: 'bottom'});
     });
     {% endif %}
     function filter_office_sesion(office_legal_name, ajax_url) {
