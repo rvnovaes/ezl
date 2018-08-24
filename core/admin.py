@@ -38,6 +38,7 @@ class ContactMechanism(admin.ModelAdmin):
 @admin.register(Office)
 class OfficeAdmin(admin.ModelAdmin):
     filter_horizontal = ['persons', 'offices']
+    search_fields = ['legal_name']
     list_display = ['name', 'auth_user']
 
 

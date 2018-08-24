@@ -17,22 +17,26 @@ from chat.models import Chat, UserByChat
 from lawsuit.models import CourtDistrict
 from core.utils import check_environ
 
-send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'execution_date'])
+send_notes_execution_date = Signal(
+    providing_args=['notes', 'instance', 'execution_date'])
 
 
 @receiver(post_save, sender=Ecm)
 def export_ecm_path(sender, instance, created, **kwargs):
     if created and instance.legacy_code is None and instance.task.legacy_code:
-        export_ecm.apply_async((instance.id,), link=export_ecm_related_folter_to_task.s(instance.id, ))
+        export_ecm.apply_async(
+            (instance.id,), link=export_ecm_related_folter_to_task.s(instance.id, ))
 
 
 @receiver(post_save, sender=Ecm)
 def copy_ecm_related(sender, instance, created, **kwargs):
     if created and instance.path:
         if instance.task.parent:
-            transaction.on_commit(lambda: copy_ecm(instance, instance.task.parent))
+            transaction.on_commit(lambda: copy_ecm(
+                instance, instance.task.parent))
         if instance.task.get_child:
-            transaction.on_commit(lambda: copy_ecm(instance, instance.task.get_child))
+            transaction.on_commit(lambda: copy_ecm(
+                instance, instance.task.get_child))
 
 
 @receiver(post_delete, sender=Ecm)
@@ -56,7 +60,8 @@ def delete_ecm_advwin(sender, instance, **kwargs):
 @receiver(post_init, sender=Task)
 def load_previous_status(sender, instance, **kwargs):
     instance.__previous_status = \
-        TaskStatus(instance.task_status) if instance.task_status else TaskStatus.INVALID
+        TaskStatus(
+            instance.task_status) if instance.task_status else TaskStatus.INVALID
     instance._mail_attrs = None
 
 
@@ -87,7 +92,8 @@ def new_task(sender, instance, created, **kwargs):
 def change_status(sender, instance, **kwargs):
     now_date = timezone.now()
     new_status = TaskStatus(instance.task_status) or TaskStatus.INVALID
-    previous_status = TaskStatus(instance.__previous_status) or TaskStatus.INVALID
+    previous_status = TaskStatus(
+        instance.__previous_status) or TaskStatus.INVALID
 
     if new_status is not previous_status:
         if new_status is TaskStatus.REQUESTED:
@@ -116,6 +122,7 @@ def change_status(sender, instance, **kwargs):
             instance.execution_date = now_date
 
         instance.alter_date = now_date
+
 
 @receiver(post_save, sender=Task)
 @check_environ
@@ -151,8 +158,10 @@ def update_status_parent_task(sender, instance, **kwargs):
             fields = get_parent_fields(instance.status)
             for field in fields:
                 setattr(instance.parent, field, getattr(instance, field)),
-            instance.parent._mail_attrs = get_parent_recipients(instance.status)
-            setattr(instance.parent, '_TaskDetailView__server', getattr(instance, '_TaskDetailView__server', None))
+            instance.parent._mail_attrs = get_parent_recipients(
+                instance.status)
+            setattr(instance.parent, '_TaskDetailView__server',
+                    getattr(instance, '_TaskDetailView__server', None))
             instance.parent.save(**{'skip_signal': instance._skip_signal,
                                     'skip_mail': False})
 
@@ -176,7 +185,8 @@ def update_status_child_task(sender, instance, **kwargs):
                 child.task_number, instance.office.legal_name, getattr(instance, '__notes', '')))
         child.task_status = status
         child._mail_attrs = get_child_recipients(instance.task_status)
-        setattr(child, '_TaskDetailView__server', getattr(instance, '_TaskDetailView__server', None))
+        setattr(child, '_TaskDetailView__server', getattr(
+            instance, '_TaskDetailView__server', None))
         child.save(** {'skip_signal': instance._skip_signal,
                        'skip_mail': False,
                        'from_parent': True})
@@ -187,7 +197,8 @@ def send_task_emails(sender, instance, created, **kwargs):
     mail_list = []
 
     if not getattr(instance, '_skip_mail') and instance.__previous_status != instance.task_status:
-        number = '{} ({})'.format(instance.task_number, instance.legacy_code) if instance.legacy_code else str(instance.task_number)
+        number = '{} ({})'.format(instance.task_number,
+                                  instance.legacy_code) if instance.legacy_code else str(instance.task_number)
 
         if hasattr(instance, '_TaskCreateView__server'):
             project_link = instance._TaskCreateView__server
@@ -199,7 +210,8 @@ def send_task_emails(sender, instance, created, **kwargs):
             project_link = instance._TaskDetailView__server
 
         else:
-            project_link = '{}{}'.format(settings.PROJECT_LINK, reverse('task_detail', kwargs={'pk': instance.pk}))
+            project_link = '{}{}'.format(settings.PROJECT_LINK, reverse(
+                'task_detail', kwargs={'pk': instance.pk}))
 
         """
         Caso a OS não tenha o status alterado por um signal de um parent (Pai, ou filha), ela chegará aqui sem o atributo 
@@ -214,21 +226,27 @@ def send_task_emails(sender, instance, created, **kwargs):
             short_message = short_message_dict.get(instance.status, '')
 
             if instance.task_status in [TaskStatus.REFUSED_SERVICE]:
-                custom_text = ' pelo(a) contratante ' + str(instance.person_distributed_by).title()
+                custom_text = ' pelo(a) contratante ' + \
+                    str(instance.person_distributed_by).title()
                 persons_to_receive = [instance.person_asked_by]
 
             elif instance.task_status in [TaskStatus.REFUSED]:
-                custom_text = ' pelo(a) correspondente ' + str(instance.person_executed_by).title()
+                custom_text = ' pelo(a) correspondente ' + \
+                    str(instance.person_executed_by).title()
                 persons_to_receive = [instance.person_distributed_by]
 
             elif instance.task_status in [TaskStatus.RETURN]:
-                custom_text = ' pelo(a) contratante ' + str(instance.person_distributed_by).title()
-                persons_to_receive = [instance.office, instance.person_distributed_by]
+                custom_text = ' pelo(a) contratante ' + \
+                    str(instance.person_distributed_by).title()
+                persons_to_receive = [instance.office,
+                                      instance.person_distributed_by]
                 if instance.person_executed_by:
                     if instance.person_executed_by.emails != '':
-                        persons_to_receive = [instance.person_executed_by, instance.person_distributed_by]
+                        persons_to_receive = [
+                            instance.person_executed_by, instance.person_distributed_by]
 
-            persons_to_receive = [x for x in persons_to_receive if x is not None]
+            persons_to_receive = [
+                x for x in persons_to_receive if x is not None]
             for person in persons_to_receive:
                 mails = person.emails.split(' | ')
                 for mail in mails:
@@ -243,34 +261,46 @@ def send_task_emails(sender, instance, created, **kwargs):
                     mails = recipient.emails.split(' | ')
                     for mail in mails:
                         mail_list.append(mail)
-            short_message = mail_attrs.get('short_message') if mail_list else ''
-            office = instance.parent.office if mail_attrs.get('office') == 'parent' else instance.get_child.office
+            short_message = mail_attrs.get(
+                'short_message') if mail_list else ''
+            office = instance.parent.office if mail_attrs.get(
+                'office') == 'parent' else instance.get_child.office
             custom_text = ' pelo escritório ' + office.__str__().title() if mail_list else ''
 
         if mail_list:
-            task_send_mail(instance, number, project_link, short_message, custom_text, mail_list)
+            task_send_mail(instance, number, project_link,
+                           short_message, custom_text, mail_list)
 
         instance.__previous_status = TaskStatus(instance.task_status)
 
 
-def create_or_update_user_by_chat(task, task_to_fields, fields):    
+def create_or_update_user_by_chat(task, task_to_fields, fields):
     for field in fields:
         user = None
         if getattr(task_to_fields, field, False):
             user = getattr(getattr(task_to_fields, field), 'auth_user', False)
         if user:
-            try:                            
+            try:
                 user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
                     'create_user': user, 'user_by_chat': user, 'chat': task.chat
                 })
             except MultipleObjectsReturned:
-                #Tratamento específico para cenário da tarefa EZL-904
-                user = UserByChat.objects.filter(user_by_chat=user, chat=task.chat).first()
+                # Tratamento específico para cenário da tarefa EZL-904
+                user = UserByChat.objects.filter(
+                    user_by_chat=user, chat=task.chat).first()
             user = user.user_by_chat
+
+def create_users_company_by_chat(company, chat):
+    users = []    
+    for company_user in company.users.all():
+        user_by_chat = UserByChat(
+            create_user=chat.create_user, user_by_chat=company_user.user, chat=chat)
+        users.append(user_by_chat)
+    UserByChat.objects.bulk_create(users)
 
 
 @receiver(post_save, sender=Task)
-def create_or_update_chat(sender, instance, created, **kwargs):    
+def create_or_update_chat(sender, instance, created, **kwargs):
     opposing_party = ''
     if instance.movement and instance.movement.law_suit:
         opposing_party = instance.movement.law_suit.opposing_party
@@ -285,7 +315,7 @@ def create_or_update_chat(sender, instance, created, **kwargs):
                final_deadline_date=instance.final_deadline_date.strftime('%d/%m/%Y %H:%M'))
     label = 'task-{}'.format(instance.pk)
     title = """#{task_number} - {type_task}""".format(
-                    task_number=instance.task_number, type_task=instance.type_task)
+        task_number=instance.task_number, type_task=instance.type_task)
     chat, chat_created = Chat.objects.update_or_create(
         label=label, defaults={
             'create_user': instance.create_user,
@@ -293,9 +323,9 @@ def create_or_update_chat(sender, instance, created, **kwargs):
             'title': title,
             'back_url': '/dashboard/{}'.format(instance.pk),
         }
-    )    
+    )
     instance.chat = chat
-    instance.chat.offices.add(instance.office)    
+    instance.chat.offices.add(instance.office)
     create_or_update_user_by_chat(instance, instance, [
         'person_asked_by', 'person_executed_by', 'person_distributed_by'])
     if instance.parent:
@@ -304,5 +334,31 @@ def create_or_update_chat(sender, instance, created, **kwargs):
             'person_asked_by', 'person_executed_by', 'person_distributed_by'
         ])
     post_save.disconnect(create_or_update_chat, sender=sender)
-    instance.save(**{'skip_signal': True, 'skip_mail': True, 'from_parent': True})
+    instance.save(
+        **{'skip_signal': True, 'skip_mail': True, 'from_parent': True})
     post_save.connect(create_or_update_chat, sender=sender)
+
+
+@receiver(post_save, sender=Task)
+def create_company_chat(sender, instance, created, **kwargs):    
+    if not instance.parent and instance.client.company:
+        label = 'company-task-{}'.format(instance.pk)
+        title = """#{lawsuit_number}""".format(
+            lawsuit_number=instance.lawsuit_number)
+        description = "Processo: {}".format(instance.lawsuit_number)
+        chat, chat_created = Chat.objects.update_or_create(
+            label=label, defaults={
+                'company': instance.client.company,
+                'create_user': instance.create_user,
+                'description': description,
+                'title': title,
+                'back_url': '/dashboard/{}'.format(instance.pk),
+            }
+        )
+        instance.company_chat = chat
+        if chat_created:            
+            instance.company_chat.offices.add(instance.office)
+            create_users_company_by_chat(instance.client.company, chat)
+        post_save.disconnect(create_company_chat, sender=sender)
+        instance.save(**{'skip_signal': True, 'skip_mail': True, 'from_parent': True})
+        post_save.connect(create_company_chat, sender=sender)

@@ -156,7 +156,10 @@ class ChatMenssage(CustomLoginRequiredView, View):
         chat = Chat.objects.get(pk=int(request.GET.get('chat')))
         messages = list(chat.messages.all().values('message', 'create_user__username', 'create_user_id', 'create_date'))
         office = get_office_session(request)        
-        task = chat.task_set.filter(pk=chat.label.split('-')[1]).first()
+        if chat.tasks_company_chat.exists():
+            task = chat.tasks_company_chat.first()
+        else:
+            task = chat.task_set.filter(pk=chat.label.split('-')[1]).first()
         if task:
             if task.parent and task.parent.office == office:
                 task_id = task.parent.pk
@@ -179,23 +182,31 @@ class InternalChatOffices(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
         task = Task.objects.get(pk=int(request.GET.get('task')))
         data = []
+        if task.company_chat:
+            data.append({
+                'chat': task.company_chat.pk, # "Deve ser o pk da propria task"
+                'office_pk': task.office.pk, #"Deve ser o pk do office do parent"
+                'name': task.company_chat.company.name,                 
+                'logo': task.company_chat.company.logo.url 
+
+            })
         if task.parent:
             data.append({
                 'chat': task.chat.pk, # "Deve ser o pk da propria task"
                 'office_pk': task.parent.office.pk, #"Deve ser o pk do office do parent"
-                'office_legal_name': task.parent.office.legal_name
+                'name': task.parent.office.legal_name
             })
         for task_child in task.child.all():
             data.append({
                 'chat': task_child.chat.pk, # "Deve ser o pk do chat da task filha"
                 'office_pk': task_child.office.pk,
-                'office_legal_name': task_child.office.legal_name
+                'name': task_child.office.legal_name
             })
         if not all([task.parent, task.child.exists()]):
             data.append({
                 'chat': task.chat.pk, # "Deve ser o pk do chat da task filha"
                 'office_pk': task.office.pk,
-                'office_legal_name': task.office.legal_name
+                'name': task.office.legal_name
             })
         return JsonResponse(data, safe=False)
 

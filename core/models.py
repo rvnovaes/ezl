@@ -305,6 +305,7 @@ class AbstractPerson(Audit, LegacyCode):
 
 
 class Company(models.Model):
+    logo = models.ImageField(verbose_name='Logo', null=True, blank=True)
     name = models.CharField(verbose_name='Empresa', max_length=255)
 
     def __str__(self):
@@ -358,8 +359,8 @@ class Person(AbstractPerson):
 
 
 class Office(AbstractPerson):
-    objects = PersonManager()
-
+    objects = PersonManager()    
+    logo = models.ImageField(verbose_name='Logo', null=True, blank=True)
     persons = models.ManyToManyField(
         Person, blank=True, related_name='offices', through='OfficeMembership')
     offices = models.ManyToManyField('self', blank=True)

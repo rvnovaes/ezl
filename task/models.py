@@ -201,6 +201,9 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                  max_digits=9, decimal_places=2, default=Decimal('0.00'))
     chat = models.ForeignKey(Chat, verbose_name='Chat', on_delete=models.SET_NULL, null=True,
                              blank=True)
+    company_chat = models.ForeignKey(
+        Chat, verbose_name='Chat Company', on_delete=models.SET_NULL, null=True, 
+        blank=True, related_name='tasks_company_chat')
     billing_date = models.DateTimeField(null=True, blank=True)
     receipt_date = models.DateTimeField(null=True, blank=True)
 
