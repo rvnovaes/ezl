@@ -20,9 +20,9 @@ $(document).ready(function() {
         window.interval_chat = count_message()
     });
     $(window).on('focusout', function(){
-        clearInterval(window.interval_chat);        
+        clearInterval(window.interval_chat);
     });
-    $("#btn-unread-message").on('click', function(){        
+    $("#btn-unread-message").on('click', function(){
         getCountMessages();
     });
 });
@@ -84,7 +84,7 @@ var chatReadMessage = function (chat_id, csrf_token) {
     })
 };
 
-var chatUnreadMessage = function (chat_id, csrf_token) {    
+var chatUnreadMessage = function (chat_id, csrf_token) {
     $.ajax({
         type: 'GET',
         url: '/chat/chat_unread_messages',
