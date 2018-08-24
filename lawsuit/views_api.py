@@ -1,6 +1,4 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
-from django.views import View
 from .models import LawSuit, Movement
 from core.api import ApiViewMixin
 from core.utils import get_office_session
