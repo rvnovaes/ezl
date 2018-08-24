@@ -12,8 +12,7 @@ from task.models import TypeTask
 from task.resources import TaskResource
 from lawsuit.models import CourtDistrict
 from tablib import Dataset
-# from .utils import remove_caracter_especial, clearCache
-import time
+import traceback
 
 
 def int_formatter(cell_value):
@@ -23,19 +22,9 @@ def int_formatter(cell_value):
         return cell_value
 
 
-# def temporária
-def get_test_file(file_id):
-    xls_file = ImportXlsFile.objects.get(pk=file_id)
-    task_resource = TaskResource()
-    dataset = Dataset()
-
-    imported_data = dataset.load(xls_file.file_xls.read())
-    params = {'create_user': xls_file.create_user, 'office': xls_file.office}
-    return task_resource.import_data(imported_data, dry_run=True, **params)
-
-
 @shared_task(bind=True)
 def import_xls_task_list(self, file_id):
+    ret = {'totals': 0}
     try:
         xls_file = ImportXlsFile.objects.get(pk=file_id)
         task_resource = TaskResource()
@@ -43,11 +32,11 @@ def import_xls_task_list(self, file_id):
 
         imported_data = dataset.load(xls_file.file_xls.read())
         params = {'create_user': xls_file.create_user,'office': xls_file.office}
-        result = task_resource.import_data(imported_data, dry_run=True, **params)
-        if not result.has_errors():
-            result = task_resource.import_data(imported_data, dry_run=False, **params)
-        else:
-            ret = list(map(lambda i: {'line': i[0], 'errors': set(map(lambda j: j.error, i[1]))}, result.row_errors()))
-            return ret
+        result = task_resource.import_data(imported_data, dry_run=False, **params)
+        ret['totals'] = result.totals
+        if result.has_errors():
+            ret['errors'] = list(map(lambda i: {'line': i[0], 'errors': set(map(lambda j: j.error, i[1]))}, result.row_errors()))
+        return ret
     except Exception as e:
-        pass
+        ret['errors'] = '{} - {}'.format(e, traceback.format_exc())
+        return ret

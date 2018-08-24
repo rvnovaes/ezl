@@ -1294,7 +1294,8 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
             file_xls.start = timezone.now()
             file_xls.save()
 
-            import_xls_task_list(file_xls.pk)
+            ret = import_xls_task_list(file_xls.pk)
+            file_xls.end = timezone.now()
             # self.context['show_modal_progress'] = True
             # context['file_xls'] = file_xls
             # context['file_name'] = request.FILES['file_xls'].name

@@ -19,16 +19,16 @@ class TaskResource(resources.ModelResource):
     person_distributed_by = Field(column_name='person_distributed_by', attribute='person_distributed_by',
                                   widget=UnaccentForeignKeyWidget(Person, 'legal_name'))
     final_deadline_date = Field(column_name='final_deadline_date', attribute='final_deadline_date',
-                                widget=DateTimeWidget(format='%d/%m/%Y %H:%M'),
+                                widget=DateTimeWidget(format=('%d/%m/%Y %H:%M', '%d/%m/%Y %H:%M',)),
                                 saves_null_values=False)
     delegation_date = Field(column_name='delegation_date', attribute='delegation_date',
-                            widget=DateTimeWidget(format='%d/%m/%Y %H:%M'))
+                            widget=DateTimeWidget(format=('%d/%m/%Y %H:%M', '%d/%m/%Y %H:%M',)))
     acceptance_date = Field(column_name='acceptance_date', attribute='acceptance_date',
-                            widget=DateTimeWidget(format='%d/%m/%Y %H:%M'))
+                            widget=DateTimeWidget(format=('%d/%m/%Y %H:%M', '%d/%m/%Y %H:%M',)))
     execution_date = Field(column_name='execution_date', attribute='execution_date',
-                           widget=DateTimeWidget(format='%d/%m/%Y %H:%M'))
+                           widget=DateTimeWidget(format=('%d/%m/%Y %H:%M', '%d/%m/%Y %H:%M',)))
     requested_date = Field(column_name='requested_date', attribute='requested_date',
-                           widget=DateTimeWidget(format='%d/%m/%Y %H:%M'))
+                           widget=DateTimeWidget(format=('%d/%m/%Y %H:%M', '%d/%m/%Y %H:%M',)))
     task_status = Field(column_name='task_status', attribute='task_status', widget=TaskStatusWidget())
     amount = Field(column_name='amount', attribute='amount', widget=DecimalWidget())
 
@@ -38,6 +38,7 @@ class TaskResource(resources.ModelResource):
 
     class Meta:
         model = Task
+        import_id_fields = ('legacy_code',)
 
     def validate_folder(self, row, row_errors):
         folder_number = int(row['folder_number']) if row['folder_number'] else ''
