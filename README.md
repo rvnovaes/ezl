@@ -7,7 +7,7 @@ Com o EZL, o solicitante cadastra as providências que precisam ser cumpridas e,
 
 O sistema também envia alertas de providências para o email do correspondente, como mais uma forma de avisá-lo que há uma tarefa a ser feita. Em seguida, ele poderá aceitá-la ou recusá-la, conforme sua disponibilidade. Se recusada, a providência será enviada a outro advogado.
 
-Site do [Easy Lawyer](http://www.mttech.com.br/produtos/easy-lawyer/)
+Site do [Easy Lawyer](http://www.ezlawyer.com.br/)
 
 Atenção:
 =======
