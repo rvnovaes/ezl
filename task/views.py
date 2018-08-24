@@ -52,6 +52,8 @@ from django.core.files.base import ContentFile
 from functools import reduce
 import operator
 
+from datetime import datetime
+
 mapOrder = {
     'asc': '',
     'desc': '-'
@@ -157,7 +159,7 @@ class TaskToAssignView(AuditFormMixin, UpdateView):
 
     def form_valid(self, form):
         super().form_valid(form)
-        if form.is_valid():            
+        if form.is_valid():
             form.instance.person_distributed_by = self.request.user.person
             form.instance.task_status = TaskStatus.OPEN
             # TODO: rever processo de anexo, quando for trocar para o ECM Generico
@@ -236,16 +238,13 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
+        print(datetime.now())
         context['filter'] = self.task_filter
-        try:
-            if self.request.GET['group_by_tasks'] == OFFICE:
-                office_list, total =  self.get_os_grouped_by_office()
-            else:
-                office_list, total =  self.get_os_grouped_by_client()
-        except:
-            office_list, total = self.get_os_grouped_by_office()
-        context['offices'] = office_list
-        context['total'] = total
+        print(datetime.now())
+        context['offices_report'] = self.get_os_grouped_by_office()
+        print(datetime.now())
+        context['total'] = sum(map(lambda x: x['total'], context['offices_report']))
+        print(datetime.now())
         return context
 
     def get_queryset(self):
@@ -288,30 +287,29 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
                 if data['finished_in'].stop:
                     finished_query.add(
                         Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
+
+            if query or finished_query:
+                query.add(Q(finished_query), Q.AND)
+                queryset = queryset.filter(query)
             else:
-                # O filtro padrão para finished_date é do dia 01 do mês atual e o dia corrente como data final
-                finished_query.add(
-                    Q(finished_date__gte=timezone.now().replace(day=1, hour=0, minute=0)), Q.AND)
-                finished_query.add(
-                    Q(finished_date__lte=timezone.now().replace(hour=23, minute=59)), Q.AND)
-            query.add(Q(finished_query), Q.AND)
-            queryset = queryset.filter(query)
+                queryset = Task.objects.none()
 
         return queryset
 
     def get_os_grouped_by_office(self):
         offices = []
-        offices_map = {}
+        import collections
+        offices_map = collections.defaultdict(list)
         tasks = self.get_queryset()
         total = 0
         for task in tasks:
             correspondent = self._get_related_office(task)
-            if correspondent not in offices_map:
-                offices_map[correspondent] = {}
+            offices_map[correspondent].append(task)
             client = self._get_related_client(task)
             if client not in offices_map[correspondent]:
                 offices_map[correspondent][client] = []
             offices_map[correspondent][client].append(task)
+        offices_map.default_factory = None
 
         offices_map_total = {}
         for office, clients in offices_map.items():
@@ -493,7 +491,7 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
         grouped = dict()
         for obj in data:
             grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
-        returned = grouped.get(TaskStatus.RETURN) or {}        
+        returned = grouped.get(TaskStatus.RETURN) or {}
         accepted = grouped.get(TaskStatus.ACCEPTED) or {}
         opened = grouped.get(TaskStatus.OPEN) or {}
         done = grouped.get(TaskStatus.DONE) or {}
@@ -813,9 +811,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
                 if not checker.has_perm('can_distribute_tasks', office_session):
                     if checker.has_perm('view_delegated_tasks', office_session):
-                        person_dynamic_query.add(Q(person_executed_by=person.id), Q.AND)
+                        person_dynamic_query.add(Q(person_executed_by=person.id), Q.OR)
                     if checker.has_perm('view_requested_tasks', office_session):
-                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.AND)
+                        person_dynamic_query.add(Q(person_asked_by=person.id), Q.OR)
                 if data['office_executed_by']:
                     task_dynamic_query.add(Q(child__office_id=data['office_executed_by']), Q.AND)
                 if data['state']:

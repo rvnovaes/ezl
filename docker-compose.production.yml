@@ -118,6 +118,11 @@ services:
       - db
       - queues
 
+  queues:
+    ports:
+      - "8083:15672"
+      - "5672:5672"
+
   tasks-schedule:
     environment:
       ENV: production

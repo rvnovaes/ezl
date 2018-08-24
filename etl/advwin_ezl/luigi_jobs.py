@@ -84,20 +84,6 @@ class ConfigTask(luigi.Task):
         self.output().open("w").close()
 
 
-class UserTask(luigi.Task):
-    date_interval = luigi.DateHourParameter()
-
-    def output(self):
-        return luigi.LocalTarget(path=get_target_path(self))
-
-    def requires(self):
-        yield ConfigTask(self.date_interval)
-
-    def run(self):
-        self.output().open("w").close()
-        UserETL().import_data()
-
-
 class CourtDivisionTask(luigi.Task):
     date_interval = luigi.DateHourParameter()
 
@@ -105,7 +91,7 @@ class CourtDivisionTask(luigi.Task):
         return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield UserTask(self.date_interval)
+        yield ConfigTask(self.date_interval)
 
     def run(self):
         self.output().open("w").close()
