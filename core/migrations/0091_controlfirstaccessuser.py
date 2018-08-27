@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('core', '0090_office_use_service'),
+        ('core', '0090_auto_20180711_1813'),
     ]
 
     operations = [
@@ -26,10 +26,5 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Controle de primeiro acesso',
                 'verbose_name_plural': 'Controle de primeiro acesso',
             },
-        ),
-        migrations.AddField(
-            model_name='office',
-            name='use_etl',
-            field=models.BooleanField(default=True, verbose_name='Possuo processo de importação de dados de outros sistemas'),
         ),
     ]
