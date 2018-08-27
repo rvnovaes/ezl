@@ -1,9 +1,13 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
-from django.views import View
 from .models import LawSuit, Movement
 from core.api import ApiViewMixin
+from core.utils import get_office_session
 from task.models import Task
+
+
+def office_filter(queryset, request):
+    office = get_office_session(request)
+    return queryset.filter(office=office)
 
 
 class LawsuitApiView(LoginRequiredMixin, ApiViewMixin):
@@ -15,7 +19,7 @@ class LawsuitApiView(LoginRequiredMixin, ApiViewMixin):
             raise self.bad_request("folder is required")
 
         queryset = queryset.filter(folder_id=folder)
-        return queryset
+        return office_filter(queryset, self.request)
 
 
 class MovementApiView(LoginRequiredMixin, ApiViewMixin):
@@ -27,7 +31,7 @@ class MovementApiView(LoginRequiredMixin, ApiViewMixin):
             raise self.bad_request("lawsuit is required")
 
         queryset = queryset.filter(law_suit_id=lawsuit)
-        return queryset
+        return office_filter(queryset, self.request)
 
 
 class TaskApiView(LoginRequiredMixin, ApiViewMixin):
@@ -39,4 +43,4 @@ class TaskApiView(LoginRequiredMixin, ApiViewMixin):
             raise self.bad_request("movement is required")
 
         queryset = queryset.filter(movement_id=movement)
-        return queryset
+        return office_filter(queryset, self.request)

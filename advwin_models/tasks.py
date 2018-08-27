@@ -67,6 +67,7 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
         LOGGER.debug('Exportando ECM %d-%s ', ecm.id, ecm)
         try:
             result = get_advwin_engine().execute(stmt)
+            result.close()
         except Exception as exc:
             self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
             LOGGER.warning('Não foi possível exportar ECM: %d-%s\n%s',
@@ -83,6 +84,7 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
         id_doc = []
         for row in result:
             id_doc.append(row['ID_doc'])
+        result.close()
         LOGGER.info('ECM %s: exportado', ecm)
         return id_doc
     else:
@@ -107,8 +109,10 @@ def export_ecm_related_folter_to_task(self, id_docs, ecm_id, execute=True):
         result = None
         try:
             result = get_advwin_engine().execute(stmt)
+            total_afected = result.rowcount
+            result.close()
             LOGGER.info('ECM %s: relacionamento criado entre Pasta e Agenda', ecm)
-            return '{} Registros afetados'.format(result.rowcount)
+            return '{} Registros afetados'.format(total_afected)
         except Exception as exc:
             self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
             LOGGER.warning('Não foi possível relacionar o ECM entre Agenda e Pasta: %d-%s\n%s',
@@ -181,7 +185,10 @@ def delete_ecm_related_folder_to_task(self, ecm_id, id_doc, task_id, ecm_create_
             id_lig = row['ID_lig']
             stmt = JuridGEDLig.__table__.delete().where(JuridGedMain.__table__.c.ID_lig == id_lig)
             deleted_ecm = get_advwin_engine().execute(stmt)
-        return '{} Registros afetados'.format(result.rowcount)
+            deleted_ecm.close()
+        total_afected = result.rowcount
+        result.close()
+        return '{} Registros afetados'.format(total_afected)
 
 
 @retry(stop_max_attempt_number=4, wait_fixed=1000)
@@ -216,7 +223,9 @@ def delete_ecm(ecm_id, execute=True):
                 deleted_ecm = get_advwin_engine().execute(stmt)
                 delete_ecm_related_folder_to_task.delay(ecm_id, id_doc, ecm.task.id, ecm.create_user.username)
             LOGGER.info('ECM %s: excluído', ecm_id)
-            return '{} Registros afetados'.format(result.rowcount)
+            total_afected = result.rowcount
+            result.close()
+            return '{} Registros afetados'.format(total_afected)
         except Exception as exc:
             LOGGER.warning('Não foi possível excluir o ECM: %d-%s\n%s',
                            ecm_id,
@@ -234,12 +243,14 @@ def get_folder_to_related(task):
             stmt = JuridAgendaTable.__table__.select().where(and_(
                 JuridAgendaTable.__table__.c.Ident == task.legacy_code
             ))
-            result = get_advwin_engine().execute(stmt).fetchone()['Pasta']
+            result = get_advwin_engine().execute(stmt)
+            folder_to_related = result.fetchone()['Pasta']
+            result.close()
         except Exception as e:
             LOGGER.warning('Não foi l encontrar pasta para a Providencia: %d-%s\n%s',
                            task.legacy_code, exc_info=(type(e), e, e.__traceback__))
         finally:
-            return result
+            return folder_to_related
     return task.movement.law_suit.folder.legacy_code
 
 
@@ -284,7 +295,9 @@ def insert_advwin_history(task_history, values, execute=True):
             LOGGER.info('Histórico de OS %d-%d: exportado com sucesso.',
                         task_history.task.id,
                         task_history.id)
-            return '{} Registros afetados'.format(result.rowcount)
+            total_afected = result.rowcount
+            result.close()
+            return '{} Registros afetados'.format(total_afected)
         except Exception as exc:
             LOGGER.warning('Não foi possível exportar Histórico de OS: %d-%d\n%s',
                            task_history.task.id,
@@ -445,7 +458,9 @@ def update_advwin_task(task, values, execute=True):
         try:
             result = get_advwin_engine().execute(stmt)
             LOGGER.info('OS %s: exportada com  status %s', task, task.task_status)
-            return '{} Registros atualizados'.format(result.rowcount)
+            total_afected = result.rowcount
+            result.close()
+            return '{} Registros atualizados'.format(total_afected)
         except Exception as exc:
             LOGGER.warning('Não foi possível exportar OS: %d-%s com status %s\n%s',
                            task.id,

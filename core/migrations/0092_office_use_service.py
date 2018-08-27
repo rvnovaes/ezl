@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0089_auto_20180703_1712'),
+        ('core', '0091_controlfirstaccessuser'),
     ]
 
     operations = [
@@ -16,5 +16,11 @@ class Migration(migrations.Migration):
             model_name='office',
             name='use_service',
             field=models.BooleanField(default=True, verbose_name='Possuo equipe de conferência de dados na delegação e validação da OS'),
+        ),
+        migrations.AddField(
+            model_name='office',
+            name='use_etl',
+            field=models.BooleanField(default=True,
+                                      verbose_name='Possuo processo de importação de dados de outros sistemas'),
         ),
     ]
