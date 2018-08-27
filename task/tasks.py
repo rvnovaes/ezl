@@ -35,7 +35,8 @@ def import_xls_task_list(self, file_id):
         result = task_resource.import_data(imported_data, dry_run=False, **params)
         ret['totals'] = result.totals
         if result.has_errors():
-            ret['errors'] = list(map(lambda i: {'line': i[0], 'errors': set(map(lambda j: j.error, i[1]))}, result.row_errors()))
+            ret['errors'] = list(map(lambda i: {'line': i[0], 'errors': list(map(lambda j: j.error.__str__(), i[1]))},
+                                     result.row_errors()))
         return ret
     except Exception as e:
         ret['errors'] = '{} - {}'.format(e, traceback.format_exc())

@@ -239,7 +239,7 @@
                             .attr('name', 'action')
                             .attr('value', 'OPEN')
                             .appendTo('#task_detail');
-                        toogleModals('#confirmAction', '#procssing')
+                        toogleModals('#confirmAction', '#processing')
                         $('#task_detail').unbind('submit').submit();
                     }else{
                         $('#actionButton').removeAttr('disabled')
@@ -251,7 +251,7 @@
                     .attr('value', 'OPEN')
                     .appendTo('#task_detail');
                 $('#task_detail').unbind('submit').submit();
-                toogleModals('#confirmAction', '#procssing')
+                toogleModals('#confirmAction', '#processing')
             }
         }
 
@@ -259,7 +259,7 @@
             var task_status = actionButton.value;
             var have_survey = actionButton.getAttribute('survey');
             actionButton.disabled = true;
-            {#toogleModals('#confirmAction', '#procssing')#}
+            {#toogleModals('#confirmAction', '#processing')#}
             if ((task_status === 'DONE' || task_status === 'FINISHED' && use_service === 'False') && have_survey){
                 beforeSubmit(task_status);
             }else if(task_status === 'OPEN'){
@@ -274,7 +274,7 @@
                 });
                 if (ret) {
                     $('<input name="action" value="'+ task_status +'">').appendTo($('#task_detail'));
-                    toogleModals('#confirmAction', '#procssing');
+                    toogleModals('#confirmAction', '#processing');
                     $('#task_detail').unbind('submit').submit();
                 }
             }
@@ -396,7 +396,7 @@
         }
         function showError(error) {
             $('#locating').modal('hide');
-            var msg = ''
+            var msg = '';
             switch(error.code) {
                 case error.PERMISSION_DENIED:
                     msg = "O usuário negou o acesso à Geolocalização.";
@@ -484,17 +484,7 @@
             </div>
         </div>
     </div>
-    <!-- Janela modal para mostrar enquanto faz submit do form -->
-    <div id="procssing" class="modal" data-keyboard="false">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content ">
-                <div class="modal-body" style="text-align: center;">
-                    <h1>Aguarde...</h1>
-                    <p class="h1"><i class="fa fa-spin fa-spinner"></i></p>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include 'task/modal/processing.html' %}
 {% endblock %}
 {% block script_document_ready %}
     {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}

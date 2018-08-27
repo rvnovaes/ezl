@@ -1296,10 +1296,7 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
 
             ret = import_xls_task_list(file_xls.pk)
             file_xls.end = timezone.now()
-            # self.context['show_modal_progress'] = True
-            # context['file_xls'] = file_xls
-            # context['file_name'] = request.FILES['file_xls'].name
         else:
             messages.error(request, form.errors)
-
-        return render(request, self.template_name, context)
+        return JsonResponse({"status": "ok",
+                             "ret": json.dumps(ret)})

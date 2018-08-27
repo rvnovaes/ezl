@@ -54,8 +54,34 @@
                             confirmButtonColor: "#DD6B55",                        
                             closeOnConfirm: false
                         }, function(isConfirm){
-                            if (isConfirm) {                                                   
-                                $('#import_task_list_form').submit();
+                            if (isConfirm) {
+                                swal.close();
+                                $('#processing').modal({backdrop: 'static', keyboard: false});
+                                var formData = new FormData($('#import_task_list_form')[0]);
+                                $.ajax({
+                                    type: 'POST',
+                                    url: window.location,
+                                    data: formData,
+                                    contentType: false,
+                                    processData: false,
+                                    success: function (result) {
+                                        console.log(result);
+                                        //if (result.ok){
+                                        //    location.reload();
+                                        //    $('#locating').modal('hide');
+                                        //}else{
+                                        //    $('#locating').modal('hide');
+                                        //    showToast('error', 'Atenção', "Localização não registrada", 0, false);
+                                        //}
+                                    },
+                                    error: function (request, status, error) {
+                                    },
+                                    beforeSend: function (xhr, settings) {
+                                        xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                                    },
+                                    dataType: 'json'
+                                })
+                                //$('#import_task_list_form').submit();
                             }
                         }
                     );
@@ -84,7 +110,8 @@
 
             </tbody>
         </table>
-    </div> 
+    </div>
+    {% include 'task/modal/processing.html' %}
 {% endblock %}
 
 
