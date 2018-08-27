@@ -36,7 +36,7 @@
                        </tr>
                     {% endwith %}
                 {% else %}
-                    {% for office in object.person.offices.all %}
+                    {% for office in object.person.offices.active_offices %}
                         {% get_obj_perms request.user for office as "office_perms" %}
                         {% if 'can_access_general_data' in office_perms %}
                             <tr>

@@ -1,18 +1,18 @@
 <ul class="nav" id="side-menu">
-    <li> <!-- DASHBOARD -->
+    <li id="id_dashboard"> <!-- DASHBOARD -->
         <a href="{% url 'dashboard' %}" class="waves-effect">
             <i class="mdi mdi-av-timer fa-fw"></i>
             <span class="hide-menu">Dashboard</span>
         </a>
     </li>
-    <li> <!-- DASHBOARD -->
+    <li id="id_task_seach"> <!-- DASHBOARD -->
         <a href="{% url 'task_search' %}" class="waves-effect">
             <i class="mdi mdi-magnify fa-fw"></i>
             <span class="hide-menu">Pesquisar</span>
         </a>
-    </li>    
+    </li>
     {% if 'can_access_general_data' in office_session_perms %}
-    <li> <!-- CADASTROS -->
+    <li id="id_cadastros"> <!-- CADASTROS -->
         <a href="javascript:void(0)" class="waves-effect">
             <i class="fa fa-pencil-square-o fa-fw" data-icon="v"></i>
             <span class="hide-menu">Cadastros<span class="fa arrow"></span></span>
@@ -70,7 +70,7 @@
         </ul>
     </li>
     {% if perms.core.view_all_tasks %}
-    <li>
+    <li id="id_relatorios">
         <a href="javascript:void(0)" class="waves-effect">
             <i class="mdi mdi-chart-bar fa-fw"></i>
             <span class="hide-menu">Relatórios<span class="fa arrow"></span></span>
@@ -91,20 +91,18 @@
         </ul>
     </li>
     {% endif %}
-    <li> <!-- ADMINISTRAÇÃO -->
+    <li id="id_administracao"> <!-- ADMINISTRAÇÃO -->
         <a href="javascript:void(0)" class="waves-effect">
             <i class="fa fa-folder-o fa-fw" data-icon="v"></i>
             <span class="hide-menu">Administração<span class="fa arrow"></span></span>
         </a>
         <ul class="nav nav-second-level">
-            {% if request.user.is_superuser%} 
-                <li> <!-- ESCRIITORIOS -->
-                    <a href="{% url 'office_list' %}" target="_self">
-                        <i class="fa fa-building-o fa-fw"></i>
-                        <span class="hide-menu">Escritórios</span>
-                    </a>
-                </li>
-            {%endif%}
+            {% if request.user.is_superuser%}<li> <!-- ESCRIITORIOS -->
+                <a href="{% url 'office_list' %}" target="_self">
+                    <i class="fa fa-building-o fa-fw"></i>
+                    <span class="hide-menu">Escritórios</span>
+                </a>
+            </li>{%endif%}
             <li><!-- IMPORTAÇÃO TABELA DE PREÇO -->
                 <a href="{% url 'import_service_price_table' %}" target="_self">
                     <i class="fa fa-money fa-fw"></i>
@@ -113,7 +111,7 @@
             </li>
             <li>
                 <a href="{% url 'team_list' %}" target="_self">
-                    <i class="fa fa-group"></i>
+                    <i class="fa fa-group fa-fw"></i>
                     <span class="hide-menu">Equipes</span>
                 </a>
             </li>
@@ -149,13 +147,31 @@
         <ul class="nav nav-second-level">
             <li> <!-- MANUAL DO USUARIO -->
                 <a href="https://mttech.atlassian.net/wiki/spaces/PUB/pages/55738374/Manual+do+usu+rio" class="waves-effect" target="_blank">
-                    <i class="mdi mdi-file-pdf"></i>
+                    <i class="mdi mdi-file-pdf fa-fw"></i>
                     <span class="hide-menu">Manual do Usuário</span>
+                </a>
+            </li>
+            <li> <!-- SUPORTE -->
+                <a href="http://suporte.ezlawyer.com.br" class="waves-effect" target="_blank">
+                    <i class="fa fa-life-ring fa-fw"></i>
+                    <span class="hide-menu">Suporte</span>
+                </a>
+            </li>
+            <li> <!-- Tour -->
+                <a href="{% url 'dashboard' %}" class="waves-effect" data-toggle="modal" id="id_btn_tour">
+                    <i class="mdi mdi-map"></i>
+                    <span class="hide-menu">Tour</span>
+                    <script>
+                        $('#id_btn_tour').on('click', function(e) {
+                            var tour_enabled_for_user_key = '{{ request.user }}_tour_enabled_for_user';
+                            localStorage[tour_enabled_for_user_key] = true;
+                        });
+                    </script>
                 </a>
             </li>
             <li> <!-- SOBRE -->
                 <a href="#about-modal" class="waves-effect" data-toggle="modal">
-                    <i class="mdi mdi-information-outline"></i>
+                    <i class="mdi mdi-information-outline fa-fw"></i>
                     <span class="hide-menu">Sobre</span>
                 </a>
             </li>

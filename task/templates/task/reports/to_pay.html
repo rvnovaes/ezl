@@ -52,18 +52,6 @@
                                         
                                         $('#finished_in_0').datepicker(config);
                                         $('#finished_in_1').datepicker(config);
-
-                                        var date = new Date();
-                                        var dtini = $("#finished_in_0").datepicker("getDate");
-                                        if (dtini == null) {
-                                            startDate = new Date(date.getFullYear(), date.getMonth(), 1);                                                                                                                           
-                                            $('#finished_in_0').datepicker("update", startDate);
-                                        }
-                                        
-                                        var dtfim = $("#finished_in_1").datepicker("getDate");
-                                        if (dtfim == null) {
-                                            $('#finished_in_1').datepicker("update", date);
-                                        }
                                     });                                                                        
                                 </script>
                             </div>
@@ -173,7 +161,6 @@
                                     <th><center>R$ {{office.client_total}}</center></th>
                                 </tr>
                             {% endifchanged %}
-
                             {% for task in office.tasks %}
                                 <tr role="row">
                                     <td></td>
