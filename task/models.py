@@ -294,7 +294,8 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     @property
     def get_child(self):
-        if self.child.exists():
+        if self.child.exists() and self.child.latest('pk').task_status not in [TaskStatus.REFUSED.__str__(),
+                                                                               TaskStatus.REFUSED_SERVICE.__str__()]:
             return self.child.latest('pk')
         return None
 
@@ -306,8 +307,9 @@ class Task(Audit, LegacyCode, OfficeMixin):
     @property
     def allow_attachment(self):
         return not (self.status == TaskStatus.REFUSED or
-                self.status == TaskStatus.BLOCKEDPAYMENT or
-                self.status == TaskStatus.FINISHED)
+                    self.status == TaskStatus.BLOCKEDPAYMENT or
+                    self.status == TaskStatus.FINISHED)
+
     @property
     def origin_code(self):
         if self.parent:
