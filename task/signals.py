@@ -6,8 +6,7 @@ from django.utils import timezone
 from django.urls import reverse
 from django.db.models import Q
 from django.core.exceptions import MultipleObjectsReturned
-from advwin_models.tasks import export_ecm, export_task, export_task_history, delete_ecm, \
-    export_ecm_related_folter_to_task
+from advwin_models.tasks import export_ecm, export_task, export_task_history, delete_ecm
 from django.conf import settings
 from task.models import Task, TaskStatus, TaskHistory, Ecm
 from task.utils import task_send_mail, copy_ecm
@@ -23,7 +22,7 @@ send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'executi
 @receiver(post_save, sender=Ecm)
 def export_ecm_path(sender, instance, created, **kwargs):
     if created and instance.legacy_code is None and instance.task.legacy_code:
-        export_ecm.apply_async((instance.id,), link=export_ecm_related_folter_to_task.s(instance.id, ))
+        export_ecm.delay(instance.id,)
 
 
 @receiver(post_save, sender=Ecm)

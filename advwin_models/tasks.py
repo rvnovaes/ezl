@@ -92,38 +92,6 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
 
 
 @shared_task(bind=True, max_retries=MAX_RETRIES)
-def export_ecm_related_folter_to_task(self, id_docs, ecm_id, execute=True):
-    ecm = Ecm.objects.get(pk=ecm_id)
-    values = []
-    for id_doc in id_docs:
-        values.append({
-            'Id_tabela_or': 'Pastas',
-            'Id_codigo_or': get_folder_to_related(task=ecm.task),
-            'Id_id_doc': id_doc,
-            'id_ID_or': 0,
-            'dt_inserido': timezone.localtime(ecm.create_date),
-            'usuario_insercao': ecm.create_user.username
-        })
-    stmt = JuridGEDLig.__table__.insert().values(values)
-    if execute:
-        result = None
-        try:
-            result = get_advwin_engine().execute(stmt)
-            total_afected = result.rowcount
-            result.close()
-            LOGGER.info('ECM %s: relacionamento criado entre Pasta e Agenda', ecm)
-            return '{} Registros afetados'.format(total_afected)
-        except Exception as exc:
-            self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
-            LOGGER.warning('Não foi possível relacionar o ECM entre Agenda e Pasta: %d-%s\n%s',
-                           ecm.id,
-                           ecm,
-                           exc,
-                           exc_info=(type(exc), exc, exc.__traceback__))
-            raise exc
-
-
-@shared_task(bind=True, max_retries=MAX_RETRIES)
 def export_ecm_finished_task(self, ecm_id):
     ecm = Ecm.objects.get(pk=ecm_id)
     id_codigo_or = get_folder_to_related(task=ecm.task)
@@ -143,7 +111,9 @@ def export_ecm_finished_task(self, ecm_id):
     result = None
     try:
         result = get_advwin_engine().execute(stmt)
-        return '{} Registros afetados'.format(result.rowcount)
+        total_afected = result.rowcount
+        result.close()
+        return '{} Registros afetados'.format(total_afected)
     except Exception as exc:
         self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
         LOGGER.warning('Não foi possível relacionar o ECM entre Agenda e Pasta: %d-%s\n%s',
@@ -581,7 +551,6 @@ def export_task(self, task_id, task=None, execute=True):
             'SubStatus': 100,
             'Status': 1,
             'prazo_lido': 1,
-            'substatus_prazo': 3,
             'Ag_StatusExecucao': 'Em Execucao',
             'Data_confirmacao': timezone.localtime(task.finished_date),
             'Obs': get_task_observation(task, 'Diligência devidamente cumprida por',
@@ -592,8 +561,7 @@ def export_task(self, task_id, task=None, execute=True):
             ret = update_advwin_task(task, values, execute)
             if task.task_status == TaskStatus.FINISHED.value or task.task_status == TaskStatus.BLOCKEDPAYMENT.value:
                 for ecm in task.ecm_set.all():
-                    if ecm.legacy_code:
-                        export_ecm_finished_task.delay(ecm.pk)
+                    export_ecm_finished_task.delay(ecm.pk)
             return ret
         except Exception as exc:
             self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
