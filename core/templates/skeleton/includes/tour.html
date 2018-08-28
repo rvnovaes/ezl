@@ -66,8 +66,7 @@
         if (document.getElementById("id_navbar"))
         {
             AnnoButton.NextButton.text = 'Continuar';
-            AnnoButton.BackButton.text = 'Voltar';
-            AnnoButton.DoneButton.text = 'Concluir';
+            AnnoButton.DoneButton.text = 'Finalizar';
             anno_steps.push(
                 {
                     target: "#id_navbar",
@@ -79,7 +78,7 @@
                     },
                     className: 'anno-width-400',
                     arrowPosition: '',
-                    buttons: [AnnoButton.NextButton]
+                    buttons: [AnnoButton.NextButton, AnnoButton.DoneButton]
                 }
             );
         }
@@ -91,7 +90,7 @@
                     content: "Clicando no nome do usuário é possível acessar seus dados de perfil, "+
                         "os seus escritórios vinculados e os convites que estão pendentes de aceitação.",
                     position: 'left',
-                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
                 }
             );            
         }
@@ -103,7 +102,7 @@
                     content: "Verifique em qual escritório está trabalhando e alterne entre os que você "+
                     "possui vínculo.",
                     position: 'left', 
-                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
                 }
             );
         }
@@ -115,7 +114,7 @@
                     content: "Crie OS's avulsas. Para tal, é necessário ter os dados de cliente, nº do processo e "+
                     "movimentação já cadastrados.",
                     position: 'right',
-                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
                 }
             );                                                             
         } 
@@ -126,7 +125,7 @@
                     target: "#id_chat",
                     content: "Quando houver uma nova mensagem no chat, o alerta vermelho piscará nesse ícone.",
                     position: "left",
-                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
                 }
             );
         }
@@ -138,7 +137,7 @@
                     content: "Quando houver uma nova solicitação de vínculo entre usuário e escritório, o alerta "+
                     "vermelho piscará nesse ícone. Ao entrar, é possível aceitá-la ou recusá-la.",
                     position: "left",
-                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
                 }
             );
         }
@@ -149,7 +148,7 @@
                     target: "#id_dashboard",
                     content: "Acesso à tela principal do sistema.",
                     className: 'anno-width-200',
-                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
                 }
             );
         }                 
@@ -158,7 +157,7 @@
             anno_steps.push({
                 target: "#id_total",
                 content: "Esse quadro exibe a quantidade total de OS's pertencentes ao escritório selecionado.",
-                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
             });
         }
         if (document.getElementById("id_error"))
@@ -166,7 +165,7 @@
             anno_steps.push({
                 target: "#id_error",
                 content: "São OS’s importadas do sistema de gestão externo que possuem inconsistências na solicitação.",
-                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
             });
         }
         if (document.getElementById("id_requested"))
@@ -178,7 +177,7 @@
                 "Feito isso, as OS’s passam respectivamente aos status <b>Aceitas pelo Service</b> ou "+
                 "<b>Recusadas pelo Service</b>.",
                 position: 'left',
-                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
             });
         }
         if (document.getElementById("id_accepted_service"))
@@ -189,7 +188,7 @@
                 "Para tanto, o usuário poderá <b>Atribuir</b> a OS para ser cumprida por um correspondente interno do"+
                 "escritório ou <b>Delegar</b> para ser cumprida por um fornecedor de logística jurídica. "+
                 "Feito isso, as OS’s vão para o status <b>Delegadas/Em aberto</b>.",
-                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
             });
         }
         if (document.getElementById("id_refused_service"))
@@ -197,7 +196,7 @@
             anno_steps.push({
                 target: "#id_refused_service",
                 content: "São OS’s que possuem erros na solicitação e, portanto, serão canceladas.",
-                buttons: [AnnoButton.BackButton, AnnoButton.NextButton] 
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
             });
         }
         if (document.getElementById("id_return"))
@@ -206,7 +205,7 @@
                 target: "#id_return",
                 content: "Se for verificado erro no cumprimento da OS, o solicitante pode retorná-la para que o "+
                 "correspondente refaça o serviço.",
-                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
             });
         }
         if (document.getElementById("id_open"))
@@ -217,7 +216,7 @@
                  "de logística jurídica. O usuário que irá realizar a tarefa deverá  aceitá-la ou recusá-la, de modo "+
                  "a informar ao contratante se realizará ou não o serviço. É crucial que o contratante seja avisado "+
                  "com a maior antecedência possível para que tenha tempo hábil de delegar à outra logística jurídica.",
-                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
             });
         }
         if (document.getElementById("id_accepted"))
@@ -225,7 +224,7 @@
             anno_steps.push({
                 target: "#id_accepted",
                 content: "São as OS’s aceitas pelo correspondente e que devem ser cumpridas por ele.",
-                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
             });
         }
         if (document.getElementById("id_done"))
@@ -235,7 +234,7 @@
                 content: "Após realizar o serviço, a OS deve ser encaminhada para o status <b>Cumprida</b>."+
                 "<br>Para cumpri-la, deve-se informar a data de cumprimento do prazo e anexar o respectivo documento, "
                 + "se for o caso.",
-                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
             });
         }
         if (document.getElementById("id_finished"))
@@ -244,7 +243,7 @@
                 target: "#id_finished",
                 content: "Se o serviço foi prestado com êxito, o contratante finaliza a OS. As OS's finalizadas "+
                 "entram no fluxo de pagamento.",
-                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
             });
         }
         if (document.getElementById("id_refused"))
@@ -253,7 +252,7 @@
                 target: "#id_refused",
                 content: "Se verificar erros no cumprimento do ato, o solicitante ou o contratante poderão retornar a "+
                  "mesma para que o correspondente refaça o serviço.",
-                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
             });
         }
         if (document.getElementById("id_blockedpayment"))
@@ -262,14 +261,14 @@
                 target: "#id_blockedpayment",
                 content: "Já as OS's glosada são aquelas que, por alguma razão (geralmente erro do correspondente), "+
                 "não serão pagas.",
-                buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
             });
         }                
 
         {% if 'can_access_general_data' in office_session_perms %}                   
             if (document.getElementById("id_task_seach"))
             {                
-                id_task_search_element.buttons = [AnnoButton.BackButton, AnnoButton.NextButton];
+                id_task_search_element.buttons = [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton];
                 anno_steps.push(id_task_search_element);
             }
             if (document.getElementById("id_cadastros"))
@@ -279,7 +278,7 @@
                     content: "Acesso aos cadastros do sistema como Pessoa, Tabela de Preços, entre outros.",
                     position: 'bottom',
                     className: 'anno-width-200',
-                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                    buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
                 });
             }
             {% if perms.core.view_all_tasks %}
@@ -290,7 +289,7 @@
                         content: "Aqui você encontra relatórios de OS's a pagar e a receber.",
                         position: 'bottom',
                         className: 'anno-width-200',
-                        buttons: [AnnoButton.BackButton, AnnoButton.NextButton]
+                        buttons: [AnnoButton.BackButton, AnnoButton.NextButton, AnnoButton.DoneButton]
                     });
                 }
             {% endif %}

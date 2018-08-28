@@ -705,12 +705,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  AnnoButton.DoneButton = new AnnoButton({
 	    text: 'Done',
 	    click: function() {
-	      return this.hide();
+          finish_tour_enabled_for_user();
+          return this.hide();
 	    }
 	  });
 
 	  AnnoButton.BackButton = new AnnoButton({
-	    text: 'Back',
+	    text: 'Voltar',
 	    className: 'anno-btn-low-importance',
 	    click: function() {
 	      return this.switchToChainPrev();
