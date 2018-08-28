@@ -437,21 +437,19 @@ class ToPayTaskReportView(TaskReportBase):
         return JsonResponse({"status": "ok"})
 
 
-class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
+class DashboardView(CustomLoginRequiredView, TemplateView):
     template_name = 'task/task_dashboard.html'
     table_pagination = {
         'per_page': 5
     }
-    count_task = 0
-    count_tasks_with_error = 0
-    count_tasks_requested_monthly = 0
+    ret_status_dict = {}
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         person = Person.objects.get(auth_user=self.request.user)
-        context['task_count'] = self.count_task
-        context['count_tasks_with_error'] = self.count_tasks_with_error
-        context['count_tasks_requested_monthly'] = self.count_tasks_requested_monthly
+        data, office_session = self.get_data(person)
+        self.set_count_task(data)
+        context['ret_status_dict'] = self.ret_status_dict
 
         if not self.request.user.get_all_permissions():
             context['messages'] = [
@@ -459,111 +457,43 @@ class DashboardView(CustomLoginRequiredView, MultiTableMixin, TemplateView):
             ]
         return context
 
-    def get_tables(self):
-        person = Person.objects.get(auth_user=self.request.user)
-        data, data_error, office_session = self.get_data(person)
-        self.set_count_task(data, data_error)
-        tables = self.get_list_tables(data, data_error, person, office_session) if person else []
-        return tables
-
-    def set_count_task(self, data, data_error):
-        self.count_task = len(data)
-        self.count_tasks_with_error = len(data_error)
-        self.count_tasks_requested_monthly = len(data.filter(requested_date__year=datetime.today().year,
-                                                            requested_date__month=datetime.today().month))
+    def set_count_task(self, data):
+        status_totals = data.values('task_status').annotate(total=Count('task_status')).order_by('task_status')
+        total = 0
+        status_dict = {}
+        for status in status_totals:
+            task_status_value = status['task_status']
+            task_status = TaskStatus(task_status_value)
+            status_dict[task_status.get_status_order] = {
+                'status': task_status_value,
+                'total': status['total'],
+                'name': task_status.name,
+                'title': task_status_value,
+                'task_icon': task_status.get_icon
+            }
+            total += status['total']
+        self.ret_status_dict = {}
+        for status_key in sorted(status_dict.keys()):
+            self.ret_status_dict[str(status_key)] = status_dict[status_key]
+        self.ret_status_dict['total'] = total
+        self.ret_status_dict['total_requested_month'] = data.filter(requested_date__year=datetime.today().year,
+                                                                    requested_date__month=datetime.today().month).count()
 
     def get_data(self, person):
         checker = ObjectPermissionChecker(person.auth_user)
         rule_view = RuleViewTask(request=self.request)
         dynamic_query = rule_view.get_dynamic_query(person, checker)
         data = []
-        data_error = []
         office_session = get_office_session(self.request)
         if not office_session:
-            return data, data_error, office_session
+            return data, office_session
         # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
         if dynamic_query or checker.has_perm('group_admin', office_session):
             # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
             if office_session:
-                data = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query)
-                data_error = DashboardViewModel.objects.filter(office_id=office_session.id).filter(dynamic_query,
-                                                                                                   task_status=TaskStatus.ERROR)
-        return data, data_error, office_session
+                data = Task.objects.filter(dynamic_query).filter(is_active=True, office_id=office_session.id)
 
-    @staticmethod
-    def get_list_tables(data, data_error, person, office_session):
-        grouped = dict()
-        for obj in data:
-            grouped.setdefault(TaskStatus(obj.task_status), []).append(obj)
-        returned = grouped.get(TaskStatus.RETURN) or {}
-        accepted = grouped.get(TaskStatus.ACCEPTED) or {}
-        opened = grouped.get(TaskStatus.OPEN) or {}
-        done = grouped.get(TaskStatus.DONE) or {}
-        refused = grouped.get(TaskStatus.REFUSED) or {}
-        blocked_payment = grouped.get(TaskStatus.BLOCKEDPAYMENT) or {}
-        finished = grouped.get(TaskStatus.FINISHED) or {}
-        requested = grouped.get(TaskStatus.REQUESTED) or {}
-        accepted_service = grouped.get(TaskStatus.ACCEPTED_SERVICE) or {}
-        refused_service = grouped.get(TaskStatus.REFUSED_SERVICE) or {}
-        #  Necessario filtrar as inconsistencias pelos ids das tasks pelo fato das instancias de error serem de DashboardTaskView
-        error = InconsistencyETL.objects.filter(is_active=True, task__id__in=[task.pk for task in data_error]) or {}
-
-        return_list = []
-        checker = ObjectPermissionChecker(person.auth_user)
-        if not office_session:
-            return []
-        if checker.has_perm('can_access_general_data', office_session) or checker.has_perm('group_admin',
-                                                                                           office_session):
-            if office_session.use_etl:
-                return_list.append(DashboardErrorStatusTable(error,
-                                                             title='Erro no sistema de origem',
-                                                             status=TaskStatus.ERROR))
-
-            # status 10 - Solicitada
-            return_list.append(DashboardStatusTable(requested,
-                                                    title='Solicitadas',
-                                                    status=TaskStatus.REQUESTED))
-            if office_session.use_service:
-                # status 11 - Aceita pelo Service
-                return_list.append(DashboardStatusTable(accepted_service,
-                                                        title='Aceitas pelo Service',
-                                                        status=TaskStatus.ACCEPTED_SERVICE))
-
-                # status 20 - Recusada pelo Sevice
-                return_list.append(DashboardStatusTable(refused_service,
-                                                        title='Recusadas pelo Service',
-                                                        status=TaskStatus.REFUSED_SERVICE))
-
-        return_list.append(DashboardStatusTable(returned,
-                                                title='Retornadas',
-                                                status=TaskStatus.RETURN))
-
-        return_list.append(DashboardStatusTable(opened,
-                                                title='Delegada/Em Aberto',
-                                                status=TaskStatus.OPEN))
-
-        return_list.append(DashboardStatusTable(accepted,
-                                                title='A Cumprir',
-                                                status=TaskStatus.ACCEPTED))
-
-        return_list.append(DashboardStatusTable(done,
-                                                title='Cumpridas',
-                                                status=TaskStatus.DONE))
-
-        return_list.append(DashboardStatusTable(finished,
-                                                title='Finalizadas',
-                                                status=TaskStatus.FINISHED))
-
-        # status 40 - Recusada
-        return_list.append(DashboardStatusTable(refused,
-                                                title='Recusadas',
-                                                status=TaskStatus.REFUSED))
-
-        return_list.append(DashboardStatusTable(blocked_payment,
-                                                title='Glosadas',
-                                                status=TaskStatus.BLOCKEDPAYMENT))
-
-        return return_list
+        return data, office_session
 
 
 class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
@@ -1051,8 +981,8 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
             ret[status['task_status'].replace(' ', '_').lower()] = status['total']
             total += status['total']
         ret['total'] = total
-        ret['total_solicitada_mes'] = task_object.filter(requested_date__year=datetime.today().year,
-            requested_date__month=datetime.today().month).count()
+        ret['total_requested_month'] = task_object.filter(requested_date__year=datetime.today().year,
+                                                          requested_date__month=datetime.today().month).count()
         return JsonResponse(ret)
 
 
@@ -1089,7 +1019,6 @@ def ajax_get_task_data_table(request):
         ),
     ).values(*values_list)
 
-
     # criando o filtro de busca a partir do valor enviado no campo de pesquisa
     search_value = search_dict.get('value', None)
     reduced_filter = None
@@ -1101,9 +1030,8 @@ def ajax_get_task_data_table(request):
                 search_dict_query[key] = search_value
         reduced_filter = reduce(operator.or_, (Q(**d) for d in [dict([i]) for i in search_dict_query.items()]))
 
-    #criando lista de ordered
+    # criando lista de ordered
     ordered_list = list(map(lambda i: '{}{}'.format(mapOrder.get(i.get('dir')), i.get('column')), order_dict))
-
 
     records_total = query.count()
     if not ordered_list:

@@ -32,5 +32,8 @@ def get_refused_action(user, task, office_session_perms):
 
 @register.filter
 def remove_spaces_lower(status):
-    ret = status.value
+    try:
+        ret = status.value
+    except:
+        ret = status
     return ret.replace(' ', '_').lower()
