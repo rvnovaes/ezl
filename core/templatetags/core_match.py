@@ -10,12 +10,8 @@ register = template.Library()
 def get_percent(val1, val2):
     try:
         if not val1:
-            import pdb;
-            pdb.set_trace()
             val1 = 0
         if not val2:
-            import pdb;
-            pdb.set_trace()
             val2 = 0
         percent = int(val1) * 100 / int(val2)
     except ZeroDivisionError:
