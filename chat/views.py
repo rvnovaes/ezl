@@ -11,7 +11,7 @@ from core.models import Person
 from core.models import Office
 from core.utils import get_office_session
 from guardian.core import ObjectPermissionChecker
-from guardian.shortcuts import  get_groups_with_perms
+from guardian.shortcuts import get_groups_with_perms
 from django.shortcuts import render
 from task.models import Task
 from django.forms.models import model_to_dict
@@ -39,7 +39,7 @@ class ChatCountMessages(CustomLoginRequiredView, View):
         if has_groups:
             data['grouped_messages'] = list(UnreadMessage.objects.filter(
                 user_by_message__user_by_chat=self.request.user
-                ).values('message__chat__pk').annotate(quantity=Count('id')).order_by())
+            ).values('message__chat__pk').annotate(quantity=Count('id')).order_by())
 
         return JsonResponse(data)
 
@@ -68,7 +68,7 @@ class ChatGetMessages(CustomLoginRequiredView, View):
                 'text': x.message,
                 'message_create_date': x.create_date.strftime("%d/%m/%Y às %H:%M:%S"),
                 'user': x.create_user.username
-                },
+            },
             qry_message
         )
         data = {
@@ -97,7 +97,8 @@ class ChatOfficeContactView(CustomLoginRequiredView, View):
         current_office = get_office_session(request)
         chats = Chat.objects.filter(users__user_by_chat=self.request.user, users__is_active=True).order_by(
             'pk').distinct('pk')
-        data = list(Office.objects.filter(chats__in=chats,).values('pk', 'legal_name').distinct('pk'))
+        data = list(Office.objects.filter(chats__in=chats,).values(
+            'pk', 'legal_name').distinct('pk'))
         data = self.add_count_unread_message(request.user, data)
         return JsonResponse(data, safe=False)
 
@@ -110,7 +111,8 @@ class ChatsByOfficeView(CustomLoginRequiredView, View):
             user_by_message__user_by_chat=user,
         ).values('message__chat').annotate(count=Count('id'))
         items = []
-        unread_chats_dict = dict({(item['message__chat'], item['count']) for item in unread_chats})
+        unread_chats_dict = dict(
+            {(item['message__chat'], item['count']) for item in unread_chats})
         for chat in chats:
             last_message = chat.messages.last()
             item = {
@@ -122,7 +124,9 @@ class ChatsByOfficeView(CustomLoginRequiredView, View):
                 "has_messages": chat.messages.exists()
             }
             items.append(item)
-        return list(reversed(sorted(items, key=lambda x: x['alter_date'])))
+        unread_chats_ids = list(
+            set(unread_chats.values_list('message__chat', flat=True).order_by('-create_date')))
+        return sorted(items, key=lambda i: i.get('id') in unread_chats_ids, reverse=True)
 
     def get(self, request, *args, **kwargs):
         filters = {
@@ -142,20 +146,18 @@ class ChatsByOfficeView(CustomLoginRequiredView, View):
             filters["messages__alter_date__gt"] = since
 
         office = Office.objects.get(pk=office_id)
-        chats = office.chats.filter(**filters)\
-                    .distinct('id')\
-                    .prefetch_related('messages')\
-                    .order_by('id')
-        #            .order_by('-messages__create_date', 'id')
+        chats = office.chats.filter(
+            **filters).distinct('id').prefetch_related('messages').order_by('id')
         data = self.add_count_unread_message(request.user, chats)
         return JsonResponse(data, safe=False)
 
 
 class ChatMenssage(CustomLoginRequiredView, View):
-    def get(self, request, *args, **kwargs):        
+    def get(self, request, *args, **kwargs):
         chat = Chat.objects.get(pk=int(request.GET.get('chat')))
-        messages = list(chat.messages.all().values('message', 'create_user__username', 'create_user_id', 'create_date'))
-        office = get_office_session(request)        
+        messages = list(chat.messages.all().values(
+            'message', 'create_user__username', 'create_user_id', 'create_date'))
+        office = get_office_session(request)
         task = chat.task_set.filter(pk=chat.label.split('-')[1]).first()
         if task:
             if task.parent and task.parent.office == office:
@@ -181,19 +183,19 @@ class InternalChatOffices(CustomLoginRequiredView, View):
         data = []
         if task.parent:
             data.append({
-                'chat': task.chat.pk, # "Deve ser o pk da propria task"
-                'office_pk': task.parent.office.pk, #"Deve ser o pk do office do parent"
+                'chat': task.chat.pk,  # "Deve ser o pk da propria task"
+                'office_pk': task.parent.office.pk,  # "Deve ser o pk do office do parent"
                 'office_legal_name': task.parent.office.legal_name
             })
         for task_child in task.child.all():
             data.append({
-                'chat': task_child.chat.pk, # "Deve ser o pk do chat da task filha"
+                'chat': task_child.chat.pk,  # "Deve ser o pk do chat da task filha"
                 'office_pk': task_child.office.pk,
                 'office_legal_name': task_child.office.legal_name
             })
         if not all([task.parent, task.child.exists()]):
             data.append({
-                'chat': task.chat.pk, # "Deve ser o pk do chat da task filha"
+                'chat': task.chat.pk,  # "Deve ser o pk do chat da task filha"
                 'office_pk': task.office.pk,
                 'office_legal_name': task.office.legal_name
             })
@@ -201,13 +203,13 @@ class InternalChatOffices(CustomLoginRequiredView, View):
 
 
 class UnreadMessageView(CustomLoginRequiredView, View):
-    def post(self, request, *args, **kwargs):        
+    def post(self, request, *args, **kwargs):
         chat_id = json.loads(request.body).get('chat')
         chat = Chat.objects.get(pk=chat_id)
         chat.save()
         if (chat.messages.exists()):
-            user_by_chat = chat.users.filter(user_by_chat=request.user).first()            
+            user_by_chat = chat.users.filter(user_by_chat=request.user).first()
             unread_message = UnreadMessage.objects.create(
                 create_user=request.user, message=chat.messages.latest('pk'), user_by_message=user_by_chat)
             unread_message.message.save()
-        return JsonResponse({'status': 'ok' })
+        return JsonResponse({'status': 'ok'})
