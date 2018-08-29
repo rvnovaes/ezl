@@ -47,8 +47,6 @@ def get_task_attachment(self, form):
 @retry(stop_max_attempt_number=4, wait_fixed=1000)
 def copy_ecm(ecm, task):
     try:
-        import pdb
-        pdb.set_trace()
         file_name = os.path.basename(ecm.path.name)
         ecm_related = ecm.ecm_related
         if not ecm_related:
