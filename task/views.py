@@ -373,6 +373,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
     def _get_related_client(self, task):
         return task.client
 
+
 class ToReceiveTaskReportView(TaskReportBase):
     template_name = 'task/reports/to_receive.html'
     filter_class = TaskToReceiveFilter
