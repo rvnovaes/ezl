@@ -238,13 +238,16 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
-        print(datetime.now())
         context['filter'] = self.task_filter
-        print(datetime.now())
-        context['offices_report'] = self.get_os_grouped_by_office()
-        print(datetime.now())
-        context['total'] = sum(map(lambda x: x['total'], context['offices_report']))
-        print(datetime.now())
+        try:
+            if self.request.GET['group_by_tasks'] == OFFICE:
+                office_list, total = self.get_os_grouped_by_office()
+            else:
+                office_list, total = self.get_os_grouped_by_client()
+        except:
+            office_list, total = self.get_os_grouped_by_office()
+        context['offices'] = office_list
+        context['total'] = total
         return context
 
     def get_queryset(self):
@@ -298,18 +301,17 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
 
     def get_os_grouped_by_office(self):
         offices = []
-        import collections
-        offices_map = collections.defaultdict(list)
+        offices_map = {}
         tasks = self.get_queryset()
         total = 0
         for task in tasks:
             correspondent = self._get_related_office(task)
-            offices_map[correspondent].append(task)
+            if correspondent not in offices_map:
+                offices_map[correspondent] = {}
             client = self._get_related_client(task)
             if client not in offices_map[correspondent]:
                 offices_map[correspondent][client] = []
             offices_map[correspondent][client].append(task)
-        offices_map.default_factory = None
 
         offices_map_total = {}
         for office, clients in offices_map.items():
