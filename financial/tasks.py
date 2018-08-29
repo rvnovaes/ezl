@@ -57,7 +57,6 @@ def get_client(row, xls_file, office_session):
         client_cleaned = remove_caracter_especial(str(row[ColumnIndex.client.value].value).strip())
         client = office_session.persons.filter(legal_name__unaccent__iexact=client_cleaned, is_customer=True).first()
         if not client:
-            # import pdb; pdb.set_trace()
             xls_file.log = xls_file.log + ('Cliente %s não encontrado' % client_cleaned + ";")
     return client
 
