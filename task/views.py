@@ -479,12 +479,12 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
             total += task_status_total
         can_access_general_data = checker.has_perm('can_access_general_data', office_session)
         group_admin = checker.has_perm('group_admin', office_session)
-        if not office_session.use_service or not (can_access_general_data and group_admin):
+        if not office_session.use_service or not (can_access_general_data or group_admin):
             total -= status_dict[TaskStatus.ACCEPTED_SERVICE.get_status_order]['total']
             total -= status_dict[TaskStatus.REFUSED_SERVICE.get_status_order]['total']
             del status_dict[TaskStatus.ACCEPTED_SERVICE.get_status_order]
             del status_dict[TaskStatus.REFUSED_SERVICE.get_status_order]
-        if not office_session.use_etl or not (can_access_general_data and group_admin):
+        if not office_session.use_etl or not (can_access_general_data or group_admin):
             total -= status_dict[TaskStatus.ERROR.get_status_order]['total']
             del status_dict[TaskStatus.ERROR.get_status_order]
 
@@ -999,14 +999,14 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
 
         can_access_general_data = checker.has_perm('can_access_general_data', office_session)
         group_admin = checker.has_perm('group_admin', office_session)
-        if not office_session.use_service  or not (can_access_general_data and group_admin):
+        if not office_session.use_service or not (can_access_general_data or group_admin):
             if ret.get(TaskStatus.ACCEPTED_SERVICE.value.replace(' ', '_').lower()):
                 total -= ret.get(TaskStatus.ACCEPTED_SERVICE.value.replace(' ', '_').lower())
                 del ret[TaskStatus.ACCEPTED_SERVICE.value.replace(' ', '_').lower()]
             if ret.get(TaskStatus.REFUSED_SERVICE.value.replace(' ', '_').lower()):
                 total -= ret.get(TaskStatus.REFUSED_SERVICE.value.replace(' ', '_').lower())
                 del ret[TaskStatus.REFUSED_SERVICE.value.replace(' ', '_').lower()]
-        if not office_session.use_etl or not (can_access_general_data and group_admin):
+        if not office_session.use_etl or not (can_access_general_data or group_admin):
             if ret.get(TaskStatus.ERROR.value.replace(' ', '_').lower()):
                 total -= ret.get(TaskStatus.ERROR.value.replace(' ', '_').lower())
                 del ret[TaskStatus.ERROR.value.replace(' ', '_').lower()]
