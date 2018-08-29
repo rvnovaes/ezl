@@ -27,7 +27,8 @@ def get_task_attachment(self, form):
                   form.instance.movement.law_suit.organ.address_set.first() else None)) | Q(city=None)))
 
     for rule in attachmentrules:
-        attachments = Attachment.objects.filter(model_name='ecm.defaultattachmentrule').filter(object_id=rule.id)
+        attachments = Attachment.objects.filter(
+            model_name='ecm.defaultattachmentrule').filter(object_id=rule.id)
         for attachment in attachments:
             if os.path.isfile(attachment.file.path):
                 file_name = os.path.basename(attachment.file.name)
@@ -67,13 +68,16 @@ def copy_ecm(ecm, task):
         {}
         {}""".format(ecm.id, task.id, e, traceback.format_exc())
         recipients = [admin[1] for admin in settings.ADMINS]
+        # Nessario converter para unicode pois o celery usa python 2.7
+        body = u'{}'.format(body)
         send_mail.delay(recipients, subject, body)
 
 
 def task_send_mail(instance, number, project_link, short_message, custom_text, mail_list):
     mail = SendMail()
     mail.subject = 'Easy Lawyer - OS {} - {} - Prazo: {} - {}'.format(number, str(instance.type_task).title(),
-                                                                      instance.final_deadline_date.strftime('%d/%m/%Y'),
+                                                                      instance.final_deadline_date.strftime(
+                                                                          '%d/%m/%Y'),
                                                                       instance.task_status)
     mail.message = render_to_string('mail/base.html',
                                     {'server': project_link,
