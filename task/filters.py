@@ -146,3 +146,7 @@ class TaskToReceiveFilter(TaskReportFilterBase):
             ('false', 'Somente não recebidas'),
             )
         )
+    group_by_tasks = ChoiceFilter(
+        empty_label=None,
+        choices=GROUP_BY_TASK_TO_RECEIVE_TYPE
+    )
