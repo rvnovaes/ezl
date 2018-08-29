@@ -415,6 +415,7 @@ class TaskGeolocation(Audit):
     class Meta:
         verbose_name = 'Geolocalização da Providência'
         verbose_name_plural = 'Geolocalização das Providências'
+        ordering = ('task', 'date', )
 
     @property
     def position(self):
