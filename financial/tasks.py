@@ -50,14 +50,15 @@ def get_type_task(row, xls_file):
     return type_task
 
 
-def get_client(row, xls_file):
+def get_client(row, xls_file, office_session):
     # cliente
-    client = False
+    client = False    
     if row[ColumnIndex.client.value].value:
         client_cleaned = remove_caracter_especial(str(row[ColumnIndex.client.value].value).strip())
-        client = Person.objects.filter(legal_name__unaccent__iexact=client_cleaned, is_customer=True).first()
+        client = office_session.persons.filter(legal_name__unaccent__iexact=client_cleaned, is_customer=True).first()
         if not client:
-            xls_file.log = xls_file.log + ('Cliente %s não encontrado' % client) + ";"
+            # import pdb; pdb.set_trace()
+            xls_file.log = xls_file.log + ('Cliente %s não encontrado' % client_cleaned + ";")
     return client
 
 
@@ -160,7 +161,7 @@ def import_xls_service_price_table(self, file_id):
                 type_task = get_type_task(row, xls_file)
                 state = get_state(row, xls_file)
                 court_district = get_court_district(row, xls_file, state)
-                client = get_client(row, xls_file)
+                client = get_client(row, xls_file, office_session)
 
                 if row_is_valid(office_correspondent, type_task, state):
                     value = get_service_value(row, xls_file, office_correspondent, court_district, state, client)

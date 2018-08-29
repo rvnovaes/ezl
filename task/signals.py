@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models.signals import post_init, pre_save, post_save, post_delete, pre_delete
 from django.dispatch import receiver, Signal
@@ -187,7 +186,8 @@ def send_task_emails(sender, instance, created, **kwargs):
     mail_list = []
 
     if not getattr(instance, '_skip_mail') and instance.__previous_status != instance.task_status:
-        number = '{} ({})'.format(instance.task_number, instance.legacy_code) if instance.legacy_code else str(instance.task_number)
+        number = '{} ({})'.format(instance.task_number, instance.legacy_code) if instance.legacy_code else str(
+            instance.task_number)
 
         if hasattr(instance, '_TaskCreateView__server'):
             project_link = instance._TaskCreateView__server
@@ -244,7 +244,12 @@ def send_task_emails(sender, instance, created, **kwargs):
                     for mail in mails:
                         mail_list.append(mail)
             short_message = mail_attrs.get('short_message') if mail_list else ''
-            office = instance.parent.office if mail_attrs.get('office') == 'parent' else instance.get_child.office
+            if mail_attrs.get('office') == 'parent':
+                office = instance.parent.office
+            elif mail_attrs.get('office') == 'child' and instance.get_child:
+                office = instance.get_child.office
+            else:
+                office = instance.child.latest('pk').office
             custom_text = ' pelo escritório ' + office.__str__().title() if mail_list else ''
 
         if mail_list:

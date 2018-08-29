@@ -238,13 +238,16 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         self.task_filter = self.filter_class(data=self.request.GET, request=self.request)
-        print(datetime.now())
         context['filter'] = self.task_filter
-        print(datetime.now())
-        context['offices_report'] = self.get_os_grouped_by_office()
-        print(datetime.now())
-        context['total'] = sum(map(lambda x: x['total'], context['offices_report']))
-        print(datetime.now())
+        try:
+            if self.request.GET['group_by_tasks'] == OFFICE:
+                office_list, total = self.get_os_grouped_by_office()
+            else:
+                office_list, total = self.get_os_grouped_by_client()
+        except:
+            office_list, total = self.get_os_grouped_by_office()
+        context['offices'] = office_list
+        context['total'] = total
         return context
 
     def get_queryset(self):
@@ -298,18 +301,17 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
 
     def get_os_grouped_by_office(self):
         offices = []
-        import collections
-        offices_map = collections.defaultdict(list)
+        offices_map = {}
         tasks = self.get_queryset()
         total = 0
         for task in tasks:
             correspondent = self._get_related_office(task)
-            offices_map[correspondent].append(task)
+            if correspondent not in offices_map:
+                offices_map[correspondent] = {}
             client = self._get_related_client(task)
             if client not in offices_map[correspondent]:
                 offices_map[correspondent][client] = []
             offices_map[correspondent][client].append(task)
-        offices_map.default_factory = None
 
         offices_map_total = {}
         for office, clients in offices_map.items():
@@ -370,6 +372,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
 
     def _get_related_client(self, task):
         return task.client
+
 
 class ToReceiveTaskReportView(TaskReportBase):
     template_name = 'task/reports/to_receive.html'
@@ -447,8 +450,9 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         person = Person.objects.get(auth_user=self.request.user)
-        data, office_session = self.get_data(person)
-        self.set_count_task(data)
+        checker = ObjectPermissionChecker(person.auth_user)
+        data, office_session = self.get_data(person, checker)
+        self.set_count_task(data, office_session, checker)
         context['ret_status_dict'] = self.ret_status_dict
 
         if not self.request.user.get_all_permissions():
@@ -457,21 +461,33 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
             ]
         return context
 
-    def set_count_task(self, data):
+    def set_count_task(self, data, office_session, checker):
         status_totals = data.values('task_status').annotate(total=Count('task_status')).order_by('task_status')
         total = 0
         status_dict = {}
-        for status in status_totals:
-            task_status_value = status['task_status']
-            task_status = TaskStatus(task_status_value)
+        for task_status in TaskStatus:
+            status = status_totals.filter(task_status=task_status).first()
+            task_status_value = task_status.value
+            task_status_total = status['total'] if status else 0
             status_dict[task_status.get_status_order] = {
                 'status': task_status_value,
-                'total': status['total'],
+                'total': task_status_total,
                 'name': task_status.name,
                 'title': task_status_value,
                 'task_icon': task_status.get_icon
             }
-            total += status['total']
+            total += task_status_total
+        can_access_general_data = checker.has_perm('can_access_general_data', office_session)
+        group_admin = checker.has_perm('group_admin', office_session)
+        if not office_session.use_service or not (can_access_general_data and group_admin):
+            total -= status_dict[TaskStatus.ACCEPTED_SERVICE.get_status_order]['total']
+            total -= status_dict[TaskStatus.REFUSED_SERVICE.get_status_order]['total']
+            del status_dict[TaskStatus.ACCEPTED_SERVICE.get_status_order]
+            del status_dict[TaskStatus.REFUSED_SERVICE.get_status_order]
+        if not office_session.use_etl or not (can_access_general_data and group_admin):
+            total -= status_dict[TaskStatus.ERROR.get_status_order]['total']
+            del status_dict[TaskStatus.ERROR.get_status_order]
+
         self.ret_status_dict = {}
         for status_key in sorted(status_dict.keys()):
             self.ret_status_dict[str(status_key)] = status_dict[status_key]
@@ -479,8 +495,7 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
         self.ret_status_dict['total_requested_month'] = data.filter(requested_date__year=datetime.today().year,
                                                                     requested_date__month=datetime.today().month).count()
 
-    def get_data(self, person):
-        checker = ObjectPermissionChecker(person.auth_user)
+    def get_data(self, person, checker):
         rule_view = RuleViewTask(request=self.request)
         dynamic_query = rule_view.get_dynamic_query(person, checker)
         data = []
@@ -975,11 +990,26 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
         dynamic_query = rule_view.get_dynamic_query(request.user.person, checker)
         task_object = Task.objects.filter(dynamic_query).filter(is_active=True, office=get_office_session(request))
         status_totals = task_object.values('task_status').annotate(total=Count('task_status')).order_by('task_status')
+        office_session = get_office_session(request)
         ret = {}
         total = 0
         for status in status_totals:
             ret[status['task_status'].replace(' ', '_').lower()] = status['total']
             total += status['total']
+
+        can_access_general_data = checker.has_perm('can_access_general_data', office_session)
+        group_admin = checker.has_perm('group_admin', office_session)
+        if not office_session.use_service  or not (can_access_general_data and group_admin):
+            if ret.get(TaskStatus.ACCEPTED_SERVICE.value.replace(' ', '_').lower()):
+                total -= ret.get(TaskStatus.ACCEPTED_SERVICE.value.replace(' ', '_').lower())
+                del ret[TaskStatus.ACCEPTED_SERVICE.value.replace(' ', '_').lower()]
+            if ret.get(TaskStatus.REFUSED_SERVICE.value.replace(' ', '_').lower()):
+                total -= ret.get(TaskStatus.REFUSED_SERVICE.value.replace(' ', '_').lower())
+                del ret[TaskStatus.REFUSED_SERVICE.value.replace(' ', '_').lower()]
+        if not office_session.use_etl or not (can_access_general_data and group_admin):
+            if ret.get(TaskStatus.ERROR.value.replace(' ', '_').lower()):
+                total -= ret.get(TaskStatus.ERROR.value.replace(' ', '_').lower())
+                del ret[TaskStatus.ERROR.value.replace(' ', '_').lower()]
         ret['total'] = total
         ret['total_requested_month'] = task_object.filter(requested_date__year=datetime.today().year,
                                                           requested_date__month=datetime.today().month).count()
