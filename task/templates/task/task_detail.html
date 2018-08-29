@@ -239,6 +239,7 @@
                             .attr('name', 'action')
                             .attr('value', 'OPEN')
                             .appendTo('#task_detail');
+                        swal.close();
                         toogleModals('#confirmAction', '#procssing')
                         $('#task_detail').unbind('submit').submit();
                     }else{

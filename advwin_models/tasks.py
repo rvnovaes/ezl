@@ -483,10 +483,11 @@ def export_task(self, task_id, task=None, execute=True):
         }
     elif task.task_status == TaskStatus.OPEN.value:
         advwin_advogado = None
-        if task.child.exists():
-            delegated_to = task.child.latest('pk').office.legal_name
-            for user in {user for user, perms in get_users_with_perms(task.child.latest('pk').office, attach_perms=True).items() if
-                         'group_admin' in perms}:
+        if task.get_child:
+            delegated_office = task.get_child.office
+            delegated_to = delegated_office.legal_name
+            for user in {user for user, perms in
+                         get_users_with_perms(delegated_office, attach_perms=True).items() if 'group_admin' in perms}:
                 if user.person.legacy_code:
                     advwin_advogado = user.person.legacy_code
                     break
