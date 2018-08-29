@@ -148,5 +148,5 @@ class TaskToReceiveFilter(TaskReportFilterBase):
         )
     group_by_tasks = ChoiceFilter(
         empty_label=None,
-        choices=GROUP_BY_TASK_TO_PAY_TYPE
+        choices=GROUP_BY_TASK_TO_RECEIVE_TYPE
     )
