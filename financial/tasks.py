@@ -2,16 +2,14 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.utils import timezone
+from enum import Enum
 from celery import shared_task, current_task, chain
-from celery.utils.log import get_task_logger
 from openpyxl import load_workbook
-from djmoney.money import Money
 from .models import ServicePriceTable, ImportServicePriceTable
-from core.models import Office, State
+from core.models import Office, State, Person
 from task.models import TypeTask
 from lawsuit.models import CourtDistrict
-from .utils import remove_caracter_especial, clearCache
-import time
+from .utils import remove_caracter_especial
 
 IMPORTED_IMPORT_SERVICE_PRICE_TABLE = 'imported_ispt_'
 IMPORTED_WORKSHEET = 'imported_worksheet_'
@@ -20,11 +18,21 @@ WORKSHEET_IN_PROCESS = 'worksheet_in_process_'
 ERROR_PROCESS = 'ERROR_PROCESS_'
 
 
+class ColumnIndex(Enum):
+    correspondent = 0
+    type_task = 1
+    client = 2
+    court_district = 3
+    state = 4
+    value = 5
+
+
 def get_office_correspondent(row, xls_file):
     # escritorio correspondente
-    office_correspondent = False    
-    if row[0].value:
-        office_name = remove_caracter_especial(str(row[0].value).strip())                
+    office_correspondent = False
+
+    if row[ColumnIndex.correspondent.value].value:
+        office_name = remove_caracter_especial(str(row[ColumnIndex.correspondent.value].value).strip())
         office_correspondent = Office.objects.filter(legal_name__unaccent__iexact=office_name).first()
         if not office_correspondent:                        
             xls_file.log = xls_file.log + ('Escritório correspondente %s não encontrado' % office_name) + ";"
@@ -34,47 +42,58 @@ def get_office_correspondent(row, xls_file):
 def get_type_task(row, xls_file):
     # serviço
     type_task = False
-    if row[1].value:        
-        name_service = remove_caracter_especial(str(row[1].value).strip())
+    if row[ColumnIndex.type_task.value].value:
+        name_service = remove_caracter_especial(str(row[ColumnIndex.type_task.value].value).strip())
         type_task = TypeTask.objects.filter(name__unaccent__iexact=name_service).first()
         if not type_task:
             xls_file.log = xls_file.log + ('Tipo de serviço %s não encontrado' % name_service) + ";"
     return type_task
 
 
+def get_client(row, xls_file):
+    # cliente
+    client = False
+    if row[ColumnIndex.client.value].value:
+        client_cleaned = remove_caracter_especial(str(row[ColumnIndex.client.value].value).strip())
+        client = Person.objects.filter(legal_name__unaccent__iexact=client_cleaned, is_customer=True).first()
+        if not client:
+            xls_file.log = xls_file.log + ('Cliente %s não encontrado' % client) + ";"
+    return client
+
+
+def get_court_district(row, xls_file, state):
+    # Comarca
+    court_district = False
+    if row[ColumnIndex.court_district.value].value and state:
+        court_district_name = remove_caracter_especial(str(row[ColumnIndex.court_district.value].value).strip())
+        court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_name, state=state.pk).first()
+        if not court_district:
+            msg_error = '%s - %s' % (court_district_name, state.initials) if state else '%s' % court_district_name
+            xls_file.log = xls_file.log + 'Comarca ' + msg_error + ' não encontrada' + ";"
+    return court_district
+
+
 def get_state(row, xls_file):
     # uf            
     state = False
-    if row[3].value:
-        uf = remove_caracter_especial(str(row[3].value).strip())
+    if row[ColumnIndex.state.value].value:
+        uf = remove_caracter_especial(str(row[ColumnIndex.state.value].value).strip())
         state = State.objects.filter(initials__iexact=uf).first()
         if not state:
             xls_file.log = xls_file.log + ('UF %s não encontrada' % uf) + ";"                    
     return state
 
 
-def get_court_district(row, xls_file, state):
-    # Comarca
-    court_district = False
-    if row[2].value and state:
-        court_district_name = remove_caracter_especial(str(row[2].value).strip())
-        court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district_name, state=state.pk).first()
-        if not court_district:            
-            msg_error = '%s - %s' % (court_district_name, state.initials) if state else '%s' % court_district_name
-            xls_file.log = xls_file.log + 'Comarca ' + msg_error +  ' não encontrada' + ";"            
-    return court_district
-
-
-def get_service_value(row, xls_file, office_correspondent, court_district, state):
+def get_service_value(row, xls_file, office_correspondent, court_district, state, client):
     value = 0
     try:                        
-        if type(row[4].value) == str: 
-            value = Decimal(row[4].value.replace('R$\xa0', '').replace(',', '.'))
+        if type(row[ColumnIndex.value.value].value) == str:
+            value = Decimal(row[ColumnIndex.value.value].value.replace('R$\xa0', '').replace(',', '.'))
         else:                        
-            value = row[4].value
+            value = row[ColumnIndex.value.value].value
     except:        
-        xls_file.log = xls_file.log + ('Valor {} inválido. Verificar escritório {}, comarca {}, estado {}.'.format(
-            row[4].value, office_correspondent, court_district, state)) + ";"
+        xls_file.log = xls_file.log + ('Valor {} inválido. Verificar escritório {}, comarca {}, estado {}, cliente {}.'.format(
+            row[ColumnIndex.value.value].value, office_correspondent, court_district, state, client)) + ";"
     finally:
         return value
 
@@ -83,13 +102,14 @@ def row_is_valid(office_correspondent, type_task, state):
     return all([office_correspondent, type_task, state])
 
 
-def update_or_create_service_price_table(xls_file, office_session, user_session, office_correspondent, 
-        type_task, court_district, state, value):    
+def update_or_create_service_price_table(xls_file, office_session, user_session, office_correspondent,
+                                         type_task, court_district, state, client, value):
     service_price_table = ServicePriceTable.objects.filter(
         office=office_session,
         office_correspondent=office_correspondent.pk,
         type_task=type_task.pk,
         court_district=court_district.pk if court_district else None,
+        client=client.pk if client else None,
         state=state.pk).first()
     if not service_price_table:                    
         service_price_table = ServicePriceTable.objects.create(
@@ -97,6 +117,7 @@ def update_or_create_service_price_table(xls_file, office_session, user_session,
             office_correspondent=office_correspondent,
             type_task=type_task,
             court_district=court_district if court_district else None,
+            client=client if client else None,
             state=state,
             value=value,
             create_user=user_session
@@ -138,11 +159,13 @@ def import_xls_service_price_table(self, file_id):
                 office_correspondent = get_office_correspondent(row, xls_file)
                 type_task = get_type_task(row, xls_file)
                 state = get_state(row, xls_file)
-                court_district = get_court_district(row, xls_file, state)                
+                court_district = get_court_district(row, xls_file, state)
+                client = get_client(row, xls_file)
+
                 if row_is_valid(office_correspondent, type_task, state):
-                    value = get_service_value(row, xls_file, office_correspondent, court_district, state)
-                    update_or_create_service_price_table(xls_file, office_session, user_session, office_correspondent, 
-                        type_task, court_district, state, value)
+                    value = get_service_value(row, xls_file, office_correspondent, court_district, state, client)
+                    update_or_create_service_price_table(xls_file, office_session, user_session, office_correspondent,
+                                                         type_task, court_district, state, client, value)
                     i = i + 1
                     process_percent = int(100 * float(i) / float(total))            
                     cache.set(percent_imported_cache_key, process_percent, timeout=None)            

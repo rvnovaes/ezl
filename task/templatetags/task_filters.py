@@ -34,3 +34,13 @@ def get_refused_action(user, task, office_session_perms):
 def remove_spaces_lower(status):
     ret = status.value
     return ret.replace(' ', '_').lower()
+
+
+@register.simple_tag
+def get_checkin(geolocation):
+    return geolocation.filter(checkpointtype='Checkin').first()
+
+
+@register.simple_tag
+def get_checkout(geolocation):
+    return geolocation.filter(checkpointtype='Checkout').first()
