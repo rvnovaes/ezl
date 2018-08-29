@@ -449,8 +449,9 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         person = Person.objects.get(auth_user=self.request.user)
-        data, office_session = self.get_data(person)
-        self.set_count_task(data, office_session)
+        checker = ObjectPermissionChecker(person.auth_user)
+        data, office_session = self.get_data(person, checker)
+        self.set_count_task(data, office_session, checker)
         context['ret_status_dict'] = self.ret_status_dict
 
         if not self.request.user.get_all_permissions():
@@ -459,7 +460,7 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
             ]
         return context
 
-    def set_count_task(self, data, office_session):
+    def set_count_task(self, data, office_session, checker):
         status_totals = data.values('task_status').annotate(total=Count('task_status')).order_by('task_status')
         total = 0
         status_dict = {}
@@ -475,12 +476,14 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
                 'task_icon': task_status.get_icon
             }
             total += task_status_total
-        if not office_session.use_service:
+        can_access_general_data = checker.has_perm('can_access_general_data', office_session)
+        group_admin = checker.has_perm('group_admin', office_session)
+        if not office_session.use_service or not (can_access_general_data and group_admin):
             total -= status_dict[TaskStatus.ACCEPTED_SERVICE.get_status_order]['total']
             total -= status_dict[TaskStatus.REFUSED_SERVICE.get_status_order]['total']
             del status_dict[TaskStatus.ACCEPTED_SERVICE.get_status_order]
             del status_dict[TaskStatus.REFUSED_SERVICE.get_status_order]
-        if not office_session.use_etl:
+        if not office_session.use_etl or not (can_access_general_data and group_admin):
             total -= status_dict[TaskStatus.ERROR.get_status_order]['total']
             del status_dict[TaskStatus.ERROR.get_status_order]
 
@@ -491,8 +494,7 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
         self.ret_status_dict['total_requested_month'] = data.filter(requested_date__year=datetime.today().year,
                                                                     requested_date__month=datetime.today().month).count()
 
-    def get_data(self, person):
-        checker = ObjectPermissionChecker(person.auth_user)
+    def get_data(self, person, checker):
         rule_view = RuleViewTask(request=self.request)
         dynamic_query = rule_view.get_dynamic_query(person, checker)
         data = []
@@ -993,14 +995,17 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
         for status in status_totals:
             ret[status['task_status'].replace(' ', '_').lower()] = status['total']
             total += status['total']
-        if not office_session.use_service:
+
+        can_access_general_data = checker.has_perm('can_access_general_data', office_session)
+        group_admin = checker.has_perm('group_admin', office_session)
+        if not office_session.use_service  or not (can_access_general_data and group_admin):
             if ret.get(TaskStatus.ACCEPTED_SERVICE.value.replace(' ', '_').lower()):
                 total -= ret.get(TaskStatus.ACCEPTED_SERVICE.value.replace(' ', '_').lower())
                 del ret[TaskStatus.ACCEPTED_SERVICE.value.replace(' ', '_').lower()]
             if ret.get(TaskStatus.REFUSED_SERVICE.value.replace(' ', '_').lower()):
                 total -= ret.get(TaskStatus.REFUSED_SERVICE.value.replace(' ', '_').lower())
                 del ret[TaskStatus.REFUSED_SERVICE.value.replace(' ', '_').lower()]
-        if not office_session.use_etl:
+        if not office_session.use_etl or not (can_access_general_data and group_admin):
             if ret.get(TaskStatus.ERROR.value.replace(' ', '_').lower()):
                 total -= ret.get(TaskStatus.ERROR.value.replace(' ', '_').lower())
                 del ret[TaskStatus.ERROR.value.replace(' ', '_').lower()]
