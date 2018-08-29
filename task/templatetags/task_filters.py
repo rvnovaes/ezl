@@ -37,3 +37,13 @@ def remove_spaces_lower(status):
     except:
         ret = status
     return ret.replace(' ', '_').lower()
+
+
+@register.simple_tag
+def get_checkin(geolocation):
+    return geolocation.filter(checkpointtype='Checkin').first()
+
+
+@register.simple_tag
+def get_checkout(geolocation):
+    return geolocation.filter(checkpointtype='Checkout').first()
