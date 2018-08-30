@@ -1,22 +1,19 @@
 import json
 import csv
-import os
 import copy
 import pickle
 import io
 from urllib.parse import urlparse
 from zipfile import ZipFile
-from pathlib import Path
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from core.views import CustomLoginRequiredView
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
 from django.db.models import Q, Case, When, CharField, IntegerField, Count
-from django.db.models.expressions import RawSQL
 from django.db.models.functions import Cast
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse_lazy, reverse
@@ -29,11 +26,9 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
     DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
-from core.models import Person, Team
+from core.models import Person
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
-from etl.models import InconsistencyETL
-from etl.tables import DashboardErrorStatusTable
-from lawsuit.models import Movement, CourtDistrict
+from lawsuit.models import Movement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
@@ -45,14 +40,11 @@ from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
 from financial.tables import ServicePriceTableTaskTable
 from core.utils import get_office_session, get_domain
-from task.utils import get_task_attachment, copy_ecm
+from task.utils import get_task_attachment, copy_ecm, get_dashboard_tasks
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
-from django.core.files.base import ContentFile
 from functools import reduce
 import operator
-
-from datetime import datetime
 
 mapOrder = {
     'asc': '',
@@ -451,9 +443,8 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
         context = super().get_context_data(*args, **kwargs)
         person = Person.objects.get(auth_user=self.request.user)
         checker = ObjectPermissionChecker(person.auth_user)
-        data, office_session = self.get_data(person, checker)
-        self.set_count_task(data, office_session, checker)
-        context['ret_status_dict'] = self.ret_status_dict
+        ret_status_dict, office_session = self.get_data(person, checker)
+        context['ret_status_dict'] = ret_status_dict
 
         if not self.request.user.get_all_permissions():
             context['messages'] = [
@@ -461,52 +452,9 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
             ]
         return context
 
-    def set_count_task(self, data, office_session, checker):
-        status_totals = data.values('task_status').annotate(total=Count('task_status')).order_by('task_status')
-        total = 0
-        status_dict = {}
-        for task_status in TaskStatus:
-            status = status_totals.filter(task_status=task_status).first()
-            task_status_value = task_status.value
-            task_status_total = status['total'] if status else 0
-            status_dict[task_status.get_status_order] = {
-                'status': task_status_value,
-                'total': task_status_total,
-                'name': task_status.name,
-                'title': task_status_value,
-                'task_icon': task_status.get_icon
-            }
-            total += task_status_total
-        can_access_general_data = checker.has_perm('can_access_general_data', office_session)
-        group_admin = checker.has_perm('group_admin', office_session)
-        if not office_session.use_service or not (can_access_general_data or group_admin):
-            total -= status_dict[TaskStatus.ACCEPTED_SERVICE.get_status_order]['total']
-            total -= status_dict[TaskStatus.REFUSED_SERVICE.get_status_order]['total']
-            del status_dict[TaskStatus.ACCEPTED_SERVICE.get_status_order]
-            del status_dict[TaskStatus.REFUSED_SERVICE.get_status_order]
-        if not office_session.use_etl or not (can_access_general_data or group_admin):
-            total -= status_dict[TaskStatus.ERROR.get_status_order]['total']
-            del status_dict[TaskStatus.ERROR.get_status_order]
-
-        self.ret_status_dict = {}
-        for status_key in sorted(status_dict.keys()):
-            self.ret_status_dict[str(status_key)] = status_dict[status_key]
-        self.ret_status_dict['total'] = total
-        self.ret_status_dict['total_requested_month'] = data.filter(requested_date__year=datetime.today().year,
-                                                                    requested_date__month=datetime.today().month).count()
-
     def get_data(self, person, checker):
-        rule_view = RuleViewTask(request=self.request)
-        dynamic_query = rule_view.get_dynamic_query(person, checker)
-        data = []
         office_session = get_office_session(self.request)
-        if not office_session:
-            return data, office_session
-        # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
-        if dynamic_query or checker.has_perm('group_admin', office_session):
-            # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
-            if office_session:
-                data = Task.objects.filter(dynamic_query).filter(is_active=True, office_id=office_session.id)
+        data = get_dashboard_tasks(self.request, office_session, checker, person)
 
         return data, office_session
 
@@ -986,34 +934,10 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
 
     def get(self, request, *args, **kwargs):
         checker = ObjectPermissionChecker(request.user)
-        rule_view = RuleViewTask(request=request)
-        dynamic_query = rule_view.get_dynamic_query(request.user.person, checker)
-        task_object = Task.objects.filter(dynamic_query).filter(is_active=True, office=get_office_session(request))
-        status_totals = task_object.values('task_status').annotate(total=Count('task_status')).order_by('task_status')
         office_session = get_office_session(request)
-        ret = {}
-        total = 0
-        for status in status_totals:
-            ret[status['task_status'].replace(' ', '_').lower()] = status['total']
-            total += status['total']
+        data = get_dashboard_tasks(request, office_session, checker, request.user.person)
 
-        can_access_general_data = checker.has_perm('can_access_general_data', office_session)
-        group_admin = checker.has_perm('group_admin', office_session)
-        if not office_session.use_service or not (can_access_general_data or group_admin):
-            if ret.get(TaskStatus.ACCEPTED_SERVICE.value.replace(' ', '_').lower()):
-                total -= ret.get(TaskStatus.ACCEPTED_SERVICE.value.replace(' ', '_').lower())
-                del ret[TaskStatus.ACCEPTED_SERVICE.value.replace(' ', '_').lower()]
-            if ret.get(TaskStatus.REFUSED_SERVICE.value.replace(' ', '_').lower()):
-                total -= ret.get(TaskStatus.REFUSED_SERVICE.value.replace(' ', '_').lower())
-                del ret[TaskStatus.REFUSED_SERVICE.value.replace(' ', '_').lower()]
-        if not office_session.use_etl or not (can_access_general_data or group_admin):
-            if ret.get(TaskStatus.ERROR.value.replace(' ', '_').lower()):
-                total -= ret.get(TaskStatus.ERROR.value.replace(' ', '_').lower())
-                del ret[TaskStatus.ERROR.value.replace(' ', '_').lower()]
-        ret['total'] = total
-        ret['total_requested_month'] = task_object.filter(requested_date__year=datetime.today().year,
-                                                          requested_date__month=datetime.today().month).count()
-        return JsonResponse(ret)
+        return JsonResponse(data)
 
 
 @login_required

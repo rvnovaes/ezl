@@ -130,11 +130,14 @@
                     url: "/dashboard/verificar_status/",
                     success: function(response){
                         $.each(response, function (index, value) {
-                            $("#"+index).html(value);
-                            if(index !== 'total'){
-                                $("#"+index+"_percent").html(((value/response.total)*100).toFixed(2) + "%")
-                                $("#"+index+"_percent_bar").prop('aria-valuenow', Math.round((value/response.total)*100))
-                                $("#"+index+"_percent_bar").css('width', Math.round((value/response.total)*100)+'%')
+                            if(index === 'total' || index === 'total_requested_month'){
+                                $("#"+index).html(value);
+                            } else {
+                                status = value.status.toLowerCase().replace(' ', '_')
+                                status_total = value.total;
+                                $("#"+status+"_percent").html(((status_total/response.total)*100).toFixed(2) + "%")
+                                $("#"+status+"_percent_bar").prop('aria-valuenow', Math.round((status_total/response.total)*100))
+                                $("#"+status+"_percent_bar").css('width', Math.round((status_total/response.total)*100)+'%')
                             }
                         })
                     },
