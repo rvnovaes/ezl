@@ -3,6 +3,7 @@ import csv
 import copy
 import pickle
 import io
+from datetime import datetime
 from urllib.parse import urlparse
 from zipfile import ZipFile
 from django.contrib import messages
@@ -454,9 +455,38 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
 
     def get_data(self, person, checker):
         office_session = get_office_session(self.request)
-        data = get_dashboard_tasks(self.request, office_session, checker, person)
+        data, exclude_status = get_dashboard_tasks(self.request, office_session, checker, person)
+        ret_status_dict = self.get_ret_status_dict(data, exclude_status)
 
-        return data, office_session
+        return ret_status_dict, office_session
+
+    @staticmethod
+    def get_ret_status_dict(data, exclude_status):
+        status_totals = data.values('task_status').annotate(total=Count('task_status')).order_by('task_status')
+        total = 0
+        status_dict = {}
+        for task_status in TaskStatus:
+            if task_status.value not in exclude_status:
+                status = status_totals.filter(task_status=task_status).first()
+                task_status_value = task_status.value
+                task_status_total = status['total'] if status else 0
+                status_dict[task_status.get_status_order] = {
+                    'status': task_status_value,
+                    'total': task_status_total,
+                    'name': task_status.name,
+                    'title': task_status_value,
+                    'task_icon': task_status.get_icon
+                }
+                total += task_status_total
+
+        ret_status_dict = {}
+        for status_key in sorted(status_dict.keys()):
+            ret_status_dict[str(status_key)] = status_dict[status_key]
+        ret_status_dict['total'] = total
+        ret_status_dict['total_requested_month'] = data.filter(requested_date__year=datetime.today().year,
+                                                               requested_date__month=datetime.today().month).count()
+
+        return ret_status_dict
 
 
 class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
@@ -935,9 +965,20 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
         checker = ObjectPermissionChecker(request.user)
         office_session = get_office_session(request)
-        data = get_dashboard_tasks(request, office_session, checker, request.user.person)
+        data, exclude_status = get_dashboard_tasks(request, office_session, checker, request.user.person)
 
-        return JsonResponse(data)
+        status_totals = data.values('task_status').annotate(total=Count('task_status')).order_by('task_status')
+        ret = {}
+        total = 0
+        for status in status_totals:
+            ret[status['task_status'].replace(' ', '_').lower()] = status['total']
+            total += status['total']
+
+        ret['total'] = total
+        ret['total_requested_month'] = data.filter(requested_date__year=datetime.today().year,
+                                                   requested_date__month=datetime.today().month).count()
+
+        return JsonResponse(ret)
 
 
 @login_required

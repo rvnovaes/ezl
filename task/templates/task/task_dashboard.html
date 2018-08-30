@@ -50,7 +50,7 @@
                                 <sup>
                                     <i class="{{ status_items.task_icon }} ezl-text-{{ status_items.name|lower }} font-30"></i>
                                 </sup>
-                                <span id="{{ status_items.status|remove_spaces_lower }}" class="pull-right">{{status_items.total}}</span>
+                                <span id="{{ status_items.status|remove_spaces_lower }}" class="pull-right status-total">{{status_items.total}}</span>
                             </h1>
                         </div>{% get_percent status_items.total ret_status_dict.total as percent %}
                         <span class="text-success" id="{{ status_items.status|remove_spaces_lower }}_percent">{{ percent|stringformat:".02f" }}%</span> <div class="progress m-b-0">
@@ -129,17 +129,21 @@
                     type: "GET",
                     url: "/dashboard/verificar_status/",
                     success: function(response){
+                        $.each($('.status-total'), function (index, value){
+                            if (!(value.id in response)) {
+                                $("#"+value.id).html('0');
+                                $("#"+value.id+"_percent").html("0.00%");
+                                $("#"+value.id+"_percent_bar").prop('aria-valuenow', 0);
+                                $("#"+value.id+"_percent_bar").css('width', '0%');
+                            }
+                        })
                         $.each(response, function (index, value) {
-                            if(index === 'total' || index === 'total_requested_month'){
-                                $("#"+index).html(value);
-                            } else {
-                                var status = value.status.toLowerCase().split(' ').join('_');
-                                var status_total = value.total;
-                                var percent = (response.total > 0) ? parseFloat((status_total/response.total)*100) : parseFloat(0);
-                                $("#"+status).html(status_total);
-                                $("#"+status+"_percent").html(percent.toFixed(2) + "%");
-                                $("#"+status+"_percent_bar").prop('aria-valuenow', Math.round(percent));
-                                $("#"+status+"_percent_bar").css('width', Math.round(percent)+'%');
+                            $("#"+index).html(value);
+                            if(index !== 'total' && index !== 'total_requested_month'){
+                                var percent = (response.total > 0) ? parseFloat((value/response.total)*100) : parseFloat(0);
+                                $("#"+index+"_percent").html(percent.toFixed(2) + "%");
+                                $("#"+index+"_percent_bar").prop('aria-valuenow', Math.round(percent));
+                                $("#"+index+"_percent_bar").css('width', Math.round(percent)+'%');
                             }
                         });
                     },
@@ -148,7 +152,7 @@
                     },
                     dataType: "json"
                 });
-            }, 1000);
+            }, 3000);
         };
 
         window.interval_status;
