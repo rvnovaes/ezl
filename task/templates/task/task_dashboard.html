@@ -133,9 +133,10 @@
                             if(index === 'total' || index === 'total_requested_month'){
                                 $("#"+index).html(value);
                             } else {
-                                var status = value.status.toLowerCase().replace(' ', '_');
+                                var status = value.status.toLowerCase().split(' ').join('_');
                                 var status_total = value.total;
-                                var percent = ((status_total/response.total)*100) ? response.total > 0 : 0;
+                                var percent = (response.total > 0) ? parseFloat((status_total/response.total)*100) : parseFloat(0);
+                                $("#"+status).html(status_total);
                                 $("#"+status+"_percent").html(percent.toFixed(2) + "%");
                                 $("#"+status+"_percent_bar").prop('aria-valuenow', Math.round(percent));
                                 $("#"+status+"_percent_bar").css('width', Math.round(percent)+'%');
