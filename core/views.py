@@ -27,14 +27,14 @@ from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
-    ResetPasswordFormMixin, OfficeForm, InviteForm, InviteOfficeForm, ContactMechanismForm, TeamForm
+    ResetPasswordFormMixin, OfficeForm, InviteForm, InviteOfficeForm, ContactMechanismForm, TeamForm, CustomSettingsForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
     DELETE_SUCCESS_MESSAGE, ADDRESS_UPDATE_ERROR_MESSAGE, ADDRESS_UPDATE_SUCCESS_MESSAGE, \
     USER_CREATE_SUCCESS_MESSAGE
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
-    OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team, ControlFirstAccessUser
+    OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team, ControlFirstAccessUser, CustomSettings
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
@@ -1871,6 +1871,42 @@ class TeamDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
     success_url = reverse_lazy('team_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
+
+class CustomSettingsCreateView(AuditFormMixin, CreateView):
+    model = CustomSettings
+    form_class = CustomSettingsForm    
+    success_message = CREATE_SUCCESS_MESSAGE    
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def get_success_url(self):
+        if self.object and self.object.pk:
+            return reverse('custom_settings_update', args=(self.object.pk,))
+        return reverse('custom_settings_create')
+
+    def get(self, request, *args, **kwargs):
+        office_session = get_office_session(request)
+        if CustomSettings.objects.filter(office=office_session).exists():
+            self.object = CustomSettings.objects.filter(office=office_session).first()
+            return HttpResponseRedirect(self.get_success_url())
+        return super().get(self, request)
+
+
+class CustomSettingsUpdateView(AuditFormMixin, UpdateView):
+    model = CustomSettings
+    form_class = CustomSettingsForm    
+    success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_from_kwargs(self): 
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def get_success_url(self):
+        return reverse('custom_settings_update', args=(self.object.pk,))
 
 
 
