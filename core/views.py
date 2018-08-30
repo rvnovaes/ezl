@@ -904,7 +904,7 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         form.save(commit=False)
         checker = ObjectPermissionChecker(self.request.user)
         if form.is_valid:            
-            for office in form.instance.person.offices.all():
+            for office in form.instance.person.offices.active_offices():
                 if checker.has_perm('can_access_general_data', office):                    
                     groups = self.request.POST.getlist('office_' + str(office.id), '')
                     if not groups:                    
