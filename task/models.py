@@ -17,6 +17,7 @@ from decimal import Decimal
 
 
 class Permissions(Enum):
+    can_access_settings = 'Can access custom settings'
     view_delegated_tasks = 'Can view tasks delegated to the user'
     view_all_tasks = 'Can view all tasks'
     return_all_tasks = 'Can return tasks'
