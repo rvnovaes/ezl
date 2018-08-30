@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 from django.views.generic import ListView
 from chat.models import Chat, UnreadMessage, Message
 from core.views import CustomLoginRequiredView
@@ -85,13 +86,19 @@ class ChatGetMessages(CustomLoginRequiredView, View):
 
 class ChatOfficeContactView(CustomLoginRequiredView, View):
     @staticmethod
-    def add_count_unread_message(user, contact_offices):
+    def add_count_unread_message(user, contact_offices):        
+        min_date = datetime.strptime('1970-01-01', '%Y-%m-%d')
         for office in contact_offices:
-            unread_message_quanty = UnreadMessage.objects.filter(
+            unread_messages = UnreadMessage.objects.filter(
                 user_by_message__user_by_chat=user,
-                message__chat__offices__id=office.get('pk')).count()
+                message__chat__offices__id=office.get('pk'))
+            unread_message_quanty = unread_messages.count()
+            latest_unread_message = min_date
+            if unread_messages:
+                latest_unread_message = unread_messages.latest('create_date').create_date
             office['unread_message_quanty'] = unread_message_quanty
-        return contact_offices
+            office['latest_unread_message'] = int(time.mktime(latest_unread_message.timetuple()))         
+        return sorted(contact_offices, key=lambda i: i.get('latest_unread_message'), reverse=True)
 
     def get(self, request, *args, **kwargs):
         current_office = get_office_session(request)
