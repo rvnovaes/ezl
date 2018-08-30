@@ -133,13 +133,14 @@
                             if(index === 'total' || index === 'total_requested_month'){
                                 $("#"+index).html(value);
                             } else {
-                                status = value.status.toLowerCase().replace(' ', '_')
-                                status_total = value.total;
-                                $("#"+status+"_percent").html(((status_total/response.total)*100).toFixed(2) + "%")
-                                $("#"+status+"_percent_bar").prop('aria-valuenow', Math.round((status_total/response.total)*100))
-                                $("#"+status+"_percent_bar").css('width', Math.round((status_total/response.total)*100)+'%')
+                                var status = value.status.toLowerCase().replace(' ', '_');
+                                var status_total = value.total;
+                                var percent = ((status_total/response.total)*100) ? response.total > 0 : 0;
+                                $("#"+status+"_percent").html(percent.toFixed(2) + "%");
+                                $("#"+status+"_percent_bar").prop('aria-valuenow', Math.round(percent));
+                                $("#"+status+"_percent_bar").css('width', Math.round(percent)+'%');
                             }
-                        })
+                        });
                     },
                     beforeSend: function (xhr, settings) {
                         xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
