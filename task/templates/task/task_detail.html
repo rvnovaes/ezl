@@ -316,6 +316,13 @@
 
             var $input = $("input[name=execution_date]");
             if ($input.length > 0) {
+                if (value.id === "REQUESTED"){
+                    $input.attr('required', false);
+                    $input.val('');
+
+                }else{
+                    $input.attr('required', true);
+                }
                 var input = $input.get(0);
                 if (! input.checkValidity()) {
                     input.reportValidity();
