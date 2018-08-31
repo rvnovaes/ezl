@@ -522,3 +522,16 @@ class Team(Audit, OfficeMixin):
     def __str__(self):
         return self.name
 
+
+class ControlFirstAccessUser(models.Model):
+    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+                                     blank=False, null=False,
+                                     verbose_name='Usuário do sistema')
+    first_login = models.DateTimeField("Data do primeiro acesso.", auto_now_add=True)
+
+    def __str__(self):
+        return self.auth_user.username
+
+    class Meta:
+        verbose_name = 'Controle de primeiro acesso'
+        verbose_name_plural = 'Controle de primeiro acesso'

@@ -1,12 +1,11 @@
-from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models.signals import post_init, pre_save, post_save, post_delete, pre_delete
 from django.dispatch import receiver, Signal
 from django.utils import timezone
 from django.urls import reverse
 from django.db.models import Q
-from advwin_models.tasks import export_ecm, export_task, export_task_history, delete_ecm, \
-    export_ecm_related_folter_to_task
+from django.core.exceptions import MultipleObjectsReturned
+from advwin_models.tasks import export_ecm, export_task, export_task_history, delete_ecm
 from django.conf import settings
 from task.models import Task, TaskStatus, TaskHistory, Ecm
 from task.utils import task_send_mail, copy_ecm
@@ -22,7 +21,7 @@ send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'executi
 @receiver(post_save, sender=Ecm)
 def export_ecm_path(sender, instance, created, **kwargs):
     if created and instance.legacy_code is None and instance.task.legacy_code:
-        export_ecm.apply_async((instance.id,), link=export_ecm_related_folter_to_task.s(instance.id, ))
+        export_ecm.delay(instance.id,)
 
 
 @receiver(post_save, sender=Ecm)
@@ -186,7 +185,8 @@ def send_task_emails(sender, instance, created, **kwargs):
     mail_list = []
 
     if not getattr(instance, '_skip_mail') and instance.__previous_status != instance.task_status:
-        number = '{} ({})'.format(instance.task_number, instance.legacy_code) if instance.legacy_code else str(instance.task_number)
+        number = '{} ({})'.format(instance.task_number, instance.legacy_code) if instance.legacy_code else str(
+            instance.task_number)
 
         if hasattr(instance, '_TaskCreateView__server'):
             project_link = instance._TaskCreateView__server
@@ -243,7 +243,12 @@ def send_task_emails(sender, instance, created, **kwargs):
                     for mail in mails:
                         mail_list.append(mail)
             short_message = mail_attrs.get('short_message') if mail_list else ''
-            office = instance.parent.office if mail_attrs.get('office') == 'parent' else instance.get_child.office
+            if mail_attrs.get('office') == 'parent':
+                office = instance.parent.office
+            elif mail_attrs.get('office') == 'child' and instance.get_child:
+                office = instance.get_child.office
+            else:
+                office = instance.child.latest('pk').office
             custom_text = ' pelo escritório ' + office.__str__().title() if mail_list else ''
 
         if mail_list:
@@ -252,20 +257,24 @@ def send_task_emails(sender, instance, created, **kwargs):
         instance.__previous_status = TaskStatus(instance.task_status)
 
 
-def create_or_update_user_by_chat(task, task_to_fields, fields):        
+def create_or_update_user_by_chat(task, task_to_fields, fields):    
     for field in fields:
         user = None
         if getattr(task_to_fields, field, False):
             user = getattr(getattr(task_to_fields, field), 'auth_user', False)
         if user:
-            user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
-                'create_user': user, 'user_by_chat': user, 'chat': task.chat
-            })
+            try:                            
+                user, created = UserByChat.objects.get_or_create(user_by_chat=user, chat=task.chat, defaults={
+                    'create_user': user, 'user_by_chat': user, 'chat': task.chat
+                })
+            except MultipleObjectsReturned:
+                #Tratamento específico para cenário da tarefa EZL-904
+                user = UserByChat.objects.filter(user_by_chat=user, chat=task.chat).first()
             user = user.user_by_chat
 
 
 @receiver(post_save, sender=Task)
-def create_or_update_chat(sender, instance, created, **kwargs):
+def create_or_update_chat(sender, instance, created, **kwargs):    
     opposing_party = ''
     if instance.movement and instance.movement.law_suit:
         opposing_party = instance.movement.law_suit.opposing_party
@@ -288,9 +297,9 @@ def create_or_update_chat(sender, instance, created, **kwargs):
             'title': title,
             'back_url': '/dashboard/{}'.format(instance.pk),
         }
-    )
+    )    
     instance.chat = chat
-    instance.chat.offices.add(instance.office)
+    instance.chat.offices.add(instance.office)    
     create_or_update_user_by_chat(instance, instance, [
         'person_asked_by', 'person_executed_by', 'person_distributed_by'])
     if instance.parent:

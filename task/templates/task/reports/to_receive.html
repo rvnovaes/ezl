@@ -56,26 +56,14 @@
                                         
                                         $('#finished_in_0').datepicker(config);
                                         $('#finished_in_1').datepicker(config);
-
-                                        var date = new Date();
-                                        var dtini = $("#finished_in_0").datepicker("getDate");
-                                        if (dtini == null) {
-                                            startDate = new Date(date.getFullYear(), date.getMonth(), 1);                                                                                                                           
-                                            $('#finished_in_0').datepicker("update", startDate);
-                                        }
-                                        
-                                        var dtfim = $("#finished_in_1").datepicker("getDate");
-                                        if (dtfim == null) {
-                                            $('#finished_in_1').datepicker("update", date);
-                                        }
                                     });                                                                        
                                 </script>
                             </div>
-                            <div class="row">
-                                <div class="form-group col-sm-12 col-md-6">
-                                    {% bootstrap_label "Agrupar por: " %}
-                                    {% bootstrap_field filter.form.group_by_tasks form_group_class="" bound_css_class='' show_label=False %}
-                                </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Agrupar por: " %}
+                                {% bootstrap_field filter.form.group_by_tasks form_group_class="" bound_css_class='' show_label=False %}
                             </div>
                         </div>
                     </fieldset>
