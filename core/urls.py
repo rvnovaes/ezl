@@ -130,6 +130,4 @@ urlpatterns = [
     url(r'^teams/create/$', login_required(views.TeamCreateView.as_view()), name='team_add'), 
     url(r'^teams/(?P<pk>[0-9]+)/$', login_required(views.TeamUpdateView.as_view()), name='team_update'),
     url(r'^teams/delete$', login_required(views.TeamDeleteView.as_view()), name='team_delete'),
-    url(r'^custom_settings/$', login_required(views.CustomSettingsCreateView.as_view()), name='custom_settings_create'),
-    url(r'^custtom_settings/(?P<pk>[0-9]+)/$', login_required(views.CustomSettingsUpdateView.as_view()), name='custom_settings_update')
 ]

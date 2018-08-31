@@ -22,7 +22,6 @@ GROUP_PERMISSIONS = {
     ),
 
     Person.SUPERVISOR_GROUP: (
-        Permissions.can_access_settings,
         Permissions.block_payment_tasks,
         Permissions.can_access_general_data,
         SurveyPermissions.can_edit_surveys,
