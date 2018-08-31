@@ -1,3 +1,4 @@
+from core.models import OfficeMixin
 from django.db import models
 from enum import Enum
 
@@ -29,7 +30,7 @@ def get_legacy_type_map():
     return survey_map
 
 
-class Survey(models.Model):
+class Survey(OfficeMixin):
 
     name = models.CharField(max_length=128, verbose_name='Nome')
     data = models.TextField(
