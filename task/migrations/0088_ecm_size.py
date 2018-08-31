@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0086_dashboardviewmodel_parent_task_number'),
+        ('task', '0087_auto_20180828_1843'),
     ]
 
     operations = [
