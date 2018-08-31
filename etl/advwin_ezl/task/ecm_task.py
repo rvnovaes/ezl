@@ -81,7 +81,7 @@ class EcmEtl(GenericETL):
                     if not os.path.exists(local_path):
                         continue
 
-                    with open(local_path, 'r') as local_file:
+                    with open(local_path, 'rb') as local_file:
                         new_file = ContentFile(local_file.read())
                     filename = ntpath.basename(local_path)
                     new_file.name = filename
