@@ -194,13 +194,14 @@ class InternalChatOffices(CustomLoginRequiredView, View):
                 'office_pk': task.parent.office.pk,  # "Deve ser o pk do office do parent"
                 'office_legal_name': task.parent.office.legal_name
             })
-        for task_child in task.child.all():
+        if task.get_child:
+            task_child = task.get_child
             data.append({
                 'chat': task_child.chat.pk,  # "Deve ser o pk do chat da task filha"
                 'office_pk': task_child.office.pk,
                 'office_legal_name': task_child.office.legal_name
             })
-        if not all([task.parent, task.child.exists()]):
+        if not all([task.parent, task.get_child]):
             data.append({
                 'chat': task.chat.pk,  # "Deve ser o pk do chat da task filha"
                 'office_pk': task.office.pk,

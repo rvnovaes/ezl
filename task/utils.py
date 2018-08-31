@@ -1,12 +1,13 @@
 import copy
+from datetime import datetime
 from django.template.loader import render_to_string
 from ecm.models import DefaultAttachmentRule, Attachment
 from task.models import *
 from task.mail import SendMail
+from task.rules import RuleViewTask
 from core.utils import get_office_session
-from core.models import Team
 from core.tasks import send_mail
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.core.files.base import ContentFile
 from django.conf import settings
 from retrying import retry
@@ -27,7 +28,8 @@ def get_task_attachment(self, form):
                   form.instance.movement.law_suit.organ.address_set.first() else None)) | Q(city=None)))
 
     for rule in attachmentrules:
-        attachments = Attachment.objects.filter(model_name='ecm.defaultattachmentrule').filter(object_id=rule.id)
+        attachments = Attachment.objects.filter(
+            model_name='ecm.defaultattachmentrule').filter(object_id=rule.id)
         for attachment in attachments:
             if os.path.isfile(attachment.file.path):
                 file_name = os.path.basename(attachment.file.name)
@@ -67,13 +69,16 @@ def copy_ecm(ecm, task):
         {}
         {}""".format(ecm.id, task.id, e, traceback.format_exc())
         recipients = [admin[1] for admin in settings.ADMINS]
+        # Nessario converter para unicode pois o celery usa python 2.7
+        body = u'{}'.format(body)
         send_mail.delay(recipients, subject, body)
 
 
 def task_send_mail(instance, number, project_link, short_message, custom_text, mail_list):
     mail = SendMail()
     mail.subject = 'Easy Lawyer - OS {} - {} - Prazo: {} - {}'.format(number, str(instance.type_task).title(),
-                                                                      instance.final_deadline_date.strftime('%d/%m/%Y'),
+                                                                      instance.final_deadline_date.strftime(
+                                                                          '%d/%m/%Y'),
                                                                       instance.task_status)
     mail.message = render_to_string('mail/base.html',
                                     {'server': project_link,
@@ -90,3 +95,26 @@ def task_send_mail(instance, number, project_link, short_message, custom_text, m
     except Exception as e:
         print(e)
         print('Você tentou mandar um e-mail')
+
+
+def get_dashboard_tasks(request, office_session, checker, person):
+    rule_view = RuleViewTask(request=request)
+    dynamic_query = rule_view.get_dynamic_query(person, checker)
+    data = Task.objects.none()
+    exclude_status = []
+
+    if not office_session:
+        return data, office_session
+    # NOTE: Quando o usuário é superusuário ou não possui permissão é retornado um objeto Q vazio
+    if dynamic_query or checker.has_perm('group_admin', office_session):
+        # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
+        if office_session:
+            if not office_session.use_service:
+                exclude_status.append(TaskStatus.ACCEPTED_SERVICE.value)
+                exclude_status.append(TaskStatus.REFUSED_SERVICE.value)
+            if not office_session.use_etl:
+                exclude_status.append(TaskStatus.ERROR.value)
+            data = Task.objects.filter(dynamic_query).filter(is_active=True, office_id=office_session.id).filter(
+                ~Q(task_status__in=exclude_status))
+
+    return data, exclude_status
