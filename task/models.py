@@ -392,18 +392,31 @@ class Ecm(Audit, LegacyCode):
     def user(self):
         return User.objects.get(username=self.path.instance.create_user)
 
+    @property
+    def local_file_path(self):
+        return os.path.join(settings.MEDIA_ROOT, self.path.name)
+
+    def local_file_exists(self):
+        return os.path.exists(self.local_file_path)
+
     def delete(self, *args, **kwargs):
         if self.legacy_code:
             raise ValidationError("Não é possível apagar um arquivo que foi vinculado a outro sistema.")
+
+        # Após apagar um Ecm devemos apagar o arquivo local caso o mesmo ainda esteja no disco.
+        # O arquivo continua no disco em alguns casos pois ele pode ser ter sido criado antes de
+        # utilizarmos o S3.
+        if self.id is None and self.local_file_exists():
+            os.remove(self.local_file_path)
+
         return super().delete(*args, **kwargs)
 
     def download(self):
         """Baixamos o arquivo do S3 caso ele não exista localmente"""
-        local_file_path = os.path.join(settings.MEDIA_ROOT, self.path.name)
-        if not os.path.exists(local_file_path):
-            with open(local_file_path, 'wb') as local_file:
+        if not self.local_file_exists():
+            with open(self.local_file_path, 'wb') as local_file:
                 local_file.write(self.path.read())
-        return local_file_path
+        return self.local_file_path
 
 
 class TaskHistory(AuditCreate):
