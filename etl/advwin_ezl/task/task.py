@@ -1,9 +1,7 @@
 from itertools import chain
-from json import loads
 from os import linesep
 import pytz
 from django.db.models import Q
-from django.utils import timezone
 from sqlalchemy import update, cast, String, insert
 from advwin_models.advwin import JuridAgendaTable, JuridCorrespondenteHist, JuridFMAudienciaCorrespondente, \
     JuridFMAlvaraCorrespondente, JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente
@@ -166,11 +164,11 @@ class TaskETL(GenericETL):
                     inconsistencies.append({"inconsistency": Inconsistencies.TASKLESSMOVEMENT,
                                             "solution": Inconsistencies.get_solution(Inconsistencies.TASKLESSMOVEMENT)})
                 if not Folder.objects.filter(
-                    legacy_code=folder_legacy_code,
-                    legacy_code__isnull=False,
-                    person_customer__legacy_code=client,
-                    office=default_office,
-                    system_prefix=LegacySystem.ADVWIN.value).first():
+                        legacy_code=folder_legacy_code,
+                        legacy_code__isnull=False,
+                        person_customer__legacy_code=client,
+                        office=default_office,
+                        system_prefix=LegacySystem.ADVWIN.value).first():
 
                     status_code_advwin = TaskStatus.ERROR
                     inconsistencies.append({"inconsistency": Inconsistencies.TASKINATIVEFOLDER,
@@ -195,7 +193,6 @@ class TaskETL(GenericETL):
                     task.type_task = type_task
                     task.alter_user = user
                     task.person_asked_by = person_asked_by
-                    task.person_executed_by = person_executed_by
                     task.type_task = type_task
                     task.refused_date = refused_date
                     task.execution_date = execution_date
@@ -207,8 +204,7 @@ class TaskETL(GenericETL):
                         task.task_status = status_code_advwin
 
                     update_fields = ['requested_date', 'final_deadline_date', 'description',
-                                     'task_status', 'alter_user', 'person_asked_by',
-                                     'person_executed_by', 'type_task', 'refused_date',
+                                     'task_status', 'alter_user', 'person_asked_by', 'type_task', 'refused_date',
                                      'execution_date', 'blocked_payment_date', 'finished_date', 'requested_date',
                                      'movement']
 
