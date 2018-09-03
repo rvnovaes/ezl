@@ -1,10 +1,12 @@
 import os
+import json
 from enum import Enum
 from django.db import transaction
 
 import pickle
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls.base import reverse
@@ -14,6 +16,7 @@ from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, Off
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
 from decimal import Decimal
+from .schemas import *
 
 
 class Permissions(Enum):
@@ -140,16 +143,25 @@ class CheckPointType(Enum):
         return [(x.value, x.name) for x in cls]
 
 
+class TypeTaskMain(models.Model):
+    name = models.CharField(max_length=255, null=False, blank=False, verbose_name='Tipo de Serviço')
+    characteristics = JSONField(null=True, blank=True, verbose_name='Características disponíveis',
+                                default=json.dumps(CHARACTERISTICS, indent=4))
+
+    class Meta:
+        ordering = ('name',)
+        verbose_name = 'Tipo de Serviço Principal'
+        verbose_name_plural = 'Tipos de Serviço Principais'
+
+    def __str__(self):
+        return self.name
+
+
 class TypeTask(Audit, LegacyCode, OfficeMixin):
-    name = models.CharField(max_length=255, null=False, blank=False,
-                            verbose_name='Tipo de Serviço')
-    simple_service = models.BooleanField(verbose_name="Serviço simples",
-        default=False)
-    survey = models.ForeignKey(
-        'survey.Survey',
-        null=True,
-        verbose_name='Tipo de Formulário'
-    )
+    type_task_main = models.ForeignKey(TypeTaskMain, null=True, verbose_name='Tipo de Serviço Principal')
+    name = models.CharField(max_length=255, null=False, blank=False, verbose_name='Tipo de Serviço')
+    survey = models.ForeignKey('survey.Survey', null=True, verbose_name='Tipo de Formulário')
+    characteristics = JSONField(null=True, blank=True, verbose_name='Características disponíveis')
 
     objects = OfficeManager()
 

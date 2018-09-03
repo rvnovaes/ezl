@@ -131,6 +131,7 @@ INSTALLED_APPS = [
     'billing',
     'djmoney',
     'django_dbconn_retry',
+    'codemirror',
 ]
 
 MIDDLEWARE = [

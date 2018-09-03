@@ -1,16 +1,16 @@
-from datetime import datetime
-
+import json
 from django import forms
-from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django.utils import timezone
-from django_file_form.forms import FileFormMixin, MultipleUploadedFileField
+from django_file_form.forms import MultipleUploadedFileField
 
 from core.models import Person
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
-from core.widgets import MDDateTimepicker, MDDatePicker
+from core.widgets import MDDateTimepicker
 from core.forms import BaseForm
-from task.models import Task, TypeTask, Filter, TaskStatus
+from task.models import Task, TypeTask, Filter, TypeTaskMain
+from task.widgets import code_mirror_schema
+from .schemas import *
 
 
 class TaskForm(BaseForm):
@@ -133,9 +133,11 @@ class FilterForm(BaseForm):
     description = forms.CharField(label=u"Descrição", required=False,
                                            widget=forms.Textarea(
                                                attrs={'rows': '3'}))
+
     class Meta:
         model = Filter
         fields = ['name', 'description']
+
 
 class TaskToAssignForm(BaseForm):
     class Meta:
@@ -145,3 +147,12 @@ class TaskToAssignForm(BaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['person_executed_by'].required = True
+
+
+class TypeTaskMainForm(forms.ModelForm):
+    characteristics = forms.CharField(label="Caractersíticas",
+                                      widget=code_mirror_schema, initial=json.dumps(CHARACTERISTICS, indent=4))
+
+    class Meta:
+        model = TypeTaskMain
+        fields = '__all__'
