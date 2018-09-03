@@ -535,3 +535,13 @@ class ControlFirstAccessUser(models.Model):
     class Meta:
         verbose_name = 'Controle de primeiro acesso'
         verbose_name_plural = 'Controle de primeiro acesso'
+
+
+
+class CustomSettings(Audit):
+    office = models.OneToOneField(Office, verbose_name='Escritório')
+    email_to_notification = models.EmailField(verbose_name='E-mail para receber notificações')    
+
+
+    def __str__(self):
+        return self.office.legal_name
