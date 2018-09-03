@@ -17,7 +17,7 @@ class TaskShowStatusInline(admin.TabularInline):
 
 @admin.register(CustomSettings)
 class CustomSettingsAdmin(admin.ModelAdmin):
-    list_display = ('office', 'email_to_notification')
+    list_display = ('office', 'email_to_notification', 'i_work_alone')
     inlines = [
         TaskShowStatusInline,
         TaskWorkflowInline

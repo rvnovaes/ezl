@@ -542,6 +542,7 @@ class ControlFirstAccessUser(models.Model):
 class CustomSettings(Audit):
     office = models.OneToOneField(Office, verbose_name='Escritório')
     email_to_notification = models.EmailField(verbose_name='E-mail para receber notificações')    
+    i_work_alone = models.BooleanField(default=True)
 
     class Meta: 
         verbose_name='Configurações por escritório'

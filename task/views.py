@@ -549,6 +549,9 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(TaskDetailView, self).get_context_data(**kwargs)
+        office_session = get_office_session(self.request)
+        custom_settings = CustomSettings.objects.filter(office=office_session).first()        
+        context['custom_settings'] = custom_settings        
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
