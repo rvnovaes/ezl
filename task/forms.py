@@ -54,6 +54,10 @@ class TaskForm(BaseForm):
         if office_session:            
             self.fields['person_asked_by'].queryset = filter_valid_choice_form(
                 Person.objects.active().requesters(office_pk=office_session.pk).active_offices().order_by('name'))
+            self.fields['type_task'].queryset = filter_valid_choice_form(TypeTask.objects.filter(
+                is_active=True, office=office_session)).order_by('name')
+        else:
+            self.fields['type_task'].queryset = TypeTask.objects.none()
         if Person.objects.requesters().filter(auth_user=self.request.user):
             self.fields['person_asked_by'].initial = self.request.user.person
 
