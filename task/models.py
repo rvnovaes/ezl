@@ -1,7 +1,7 @@
 import os
 from enum import Enum
 from django.db import transaction
-
+import uuid
 import pickle
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -164,6 +164,7 @@ class TypeTask(Audit, LegacyCode):
 
 
 class Task(Audit, LegacyCode, OfficeMixin):
+    task_hash = models.UUIDField(default=uuid.uuid4, editable=False)
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='child')

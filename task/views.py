@@ -1201,3 +1201,12 @@ def ecm_batch_download(request, pk):
     except Exception as e:
         messages.error(request, 'Erro ao baixar todos arquivos.' + str(e))
         return HttpResponseRedirect(ecm.task.get_absolute_url())
+
+class ExternalTaskView(TemplateView):
+    template_name = 'task/external_task.html'
+
+    def get(self, request, task_hash):                
+        task = Task.objects.filter(task_hash=task_hash).first()        
+        task.task_status = TaskStatus.ACCEPTED_SERVICE
+        task.save()
+        return JsonResponse({'status': task.task_number})
