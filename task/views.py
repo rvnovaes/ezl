@@ -27,7 +27,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
     DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
-from core.models import Person
+from core.models import Person, CustomSettings
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE
@@ -441,7 +441,12 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
     ret_status_dict = {}
 
     def get_context_data(self, *args, **kwargs):
+        office_session = get_office_session(self.request)
         context = super().get_context_data(*args, **kwargs)
+        custom_settings = CustomSettings.objects.filter(office=office_session).first()        
+        context['cards_to_show'] = []        
+        if custom_settings and custom_settings.task_status_show:
+            context['cards_to_show'] = list(custom_settings.task_status_show.values_list('status_to_show', flat=True))
         person = Person.objects.get(auth_user=self.request.user)
         checker = ObjectPermissionChecker(person.auth_user)
         ret_status_dict, office_session = self.get_data(person, checker)

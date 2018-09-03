@@ -14,6 +14,8 @@ from task.workflow import get_parent_status, get_child_status, get_parent_fields
 from chat.models import Chat, UserByChat
 from lawsuit.models import CourtDistrict
 from core.utils import check_environ
+from core.models import CustomSettings
+
 
 send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'execution_date'])
 
@@ -310,3 +312,19 @@ def create_or_update_chat(sender, instance, created, **kwargs):
     post_save.disconnect(create_or_update_chat, sender=sender)
     instance.save(**{'skip_signal': True, 'skip_mail': True, 'from_parent': True})
     post_save.connect(create_or_update_chat, sender=sender)
+
+
+
+@receiver(post_save, sender=Task)
+def workflow_task(sender, instance, created, **kwargs):
+    custom_settings = CustomSettings.objects.filter(office=instance.office).first()
+    if custom_settings:
+        workflow_status = custom_settings.task_workflows.filter(
+            task_from=instance.task_status).first()
+        if workflow_status:            
+            instance.task_status = workflow_status.task_to
+            instance.person_executed_by = workflow_status.responsible_user.person
+            instance.person_distributed_by = workflow_status.responsible_user.person
+            post_save.disconnect(workflow_task, sender=sender)
+            instance.save(**{'skip_signal': True, 'skip_mail': True})
+            post_save.connect(workflow_task, sender=sender)        

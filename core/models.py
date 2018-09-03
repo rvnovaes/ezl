@@ -10,6 +10,7 @@ from core.managers import PersonManager
 from core.utils import LegacySystem
 from guardian.shortcuts import get_perms
 
+
 INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'), ('E', 'EXTERNAL'))
 INVITE_FROM = (('P', 'PERSON'), ('O', 'OFFICE'))
 INVALIDO = 1
@@ -542,6 +543,8 @@ class CustomSettings(Audit):
     office = models.OneToOneField(Office, verbose_name='Escritório')
     email_to_notification = models.EmailField(verbose_name='E-mail para receber notificações')    
 
+    class Meta: 
+        verbose_name='Configurações por escritório'
 
     def __str__(self):
         return self.office.legal_name

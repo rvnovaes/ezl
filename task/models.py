@@ -10,7 +10,7 @@ from django.db import models
 from django.urls.base import reverse
 from django.utils import timezone
 from sequences import get_next_value
-from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office
+from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office, CustomSettings
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
 from decimal import Decimal
@@ -547,3 +547,22 @@ class Filter(Audit):
         verbose_name = 'Filtro'
         verbose_name_plural = 'Filtros'
         unique_together = (('create_user', 'name'),)
+
+
+class TaskWorkflow(Audit):
+    custtom_settings = models.ForeignKey(CustomSettings, related_name='task_workflows')
+    task_from = models.CharField(verbose_name='Do status', null=False, max_length=30,
+                                   choices=((x.value, x.name.title()) for x in TaskStatus),
+                                   default=TaskStatus.REQUESTED)
+    task_to = models.CharField(verbose_name='Para o status', null=False, max_length=30,
+                                   choices=((x.value, x.name.title()) for x in TaskStatus),
+                                   default=TaskStatus.REQUESTED)
+
+    responsible_user = models.ForeignKey(User)
+
+class TaskShowStatus(Audit):
+    custtom_settings = models.ForeignKey(CustomSettings, related_name='task_status_show')
+    status_to_show = models.CharField(
+        verbose_name='Mostrar status', null=False, max_length=30, 
+        choices=((x.value, x.name.title()) for x in TaskStatus),default=TaskStatus.REQUESTED)    
+
