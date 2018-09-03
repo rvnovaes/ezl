@@ -140,7 +140,7 @@ class CheckPointType(Enum):
         return [(x.value, x.name) for x in cls]
 
 
-class TypeTask(Audit, LegacyCode):
+class TypeTask(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, null=False, blank=False,
                             verbose_name='Tipo de Serviço')
     simple_service = models.BooleanField(verbose_name="Serviço simples",
