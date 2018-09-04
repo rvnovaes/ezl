@@ -10,7 +10,7 @@ from django.db import models
 from django.urls.base import reverse
 from django.utils import timezone
 from sequences import get_next_value
-from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office, CustomSettings
+from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office, CustomSettings, EmailTemplate
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
 from decimal import Decimal
@@ -559,6 +559,7 @@ class TaskWorkflow(Audit):
                                    default=TaskStatus.REQUESTED)
 
     responsible_user = models.ForeignKey(User)
+    send_mail_template = models.ForeignKey(EmailTemplate, verbose_name='Template a enviar', blank=True, null=True)
 
 class TaskShowStatus(Audit):
     custtom_settings = models.ForeignKey(CustomSettings, related_name='task_status_show')

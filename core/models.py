@@ -549,3 +549,15 @@ class CustomSettings(Audit):
 
     def __str__(self):
         return self.office.legal_name
+
+
+class EmailTemplate(models.Model):
+    name = models.CharField(verbose_name='Nome do template', max_length=255)
+    template_id = models.CharField(verbose_name='Id do tempĺate (sendgrid)', max_length=255)
+
+
+    class Meta:
+        verbose_name='E-mail templates'
+
+    def __str__(self):
+        return self.name

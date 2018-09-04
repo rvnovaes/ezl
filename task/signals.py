@@ -15,6 +15,8 @@ from chat.models import Chat, UserByChat
 from lawsuit.models import CourtDistrict
 from core.utils import check_environ
 from core.models import CustomSettings
+from task.mail import TaskMail
+
 
 
 send_notes_execution_date = Signal(providing_args=['notes', 'instance', 'execution_date'])
@@ -316,7 +318,7 @@ def create_or_update_chat(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=Task)
-def workflow_task(sender, instance, created, **kwargs):
+def workflow_task(sender, instance, created, **kwargs):    
     custom_settings = CustomSettings.objects.filter(office=instance.office).first()
     if custom_settings:
         workflow_status = custom_settings.task_workflows.filter(
@@ -327,4 +329,9 @@ def workflow_task(sender, instance, created, **kwargs):
             instance.person_distributed_by = workflow_status.responsible_user.person
             post_save.disconnect(workflow_task, sender=sender)
             instance.save(**{'skip_signal': True, 'skip_mail': True})
-            post_save.connect(workflow_task, sender=sender)        
+            post_save.connect(workflow_task, sender=sender)
+            if workflow_status.send_mail_template:
+                # self, email, task, template_id
+                email = TaskMail(
+                    custom_settings.email_to_notification, instance, workflow_status.send_mail_template.template_id)
+                email.send_mail()

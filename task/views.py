@@ -1,4 +1,5 @@
 import json
+import uuid
 import csv
 import copy
 import pickle
@@ -590,6 +591,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                                                                        TaskStatus.FINISHED]:
                 return False
         new_task = copy.copy(object_parent)
+        new_task.task_hash = uuid.uuid4()
         new_task.legacy_code = None
         new_task.system_prefix = None
         new_task.pk = new_task.task_number = None
@@ -1213,8 +1215,8 @@ def ecm_batch_download(request, pk):
 class ExternalTaskView(TemplateView):
     template_name = 'task/external_task.html'
 
-    def get(self, request, task_hash):                
+    def get(self, request, status, task_hash):                        
         task = Task.objects.filter(task_hash=task_hash).first()        
-        task.task_status = TaskStatus.ACCEPTED_SERVICE
+        task.task_status = getattr(TaskStatus, status)
         task.save()
         return JsonResponse({'status': task.task_number})

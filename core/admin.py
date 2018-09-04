@@ -1,14 +1,18 @@
 from django.contrib import admin
-from core.models import AddressType, ContactMechanismType, ContactMechanism, Team, ControlFirstAccessUser
+from core.models import AddressType, ContactMechanismType, ContactMechanism, Team, ControlFirstAccessUser, EmailTemplate
 #Todo: Remover office
 from core.models import Office, Invite, InviteOffice, OfficeRelGroup, CustomSettings
 from task.models import TaskWorkflow, TaskShowStatus
 
 
+@admin.register(EmailTemplate)
+class EmailTemplateAdmin(admin.ModelAdmin):
+    pass
+
 
 class TaskWorkflowInline(admin.TabularInline):
     model = TaskWorkflow
-    fields = ('create_user', 'task_from', 'task_to', 'responsible_user')
+    fields = ('create_user', 'task_from', 'task_to', 'responsible_user', 'send_mail_template')
 
 class TaskShowStatusInline(admin.TabularInline):
     model = TaskShowStatus

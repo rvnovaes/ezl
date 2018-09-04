@@ -45,6 +45,6 @@ urlpatterns = [
 
     url(r'^filtros/excluir$', login_required(views.FilterDeleteView.as_view()),
         name='filter_delete'),
-    url(r'^external-task/(?P<task_hash>[-\w\W\d]+)/$', views.ExternalTaskView.as_view(), name="external-task"),
+    url(r'^external-task/(?P<status>[-\w\W\d]+)/(?P<task_hash>[-\w\W\d]+)/$', views.ExternalTaskView.as_view(), name="external-task"),
 
 ]
