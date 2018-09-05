@@ -1,17 +1,17 @@
-{% extends 'skeleton/forms/base.html' %}
-
-
-{% block sidebar %}
-	<div class="">
-		Faça o ligin
-	</div>
-{% endblock %}
-
+{% extends 'skeleton/base.html' %}
 {% load static %}
 {% load core_filters task_filters %}
 {% load render_table from django_tables2 %}
 {% load tz %}
 {% load djmoney %}
+
+
+{% block navbar%}  
+{%endblock%}
+{% block sidebar%} {%endblock%}
+{% block right-sidebar-chat %}
+    {% include 'chat/chat-right-sidebar.html' %}
+{% endblock %}
 
 {% block extra_stylesheets %}
     <!-- DataTables -->
@@ -31,22 +31,16 @@
     </style>
 {% endblock %}
 
-{% block right-sidebar-chat %}
-    {% include 'chat/chat-right-sidebar.html' %}
-{% endblock %}
-{% block content %}    
+{% block content %}     
     <link href="{% static 'skeleton/css/step-bar.css' %}" rel="stylesheet">
     <link href="{% static 'libs/bootstrap-rating/bootstrap-rating.css' %}" rel="stylesheet">
-
-    {% include 'task/task_to_assign.html' with task=task%}
     <form id="task_detail" action="" method="post">{% csrf_token %}
         {% include 'task/task_detail/tab.html' %}
         <div class="panel-group" role="tablist" aria-multiselectable="true">
             <!-- Arquivos ECM -->
-            {% include 'task/task_detail/arq_ecm.html' %}
+            {% include 'task/task_detail/arq_ecm_external.html' %}            
             {% include 'task/task_detail/historico.html' %}
         </div>
-        <!-- CONFIRMAR AÇÃO -->
         <div id="confirmAction" class="modal fade "
             tabindex="-1" role="alert" aria-labelledby="modalTitle"
             aria-hidden="true">
@@ -113,12 +107,16 @@
                 </div>
             </div>
         </div>
-    </form>
-    {% include 'core/mask_selector.html' %}
-{% endblock %}
+    </form>    
+{%endblock%}
 
 {% block extra_scripts %}
     <!-- UPLOADS SCRIPTS  -->
+    <script>
+        $(document).ready(function(){
+            $('#page-wrapper').css('margin', '0')
+        })
+    </script>
     {% include 'task/includes/upload.html' %}
     <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
     <script src="{% static 'libs/bootstrap-rating/bootstrap-rating.min.js' %}"></script>
@@ -441,105 +439,9 @@
             }
         });
     </script>
-{% endblock %}
-{% block script_window_load %}
-    {{ block.super }}
-    get_ecms({{form.instance.pk}});
-{% endblock %}
-
-{% block extra_modal %}
-    <!-- Janela modal para mostrar progresso de deleção do arquivo -->
-    <div id="deleting" class="modal">
-        <div class="modal-dialog">
-            <div class="modal-content ">
-                <div class="modal-body" style="text-align: center;">
-                    Excluindo arquivo ...
-                </div>
-                <div class="modal-footer">
-                    <div class="progress progress-striped active">
-                        <div class="progress-bar" style="width: 100%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Janela modal para mostrar progresso do envio de arquivos -->
-    <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" style="text-align: center">Enviando ...</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="progress progress-lg">
-                        <div class="progress-bar progress-bar-info active progress-bar-striped" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" style="width: 0%" role="progressbar">
-                            0
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Janela modal para mostrar enquanto processa a geolocalização -->
-    <div id="locating" class="modal">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content ">
-                <div class="modal-body" style="text-align: center;">
-                    <h1>Aguarde...</h1>
-                    <p class="h1"><i class="fa fa-spin fa-map-marker"></i></p>
-                </div>
-                <div class="modal-footer">
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Janela modal para mostrar enquanto faz submit do form -->
-    <div id="procssing" class="modal" data-keyboard="false">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content ">
-                <div class="modal-body" style="text-align: center;">
-                    <h1>Aguarde...</h1>
-                    <p class="h1"><i class="fa fa-spin fa-spinner"></i></p>
-                </div>
-            </div>
-        </div>
-    </div>
-{% endblock %}
-{% block script_document_ready %}
-    {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
-        $('#confirmAction').on('show.bs.modal', function (event) {
-            var table_rows = {{ correspondents_table.rows|length }};
-            if (table_rows > 0) {
-                window.table = $('#correspondents-table').DataTable({
-                    paging: false,
-                    order: [[4, 'asc']],
-                    dom: 'frti',
-                    buttons: [],
-                    language: {
-                        "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-                    },
-                });
-                $('#actionButton').removeAttr('disabled');
-            } else {
-                event.preventDefault();
-                event.stopPropagation();
-                swal({
-                    title: "Atenção",
-                    text: "Não existem tabelas de preço que atendam aos critérios desta OS",
-                    type: "warning",
-                    showCancelButton: false,
-                    confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "OK",
-                    closeOnConfirm: true
-                });
-            }
-        });
-        /* Ao fechar o modal, limpar a tabela */
-        {% if correspondents_table.rows %}
-        $('#confirmAction').on('hide.bs.modal', function (event) {
-            window.table.destroy();
-        });
-        {% endif %}
-
-    {% endif %}
+    <script type="text/javascript">
+        $(window).load(function(){
+            get_external_ecms('{{task.task_hash.hex}}');        
+        })
+    </script>
 {% endblock %}

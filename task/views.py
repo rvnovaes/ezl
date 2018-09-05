@@ -10,7 +10,7 @@ from zipfile import ZipFile
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from core.views import CustomLoginRequiredView
+from core.views import CustomLoginRequiredView, set_office_session
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
@@ -47,6 +47,8 @@ from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
 import operator
+from django.shortcuts import render
+
 
 mapOrder = {
     'asc': '',
@@ -1056,9 +1058,7 @@ def ajax_get_task_data_table(request):
     }
     return JsonResponse(data)
 
-
-def ajax_get_ecms(request):
-    task_id = request.GET.get('task_id')
+def get_ecms(task_id):
     data_list = []
     ecms = Ecm.objects.filter(task_id=task_id)
     for ecm in ecms:
@@ -1078,6 +1078,14 @@ def ajax_get_ecms(request):
         'ecms': data_list
     }
     return JsonResponse(data)
+
+def ajax_get_ecms(request):
+    task_id = request.GET.get('task_id')
+    return get_ecms(task_id)
+
+def get_external_ecms(request):
+    task = Task.objects.filter(task_hash=request.GET.get('task_hash')).first()
+    return get_ecms(task.pk)
 
 
 class FilterListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -1212,11 +1220,94 @@ def ecm_batch_download(request, pk):
         messages.error(request, 'Erro ao baixar todos arquivos.' + str(e))
         return HttpResponseRedirect(ecm.task.get_absolute_url())
 
-class ExternalTaskView(TemplateView):
+class ExternalTaskView(UpdateView):
+    model = Task
     template_name = 'task/external_task.html'
+    form_class = TaskDetailForm
 
-    def get(self, request, status, task_hash):                        
-        task = Task.objects.filter(task_hash=task_hash).first()        
-        task.task_status = getattr(TaskStatus, status)
-        task.save()
-        return JsonResponse({'status': task.task_number})
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(**kwargs)
+    
+    def get(self, request, status, task_hash, *args, **kwargs):                        
+        self.object = Task.objects.filter(task_hash=task_hash).first()                        
+        self.object.task_status = getattr(TaskStatus, status) # Todo: Ajustar
+        self.object.save()
+        custom_settings = CustomSettings.objects.filter(office=self.object.office).first()
+        request.user = custom_settings.default_user
+        set_office_session(request)
+        ecms = Ecm.objects.filter(task_id=self.object.id)
+        task_history = TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
+        survey_data = (self.object.type_task.survey.data
+                                  if self.object.type_task.survey else None)        
+        return render(
+            request, 
+            self.template_name, 
+                {
+                    'task': self.object, 
+                    'form': TaskDetailForm(instance=self.object),
+                    'user': custom_settings.default_user,                    
+                    'ecms': ecms,
+                    'task_history': task_history, 
+                    'survey_data': survey_data,
+                    'custom_settings': custom_settings
+                }
+            )
+
+
+    def post(self, request, task_hash, *args, **kwargs):
+        task = Task.objects.filter(task_hash=task_hash).first()
+        form = self.form_class(request.POST, instance=task)        
+        form.instance.task_status = TaskStatus[self.request.POST['action']] or TaskStatus.INVALID
+        if form.is_valid():
+            form.save()
+        return HttpResponseRedirect(
+            reverse('external-task', args=['ACCEPTED', form.instance.task_hash.hex]))
+
+
+
+
+class EcmExternalCreateView(CreateView):
+
+    def post(self, request, task_hash, *args, **kwargs):        
+        files = request.FILES.getlist('path')
+        task = Task.objects.filter(task_hash=task_hash).first() 
+        custom_settings = CustomSettings.objects.filter(office=task.office).first()                       
+        request.user = custom_settings.default_user
+        data = {'success': False,
+                'message': exception_create()}
+
+        for file in files:
+            file_name = file._name.replace(' ', '_')            
+            ecm = Ecm(path=file,
+                      task=task,
+                      exhibition_name=file_name,
+                      create_user_id=str(request.user.id),
+                      create_date=timezone.now())
+
+            try:
+                ecm.save()
+                data = {'success': True,
+                        'id': ecm.id,
+                        'name': str(file),
+                        'user': str(self.request.user),
+                        'username': str(self.request.user.first_name + ' ' +
+                                        self.request.user.last_name),
+                        'filename': str(ecm.exhibition_name),
+                        'task_id': str(task.pk),
+                        'message': success_sent()
+                        }
+
+            except OperationalError:
+                data = {'success': False,
+                        'message': operational_error_create()}
+
+            except IOError:
+
+                data = {'is_deleted': False,
+                        'message': ioerror_create()}
+
+            except Exception:
+                data = {'success': False,
+                        'message': exception_create()}
+
+        return JsonResponse(data)    
