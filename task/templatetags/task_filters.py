@@ -41,9 +41,13 @@ def remove_spaces_lower(status):
 
 @register.simple_tag
 def get_checkin(geolocation):
-    return geolocation.filter(checkpointtype='Checkin').first()
+    if geolocation:
+        return geolocation.filter(checkpointtype='Checkin').first()
+    return ''
 
 
 @register.simple_tag
 def get_checkout(geolocation):
-    return geolocation.filter(checkpointtype='Checkout').first()
+    if geolocation:
+        return geolocation.filter(checkpointtype='Checkout').first()
+    return ''

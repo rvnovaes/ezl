@@ -10,6 +10,7 @@ from core.managers import PersonManager
 from core.utils import LegacySystem
 from guardian.shortcuts import get_perms
 
+
 INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'), ('E', 'EXTERNAL'))
 INVITE_FROM = (('P', 'PERSON'), ('O', 'OFFICE'))
 INVALIDO = 1
@@ -535,3 +536,29 @@ class ControlFirstAccessUser(models.Model):
     class Meta:
         verbose_name = 'Controle de primeiro acesso'
         verbose_name_plural = 'Controle de primeiro acesso'
+
+
+
+class CustomSettings(Audit):
+    office = models.OneToOneField(Office, verbose_name='Escritório')
+    default_user = models.OneToOneField(User, verbose_name='Usuário default')
+    email_to_notification = models.EmailField(verbose_name='E-mail para receber notificações')    
+    i_work_alone = models.BooleanField(default=True)
+
+    class Meta: 
+        verbose_name='Configurações por escritório'
+
+    def __str__(self):
+        return self.office.legal_name
+
+
+class EmailTemplate(models.Model):
+    name = models.CharField(verbose_name='Nome do template', max_length=255)
+    template_id = models.CharField(verbose_name='Id do tempĺate (sendgrid)', max_length=255)
+
+
+    class Meta:
+        verbose_name='E-mail templates'
+
+    def __str__(self):
+        return self.name

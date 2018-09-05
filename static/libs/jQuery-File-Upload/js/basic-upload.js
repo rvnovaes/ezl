@@ -46,7 +46,7 @@ $(function () {
                     SurveyUploadDatabase.currentField = null;
                 }
                 swal("Sucesso", data.result.message, "success")
-                get_ecms(data.result.task_id);
+                get_internal_ecms(data.result.task_id);
             } else {
                 swal('Erro', data.result.message, 'error');
             }
