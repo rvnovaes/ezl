@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 import sendgrid
 from django.conf import settings
 from datetime import datetime
+from core.models import EMAIL, PHONE
 
 
 class SendMail:
@@ -38,7 +39,15 @@ class TaskMail(object):
         "lawsuit_number": self.task.lawsuit_number, 
         "client": str(self.task.client), 
         "uf": str(task.movement.law_suit.court_district.state), 
-        "court_district": str(task.movement.law_suit.court_district),        
+        "court_district": str(task.movement.law_suit.court_district),  
+        "office_name": task.parent.office.legal_name, 
+        "office_phone": task.parent.office.contactmechanism_set.filter(contact_mechanism_type=PHONE).first(),
+        "office_email": task.parent.office.contactmechanism_set.filter(contact_mechanism_type=EMAIL).first(),
+        "office_address": task.parent.office.address_set.first(), 
+        "office_correspondent_name": task.office.legal_name, 
+        "office_correspondent_phone": task.office.contactmechanism_set.filter(contact_mechanism_type=PHONE).first(),
+        "office_correspondent_email": task.office.contactmechanism_set.filter(contact_mechanism_type=EMAIL).first(),
+        "office_correspondent_address": task.parent.office.address_set.first(), 
         "task": "http://localhost:8000/providencias/external-task/ACCEPTED/{}/".format(task.task_hash.hex)
         }
         self.data = {
