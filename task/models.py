@@ -79,6 +79,20 @@ status_order_dict = {
 }
 
 
+class TypeTaskTypes(Enum):
+    LICENSE = "Alvará"
+    AUDIENCE = "Audiência"
+    DILIGENCE = "Diligência"
+    PROTOCOL = "Protocolo"
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        return [(x.value, x.name) for x in cls]
+
+
 class TaskStatus(Enum):
     REQUESTED = 'Solicitada'
     ACCEPTED_SERVICE = 'Aceita pelo Service'
@@ -144,6 +158,7 @@ class CheckPointType(Enum):
 
 
 class TypeTaskMain(models.Model):
+    is_hearing = models.BooleanField(verbose_name='É audiência', default=False)
     name = models.CharField(max_length=255, null=False, blank=False, verbose_name='Tipo de Serviço')
     characteristics = JSONField(null=True, blank=True, verbose_name='Características disponíveis',
                                 default=json.dumps(CHARACTERISTICS, indent=4))
@@ -160,8 +175,7 @@ class TypeTaskMain(models.Model):
 class TypeTask(Audit, LegacyCode, OfficeMixin):
     type_task_main = models.ForeignKey(TypeTaskMain, null=True, verbose_name='Tipo de Serviço Principal')
     name = models.CharField(max_length=255, null=False, blank=False, verbose_name='Tipo de Serviço')
-    survey = models.ForeignKey('survey.Survey', null=True, verbose_name='Tipo de Formulário')
-    characteristics = JSONField(null=True, blank=True, verbose_name='Características disponíveis')
+    survey = models.ForeignKey('survey.Survey', null=True, blank=True, verbose_name='Tipo de Formulário')
 
     objects = OfficeManager()
 
@@ -170,6 +184,10 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
         ordering = ('name',)
         verbose_name = 'Tipo de Serviço'
         verbose_name_plural = 'Tipos de Serviço'
+
+    @property
+    def use_upload(self):
+        return False
 
     def __str__(self):
         return self.name

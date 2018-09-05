@@ -11,6 +11,8 @@ from core.forms import BaseForm
 from task.models import Task, TypeTask, Filter, TypeTaskMain
 from task.widgets import code_mirror_schema
 from .schemas import *
+from .fields import JSONFieldMixin
+from survey.models import Survey
 
 
 class TaskForm(BaseForm):
@@ -127,12 +129,8 @@ class TaskDetailForm(ModelForm):
 
 
 class FilterForm(BaseForm):
-    name = forms.CharField(label=u"Nome", required=True,
-                                  widget=forms.Textarea(
-                                      attrs={'rows': '1'}))
-    description = forms.CharField(label=u"Descrição", required=False,
-                                           widget=forms.Textarea(
-                                               attrs={'rows': '3'}))
+    name = forms.CharField(label=u"Nome", required=True, widget=forms.Textarea(attrs={'rows': '1'}))
+    description = forms.CharField(label=u"Descrição", required=False, widget=forms.Textarea(attrs={'rows': '3'}))
 
     class Meta:
         model = Filter
@@ -150,9 +148,23 @@ class TaskToAssignForm(BaseForm):
 
 
 class TypeTaskMainForm(forms.ModelForm):
-    characteristics = forms.CharField(label="Caractersíticas",
-                                      widget=code_mirror_schema, initial=json.dumps(CHARACTERISTICS, indent=4))
+    characteristics = JSONFieldMixin(label="Caractersíticas",
+                                     widget=code_mirror_schema, initial=CHARACTERISTICS)
 
     class Meta:
         model = TypeTaskMain
         fields = '__all__'
+
+
+class TypeTaskForm(BaseForm):
+
+    class Meta:
+        model = TypeTask
+        fields = ['office', 'type_task_main', 'survey', 'name', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        office = get_office_session(self.request)
+        self.fields['office'] = get_office_field(self.request)
+        self.fields['survey'].queryset = Survey.objects.filter(office=office)
+        self.order_fields(['office', 'type_task_main', 'survey', 'name', 'is_active'])

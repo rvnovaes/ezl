@@ -27,15 +27,15 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
     DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
-from core.models import Person
+from core.models import Person, CorePermissions
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE
-from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm
+from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
-    TaskGeolocation
+    TaskGeolocation, TypeTaskMain
 from task.signals import send_notes_execution_date
-from task.tables import TaskTable, DashboardStatusTable, FilterTable
+from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
 from task.rules import RuleViewTask
 from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
@@ -1201,3 +1201,55 @@ def ecm_batch_download(request, pk):
     except Exception as e:
         messages.error(request, 'Erro ao baixar todos arquivos.' + str(e))
         return HttpResponseRedirect(ecm.task.get_absolute_url())
+
+
+class TypeTaskListView(CustomLoginRequiredView, PermissionRequiredMixin, SingleTableViewMixin):
+    model = TypeTask
+    table_class = TypeTaskTable
+    ordering = ('id', )
+    permission_required = (CorePermissions.group_admin, )
+
+
+class TypeTaskCreateView(AuditFormMixin, CreateView):
+    model = TypeTask
+    form_class = TypeTaskForm
+    success_url = reverse_lazy('typetask_list')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'typetask_list'
+    permission_required = (CorePermissions.group_admin, )
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+
+class TypeTaskUpdateView(PermissionRequiredMixin, AuditFormMixin, UpdateView):
+    model = TypeTask
+    form_class = TypeTaskForm
+    success_url = reverse_lazy('typetask_list')
+    success_message = UPDATE_SUCCESS_MESSAGE
+    template_name_suffix = '_update_form'
+    object_list_url = 'typetask_list'
+    permission_required = (CorePermissions.group_admin, )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class TypeTaskDeleteView(PermissionRequiredMixin, AuditFormMixin, MultiDeleteViewMixin):
+    model = TypeTask
+    success_url = reverse_lazy('typetask_list')
+    success_message = DELETE_SUCCESS_MESSAGE.format(
+        model._meta.verbose_name_plural)
+    object_list_url = 'typetask_list'
+    permission_required = (CorePermissions.group_admin, )
+
+
+class GetTypeTaskMainCharacteristics(CustomLoginRequiredView, View):
+
+    def get(self, request, pk):
+        type_task_main = TypeTaskMain.objects.filter(pk=pk).first()
+        characteristics = type_task_main.characteristics if type_task_main else None
+        return JsonResponse({"characteristics": characteristics})
