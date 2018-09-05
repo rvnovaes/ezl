@@ -15,7 +15,7 @@ from chat.models import Chat, UserByChat
 from lawsuit.models import CourtDistrict
 from core.utils import check_environ
 from core.models import CustomSettings
-from task.mail import TaskMail
+from task.mail import TaskMail, TaskOpenMailTemplate
 
 
 
@@ -332,6 +332,6 @@ def workflow_task(sender, instance, created, **kwargs):
             post_save.connect(workflow_task, sender=sender)
             if workflow_status.send_mail_template:
                 # self, email, task, template_id
-                email = TaskMail(
-                    custom_settings.email_to_notification, instance, workflow_status.send_mail_template.template_id)
+                email = TaskMail(custom_settings.email_to_notification, instance, 
+                    workflow_status.send_mail_template.template_id, TaskOpenMailTemplate)
                 email.send_mail()
