@@ -9,6 +9,9 @@
 {% block navbar%}  
 {%endblock%}
 {% block sidebar%} {%endblock%}
+{% block bar_buttons%}
+    <a class="btn btn-info pull-right m-l-20 waves-effect waves-light" href="/"> ENTRAR </a>    
+{%endblock%}
 {% block right-sidebar-chat %}
     {% include 'chat/chat-right-sidebar.html' %}
 {% endblock %}
@@ -442,6 +445,16 @@
     <script type="text/javascript">
         $(window).load(function(){
             get_external_ecms('{{task.task_hash.hex}}');        
+        })
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            const regex = /[A-Z]+/;
+            const url = location.pathname;
+            const status = regex.exec(url);
+            if (status !== null) {
+                $(`#${status[0]}`).click();
+            }
         })
     </script>
 {% endblock %}

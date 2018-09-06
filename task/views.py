@@ -1230,8 +1230,6 @@ class ExternalTaskView(UpdateView):
     
     def get(self, request, status, task_hash, *args, **kwargs):                        
         self.object = Task.objects.filter(task_hash=task_hash).first()                        
-        self.object.task_status = getattr(TaskStatus, status) # Todo: Ajustar
-        self.object.save()
         custom_settings = CustomSettings.objects.filter(office=self.object.office).first()
         request.user = custom_settings.default_user
         set_office_session(request)
@@ -1243,6 +1241,7 @@ class ExternalTaskView(UpdateView):
             request, 
             self.template_name, 
                 {
+                    'object': self.object,
                     'task': self.object, 
                     'form': TaskDetailForm(instance=self.object),
                     'user': custom_settings.default_user,                    
