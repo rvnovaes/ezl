@@ -1,16 +1,18 @@
-from datetime import datetime
-
+import json
 from django import forms
-from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django.utils import timezone
-from django_file_form.forms import FileFormMixin, MultipleUploadedFileField
+from django_file_form.forms import MultipleUploadedFileField
 
 from core.models import Person
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
-from core.widgets import MDDateTimepicker, MDDatePicker
+from core.widgets import MDDateTimepicker
 from core.forms import BaseForm
-from task.models import Task, TypeTask, Filter, TaskStatus
+from task.models import Task, TypeTask, Filter, TypeTaskMain
+from task.widgets import code_mirror_schema
+from .schemas import *
+from .fields import JSONFieldMixin
+from survey.models import Survey
 
 
 class TaskForm(BaseForm):
@@ -54,6 +56,10 @@ class TaskForm(BaseForm):
         if office_session:            
             self.fields['person_asked_by'].queryset = filter_valid_choice_form(
                 Person.objects.active().requesters(office_pk=office_session.pk).active_offices().order_by('name'))
+            self.fields['type_task'].queryset = filter_valid_choice_form(TypeTask.objects.filter(
+                is_active=True, office=office_session)).order_by('name')
+        else:
+            self.fields['type_task'].queryset = TypeTask.objects.none()
         if Person.objects.requesters().filter(auth_user=self.request.user):
             self.fields['person_asked_by'].initial = self.request.user.person
 
@@ -123,15 +129,13 @@ class TaskDetailForm(ModelForm):
 
 
 class FilterForm(BaseForm):
-    name = forms.CharField(label=u"Nome", required=True,
-                                  widget=forms.Textarea(
-                                      attrs={'rows': '1'}))
-    description = forms.CharField(label=u"Descrição", required=False,
-                                           widget=forms.Textarea(
-                                               attrs={'rows': '3'}))
+    name = forms.CharField(label=u"Nome", required=True, widget=forms.Textarea(attrs={'rows': '1'}))
+    description = forms.CharField(label=u"Descrição", required=False, widget=forms.Textarea(attrs={'rows': '3'}))
+
     class Meta:
         model = Filter
         fields = ['name', 'description']
+
 
 class TaskToAssignForm(BaseForm):
     class Meta:
@@ -141,3 +145,26 @@ class TaskToAssignForm(BaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['person_executed_by'].required = True
+
+
+class TypeTaskMainForm(forms.ModelForm):
+    characteristics = JSONFieldMixin(label="Caractersíticas",
+                                     widget=code_mirror_schema, initial=CHARACTERISTICS)
+
+    class Meta:
+        model = TypeTaskMain
+        fields = '__all__'
+
+
+class TypeTaskForm(BaseForm):
+
+    class Meta:
+        model = TypeTask
+        fields = ['office', 'type_task_main', 'survey', 'name', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        office = get_office_session(self.request)
+        self.fields['office'] = get_office_field(self.request)
+        self.fields['survey'].queryset = Survey.objects.filter(office=office)
+        self.order_fields(['office', 'type_task_main', 'survey', 'name', 'is_active'])

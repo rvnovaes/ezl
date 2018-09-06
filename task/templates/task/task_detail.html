@@ -260,7 +260,6 @@
             var task_status = actionButton.value;
             var have_survey = actionButton.getAttribute('survey');
             actionButton.disabled = true;
-            {#toogleModals('#confirmAction', '#procssing')#}
             if ((task_status === 'DONE' || task_status === 'FINISHED' && use_service === 'False') && have_survey){
                 beforeSubmit(task_status);
             }else if(task_status === 'OPEN'){

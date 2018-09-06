@@ -86,3 +86,18 @@ class FilterTable(tables.Table):
             'data_href': lambda record: '/providencias/filtros/' + str(record.pk) + '/'
         }
         order_by = ('create_user', 'name',)
+
+
+class TypeTaskTable(tables.Table):
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
+
+    class Meta:
+        sequence = ('selection', 'name', 'type_task_main', 'survey',)
+        model = TypeTask
+        fields = ['name', 'type_task_main', 'survey']
+        attrs = {"class": "table stable-striped table-bordered"}
+        empty_text = "Não existem questionários cadastrados"
+        row_attrs = {
+            'data_href': lambda record: '/providencias/type_task/' + str(record.pk) + '/'
+        }
+        order_by = 'name'
