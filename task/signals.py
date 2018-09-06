@@ -15,7 +15,7 @@ from chat.models import Chat, UserByChat
 from lawsuit.models import CourtDistrict
 from core.utils import check_environ
 from core.models import CustomSettings
-from task.mail import TaskMail, TaskOpenMailTemplate
+from task.mail import TaskMail
 
 
 
@@ -330,8 +330,18 @@ def workflow_task(sender, instance, created, **kwargs):
             post_save.disconnect(workflow_task, sender=sender)
             instance.save(**{'skip_signal': True, 'skip_mail': True})
             post_save.connect(workflow_task, sender=sender)
-            if workflow_status.send_mail_template:
-                # self, email, task, template_id
-                email = TaskMail(custom_settings.email_to_notification, instance, 
-                    workflow_status.send_mail_template.template_id, TaskOpenMailTemplate)
-                email.send_mail()
+
+
+@receiver(post_save, sender=Task)
+def workflow_send_mail(sender, instance, created, **kwargs):        
+    custom_settings = CustomSettings.objects.filter(office=instance.office).first()
+    if custom_settings:
+        status_to_show = custom_settings.task_status_show.filter(
+                    status_to_show=instance.task_status).first()    
+        if status_to_show and status_to_show.send_mail_template:
+            email = TaskMail(custom_settings.email_to_notification, instance, 
+                status_to_show.send_mail_template.template_id)
+            email.send_mail()
+    
+
+

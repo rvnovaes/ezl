@@ -1228,7 +1228,7 @@ class ExternalTaskView(UpdateView):
     def get_context_data(self, **kwargs):
         return super().get_context_data(**kwargs)
     
-    def get(self, request, status, task_hash, *args, **kwargs):                        
+    def get(self, request, status=False, task_hash=False, *args, **kwargs):                        
         self.object = Task.objects.filter(task_hash=task_hash).first()                        
         custom_settings = CustomSettings.objects.filter(office=self.object.office).first()
         request.user = custom_settings.default_user
@@ -1260,7 +1260,7 @@ class ExternalTaskView(UpdateView):
         if form.is_valid():
             form.save()
         return HttpResponseRedirect(
-            reverse('external-task', args=['ACCEPTED', form.instance.task_hash.hex]))
+            reverse('external-task-detail', args=[form.instance.task_hash.hex]))
 
 
 

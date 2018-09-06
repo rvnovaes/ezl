@@ -12,11 +12,11 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 
 class TaskWorkflowInline(admin.TabularInline):
     model = TaskWorkflow
-    fields = ('create_user', 'task_from', 'task_to', 'responsible_user', 'send_mail_template')
+    fields = ('create_user', 'task_from', 'task_to', 'responsible_user')
 
 class TaskShowStatusInline(admin.TabularInline):
     model = TaskShowStatus
-    fields = ('create_user', 'status_to_show')
+    fields = ('create_user', 'status_to_show', 'send_mail_template')
 
 
 @admin.register(CustomSettings)

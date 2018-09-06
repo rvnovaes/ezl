@@ -559,11 +559,12 @@ class TaskWorkflow(Audit):
                                    default=TaskStatus.REQUESTED)
 
     responsible_user = models.ForeignKey(User)
-    send_mail_template = models.ForeignKey(EmailTemplate, verbose_name='Template a enviar', blank=True, null=True)
+
 
 class TaskShowStatus(Audit):
     custtom_settings = models.ForeignKey(CustomSettings, related_name='task_status_show')
     status_to_show = models.CharField(
         verbose_name='Mostrar status', null=False, max_length=30, 
         choices=((x.value, x.name.title()) for x in TaskStatus),default=TaskStatus.REQUESTED)    
+    send_mail_template = models.ForeignKey(EmailTemplate, verbose_name='Template a enviar', blank=True, null=True)    
 
