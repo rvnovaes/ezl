@@ -34,6 +34,8 @@ urlpatterns = [
         name='ajax_get_task_data_table'),
     url(r'^ajax_get_ecms/$', login_required(views.ajax_get_ecms),
         name='ajax_get_ecms'),
+    url(r'^ajax_get_correspondent_table/$', login_required(views.ajax_get_correspondents_table),
+        name='ajax_get_correspondent_table'),
 
     # Filtros
     url(r'^filtros/listar/$',

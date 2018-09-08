@@ -55,7 +55,11 @@
                             {{ form.servicepricetable_id }}
                             <div class="form-group" style="margin: auto">
                                 <label>Tipo de Serviço: </label>
-                                {{ form.instance.type_task }}
+                                {% if form.type_task_field %}
+                                    {{ form.type_task_field }}
+                                {% else %}
+                                    {{ form.instance.type_task }}
+                                {% endif %}
                             </div>
                             <div id="servicepricetable" class="table-responsive" style="margin: auto">
                                 {% render_table correspondents_table %}
@@ -356,6 +360,37 @@
         }
     </script>
     <script>
+        $('#id_type_task_field').on('change', function () {
+            var tmplRowUpload = '<tr id="office-${pk}" data-id="${pk}" ' +
+                                'data-value="${value}" data-formated-value="${formated_value}" ' +
+                                'data-office-public="${office_public}" class="tr_select" role="row">\n' +
+                    '<td class="office_correspondent">${office_correspondent}</td>\n' +
+                    '<td class="court_district">${court_district}</td>\n' +
+                    '<td class="state">${state}</td>\n' +
+                    '<td class="client">${client}</td>\n' +
+                    '<td class="value">${value}</td>\n' +
+                    '<td class="office_rating">${office_rating}</td>\n' +
+                    '<td class="office_return_rating">${office_return_rating}</td>\n' +
+                '</tr>';
+            var type_task_field = $(this);
+            $.ajax({
+                type: 'GET',
+                url: '/providencias/ajax_get_correspondent_table/?task={{ form.instance.pk }}&type_task='+type_task_field.val(),
+                success: function (data) {
+                    $("#type_task").html(data.type_task);
+                    var tbody = $('#correspondents-table tbody');
+                    tbody.html('');
+                    $.each(data.correspondents_table, function( index, value ) {
+                        console.log($.tmpl(tmplRowUpload, value));
+                        $.tmpl(tmplRowUpload, value).appendTo(tbody)
+                    });
+                    row_click_function();
+                },
+                dataType: 'json'
+            });
+        })
+    </script>
+    <script>
         function getLocation() {
             if (navigator.geolocation) {
                 $('#locating').modal('show');
@@ -415,16 +450,20 @@
         }
         </script>
     <script type="text/javascript">
-        $("#correspondents-table tbody tr").click(function(){
-            $("#servicepricetable-alert").addClass("hidden");
-            id = $(this).data('id');
-            amount = $(this).data('value').toString();
-            $('input[name=servicepricetable_id]').val(id);
-            $('input[name=amount]').val(amount.replace(".", ","));
-            $(this).addClass("ezl-bg-open");
-            $(this).siblings().removeClass("ezl-bg-open");
-            $('input[name=amount]').focus();
-        });
+        var row_click_function = function (){
+            $("#correspondents-table tbody tr").click(function(){
+                $("#servicepricetable-alert").addClass("hidden");
+                id = $(this).data('id');
+                amount = $(this).data('value').toString();
+                $('input[name=servicepricetable_id]').val(id);
+                $('input[name=amount]').val(amount.replace(".", ","));
+                $(this).addClass("ezl-bg-open");
+                $(this).siblings().removeClass("ezl-bg-open");
+                $('input[name=amount]').focus();
+            });
+
+            return;
+        };
 
         $('input[id=id_amount]').keypress(function(e) {
             if(e.which == 13) {
@@ -498,6 +537,7 @@
 {% endblock %}
 {% block script_document_ready %}
     {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
+        row_click_function();
         $('#confirmAction').on('show.bs.modal', function (event) {
             var table_rows = {{ correspondents_table.rows|length }};
             if (table_rows > 0) {
@@ -511,18 +551,6 @@
                     },
                 });
                 $('#actionButton').removeAttr('disabled');
-            } else {
-                event.preventDefault();
-                event.stopPropagation();
-                swal({
-                    title: "Atenção",
-                    text: "Não existem tabelas de preço que atendam aos critérios desta OS",
-                    type: "warning",
-                    showCancelButton: false,
-                    confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "OK",
-                    closeOnConfirm: true
-                });
             }
         });
         /* Ao fechar o modal, limpar a tabela */

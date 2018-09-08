@@ -2,7 +2,6 @@ from enum import Enum
 from config.config import get_parser
 from django.db.models import Q
 import logging
-from functools import wraps
 from openpyxl import load_workbook
 import os
 from functools import wraps
@@ -20,6 +19,7 @@ def check_environ(f):
             return 'NAO E PERMITIDO EXECUTAR ESTA OPERACAO NO BANCO ADVWIN DE PRODUCAO COM O AMBIENTE DEVELOPMENT'
         return f(*args, **kwargs)
     return wrapper
+
 
 # enumerador usado para integracao entre sistemas
 class LegacySystem(Enum):
@@ -133,7 +133,6 @@ def get_office_related_office_field(request):
         else:
             queryset = office.offices.all().order_by('legal_name')
 
-
     return forms.ModelChoiceField(
         queryset=queryset,
         empty_label='',
@@ -141,6 +140,7 @@ def get_office_related_office_field(request):
         label=u'Escritório',
         initial=initial
     )
+
 
 def get_office_session(request):
     """

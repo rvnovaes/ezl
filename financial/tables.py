@@ -52,7 +52,7 @@ class ServicePriceTableTaskTable(tables.Table):
         model = ServicePriceTable
         fields = ('office_correspondent', 'court_district', 'state', 'client', 'value', 'office_rating', 'office_return_rating')
         attrs = {"class": "table stable-striped table-bordered correspondents-table", "id": "correspondents-table"}
-        empty_text = "Não existe tabela de preços cadastrada."
+        empty_text = "Não existe tabela de preços cadastrada para o tipo de serviço selecionado."
         order_by = ("value",)
         row_attrs = {
             'id': lambda record: 'office-{}'.format(record.pk),

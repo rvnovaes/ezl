@@ -23,6 +23,7 @@ from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django.core.exceptions import ValidationError
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
+from djmoney.money import Money
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
@@ -37,9 +38,9 @@ from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardV
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
 from task.rules import RuleViewTask
+from task.utils import GetCorrespondentsTable
 from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
-from financial.tables import ServicePriceTableTaskTable
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, copy_ecm, get_dashboard_tasks
 from decimal import Decimal
@@ -549,22 +550,13 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
         context['survey_data'] = (self.object.type_task.survey.data
                                   if self.object.type_task.survey else None)
+        office_session = get_office_session(self.request)
+        get_correspondents_table = GetCorrespondentsTable(self.object, office_session)
+        context['correspondents_table'] = get_correspondents_table.get_correspondents_table()
+        type_task_field = get_correspondents_table.get_type_task_field()
+        if type_task_field:
+            context['form'].fields['type_task_field'] = type_task_field
 
-        type_task = self.object.type_task
-        court_district = self.object.movement.law_suit.court_district
-        state = self.object.movement.law_suit.court_district.state
-        client = self.object.movement.law_suit.folder.person_customer
-        offices_related = self.object.office.offices.all()
-        context['correspondents_table'] = ServicePriceTableTaskTable(
-            ServicePriceTable.objects.filter(Q(office=self.object.office) | Q(office__public_office=True),
-                                             Q(Q(type_task=type_task) | Q(type_task=None)),
-                                             Q(is_active=True),
-                                             Q(office_correspondent__in=offices_related),
-                                             Q(office_correspondent__is_active=True),
-                                             Q(Q(court_district=court_district) | Q(court_district=None)),
-                                             Q(Q(state=state) | Q(state=None)),
-                                             Q(Q(client=client) | Q(client=None)))
-        )
         return context
 
     @staticmethod
@@ -1043,6 +1035,39 @@ def ajax_get_task_data_table(request):
         "recordsTotal": records_total,
         "recordsFiltered": records_filtered,
         "data": xdata
+    }
+    return JsonResponse(data)
+
+
+@login_required
+def ajax_get_correspondents_table(request):
+    type_task_id = request.GET.get('type_task', 0)
+    task_id = request.GET.get('task', 0)
+    correspondents_table_list = []
+    type_task_name = None
+    if type_task_id and task_id:
+        type_task = TypeTask.objects.filter(pk=type_task_id).first()
+        task = Task.objects.filter(pk=task_id).first()
+        office = get_office_session(request)
+        get_correspondents_table = GetCorrespondentsTable(task, office, type_task=type_task)
+        type_task_name = get_correspondents_table.update_type_task(type_task).name
+        correspondents_table = get_correspondents_table.get_correspondents_table()
+        correspondents_table_list = list(map(lambda x: {
+            'pk': x.pk,
+            'office': x.office.legal_name,
+            'office_correspondent': x.office_correspondent.legal_name,
+            'court_district': x.court_district.name if x.court_district else '—',
+            'state': x.state.name if x.state else '—',
+            'client': x.client.legal_name if x.client else '—',
+            'value': x.value,
+            'formated_value': Money(x.value, 'BRL').__str__(),
+            'office_rating': x.office_rating if x.office_rating else '0.00',
+            'office_return_rating': x.office_return_rating if x.office_return_rating else '0.00',
+            'office_public': x.office_correspondent.public_office
+        }, correspondents_table.data.data.all()))
+    data = {
+        "correspondents_table": correspondents_table_list,
+        "type_task": type_task_name
     }
     return JsonResponse(data)
 
