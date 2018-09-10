@@ -122,7 +122,7 @@ def get_dashboard_tasks(request, office_session, checker, person):
     return data, exclude_status
 
 
-class GetCorrespondentsTable(object):
+class CorrespondentsTable(object):
 
     def __init__(self, task, office_session, type_task_qs=None, type_task=None):
         self.task = task
@@ -132,7 +132,7 @@ class GetCorrespondentsTable(object):
             self.type_task, self.type_task_main = self.get_type_task(task)
         else:
             self.type_task = type_task
-            self.type_task_main = type_task.type_task_main
+            self.type_task_main = type_task.main_tasks
 
     def get_correspondents_table(self):
         task = self.task
@@ -149,7 +149,7 @@ class GetCorrespondentsTable(object):
                                                  Q(
                                                      Q(type_task=type_task) |
                                                      Q(type_task=None) |
-                                                     Q(type_task__type_task_main=type_task_main)
+                                                     Q(type_task__type_task_main__in=type_task_main)
                                                  ),
                                                  Q(
                                                      Q(office_correspondent__in=offices_related) |
@@ -168,13 +168,12 @@ class GetCorrespondentsTable(object):
 
     def get_type_task(self, task):
         type_task = task.type_task
-        type_task_main = task.type_task.type_task_main
+        type_task_main = task.type_task.main_tasks
         if type_task.office != self.office_session:
-            self.type_task_qs = TypeTask.objects.filter(office=self.office_session, type_task_main=type_task_main)
+            self.type_task_qs = TypeTask.objects.filter(office=self.office_session, type_task_main__in=type_task_main)
             if self.type_task_qs.count() == 1:
-                type_task = self.update_type_task(self.type_task_qs.first())
-                type_task_main = task.type_task.type_task_main
-                self.type_task_qs = None
+                type_task = self.type_task_qs.first()
+                type_task_main = type_task.main_tasks
             else:
                 type_task = None
         return type_task, type_task_main
@@ -187,8 +186,10 @@ class GetCorrespondentsTable(object):
                 queryset=self.type_task_qs,
                 empty_label='',
                 required=True,
-                label=u'Tipo de serviço',
+                label=u'Selecione o tipo de serviço',
             )
+            if self.type_task_qs.count() == 1:
+                type_task_field.initial = self.type_task_qs.first()
 
         return type_task_field
 

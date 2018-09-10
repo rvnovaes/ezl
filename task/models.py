@@ -173,7 +173,8 @@ class TypeTaskMain(models.Model):
 
 
 class TypeTask(Audit, LegacyCode, OfficeMixin):
-    type_task_main = models.ForeignKey(TypeTaskMain, null=True, verbose_name='Tipo de Serviço Principal')
+    type_task_main = models.ManyToManyField(TypeTaskMain, verbose_name='Tipo de Serviço Principal',
+                                            related_name='type_tasks')
     name = models.CharField(max_length=255, null=False, blank=False, verbose_name='Tipo de Serviço')
     survey = models.ForeignKey('survey.Survey', null=True, blank=True, verbose_name='Tipo de Formulário')
 
@@ -188,6 +189,10 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
     @property
     def use_upload(self):
         return False
+
+    @property
+    def main_tasks(self):
+        return list(self.type_task_main.all())
 
     def __str__(self):
         return self.name

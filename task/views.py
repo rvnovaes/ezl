@@ -38,7 +38,7 @@ from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardV
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
 from task.rules import RuleViewTask
-from task.utils import GetCorrespondentsTable
+from task.utils import CorrespondentsTable
 from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
 from core.utils import get_office_session, get_domain
@@ -551,7 +551,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         context['survey_data'] = (self.object.type_task.survey.data
                                   if self.object.type_task.survey else None)
         office_session = get_office_session(self.request)
-        get_correspondents_table = GetCorrespondentsTable(self.object, office_session)
+        get_correspondents_table = CorrespondentsTable(self.object, office_session)
         context['correspondents_table'] = get_correspondents_table.get_correspondents_table()
         type_task_field = get_correspondents_table.get_type_task_field()
         if type_task_field:
@@ -960,7 +960,8 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
         data, exclude_status = get_dashboard_tasks(request, office_session, checker, request.user.person)
 
         status_totals = data.values('task_status').annotate(total=Count('task_status')).order_by('task_status')
-        ret = {}
+
+        ret = {'office': office_session.legal_name}
         total = 0
         for status in status_totals:
             ret[status['task_status'].replace(' ', '_').lower()] = status['total']
@@ -1049,8 +1050,10 @@ def ajax_get_correspondents_table(request):
         type_task = TypeTask.objects.filter(pk=type_task_id).first()
         task = Task.objects.filter(pk=task_id).first()
         office = get_office_session(request)
-        get_correspondents_table = GetCorrespondentsTable(task, office, type_task=type_task)
-        type_task_name = get_correspondents_table.update_type_task(type_task).name
+        get_correspondents_table = CorrespondentsTable(task, office, type_task=type_task)
+        type_task = get_correspondents_table.update_type_task(type_task)
+        type_task_name = type_task.name
+        type_task_id = type_task.id
         correspondents_table = get_correspondents_table.get_correspondents_table()
         correspondents_table_list = list(map(lambda x: {
             'pk': x.pk,
@@ -1067,7 +1070,9 @@ def ajax_get_correspondents_table(request):
         }, correspondents_table.data.data.all()))
     data = {
         "correspondents_table": correspondents_table_list,
-        "type_task": type_task_name
+        "type_task": type_task_name,
+        "type_task_id": type_task_id,
+        "total": correspondents_table_list.__len__()
     }
     return JsonResponse(data)
 
