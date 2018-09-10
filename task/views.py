@@ -38,7 +38,7 @@ from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardV
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
 from task.rules import RuleViewTask
-from task.utils import CorrespondentsTable
+from task.workflow import CorrespondentsTable
 from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
 from core.utils import get_office_session, get_domain

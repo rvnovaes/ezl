@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('is_hearing', models.BooleanField(default=False, verbose_name='É audiência')),
-                ('name', models.CharField(max_length=255, verbose_name='Tipo de Serviço')),
+                ('name', models.CharField(max_length=255, unique=True, verbose_name='Tipo de Serviço')),
                 ('characteristics', django.contrib.postgres.fields.jsonb.JSONField(blank=True, default='{\n    "options": [\n        {\n            "name": "acting_area",\n            "title": "\\u00c1rea de atua\\u00e7\\u00e3o",\n            "options": [\n                "C\\u00edvel",\n                "Criminal",\n                "Trabalhista",\n                "Indiferente"\n            ],\n            "multiple": false\n        },\n        {\n            "name": "participants",\n            "title": "Participantes",\n            "options": [\n                "Advogado",\n                "Preposto"\n            ],\n            "multiple": true\n        },\n        {\n            "name": "criticality",\n            "title": "Criticidade",\n            "options": [\n                "Urgente"\n            ],\n            "multiple": false\n        }\n    ]\n}', null=True, verbose_name='Características disponíveis')),
             ],
             options={
@@ -40,6 +40,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='typetask',
             name='type_task_main',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='task.TypeTaskMain', verbose_name='Tipo de Serviço Principal'),
+            field=models.ManyToManyField(related_name='type_tasks', to='task.TypeTaskMain', verbose_name='Tipo de Serviço Principal')
         ),
     ]

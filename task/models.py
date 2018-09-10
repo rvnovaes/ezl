@@ -159,7 +159,7 @@ class CheckPointType(Enum):
 
 class TypeTaskMain(models.Model):
     is_hearing = models.BooleanField(verbose_name='É audiência', default=False)
-    name = models.CharField(max_length=255, null=False, blank=False, verbose_name='Tipo de Serviço')
+    name = models.CharField(max_length=255, null=False, blank=False, unique=True, verbose_name='Tipo de Serviço')
     characteristics = JSONField(null=True, blank=True, verbose_name='Características disponíveis',
                                 default=json.dumps(CHARACTERISTICS, indent=4))
 
