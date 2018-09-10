@@ -5,7 +5,8 @@ from task import views
 
 urlpatterns = [
     # Providências
-    url(r'^providencias/listar/$', login_required(views.TaskListView.as_view()), name='task_list'),
+    url(r'^providencias/listar/$',
+        login_required(views.TaskListView.as_view()), name='task_list'),
 
     url(r'^providencias/(?P<movement>[0-9]+)/criar/$',
         login_required(views.TaskCreateView.as_view()), name='task_add'),
@@ -24,16 +25,19 @@ urlpatterns = [
     url(r'^providencias/geolocation/finalizar$', login_required(views.GeolocationTaskFinish.as_view()),
         name='task_geolocation_finish'),
 
-    url(r'^ecm/(?P<pk>[0-9]+)/$', views.EcmCreateView.as_view(), name='ecm_add'),
+    url(r'^ecm/(?P<pk>[0-9]+)/$',
+        views.EcmCreateView.as_view(), name='ecm_add'),
 
     url(r'^ecm/(?P<pk>[0-9]+)/excluir$', views.delete_ecm, name='delete_ecm'),
 
-    url(r'^ecm/ecm_batch_download/(?P<pk>[0-9]+)/$', views.ecm_batch_download, name='ecm_batch_download'),
+    url(r'^ecm/ecm_batch_download/(?P<pk>[0-9]+)/$',
+        views.ecm_batch_download, name='ecm_batch_download'),
 
     url(r'^ajax_get_task_data_table/$', login_required(views.ajax_get_task_data_table),
         name='ajax_get_task_data_table'),
     url(r'^ajax_get_ecms/$', login_required(views.ajax_get_ecms), name='ajax_get_ecms'),
-    url(r'^ajax_get_external_ecms/$', views.get_external_ecms, name='ajax_get_external_ecms'),
+    url(r'^ajax_get_external_ecms/$', views.get_external_ecms,
+        name='ajax_get_external_ecms'),
     # Filtros
     url(r'^filtros/listar/$',
         login_required(views.FilterListView.as_view()),
@@ -44,8 +48,11 @@ urlpatterns = [
 
     url(r'^filtros/excluir$', login_required(views.FilterDeleteView.as_view()),
         name='filter_delete'),
-    url(r'^external-task/(?P<status>[-\w\W\d]+)/(?P<task_hash>[-\w\W\d]+)/$', views.ExternalTaskView.as_view(), name="external-task"),
-    url(r'^external-task-detail/(?P<task_hash>[-\w\W\d]+)/$', views.ExternalTaskView.as_view(), name="external-task-detail"),    
-    url(r'^external-task/ecm/(?P<task_hash>[-\w\W\d]+)/$', views.EcmExternalCreateView.as_view(), name='ecm_external_add'),    
+    url(r'^external-task/(?P<status>[A-Z]+)/(?P<task_hash>[-\w\W\d]+)/$',
+        views.ExternalTaskView.as_view(), name="external-task"),
+    url(r'^external-task/ecm/(?P<task_hash>[-\w\W\d]+)/$',
+        views.EcmExternalCreateView.as_view(), name='ecm_external_add'),
+    url(r'^external-task-detail/(?P<task_hash>[-\w\W\d]+)/$',
+        views.ExternalTaskView.as_view(), name="external-task-detail"),
 
 ]

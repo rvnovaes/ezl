@@ -192,7 +192,8 @@
     <script type="text/javascript">
 
         $(function () {
-            $("input[name=execution_date]").attr({'required': true,
+
+            $("input[name=execution_date]").val(new Date().toLocaleString()).attr({'required': true,
                 'placeholder': 'Data de Cumprimento'});
         });
 
@@ -265,7 +266,7 @@
             }
         }
 
-        function submit_task_detail(actionButton, use_service) {
+        function submit_task_detail(actionButton, use_service) {            
             var task_status = actionButton.value;
             var have_survey = actionButton.getAttribute('survey');
             actionButton.disabled = true;
@@ -314,8 +315,7 @@
 
         function getId(value) {
             var task_status = value.id;
-
-            if (value.id == "BLOCKEDPAYMENT" || value.id == "FINISHED"){
+            if ((value.id == "BLOCKEDPAYMENT" || value.id == "FINISHED") && ('{{custom_settings.i_work_alone}}' == 'False')){
                 $('.rating-container').show();
             } else {
                 $('.rating-container').hide();
