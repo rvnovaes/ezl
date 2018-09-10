@@ -468,7 +468,6 @@
                         $.each(data.correspondents_table, function (index, value) {
                             $.tmpl(tmplRowCorrespondent, value).appendTo(tbody)
                         });
-                        row_click_function();
                         correspondents_data_table();
                     }
                 },
@@ -489,6 +488,7 @@
                 },
             });
             $('#actionButton').removeAttr('disabled');
+            row_click_function();
             return;
         };
 
@@ -580,7 +580,7 @@
             }
             (window.total) ? window.table_rows = window.total : window.table_rows = {{ correspondents_table.rows|length }};
             if (table_rows > 0) {
-                correspondents_data_table()
+                correspondents_data_table();
             }
         });
         /* Ao fechar o modal, limpar a tabela */
