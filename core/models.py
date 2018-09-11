@@ -308,6 +308,10 @@ class Company(models.Model):
     logo = models.ImageField(verbose_name='Logo', null=True, blank=True)
     name = models.CharField(verbose_name='Empresa', max_length=255)
 
+    class Meta:
+        verbose_name = 'Empresa'
+        verbose_name_plural = 'Empresas'
+
     def __str__(self):
         return self.name
 
@@ -316,6 +320,9 @@ class CompanyUser(models.Model):
     user = models.ForeignKey(User, verbose_name='Usuário', related_name='companys')
     company = models.ForeignKey(Company, verbose_name='Empresa', related_name='users')
 
+    class Meta:        
+        verbose_name = 'Usuario da empresa'
+        verbose_name_plural = 'Usuário das empresas'
 
     def __str__(self):
         return self.user.username
@@ -577,6 +584,13 @@ class ExternalApplication(AbstractApplication):
     company = models.ForeignKey(
         Company, verbose_name='Empresa', blank=True, null=True
         )
+
+    class Meta:
+        verbose_name = 'Aplicação externa'
+        verbose_name_plural = 'Aplicações externas'
+
+    def __str__(self):
+        return self.name
 
 
 class ControlFirstAccessUser(models.Model):
