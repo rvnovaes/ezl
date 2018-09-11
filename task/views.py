@@ -22,6 +22,7 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django.core.exceptions import ValidationError
+from django.shortcuts import render
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
@@ -31,11 +32,12 @@ from core.models import Person
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE
-from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm
+from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, ImportTaskListForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable
+from task.tasks import import_xls_task_list
 from task.rules import RuleViewTask
 from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
@@ -234,9 +236,9 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
         context['filter'] = self.task_filter
         try:
             if self.request.GET['group_by_tasks'] == OFFICE:
-                office_list, total = self.get_os_grouped_by_office()
+                office_list, total =  self.get_os_grouped_by_office()
             else:
-                office_list, total = self.get_os_grouped_by_client()
+                office_list, total =  self.get_os_grouped_by_client()
         except:
             office_list, total = self.get_os_grouped_by_office()
         context['offices'] = office_list
@@ -1177,10 +1179,11 @@ class GeolocationTaskFinish(CustomLoginRequiredView, View):
                                  "finished_date": date_format(timezone.localtime(finished_date), 'DATETIME_FORMAT')})
         return JsonResponse({"ok": False})
 
+
 @login_required
 def ecm_batch_download(request, pk):
-    #https://stackoverflow.com/questions/12881294/django-create-a-zip-of-multiple-files-and-make-it-downloadable
-    #http://mypythondjango.blogspot.com/2018/01/how-to-zip-files-in-filefield-and.html
+    # https://stackoverflow.com/questions/12881294/django-create-a-zip-of-multiple-files-and-make-it-downloadable
+    # http://mypythondjango.blogspot.com/2018/01/how-to-zip-files-in-filefield-and.html
     ecms = Ecm.objects.filter(task_id=pk).select_related('task')
     try:
         buff = io.BytesIO()
@@ -1201,3 +1204,26 @@ def ecm_batch_download(request, pk):
     except Exception as e:
         messages.error(request, 'Erro ao baixar todos arquivos.' + str(e))
         return HttpResponseRedirect(ecm.task.get_absolute_url())
+
+
+class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView, TemplateView):
+    permission_required = ('core.group_admin',)
+    template_name = 'task/import_task_list.html'
+    form_class = ImportTaskListForm
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data(*args, **kwargs)
+        form = self.form_class(request.POST, request.FILES)
+        if form.is_valid():
+            file_xls = form.save(commit=False)
+            file_xls.office = get_office_session(request)
+            file_xls.create_user = request.user
+            file_xls.start = timezone.now()
+            file_xls.save()
+
+            ret = import_xls_task_list(file_xls.pk)
+            file_xls.end = timezone.now()
+        else:
+            messages.error(request, form.errors)
+        return JsonResponse({"status": "ok",
+                             "ret": json.dumps(ret)})

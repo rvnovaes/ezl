@@ -137,7 +137,7 @@ def import_xls_service_price_table(self, file_id):
         self.update_state(state="PROGRESS")
         xls_file = ImportServicePriceTable.objects.get(pk=file_id)
         xls_file.log = " "
-        #chaves para acessar dados em cache
+        # chaves para acessar dados em cache
         imported_cache_key = IMPORTED_IMPORT_SERVICE_PRICE_TABLE + str(xls_file.pk)
         imported_worksheet_key = IMPORTED_WORKSHEET + str(xls_file.pk)
         percent_imported_cache_key = PROCESS_PERCENT_IMPORT_SERVICE_PRICE_TABLE + str(xls_file.pk)

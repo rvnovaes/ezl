@@ -1,15 +1,13 @@
-from datetime import datetime
-
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django.utils import timezone
 from django_file_form.forms import FileFormMixin, MultipleUploadedFileField
 
-from core.models import Person
+from core.models import Person, ImportXlsFile
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
 from core.widgets import MDDateTimepicker, MDDatePicker
-from core.forms import BaseForm
+from core.forms import BaseForm, XlsxFileField
 from task.models import Task, TypeTask, Filter, TaskStatus
 
 
@@ -53,7 +51,7 @@ class TaskForm(BaseForm):
         office_session = get_office_session(self.request)        
         if office_session:            
             self.fields['person_asked_by'].queryset = filter_valid_choice_form(
-                Person.objects.active().requesters(office_pk=office_session.pk).active_offices().order_by('name'))
+                Person.objects.active().requesters(office_id=office_session.pk).active_offices().order_by('name'))
         if Person.objects.requesters().filter(auth_user=self.request.user):
             self.fields['person_asked_by'].initial = self.request.user.person
 
@@ -133,6 +131,7 @@ class FilterForm(BaseForm):
         model = Filter
         fields = ['name', 'description']
 
+
 class TaskToAssignForm(BaseForm):
     class Meta:
         model = Task
@@ -141,3 +140,15 @@ class TaskToAssignForm(BaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['person_executed_by'].required = True
+
+
+class ImportTaskListForm(forms.ModelForm):
+    file_xls = XlsxFileField(label='Arquivo', required=True,
+                             headers_to_check=[
+                                 'folder_number', 'folder_legacy_code', 'law_suit_number', 'instance',
+                                 'lawsuit_legacy_code', 'type_movement', 'movement_legacy_code', 'person_asked_by',
+                                 'type_task', 'final_deadline_date'])
+
+    class Meta:
+        model = ImportXlsFile
+        fields = ('file_xls',)

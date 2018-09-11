@@ -170,6 +170,7 @@ def get_domain(request):
 
 
 def validate_xlsx_header(xls_file, headers):
+    header_is_valid = False
     if headers:
         wb = load_workbook(xls_file, data_only=True)
         headers_in_file = list(map(lambda header:header.value, [list(sheet.rows)[0] for sheet in wb.worksheets][0]))

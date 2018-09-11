@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 import hashlib
 import time
@@ -521,6 +522,26 @@ class Team(Audit, OfficeMixin):
 
     def __str__(self):
         return self.name
+
+
+def get_dir_name(instance, filename):
+    path = os.path.join('media', 'service_price_table')
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return 'service_price_table/{0}'.format(filename)
+
+
+class ImportXlsFile(Audit, OfficeMixin):
+    file_xls = models.FileField('Arquivo', upload_to=get_dir_name)
+    log = models.TextField('Log', null=True)
+    start = models.DateTimeField('Início processo')
+    end = models.DateTimeField('Fim processo', null=True)
+
+    def __str__(self):
+        return self.file_xls.file.name + ' - ' + 'Início: ' + str(self.start) + ' - ' + 'Fim: ' + str(self.end)
+
+    class Meta:
+        verbose_name = 'Arquivos Importados para inserção em lote'
 
 
 class ControlFirstAccessUser(models.Model):
