@@ -50,7 +50,7 @@ class TaskFinishedEmail(object):
     path = reverse("account_reset_password_from_key",
                    kwargs=dict(uidb36=user_pk_to_url_str(self.custom_settings.default_user),
                                key=temp_key))            
-    return 'http://localhost:8000{}'.format(path)    # Todo Alterar
+    return '{}{}'.format(settings.WORKFLOW_URL_EMAIL, path)
 
   def get_dynamic_template_data(self):
     if not self.custom_settings.default_user.last_login:
@@ -89,9 +89,9 @@ class TaskOpenMailTemplate(object):
             "office_correspondent_phone": self.task.office.contactmechanism_set.filter(contact_mechanism_type=PHONE).first(),
             "office_correspondent_email": self.task.office.contactmechanism_set.filter(contact_mechanism_type=EMAIL).first(),
             "office_correspondent_address": self.task.parent.office.address_set.first(),
-            "task_url": "localhost:8000/providencias/external-task-detail/{}/".format(self.task.task_hash.hex),
-            "btn_accpeted": "http://localhost:8000/providencias/external-task/ACCEPTED/{}/".format(self.task.task_hash.hex),
-            "btn_refused": "http://localhost:8000/providencias/external-task/REFUSED/{}/".format(self.task.task_hash.hex)
+            "task_url": "{}/providencias/external-task-detail/{}/".format(settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex),
+            "btn_accpeted": "{}/providencias/external-task/ACCEPTED/{}/".format(settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex),
+            "btn_refused": "{}/providencias/external-task/REFUSED/{}/".format(settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex)
         }
 
 
@@ -103,8 +103,8 @@ class TaskAcceptedMailTemplate(object):
         return {
             "task_number": self.task.task_number,
             "office_name": self.task.parent.office.legal_name,
-            "btn_done": "http://localhost:8000/providencias/external-task/FINISHED/{}/".format(self.task.task_hash.hex),
-            "task_url": "http://localhost:8000/providencias/external-task-detail/{}/".format(self.task.task_hash.hex),
+            "btn_done": "{}/providencias/external-task/FINISHED/{}/".format(settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex),
+            "task_url": "{}/providencias/external-task-detail/{}/".format(settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex),
         }
 
 
