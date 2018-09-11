@@ -573,7 +573,7 @@
             if ($id_type_task_field.length > 0 && $id_type_task_field.val()) {
                 if ($id_type_task_field.length == 1){
                     $("#type_task").html($id_type_task_field.find(":selected").text())
-                    $("#type_task_name").html($id_type_task_field.find(":selected").text())
+                    $("#type_task_name").html("<label>Tipo de Serviço: </label> " + $id_type_task_field.find(":selected").text())
                 }
                 window.type_task_id = $id_type_task_field.val();
                 ajax_get_correspondents(window.type_task_id);

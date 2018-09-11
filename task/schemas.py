@@ -3,20 +3,24 @@ CHARACTERISTICS = {
         {
             'name': 'acting_area',
             'title': 'Área de atuação',
-            'options': ['Cível', 'Criminal', 'Trabalhista', 'Indiferente'],  # deixar apenas uma quando for o caso
-            'multiple': False
+            'options': ['Cível', 'Criminal', 'Trabalhista']  # deixar apenas uma quando for o caso
         },
         {
             'name': 'participants',
             'title': 'Participantes',
-            'options': ['Advogado', 'Preposto'],  # deixar todos os participantes
-            'multiple': True
+            'options': ['Advogado', 'Preposto']  # deixar todos os participantes
+        }
+    ],
+    'criticality': [
+        {
+            'name': 'minimal_period',
+            'title': 'Prazo Mínimo (h)',
+            'value': 48
         },
         {
-            'name': 'criticality',
-            'title': 'Criticidade',
-            'options': ['Urgente'],
-            'multiple': False
-        },
+            'name': 'urgent_period',
+            'title': 'Prazo de urgência (h)',
+            'value': 72
+        }
     ]
 }
