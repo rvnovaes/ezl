@@ -10,6 +10,9 @@ from datetime import datetime
 from core.models import EMAIL, PHONE, CustomSettings
 from task.models import TaskStatus
 import base64
+import traceback
+import logging
+logger = logging.getLogger(__name__)
 
 
 class SendMail:
@@ -50,12 +53,14 @@ class TaskFinishedEmail(object):
     return 'http://localhost:8000{}'.format(path)    # Todo Alterar
 
   def get_dynamic_template_data(self):
-      return {
-          "task_number": self.task.task_number,
-          "office_correspondent_name": self.task.parent.office.legal_name,
-          "username": self.custom_settings.default_user.username,
-          "btn_finished": self.get_url_change_password(),
-      }
+    if not self.custom_settings.default_user.last_login:
+        return {
+            "task_number": self.task.task_number,
+            "office_correspondent_name": self.task.parent.office.legal_name,
+            "username": self.custom_settings.default_user.username,
+            "btn_finished": self.get_url_change_password(),
+        }
+    return False
 
 
 class TaskOpenMailTemplate(object):
@@ -117,6 +122,7 @@ class TaskMail(object):
       }
       self.template_class = self.email_status.get(self.task.status)(task)
       self.attachments = []
+      self.dynamic_template_data = self.template_class.get_dynamic_template_data()
       for ecm in self.task.parent.ecm_set.all():
         try:
           self.attachments.append(self.set_mail_attachment(ecm))
@@ -131,11 +137,11 @@ class TaskMail(object):
                       }
                   ],
                   "subject": "Sending with SendGrid is Fun",
-                  "dynamic_template_data": self.template_class.get_dynamic_template_data()
+                  "dynamic_template_data": self.dynamic_template_data
               }
           ],
           "from": {
-              "email": "mttech.ezl@gmail.com"
+              "email": "contato@ezlawyer.com.br"
           },
           "template_id": self.template_id,             
       }
@@ -152,8 +158,12 @@ class TaskMail(object):
         }
         return attachment
 
-    def send_mail(self):      
-      response = self.sg.client.mail.send.post(request_body=self.data)
-      print(response.status_code)
-      print(response.body)
-      print(response.headers)
+    def send_mail(self): 
+      if self.dynamic_template_data:
+        try:
+          response = self.sg.client.mail.send.post(request_body=self.data)
+          logging.info('Status do E-MAIL: {}'.format(response.status_code))
+          logging.info('Body do E-MAIL: {}'.format(response.body))
+          logging.info('Header do E-MAIL: {}'.format(response.headers))
+        except Exception as e:
+          logging.error(traceback.format_exc())
