@@ -1157,6 +1157,10 @@ class RegisterNewUser(CreateView):
                                                     legal_type=legal_type,
                                                     is_active=True,
                                                     create_user=instance)
+            # Isto cria as configuracoes basicas de um Office que trabalha sozinho
+            CustomSettings.objects.create(
+                create_user=instance, office=office_instance, default_user=instance, 
+                email_to_notification=instance.email, i_work_alone=True)
             post_create_office(office_instance)
             DefaultOffice.objects.create(auth_user=instance, office=office_instance,
                                          create_user=instance)
