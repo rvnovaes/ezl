@@ -92,35 +92,36 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
 
 
 @shared_task(bind=True, max_retries=MAX_RETRIES)
-def export_ecm_related_folter_to_task(self, id_docs, ecm_id, execute=True):
+def export_ecm_finished_task(self, ecm_id):
     ecm = Ecm.objects.get(pk=ecm_id)
-    values = []
-    for id_doc in id_docs:
-        values.append({
-            'Id_tabela_or': 'Pastas',
-            'Id_codigo_or': get_folder_to_related(task=ecm.task),
-            'Id_id_doc': id_doc,
-            'id_ID_or': 0,
-            'dt_inserido': timezone.localtime(ecm.create_date),
-            'usuario_insercao': ecm.create_user.username
-        })
-    stmt = JuridGEDLig.__table__.insert().values(values)
-    if execute:
-        result = None
-        try:
-            result = get_advwin_engine().execute(stmt)
-            total_afected = result.rowcount
-            result.close()
-            LOGGER.info('ECM %s: relacionamento criado entre Pasta e Agenda', ecm)
-            return '{} Registros afetados'.format(total_afected)
-        except Exception as exc:
-            self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
-            LOGGER.warning('Não foi possíve relacionar o ECM entre Agenda e Pasta: %d-%s\n%s',
-                           ecm.id,
-                           ecm,
-                           exc,
-                           exc_info=(type(exc), exc, exc.__traceback__))
-            raise exc
+    id_codigo_or = get_folder_to_related(task=ecm.task)
+    stmt = """
+           INSERT INTO Jurid_gedlig (id_tabela_or, id_codigo_or, id_id_or, Id_id_doc)
+           SELECT 'Pastas','{id_codigo_or}', 0, id_id_doc
+           FROM Jurid_gedlig 
+           WHERE id_codigo_or = '{task_legacy_code}' 
+              AND id_tabela_or = 'Agenda'
+              AND Id_id_doc NOT IN (
+                SELECT Id_id_doc 
+                FROM Jurid_gedlig 
+                WHERE id_codigo_or = '{id_codigo_or}' 
+                AND id_tabela_or = 'Pastas'
+              )  
+    """.format(id_codigo_or=id_codigo_or, task_legacy_code=ecm.task.legacy_code)
+    result = None
+    try:
+        result = get_advwin_engine().execute(stmt)
+        total_afected = result.rowcount
+        result.close()
+        return '{} Registros afetados'.format(total_afected)
+    except Exception as exc:
+        self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
+        LOGGER.warning('Não foi possível relacionar o ECM entre Agenda e Pasta: %d-%s\n%s',
+                       ecm.id,
+                       ecm,
+                       exc,
+                       exc_info=(type(exc), exc, exc.__traceback__))
+        raise exc
 
 
 @shared_task(bind=True, max_retries=10)
@@ -145,7 +146,7 @@ def delete_ecm_related_folder_to_task(self, ecm_id, id_doc, task_id, ecm_create_
             result = get_advwin_engine().execute(stmt)
         except Exception as exc:
             self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
-            LOGGER.warning('Não foi possíve excluir o relacionamento do ECM entre Agenda e Pasta: %d\n%s',
+            LOGGER.warning('Não foi possível excluir o relacionamento do ECM entre Agenda e Pasta: %d\n%s',
                            ecm_id,
                            exc,
                            exc_info=(type(exc), exc, exc.__traceback__))
@@ -161,8 +162,8 @@ def delete_ecm_related_folder_to_task(self, ecm_id, id_doc, task_id, ecm_create_
 
 
 @retry(stop_max_attempt_number=4, wait_fixed=1000)
-def delete_ecm(ecm_id, execute=True):    
-    ecm = Ecm.objects.get(pk=ecm_id)    
+def delete_ecm(ecm_id, execute=True):
+    ecm = Ecm.objects.get(pk=ecm_id)
 
     new_path = ecm_path_ezl2advwin(ecm.path.name)
     file_name = get_ecm_file_name(ecm.path.name)
@@ -195,7 +196,7 @@ def delete_ecm(ecm_id, execute=True):
             total_afected = result.rowcount
             result.close()
             return '{} Registros afetados'.format(total_afected)
-        except Exception as exc:            
+        except Exception as exc:
             LOGGER.warning('Não foi possível excluir o ECM: %d-%s\n%s',
                            ecm_id,
                            exc,
@@ -216,7 +217,7 @@ def get_folder_to_related(task):
             folder_to_related = result.fetchone()['Pasta']
             result.close()
         except Exception as e:
-            LOGGER.warning('Não foi possíve encontrar pasta para a Providencia: %d-%s\n%s',
+            LOGGER.warning('Não foi l encontrar pasta para a Providencia: %d-%s\n%s',
                            task.legacy_code, exc_info=(type(e), e, e.__traceback__))
         finally:
             return folder_to_related
@@ -268,7 +269,7 @@ def insert_advwin_history(task_history, values, execute=True):
             result.close()
             return '{} Registros afetados'.format(total_afected)
         except Exception as exc:
-            LOGGER.warning('Não foi possíve exportar Histórico de OS: %d-%d\n%s',
+            LOGGER.warning('Não foi possível exportar Histórico de OS: %d-%d\n%s',
                            task_history.task.id,
                            task_history.id,
                            exc,
@@ -483,10 +484,11 @@ def export_task(self, task_id, task=None, execute=True):
         }
     elif task.task_status == TaskStatus.OPEN.value:
         advwin_advogado = None
-        if task.child.exists():
-            delegated_to = task.child.latest('pk').office.legal_name
-            for user in {user for user, perms in get_users_with_perms(task.child.latest('pk').office, attach_perms=True).items() if
-                         'group_admin' in perms}:
+        if task.get_child:
+            delegated_office = task.get_child.office
+            delegated_to = delegated_office.legal_name
+            for user in {user for user, perms in
+                         get_users_with_perms(delegated_office, attach_perms=True).items() if 'group_admin' in perms}:
                 if user.person.legacy_code:
                     advwin_advogado = user.person.legacy_code
                     break
@@ -558,6 +560,9 @@ def export_task(self, task_id, task=None, execute=True):
     if values:
         try:
             ret = update_advwin_task(task, values, execute)
+            if task.task_status == TaskStatus.FINISHED.value or task.task_status == TaskStatus.BLOCKEDPAYMENT.value:
+                for ecm in task.ecm_set.all():
+                    export_ecm_finished_task.delay(ecm.pk)
             return ret
         except Exception as exc:
             self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)

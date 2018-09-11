@@ -21,7 +21,9 @@
     {% if table.page %}
         <div class="table-container">
     {% endif %}
-{% include 'core/widgets/generic_search_view.html' %}
+{% block search %} 
+    {% include 'core/widgets/generic_search_view.html' %}
+{% endblock%}
 <form action="{% url link_ex %}" method="post" id="formTable">
     {% csrf_token %}
     {% block table %}

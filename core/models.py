@@ -359,13 +359,15 @@ class Person(AbstractPerson):
 
 
 class Office(AbstractPerson):
-    objects = PersonManager()    
+    objects = PersonManager()
     logo = models.ImageField(verbose_name='Logo', null=True, blank=True)
     persons = models.ManyToManyField(
         Person, blank=True, related_name='offices', through='OfficeMembership')
     offices = models.ManyToManyField('self', blank=True)
     public_office = models.BooleanField(
         default=False, verbose_name='Escritório público')
+    use_service = models.BooleanField(default=True, verbose_name='Possuo equipe de conferência de dados na delegação e validação da OS')
+    use_etl = models.BooleanField(default=True, verbose_name='Possuo processo de importação de dados de outros sistemas')
 
     class Meta:
         verbose_name = 'Escritório'
@@ -576,3 +578,16 @@ class ExternalApplication(AbstractApplication):
         Company, verbose_name='Empresa', blank=True, null=True
         )
 
+
+class ControlFirstAccessUser(models.Model):
+    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+                                     blank=False, null=False,
+                                     verbose_name='Usuário do sistema')
+    first_login = models.DateTimeField("Data do primeiro acesso.", auto_now_add=True)
+
+    def __str__(self):
+        return self.auth_user.username
+
+    class Meta:
+        verbose_name = 'Controle de primeiro acesso'
+        verbose_name_plural = 'Controle de primeiro acesso'

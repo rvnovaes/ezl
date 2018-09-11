@@ -52,20 +52,14 @@
                                         
                                         $('#finished_in_0').datepicker(config);
                                         $('#finished_in_1').datepicker(config);
-
-                                        var date = new Date();
-                                        var dtini = $("#finished_in_0").datepicker("getDate");
-                                        if (dtini == null) {
-                                            startDate = new Date(date.getFullYear(), date.getMonth(), 1);                                                                                                                           
-                                            $('#finished_in_0').datepicker("update", startDate);
-                                        }
-                                        
-                                        var dtfim = $("#finished_in_1").datepicker("getDate");
-                                        if (dtfim == null) {
-                                            $('#finished_in_1').datepicker("update", date);
-                                        }
                                     });                                                                        
                                 </script>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Agrupar por: " %}
+                                {% bootstrap_field filter.form.group_by_tasks form_group_class="" bound_css_class='' show_label=False %}
                             </div>
                         </div>
                     </fieldset>
@@ -106,17 +100,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                          {% for office in offices_report %}
+                        {% for office in offices %}
                             {% for task in office.tasks %}
                                 <tr>
                                     <td>{{ task.parent.task_number }}</td>
-                                    <td>{{ office.name }}</td>
+                                    <td>{{ office.office_name }}</td>
                                     <td>{{ task.finished_date|date:"d/m/Y H:i" }}</td>
                                     <td>{{ task.type_task }}</td>
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.court_district }}</td>
                                     <td>{{ task.client }}</td>
-                                    <td>{{ task.opposing_party }}</td>                                    
+                                    <td>{{ task.opposing_party }}</td>
                                     {% if task.parent %}
                                         {% if task.parent.parent %}
                                             <td>{{ task.parent.task_number }}</td>
@@ -137,12 +131,13 @@
                     <thead>
                         <tr role="row">
                             <th><input type="checkbox" id="checkAll" title="Marcar ou desmarcar todos"/></th>
+                            <th></th>
+                            <th></th>
                             <th>O.S.</th>
                             <th>Finalização</th>
                             <th>Serviço</th>
                             <th>Processo</th>
                             <th>Comarca</th>
-                            <th>Cliente</th>
                             <th>Parte Adversa</th>
                             <th>OS Original</th>
                             <th>Faturada</th>
@@ -150,13 +145,26 @@
                         </tr>
                     </thead>
                     <tbody id="os-table-body">
-                        {% for office in offices_report %}
-                            <tr>
-                                <th colspan="10"><center>{{ office.name }}</center></th>
-                                <th><center>R$ {{office.total}}</center></th>                                
-                            </tr>
+                        {% for office in offices %}
+                            {% ifchanged office.office_name %}
+                                <tr>
+                                    <th colspan="10">{{ office.office_name }}</th>
+                                    <th></th>
+                                    <th><center>R$ {{office.office_total}}</center></th>
+                                </tr>
+                            {% endifchanged %}
+
+                            {% ifchanged office.client_name or office.office_name %}
+                                <tr>
+                                    <th></th>
+                                    <th colspan="10">{{ office.client_name }}</th>
+                                    <th><center>R$ {{office.client_total}}</center></th>
+                                </tr>
+                            {% endifchanged %}
                             {% for task in office.tasks %}
                                 <tr role="row">
+                                    <td></td>
+                                    <td></td>
                                     <td>
                                         {% if not task.billing_date %}
                                             <input type="checkbox" value="{{ task.id }}"/>
@@ -167,7 +175,6 @@
                                     <td>{{ task.type_task }}</td>
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.court_district }}</td>
-                                    <td>{{ task.client }}</td>
                                     <td>{{ task.opposing_party }}</td>
                                     {% if task.parent %}
                                         {% if task.parent.parent %}
@@ -179,7 +186,7 @@
                                         <td>{{ task.legacy_code }}</td>
                                     {% endif %}
                                     <td>{{ task.billing_date|date:"d/m/Y" }}</td>
-                                    <td class="text-center">R$ {{ task.amount }}</td>
+                                    <td class="text-center"><center>R$ {{ task.amount }}</center></td>
                                 </tr>
                             {% endfor %}
                         {% empty %}
@@ -187,9 +194,10 @@
                                 <td colspan="11">Nenhuma OS encontrada com os filtros especificados.</td>
                             </tr>
                         {% endfor %}
-                        {% if offices_report %}
+                        {% if total %}
                             <tr class="total-container">
                                 <th colspan="10" class="text-center" >Total Geral</th>
+                                <th></th>
                                 <th class="text-center">R$ {{total}}</th>
                             </tr>
                         {% endif %}
@@ -234,6 +242,7 @@
         dom: 'Bfrtip',
         paging: false,
         searching: false,
+        order: [[ "0", "asc" ]],
         buttons: [
             'copy', 'csv', 'excel', 'pdf', 'print'
         ],

@@ -50,8 +50,8 @@
                             <i id="icon" class="mdi-24px"></i>
                              Deseja <span id="actionText">aceitar</span> o prazo? </h4>
                     </div>
-                    <div class="modal-body p-30">
-                        {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
+                    <div class="modal-body p-30">                        
+                        {% if form.instance.status.name == 'ACCEPTED_SERVICE' or  form.instance.status.name == 'REQUESTED' and not form.instance.office.use_service%}
                             {{ form.servicepricetable_id }}
                             <div class="form-group" style="margin: auto">
                                 <label>Tipo de Serviço: </label>
@@ -96,7 +96,7 @@
                         </button>
                         <button id="actionButton"
                             type="submit"
-                            onclick="submit_task_detail(this)"
+                            onclick="submit_task_detail(this, '{{form.instance.office.use_service}}')"
                             survey={% if form.instance.type_task.survey %}true{% else %}''{% endif %}
                             style="width: 100px!important;"
                             class="btn btn-raised btn-success">Sim
@@ -187,15 +187,16 @@
                 'placeholder': 'Data de Cumprimento'});
         });
 
-        function toogleModals(modalToClose, modalToOpen) {
+        function toogleModals(modalToClose, modalToOpen, task_status) {
             $(modalToClose).one('hidden.bs.modal', function() {
+                $('#survey').attr('data-status', task_status)
                 $(modalToOpen).modal('show');
             }).modal('hide');
         }
 
         //Função para exibir modal do survey
-        function beforeSubmit() {
-            toogleModals('#confirmAction', '#survey')
+        function beforeSubmit(task_status) {
+            toogleModals('#confirmAction', '#survey', task_status)
             $('#task_detail').submit(function (e) {
                 e.preventDefault();
             });
@@ -238,6 +239,7 @@
                             .attr('name', 'action')
                             .attr('value', 'OPEN')
                             .appendTo('#task_detail');
+                        swal.close();
                         toogleModals('#confirmAction', '#procssing')
                         $('#task_detail').unbind('submit').submit();
                     }else{
@@ -254,14 +256,13 @@
             }
         }
 
-        function submit_task_detail(actionButton) {
-
+        function submit_task_detail(actionButton, use_service) {
             var task_status = actionButton.value;
             var have_survey = actionButton.getAttribute('survey');
             actionButton.disabled = true;
             {#toogleModals('#confirmAction', '#procssing')#}
-            if (task_status === 'DONE' && have_survey){
-                beforeSubmit();
+            if ((task_status === 'DONE' || task_status === 'FINISHED' && use_service === 'False') && have_survey){
+                beforeSubmit(task_status);
             }else if(task_status === 'OPEN'){
                 checkDelegationOffice();
             }else{
@@ -499,21 +500,38 @@
 {% block script_document_ready %}
     {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
         $('#confirmAction').on('show.bs.modal', function (event) {
-            var table = $('#correspondents-table').DataTable({
-                paging: false,
-                order: [[4, 'asc']],
-                dom: 'frti',
-                buttons: [],
-                language: {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-                },
-            });
-            $('#actionButton').removeAttr('disabled')
+            var table_rows = {{ correspondents_table.rows|length }};
+            if (table_rows > 0) {
+                window.table = $('#correspondents-table').DataTable({
+                    paging: false,
+                    order: [[4, 'asc']],
+                    dom: 'frti',
+                    buttons: [],
+                    language: {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                    },
+                });
+                $('#actionButton').removeAttr('disabled');
+            } else {
+                event.preventDefault();
+                event.stopPropagation();
+                swal({
+                    title: "Atenção",
+                    text: "Não existem tabelas de preço que atendam aos critérios desta OS",
+                    type: "warning",
+                    showCancelButton: false,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "OK",
+                    closeOnConfirm: true
+                });
+            }
         });
         /* Ao fechar o modal, limpar a tabela */
+        {% if correspondents_table.rows %}
         $('#confirmAction').on('hide.bs.modal', function (event) {
-            $('#servicePriceTableTable').empty();
-            $('#servicePriceTableTable').DataTable().clear().destroy();
+            window.table.destroy();
         });
+        {% endif %}
+
     {% endif %}
 {% endblock %}

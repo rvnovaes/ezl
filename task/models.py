@@ -54,16 +54,27 @@ color_dict = {
     'REFUSED': 'warning',
     'INVALID': 'muted',
     'FINISHED': 'success',
-    'BLOCKEDPAYMENT':'muted',
+    'BLOCKEDPAYMENT': 'muted',
     'ERROR': 'danger',
     'REQUESTED': 'danger',
     'ACCEPTED_SERVICE': 'danger',
     'REFUSED_SERVICE': 'danger',
 }
 
-
-# next_action = {'ACCEPTED': 'cumprir', 'OPEN': 'assignment', 'RETURN': 'keyboard_return',
-# 'DONE': 'done', 'REFUSED': 'assignment_late'}
+status_order_dict = {
+    'ACCEPTED': 6,
+    'OPEN': 5,
+    'RETURN': 4,
+    'DONE': 7,
+    'REFUSED': 9,
+    'INVALID': 11,
+    'FINISHED': 8,
+    'BLOCKEDPAYMENT': 10,
+    'ERROR': 0,
+    'REQUESTED': 1,
+    'ACCEPTED_SERVICE': 2,
+    'REFUSED_SERVICE': 3,
+}
 
 
 class TaskStatus(Enum):
@@ -84,6 +95,10 @@ class TaskStatus(Enum):
     def get_icon(self):
         return icon_dict[self.name]
 
+    @property
+    def get_status_order(self):
+        return status_order_dict[self.name]
+
     def get_color(self):
         return color_dict[self.name]
 
@@ -93,12 +108,6 @@ class TaskStatus(Enum):
     @classmethod
     def choices(cls):
         return [(x.value, x.name) for x in cls]
-        # 'Em Aberto' = 1  # Providencias que foram delegadas
-        # (1, 'Aceita/Retorno'),
-        #  Retorno (return) / Aceitas (accepted) providencias que foram executadas com sucesso ou
-        # retornadas ao correspondente por pendencias
-        # (2, 'Recusada'),  # providencias recusadas pelo correposndente
-        # (3, 'Cumprida'),  # providencias executadas sem nenhuma pendencia
 
     @classmethod
     def choices_icons(cls):
@@ -299,7 +308,8 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     @property
     def get_child(self):
-        if self.child.exists():
+        if self.child.exists() and self.child.latest('pk').task_status not in [TaskStatus.REFUSED.__str__(),
+                                                                               TaskStatus.REFUSED_SERVICE.__str__()]:
             return self.child.latest('pk')
         return None
 
@@ -311,8 +321,9 @@ class Task(Audit, LegacyCode, OfficeMixin):
     @property
     def allow_attachment(self):
         return not (self.status == TaskStatus.REFUSED or
-                self.status == TaskStatus.BLOCKEDPAYMENT or
-                self.status == TaskStatus.FINISHED)
+                    self.status == TaskStatus.BLOCKEDPAYMENT or
+                    self.status == TaskStatus.FINISHED)
+
     @property
     def origin_code(self):
         if self.parent:
@@ -411,6 +422,7 @@ class TaskGeolocation(Audit):
     class Meta:
         verbose_name = 'Geolocalização da Providência'
         verbose_name_plural = 'Geolocalização das Providências'
+        ordering = ('task', 'date', )
 
     @property
     def position(self):

@@ -1,6 +1,6 @@
 import django_tables2 as tables
 from core.tables import CheckBoxMaterial
-from .models import TypeTask, DashboardViewModel, Filter
+from .models import TypeTask, DashboardViewModel, Filter, Task
 
 
 class TaskTable(tables.Table):
@@ -23,7 +23,7 @@ class TaskTable(tables.Table):
 
     class Meta:
         order_by = 'legal_name'
-        model = DashboardViewModel
+        model = Task
         sequence = ['selection', 'status', 'task_number', 'type_task', "person_executed_by", 'person_asked_by',
                     "final_deadline_date", 'delegation_date', 'acceptance_date', 'refused_date',
                     'execution_date', 'return_date', 'blocked_payment_date', 'finished_date',

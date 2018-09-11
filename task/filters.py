@@ -11,6 +11,18 @@ from task.models import TypeTask, Task, Filter, TaskStatus
 from .models import DashboardViewModel
 from core.utils import get_office_session
 
+OFFICE = 'E'
+CLIENT = 'C'
+GROUP_BY_TASK_TO_PAY_TYPE = (
+    (OFFICE, 'Por Escritório Correspondente'),
+    (CLIENT, 'Por Cliente'),
+)
+
+GROUP_BY_TASK_TO_RECEIVE_TYPE = (
+    (OFFICE, 'Por Escritório Contratante'),
+    (CLIENT, 'Por Cliente'),
+)
+
 
 class TaskApiFilter(FilterSet):
   class Meta:
@@ -104,7 +116,6 @@ class TaskFilter(FilterSet):
         order_by = ['final_deadline_date']
 
 
-
 class TaskReportFilterBase(FilterSet):
     finished_in = MDDateTimeRangeFilter(name='finished_in')
 
@@ -112,6 +123,7 @@ class TaskReportFilterBase(FilterSet):
                         required=False)
     office = CharFilter(label="Escritório Correspondente",
                         required=False)
+
     class Meta:
         model = Task
         fields = []
@@ -125,6 +137,11 @@ class TaskToPayFilter(TaskReportFilterBase):
             ('false', 'Somente não faturadas'),
             )
         )
+    group_by_tasks = ChoiceFilter(
+        empty_label=None,
+        choices= GROUP_BY_TASK_TO_PAY_TYPE
+    )
+
 
 class TaskToReceiveFilter(TaskReportFilterBase):
     status = ChoiceFilter(
@@ -134,3 +151,7 @@ class TaskToReceiveFilter(TaskReportFilterBase):
             ('false', 'Somente não recebidas'),
             )
         )
+    group_by_tasks = ChoiceFilter(
+        empty_label=None,
+        choices=GROUP_BY_TASK_TO_RECEIVE_TYPE
+    )
