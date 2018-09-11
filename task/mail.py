@@ -1,10 +1,13 @@
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.template.loader import render_to_string
+from django.contrib.auth.tokens import default_token_generator
+from allauth.account.utils import user_pk_to_url_str
+from django.urls.base import reverse
 import sendgrid
 from sendgrid.helpers.mail import Attachment, Mail
 from django.conf import settings
 from datetime import datetime
-from core.models import EMAIL, PHONE
+from core.models import EMAIL, PHONE, CustomSettings
 from task.models import TaskStatus
 import base64
 
@@ -32,11 +35,27 @@ def get_file_base64(file_path):
     return base64.b64encode(data).decode()
 
 
-class TaskAttachmentEmail(Attachment):
-    def __init__(self, file_path, file_name, *args, **kwargs):
-        self.file_path = file_path
-        self.file_name = file_name
-        super().__init__(*args, **kwargs)
+class TaskFinishedEmail(object):
+  def __init__(self, task):
+    self.task = task
+    self.custom_settings = CustomSettings.objects.filter(office=self.task.office).first()
+
+
+  def get_url_change_password(self):    
+    token_generator = default_token_generator
+    temp_key = token_generator.make_token(self.custom_settings.default_user)
+    path = reverse("account_reset_password_from_key",
+                   kwargs=dict(uidb36=user_pk_to_url_str(self.custom_settings.default_user),
+                               key=temp_key))            
+    return 'http://localhost:8000{}'.format(path)    # Todo Alterar
+
+  def get_dynamic_template_data(self):
+      return {
+          "task_number": self.task.task_number,
+          "office_correspondent_name": self.task.parent.office.legal_name,
+          "username": self.custom_settings.default_user.username,
+          "btn_finished": self.get_url_change_password(),
+      }
 
 
 class TaskOpenMailTemplate(object):
@@ -85,49 +104,55 @@ class TaskAcceptedMailTemplate(object):
 
 class TaskMail(object):
     def __init__(self, email, task, template_id):
-        self.sg = sendgrid.SendGridAPIClient(
-            apikey='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')
-        self.task = task
-        self.email = email
-        self.template_id = template_id
-        self.email_status = {
-            TaskStatus.ACCEPTED: TaskAcceptedMailTemplate,
-            TaskStatus.OPEN: TaskOpenMailTemplate
-        }
-        self.template_class = self.email_status.get(self.task.status)(task)
-        self.data = {
-            "personalizations": [
-                {
-                    "to": [
-                        {
-                            "email": self.email
-                        }
-                    ],
-                    "subject": "Sending with SendGrid is Fun",
-                    "dynamic_template_data": self.template_class.get_dynamic_template_data()
-                }
-            ],
-            "from": {
-                "email": "mttech.ezl@gmail.com"
-            },
-            "template_id": self.template_id
-        }
-        # self.mail = Main(from_mail="mttech.ezl@gmail.com",
-        #                  subject="", to_mail=self.email, content=self.data)
+      self.sg = sendgrid.SendGridAPIClient(
+          apikey='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')
+      self.task = task
+      self.email = email
+      self.template_id = template_id
+      self.email_status = {
+          TaskStatus.ACCEPTED: TaskAcceptedMailTemplate,
+          TaskStatus.OPEN: TaskOpenMailTemplate, 
+          TaskStatus.FINISHED: TaskFinishedEmail,
+      }
+      self.template_class = self.email_status.get(self.task.status)(task)
+      self.attachments = []
+      for ecm in self.task.parent.ecm_set.all():
+        try:
+          self.attachments.append(self.set_mail_attachment(ecm))
+        except:
+          pass
+      self.data = {
+          "personalizations": [
+              {
+                  "to": [
+                      {
+                          "email": self.email
+                      }
+                  ],
+                  "subject": "Sending with SendGrid is Fun",
+                  "dynamic_template_data": self.template_class.get_dynamic_template_data()
+              }
+          ],
+          "from": {
+              "email": "mttech.ezl@gmail.com"
+          },
+          "template_id": self.template_id,             
+      }
 
-        # for ecm in self.task.ecm_set.all():
-        #     mail.add_attachment(self.set_mail_attachment(ecm))
+      if self.attachments:
+        self.data['attachments'] = self.attachments
 
     def set_mail_attachment(self, ecm):
-        attachment = Attachment()
-        attachment.content = get_file_base64(str(ecm.path.file))
-        attachment.type = "application/pdf"
-        attachment.filename = ecm.filename
-        attachment.disposition = "attachment"
+        attachment = {
+          "content": get_file_base64(str(ecm.path.file)), 
+          "type": "application/pdf", 
+          "filename": ecm.filename, 
+          "disposition": "attachment"
+        }
         return attachment
 
-    def send_mail(self):
-        response = self.sg.client.mail.send.post(request_body=self.data)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
+    def send_mail(self):      
+      response = self.sg.client.mail.send.post(request_body=self.data)
+      print(response.status_code)
+      print(response.body)
+      print(response.headers)

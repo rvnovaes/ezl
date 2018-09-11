@@ -1356,6 +1356,7 @@ class EcmExternalCreateView(CreateView):
                 ecm.save()
                 data = {'success': True,
                         'id': ecm.id,
+                        'task_hash': ecm.task.task_hash.hex,
                         'name': str(file),
                         'user': str(self.request.user),
                         'username': str(self.request.user.first_name + ' ' +

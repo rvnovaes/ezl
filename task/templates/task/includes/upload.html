@@ -57,6 +57,16 @@
         task_key="task_hash"
         get_ecms(url, task_key, task_hash)
     };
+
+    var manager_ecms = function(data) {        
+        let exp =  /external-task-detail/;
+        if (exp.exec('external-task-detail')) {
+            get_external_ecms(data.result.task_hash)
+        } else {
+            get_internal_ecms(data.result.task_id)
+        }
+    };
+
     function deleteFile(task_id, pk, file) {
         swal({
             title: file,
