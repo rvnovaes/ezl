@@ -9,6 +9,7 @@ from core.utils import filter_valid_choice_form, get_office_field, get_office_se
 from core.widgets import MDDateTimepicker, MDDatePicker
 from core.forms import BaseForm, XlsxFileField
 from task.models import Task, TypeTask, Filter, TaskStatus
+from task.resources import COLUMN_NAME_DICT
 
 
 class TaskForm(BaseForm):
@@ -144,11 +145,16 @@ class TaskToAssignForm(BaseForm):
 
 class ImportTaskListForm(forms.ModelForm):
     file_xls = XlsxFileField(label='Arquivo', required=True,
-                             headers_to_check=[
-                                 'folder_number', 'folder_legacy_code', 'law_suit_number', 'instance',
-                                 'lawsuit_legacy_code', 'type_movement', 'movement_legacy_code', 'person_asked_by',
-                                 'type_task', 'final_deadline_date'])
+                             headers_to_check=[])
 
     class Meta:
         model = ImportXlsFile
         fields = ('file_xls',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        list_header_to_check = ['folder_number', 'folder_legacy_code', 'law_suit_number', 'instance',
+                                'lawsuit_legacy_code', 'type_movement', 'movement_legacy_code', 'person_asked_by',
+                                'type_task', 'final_deadline_date']
+        for header in list_header_to_check:
+            self.fields['file_xls'].headers_to_check.append(COLUMN_NAME_DICT[header]['column_name'])

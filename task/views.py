@@ -219,7 +219,7 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteVi
     model = Task
     success_message = DELETE_SUCCESS_MESSAGE.format(model._meta.verbose_name_plural)
 
-    def post(selfTaskReportBase, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         self.success_url = urlparse(request.META.get('HTTP_REFERER')).path
         return super(TaskDeleteView, self).post(request, *args, **kwargs)
 
@@ -1214,6 +1214,7 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(*args, **kwargs)
         form = self.form_class(request.POST, request.FILES)
+        status = 200
         if form.is_valid():
             file_xls = form.save(commit=False)
             file_xls.office = get_office_session(request)
@@ -1224,6 +1225,8 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
             ret = import_xls_task_list(file_xls.pk)
             file_xls.end = timezone.now()
         else:
+            status = 500
+            ret = {'status': 'false', 'message': form.errors}
             messages.error(request, form.errors)
-        return JsonResponse({"status": "ok",
-                             "ret": json.dumps(ret)})
+            return JsonResponse(ret, status=status)
+        return JsonResponse(json.loads(json.dumps(ret)), status=status)

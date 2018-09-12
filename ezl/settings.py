@@ -412,3 +412,6 @@ LOGGING = {
 
 UPLOAD_DIRECTORY = 'uploads'
 ADMINS = [('EZL Erros', 'erros.ezlawyer@gmail.com')]
+
+# configuração para o django_import_export
+DATETIME_INPUT_FORMATS = ('%d/%m/%Y %H:%M', '%d/%m/%Y %H:%M',)

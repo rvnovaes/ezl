@@ -37,73 +37,111 @@
         <script>
             function showMessages()
             {                                                                              
-                {% if type_contact_mechanism_type_EMAIL_is_empty %}
-                    swal(
-                        "Erro", 
-                        "Deve ser configurado o tipo de mecanismo de contato 'E-mail' corretamente para continuar importação.", 
-                        "error")                    
-                {% else %}
-                    var text_msg = "Ao iniciar o processo de importação de tabela de preços não será possível cancelá-lo. Deseja continuar?"                
-                    swal({
-                            title: "Importante",
-                            text: text_msg,
-                            type: "warning",
-                            showCancelButton: true,
-                            confirmButtonText: "Sim",
-                            cancelButtonText: "Não",
-                            confirmButtonColor: "#DD6B55",                        
-                            closeOnConfirm: false
-                        }, function(isConfirm){
-                            if (isConfirm) {
-                                swal.close();
-                                $('#processing').modal({backdrop: 'static', keyboard: false});
-                                var formData = new FormData($('#import_task_list_form')[0]);
-                                $.ajax({
-                                    type: 'POST',
-                                    url: window.location,
-                                    data: formData,
-                                    contentType: false,
-                                    processData: false,
-                                    success: function (result) {
-                                        console.log(result);
-                                        //if (result.ok){
-                                        //    location.reload();
-                                        //    $('#locating').modal('hide');
-                                        //}else{
-                                        //    $('#locating').modal('hide');
-                                        //    showToast('error', 'Atenção', "Localização não registrada", 0, false);
-                                        //}
-                                    },
-                                    error: function (request, status, error) {
-                                    },
-                                    beforeSend: function (xhr, settings) {
-                                        xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
-                                    },
-                                    dataType: 'json'
-                                })
-                                //$('#import_task_list_form').submit();
-                            }
+                var text_msg = "Ao iniciar o processo de importação de tabela de preços não será possível cancelá-lo. Deseja continuar?"
+                swal({
+                        title: "Importante",
+                        text: text_msg,
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Sim",
+                        cancelButtonText: "Não",
+                        confirmButtonColor: "#DD6B55",
+                        closeOnConfirm: false
+                    }, function(isConfirm){
+                        if (isConfirm) {
+                            swal.close();
+                            $('#processing').modal({backdrop: 'static', keyboard: false});
+                            var formData = new FormData($('#import_task_list_form')[0]);
+                            $.ajax({
+                                type: 'POST',
+                                url: window.location,
+                                data: formData,
+                                contentType: false,
+                                processData: false,
+                                success: function (result) {
+                                    var $total_rows = $("#total_rows");
+                                    $total_rows[0].getElementsByTagName('span')[0].innerHTML = result.total_rows;
+                                    $total_rows.css('display', 'block');
+                                    if(result.totals){
+                                        $.each(result.totals, function(key, val){
+                                            $("#"+key).html(val)
+                                        });
+                                        $("#totals").css('display', 'block');
+                                    } else {
+                                        $("#totals").css('display', 'none');
+                                    }
+                                    $("#id_file_xls").val('');
+                                    if(result.errors){
+                                        var log_table = $('#log_table');
+                                        var log_table_tbody = $('#log_table tbody');
+                                        for (var j = 0; j < result.errors.length; j++) {
+                                            var result_error_obj = result.errors[j]
+                                            var errors_desc = '';
+                                            for (var i = 0; i < result_error_obj.errors[0].length; i++) {
+                                                errors_desc += $.trim(result_error_obj.errors[0][i]).split("'").join('') + '<br />';
+                                            }
+                                            log_table_tbody.append('<tr> ' +
+                                                '<td>' + result_error_obj.line + '</td>' +
+                                                '<td>' + errors_desc + '</td></tr>');
+                                        }
+                                        $("#div-log-table").css('display', 'block');
+                                        log_table.DataTable({
+                                            language: {
+                                                "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                                            },
+                                            buttons: [
+                                                'copy', 'csv', 'excel', 'pdf', 'print'
+                                            ],
+                                            destroy: true,
+                                        });
+                                    }else{
+                                        $("#div-log-table").css('display', 'none');
+                                    }
+                                    var drEvent = window.file_xls_field.dropify();
+                                    drEvent = drEvent.data('dropify');
+                                    drEvent.resetPreview();
+                                    drEvent.clearElement();
+                                    $('#processing').modal('hide');
+                                },
+                                error: function (request, status, error) {
+                                    {#$('#processing').modal('hide');#}
+                                    {#window.location.reload()#}
+                                },
+                                beforeSend: function (xhr, settings) {
+                                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                                },
+                                dataType: 'json'
+                            })
                         }
-                    );
-                {% endif %}                
+                    }
+                );
             }
-            
-            $(document).ready(function(){
-                {% if show_modal_progress %}
-                    $('#progressBarImportServicePriceTableAction').modal('show');
-                {% endif %}
-            })
-        </script>                
-        
-{#        {% include 'financial/import_service_price_table_progress_modal.html' %}#}
+        </script>
     </form>
     
-    <br>    
+    <br>
+    <div class="col-xs-12 form-group"  id="total_rows" style="display: none">
+        <label>Total importado: </label>&nbsp;<span></span>
+    </div>
+    <div id="totals" class="col-xs-12" style="display: none">
+        <label>Detalhe dos registros importados:</label>
+        <ul>
+            <li>Novos: <span id="new"></span></li>
+            <li>Atualizados: <span id="update"></span></li>
+            <li>Apagados: <span id="delete"></span></li>
+            <li>Ignorados: <span id="skip"></span></li>
+            <li>Com erro: <span id="error"></span></li>
+        </ul>
+    </div>
     <div id="div-log-table" style="display: none">
-            <table id="LogTable">
+            <table id="log_table">
             <thead>
                 <tr>
-                    <th>Log do processo</th>
+                    <th colspan="2">Log de errors do processo</th>
+                </tr>
+                <tr>
+                    <th>Linha</th>
+                    <th>Erros</th>
                 </tr>
             </thead>
             <tbody>
@@ -129,7 +167,8 @@
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
     <script>
         $('document').ready(function(){
-            $('.dropify').attr('data-height', '200').attr('data-allowed-file-extensions', 'xlsx').dropify();
+            window.file_xls_field = $('.dropify');
+            window.file_xls_field.attr('data-height', '200').attr('data-allowed-file-extensions', 'xlsx').dropify()
         })
     </script>
 {% endblock %}
