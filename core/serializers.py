@@ -46,7 +46,8 @@ class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):
             CpfCnpjOfficeUniqueValidator(
                 queryset=Person.objects.filter()
             )
-        ]
+        ],
+        required=False
     )
 
     def create(self, validate_data):
@@ -64,6 +65,5 @@ class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):
 
     class Meta:
         model = Person
-        fields = ('id', 'name', 'legal_name', 'legal_type', 'cpf_cnpj',
-                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active', 
-                  'legacy_code')        
+        fields = ('id', 'name', 'legal_name', 'legal_type', 'cpf_cnpj', 'is_lawyer', 'is_customer', 'is_supplier',
+                  'is_active', 'legacy_code', 'create_user')

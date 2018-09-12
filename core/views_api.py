@@ -14,9 +14,9 @@ from rest_framework.decorators import permission_classes
 
 
 class ApplicationView(object):
-	def __init__(self, request, *args, **kwargs):
-		self.request = request
-		print(self.request)
+    def __init__(self, request, *args, **kwargs):
+        self.request = request
+        print(self.request)
 
 
 @permission_classes((TokenHasReadWriteScope,))
@@ -24,6 +24,5 @@ class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
 
-
     def get_queryset(self):
-    	return Person.objects.filter(offices=self.request.auth.application.office)
+        return Person.objects.filter(offices=self.request.auth.application.office)
