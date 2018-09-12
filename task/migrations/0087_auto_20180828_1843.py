@@ -8,7 +8,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0090_task_company_chat'),
+        ('task', '0086_dashboardviewmodel_parent_task_number'),
     ]
 
     operations = [
