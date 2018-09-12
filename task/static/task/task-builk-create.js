@@ -58,7 +58,7 @@ TaskForm = (function($){
                 choices = ['<option value="">Selecione...</option>'];
             }
             $(data.data).each(function(i, item){
-                choices.push('<option value="' + item.id + '">' + item.law_suit_number + ' - ' + item.person_lawyer.name + '</option>');
+                choices.push('<option value="' + item.id + '">' + item.law_suit_number + ' - ' + item.court_district.name + '</option>');
             });
             self.$lawsuit.html(choices.join(''));
             self.$lawsuit.selectpicker('refresh')
