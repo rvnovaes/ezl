@@ -14,6 +14,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CourtDistrictFilter, MovementFilter
 from rest_framework.decorators import permission_classes
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope, TokenHasReadWriteScope
+from core.models import CompanyUser
+
 
 
 @permission_classes((TokenHasReadWriteScope,))
@@ -35,19 +37,26 @@ class FolderViewSet(viewsets.ModelViewSet):
 
 @permission_classes((TokenHasReadWriteScope,))
 class InstanceViewSet(viewsets.ModelViewSet):
-    queryset = Instance.objects.all()
+    queryset = Instance.objects.all()   
     serializer_class = InstanceSerializer
 
 
-@permission_classes((TokenHasReadWriteScope,))
+# @permission_classes((TokenHasReadWriteScope,))
 class LawSuitViewSet(viewsets.ModelViewSet):
     serializer_class = LawSuitSerializer
     filter_backends = (SearchFilter,)
     search_fields = ('folder__legacy_code',)
 
-    def get_queryset(self):
+    def get_queryset(self):        
         return LawSuit.objects.filter(office=self.request.auth.application.office)
 
+class CompanyLawsuitViewSet(LawSuitViewSet):
+    def get_queryset(self):
+        if self.request.user.is_authenticated():
+            return LawSuit.objects.filter(
+                folder__person_customer__company__in=CompanyUser.objects.filter(
+                    user=self.request.user).values_list('company', flat=True))        
+        return []
 
 def office_filter(queryset, request):
     office = get_office_session(request)

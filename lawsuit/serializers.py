@@ -23,13 +23,17 @@ class InstanceSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'office', 'create_user', 'legacy_code')
 
 
-class LawSuitSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
+class LawSuitSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):        
+    office_name = serializers.SerializerMethodField()
     class Meta:
         model = LawSuit
         fields = (
             'id', 'folder', 'law_suit_number', 'opposing_party', 'court_district', 'instance', 'organ',
             'court_division', 'person_lawyer', 'is_current_instance', 'is_active', 'office', 'create_user',
-            'legacy_code')
+            'legacy_code', 'office_name')
+
+    def get_office_name(self, obj):
+        return obj.office.legal_name
 
 
 class CourtDivisionSerializer(serializers.ModelSerializer):
