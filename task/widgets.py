@@ -28,7 +28,7 @@ class PersonAskedByWidget(UnaccentForeignKeyWidget):
         if person_asked_by and person_asked_by in Person.objects.requesters(office_id=row['office']):
             return person_asked_by
         else:
-            return ''
+            return None
 
 
 class TaskStatusWidget(Widget):

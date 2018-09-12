@@ -1,11 +1,11 @@
 from core.models import Person
 from decimal import Decimal
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from import_export import resources
 from import_export.fields import Field
 from import_export.widgets import DateTimeWidget, DecimalWidget
 from lawsuit.models import Folder, LawSuit, Movement
+from task.instance_loaders import TaskModelInstanceLoader
 from task.models import Task, TypeTask
 from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget
 
@@ -61,10 +61,11 @@ class TaskResource(resources.ModelResource):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.office_id = None
+        self._meta.instance_loader_class = TaskModelInstanceLoader
 
     class Meta:
         model = Task
-        import_id_fields = ('id', 'legacy_code',)
+        import_id_fields = ('legacy_code',)
 
     def validate_folder(self, row, row_errors):
         folder_number = int(row['folder_number']) if row['folder_number'] else ''
@@ -125,6 +126,9 @@ class TaskResource(resources.ModelResource):
 
         if 'id' not in dataset._Dataset__headers:
             dataset.insert_col(0, col=["", ] * dataset.height, header="id")
+        else:
+            self.__setattr__('import_id_fields', ('id',))
+
         dataset.insert_col(1, col=[int("{}".format(kwargs['office'].id)), ] * dataset.height, header="office")
         dataset.insert_col(1, col=[int("{}".format(kwargs['create_user'].id)), ] * dataset.height, header="create_user")
         dataset.insert_col(3, col=["", ] * dataset.height, header="movement")

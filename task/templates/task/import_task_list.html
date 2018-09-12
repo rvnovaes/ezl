@@ -104,8 +104,8 @@
                                     $('#processing').modal('hide');
                                 },
                                 error: function (request, status, error) {
-                                    {#$('#processing').modal('hide');#}
-                                    {#window.location.reload()#}
+                                    $('#processing').modal('hide');
+                                    window.location.reload()
                                 },
                                 beforeSend: function (xhr, settings) {
                                     xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
