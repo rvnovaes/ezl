@@ -13,6 +13,7 @@ router.register(r'court_division', views.CourtDivisionViewSet, base_name='court_
 router.register(r'type_movement', views.TypeMovementViewSet, base_name='type_movement')
 router.register(r'movement', views.MovementViewSet, base_name='movement')
 router.register(r'organ', views.OrganViewSet, base_name='organ')
+router.register(r'company/lawsuit', views.CompanyLawsuitViewSet, base_name='company-lawsuit')
 
 urlpatterns = [
 
