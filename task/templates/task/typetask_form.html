@@ -1,0 +1,44 @@
+{% extends 'skeleton/forms/base.html' %}
+
+{% block form %}
+    {{ block.super }}
+    <div class="row">
+        <div class="form-group col-sm-12">
+            <label class="control-label">Características do tipo de serviço selecionado:</label>
+            <div id="typetask_characteristics"></div>
+        </div>
+    </div>
+{% endblock form %}
+
+{% block extra_scripts %}
+    {{ block.super }}
+    <script>
+        function get_typetask_characteristics(type_task_main){
+            if (! type_task_main){
+                type_task_main = 0
+            }
+            $.ajax({
+                type: 'GET',
+                url: '/providencias/type_task_main/' + type_task_main + '/get',
+                success: function (result) {
+                    var typetask_options = result.characteristics.options
+                    var typetask_characteristics = []
+                    typetask_options.forEach(function(data){
+                        typetask_characteristics.push(data.title + ': ' + data.values.join(", "))
+                    });
+                    $('#typetask_characteristics').html(typetask_characteristics.join('<br>'))
+                },
+                dataType: 'json'
+            })
+        }
+
+        $('#id_type_task_main').on('change', function () {
+            var type_task_main = this.value;
+            get_typetask_characteristics(type_task_main)
+        });
+    </script>
+{% endblock extra_scripts %}
+
+{% block script_window_load %}
+    get_typetask_characteristics($('#id_type_task_main').val())
+{% endblock %}
