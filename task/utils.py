@@ -117,3 +117,18 @@ def get_dashboard_tasks(request, office_session, checker, person):
                 ~Q(task_status__in=exclude_status))
 
     return data, exclude_status
+
+
+def create_default_type_tasks(office, create_user=None):
+    if not create_user:
+        create_user = office.create_user
+    main_type_tasks = TypeTaskMain.objects.all()
+    TypeTask.objects.filter(office=office).delete()
+    for main_type_task in main_type_tasks:
+        type_task = TypeTask()
+        type_task.name = main_type_task.name
+        type_task.create_user = create_user
+        type_task.office = office
+        type_task.save()
+        type_task.type_task_main.add(main_type_task)
+        type_task.save()

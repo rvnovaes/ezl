@@ -5,6 +5,19 @@ from __future__ import unicode_literals
 import django.contrib.postgres.fields.jsonb
 from django.db import migrations, models
 import django.db.models.deletion
+from django.core.management import call_command
+
+
+def load_fixture(apps, schema_editor):
+    call_command('loaddata', 'type_task_main', app_label='task')
+
+
+def create_default_type_tasks(apps, schema_editor):
+    from core.models import Office
+    from task.utils import create_default_type_tasks
+    offices = Office.objects.filter(typetask_office__isnull=True)
+    for office in offices:
+        create_default_type_tasks(office)
 
 
 class Migration(migrations.Migration):
@@ -28,6 +41,7 @@ class Migration(migrations.Migration):
                 'ordering': ('name',),
             },
         ),
+        migrations.RunPython(load_fixture),
         migrations.RemoveField(
             model_name='typetask',
             name='simple_service',
@@ -46,4 +60,5 @@ class Migration(migrations.Migration):
             name='type_task_main',
             field=models.ManyToManyField(related_name='type_tasks', to='task.TypeTaskMain', verbose_name='Tipo de Serviço Principal')
         ),
+        migrations.RunPython(create_default_type_tasks),
     ]

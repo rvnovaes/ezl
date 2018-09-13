@@ -550,6 +550,9 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             TaskHistory.objects.filter(task_id=self.object.id).order_by('-create_date')
         context['survey_data'] = (self.object.type_task.survey.data
                                   if self.object.type_task.survey else None)
+        if self.object.parent:
+            context['survey_data'] = (self.object.parent.type_task.survey.data
+                                      if self.object.parent.type_task.survey else None)
         office_session = get_office_session(self.request)
         get_correspondents_table = CorrespondentsTable(self.object, office_session)
         context['correspondents_table'] = get_correspondents_table.get_correspondents_table()

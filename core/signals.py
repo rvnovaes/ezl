@@ -3,12 +3,33 @@ from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_init, pre_save, post_save, post_delete
 
-from core.models import Person, Invite, Office
+from core.models import Person, Invite, Office, OfficeMembership
 from django.dispatch import receiver, Signal
 from task.mail import SendMail
+from task.utils import create_default_type_tasks
 from django.template.loader import render_to_string
 from core.permissions import create_permission
 from guardian.shortcuts import get_groups_with_perms
+
+
+def post_create_office(office):
+    member, created = OfficeMembership.objects.get_or_create(
+        person=office.create_user.person, office=office,
+        defaults={'create_user': office.create_user, 'is_active': True})
+    if not created:
+        # Caso o relacionamento esteja apenas inativo
+        member.is_active = True
+        member.save()
+    else:
+        for super_user in User.objects.filter(is_superuser=True).all():
+            member, created = OfficeMembership.objects.update_or_create(
+                person=super_user.person, office=office,
+                defaults={'create_user': office.create_user, 'is_active': True})
+    if not office.create_user.is_superuser:
+        for group in {group for group, perms in
+                      get_groups_with_perms(office, attach_perms=True).items() if 'group_admin' in perms}:
+            office.create_user.groups.add(group)
+    create_default_type_tasks(office)
 
 
 def create_person(instance, sender, **kwargs):
@@ -59,6 +80,8 @@ models.signals.post_save.connect(
 
 @receiver(post_save, sender=Office)
 def office_post_save(sender, instance, created, **kwargs):
+    if created:
+        post_create_office(instance)
     if created or not get_groups_with_perms(instance):
         create_permission(instance)
         if not instance.create_user.is_superuser:

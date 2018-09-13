@@ -44,6 +44,7 @@ from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task, TaskStatus
 from task.metrics import get_correspondent_metrics
+from task.utils import create_default_type_tasks
 from ecm.forms import AttachmentForm
 from ecm.utils import attachment_form_valid, attachments_multi_delete
 from django.core.validators import validate_email
@@ -51,24 +52,6 @@ from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_groups_with_perms
 from billing.models import Plan, PlanOffice
 
-
-def post_create_office(office):
-    member, created = OfficeMembership.objects.get_or_create(
-        person=office.create_user.person, office=office,
-        defaults={'create_user': office.create_user, 'is_active': True})
-    if not created:
-        # Caso o relacionamento esteja apenas inativo
-        member.is_active = True
-        member.save()
-    else:
-        for super_user in User.objects.filter(is_superuser=True).all():
-            member, created = OfficeMembership.objects.update_or_create(
-                person=super_user.person, office=office,
-                defaults={'create_user': office.create_user, 'is_active': True})
-    if not office.create_user.is_superuser:
-        for group in {group for group, perms in
-                      get_groups_with_perms(office, attach_perms=True).items() if 'group_admin' in perms}:
-            office.create_user.groups.add(group)
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -209,6 +192,7 @@ class MultiDeleteView(DeleteView):
             return HttpResponseRedirect(self.success_url)
         else:
             return HttpResponseRedirect(self.get_success_url())
+
 
 def remove_invalid_registry(f):
     """
@@ -1030,7 +1014,6 @@ class OfficeCreateView(AuditFormMixin, CreateView):
     def form_valid(self, form):
         form.instance.create_user = self.request.user
         form.instance.save()
-        post_create_office(form.instance)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -1177,7 +1160,6 @@ class RegisterNewUser(CreateView):
                                                     cpf_cnpj=cpf_cnpj,
                                                     is_active=True,
                                                     create_user=instance)
-            post_create_office(office_instance)
             DefaultOffice.objects.create(auth_user=instance, office=office_instance,
                                          create_user=instance)
         elif select_office_register == '3':
@@ -1189,7 +1171,6 @@ class RegisterNewUser(CreateView):
                                                     legal_type=legal_type,
                                                     is_active=True,
                                                     create_user=instance)
-            post_create_office(office_instance)
             DefaultOffice.objects.create(auth_user=instance, office=office_instance,
                                          create_user=instance)
         if office_instance:
