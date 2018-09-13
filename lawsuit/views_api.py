@@ -17,7 +17,6 @@ from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHa
 from core.models import CompanyUser
 
 
-
 @permission_classes((TokenHasReadWriteScope,))
 class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CourtDistrict.objects.all()
@@ -41,7 +40,7 @@ class InstanceViewSet(viewsets.ModelViewSet):
     serializer_class = InstanceSerializer
 
 
-# @permission_classes((TokenHasReadWriteScope,))
+@permission_classes((TokenHasReadWriteScope,))
 class LawSuitViewSet(viewsets.ModelViewSet):
     serializer_class = LawSuitSerializer
     filter_backends = (SearchFilter,)
@@ -50,6 +49,7 @@ class LawSuitViewSet(viewsets.ModelViewSet):
     def get_queryset(self):        
         return LawSuit.objects.filter(office=self.request.auth.application.office)
 
+
 class CompanyLawsuitViewSet(LawSuitViewSet):
     def get_queryset(self):
         if self.request.user.is_authenticated():
@@ -57,6 +57,7 @@ class CompanyLawsuitViewSet(LawSuitViewSet):
                 folder__person_customer__company__in=CompanyUser.objects.filter(
                     user=self.request.user).values_list('company', flat=True))        
         return []
+
 
 def office_filter(queryset, request):
     office = get_office_session(request)

@@ -16,6 +16,11 @@ class FolderSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, O
         fields = (
             'id', 'office', 'folder_number', 'person_customer', 'cost_center', 'office', 'create_user', 'legacy_code')
 
+    def validate_legacy_code(self, value):
+        if not value:
+            value = ""
+        return value
+
 
 class InstanceSerializer(serializers.ModelSerializer):
     class Meta:
