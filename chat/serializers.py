@@ -18,10 +18,11 @@ class UnreadMessageSerializer(serializers.ModelSerializer):
 	message = serializers.SerializerMethodField()
 	office = serializers.SerializerMethodField()
 	chat = serializers.SerializerMethodField()
+	task = serializers.SerializerMethodField()
 
 	class Meta:
 		model = UnreadMessage
-		fields = ('id', 'create_date', 'create_user', 'message', 'office', 'chat')
+		fields = ('id', 'create_date', 'create_user', 'message', 'office', 'chat', 'task')
 
 	def get_message(self, obj):
 		return obj.message.message
@@ -34,3 +35,6 @@ class UnreadMessageSerializer(serializers.ModelSerializer):
 
 	def get_chat(self, obj):
 		return {'title': obj.message.chat.title}
+
+	def get_task(self, obj):
+		return obj.message.chat.tasks_company_chat.latest('pk').pk

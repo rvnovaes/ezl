@@ -14,7 +14,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CourtDistrictFilter, MovementFilter
 from rest_framework.decorators import permission_classes
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope, TokenHasReadWriteScope
-from core.models import CompanyUser
+from core.models import CompanyUser, Company
 
 
 
@@ -54,8 +54,8 @@ class CompanyLawsuitViewSet(LawSuitViewSet):
     def get_queryset(self):
         if self.request.user.is_authenticated():
             return LawSuit.objects.filter(
-                folder__person_customer__company__in=CompanyUser.objects.filter(
-                    user=self.request.user).values_list('company', flat=True))        
+                folder__person_customer__company__in=Company.objects.filter(
+                    users__user=self.request.user))       
         return []
 
 def office_filter(queryset, request):
