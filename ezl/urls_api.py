@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'^', include((router_task.urls, 'task'), namespace='task')),       
     url(r'^', include((router_dashboard.urls, 'dashboard'), namespace='dashboard')),       
     url(r'^', include((router_chat.urls, 'chat'), namespace='chat')),       
+    url(r'^', include('core.urls_api')),
     url(r'^', include('task.urls_api')),       
     url(r'^oauth2/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]

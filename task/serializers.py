@@ -21,7 +21,7 @@ class TaskCreateSerializer(serializers.ModelSerializer, CreateUserSerializerMixi
         exclude = ('create_date', 'alter_date', 'system_prefix', 'is_active', 'survey_result', 'chat', 'task_number')   
 
 
-class EcmTaskSerializer(serializers.ModelSerializer):
+class EcmTaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):
     class Meta:
         model = Ecm
         exclude = ('create_date', 'alter_date', 'system_prefix', 'is_active')

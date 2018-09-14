@@ -1,7 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 from pycpfcnpj import cpfcnpj
-from .models import Person, Office
+from .models import Person, Office, Company
 from .view_validators import create_person_office_relation, person_exists
 from .messages import person_cpf_cnpj_already_exists, invalid_field
 from .utils import get_office_session, get_office_api
@@ -12,7 +12,10 @@ from rest_framework.fields import SlugField
 class CreateUserDefault(object):
     def set_context(self, serializer_field):
         application = serializer_field.context['request'].auth.application
-        self.create_user = application.user or application.office.create_user
+        if serializer_field.context['request'].user:
+            self.create_user = serializer_field.context['request'].user
+        else:
+            self.create_user = application.user or application.office.create_user
 
     def __call__(self):
         return self.create_user
@@ -67,3 +70,10 @@ class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):
         model = Person
         fields = ('id', 'name', 'legal_name', 'legal_type', 'cpf_cnpj', 'is_lawyer', 'is_customer', 'is_supplier',
                   'is_active', 'legacy_code', 'create_user')
+
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ('id', 'name', 'logo')
