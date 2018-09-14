@@ -131,6 +131,7 @@
                     type: "GET",
                     url: "/dashboard/verificar_status/",
                     success: function(response){
+                        $("#current_office").html(response.office);
                         $.each($('.status-total'), function (index, value){
                             if (!(value.id in response)) {
                                 $("#"+value.id).html('0');

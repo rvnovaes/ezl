@@ -45,7 +45,8 @@ class MDDatePicker(DateTimeBaseInput):
         context['widget']['type'] = self.input_type
         context['widget']['format'] = self.format
         if self.min_date:
-            context['widget']['min_date'] = timezone.localtime(self.min_date).strftime('%d/%m/%Y')
+            context['widget']['min_date'] = timezone.localtime(
+                self.min_date).strftime('%d/%m/%Y')
 
         if value and not isinstance(value, six.string_types):
             context['widget']['value'] = value.strftime('%d/%m/%Y')
@@ -156,7 +157,8 @@ class DateTimeRangeField(forms.MultiValueField):
 
         if fields is None:
             fields = (
-                forms.DateTimeField(widget=MDDateTimepicker(attrs={'class': 'form-control'})),
+                forms.DateTimeField(widget=MDDateTimepicker(
+                    attrs={'class': 'form-control'})),
                 forms.DateTimeField(widget=MDDateTimepicker(attrs={'class': 'form-control'})))
             super(DateTimeRangeField, self).__init__(fields, *args, **kwargs)
 
@@ -197,8 +199,8 @@ class MDSelect(ChoiceWidget):
         """Return True if the choice's value is empty string or None."""
         value, _ = choice
         return (
-                (isinstance(value, six.string_types) and not bool(value)) or
-                value is None
+            (isinstance(value, six.string_types) and not bool(value)) or
+            value is None
         )
 
     def use_required_attribute(self, initial):
@@ -206,7 +208,8 @@ class MDSelect(ChoiceWidget):
         Don't render 'required' if the first <option> has a value, as that's
         invalid HTML.
         """
-        use_required_attribute = super(MDSelect, self).use_required_attribute(initial)
+        use_required_attribute = super(
+            MDSelect, self).use_required_attribute(initial)
         # 'required' is always okay for <select multiple>.
         if self.allow_multiple_selected:
             return use_required_attribute

@@ -6,15 +6,17 @@ from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
-
+from core import views_api
 from core.views import (ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin,
     CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave, PopupSuccessView,
     OfficeAutocomplete, OfficeCorrespondentAutocomplete)
 from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView
+from rest_framework_swagger.views import get_swagger_view
 
+schema_view = get_swagger_view(title='API para integração com o Ezlawyer')
 urlpatterns = [
-
+    url(r'^docs/$', schema_view),
     url(r'^the-cool-upload-method/', include('django_file_form.urls')),
 
     url(r'^', include('core.urls')),
@@ -24,7 +26,7 @@ urlpatterns = [
     url(r'^accounts/', include('allauth.urls')),
     url(r'^financeiro/', include('financial.urls'), name='financial'),
     url(r'^pesquisa/', include('survey.urls'), name='survey'),
-    url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),
+    url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),    
     url(r'^v1/lawsuit/', include('lawsuit.urls_api'), name='lawsuit_api'),
     url(r'^providencias/', include('task.urls'), name='task'),
     url(r'^dashboard/$', login_required(DashboardView.as_view()), name='dashboard'),
@@ -82,7 +84,8 @@ urlpatterns = [
 
 
     url(r'^popup_success', PopupSuccessView.as_view(), name='popup_success'),
-
+    url(r'^api-auth/', include('rest_framework.urls')),
+    url(r'^api/v1/', include('ezl.urls_api')),    
 ] + \
     static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static/')) + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

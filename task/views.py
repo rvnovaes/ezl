@@ -24,23 +24,24 @@ from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django.core.exceptions import ValidationError
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
+from djmoney.money import Money
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
     DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
-from core.models import Person, CustomSettings
+from core.models import Person, CorePermissions, CustomSettings
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE
-from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm
+from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm
 from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
-    TaskGeolocation
+    TaskGeolocation, TypeTaskMain
 from task.signals import send_notes_execution_date
-from task.tables import TaskTable, DashboardStatusTable, FilterTable
+from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
 from task.rules import RuleViewTask
+from task.workflow import CorrespondentsTable
 from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
-from financial.tables import ServicePriceTableTaskTable
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, copy_ecm, get_dashboard_tasks
 from decimal import Decimal
@@ -580,24 +581,16 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 task_id=self.object.id).order_by('-create_date')
         context['survey_data'] = (self.object.type_task.survey.data
                                   if self.object.type_task.survey else None)
+        if self.object.parent:
+            context['survey_data'] = (self.object.parent.type_task.survey.data
+                                      if self.object.parent.type_task.survey else None)
+        office_session = get_office_session(self.request)
+        get_correspondents_table = CorrespondentsTable(self.object, office_session)
+        context['correspondents_table'] = get_correspondents_table.get_correspondents_table()
+        type_task_field = get_correspondents_table.get_type_task_field()
+        if type_task_field:
+            context['form'].fields['type_task_field'] = type_task_field
 
-        type_task = self.object.type_task
-        court_district = self.object.movement.law_suit.court_district
-        state = self.object.movement.law_suit.court_district.state
-        client = self.object.movement.law_suit.folder.person_customer
-        offices_related = self.object.office.offices.all()
-        context['correspondents_table'] = ServicePriceTableTaskTable(
-            ServicePriceTable.objects.filter(Q(office=self.object.office) | Q(office__public_office=True),
-                                             Q(Q(type_task=type_task)
-                                               | Q(type_task=None)),
-                                             Q(is_active=True),
-                                             Q(office_correspondent__in=offices_related),
-                                             Q(office_correspondent__is_active=True),
-                                             Q(Q(court_district=court_district) | Q(
-                                                 court_district=None)),
-                                             Q(Q(state=state) | Q(state=None)),
-                                             Q(Q(client=client) | Q(client=None)))
-        )
         return context
 
     @staticmethod
@@ -1030,9 +1023,9 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
         data, exclude_status = get_dashboard_tasks(
             request, office_session, checker, request.user.person)
 
-        status_totals = data.values('task_status').annotate(
-            total=Count('task_status')).order_by('task_status')
-        ret = {}
+        status_totals = data.values('task_status').annotate(total=Count('task_status')).order_by('task_status')
+
+        ret = {'office': office_session.legal_name}
         total = 0
         for status in status_totals:
             ret[status['task_status'].replace(
@@ -1112,6 +1105,43 @@ def ajax_get_task_data_table(request):
         "recordsTotal": records_total,
         "recordsFiltered": records_filtered,
         "data": xdata
+    }
+    return JsonResponse(data)
+
+
+@login_required
+def ajax_get_correspondents_table(request):
+    type_task_id = request.GET.get('type_task', 0)
+    task_id = request.GET.get('task', 0)
+    correspondents_table_list = []
+    type_task_name = None
+    if type_task_id and task_id:
+        type_task = TypeTask.objects.filter(pk=type_task_id).first()
+        task = Task.objects.filter(pk=task_id).first()
+        office = get_office_session(request)
+        get_correspondents_table = CorrespondentsTable(task, office, type_task=type_task)
+        type_task = get_correspondents_table.update_type_task(type_task)
+        type_task_name = type_task.name
+        type_task_id = type_task.id
+        correspondents_table = get_correspondents_table.get_correspondents_table()
+        correspondents_table_list = list(map(lambda x: {
+            'pk': x.pk,
+            'office': x.office.legal_name,
+            'office_correspondent': x.office_correspondent.legal_name,
+            'court_district': x.court_district.name if x.court_district else '—',
+            'state': x.state.name if x.state else '—',
+            'client': x.client.legal_name if x.client else '—',
+            'value': x.value,
+            'formated_value': Money(x.value, 'BRL').__str__(),
+            'office_rating': x.office_rating if x.office_rating else '0.00',
+            'office_return_rating': x.office_return_rating if x.office_return_rating else '0.00',
+            'office_public': x.office_correspondent.public_office
+        }, correspondents_table.data.data.all()))
+    data = {
+        "correspondents_table": correspondents_table_list,
+        "type_task": type_task_name,
+        "type_task_id": type_task_id,
+        "total": correspondents_table_list.__len__()
     }
     return JsonResponse(data)
 
@@ -1284,6 +1314,58 @@ def ecm_batch_download(request, pk):
     except Exception as e:
         messages.error(request, 'Erro ao baixar todos arquivos.' + str(e))
         return HttpResponseRedirect(ecm.task.get_absolute_url())
+
+
+class TypeTaskListView(CustomLoginRequiredView, PermissionRequiredMixin, SingleTableViewMixin):
+    model = TypeTask
+    table_class = TypeTaskTable
+    ordering = ('id', )
+    permission_required = (CorePermissions.group_admin, )
+
+
+class TypeTaskCreateView(AuditFormMixin, CreateView):
+    model = TypeTask
+    form_class = TypeTaskForm
+    success_url = reverse_lazy('typetask_list')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'typetask_list'
+    permission_required = (CorePermissions.group_admin, )
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+
+class TypeTaskUpdateView(PermissionRequiredMixin, AuditFormMixin, UpdateView):
+    model = TypeTask
+    form_class = TypeTaskForm
+    success_url = reverse_lazy('typetask_list')
+    success_message = UPDATE_SUCCESS_MESSAGE
+    template_name_suffix = '_update_form'
+    object_list_url = 'typetask_list'
+    permission_required = (CorePermissions.group_admin, )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class TypeTaskDeleteView(PermissionRequiredMixin, AuditFormMixin, MultiDeleteViewMixin):
+    model = TypeTask
+    success_url = reverse_lazy('typetask_list')
+    success_message = DELETE_SUCCESS_MESSAGE.format(
+        model._meta.verbose_name_plural)
+    object_list_url = 'typetask_list'
+    permission_required = (CorePermissions.group_admin, )
+
+
+class GetTypeTaskMainCharacteristics(CustomLoginRequiredView, View):
+
+    def get(self, request, pk):
+        type_task_main = TypeTaskMain.objects.filter(pk=pk).first()
+        characteristics = type_task_main.characteristics if type_task_main else None
+        return JsonResponse({"characteristics": characteristics})
 
 
 class ExternalTaskView(UpdateView):

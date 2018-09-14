@@ -35,9 +35,13 @@ urlpatterns = [
 
     url(r'^ajax_get_task_data_table/$', login_required(views.ajax_get_task_data_table),
         name='ajax_get_task_data_table'),
-    url(r'^ajax_get_ecms/$', login_required(views.ajax_get_ecms), name='ajax_get_ecms'),
+    url(r'^ajax_get_ecms/$', login_required(views.ajax_get_ecms),
+        name='ajax_get_ecms'),
     url(r'^ajax_get_external_ecms/$', views.get_external_ecms,
         name='ajax_get_external_ecms'),
+    url(r'^ajax_get_correspondent_table/$', login_required(views.ajax_get_correspondents_table),
+        name='ajax_get_correspondent_table'),
+
     # Filtros
     url(r'^filtros/listar/$',
         login_required(views.FilterListView.as_view()),
@@ -54,5 +58,19 @@ urlpatterns = [
         views.EcmExternalCreateView.as_view(), name='ecm_external_add'),
     url(r'^external-task-detail/(?P<task_hash>[-\w\W\d]+)/$',
         views.ExternalTaskView.as_view(), name="external-task-detail"),
+
+    # TypeTask
+    url(r'^type_task/listar/$',
+        login_required(views.TypeTaskListView.as_view()),
+        name='typetask_list'),
+    url(r'^type_task/criar/$', views.TypeTaskCreateView.as_view(), name='typetask_add'),
+
+    url(r'^type_task/(?P<pk>[0-9]+)/$', login_required(views.TypeTaskUpdateView.as_view()),
+        name='typetask_update'),
+
+    url(r'^type_task/excluir$', login_required(views.TypeTaskDeleteView.as_view()),
+        name='typetask_delete'),
+    url(r'^type_task_main/(?P<pk>[0-9]+)/get$', login_required(views.GetTypeTaskMainCharacteristics.as_view()),
+        name='typetaskmain_get'),
 
 ]
