@@ -30,7 +30,7 @@ class ChatListView(ListView):
         return context
 
 
-class ChatCountMessages(CustomLoginRequiredView, View):
+class ChatCountMessages(View):
     def get(self, request, *args, **kwargs):
         has_groups = request.GET.get('has_groups', 'false') == 'true'
         data = {
@@ -45,7 +45,7 @@ class ChatCountMessages(CustomLoginRequiredView, View):
         return JsonResponse(data)
 
 
-class ChatReadMessages(CustomLoginRequiredView, View):
+class ChatReadMessages(View):
     def post(self, request, *args, **kwargs):
         chat_id = json.loads(request.body).get('chat_id')
         chat = Chat.objects.filter(pk=int(chat_id)).first()
@@ -55,7 +55,7 @@ class ChatReadMessages(CustomLoginRequiredView, View):
         return JsonResponse({'status': 'ok'})
 
 
-class ChatGetMessages(CustomLoginRequiredView, View):
+class ChatGetMessages(View):
     def post(self, request, *args, **kwargs):
         chat_id = request.POST.get('chat_id')
         qry_message = Message.objects.filter(
@@ -84,7 +84,7 @@ class ChatGetMessages(CustomLoginRequiredView, View):
         return JsonResponse(data)
 
 
-class ChatOfficeContactView(CustomLoginRequiredView, View):
+class ChatOfficeContactView(View):
     @staticmethod
     def add_count_unread_message(user, contact_offices):        
         min_date = datetime.strptime('1970-01-01', '%Y-%m-%d')
@@ -110,7 +110,7 @@ class ChatOfficeContactView(CustomLoginRequiredView, View):
         return JsonResponse(data, safe=False)
 
 
-class ChatsByOfficeView(CustomLoginRequiredView, View):
+class ChatsByOfficeView(View):
     @staticmethod
     def add_count_unread_message(user, chats):
         # Pegamos todos os chats do usuário que possuem mensagens não lidas
@@ -159,7 +159,7 @@ class ChatsByOfficeView(CustomLoginRequiredView, View):
         return JsonResponse(data, safe=False)
 
 
-class ChatMenssage(CustomLoginRequiredView, View):
+class ChatMenssage(View):
     def get(self, request, *args, **kwargs):
         chat = Chat.objects.get(pk=int(request.GET.get('chat')))
         messages = list(chat.messages.all().values(
@@ -184,8 +184,8 @@ class ChatMenssage(CustomLoginRequiredView, View):
         return JsonResponse(data, safe=False)
 
 
-class InternalChatOffices(CustomLoginRequiredView, View):
-    def get(self, request, *args, **kwargs):
+class InternalChatOffices(View):
+    def get(self, request, *args, **kwargs):        
         task = Task.objects.get(pk=int(request.GET.get('task')))
         data = []
         if task.parent:

@@ -1,7 +1,7 @@
 import os
 from enum import Enum
 from django.db import transaction
-
+import uuid
 import pickle
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -10,13 +10,14 @@ from django.db import models
 from django.urls.base import reverse
 from django.utils import timezone
 from sequences import get_next_value
-from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office
+from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office, CustomSettings, EmailTemplate
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
 from decimal import Decimal
 
 
 class Permissions(Enum):
+    can_access_settings = 'Can access custom settings'
     view_delegated_tasks = 'Can view tasks delegated to the user'
     view_all_tasks = 'Can view all tasks'
     return_all_tasks = 'Can return tasks'
@@ -164,6 +165,7 @@ class TypeTask(Audit, LegacyCode):
 
 
 class Task(Audit, LegacyCode, OfficeMixin):
+    task_hash = models.UUIDField(default=uuid.uuid4, editable=False)
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='child')
@@ -545,3 +547,24 @@ class Filter(Audit):
         verbose_name = 'Filtro'
         verbose_name_plural = 'Filtros'
         unique_together = (('create_user', 'name'),)
+
+
+class TaskWorkflow(Audit):
+    custtom_settings = models.ForeignKey(CustomSettings, related_name='task_workflows')
+    task_from = models.CharField(verbose_name='Do status', null=False, max_length=30,
+                                   choices=((x.value, x.name.title()) for x in TaskStatus),
+                                   default=TaskStatus.REQUESTED)
+    task_to = models.CharField(verbose_name='Para o status', null=False, max_length=30,
+                                   choices=((x.value, x.name.title()) for x in TaskStatus),
+                                   default=TaskStatus.REQUESTED)
+
+    responsible_user = models.ForeignKey(User)
+
+
+class TaskShowStatus(Audit):
+    custtom_settings = models.ForeignKey(CustomSettings, related_name='task_status_show')
+    status_to_show = models.CharField(
+        verbose_name='Mostrar status', null=False, max_length=30, 
+        choices=((x.value, x.name.title()) for x in TaskStatus),default=TaskStatus.REQUESTED)    
+    send_mail_template = models.ForeignKey(EmailTemplate, verbose_name='Template a enviar', blank=True, null=True)    
+

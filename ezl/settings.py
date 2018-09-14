@@ -67,7 +67,9 @@ SECRET_KEY = 'f5*(8sgk)n1!i52xijv0yt@jtewp28%g%sp1rx*=y68ocgg+!2'
 # SECURITY WARNING: don't run with debug turned on in production!
 if environment == 'development':
     DEBUG = True
+    WORKFLOW_URL_EMAIL = 'http://localhost:8000'
 else:
+    WORKFLOW_URL_EMAIL = 'https://ezl.ezlawyer.com.br'
     DEBUG = False
 
 ALLOWED_HOSTS = ['*']
