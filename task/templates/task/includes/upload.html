@@ -1,4 +1,4 @@
-<script>
+<script>            
     var tmplRowUpload = '<tr class="zoomInDown animated">\n' +
                         '    <td style="width: 50px;">\n' +
                         '       <div class="circle circle-sm bg-info di"> <i class="fa fa-user"></i></div>\n' +
@@ -19,12 +19,12 @@
                         '    </td>\n' +
                         '</tr>';
 
-    function get_ecms(task_id) {
+    var get_ecms = function(url, task_key, task_value){
+        var data = {}
+        data[task_key] = task_value
         $.ajax({
-            url: "/providencias/ajax_get_ecms/",
-            data: {
-                'task_id': task_id
-            },
+            url: url,
+            data: data,
             dataType: 'json',
             success: function (data) {
                 $('#containnerUploads').html('');
@@ -41,7 +41,31 @@
                 })
             }
         });
-    }
+    };
+
+    // get_internal_ecms acessa os ecms atraves de usuario interno na base 
+    // logado no sistema.     
+    function get_internal_ecms(task_id) {            
+        url = "/providencias/ajax_get_ecms/";
+        task_key="task_id"
+        get_ecms(url, task_key, task_id)
+    };
+    // get_external_ecms acessa os ecms sem fazer login na base de dados
+    // e utiliza o uuid da task para isso.     
+    var get_external_ecms = function(task_hash) {
+        url = "/providencias/ajax_get_external_ecms/";
+        task_key="task_hash"
+        get_ecms(url, task_key, task_hash)
+    };
+
+    var manager_ecms = function(data) {        
+        let exp =  /external-task-detail/;
+        if (exp.exec('external-task-detail')) {
+            get_external_ecms(data.result.task_hash)
+        } else {
+            get_internal_ecms(data.result.task_id)
+        }
+    };
 
     function deleteFile(task_id, pk, file) {
         swal({
@@ -62,7 +86,7 @@
                 success: function (data) {
                     if (data.is_deleted) {
                         $('#deleting').modal('hide');
-                        get_ecms(task_id);
+                        get_internal_ecms(task_id);
                         swal("Sucesso", data.message, "success")
                     }
                     else {
@@ -78,5 +102,5 @@
                 }
             })
         });
-    }
+    }        
 </script>

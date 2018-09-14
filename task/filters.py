@@ -24,6 +24,11 @@ GROUP_BY_TASK_TO_RECEIVE_TYPE = (
 )
 
 
+class TaskApiFilter(FilterSet):
+  class Meta:
+    model = Task
+    fields = ['legacy_code', 'task_number']
+
 class TaskFilter(FilterSet):
     state = ModelChoiceFilter(queryset=filter_valid_choice_form(
         State.objects.filter(is_active=True)),

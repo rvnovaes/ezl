@@ -1,6 +1,16 @@
 from core.models import Person
 from import_export.widgets import ForeignKeyWidget, Widget, DateTimeWidget
 from task.models import TaskStatus
+from codemirror import CodeMirrorTextarea
+
+code_mirror_schema = CodeMirrorTextarea(
+    mode="javascript",
+    theme="material",
+    config={
+        'fixedGutter': True,
+        'indentUnit': 4
+    }
+)
 
 
 class UnaccentForeignKeyWidget(ForeignKeyWidget):

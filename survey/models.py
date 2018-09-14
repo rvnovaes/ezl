@@ -1,3 +1,4 @@
+from core.models import OfficeMixin, OfficeManager, Audit
 from django.db import models
 from enum import Enum
 
@@ -29,7 +30,7 @@ def get_legacy_type_map():
     return survey_map
 
 
-class Survey(models.Model):
+class Survey(OfficeMixin, Audit):
 
     name = models.CharField(max_length=128, verbose_name='Nome')
     data = models.TextField(
@@ -38,8 +39,14 @@ class Survey(models.Model):
         blank=True
     )
 
+    objects = OfficeManager()
+
     def __str__(self):
         return self.name
 
     class Meta:
         verbose_name = 'Questionário'
+
+    @property
+    def use_upload(self):
+        return False
