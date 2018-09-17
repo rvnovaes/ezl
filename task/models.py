@@ -181,6 +181,11 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, null=False, blank=False, verbose_name='Tipo de Serviço')
     survey = models.ForeignKey('survey.Survey', null=True, blank=True, verbose_name='Tipo de Formulário')
 
+    office = models.ForeignKey(Office, on_delete=models.CASCADE, blank=False,
+                               null=False,
+                               related_name='%(class)s_office',
+                               verbose_name='Escritório')
+
     objects = OfficeManager()
 
     class Meta:
