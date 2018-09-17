@@ -779,9 +779,9 @@ class GenericFormOneToMany(FormView, SingleTableView):
                                              self.related_model._meta.fields,
                                              related_id=related_model_id,
                                              field_name_related=field_related.name)
-        args = generic_search.despatch()
-        if args:
-            table = eval(args.replace('.model.', '.related_model.'))
+        generic_search_args = generic_search.despatch()
+        if generic_search_args:
+            table = eval(generic_search_args.replace('.model.', '.related_model.'))
         else:
             table = self.table_class(self.related_model.objects.none())
             if related_model_id:

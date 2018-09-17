@@ -90,6 +90,11 @@ class OfficeManager(models.Manager):
     def get_queryset(self, office=False):
         res = super().get_queryset()
         if office:
+            office_list = []
+            if type(office) is list:
+                office_list.extend(office)
+            else:
+                office_list.append(office)
             res = super().get_queryset().filter(office__id__in=office)
         return res
 
