@@ -48,6 +48,10 @@ TaskForm = (function($){
     TaskForm.prototype.eventChangeFolder = function(value, callback) {
         self.fieldWasChanged('folder', value);
         if (isEmpty(value)){
+            choices = ['<option value="">Sem registros</option>'];
+            self.$lawsuit.html(choices.join(''));
+            self.$lawsuit.select2();
+            self.$lawsuit.selectpicker('refresh')
             return false;
         }
         $.get("/v1/lawsuit/lawsuit?folder=" + value, function(data){
@@ -61,6 +65,7 @@ TaskForm = (function($){
                 choices.push('<option value="' + item.id + '">' + item.law_suit_number + ' - ' + item.court_district.name + '</option>');
             });
             self.$lawsuit.html(choices.join(''));
+            self.$lawsuit.select2();
             self.$lawsuit.selectpicker('refresh')
 
             if (typeof(callback) == "function"){
@@ -103,6 +108,12 @@ TaskForm = (function($){
 
     TaskForm.prototype.loadEvents = function() {
         self.$folder.change(function(){
+            if ($(this).val() === '') {
+                $(this).data('value', '');
+                $(this).attr('value', '');
+            }else{
+                $(this).data('value', parseInt($(this).attr('value')));
+            }
             var value = $(this).data('value');
             self.eventChangeFolder(value);
         });
@@ -218,9 +229,14 @@ TaskForm = (function($){
 
     TaskForm.prototype.successPopup = function(field, value, label){
         var $el = self["$" + field];
+        debugger
         if ($el.prop('tagName').toLowerCase() == "select"){
             addOption($el, decodeURI(label), value);
-            $el.val(value);
+            if (field == 'lawsuit'){
+                $el.val(value).trigger("change");
+            }else{
+                $el.val(value);
+            }
             $el.value = value;
         } else {
             $('#id_folder').attr('data-value', value);

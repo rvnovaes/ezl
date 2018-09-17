@@ -227,6 +227,8 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
         ret = "{}".format(self.law_suit_number)
         if self.person_lawyer:
             ret = "{} - {}".format(ret, self.person_lawyer.legal_name)
+        else:
+            ret = "{} - {}".format(ret, self.court_district.name)
         return ret
 
     def save(self, *args, **kwargs):

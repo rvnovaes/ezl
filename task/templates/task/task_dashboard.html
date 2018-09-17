@@ -44,7 +44,7 @@
                 <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12" id="id_{{ status_items.name|lower }}">
                     <a {% if status_items.total %}href="#modal-view-task-table" data-toggle="modal"{% else %}href="javascript:swal('Não há dados para exibir.')"{% endif %} data-status="{{ status_items.status }}">
                     <div class="white-box">
-                        <h5 class="font-bold ezl-text-{{ status_items.name|lower }}">{{ status_items.title }}</h5>
+                        <h5 class="font-bold ezl-text-{{ status_items.name|lower }}" style="min-height: 32px">{{ status_items.title }}</h5>
                         <div class="text-left">
                             <h1>
                                 <sup>
