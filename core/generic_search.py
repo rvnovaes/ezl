@@ -3,6 +3,8 @@ from itertools import groupby
 from datetime import datetime
 from django.contrib.auth.models import User
 from financial.utils import remove_caracter_especial
+from core.utils import get_office_session
+
 
 def field_to_html_input(field):
     html_map = {
@@ -89,7 +91,12 @@ class GenericSearchFormat(object):
             if self.model == User:
                 search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
             else:
-                search = "self.table_class(self.model.objects.get_queryset(office=office).filter({params}))"
+                if not office:
+                    office = get_office_session(self.request)
+                search = "self.table_class(self.model.objects.get_queryset(office=[{office}]).filter({params}))".format(
+                    office=office.id,
+                    params='{params}'
+                )
         except:
             search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
 
