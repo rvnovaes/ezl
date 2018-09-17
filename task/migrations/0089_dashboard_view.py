@@ -11,7 +11,7 @@ import task.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0087_typetask_is_audience'),
+        ('task', '0088_typetask_is_audience'),
     ]
 
     operations = []

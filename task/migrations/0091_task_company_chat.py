@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('chat', '0013_chat_company'),
-        ('task', '0089_auto_20180813_1320'),
+        ('task', '0090_auto_20180813_1320'),
     ]
 
     operations = [

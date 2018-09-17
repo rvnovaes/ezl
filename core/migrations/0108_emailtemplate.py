@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0097_remove_customsettings_task_settings'),
+        ('core', '0107_remove_customsettings_task_settings'),
     ]
 
     operations = [

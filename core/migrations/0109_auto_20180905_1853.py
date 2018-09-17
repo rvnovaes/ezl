@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('core', '0098_emailtemplate'),
+        ('core', '0108_emailtemplate'),
     ]
 
     operations = [

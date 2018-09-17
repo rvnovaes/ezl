@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('task', '0094_auto_20180903_1649'),
+        ('task', '0100_auto_20180903_1649'),
     ]
 
     operations = [

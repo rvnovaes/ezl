@@ -9,7 +9,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0087_auto_20180828_1843'),
+        ('task', '0091_task_company_chat'),
     ]
 
     operations = [

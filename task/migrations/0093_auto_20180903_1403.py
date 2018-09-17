@@ -8,7 +8,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0088_task_task_hash'),
+        ('task', '0092_task_task_hash'),
     ]
 
     operations = [

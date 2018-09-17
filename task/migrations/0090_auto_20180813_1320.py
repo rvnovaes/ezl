@@ -9,7 +9,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0088_dashboard_view'),
+        ('task', '0089_dashboard_view'),
     ]
 
     operations = [

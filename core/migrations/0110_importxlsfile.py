@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('core', '0092_office_use_service'),
+        ('core', '0109_auto_20180905_1853'),
     ]
 
     operations = [

@@ -23,7 +23,7 @@ def create_default_type_tasks(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0091_typetask_office'),
+        ('task', '0097_auto_20180903_1634'),
     ]
 
     operations = [
