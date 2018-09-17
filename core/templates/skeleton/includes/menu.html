@@ -124,12 +124,14 @@
                     <span class="hide-menu">Importação de OS</span>
                 </a>
             </li>
-            <li><!-- IMPORTAÇÃO TABELA DE PREÇO -->
+            {% if 'group_admin' in office_session_perms or request.user.is_superuser %}
+            <li><!-- TIPOS DE TASK -->
                 <a href="{% url 'typetask_list' %}" target="_self">
                     <i class="fa fa-code-fork fa-fw"></i>
                     <span class="hide-menu">Tipo de Serviço</span>
                 </a>
             </li>
+            {% endif %}
             <li><!-- IMPORTAÇÃO TABELA DE PREÇO -->
                 <a href="{% url 'import_service_price_table' %}" target="_self">
                     <i class="fa fa-money fa-fw"></i>
