@@ -108,7 +108,7 @@ def custom_settings_post_save(sender, instance, created, **kwargs):
         instance.office.use_etl = False
         instance.office.use_service = False
         instance.default_user.groups.add(
-            Group.objects.filter('Correspondente-{}'.format(instance.office.pk)).first())
+                Group.objects.filter(name='Correspondente-{}'.format(instance.office.pk)).first())
         status_to_show = [
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.OPEN, send_mail_template=EmailTemplate.objects.filter(
