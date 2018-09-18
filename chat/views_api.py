@@ -19,4 +19,4 @@ class UnreadMessageViewSet(viewsets.ModelViewSet):
 
 	def get_queryset(self):
 		user = self.request.user				
-		return UnreadMessage.objects.filter(user_by_message__user_by_chat_id=2).order_by('-id')
+		return UnreadMessage.objects.filter(user_by_message__user_by_chat_id=user.pk).order_by('-id')
