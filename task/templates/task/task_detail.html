@@ -312,8 +312,13 @@
 
         function getId(value) {
             var task_status = value.id;
+            {% if custom_settings %}
+            var office_work_alone = {{ custom_settings.i_work_alone|lower }};
+            {% else %}
+            var office_work_alone = false;
+            {% endif %}
 
-            if (value.id == "BLOCKEDPAYMENT" || value.id == "FINISHED"){
+            if ((value.id == "BLOCKEDPAYMENT" || value.id == "FINISHED") && !(office_work_alone) ){
                 $('.rating-container').show();
             } else {
                 $('.rating-container').hide();
