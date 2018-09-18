@@ -18,7 +18,6 @@ from core.models import CustomSettings
 from task.mail import TaskMail
 
 
-
 send_notes_execution_date = Signal(
     providing_args=['notes', 'instance', 'execution_date'])
 
@@ -63,6 +62,7 @@ def create_or_update_user_by_chat(task, task_to_fields, fields):
                 #Tratamento específico para cenário da tarefa EZL-904
                 user = UserByChat.objects.filter(user_by_chat=user, chat=task.chat).first()
             user = user.user_by_chat
+
 
 def create_users_company_by_chat(company, chat):
     users = []
@@ -317,8 +317,6 @@ def receive_notes_execution_date(notes, instance, execution_date, survey_result,
     instance.survey_result = survey_result if survey_result else None
 
 
-
-
 @receiver(pre_save, sender=Task)
 def change_status(sender, instance, **kwargs):
     now_date = timezone.now()
@@ -353,6 +351,7 @@ def change_status(sender, instance, **kwargs):
             instance.execution_date = now_date
 
         instance.alter_date = now_date
+
 
 @receiver(post_save, sender=TaskHistory)
 @check_environ
@@ -413,6 +412,3 @@ def update_status_child_task(sender, instance, **kwargs):
         child.save(** {'skip_signal': instance._skip_signal,
                        'skip_mail': False,
                        'from_parent': True})
-
-
-
