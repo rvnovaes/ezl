@@ -28,6 +28,11 @@ class SurveyCreateView(AuditFormMixin, CreateView):
     object_list_url = 'survey_list'
     permission_required = (SurveyPermissions.can_edit_surveys, )
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class SurveyUpdateView(PermissionRequiredMixin, AuditFormMixin, UpdateView):
     model = Survey

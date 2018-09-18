@@ -2,7 +2,6 @@ from etl.models import DashboardETL, ErrorETL
 from django.contrib import admin
 
 
-
 class DashboardErrorInline(admin.TabularInline):
     model = ErrorETL
     fk_name = 'log'

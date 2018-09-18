@@ -14,7 +14,8 @@ def add_admin_to_offices(apps, schema_editor):
     super_users = User.objects.filter(is_superuser=True).all()
     for super_user in super_users:
         super_user.groups.all().delete()
-        offices = Office.objects.exclude(officemembership__person=super_user.person).all()
+        offices = Office.objects.exclude(
+            officemembership__person=super_user.person).all()
         for office in offices:
             OfficeMembership(office=office,
                              person=super_user.person,

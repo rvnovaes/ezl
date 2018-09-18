@@ -1,5 +1,4 @@
 import copy
-from datetime import datetime
 from django.template.loader import render_to_string
 from ecm.models import DefaultAttachmentRule, Attachment
 from task.models import *
@@ -7,7 +6,7 @@ from task.mail import SendMail
 from task.rules import RuleViewTask
 from core.utils import get_office_session
 from core.tasks import send_mail
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.core.files.base import ContentFile
 from django.conf import settings
 from retrying import retry
@@ -118,3 +117,18 @@ def get_dashboard_tasks(request, office_session, checker, person):
                 ~Q(task_status__in=exclude_status))
 
     return data, exclude_status
+
+
+def create_default_type_tasks(office, create_user=None):
+    if not create_user:
+        create_user = office.create_user
+    main_type_tasks = TypeTaskMain.objects.all()
+    TypeTask.objects.filter(office=office).delete()
+    for main_type_task in main_type_tasks:
+        type_task = TypeTask()
+        type_task.name = main_type_task.name
+        type_task.create_user = create_user
+        type_task.office = office
+        type_task.save()
+        type_task.type_task_main.add(main_type_task)
+        type_task.save()

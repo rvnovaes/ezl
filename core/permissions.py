@@ -22,6 +22,7 @@ GROUP_PERMISSIONS = {
     ),
 
     Person.SUPERVISOR_GROUP: (
+        Permissions.can_access_settings,
         Permissions.block_payment_tasks,
         Permissions.can_access_general_data,
         SurveyPermissions.can_edit_surveys,
@@ -58,15 +59,17 @@ GROUP_PERMISSIONS = {
 
 }
 
+
 def create_permission(office):
     from core.models import Office
     content_type = ContentType.objects.get_for_model(Office)
     for group_name, permissions in GROUP_PERMISSIONS.items():
-        name='{}-{}'.format(group_name, office.id)
+        name = '{}-{}'.format(group_name, office.id)
         group, nil = create_group(name)
         if office.legal_name == 'Marcelo Tostes Advogados Associados' and office.pk == 1:
             update_groups(group_name, group_name, office)
-        update_groups(group_name, '{}-{}-{}'.format(group_name, office.id, office.legal_name), office)
+        update_groups(group_name, '{}-{}-{}'.format(group_name,
+                                                    office.id, office.legal_name), office)
         group.permissions.clear()
         OfficeRelGroup.objects.filter(group=group).delete()
         for permission in Permissions:
@@ -81,18 +84,21 @@ def create_permission(office):
             group.permissions.add(permission)
             OfficeRelGroup.objects.get_or_create(office=office, group=group)
 
+
 def create_group(group_name):
     return Group.objects.get_or_create(name=group_name)
+
 
 def update_groups(group_name, name_to_search, office):
     groups = Group.objects.filter(name=name_to_search)
     for group in groups:
         if Group.objects.filter(name='{}-{}'.format(group_name, office.id)).exists():
-            old_group = Group.objects.filter(name='{}-{}'.format(group_name, office.id)).first()
+            old_group = Group.objects.filter(
+                name='{}-{}'.format(group_name, office.id)).first()
             for user in group.user_set.all():
                 old_group.user_set.add(user)
             group.user_set.clear()
             group.delete()
         else:
-            group.name =  '{}-{}'.format(group_name, office.id)
+            group.name = '{}-{}'.format(group_name, office.id)
             group.save()

@@ -8,6 +8,7 @@ from chat.models import Chat, Message, UserByChat, UnreadMessage
 from urllib.parse import parse_qs
 from django.utils import timezone
 from django.db.models import Q
+from django.contrib.auth.models import User
 
 
 @channel_session_user_from_http
@@ -22,13 +23,16 @@ def ws_connect(message, label):
 
 @channel_session_user
 def ws_message(message, label):
-    try:
+    try:        
         data = json.loads(message['text'])
+        user_message = message.user        
+        if data.get('user_id'):
+            user_message = User.objects.get(pk=data.get('user_id'))
         chat, created = Chat.objects.get_or_create(pk=int(data.get('chat')))
-        chat_message = chat.messages.create(create_user=message.user, message=data.get('text'))
+        chat_message = chat.messages.create(create_user=user_message, message=data.get('text'))
         chat.save()
-        for user in UserByChat.objects.filter(~Q(user_by_chat=message.user), chat=chat, is_active=True):
-            UnreadMessage.objects.create(create_user=message.user, user_by_message=user,
+        for user in UserByChat.objects.filter(~Q(user_by_chat=user_message), chat=chat, is_active=True):
+            UnreadMessage.objects.create(create_user=user_message, user_by_message=user,
                                          message=chat_message)
         data['create_date'] = timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M')
         data['create_user_id'] = chat_message.create_user.id
