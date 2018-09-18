@@ -30,7 +30,7 @@ class UnreadMessageSerializer(serializers.ModelSerializer):
 	def get_office(self, obj):
 		if obj.message.chat.offices.exists():
 			office = obj.message.chat.offices.first()
-			return {'name': office.legal_name, 'logo': office.logo.url}
+			return {'name': office.legal_name, 'logo': office.logo.url if office.logo else ''}
 		return {}
 
 	def get_chat(self, obj):

@@ -64,6 +64,36 @@ def create_or_update_user_by_chat(task, task_to_fields, fields):
                 user = UserByChat.objects.filter(user_by_chat=user, chat=task.chat).first()
             user = user.user_by_chat
 
+def create_users_company_by_chat(company, chat):
+    users = []
+    for company_user in company.users.all():
+        user_by_chat = UserByChat(
+            create_user=chat.create_user, user_by_chat=company_user.user, chat=chat)
+        users.append(user_by_chat)
+    UserByChat.objects.bulk_create(users)
+
+
+def create_company_chat(sender, instance, created, **kwargs):
+    if not instance.parent and instance.client.company:
+        label = 'company-task-{}'.format(instance.pk)
+        title = """#{lawsuit_number}""".format(
+            lawsuit_number=instance.lawsuit_number)
+        description = "Processo: {}".format(instance.lawsuit_number)
+        chat, chat_created = Chat.objects.update_or_create(
+            label=label, defaults={
+                'company': instance.client.company,
+                'create_user': instance.create_user,
+                'description': description,
+                'title': title,
+                'back_url': '/dashboard/{}'.format(instance.pk),
+            }
+        )
+        instance.company_chat = chat
+        if chat_created:
+            instance.company_chat.offices.add(instance.office)
+            create_users_company_by_chat(instance.client.company, chat)
+        instance.save(**{'skip_signal': True, 'skip_mail': True, 'from_parent': True})
+
 
 def create_or_update_chat(sender, instance, created, **kwargs):
     try:
@@ -226,6 +256,7 @@ def post_save_task(sender, instance, created, **kwargs):
         new_task(sender, instance, created, **kwargs)
         ezl_export_task_to_advwin(sender, instance, **kwargs)
         create_or_update_chat(sender, instance, created, **kwargs)
+        create_company_chat(sender, instance, created, **kwargs)
         workflow_task(sender, instance, created, **kwargs)
         workflow_send_mail(sender, instance, created, **kwargs)
         send_task_emails(sender, instance, created, **kwargs)
