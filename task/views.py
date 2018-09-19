@@ -1320,11 +1320,10 @@ def ecm_batch_download(request, pk):
         return HttpResponseRedirect(ecm.task.get_absolute_url())
 
 
-class TypeTaskListView(CustomLoginRequiredView, PermissionRequiredMixin, SingleTableViewMixin):
+class TypeTaskListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = TypeTask
     table_class = TypeTaskTable
     ordering = ('id', )
-    permission_required = (CorePermissions.group_admin, )
 
 
 class TypeTaskCreateView(AuditFormMixin, CreateView):
