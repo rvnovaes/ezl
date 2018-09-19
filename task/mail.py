@@ -1,4 +1,5 @@
 from django.core.mail import send_mail, EmailMultiAlternatives
+from django.templatetags.tz import localtime
 from django.template.loader import render_to_string
 from django.contrib.auth.tokens import default_token_generator
 from allauth.account.utils import user_pk_to_url_str
@@ -13,7 +14,19 @@ import base64
 import traceback
 import logging
 
+
 logger = logging.getLogger(__name__)
+
+
+def to_localtime(date_time=None, format_str='%d/%m/%Y %H:%M'):
+    if date_time:
+        return localtime(date_time).strftime(format_str)
+    else:
+        return ''
+
+
+def get_str_or_blank(obj=None):
+    return str(obj) if obj else ''
 
 
 class SendMail:
@@ -70,27 +83,29 @@ class TaskOpenMailTemplate(object):
     def get_dynamic_template_data(self):
         return {
             "task_number": self.task.task_number,
-            "description": self.task.description,
-            "final_deadline_date": datetime.strftime(self.task.final_deadline_date, '%d/%m/%Y %H:%M'),
-            "opposing_party": self.task.opposing_party,
-            "delegation_date": datetime.strftime(self.task.delegation_date, '%d/%m/%Y %H:%M'),
-            "court_division": str(self.task.court_division),
-            "organ": str(self.task.movement.law_suit.organ),
-            "address": self.task.address,
-            "lawsuit_number": self.task.lawsuit_number,
-            "client": str(self.task.client),
-            "state": str(self.task.movement.law_suit.court_district.state),
-            "court_district": str(self.task.movement.law_suit.court_district),
-            "office_name": self.task.parent.office.legal_name,
-            "office_phone": str(self.task.parent.office.contactmechanism_set.filter(contact_mechanism_type=PHONE).first()),
-            "office_email": str(self.task.parent.office.contactmechanism_set.filter(contact_mechanism_type=EMAIL).first()),
-            "office_address": str(self.task.parent.office.address_set.first()),
-            "office_correspondent_name": self.task.office.legal_name,
-            "office_correspondent_phone": str(self.task.office.contactmechanism_set.filter(
+            "description": get_str_or_blank(self.task.description),
+            "final_deadline_date": to_localtime(self.task.final_deadline_date, '%d/%m/%Y %H:%M'),
+            "opposing_party": get_str_or_blank(self.task.opposing_party),
+            "delegation_date": to_localtime(self.task.delegation_date, '%d/%m/%Y %H:%M'),
+            "court_division": get_str_or_blank(self.task.court_division),
+            "organ": get_str_or_blank(self.task.movement.law_suit.organ),
+            "address": get_str_or_blank(self.task.address),
+            "lawsuit_number": get_str_or_blank(self.task.lawsuit_number),
+            "client": get_str_or_blank(self.task.client),
+            "state": get_str_or_blank(self.task.movement.law_suit.court_district.state),
+            "court_district": get_str_or_blank(self.task.movement.law_suit.court_district),
+            "office_name": get_str_or_blank(self.task.parent.office.legal_name),
+            "office_phone": get_str_or_blank(self.task.parent.office.contactmechanism_set.filter(
                 contact_mechanism_type=PHONE).first()),
-            "office_correspondent_email": str(self.task.office.contactmechanism_set.filter(
+            "office_email": get_str_or_blank(self.task.parent.office.contactmechanism_set.filter(
                 contact_mechanism_type=EMAIL).first()),
-            "office_correspondent_address": str(self.task.parent.office.address_set.first()),
+            "office_address": get_str_or_blank(self.task.parent.office.address_set.first()),
+            "office_correspondent_name": self.task.office.legal_name,
+            "office_correspondent_phone": get_str_or_blank(self.task.office.contactmechanism_set.filter(
+                contact_mechanism_type=PHONE).first()),
+            "office_correspondent_email": get_str_or_blank(self.task.office.contactmechanism_set.filter(
+                contact_mechanism_type=EMAIL).first()),
+            "office_correspondent_address": get_str_or_blank(self.task.parent.office.address_set.first()),
             "task_url": "{}/providencias/external-task-detail/{}/".format(settings.WORKFLOW_URL_EMAIL,
                                                                           self.task.task_hash.hex),
             "btn_accpeted": "{}/providencias/external-task/ACCEPTED/{}/".format(settings.WORKFLOW_URL_EMAIL,
