@@ -123,7 +123,7 @@ class CorrespondentsTable(object):
             client = task.movement.law_suit.folder.person_customer
             offices_related = task.office.offices.all()
             correspondents_table = ServicePriceTableTaskTable(
-                ServicePriceTable.objects.filter(Q(Q(office=task.office) |
+                set(ServicePriceTable.objects.filter(Q(Q(office=task.office) |
                                                    Q(Q(office__public_office=True), ~Q(office=task.office))),
                                                  Q(
                                                      Q(type_task=type_task) |
@@ -139,7 +139,7 @@ class CorrespondentsTable(object):
                                                  Q(Q(court_district=court_district) | Q(court_district=None)),
                                                  Q(Q(state=state) | Q(state=None)),
                                                  Q(Q(client=client) | Q(client=None)),
-                                                 Q(is_active=True))
+                                                 Q(is_active=True)))
             )
         else:
             correspondents_table = ServicePriceTableTaskTable(ServicePriceTable.objects.none())
