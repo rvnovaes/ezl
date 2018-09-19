@@ -1340,27 +1340,25 @@ class TypeTaskCreateView(AuditFormMixin, CreateView):
         return kw
 
 
-class TypeTaskUpdateView(PermissionRequiredMixin, AuditFormMixin, UpdateView):
+class TypeTaskUpdateView(AuditFormMixin, UpdateView):
     model = TypeTask
     form_class = TypeTaskForm
     success_url = reverse_lazy('typetask_list')
     success_message = UPDATE_SUCCESS_MESSAGE
     template_name_suffix = '_update_form'
     object_list_url = 'typetask_list'
-    permission_required = (CorePermissions.group_admin, )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
 
 
-class TypeTaskDeleteView(PermissionRequiredMixin, AuditFormMixin, MultiDeleteViewMixin):
+class TypeTaskDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     model = TypeTask
     success_url = reverse_lazy('typetask_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(
         model._meta.verbose_name_plural)
     object_list_url = 'typetask_list'
-    permission_required = (CorePermissions.group_admin, )
 
 
 class GetTypeTaskMainCharacteristics(CustomLoginRequiredView, View):
