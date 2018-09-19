@@ -517,6 +517,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.REFUSED_SERVICE:
             form.instance.person_distributed_by = self.request.user.person
+        if form.instance.task_status == TaskStatus.REFUSED and not form.instance.person_distributed_by:
+            form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.OPEN:
             if not form.instance.person_distributed_by:
                 form.instance.person_distributed_by = self.request.user.person
