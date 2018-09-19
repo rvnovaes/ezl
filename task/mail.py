@@ -82,15 +82,15 @@ class TaskOpenMailTemplate(object):
             "state": str(self.task.movement.law_suit.court_district.state),
             "court_district": str(self.task.movement.law_suit.court_district),
             "office_name": self.task.parent.office.legal_name,
-            "office_phone": self.task.parent.office.contactmechanism_set.filter(contact_mechanism_type=PHONE).first(),
-            "office_email": self.task.parent.office.contactmechanism_set.filter(contact_mechanism_type=EMAIL).first(),
-            "office_address": self.task.parent.office.address_set.first(),
+            "office_phone": str(self.task.parent.office.contactmechanism_set.filter(contact_mechanism_type=PHONE).first()),
+            "office_email": str(self.task.parent.office.contactmechanism_set.filter(contact_mechanism_type=EMAIL).first()),
+            "office_address": str(self.task.parent.office.address_set.first()),
             "office_correspondent_name": self.task.office.legal_name,
-            "office_correspondent_phone": self.task.office.contactmechanism_set.filter(
-                contact_mechanism_type=PHONE).first(),
-            "office_correspondent_email": self.task.office.contactmechanism_set.filter(
-                contact_mechanism_type=EMAIL).first(),
-            "office_correspondent_address": self.task.parent.office.address_set.first(),
+            "office_correspondent_phone": str(self.task.office.contactmechanism_set.filter(
+                contact_mechanism_type=PHONE).first()),
+            "office_correspondent_email": str(self.task.office.contactmechanism_set.filter(
+                contact_mechanism_type=EMAIL).first()),
+            "office_correspondent_address": str(self.task.parent.office.address_set.first()),
             "task_url": "{}/providencias/external-task-detail/{}/".format(settings.WORKFLOW_URL_EMAIL,
                                                                           self.task.task_hash.hex),
             "btn_accpeted": "{}/providencias/external-task/ACCEPTED/{}/".format(settings.WORKFLOW_URL_EMAIL,
