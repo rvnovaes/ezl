@@ -17,7 +17,7 @@ from core.forms import BaseForm, BaseModelForm
 class TypeMovementForm(BaseForm):
     class Meta:
         model = TypeMovement
-        fields = ['office', 'name', 'is_active']
+        fields = ['office', 'name', 'is_default', 'is_active']
 
     name = forms.CharField(
         max_length=255,
@@ -65,7 +65,7 @@ class MovementForm(BaseForm):
 class FolderForm(BaseForm):
     class Meta:
         model = Folder
-        fields = ['office', 'folder_number', 'person_customer', 'cost_center', 'is_active']
+        fields = ['office', 'folder_number', 'person_customer', 'cost_center', 'is_default', 'is_active']
 
     folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
     person_customer = forms.CharField(label="Cliente",

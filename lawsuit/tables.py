@@ -26,9 +26,9 @@ class TypeMovementTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'name', 'is_active', 'legacy_code')
+        sequence = ('selection', 'name', 'is_active', 'legacy_code', 'is_default')
         model = TypeMovement
-        fields = ['selection', 'name', 'legacy_code', 'is_active']
+        fields = ['selection', 'name', 'legacy_code', 'is_default', 'is_active']
         attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem tipos de movimentações cadastradas"
         row_attrs = {
@@ -57,9 +57,11 @@ class FolderTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'folder_number', 'person_customer', 'cost_center', 'is_active', 'legacy_code')
+        sequence = ('selection', 'folder_number', 'person_customer', 'cost_center', 'is_active', 'legacy_code',
+                    'is_default')
         model = Folder
-        fields = ['folder_number', 'selection', 'legacy_code', 'person_customer', 'cost_center', 'is_active']
+        fields = ['folder_number', 'selection', 'legacy_code', 'person_customer', 'cost_center', 'is_active',
+                  'is_default']
         readonly_fields = ['folder_number']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem pastas cadastradas"
