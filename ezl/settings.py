@@ -280,6 +280,17 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+AWS_ACCESS_KEY_ID = 'AKIAJTB675KE6AXUTPKA'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_FILE_OVERWRITE = False
+if environment == 'production':
+    AWS_STORAGE_BUCKET_NAME = 'ezl-production'
+else:
+    AWS_STORAGE_BUCKET_NAME = 'ezl-development'
+AWS_STORAGE_BUCKET_URL = 'https://{}.s3.amazonaws.com/'.format(AWS_STORAGE_BUCKET_NAME)
+
 LOGIN_REDIRECT_URL = reverse_lazy('inicial')
 
 AUTHENTICATION_BACKENDS = (

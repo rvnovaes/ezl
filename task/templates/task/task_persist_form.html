@@ -85,14 +85,14 @@
 
 {% block extra_scripts %}
     {{ block.super }}
-    <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
-    <script src="{% static "file_form/file_form.js" %}"></script>
-    <script src="{% static "skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js" %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'task/task-typetask.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+    {% include 'ecm/javascripts.html' %}
     <script>
-       $(function() {
-           initUploadFields($('#object_form'));
-       });
+        get_attachments('{{ object|get_modelname_from_object }}', {{object.pk}})
     </script>
     {% endblock %}
 
@@ -102,5 +102,5 @@
     <link href="{% static "skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css" %}" rel="stylesheet" type="text/css" />
 {% endblock %}
 {% block attachment_form %}
-    {% include 'ecm/attachments_create.html' %}
+  {% include 'ecm/attachments.html' %}
 {% endblock attachment_form %}

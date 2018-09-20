@@ -30,7 +30,8 @@ def get_task_attachment(self, form):
         attachments = Attachment.objects.filter(
             model_name='ecm.defaultattachmentrule').filter(object_id=rule.id)
         for attachment in attachments:
-            if os.path.isfile(attachment.file.path):
+            new_file = get_file_content_copy(attachment.file)
+            if new_file:
                 file_name = os.path.basename(attachment.file.name)
                 new_file = ContentFile(attachment.file.read())
                 new_file.name = file_name
@@ -46,31 +47,45 @@ def get_task_attachment(self, form):
 
 @retry(stop_max_attempt_number=4, wait_fixed=1000)
 def copy_ecm(ecm, task):
-    try:
+    new_file = get_file_content_copy(ecm.path)
+    if new_file:
         file_name = os.path.basename(ecm.path.name)
         ecm_related = ecm.ecm_related
         if not ecm_related:
             ecm_related = ecm
         if not Ecm.objects.filter(Q(task=task), Q(ecm_related=ecm_related)) \
                 and not task == ecm_related.task:
+
             new_ecm = copy.copy(ecm)
             new_ecm.pk = None
             new_ecm.task = task
-            new_file = ContentFile(ecm.path.read())
-            new_file.name = file_name
             new_ecm.path = new_file
-            new_ecm.exhibition_name = file_name
+            new_file.name = os.path.basename(ecm.path.name)
+            new_ecm.exhibition_name = new_file.name
             new_ecm.ecm_related = ecm_related
             new_ecm.save()
-    except Exception as e:
+            return new_ecm
+    else:
         subject = 'Erro ao copiar ECM {}'.format(ecm.id)
         body = """Erro ao copiar ECM {} para a OS {}:
-        {}
-        {}""".format(ecm.id, task.id, e, traceback.format_exc())
+        {} does not exists""".format(ecm.id, task.id, str(ecm.path))
         recipients = [admin[1] for admin in settings.ADMINS]
         # Nessario converter para unicode pois o celery usa python 2.7
         body = u'{}'.format(body)
         send_mail.delay(recipients, subject, body)
+
+
+def get_file_content_copy(filefield):
+    local_file_path = os.path.join(settings.MEDIA_ROOT, filefield.name)
+    if os.path.exists(local_file_path):
+        with open(local_file_path, 'r') as local_file:
+            content = ContentFile(local_file.read())
+    else:
+        try:
+            content = ContentFile(filefield.read())
+        except:
+            content = None
+    return content
 
 
 def task_send_mail(instance, number, project_link, short_message, custom_text, mail_list):

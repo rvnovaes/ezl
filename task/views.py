@@ -628,8 +628,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
         new_task.save()
         for ecm in object_parent.ecm_set.all():
-            if ecm.path:
-                copy_ecm(ecm, new_task)
+            new_ecm = copy_ecm(ecm, new_task)
 
     def dispatch(self, request, *args, **kwargs):
         res = super().dispatch(request, *args, **kwargs)
@@ -646,7 +645,6 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
 
 class EcmCreateView(CustomLoginRequiredView, CreateView):
     def post(self, request, *args, **kwargs):
-
         files = request.FILES.getlist('path')
         task = kwargs['pk']
         data = {'success': False,

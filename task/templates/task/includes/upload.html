@@ -59,8 +59,7 @@
     };
 
     var manager_ecms = function(data) {        
-        let exp =  /external-task-detail/;
-        if (exp.exec('external-task-detail')) {
+        if(location.href.indexOf('external-task') != -1){
             get_external_ecms(data.result.task_hash)
         } else {
             get_internal_ecms(data.result.task_id)

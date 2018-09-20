@@ -1,6 +1,8 @@
+import os
 import importlib
 import json
 from abc import abstractproperty
+from urllib.parse import urljoin
 from functools import wraps
 from django import forms
 from django.forms.utils import ErrorList
@@ -21,6 +23,7 @@ from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
+from django.views.static import serve as static_serve_view
 from django.views import View
 from django.views.generic import ListView, TemplateView
 from allauth.account.views import LoginView, PasswordResetView
@@ -1960,3 +1963,11 @@ class CustomSettingsUpdateView(AuditFormMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('custom_settings_update', args=(self.object.pk,))
+
+
+class MediaFileView(LoginRequiredMixin, View):
+
+    def get(self, request, path):
+        if os.path.exists(os.path.join(settings.MEDIA_ROOT, path)):
+            return static_serve_view(self.request, path, document_root=settings.MEDIA_ROOT)
+        return HttpResponseRedirect(urljoin(settings.AWS_STORAGE_BUCKET_URL, path))

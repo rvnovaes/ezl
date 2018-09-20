@@ -86,9 +86,7 @@ urlpatterns = [
     url(r'^popup_success', PopupSuccessView.as_view(), name='popup_success'),
     url(r'^api-auth/', include('rest_framework.urls')),
     url(r'^api/v1/', include('ezl.urls_api')),    
-] + \
-    static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static/')) + \
-    static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static/'))
 
 if settings.DEBUG:
     import debug_toolbar

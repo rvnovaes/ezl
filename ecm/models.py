@@ -26,14 +26,10 @@ class Attachment(AuditCreate, LegacyCode):
     file = models.FileField(
         verbose_name="Arquivo", upload_to=get_uploda_to
     )
+    size = models.PositiveIntegerField(null=True, blank=True)
     exibition_name = models.CharField(
         verbose_name="Nome de Exibição", max_length=255
     )
-
-    class Meta:
-        ordering = ['-id']
-        verbose_name = "Anexo"
-        verbose_name_plural = "Anexos"
 
     @property
     def filename(self):
@@ -43,6 +39,20 @@ class Attachment(AuditCreate, LegacyCode):
         return '{}/{}: {}'.format(
             self.object_id, self.model_name, self.filename
         )
+
+    def save(self, *args, **kwargs):
+        if not self.size:
+            try:
+                self.size = self.file.size
+            except:
+                # Skip errors when file does not exists
+                pass
+        return super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = "Anexo"
+        verbose_name_plural = "Anexos"
 
 
 class DefaultAttachmentRule (Audit, OfficeMixin):

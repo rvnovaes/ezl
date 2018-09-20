@@ -411,6 +411,7 @@ class EcmManager(models.Manager):
 
 class Ecm(Audit, LegacyCode):
     path = models.FileField(upload_to=get_dir_name, max_length=255, null=False)
+    size = models.PositiveIntegerField(null=True, blank=True)
     task = models.ForeignKey(Task, blank=False, null=False, on_delete=models.PROTECT)
     updated = models.BooleanField(default=True, null=False)
     exhibition_name = models.CharField(
@@ -420,19 +421,49 @@ class Ecm(Audit, LegacyCode):
 
     objects = EcmManager()
 
+    def save(self, *args, **kwargs):
+        if not self.size:
+            try:
+                self.size = self.path.size
+            except:
+                # Skip errors when file does not exists
+                pass
+        return super().save(*args, **kwargs)
+
     # Retorna o nome do arquivo no Path, para renderizar no tamplate
     @property
     def filename(self):
-        return os.path.basename(self.path.path) if self.path else None
+        return os.path.basename(self.path.name) if self.path else None
 
     @property
     def user(self):
         return User.objects.get(username=self.path.instance.create_user)
 
+    @property
+    def local_file_path(self):
+        return os.path.join(settings.MEDIA_ROOT, self.path.name)
+
+    def local_file_exists(self):
+        return os.path.exists(self.local_file_path)
+
     def delete(self, *args, **kwargs):
         if self.legacy_code:
             raise ValidationError("Não é possível apagar um arquivo que foi vinculado a outro sistema.")
+
+        # Após apagar um Ecm devemos apagar o arquivo local caso o mesmo ainda esteja no disco.
+        # O arquivo continua no disco em alguns casos pois ele pode ser ter sido criado antes de
+        # utilizarmos o S3.
+        if self.id is None and self.local_file_exists():
+            os.remove(self.local_file_path)
+
         return super().delete(*args, **kwargs)
+
+    def download(self):
+        """Baixamos o arquivo do S3 caso ele não exista localmente"""
+        if not self.local_file_exists():
+            with open(self.local_file_path, 'wb') as local_file:
+                local_file.write(self.path.read())
+        return self.local_file_path
 
 
 class TaskHistory(AuditCreate):
