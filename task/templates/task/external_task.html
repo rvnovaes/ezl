@@ -453,7 +453,12 @@
             const url = location.pathname;
             const status = regex.exec(url);
             if (status !== null) {
-                $(`#${status[0]}`).click();
+                if (status[0] === 'FINISHED') {
+                    $('#collapseECM').collapse('show');
+                    scrollTo($("#collapseHistory").offset().left, $("#collapseECM").offset().top)
+                } else {
+                    $(`#${status[0]}`).click();                    
+                }
             }
         })
     </script>
