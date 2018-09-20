@@ -16,6 +16,9 @@ from lawsuit.models import CourtDistrict
 from core.utils import check_environ
 from core.models import CustomSettings
 from task.mail import TaskMail
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 send_notes_execution_date = Signal(
@@ -35,8 +38,12 @@ def new_task(sender, instance, created, **kwargs):
             task_history.create_date = instance.create_date
             task_history.notes = notes
             task_history.save(skip_signal=skip_signal)
-    except:
-        pass
+            msg = 'HISTORICO SALVO: {task} {username} {status} {create_date} {notes}'.format(
+                task=task_history.task.task_number, username=task_history.create_user, 
+                status=task_history.status, create_date=task_history.create_date, notes=task_history.notes)
+            logger.info(msg)
+    except Exception as e:
+        logger.error('ERRO AO SALVAR HISTORICO {}'.format(e))        
 
 
 @check_environ
@@ -312,6 +319,8 @@ def load_previous_status(sender, instance, **kwargs):
 @receiver(send_notes_execution_date)
 def receive_notes_execution_date(notes, instance, execution_date, survey_result, **kwargs):
     setattr(instance, '__notes', notes if notes else '')
+    setattr(instance, '__external_task', kwargs.get('external_task'))
+    logger.info('HISTORY {}', kwargs)
     if execution_date and not instance.execution_date:
         instance.execution_date = execution_date
     instance.survey_result = survey_result if survey_result else None
@@ -359,9 +368,6 @@ def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
     if not getattr(instance, '_skip_signal', None) and instance.task.legacy_code:
         export_task_history.delay(instance.pk)
 
-
-# update parent task
-@receiver(pre_save, sender=Task)
 def update_status_parent_task(sender, instance, **kwargs):
     """
     Responsavel por alterar o status da OS pai, quando o status da OS filha e modificado
@@ -387,8 +393,6 @@ def update_status_parent_task(sender, instance, **kwargs):
             instance.parent.save(**{'skip_signal': instance._skip_signal,
                                     'skip_mail': False})
 
-
-@receiver(pre_save, sender=Task)
 def update_status_child_task(sender, instance, **kwargs):
     """
     Responsavel por atualizar o status da os filha se a o estatus da OS pai e modificado
@@ -403,8 +407,9 @@ def update_status_child_task(sender, instance, **kwargs):
     if instance.get_child and status:
         child = instance.get_child
         if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
-            setattr(child, '__notes', 'A OS {} foi recusada pelo escritório contratante {} pelo motivo {}'.format(
-                child.task_number, instance.office.legal_name, getattr(instance, '__notes', '')))
+            if not getattr(instance, '__external_task', False):
+                setattr(child, '__notes', 'A OS {} foi recusada pelo escritório contratante {} pelo motivo {}'.format(
+                    child.task_number, instance.office.legal_name, getattr(instance, '__notes', '')))                   
         child.task_status = status
         child._mail_attrs = get_child_recipients(instance.task_status)
         setattr(child, '_TaskDetailView__server', getattr(
@@ -412,3 +417,11 @@ def update_status_child_task(sender, instance, **kwargs):
         child.save(** {'skip_signal': instance._skip_signal,
                        'skip_mail': False,
                        'from_parent': True})
+
+
+@receiver(pre_save, sender=Task)
+def pre_save_task(sender, instance, **kwargs):
+    pre_save.disconnect(pre_save_task, sender=sender)    
+    update_status_parent_task(sender, instance, **kwargs)
+    update_status_child_task(sender, instance, **kwargs)
+    pre_save.connect(pre_save_task, sender=sender)

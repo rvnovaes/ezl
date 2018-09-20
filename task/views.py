@@ -51,6 +51,8 @@ from guardian.core import ObjectPermissionChecker
 from functools import reduce
 import operator
 from django.shortcuts import render
+import logging
+logger = logging.getLogger(__name__)
 
 
 mapOrder = {
@@ -244,9 +246,9 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
         context['filter'] = self.task_filter
         try:
             if self.request.GET['group_by_tasks'] == OFFICE:
-                office_list, total =  self.get_os_grouped_by_office()
+                office_list, total = self.get_os_grouped_by_office()
             else:
-                office_list, total =  self.get_os_grouped_by_client()
+                office_list, total = self.get_os_grouped_by_client()
         except:
             office_list, total = self.get_os_grouped_by_office()
         context['offices'] = office_list
@@ -534,9 +536,6 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                           if form.cleaned_data['execution_date'] else form.initial['execution_date'])
         survey_result = (form.cleaned_data['survey_result']
                          if form.cleaned_data['survey_result'] else form.initial['survey_result'])
-
-        send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
-                                       execution_date=execution_date, survey_result=survey_result)
         form.instance.__server = get_domain(self.request)
         if form.instance.task_status == TaskStatus.ACCEPTED_SERVICE:
             form.instance.person_distributed_by = self.request.user.person
@@ -589,7 +588,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             context['survey_data'] = (self.object.parent.type_task.survey.data
                                       if self.object.parent.type_task.survey else None)
         office_session = get_office_session(self.request)
-        get_correspondents_table = CorrespondentsTable(self.object, office_session)
+        get_correspondents_table = CorrespondentsTable(
+            self.object, office_session)
         context['correspondents_table'] = get_correspondents_table.get_correspondents_table()
         type_task_field = get_correspondents_table.get_type_task_field()
         if type_task_field:
@@ -1025,7 +1025,8 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
         data, exclude_status = get_dashboard_tasks(
             request, office_session, checker, request.user.person)
 
-        status_totals = data.values('task_status').annotate(total=Count('task_status')).order_by('task_status')
+        status_totals = data.values('task_status').annotate(
+            total=Count('task_status')).order_by('task_status')
 
         ret = {'office': office_session.legal_name}
         total = 0
@@ -1121,7 +1122,8 @@ def ajax_get_correspondents_table(request):
         type_task = TypeTask.objects.filter(pk=type_task_id).first()
         task = Task.objects.filter(pk=task_id).first()
         office = get_office_session(request)
-        get_correspondents_table = CorrespondentsTable(task, office, type_task=type_task)
+        get_correspondents_table = CorrespondentsTable(
+            task, office, type_task=type_task)
         type_task = get_correspondents_table.update_type_task(type_task)
         type_task_name = type_task.name
         type_task_id = type_task.id
@@ -1368,6 +1370,10 @@ class GetTypeTaskMainCharacteristics(CustomLoginRequiredView, View):
 
 
 class ExternalTaskView(UpdateView):
+    """
+    Permite que o um usuario execute acoes em uma determinado 
+    OS sem estar logado
+    """
     model = Task
     template_name = 'task/external_task.html'
     form_class = TaskDetailForm
@@ -1386,7 +1392,6 @@ class ExternalTaskView(UpdateView):
             task_id=self.object.id).order_by('-create_date')
         survey_data = (self.object.type_task.survey.data
                        if self.object.type_task.survey else None)
-        # if status and status == TaskStatus.FINISHED:
         self.execution_date = timezone.now()
         return render(
             request,
@@ -1405,10 +1410,22 @@ class ExternalTaskView(UpdateView):
 
     def post(self, request, task_hash, *args, **kwargs):
         task = Task.objects.filter(task_hash=task_hash).first()
+        custom_settings = CustomSettings.objects.filter(office=task.office)
         form = self.form_class(request.POST, instance=task)
+        if custom_settings.exists():
+            form.instance.alter_user = custom_settings.first().default_user        
         form.instance.task_status = TaskStatus[self.request.POST['action']
                                                ] or TaskStatus.INVALID
         if form.is_valid():
+            notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None
+            logger.info('*send_notes_execution_date*: {}'.format(notes))
+            execution_date = (form.cleaned_data['execution_date']
+                              if form.cleaned_data['execution_date'] else form.initial['execution_date'])
+            survey_result = (form.cleaned_data['survey_result']
+                             if form.cleaned_data['survey_result'] else form.initial['survey_result'])
+            send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
+                                           execution_date=execution_date, survey_result=survey_result, **{'external_task': True})
+            form.instance.__external_task = True            
             form.save()
         return HttpResponseRedirect(
             reverse('external-task-detail', args=[form.instance.task_hash.hex]))
