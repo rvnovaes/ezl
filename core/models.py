@@ -95,7 +95,7 @@ class OfficeManager(models.Manager):
                 office_list.extend(office)
             else:
                 office_list.append(office)
-            res = super().get_queryset().filter(office__id__in=office)
+            res = super().get_queryset().filter(office__id__in=office_list)
         return res
 
 
