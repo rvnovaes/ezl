@@ -1,22 +1,28 @@
 import os
+import json
 from enum import Enum
 from django.db import transaction
-
+import uuid
 import pickle
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls.base import reverse
 from django.utils import timezone
 from sequences import get_next_value
-from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office
+from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office, CustomSettings, EmailTemplate
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
 from decimal import Decimal
+from .schemas import *
+from django.contrib.postgres.fields import JSONField
+
 
 
 class Permissions(Enum):
+    can_access_settings = 'Can access custom settings'
     view_delegated_tasks = 'Can view tasks delegated to the user'
     view_all_tasks = 'Can view all tasks'
     return_all_tasks = 'Can return tasks'
@@ -74,6 +80,20 @@ status_order_dict = {
     'ACCEPTED_SERVICE': 2,
     'REFUSED_SERVICE': 3,
 }
+
+
+class TypeTaskTypes(Enum):
+    LICENSE = "Alvará"
+    AUDIENCE = "Audiência"
+    DILIGENCE = "Diligência"
+    PROTOCOL = "Protocolo"
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        return [(x.value, x.name) for x in cls]
 
 
 class TaskStatus(Enum):
@@ -140,16 +160,31 @@ class CheckPointType(Enum):
         return [(x.value, x.name) for x in cls]
 
 
-class TypeTask(Audit, LegacyCode):
-    name = models.CharField(max_length=255, null=False, blank=False,
-                            verbose_name='Tipo de Serviço')
-    simple_service = models.BooleanField(verbose_name="Serviço simples",
-        default=False)
-    survey = models.ForeignKey(
-        'survey.Survey',
-        null=True,
-        verbose_name='Tipo de Formulário'
-    )
+class TypeTaskMain(models.Model):
+    is_hearing = models.BooleanField(verbose_name='É audiência', default=False)
+    name = models.CharField(max_length=255, null=False, blank=False, unique=True, verbose_name='Tipo de Serviço')
+    characteristics = JSONField(null=True, blank=True, verbose_name='Características disponíveis',
+                                default=json.dumps(CHARACTERISTICS, indent=4))
+
+    class Meta:
+        ordering = ('name',)
+        verbose_name = 'Tipo de Serviço Principal'
+        verbose_name_plural = 'Tipos de Serviço Principais'
+
+    def __str__(self):
+        return self.name
+
+
+class TypeTask(Audit, LegacyCode, OfficeMixin):
+    type_task_main = models.ManyToManyField(TypeTaskMain, verbose_name='Tipo de Serviço Principal',
+                                            related_name='type_tasks')
+    name = models.CharField(max_length=255, null=False, blank=False, verbose_name='Tipo de Serviço')
+    survey = models.ForeignKey('survey.Survey', null=True, blank=True, verbose_name='Tipo de Formulário')
+
+    office = models.ForeignKey(Office, on_delete=models.CASCADE, blank=False,
+                               null=False,
+                               related_name='%(class)s_office',
+                               verbose_name='Escritório')
 
     objects = OfficeManager()
 
@@ -159,11 +194,20 @@ class TypeTask(Audit, LegacyCode):
         verbose_name = 'Tipo de Serviço'
         verbose_name_plural = 'Tipos de Serviço'
 
+    @property
+    def use_upload(self):
+        return False
+
+    @property
+    def main_tasks(self):
+        return list(self.type_task_main.all())
+
     def __str__(self):
         return self.name
 
 
 class Task(Audit, LegacyCode, OfficeMixin):
+    task_hash = models.UUIDField(default=uuid.uuid4, editable=False)
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='child')
@@ -203,11 +247,14 @@ class Task(Audit, LegacyCode, OfficeMixin):
     task_status = models.CharField(null=False, verbose_name=u'', max_length=30,
                                    choices=((x.value, x.name.title()) for x in TaskStatus),
                                    default=TaskStatus.REQUESTED)
-    survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    survey_result = JSONField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
     amount = models.DecimalField(null=False, blank=False, verbose_name='Valor',
                                  max_digits=9, decimal_places=2, default=Decimal('0.00'))
     chat = models.ForeignKey(Chat, verbose_name='Chat', on_delete=models.SET_NULL, null=True,
                              blank=True)
+    company_chat = models.ForeignKey(
+        Chat, verbose_name='Chat Company', on_delete=models.SET_NULL, null=True,
+        blank=True, related_name='tasks_company_chat')
     billing_date = models.DateTimeField(null=True, blank=True)
     receipt_date = models.DateTimeField(null=True, blank=True)
 
@@ -496,7 +543,6 @@ class DashboardViewModel(Audit, OfficeMixin):
                                    default=TaskStatus.OPEN)
     client = models.CharField(null=True, verbose_name='Cliente', max_length=255)
     type_service = models.CharField(null=True, verbose_name='Serviço', max_length=255)
-    survey_result = models.TextField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
     law_suit_number = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='Número do Processo')    
     parent_task_number = models.PositiveIntegerField(default=0, verbose_name='OS Original')
@@ -576,3 +622,24 @@ class Filter(Audit):
         verbose_name = 'Filtro'
         verbose_name_plural = 'Filtros'
         unique_together = (('create_user', 'name'),)
+
+
+class TaskWorkflow(Audit):
+    custtom_settings = models.ForeignKey(CustomSettings, related_name='task_workflows')
+    task_from = models.CharField(verbose_name='Do status', null=False, max_length=30,
+                                   choices=((x.value, x.name.title()) for x in TaskStatus),
+                                   default=TaskStatus.REQUESTED)
+    task_to = models.CharField(verbose_name='Para o status', null=False, max_length=30,
+                                   choices=((x.value, x.name.title()) for x in TaskStatus),
+                                   default=TaskStatus.REQUESTED)
+
+    responsible_user = models.ForeignKey(User)
+
+
+class TaskShowStatus(Audit):
+    custtom_settings = models.ForeignKey(CustomSettings, related_name='task_status_show')
+    status_to_show = models.CharField(
+        verbose_name='Mostrar status', null=False, max_length=30,
+        choices=((x.value, x.name.title()) for x in TaskStatus),default=TaskStatus.REQUESTED)
+    send_mail_template = models.ForeignKey(EmailTemplate, verbose_name='Template a enviar', blank=True, null=True)
+

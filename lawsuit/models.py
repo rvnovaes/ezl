@@ -111,6 +111,10 @@ class CourtDistrict(Audit, LegacyCode):
     def __str__(self):
         return '{} ({})'.format(self.name, self.state.initials)
 
+    def simple_serialize(self):
+        """Simple JSON representation of instance"""
+        return {"id": self.id, "name": self.name}
+
 
 class Organ(Person, OfficeMixin):
     """
@@ -177,7 +181,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
         """JSON representation of instance"""
         data = {
             "id": self.id,
-            "person_lawyer": self.person_lawyer.simple_serialize(),
+            "court_district": self.court_district.simple_serialize() if self.court_district else False,
             "law_suit_number": self.law_suit_number,
             "folder": self.folder.simple_serialize()
         }
@@ -221,8 +225,8 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
 
     def __str__(self):
         ret = "{}".format(self.law_suit_number)
-        if self.person_lawyer:
-            ret = "{} - {}".format(ret, self.person_lawyer.legal_name)
+        if self.court_district:
+            ret = "{} - {}".format(ret, self.court_district.name)
         return ret
 
     def save(self, *args, **kwargs):

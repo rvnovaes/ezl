@@ -1,5 +1,4 @@
 import copy
-from datetime import datetime
 from django.template.loader import render_to_string
 from ecm.models import DefaultAttachmentRule, Attachment
 from task.models import *
@@ -7,7 +6,7 @@ from task.mail import SendMail
 from task.rules import RuleViewTask
 from core.utils import get_office_session
 from core.tasks import send_mail
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.core.files.base import ContentFile
 from django.conf import settings
 from retrying import retry
@@ -116,6 +115,7 @@ def get_dashboard_tasks(request, office_session, checker, person):
     rule_view = RuleViewTask(request=request)
     dynamic_query = rule_view.get_dynamic_query(person, checker)
     data = Task.objects.none()
+    exclude_status = []
 
     if not office_session:
         return data, office_session
@@ -123,39 +123,27 @@ def get_dashboard_tasks(request, office_session, checker, person):
     if dynamic_query or checker.has_perm('group_admin', office_session):
         # filtra as OS de acordo com a pessoa (correspondente, solicitante e contratante) preenchido na OS
         if office_session:
-            data = Task.objects.filter(dynamic_query).filter(is_active=True, office_id=office_session.id)
+            if not office_session.use_service:
+                exclude_status.append(TaskStatus.ACCEPTED_SERVICE.value)
+                exclude_status.append(TaskStatus.REFUSED_SERVICE.value)
+            if not office_session.use_etl:
+                exclude_status.append(TaskStatus.ERROR.value)
+            data = Task.objects.filter(dynamic_query).filter(is_active=True, office_id=office_session.id).filter(
+                ~Q(task_status__in=exclude_status))
 
-    status_totals = data.values('task_status').annotate(total=Count('task_status')).order_by('task_status')
-    total = 0
-    status_dict = {}
-    for task_status in TaskStatus:
-        status = status_totals.filter(task_status=task_status).first()
-        task_status_value = task_status.value
-        task_status_total = status['total'] if status else 0
-        status_dict[task_status.get_status_order] = {
-            'status': task_status_value,
-            'total': task_status_total,
-            'name': task_status.name,
-            'title': task_status_value,
-            'task_icon': task_status.get_icon
-        }
-        total += task_status_total
-    can_access_general_data = checker.has_perm('can_access_general_data', office_session)
-    group_admin = checker.has_perm('group_admin', office_session)
-    if not office_session.use_service or not (can_access_general_data or group_admin):
-        total -= status_dict[TaskStatus.ACCEPTED_SERVICE.get_status_order]['total']
-        total -= status_dict[TaskStatus.REFUSED_SERVICE.get_status_order]['total']
-        del status_dict[TaskStatus.ACCEPTED_SERVICE.get_status_order]
-        del status_dict[TaskStatus.REFUSED_SERVICE.get_status_order]
-    if not office_session.use_etl or not (can_access_general_data or group_admin):
-        total -= status_dict[TaskStatus.ERROR.get_status_order]['total']
-        del status_dict[TaskStatus.ERROR.get_status_order]
+    return data, exclude_status
 
-    ret_status_dict = {}
-    for status_key in sorted(status_dict.keys()):
-        ret_status_dict[str(status_key)] = status_dict[status_key]
-    ret_status_dict['total'] = total
-    ret_status_dict['total_requested_month'] = data.filter(requested_date__year=datetime.today().year,
-                                                           requested_date__month=datetime.today().month).count()
 
-    return ret_status_dict
+def create_default_type_tasks(office, create_user=None):
+    if not create_user:
+        create_user = office.create_user
+    main_type_tasks = TypeTaskMain.objects.all()
+    TypeTask.objects.filter(office=office).delete()
+    for main_type_task in main_type_tasks:
+        type_task = TypeTask()
+        type_task.name = main_type_task.name
+        type_task.create_user = create_user
+        type_task.office = office
+        type_task.save()
+        type_task.type_task_main.add(main_type_task)
+        type_task.save()

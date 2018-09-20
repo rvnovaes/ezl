@@ -19,11 +19,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='person',
             name='is_client',
-            field=models.BooleanField(default=False, verbose_name='É Cliente?'),
+            field=models.BooleanField(
+                default=False, verbose_name='É Cliente?'),
         ),
         migrations.AddField(
             model_name='person',
             name='is_provider',
-            field=models.BooleanField(default=False, verbose_name='É Fornecedor?'),
+            field=models.BooleanField(
+                default=False, verbose_name='É Fornecedor?'),
         ),
     ]

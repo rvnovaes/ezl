@@ -16,7 +16,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='team',
             name='members',
-            field=models.ManyToManyField(related_name='team_members', to=settings.AUTH_USER_MODEL, verbose_name='Membros'),
+            field=models.ManyToManyField(
+                related_name='team_members', to=settings.AUTH_USER_MODEL, verbose_name='Membros'),
         ),
         migrations.AlterField(
             model_name='team',
@@ -26,7 +27,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='team',
             name='supervisors',
-            field=models.ManyToManyField(related_name='team_supervisors', to=settings.AUTH_USER_MODEL, verbose_name='Supervisores'),
+            field=models.ManyToManyField(
+                related_name='team_supervisors', to=settings.AUTH_USER_MODEL, verbose_name='Supervisores'),
         ),
         migrations.AlterUniqueTogether(
             name='team',

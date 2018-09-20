@@ -1,0 +1,14 @@
+{%extends 'task/task_detail/arq_ecm.html' %}
+
+{% block ecm_add %}
+<input id="fileupload" type="file" name="path" multiple
+        style="display: none;"
+        data-method="POST"
+        enctype="multipart/form-data"
+        data-url="{% url 'ecm_external_add' task.task_hash.hex %}"
+        data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+{% endblock %}
+
+{% block ecm_batch_download %} 
+
+{%endblock%}

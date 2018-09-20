@@ -101,7 +101,6 @@ class ServicePriceTableForm(BaseModelForm):
 class ImportServicePriceTableForm(forms.ModelForm):
     file_xls = XlsxFileField(label='Arquivo', required=True,
                              headers_to_check=['Correspondente', 'Serviço', 'Cliente', 'Comarca', 'UF', 'Valor'])
-
     class Meta:
         model = ImportServicePriceTable
         fields = ('file_xls', )

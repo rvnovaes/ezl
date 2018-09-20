@@ -251,7 +251,7 @@
        });
     </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
-    <script src="{% static 'task/task-builk-create.js' %}"></script>
+    <script src="{% static 'task/task-bulk-create.js' %}"></script>
     <script src="{% static 'task/task-typetask.js' %}"></script>
     <script src="{% static 'skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js' %}"></script>
     <script src="{% static 'core/js/typeahead.js' %}"></script>
@@ -271,13 +271,27 @@
     <link rel="stylesheet" href="{% static "fileuploader.css" %}">
     <style type="text/css">
         .select2{
-            margin-top: 20px !important;
+            margin-top: -4px !important;
         }
+
+        .select2-container {
+            min-width: 100% !important;
+        }
+
         .nav-form label{
             width: 100%;
         }
+
         .modal-dialog {
             width: 95%!important;
+        }
+        .loading {
+            background-color: #ffffff;
+            background-image: url("../../static/img/loading.gif") !important;
+            background-size: 16px 16px;
+            background-position: right center;
+            background-repeat: no-repeat;
+
         }
     </style>
 

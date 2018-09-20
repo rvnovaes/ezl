@@ -1,0 +1,20 @@
+[
+{
+    "model": "dashboard.doughnutchart",
+    "pk": 2,
+    "fields": {
+        "name": "TOP 5 COMARCAS COM MAIS AUDI\u00caNCIA",
+        "code": "from django.db.models import Count\r\nfrom lawsuit.models import Folder\r\nfrom task.models import Task\r\nfrom random import randint\r\n\r\nfolders = Folder.objects.filter(person_customer__company=self.company)\r\ntasks = Task.objects.filter(movement__folder__in=folders, type_task__type_task_main__is_hearing=True).values('movement__law_suit__court_district__name')\r\nres = tasks.annotate(count=Count('movement__law_suit__court_district__name')).order_by('-count')[:5]\r\nlabels = res.values_list('movement__law_suit__court_district__name', flat=True)\r\nvalues = res.values_list('count', flat=True)\r\n\r\n\r\nresult = {\r\n  \"title\": \"Top 5 comarcas com mais audi\u00eancias\", \r\n  \"labels\": labels, \r\n  \"values\": values\r\n}",
+        "schema": "{\"title\": \"string\", \"labels\": \"list\", \"values\": \"list\"}"
+    }
+},
+{
+    "model": "dashboard.doughnutchart",
+    "pk": 3,
+    "fields": {
+        "name": "TOP 5 COMARCAS COM MAIS AUDI\u00caNCIA NO M\u00caS",
+        "code": "from django.utils import timezone\r\nfrom django.db.models import Count\r\nfrom lawsuit.models import Folder\r\nfrom task.models import Task\r\nfrom random import randint\r\n\r\nfolders = Folder.objects.filter(person_customer__company=self.company)\r\nfolders = Folder.objects.filter(person_customer__company=self.company)\r\ntasks = Task.objects.filter(\r\n   movement__folder__in=folders, \r\n   type_task__type_task_main__is_hearing=True,\r\n   final_deadline_date__year=timezone.now().year,\r\n   final_deadline_date__month=timezone.now().month\r\n ).values('movement__law_suit__court_district__name')\r\nres = tasks.annotate(count=Count('movement__law_suit__court_district__name')).order_by('-count')[:5]\r\nlabels = res.values_list('movement__law_suit__court_district__name', flat=True)\r\nvalues = res.values_list('count', flat=True)\r\n\r\n\r\nresult = {\r\n  \"title\": \"Top 5 comarcas com mais audi\u00eancias no m\u00eas\", \r\n  \"labels\": labels, \r\n  \"values\": values\r\n}",
+        "schema": "{\"title\": \"string\", \"labels\": \"list\", \"values\": \"list\"}"
+    }
+}
+]

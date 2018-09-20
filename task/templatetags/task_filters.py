@@ -26,7 +26,10 @@ def get_refused_action(user, task, office_session_perms):
         elif task.get_child:
             refused_action = 'REQUESTED' if valid_status(task.get_child.task_status) else 'INVALID_CHILD_STATUS'
     if 'can_distribute_tasks' in office_session_perms and task.status.name == 'ERROR':
-        refused_action = 'REFUSED'
+        if task.office.use_service:
+            refused_action = 'REFUSED_SERVICE'
+        else:
+            refused_action = 'REFUSED'
     return refused_action
 
 
@@ -41,9 +44,13 @@ def remove_spaces_lower(status):
 
 @register.simple_tag
 def get_checkin(geolocation):
-    return geolocation.filter(checkpointtype='Checkin').first()
+    if geolocation:
+        return geolocation.filter(checkpointtype='Checkin').first()
+    return ''
 
 
 @register.simple_tag
 def get_checkout(geolocation):
-    return geolocation.filter(checkpointtype='Checkout').first()
+    if geolocation:
+        return geolocation.filter(checkpointtype='Checkout').first()
+    return ''

@@ -15,7 +15,7 @@
             </button>
         {% endif %}
         {% if 'view_delegated_tasks' in office_session_perms or 'can_distribute_tasks' in office_session_perms %}
-            {% with request.user|get_refused_action:form.instance as refused_acton %}
+            {% get_refused_action request.user form.instance office_session_perms as refused_acton %}          
                 {% if refused_acton == 'REFUSED' or refused_acton == 'REQUESTED' %}
                 <button type="button" id="{{ refused_acton }}" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                         class="text-white btn btn-ezl-refused">
@@ -23,8 +23,7 @@
                 </button>
                 {% elif refused_acton == 'INVALID_CHILD_STATUS' %}
                     <p>Essa OS não pode ser recusada, pois encontra-se no status {{ form.instance.get_child.task_status|lower }} no escritório correspondente.</p>
-                {% endif %}
-            {% endwith %}
+                {% endif %}            
         {% endif %}
         {% if 'block_payment_tasks' in office_session_perms %}
             <button type="button" id="BLOCKEDPAYMENT" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
@@ -52,21 +51,23 @@
                 </div>
             {% endif %}
             {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                {% if form.instance.geolocation.last.checkpointtype == 'Checkin' %}
-                    <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
-                            data-checkpointtype="Checkout" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
-                        <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkout</span>
-                    </button>
-                {% elif not form.instance.geolocation.last.checkpointtype %}
-                    <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
-                            data-checkpointtype="Checkin" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
-                        <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkin</span>
-                    </button>
-                {% endif %}
-                <button type="button" onclick="getId(this)" id="DONE" type="submit" data-toggle="" data-target="#confirmAction"
-                        class="text-white btn btn-ezl-done">
-                    <span class="btn-label"><i class="mdi mdi-checkbox-marked-circle-outline"></i></span> Cumprir
-                </button>                
+                {% if not custom_settings.i_work_alone %}
+                    {% if form.instance.geolocation.last.checkpointtype == 'Checkin' %}
+                        <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
+                                data-checkpointtype="Checkout" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
+                            <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkout</span>
+                        </button>
+                    {% elif not form.instance.geolocation.last.checkpointtype %}
+                        <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
+                                data-checkpointtype="Checkin" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
+                            <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkin</span>
+                        </button>
+                    {% endif %}
+                    <button type="button" onclick="getId(this)" id="DONE" type="submit" data-toggle="" data-target="#confirmAction"
+                            class="text-white btn btn-ezl-done">
+                        <span class="btn-label"><i class="mdi mdi-checkbox-marked-circle-outline"></i></span> Cumprir
+                    </button>                
+                {%endif%}                    
                 <button type="button" id="FINISHED" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                         class="text-white btn btn-raised btn-ezl-finished">
                     <span class="btn-label"><i class="mdi mdi-gavel"></i></span> Cumprir e Finalizar

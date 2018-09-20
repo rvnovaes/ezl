@@ -67,10 +67,13 @@ SECRET_KEY = 'f5*(8sgk)n1!i52xijv0yt@jtewp28%g%sp1rx*=y68ocgg+!2'
 # SECURITY WARNING: don't run with debug turned on in production!
 if environment == 'development':
     DEBUG = True
+    WORKFLOW_URL_EMAIL = 'http://localhost:8000'
 else:
+    WORKFLOW_URL_EMAIL = 'https://ezl.ezlawyer.com.br'
     DEBUG = False
 
 ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
 CSRF_TRUSTED_ORIGINS = ['.ezlawyer.com.br']
 
 # Application definition
@@ -127,13 +130,20 @@ INSTALLED_APPS = [
     'channels',
     'chat',
     'ecm',
+    'dashboard',
+    'codemirror',
     'guardian',
     'billing',
     'djmoney',
+    'rest_framework',
+    'rest_framework_swagger',
+    'oauth2_provider',
+    'import_export',
     'django_dbconn_retry',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -141,7 +151,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'ezl.urls'
@@ -422,3 +432,35 @@ LOGGING = {
 
 UPLOAD_DIRECTORY = 'uploads'
 ADMINS = [('EZL Erros', 'erros.ezlawyer@gmail.com')]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ('oauth2_provider.contrib.rest_framework.OAuth2Authentication',),
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend', ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 30,
+
+}
+
+OAUTH2_PROVIDER = {
+    # this is the list of available scopes
+    'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore',
+    'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'},
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,
+}
+
+OAUTH2_PROVIDER_APPLICATION_MODEL = 'core.ExternalApplication'
+
+SWAGGER_SETTINGS = {
+    'LOGIN_URL': 'rest_framework:login',
+    'LOGOUT_URL': 'rest_framework:logout',
+    'USE_SESSION_AUTH': True,
+    'DOC_EXPANSION': 'list',
+    'APIS_SORTER': 'alpha',
+    'SECURITY_DEFINITIONS': None,
+    'JSON_EDITOR': True,
+    'OPERATIONS_SORTER': 'method',
+    'SHOW_REQUEST_HEADERS': True,
+}
+
+# configuração para o django_import_export
+DATETIME_INPUT_FORMATS = ('%d/%m/%Y %H:%M', '%d/%m/%Y %H:%M',)
