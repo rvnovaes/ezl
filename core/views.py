@@ -466,10 +466,10 @@ class SingleTableViewMixin(SingleTableView):
             current_office_session = custom_session_user.get(
                 str(self.request.user.pk))
             office = Office.objects.filter(pk=int(current_office_session.get(
-                'current_office'))).values_list('id', flat=True)
+                'current_office'))).values_list('id', flat=True).first()
         if not office:
             office = self.request.user.person.offices.active_offices().values_list('id',
-                                                                                   flat=True)
+                                                                                   flat=True).first()
 
         generic_search = GenericSearchFormat(
             self.request, self.model, self.model._meta.fields)
@@ -778,8 +778,8 @@ class GenericFormOneToMany(FormView, SingleTableView):
                    self.related_model._meta.fields))
         field_related = list(filter(lambda i: i.related_model == self.model,
                                     fields_related))[0]
-        generic_search = GenericSearchFormat(self.request, self.related_model,
-                                             self.related_model._meta.fields,
+        generic_search = GenericSearchFormat(request=self.request, model=self.related_model,
+                                             fields=self.related_model._meta.fields,
                                              related_id=related_model_id,
                                              field_name_related=field_related.name)
         generic_search_args = generic_search.despatch()

@@ -93,9 +93,9 @@ class GenericSearchFormat(object):
                 search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
             else:
                 if not office:
-                    office = get_office_session(self.request)
+                    office = [get_office_session(self.request).id]
                 search = "self.table_class(self.model.objects.get_queryset(office=[{office}]).filter({params}))".format(
-                    office=office.id,
+                    office=office,
                     params='{params}'
                 )
         except:
