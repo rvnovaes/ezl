@@ -80,7 +80,8 @@ class LawSuitTable(tables.Table):
             'person_lawyer', 'is_current_instance', 'is_active', 'legacy_code')
         model = LawSuit
         fields = ['selection', 'instance', 'court_district', 'organ', 'court_division',
-                  'law_suit_number', 'person_lawyer', 'is_active', 'is_current_instance', 'legacy_code', 'opposing_party']
+                  'law_suit_number', 'person_lawyer', 'is_active', 'is_current_instance', 'legacy_code',
+                  'opposing_party']
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem processos cadastrados"
         row_attrs = {

@@ -23,7 +23,9 @@ def check_environ(f):
 
 # enumerador usado para integracao entre sistemas
 class LegacySystem(Enum):
-    ADVWIN = u"Advwin"
+    ADVWIN = "Advwin"
+    AUTOJUR = "Autojur"
+    ELAW = "eLaw"
 
 
 def filter_valid_choice_form(queryset):

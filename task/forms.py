@@ -182,8 +182,5 @@ class ImportTaskListForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        list_header_to_check = ['folder_number', 'folder_legacy_code', 'law_suit_number', 'instance',
-                                'lawsuit_legacy_code', 'type_movement', 'movement_legacy_code', 'person_asked_by',
-                                'type_task', 'final_deadline_date']
-        for header in list_header_to_check:
-            self.fields['file_xls'].headers_to_check.append(COLUMN_NAME_DICT[header]['column_name'])
+        self.fields['file_xls'].headers_to_check.extend([v['column_name']
+                                                         for k, v in COLUMN_NAME_DICT.items() if v['required']])
