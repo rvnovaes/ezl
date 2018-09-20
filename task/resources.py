@@ -4,7 +4,7 @@ from django.db.models import Q
 from import_export import resources
 from import_export.fields import Field
 from import_export.widgets import DateTimeWidget, DecimalWidget
-from lawsuit.models import Folder, LawSuit, Movement, TypeMovement
+from lawsuit.models import Folder, LawSuit, Movement, TypeMovement, CourtDistrict, CourtDivision, Organ, Instance
 from task.instance_loaders import TaskModelInstanceLoader
 from task.models import Task, TypeTask
 from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget
@@ -37,7 +37,7 @@ COLUMN_NAME_DICT = {
     'lawsuit_person_lawyer': {'column_name': 'processo.advogado', 'attribute': 'movement__law_suit__person_lawyer',
                               'required': False},
     'lawsuit_court_district': {'column_name': 'processo.comarca', 'attribute': 'movement__law_suit__court_district',
-                               'required': False},
+                               'required': True},
     'lawsuit_court_division': {'column_name': 'processo.vara', 'attribute': 'movement__law_suit__court_division',
                                'required': False},
     'lawsuit_organ': {'column_name': 'processo.orgao', 'attribute': 'movement__law_suit__organ', 'required': False},
@@ -72,9 +72,13 @@ COLUMN_NAME_DICT = {
     'blocked_payment_date': {'column_name': 'os.data_glosa', 'attribute': 'blocked_payment_date', 'required': False},
     'finished_date': {'column_name': 'os.data_finalizacao', 'attribute': 'finished_date', 'required': False},
     'receipt_date': {'column_name': 'os.data_recebimento', 'attribute': 'receipt_date', 'required': False},
-    'billing_date': {'column_name': 'os.codigo_legado', 'attribute': 'billing_date', 'required': False},
+    'billing_date': {'column_name': 'os.data_pagamento', 'attribute': 'billing_date', 'required': False},
     'legacy_code': {'column_name': 'os.codigo_legado', 'attribute': 'legacy_code', 'required': False},
 }
+
+
+def self_or_none(obj):
+    return obj if obj else None
 
 
 class TaskResource(resources.ModelResource):
@@ -109,11 +113,14 @@ class TaskResource(resources.ModelResource):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.office = kwargs['office']
-        self.create_user = kwargs['create_user']
-        self.office_id = self.office.id
+        self.office = None
+        self.create_user = None
+        self.office_id = None
         self.default_type_movement = None
         self._meta.instance_loader_class = TaskModelInstanceLoader
+        self.folder = None
+        self.lawsuit = None
+        self.movement = None
 
     class Meta:
         model = Task
@@ -131,6 +138,7 @@ class TaskResource(resources.ModelResource):
         else:
             if not (folder_legacy_code or folder_number):
                 folder, created = Folder.objects.get_or_create(person_customer=person_customer, is_default=True,
+                                                               office=self.office,
                                                                defaults={'create_user': self.create_user})
             else:
                 if folder_legacy_code:
@@ -157,22 +165,58 @@ class TaskResource(resources.ModelResource):
             if not lawsuit and lawsuit_number:
                 lawsuit = LawSuit.objects.filter(law_suit_number=lawsuit_number, office_id=self.office_id).first()
             if not lawsuit:
-                is_current_instance = TRUE_FALSE_DICT.get(row['lawsuit_is_current_instance'], False)
-                row_errors.append('Não foi encontrado registro de processo correspondente aos valores informados;')
+                instance = Instance.objects.filter(name=instance, office=self.office).first()
+                if instance:
+                    is_current_instance = TRUE_FALSE_DICT.get(row['lawsuit_is_current_instance'], False)
+                    is_active = TRUE_FALSE_DICT.get(row.get('lawsuit_is_active', 'F'), False)
+                    person_lawyer = row.get('lawsuit_court_district', '')
+                    if person_lawyer:
+                        person_lawyer = Person.objects.filter(
+                            legal_name__unaccent__icontains=row.get('lawsuit_person_lawyer'), is_lawyer=True,
+                            offices=self.office).first()
+                    court_district = row.get('lawsuit_court_district', '')
+                    if court_district:
+                        court_district = CourtDistrict.objects.filter(name=row.get('lawsuit_court_district')).first()
+                    court_division = row.get('lawsuit_court_division', '')
+                    if court_division:
+                        court_division = CourtDivision.objects.filter(name=row.get('lawsuit_court_division'),
+                                                                      office=self.office).first()
+                    organ = row.get('lawsuit_organ', '')
+                    if organ:
+                        organ = Organ.objects.filter(legal_name=row.get('lawsuit_organ', offices=self.office)).first()
+                    opposing_party = row.get('opposing_party', '')
+                    lawsuit = LawSuit.objects.create(
+                        person_lawyer=self_or_none(person_lawyer),
+                        folder=self.folder,
+                        instance=instance,
+                        court_district=self_or_none(court_district),
+                        organ=self_or_none(organ),
+                        court_division=self_or_none(court_division),
+                        law_suit_number=lawsuit_number,
+                        is_current_instance=is_current_instance,
+                        opposing_party=self_or_none(opposing_party),
+                        create_user=self.create_user,
+                        is_active=is_active,
+                        office=self.office
+                    )
+                else:
+                    row_errors.append('Não foi encontrada instância para este escritório com o valor informado;')
         return lawsuit
 
-    def validate_movement(self, row, row_errors, folder, lawsuit):
+    def validate_movement(self, row, row_errors):
         type_movement_name = row['type_movement']
         movement_legacy_code = row['movement_legacy_code']
         movement = None
         if not (type_movement_name or movement_legacy_code):
-            row_errors.append("É obrigatório o preenchimento de um dos campos de identificação da "
-                              "movimentação (type_movement ou movement_legacy_code);")
+            movement, created = Movement.objects.get_or_create(folder=self.folder, law_suit=self.lawsuit,
+                                                               type_movement=self.default_type_movement,
+                                                               office=self.office,
+                                                               defaults={'create_user': self.create_user})
         else:
             if movement_legacy_code:
                 movement = Movement.objects.filter(legacy_code=movement_legacy_code, office_id=self.office_id).first()
-            if not movement and (type_movement_name and folder and lawsuit):
-                movement = Movement.objects.filter(Q(folder=folder), Q(law_suit=lawsuit),
+            if not movement and (type_movement_name and self.folder and self.lawsuit):
+                movement = Movement.objects.filter(Q(folder=self.folder), Q(law_suit=self.lawsuit),
                                                    Q(type_movement__name=type_movement_name),
                                                    Q(office_id=self.office_id)).first()
             if not movement:
@@ -180,6 +224,9 @@ class TaskResource(resources.ModelResource):
         return movement
 
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+        self.office = kwargs['office']
+        self.create_user = kwargs['create_user']
+        self.office_id = self.office.id
         for k, v in COLUMN_NAME_DICT.items():
             if v['column_name'] in dataset.headers:
                 headers_index = dataset.headers.index(v['column_name'])
@@ -198,12 +245,12 @@ class TaskResource(resources.ModelResource):
 
     def before_import_row(self, row, **kwargs):
         row_errors = []
-        folder = self.validate_folder(row, row_errors)
-        lawsuit = self.validate_lawsuit(row, row_errors)
-        movement = self.validate_movement(row, row_errors, folder, lawsuit)
+        self.folder = self.validate_folder(row, row_errors)
+        self.lawsuit = self.validate_lawsuit(row, row_errors) if self.folder else None
+        self.movement = self.validate_movement(row, row_errors) if self.lawsuit else None
 
-        if movement:
-            row['movement'] = movement.id
+        if self.movement:
+            row['movement'] = self.movement.id
         if row_errors:
             raise Exception(row_errors)
 

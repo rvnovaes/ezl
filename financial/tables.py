@@ -39,11 +39,11 @@ class ServicePriceTableTable(tables.Table):
 
 
 class ServicePriceTableTaskTable(tables.Table):
-    office_correspondent = tables.Column(orderable=False)
-    court_district = tables.Column(orderable=False)
-    state = tables.Column(orderable=False)
-    client = tables.Column(orderable=False)
-    value = tables.Column(orderable=False)
+    office_correspondent = tables.Column(orderable=False, verbose_name='Escritório correspondente')
+    court_district = tables.Column(orderable=False, verbose_name='Comarca')
+    state = tables.Column(orderable=False, verbose_name='UF')
+    client = tables.Column(orderable=False, verbose_name='Cliente')
+    value = tables.Column(orderable=False, verbose_name='Valor')
     office_rating = tables.Column(orderable=False, verbose_name='Avaliação*')
     office_return_rating = tables.Column(orderable=False, verbose_name='OS Retornadas')
 
