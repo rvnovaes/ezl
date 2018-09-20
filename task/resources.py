@@ -1,6 +1,8 @@
+import datetime
 from core.models import Person
 from decimal import Decimal
 from django.db.models import Q
+from django.utils.timezone import make_aware
 from import_export import resources
 from import_export.fields import Field
 from import_export.widgets import DateTimeWidget, DecimalWidget
@@ -79,6 +81,11 @@ COLUMN_NAME_DICT = {
 
 def self_or_none(obj):
     return obj if obj else None
+
+
+def date_from_float(date_float):
+    seconds = int(round((date_float - 25569) * 86400.0))
+    return make_aware(datetime.datetime.utcfromtimestamp(seconds))
 
 
 class TaskResource(resources.ModelResource):
@@ -253,4 +260,5 @@ class TaskResource(resources.ModelResource):
             row['movement'] = self.movement.id
         if row_errors:
             raise Exception(row_errors)
-
+        if type(row['acceptance_service_date']) is float:
+            row['acceptance_service_date'] = date_from_float(row['acceptance_service_date'])
