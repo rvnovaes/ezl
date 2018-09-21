@@ -84,6 +84,12 @@ services:
     environment:
       ENV: production
       PYTHONPATH: /app
+    volumes:
+      - .:/app
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
+      - ./media/service_price_table:/app/media/service_price_table
+      - ezl-logs:/var/log/ezl
     depends_on:
       - builder
       - db
@@ -92,6 +98,12 @@ services:
     environment:
       ENV: production
       PYTHONPATH: /app
+    volumes:
+      - .:/app
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
+      - ./media/service_price_table:/app/media/service_price_table
+      - ezl-logs:/var/log/ezl
     depends_on:
       - builder
       - db
@@ -100,6 +112,12 @@ services:
     environment:
       ENV: production
       PYTHONPATH: /app
+    volumes:
+      - .:/app
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
+      - ./media/service_price_table:/app/media/service_price_table
+      - ezl-logs:/var/log/ezl      
     depends_on:
       - builder
       - db
@@ -112,6 +130,8 @@ services:
     command: celery -A ezl worker -l debug --concurrency 10 -P eventlet -Ofair -n worker4@%h
     volumes:
       - .:/app
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
       - ./media/service_price_table:/app/media/service_price_table
       - ezl-logs:/var/log/ezl
     depends_on:
@@ -128,6 +148,12 @@ services:
     environment:
       ENV: production
       PYTHONPATH: /app
+    volumes:
+      - .:/app
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
+      - ./media/service_price_table:/app/media/service_price_table
+      - ezl-logs:/var/log/ezl      
 
   pgweb:
     build:
