@@ -106,6 +106,8 @@ class DefaultAttachmentRuleForm(BaseModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
+        self.fields['type_task'].queryset = filter_valid_choice_form(TypeTask.objects.filter(
+            is_active=True, office=get_office_session(self.request))).order_by('name')        
 
 
 class DefaultAttachmentRuleCreateForm(DefaultAttachmentRuleForm):
