@@ -122,25 +122,28 @@ class CorrespondentsTable(object):
             state = task.movement.law_suit.court_district.state
             client = task.movement.law_suit.folder.person_customer
             offices_related = task.office.offices.all()
-            correspondents_table = ServicePriceTableTaskTable(
-                set(ServicePriceTable.objects.filter(Q(Q(office=task.office) |
-                                                   Q(Q(office__public_office=True), ~Q(office=task.office))),
-                                                 Q(
-                                                     Q(type_task=type_task) |
-                                                     Q(type_task=None) |
-                                                     Q(type_task__type_task_main__in=type_task_main)
-                                                 ),
-                                                 Q(
-                                                     Q(office_correspondent__in=offices_related) |
-                                                     Q(Q(office_correspondent__public_office=True),
-                                                       ~Q(office_correspondent=task.office))
-                                                 ),
-                                                 Q(office_correspondent__is_active=True),
-                                                 Q(Q(court_district=court_district) | Q(court_district=None)),
-                                                 Q(Q(state=state) | Q(state=None)),
-                                                 Q(Q(client=client) | Q(client=None)),
-                                                 Q(is_active=True)))
-            )
+            qs = ServicePriceTable.objects.filter(Q(Q(office=task.office) |
+                                                    Q(Q(office__public_office=True), ~Q(office=task.office))),
+                                                  Q(
+                                                      Q(type_task=type_task) |
+                                                      Q(type_task=None) |
+                                                      Q(type_task__type_task_main__in=type_task_main)
+                                                  ),
+                                                  Q(
+                                                      Q(office_correspondent__in=offices_related) |
+                                                      Q(Q(office_correspondent__public_office=True),
+                                                        ~Q(office_correspondent=task.office))
+                                                  ),
+                                                  Q(office_correspondent__is_active=True),
+                                                  Q(Q(court_district=court_district) | Q(court_district=None)),
+                                                  Q(Q(state=state) | Q(state=None)),
+                                                  Q(Q(client=client) | Q(client=None)),
+                                                  Q(is_active=True))
+            qs_values = qs.values('pk', 'office_id', 'type_task__office_id')
+            ignore_list = [v['pk'] for v in qs_values if v['office_id'] != v['type_task__office_id']]
+            if ignore_list:
+                qs = qs.filter(~Q(id__in=ignore_list))
+            correspondents_table = ServicePriceTableTaskTable(set(qs))
         else:
             correspondents_table = ServicePriceTableTaskTable(ServicePriceTable.objects.none())
 
