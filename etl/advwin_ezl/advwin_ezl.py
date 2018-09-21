@@ -141,9 +141,18 @@ class GenericETL(object):
             for record in records:
                 record.deactivate()
 
-    def deactivate_all(self):
+    def deactivate_all(self, default_office):
         if not truncate_all_tables:
-            self.model.objects.filter(system_prefix=LegacySystem.ADVWIN.value).update(is_active=False)
+            if self.model._meta.object_name == 'Person':
+                self.model.objects.filter(offices=default_office,
+                                          system_prefix=LegacySystem.ADVWIN.value).update(is_active=False)
+            else:
+                try:
+                    office_field = self.model._meta.get_field('office')
+                    self.model.objects.filter(office=default_office,
+                                              system_prefix=LegacySystem.ADVWIN.value).update(is_active=False)
+                except:
+                    self.model.objects.filter(system_prefix=LegacySystem.ADVWIN.value).update(is_active=False)
 
     def config_import(self, rows, user, rows_count, default_office, log=False):
         raise NotImplementedError()
@@ -158,7 +167,7 @@ class GenericETL(object):
             executed_query=self.import_query, create_user=user,
             db_name_source=db_name_source, db_host_source=db_host_source, office=default_office)
         if self.has_status:
-            self.deactivate_all()
+            self.deactivate_all(default_office)
 
         for attempt in range(5):
             try:
