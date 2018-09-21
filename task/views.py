@@ -536,6 +536,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                           if form.cleaned_data['execution_date'] else form.initial['execution_date'])
         survey_result = (form.cleaned_data['survey_result']
                          if form.cleaned_data['survey_result'] else form.initial['survey_result'])
+        send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
+                                       execution_date=execution_date, survey_result=survey_result, **{'external_task': True})        
         form.instance.__server = get_domain(self.request)
         if form.instance.task_status == TaskStatus.ACCEPTED_SERVICE:
             form.instance.person_distributed_by = self.request.user.person

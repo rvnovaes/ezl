@@ -46,6 +46,7 @@ services:
       - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas
     environment:
       ENV: production
+      WORKFLOW_EMAIL: "https://ezl.ezlawyer.com.br"
   ws:
     image: ezl:latest
     volumes:

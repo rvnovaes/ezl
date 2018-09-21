@@ -33,6 +33,7 @@ services:
       EMAIL_HOST: mail
       EMAIL_PORT: 1026
       EMAIL_USE_SSL: "false"
+      WORKFLOW_EMAIL: "https://demo.ezlawyer.com.br"
   ws:
     image: ezl:latest
     volumes:

@@ -11,6 +11,8 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 from retrying import retry
 import traceback
+import logging
+logger = logging.getLogger(__name__)
 
 
 def get_task_attachment(self, form):
@@ -33,7 +35,6 @@ def get_task_attachment(self, form):
             new_file = get_file_content_copy(attachment.file)
             if new_file:
                 file_name = os.path.basename(attachment.file.name)
-                new_file = ContentFile(attachment.file.read())
                 new_file.name = file_name
                 if not Ecm.objects.filter(exhibition_name=file_name, task_id=form.instance.id):
                     obj = Ecm(path=new_file,
@@ -66,16 +67,20 @@ def copy_ecm(ecm, task):
             new_ecm.save()
             return new_ecm
     else:
-        subject = 'Erro ao copiar ECM {}'.format(ecm.id)
-        body = """Erro ao copiar ECM {} para a OS {}:
-        {} does not exists""".format(ecm.id, task.id, str(ecm.path))
-        recipients = [admin[1] for admin in settings.ADMINS]
-        # Nessario converter para unicode pois o celery usa python 2.7
-        body = u'{}'.format(body)
-        send_mail.delay(recipients, subject, body)
+        try:
+            subject = 'Erro ao copiar ECM {}'.format(ecm.id)
+            body = """Erro ao copiar ECM {} para a OS {}:
+            {} does not exists""".format(ecm.id, task.id, str(ecm.path))
+            recipients = [admin[1] for admin in settings.ADMINS]
+            # Nessario converter para unicode pois o celery usa python 2.7
+            body = u'{}'.format(body)
+            send_mail.delay(recipients, subject, body)
+        except Exception as e:
+            logger.error('OCORREU UM ERRO AO COPIAR O ECM E NAO FOI POSSIVEL NOTIFICAR POR E-MAIL')
+            logger.error(e)
 
 
-def get_file_content_copy(filefield):
+def get_file_content_copy(filefield):    
     local_file_path = os.path.join(settings.MEDIA_ROOT, filefield.name)
     if os.path.exists(local_file_path):
         with open(local_file_path, 'r') as local_file:

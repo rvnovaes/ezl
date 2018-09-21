@@ -45,13 +45,6 @@ class SendMail:
         msg.send()
 
 
-def get_file_base64(file_path):
-    with open(file_path, 'rb') as f:
-        data = f.read()
-        f.close()
-    return base64.b64encode(data).decode()
-
-
 class TaskFinishedEmail(object):
     def __init__(self, task):
         self.task = task
@@ -173,7 +166,7 @@ class TaskMail(object):
 
     def set_mail_attachment(self, ecm):
         attachment = {
-            "content": get_file_base64(str(ecm.path.file)),
+            "content": base64.b64encode(ecm.path.read()).decode(),
             "type": "application/pdf",
             "filename": ecm.filename,
             "disposition": "attachment"
