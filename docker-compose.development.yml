@@ -19,6 +19,7 @@ services:
       EMAIL_HOST: mail
       EMAIL_PORT: 1025
       EMAIL_USE_SSL: "false"
+      WORKFLOW_EMAIL: "http://localhost:8000"
     ports:
       - "8000:8000"
     depends_on:
