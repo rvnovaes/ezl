@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from .models import Attachment, DefaultAttachmentRule
 from core.forms import BaseModelForm
-from core.utils import filter_valid_choice_form, get_office_field
+from core.utils import filter_valid_choice_form, get_office_field, get_office_session
 from core.models import City, State, Person
 from core.widgets import TypeaHeadForeignKeyWidget
 from lawsuit.models import CourtDistrict
