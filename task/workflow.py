@@ -139,7 +139,6 @@ class CorrespondentsTable(object):
                                                   Q(Q(state=state) | Q(state=None)),
                                                   Q(Q(client=client) | Q(client=None)),
                                                   Q(is_active=True))
-            import pdb;pdb.set_trace()
             qs_values = qs.values('pk', 'office_id', 'type_task__office_id')
             ignore_list = [v['pk'] for v in qs_values if v['office_id'] != v['type_task__office_id']]
             if ignore_list:
