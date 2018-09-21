@@ -86,7 +86,7 @@
                     if (data.is_deleted) {
                         $('#deleting').modal('hide');
                         get_internal_ecms(task_id);
-                        swal("Sucesso", data.message, "success")
+                        swal.close()
                     }
                     else {
                         $('#deleting').modal('hide');

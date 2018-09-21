@@ -45,7 +45,6 @@ $(function () {
                 } else {
                     SurveyUploadDatabase.currentField = null;
                 }
-                swal("Sucesso", data.result.message, "success")                
                 manager_ecms(data);
             } else {
                 swal('Erro', data.result.message, 'error');

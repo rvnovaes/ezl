@@ -116,7 +116,6 @@
             done: function (e, data) {
                 if (data.result.success) {
                     $("#modal-progress").modal("hide");
-                    swal("Sucesso", data.result.message, "success");
                     get_attachments(data.result.model_name, data.result.object_id);
                 } else {
                     $("#modal-progress").modal("hide");
