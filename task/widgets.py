@@ -1,4 +1,6 @@
+import datetime
 from core.models import Person
+from django.utils.timezone import make_aware
 from import_export.widgets import ForeignKeyWidget, Widget, DateTimeWidget
 from task.models import TaskStatus
 from codemirror import CodeMirrorTextarea
@@ -38,7 +40,7 @@ class PersonAskedByWidget(UnaccentForeignKeyWidget):
         if person_asked_by and person_asked_by in Person.objects.requesters(office_id=row['office']):
             return person_asked_by
         else:
-            return None
+            raise ValueError("Não foi encontrado solicitante para este escritório com o nome {}.".format(value))
 
 
 class TaskStatusWidget(Widget):
@@ -47,3 +49,16 @@ class TaskStatusWidget(Widget):
     """
     def clean(self, value, row=None, *args, **kwargs):
         return TaskStatus._value2member_map_.get(value, TaskStatus.REQUESTED)
+
+
+class DateTimeWidgetMixin(DateTimeWidget):
+    """
+    Widget to convert from excell double to string datetime
+    """
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            return None
+        if isinstance(value, float):
+            seconds = int(round((value - 25569) * 86400.0))
+            value = make_aware(datetime.datetime.utcfromtimestamp(seconds))
+        return super().clean(value, row, *args, **kwargs)

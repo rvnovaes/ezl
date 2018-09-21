@@ -1,15 +1,14 @@
-import datetime
 from core.models import Person
 from decimal import Decimal
 from django.db.models import Q
-from django.utils.timezone import make_aware
+from django.db.models.fields import NOT_PROVIDED
 from import_export import resources
 from import_export.fields import Field
-from import_export.widgets import DateTimeWidget, DecimalWidget
+from import_export.widgets import DecimalWidget
 from lawsuit.models import Folder, LawSuit, Movement, TypeMovement, CourtDistrict, CourtDivision, Organ, Instance
 from task.instance_loaders import TaskModelInstanceLoader
 from task.models import Task, TypeTask
-from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget
+from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin
 
 
 TRUE_FALSE_DICT = {
@@ -83,40 +82,75 @@ def self_or_none(obj):
     return obj if obj else None
 
 
-def date_from_float(date_float):
-    seconds = int(round((date_float - 25569) * 86400.0))
-    return make_aware(datetime.datetime.utcfromtimestamp(seconds))
+class CustomFieldImportExport(Field):
+    def clean(self, data):
+        """
+        Translates the value stored in the imported datasource to an
+        appropriate Python object and returns it.
+        """
+        try:
+            value = data[self.column_name]
+        except KeyError:
+            raise KeyError("Column '%s' not found in dataset. Available "
+                           "columns are: %s" % (self.column_name, list(data)))
+
+        try:
+            value = self.widget.clean(value, row=data)
+        except ValueError as e:
+            column_name = COLUMN_NAME_DICT.get(self.column_name, self.column_name)
+            if not column_name == self.column_name:
+                column_name = column_name.get('column_name')
+            raise ValueError("Coluna '%s': %s" % (column_name, e))
+
+        if value in self.empty_values and self.default != NOT_PROVIDED:
+            if callable(self.default):
+                return self.default()
+            return self.default
+
+        return value
 
 
 class TaskResource(resources.ModelResource):
-
-    type_task = Field(column_name='type_task', attribute='type_task', widget=UnaccentForeignKeyWidget(TypeTask, 'name'),
-                      saves_null_values=False)
-    person_asked_by = Field(column_name='person_asked_by', attribute='person_asked_by',
-                            widget=PersonAskedByWidget(Person, 'legal_name'), saves_null_values=False)
-    person_executed_by = Field(column_name='person_executed_by', attribute='person_executed_by',
-                               widget=UnaccentForeignKeyWidget(Person, 'legal_name'))
-    person_distributed_by = Field(column_name='person_distributed_by', attribute='person_distributed_by',
-                                  widget=UnaccentForeignKeyWidget(Person, 'legal_name'))
-    final_deadline_date = Field(column_name='final_deadline_date', attribute='final_deadline_date',
-                                widget=DateTimeWidget(), saves_null_values=False)
-    delegation_date = Field(column_name='delegation_date', attribute='delegation_date', widget=DateTimeWidget())
-    acceptance_date = Field(column_name='acceptance_date', attribute='acceptance_date', widget=DateTimeWidget())
-    execution_date = Field(column_name='execution_date', attribute='execution_date', widget=DateTimeWidget())
-    requested_date = Field(column_name='requested_date', attribute='requested_date', widget=DateTimeWidget())
-    acceptance_service_date = Field(column_name='acceptance_service_date', attribute='acceptance_service_date',
-                                    widget=DateTimeWidget())
-    refused_service_date = Field(column_name='refused_service_date', attribute='refused_service_date',
-                                 widget=DateTimeWidget())
-    refused_date = Field(column_name='refused_date', attribute='refused_date', widget=DateTimeWidget())
-    return_date = Field(column_name='return_date', attribute='return_date', widget=DateTimeWidget())
-    blocked_payment_date = Field(column_name='blocked_payment_date', attribute='blocked_payment_date',
-                                 widget=DateTimeWidget())
-    finished_date = Field(column_name='finished_date', attribute='finished_date', widget=DateTimeWidget())
-    receipt_date = Field(column_name='receipt_date', attribute='receipt_date', widget=DateTimeWidget())
-    billing_date = Field(column_name='billing_date', attribute='billing_date', widget=DateTimeWidget())
-    task_status = Field(column_name='task_status', attribute='task_status', widget=TaskStatusWidget())
-    amount = Field(column_name='amount', attribute='amount', widget=DecimalWidget(), default=Decimal('0.00'))
+    type_task = CustomFieldImportExport(column_name='type_task', attribute='type_task',
+                                        widget=UnaccentForeignKeyWidget(TypeTask, 'name'),
+                                        saves_null_values=False)
+    person_asked_by = CustomFieldImportExport(column_name='person_asked_by', attribute='person_asked_by',
+                                              widget=PersonAskedByWidget(Person, 'legal_name'), saves_null_values=False)
+    person_executed_by = CustomFieldImportExport(column_name='person_executed_by', attribute='person_executed_by',
+                                                 widget=UnaccentForeignKeyWidget(Person, 'legal_name'))
+    person_distributed_by = CustomFieldImportExport(column_name='person_distributed_by',
+                                                    attribute='person_distributed_by',
+                                                    widget=UnaccentForeignKeyWidget(Person, 'legal_name'))
+    final_deadline_date = CustomFieldImportExport(column_name='final_deadline_date', attribute='final_deadline_date',
+                                                  widget=DateTimeWidgetMixin(), saves_null_values=False)
+    delegation_date = CustomFieldImportExport(column_name='delegation_date', attribute='delegation_date',
+                                              widget=DateTimeWidgetMixin())
+    acceptance_date = CustomFieldImportExport(column_name='acceptance_date', attribute='acceptance_date',
+                                              widget=DateTimeWidgetMixin())
+    execution_date = CustomFieldImportExport(column_name='execution_date', attribute='execution_date',
+                                             widget=DateTimeWidgetMixin())
+    requested_date = CustomFieldImportExport(column_name='requested_date', attribute='requested_date',
+                                             widget=DateTimeWidgetMixin())
+    acceptance_service_date = CustomFieldImportExport(column_name='acceptance_service_date',
+                                                      attribute='acceptance_service_date',
+                                                      widget=DateTimeWidgetMixin())
+    refused_service_date = CustomFieldImportExport(column_name='refused_service_date', attribute='refused_service_date',
+                                                   widget=DateTimeWidgetMixin())
+    refused_date = CustomFieldImportExport(column_name='refused_date', attribute='refused_date',
+                                           widget=DateTimeWidgetMixin())
+    return_date = CustomFieldImportExport(column_name='return_date', attribute='return_date',
+                                          widget=DateTimeWidgetMixin())
+    blocked_payment_date = CustomFieldImportExport(column_name='blocked_payment_date', attribute='blocked_payment_date',
+                                                   widget=DateTimeWidgetMixin())
+    finished_date = CustomFieldImportExport(column_name='finished_date', attribute='finished_date',
+                                            widget=DateTimeWidgetMixin())
+    receipt_date = CustomFieldImportExport(column_name='receipt_date', attribute='receipt_date',
+                                           widget=DateTimeWidgetMixin())
+    billing_date = CustomFieldImportExport(column_name='billing_date', attribute='billing_date',
+                                           widget=DateTimeWidgetMixin())
+    task_status = CustomFieldImportExport(column_name='task_status', attribute='task_status', widget=TaskStatusWidget())
+    amount = CustomFieldImportExport(column_name='amount', attribute='amount', widget=DecimalWidget(),
+                                     default=Decimal('0.00'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -175,7 +209,7 @@ class TaskResource(resources.ModelResource):
                 instance = Instance.objects.filter(name=instance, office=self.office).first()
                 if instance:
                     is_current_instance = TRUE_FALSE_DICT.get(row['lawsuit_is_current_instance'], False)
-                    is_active = TRUE_FALSE_DICT.get(row.get('lawsuit_is_active', 'F'), False)
+                    is_active = TRUE_FALSE_DICT.get(row.get('lawsuit_is_active', 'F'), True)
                     person_lawyer = row.get('lawsuit_court_district', '')
                     if person_lawyer:
                         person_lawyer = Person.objects.filter(
@@ -260,5 +294,4 @@ class TaskResource(resources.ModelResource):
             row['movement'] = self.movement.id
         if row_errors:
             raise Exception(row_errors)
-        if type(row['acceptance_service_date']) is float:
-            row['acceptance_service_date'] = date_from_float(row['acceptance_service_date'])
+        row['is_active'] = TRUE_FALSE_DICT.get('is_active', True)
