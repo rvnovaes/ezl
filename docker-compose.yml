@@ -67,6 +67,8 @@ services:
       - .:/app
       - ./media/service_price_table:/app/media/service_price_table
       - ezl-logs:/var/log/ezl
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
     depends_on:
       - builder
       - db
@@ -78,6 +80,8 @@ services:
       - .:/app
       - ./media/service_price_table:/app/media/service_price_table
       - ezl-logs:/var/log/ezl
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
     depends_on:
       - builder
       - db
@@ -89,6 +93,8 @@ services:
       - .:/app
       - ./media/service_price_table:/app/media/service_price_table
       - ezl-logs:/var/log/ezl
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
     depends_on:
       - builder
       - db
@@ -100,6 +106,8 @@ services:
     volumes:
       - .:/app
       - ezl-logs:/var/log/ezl
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
     depends_on:
       - tasks
 

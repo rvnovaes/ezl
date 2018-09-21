@@ -59,6 +59,12 @@ services:
       EMAIL_PORT: 1025
       EMAIL_USE_SSL: "false"
       PYTHONPATH: /app
+    volumes:
+      - .:/app
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
+      - ./media/service_price_table:/app/media/service_price_table
+      - ezl-logs:/var/log/ezl      
     depends_on:
       - builder
       - db
@@ -71,6 +77,12 @@ services:
       EMAIL_PORT: 1025
       EMAIL_USE_SSL: "false"
       PYTHONPATH: /app
+    volumes:
+      - .:/app
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
+      - ./media/service_price_table:/app/media/service_price_table
+      - ezl-logs:/var/log/ezl      
     depends_on:
       - builder
       - db
@@ -83,6 +95,12 @@ services:
       EMAIL_PORT: 1025
       EMAIL_USE_SSL: "false"
       PYTHONPATH: /app
+    volumes:
+      - .:/app
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
+      - ./media/service_price_table:/app/media/service_price_table
+      - ezl-logs:/var/log/ezl      
     depends_on:
       - builder
       - db
@@ -93,6 +111,12 @@ services:
     environment:
       ENV: development
       PYTHONPATH: /app
+    volumes:
+      - .:/app
+      - /mnt/windows_ecm/Agenda:/app/media/ECM
+      - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
+      - ./media/service_price_table:/app/media/service_price_table
+      - ezl-logs:/var/log/ezl      
 
   tunnel:
     image: ezl:latest
