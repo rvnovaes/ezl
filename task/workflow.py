@@ -125,9 +125,17 @@ class CorrespondentsTable(object):
             qs = ServicePriceTable.objects.filter(Q(Q(office=task.office) |
                                                     Q(Q(office__public_office=True), ~Q(office=task.office))),
                                                   Q(
-                                                      Q(type_task=type_task) |
-                                                      Q(type_task=None) |
-                                                      Q(type_task__type_task_main__in=type_task_main)
+                                                      Q(
+                                                          Q(  # para escritorios nao publicos seleciona os precos que estao vinculados aos tipos de servico da tabaela do proprio escritorio
+                                                              Q(type_task=type_task) |
+                                                              Q(type_task=None)
+                                                          ),
+                                                          Q(office=task.office)
+                                                      ) |
+                                                      Q(  # para escritorios publicos seleciona os precos que estao vinculados aos tipos de servico vinculados ao tipo de servico padrao
+                                                          Q(type_task__type_task_main__in=type_task_main),
+                                                          Q(office__public_office=True)
+                                                      )
                                                   ),
                                                   Q(
                                                       Q(office_correspondent__in=offices_related) |
