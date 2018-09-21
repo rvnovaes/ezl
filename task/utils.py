@@ -83,7 +83,7 @@ def copy_ecm(ecm, task):
 def get_file_content_copy(filefield):    
     local_file_path = os.path.join(settings.MEDIA_ROOT, filefield.name)
     if os.path.exists(local_file_path):
-        with open(local_file_path, 'r') as local_file:
+        with open(local_file_path, 'rb') as local_file:
             content = ContentFile(local_file.read())
     else:
         try:
