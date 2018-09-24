@@ -8,13 +8,10 @@ class CourtDivisionETL(GenericETL):
     advwin_table = 'Jurid_Varas'
     model = CourtDivision
     import_query = """
-                    SELECT
+                    SELECT DISTINCT
                       codigo AS legacy_code,
                       descricao
                     FROM Jurid_Varas AS v1
-                    WHERE codigo = (SELECT min(codigo)
-                                    FROM Jurid_Varas AS v2
-                                    WHERE v1.descricao = v2.descricao)
                     """
     has_status = False
 
@@ -30,7 +27,7 @@ class CourtDivisionETL(GenericETL):
                 instance = self.model.objects.filter(
                   legacy_code=code,
                   legacy_code__isnull=False,
-                  office=office,
+                  office=default_office,
                   system_prefix=LegacySystem.ADVWIN.value).first()
                 if instance:
                     instance.name = name

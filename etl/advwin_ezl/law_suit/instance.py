@@ -6,16 +6,10 @@ from etl.utils import get_message_log_default, save_error_log
 
 class InstanceETL(GenericETL):
     import_query = """
-                   SELECT Codigo AS legacy_code,
+                   SELECT DISTINCT Codigo AS legacy_code,
                           Descicao
-
                    FROM Jurid_Instancia AS i1
-
-                   WHERE Descicao IS NOT NULL AND Codigo =
-                   (SELECT min (Codigo)
-                      FROM Jurid_Instancia AS i2
-                      WHERE i1.Descicao = i2.Descicao)
-
+                   WHERE Descicao IS NOT NULL
                    """
 
     model = Instance
