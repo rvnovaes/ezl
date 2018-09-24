@@ -63,4 +63,16 @@
             {%endblock%}                              
         </div>
     </div>
+    {% include 'task/modal/processing.html' %}
 </div>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#fileupload').on('fileuploadstart', function(e, data){
+            $('#processing').modal('show');            
+        });
+
+        $('#fileupload').on('fileuploaddone', function(e, data){
+            $('#processing').modal('hide');            
+        });        
+    })
+</script>
