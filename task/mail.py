@@ -62,6 +62,8 @@ class TaskFinishedEmail(object):
         if not self.custom_settings.default_user.last_login:
             return {
                 "task_number": self.task.task_number,
+                "title_type_service": "OS {task_number} - {type_task} ".format(task_number=self.task.task_number, type_task=self.task.type_task.name),
+                "office_name": self.task.parent.office.legal_name,
                 "office_correspondent_name": self.task.parent.office.legal_name,
                 "username": self.custom_settings.default_user.username,
                 "btn_finished": self.get_url_change_password(),
@@ -76,6 +78,8 @@ class TaskOpenMailTemplate(object):
     def get_dynamic_template_data(self):
         return {
             "task_number": self.task.task_number,
+            "title_type_service": "OS {task_number} - {type_task} ".format(task_number=self.task.task_number, type_task=self.task.type_task.name),
+            "type_task": self.task.type_task.name,
             "description": get_str_or_blank(self.task.description),
             "final_deadline_date": to_localtime(self.task.final_deadline_date, '%d/%m/%Y %H:%M'),
             "opposing_party": get_str_or_blank(self.task.opposing_party),
@@ -115,6 +119,7 @@ class TaskAcceptedMailTemplate(object):
     def get_dynamic_template_data(self):
         return {
             "task_number": self.task.task_number,
+            "title_type_service": "OS {task_number} - {type_task} ".format(task_number=self.task.task_number, type_task=self.task.type_task.name),
             "office_name": self.task.parent.office.legal_name,
             "btn_done": "{}/providencias/external-task/FINISHED/{}/".format(settings.WORKFLOW_URL_EMAIL,
                                                                             self.task.task_hash.hex),
