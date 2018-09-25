@@ -472,11 +472,14 @@
                 url: '/providencias/ajax_get_correspondent_table/?task={{ form.instance.pk }}&type_task='+type_task,
                 success: function (data) {
                     window.total = data.total;
+                    window.table_rows = data.total;
                     window.type_task_id = data.type_task_id;
                     $("#type_task").html(data.type_task);
                     var tbody = $('#correspondents-table tbody');
-                    tbody.html('');
-                    $('#correspondents-table').DataTable().destroy();
+                    if(window.table) {
+                        window.table.destroy();
+                    }
+                    tbody.html('')
                     if (data.total > 0) {
                         $.each(data.correspondents_table, function (index, value) {
                             $.tmpl(tmplRowCorrespondent, value).appendTo(tbody)
