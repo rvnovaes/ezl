@@ -23,6 +23,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'etl.tasks.remove_old_etldashboard',
         'schedule': crontab(minute=0, hour=2)
     },
+    'task-clear_sessions': {
+        'task': 'core.tasks.clear_sessions',
+        'schedule': crontab(minute=0, hour=3)
+    },
 }
 CELERY_SEND_TASK_EMAILS = False
 CELERY_TASK_IGNORE_RESULT = True
