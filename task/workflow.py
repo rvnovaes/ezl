@@ -126,13 +126,17 @@ class CorrespondentsTable(object):
                                                     Q(Q(office__public_office=True), ~Q(office=task.office))),
                                                   Q(
                                                       Q(
-                                                          Q(  # para escritorios nao publicos seleciona os precos que estao vinculados aos tipos de servico da tabaela do proprio escritorio
+                                                          Q(  # para escritorios nao publicos seleciona os precos que
+                                                              # estao vinculados aos tipos de servico da tabaela do
+                                                              # proprio escritorio
                                                               Q(type_task=type_task) |
                                                               Q(type_task=None)
                                                           ),
                                                           Q(office=task.office)
                                                       ) |
-                                                      Q(  # para escritorios publicos seleciona os precos que estao vinculados aos tipos de servico vinculados ao tipo de servico padrao
+                                                      Q(  # para escritorios publicos seleciona os precos que estao
+                                                          # vinculados aos tipos de servico vinculados ao tipo de
+                                                          # servico padrao
                                                           Q(type_task__type_task_main__in=type_task_main),
                                                           Q(office__public_office=True)
                                                       )
@@ -160,27 +164,28 @@ class CorrespondentsTable(object):
     def get_type_task(self, task):
         type_task = task.type_task
         type_task_main = task.type_task.main_tasks
+        self.type_task_qs = TypeTask.objects.filter(office=self.office_session, type_task_main__in=type_task_main)
         if type_task.office != self.office_session:
-            self.type_task_qs = TypeTask.objects.filter(office=self.office_session, type_task_main__in=type_task_main)
             if self.type_task_qs.count() == 1:
                 type_task = self.type_task_qs.first()
                 type_task_main = type_task.main_tasks
+                self.type_task_qs = None
             else:
                 type_task = None
         return type_task, type_task_main
 
     def get_type_task_field(self):
-        if not self.type_task_qs:
+        if not self.type_task_qs or self.type_task_qs.count() == 1:
             type_task_field = None
         else:
+            initial = self.type_task.id if self.type_task in self.type_task_qs else None
             type_task_field = forms.ModelChoiceField(
                 queryset=self.type_task_qs,
                 empty_label='',
                 required=True,
                 label=u'Selecione o tipo de serviço',
+                initial=initial,
             )
-            if self.type_task_qs.count() == 1:
-                type_task_field.initial = self.type_task_qs.first()
 
         return type_task_field
 

@@ -471,17 +471,18 @@
                 type: 'GET',
                 url: '/providencias/ajax_get_correspondent_table/?task={{ form.instance.pk }}&type_task='+type_task,
                 success: function (data) {
+                    window.total = data.total;
+                    window.type_task_id = data.type_task_id;
+                    $("#type_task").html(data.type_task);
+                    var tbody = $('#correspondents-table tbody');
+                    tbody.html('');
+                    $('#correspondents-table').DataTable().destroy();
                     if (data.total > 0) {
-                        window.total = data.total;
-                        window.type_task_id = data.type_task_id;
-                        $("#type_task").html(data.type_task);
-                        var tbody = $('#correspondents-table tbody');
-                        tbody.html('');
                         $.each(data.correspondents_table, function (index, value) {
                             $.tmpl(tmplRowCorrespondent, value).appendTo(tbody)
                         });
-                        correspondents_data_table();
                     }
+                    correspondents_data_table();
                 },
                 dataType: 'json'
             });
@@ -573,7 +574,7 @@
             }
             var $id_type_task_field = $("#id_type_task_field");
             if ($id_type_task_field.length > 0 && $id_type_task_field.val()) {
-                if ($id_type_task_field.length == 1){
+                if ($id_type_task_field[0].options.length == 1){
                     $("#type_task").html($id_type_task_field.find(":selected").text())
                     $("#type_task_name").html("<label>Tipo de Serviço: </label> " + $id_type_task_field.find(":selected").text())
                 }

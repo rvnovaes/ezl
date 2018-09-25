@@ -1142,7 +1142,7 @@ def ajax_get_correspondents_table(request):
             'office_rating': x.office_rating if x.office_rating else '0.00',
             'office_return_rating': x.office_return_rating if x.office_return_rating else '0.00',
             'office_public': x.office_correspondent.public_office
-        }, correspondents_table.data.data.all()))
+        }, correspondents_table.data.data))
     data = {
         "correspondents_table": correspondents_table_list,
         "type_task": type_task_name,
