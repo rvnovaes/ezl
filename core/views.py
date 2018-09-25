@@ -54,6 +54,8 @@ from django.core.validators import validate_email
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_groups_with_perms
 from billing.models import Plan, PlanOffice
+from django.contrib.auth.mixins import PermissionRequiredMixin
+
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -1971,3 +1973,15 @@ class MediaFileView(LoginRequiredMixin, View):
         if os.path.exists(os.path.join(settings.MEDIA_ROOT, path)):
             return static_serve_view(self.request, path, document_root=settings.MEDIA_ROOT)
         return HttpResponseRedirect(urljoin(settings.AWS_STORAGE_BUCKET_URL, path))
+
+
+
+class OfficePermissionRequiredMixin(PermissionRequiredMixin):
+    def has_permission(self):
+        guardian = ObjectPermissionChecker(self.request.user)
+        office_session = get_office_session(self.request)        
+        perms = self.get_permission_required()
+        for perm in perms:
+            if not guardian.has_perm(perm.name, office_session):
+                return False
+        return True
