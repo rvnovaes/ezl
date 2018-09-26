@@ -84,7 +84,8 @@ class GenericSearchFormat(object):
 
         if self.params.get('is_active') == 'T':
             self.params.pop('is_active')
-            self.model_type_fields.remove({'type': 'BooleanField', 'name': 'is_active'})
+            self.model_type_fields.remove(
+                {'type': 'BooleanField', 'name': 'is_active'})
 
         try:
             office_field = self.model._meta.get_field('office')
@@ -92,9 +93,9 @@ class GenericSearchFormat(object):
                 search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
             else:
                 if not office:
-                    office = get_office_session(self.request)
+                    office = [get_office_session(self.request).id]
                 search = "self.table_class(self.model.objects.get_queryset(office=[{office}]).filter({params}))".format(
-                    office=office.id,
+                    office=office,
                     params='{params}'
                 )
         except:
@@ -102,7 +103,8 @@ class GenericSearchFormat(object):
 
         for field in self.model_type_fields:
             if field.get('type') in ['DateField', 'DateTimeField']:
-                value = self.params.get(field.get('name') + '_ini'), self.params.get(field.get('name') + '_fim')
+                value = self.params.get(
+                    field.get('name') + '_ini'), self.params.get(field.get('name') + '_fim')
                 params.append(
                     self.search.get(field.get('type'),
                                     GenericSearch()).dict_to_filter(field.get('name'), value))
@@ -114,7 +116,8 @@ class GenericSearchFormat(object):
                                                         self.params.get(field.get('name'))))
 
         if self.related_id:
-            params.append('{0}__id={1}'.format(self.field_name_related, self.related_id))
+            params.append('{0}__id={1}'.format(
+                self.field_name_related, self.related_id))
 
         if not params:
             return False

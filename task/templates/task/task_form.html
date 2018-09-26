@@ -33,7 +33,7 @@
 {% endblock extra_scripts %}
 {% block script_window_load %}
     {{ block.super }}
-    get_ecms({{form.instance.pk}});
+    get_internal_ecms({{form.instance.pk}});
 {% endblock %}
 {% block extra_modal %}
     <!-- Janela modal para mostrar progresso de deleção do arquivo -->

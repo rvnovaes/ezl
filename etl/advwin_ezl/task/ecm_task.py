@@ -1,4 +1,8 @@
+import os
+import ntpath
 from django.db.utils import IntegrityError
+from django.conf import settings
+from django.core.files.base import ContentFile
 import traceback
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
@@ -73,6 +77,15 @@ class EcmEtl(GenericETL):
             try:
                 path = ecm_path_advwin2ezl(row['path'])
                 if path:
+                    local_path = os.path.join(settings.MEDIA_ROOT, path)
+                    if not os.path.exists(local_path):
+                        continue
+
+                    with open(local_path, 'rb') as local_file:
+                        new_file = ContentFile(local_file.read())
+                    filename = ntpath.basename(local_path)
+                    new_file.name = filename
+
                     tasks = Task.objects.filter(
                         legacy_code=row['task_legacy_code'],
                         legacy_code__isnull=False)
@@ -84,12 +97,12 @@ class EcmEtl(GenericETL):
                             arquivos acabam sendo duplicados
                             https://mttech.atlassian.net/browse/EZL-828
                             """
-                            if not self.model.objects.filter(task=task, path=path):
+                            if not self.model.objects.filter(task=task, path__endswith=filename):
                                 self.model.objects.create(task=task,
                                                           legacy_code=row['legacy_code'],
                                                           system_prefix=LegacySystem.ADVWIN.value,
                                                           is_active=True,
-                                                          path=path,
+                                                          path=new_file,
                                                           create_user=user,
                                                           alter_user=user,
                                                           exhibition_name=row['exhibition_name'],

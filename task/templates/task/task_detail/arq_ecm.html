@@ -47,17 +47,32 @@
                     <i class="icon-cloud-upload"></i> Enviar arquivo(s)
                 </button>
 
+                {% block ecm_add %}
                 <input id="fileupload" type="file" name="path" multiple
                         style="display: none;"
                         data-method="POST"
                         enctype="multipart/form-data"
                         data-url="{% url 'ecm_add' object.id %}"
                         data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+                {% endblock %}
             {% endif %}        
-                              
-            <a href="{% url 'ecm_batch_download' object.id %}" class="btn btn-sm btn-success js-batch-download-files">
-                <i class="icon-cloud-download"></i>
-                Baixar todos arquivo(s)</a>        
+            {% block ecm_batch_download %}
+                <a href="{% url 'ecm_batch_download' object.id %}" class="btn btn-sm btn-success js-batch-download-files">
+                    <i class="icon-cloud-download"></i>
+                    Baixar todos arquivo(s)</a>        
+            {%endblock%}                              
         </div>
     </div>
+    {% include 'task/modal/processing.html' %}
 </div>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#fileupload').on('fileuploadstart', function(e, data){
+            $('#processing').modal('show');            
+        });
+
+        $('#fileupload').on('fileuploaddone', function(e, data){
+            $('#processing').modal('hide');            
+        });        
+    })
+</script>

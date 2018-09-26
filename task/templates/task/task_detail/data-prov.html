@@ -4,7 +4,7 @@
         <tbody>
         <tr>
             <th>Serviço solicitado</th>
-            <td>
+            <td id="type_task">
                 {{ form.instance.type_task|default_if_none:"---" }}
             </td>
         </tr>
@@ -29,7 +29,7 @@
         <tr>
             <th>Recebida em</th>
             <td>
-                {{ form.instance.delegation_date|localtime|default_if_none:"---" }}
+                {{ form.instance.requested_date|localtime|default_if_none:"---" }}
             </td>
         </tr>
         <tr>

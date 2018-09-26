@@ -16,11 +16,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='address',
             name='country',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.Country'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, to='core.Country'),
         ),
         migrations.AlterField(
             model_name='address',
             name='state',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.State'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, to='core.State'),
         ),
     ]

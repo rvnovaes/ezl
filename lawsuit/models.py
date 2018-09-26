@@ -20,6 +20,7 @@ def get_lawsuit_number():
 class TypeMovement(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, blank=False, null=False, default="", verbose_name='Nome')
     uses_wo = models.BooleanField(default=False, verbose_name='Utiliza ordem de serviço?')
+    is_default = models.BooleanField(default=False, verbose_name='Movimentação padrão para importação')
 
     objects = OfficeManager()
 
@@ -59,6 +60,7 @@ class Folder(Audit, LegacyCode, OfficeMixin):
                                     blank=True,
                                     null=True,
                                     verbose_name='Centro de custo')
+    is_default = models.BooleanField(default=False, verbose_name='Pasta padrão para importação')
 
     objects = OfficeManager()
 

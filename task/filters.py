@@ -24,6 +24,12 @@ GROUP_BY_TASK_TO_RECEIVE_TYPE = (
 )
 
 
+class TaskApiFilter(FilterSet):
+  class Meta:
+    model = Task
+    fields = ['legacy_code', 'task_number']
+
+
 class TaskFilter(FilterSet):
     state = ModelChoiceFilter(queryset=filter_valid_choice_form(
         State.objects.filter(is_active=True)),
@@ -37,7 +43,7 @@ class TaskFilter(FilterSet):
                                                                  url='/processos/courtdistrict_autocomplete'))
 
     task_status = MultipleChoiceFilter(label="Status", required=False,
-      choices=[(task_status.name, task_status.value) for task_status in TaskStatus])
+                                       choices=[(task_status.name, task_status.value) for task_status in TaskStatus])
     type_task = ModelChoiceFilter(queryset=filter_valid_choice_form(TypeTask.objects.filter(is_active=True)),
                                   label=u"Tipo de Serviço")
     cost_center = ModelChoiceFilter(queryset=filter_valid_choice_form(CostCenter.objects.filter(is_active=True)),
@@ -45,7 +51,7 @@ class TaskFilter(FilterSet):
     court = ModelChoiceFilter(queryset=filter_valid_choice_form(Organ.objects.filter(is_active=True)),
                               label="Órgão")
     team = ModelChoiceFilter(queryset=filter_valid_choice_form(Team.objects.filter(is_active=True)),
-                              label="Equipe")
+                             label="Equipe")
     folder_number = NumberFilter(label=u"Nº da pasta")
     folder_legacy_code = CharFilter(label=u"Nº da pasta de origem")
     law_suit_number = CharFilter(label=u"Nº do processo")
@@ -59,25 +65,28 @@ class TaskFilter(FilterSet):
                                                          name='client',
                                                          url='/client_form'))
     office_executed_by = CharFilter(label='Escritório contrado', required=False, 
-      widget=TypeaHeadForeignKeyWidget(model=Office, field_related='legal_name', name='office_executed_by', url='/office_correspondent_form'))
+                                    widget=TypeaHeadForeignKeyWidget(model=Office,
+                                                                     field_related='legal_name',
+                                                                     name='office_executed_by',
+                                                                     url='/office_correspondent_form'))
     person_executed_by = CharFilter(label="Correspondente",
-                        required=False,
-                        widget=TypeaHeadForeignKeyWidget(model=Person,
-                                                         field_related='legal_name',
-                                                         name='person_executed_by',
-                                                         url='/correspondent_form'))
-    person_asked_by = CharFilter(label="Solicitante",
                                     required=False,
                                     widget=TypeaHeadForeignKeyWidget(model=Person,
                                                                      field_related='legal_name',
-                                                                     name='person_asked_by',
-                                                                     url='/requester_form'))
-    person_distributed_by = CharFilter(label="Contratante",
+                                                                     name='person_executed_by',
+                                                                     url='/correspondent_form'))
+    person_asked_by = CharFilter(label="Solicitante",
                                  required=False,
                                  widget=TypeaHeadForeignKeyWidget(model=Person,
                                                                   field_related='legal_name',
-                                                                  name='person_distributed_by',
-                                                                  url='/service_form'))
+                                                                  name='person_asked_by',
+                                                                  url='/requester_form'))
+    person_distributed_by = CharFilter(label="Contratante",
+                                       required=False,
+                                       widget=TypeaHeadForeignKeyWidget(model=Person,
+                                                                        field_related='legal_name',
+                                                                        name='person_distributed_by',
+                                                                        url='/service_form'))
     final_deadline_date_in = MDDateTimeRangeFilter(name='final_deadline_date_in', label='Prazo entre:')
     requested_in = MDDateTimeRangeFilter(name='requested_in', label=u"Solicitadas entre:")
     accepted_service_in = MDDateTimeRangeFilter(name='accepted_service_in', label="Aceitas pelo Service entre:")
@@ -103,7 +112,15 @@ class TaskFilter(FilterSet):
     def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
         super(TaskFilter, self).__init__(data, queryset, prefix, strict, request)
         self.filters['custom_filter'].queryset = Filter.objects.filter(create_user=self.request.user).order_by('name')
-        self.filters['team'].queryset = Team.objects.filter(office=get_office_session(self.request))
+        filters_list = ['type_task', 'cost_center', 'court', 'team']
+        office_session = get_office_session(self.request)
+        for filter_field in filters_list:
+            self.filters[filter_field].queryset = self.filters[filter_field].queryset.filter(office=office_session)
+        custom_settings = getattr(office_session, 'customsettings', None)
+        if custom_settings and custom_settings.task_status_show:
+            task_status_choices = list(custom_settings.task_status_show.values_list('status_to_show', flat=True))
+            self.filters['task_status'].extra['choices'] = list(map(lambda x: (TaskStatus(x).name, x),
+                                                                    task_status_choices))
 
     class Meta:
         model = DashboardViewModel

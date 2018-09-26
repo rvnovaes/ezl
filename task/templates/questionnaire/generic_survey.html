@@ -3,8 +3,10 @@
 {% block content %}
     {% load bootstrap3 %}
     <script id="inline-script">
-        window.survey = new Survey.Model({{ survey_data|safe }});
-        window.survey2 = new Survey.Model({{ survey_data|safe }});
+        {% if survey_data %}
+            window.survey = new Survey.Model({{ survey_data|safe }});
+            window.survey2 = new Survey.Model({{ survey_data|safe }});
+        {% endif %}
     </script>
         <div id="survey" class="modal" data-status="">
         <div class="modal-dialog">
@@ -26,6 +28,7 @@
             </div>
         </div>
     </div>
+    {% if survey_data %}
     <script>
         setInterval(function(){
             $('#survey input[type=file]').each(function(){
@@ -111,7 +114,7 @@
                 });
                 question.valueChangedCallback = function () {
                     widget.datepicker('setDate', new Date(question.value));
-                }
+                };
                 question.valueChangedCallback();
                 question.value = new Date();
             },
@@ -120,7 +123,7 @@
                 $(el).find('.widget-datepicker').datepicker("destroy");
 
             }
-        }
+        };
 
 
         Survey.CustomWidgetCollection.Instance.addCustomWidget(widget);
@@ -130,12 +133,6 @@
         var footer = document.querySelector("#surveyElement").querySelector('.panel-footer')
         var cancelBtn = document.createElement("button");
 
-        {#        cancelBtn.onclick = function () {#}
-        {#            if (confirm("Deseja cancelar o preenchimento do formulário? (Todas as repostas serão perdidas)")) {#}
-        {#                $("#surveyElement").Survey({model: survey});#}
-        {#                return false;#}
-        {#            }#}
-        {#        };#}
         footer.className = "row align-center";
         footer.style = "text-align: center;";
 
@@ -150,5 +147,6 @@
         footer.appendChild(cancelBtn);
 
     </script>
+    {% endif %}
 
 {% endblock %}

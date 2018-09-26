@@ -51,7 +51,7 @@ angular.module('app').controller('chatInternalCtrl', function($scope, chatApiSer
   }
 
   vm.getClass = function(message){
-    if (message.create_user_id === vm.messages.request_user_id) {
+    if ((message.create_user_id === vm.messages.request_user_id) || (message.create_user_id === window.user_id)) {
       return "odd"
     }
     return "non-odd"
@@ -66,7 +66,8 @@ angular.module('app').controller('chatInternalCtrl', function($scope, chatApiSer
       var data = JSON.stringify({
         'text': vm.messageToSend,
         'chat': vm.chat.id,
-        'label': vm.chat.label
+        'label': vm.chat.label, 
+        'user_id': window.user_id,
       });
       vm.sockets[vm.chat.id].onopen(data);
       vm.updateScroll()

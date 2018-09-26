@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from .models import Attachment, DefaultAttachmentRule
 from core.forms import BaseModelForm
-from core.utils import filter_valid_choice_form, get_office_field
+from core.utils import filter_valid_choice_form, get_office_field, get_office_session
 from core.models import City, State, Person
 from core.widgets import TypeaHeadForeignKeyWidget
 from lawsuit.models import CourtDistrict
@@ -106,6 +106,8 @@ class DefaultAttachmentRuleForm(BaseModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
+        self.fields['type_task'].queryset = filter_valid_choice_form(TypeTask.objects.filter(
+            is_active=True, office=get_office_session(self.request))).order_by('name')        
 
 
 class DefaultAttachmentRuleCreateForm(DefaultAttachmentRuleForm):
