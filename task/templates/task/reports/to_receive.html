@@ -141,7 +141,7 @@
                             <th>Parte Adversa</th>
                             <th>OS Original</th>
                             <th>Recebida</th>
-                            <th>Valor</th>
+                            <th>Valor (R$)</th>
                         </tr>
                     </thead>
                     <tbody id="os-table-body">
@@ -150,7 +150,7 @@
                                 <tr>
                                     <th colspan="10">{{ office.office_name }}</th>
                                     <th></th>
-                                    <th><center>R$ {{office.office_total}}</center></th>
+                                    <th><center>{{office.office_total}}</center></th>
                                 </tr>
                             {% endifchanged %}
 
@@ -158,7 +158,7 @@
                                 <tr>
                                     <th></th>
                                     <th colspan="10">{{ office.client_name }}</th>
-                                    <th><center>R$ {{office.client_total}}</center></th>
+                                    <th><center>{{office.client_total}}</center></th>
                                 </tr>
                             {% endifchanged %}
                             {% for task in office.tasks %}
@@ -182,7 +182,7 @@
                                         <td>{{ task.legacy_code }}</td>
                                     {% endif %}
                                     <td>{{ task.receipt_date|date:"d/m/Y" }}</td>
-                                    <td class="text-center"><center>R$ {{ task.amount }}</center></td>
+                                    <td class="text-center"><center>{{ task.amount }}</center></td>
                                 </tr>
                             {% endfor %}
                         {% empty %}
@@ -192,9 +192,8 @@
                         {% endfor %}
                         {% if total %}
                             <tr class="total-container">
-                                <th colspan="10" class="text-center" >Total Geral</th>
-                                <th></th>
-                                <th class="text-center">R$ {{total}}</th>
+                                <th colspan="10" class="text-right" >Total Geral (R$)</th>
+                                <th colspan="2" class="text-right">{{total}}</th>
                             </tr>
                         {% endif %}
 

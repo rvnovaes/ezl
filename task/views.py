@@ -336,6 +336,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
                 offices.append({
                     'office_name': office.name,
                     'client_name': client.name,
+                    'client_refunds': client.refunds_correspondent_service,
                     'tasks': tasks,
                     "client_total": client_total,
                     "office_total": 0,

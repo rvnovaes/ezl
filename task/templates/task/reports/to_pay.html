@@ -97,6 +97,7 @@
                             <th>Processo</th>
                             <th>Comarca</th>
                             <th>Cliente</th>
+                            <th>Reembolsa valor</th>
                             <th>Parte Adversa</th>
                             <th>OS Original</th>
                             <th>Faturada</th>
@@ -114,6 +115,7 @@
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.court_district }}</td>
                                     <td>{{ task.client }}</td>
+                                    <td>{{ office.client_refunds }}</td>
                                     <td>{{ task.opposing_party }}</td>
                                     {% if task.parent %}
                                         {% if task.parent.parent %}
@@ -145,7 +147,7 @@
                             <th>Parte Adversa</th>
                             <th>OS Original</th>
                             <th>Faturada</th>
-                            <th>Valor</th>
+                            <th>Valor (R$)</th>
                         </tr>
                     </thead>
                     <tbody id="os-table-body">
@@ -154,15 +156,24 @@
                                 <tr>
                                     <th colspan="10">{{ office.office_name }}</th>
                                     <th></th>
-                                    <th><center>R$ {{office.office_total}}</center></th>
+                                    <th><center>{{office.office_total}}</center></th>
                                 </tr>
                             {% endifchanged %}
 
                             {% ifchanged office.client_name or office.office_name %}
                                 <tr>
                                     <th></th>
-                                    <th colspan="10">{{ office.client_name }}</th>
-                                    <th><center>R$ {{office.client_total}}</center></th>
+                                    <th colspan="10">
+                                        <div class="col-xs-10">
+                                            {{ office.client_name }}
+                                        </div>
+                                        <div class="col-xs-2">
+                                            {% if office.client_refunds %}
+                                            <span class="badge badge-danger pull-right"><i class="fa fa-check"></i> Reembolsa valor</span>
+                                            {% endif %}
+                                        </div>
+                                    </th>
+                                    <th><center>{{office.client_total}}</center></th>
                                 </tr>
                             {% endifchanged %}
                             {% for task in office.tasks %}
@@ -190,7 +201,7 @@
                                         <td>{{ task.legacy_code }}</td>
                                     {% endif %}
                                     <td>{{ task.billing_date|date:"d/m/Y" }}</td>
-                                    <td class="text-center"><center>R$ {{ task.amount }}</center></td>
+                                    <td class="text-center"><center>{{ task.amount }}</center></td>
                                 </tr>
                             {% endfor %}
                         {% empty %}
@@ -200,9 +211,8 @@
                         {% endfor %}
                         {% if total %}
                             <tr class="total-container">
-                                <th colspan="10" class="text-center" >Total Geral</th>
-                                <th></th>
-                                <th class="text-center">R$ {{total}}</th>
+                                <th colspan="10" class="text-right" >Total Geral (R$)</th>
+                                <th colspan="2" class="text-right">{{total}}</th>
                             </tr>
                         {% endif %}
                     </tbody>
