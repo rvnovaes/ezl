@@ -26,7 +26,6 @@ from core.utils import validate_xlsx_header
 from django.core.exceptions import ValidationError
 
 
-
 class BaseModelForm(FileFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -238,8 +237,8 @@ class PersonForm(BaseModelForm):
 
     class Meta:
         model = Person
-        fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj',
-                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active', 'import_from_legacy', 'auth_user', 'company']
+        fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_lawyer', 'is_customer', 'is_supplier',
+                  'is_active', 'import_from_legacy', 'refunds_correspondent_service', 'auth_user', 'company']
 
     def clean(self):
         cleaned_data = super().clean()

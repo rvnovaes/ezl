@@ -299,6 +299,12 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
                     finished_query.add(
                         Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
 
+            if 'refunds_correspondent_service' in data and data['refunds_correspondent_service']:
+                refunds = (data['refunds_correspondent_service'] == 'True')
+                query.add(
+                    Q(movement__law_suit__folder__person_customer__refunds_correspondent_service=refunds),
+                    Q.AND)
+
             if query or finished_query:
                 query.add(Q(finished_query), Q.AND)
                 queryset = queryset.filter(query)
