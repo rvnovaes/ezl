@@ -350,6 +350,9 @@ class Person(AbstractPerson):
 
     company = models.ForeignKey(Company, verbose_name='Compartilhar com empresa', null=True, blank=True)
 
+    refunds_correspondent_service = models.BooleanField(
+        null=False, default=False, verbose_name='Cliente reembolsa valor gasto com serviço de correspondência')
+
     class Meta:
         db_table = 'person'
         ordering = ['legal_name', 'name']
