@@ -1,0 +1,26 @@
+[
+{
+    "model": "core.emailtemplate",
+    "pk": 1,
+    "fields": {
+        "name": "OS EM ABERTO",
+        "template_id": "d-a9f3606fb333406c9b907fee244e30a4"
+    }
+},
+{
+    "model": "core.emailtemplate",
+    "pk": 2,
+    "fields": {
+        "name": "OS A CUMPRIR",
+        "template_id": "d-ae35cc53722345eaa4a4adf521c3bd81"
+    }
+},
+{
+    "model": "core.emailtemplate",
+    "pk": 3,
+    "fields": {
+        "name": "OS FINALIZADA",
+        "template_id": "d-7af22ba0396943729cdcb87e2e9f787c"
+    }
+}
+]

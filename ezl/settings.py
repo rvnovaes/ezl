@@ -23,6 +23,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'etl.tasks.remove_old_etldashboard',
         'schedule': crontab(minute=0, hour=2)
     },
+    'task-clear_sessions': {
+        'task': 'core.tasks.clear_sessions',
+        'schedule': crontab(minute=0, hour=3)
+    },
 }
 CELERY_SEND_TASK_EMAILS = False
 CELERY_TASK_IGNORE_RESULT = True
@@ -65,12 +69,16 @@ except KeyError as e:
 SECRET_KEY = 'f5*(8sgk)n1!i52xijv0yt@jtewp28%g%sp1rx*=y68ocgg+!2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+
+WORKFLOW_URL_EMAIL = os.environ.get('WORKFLOW_EMAIL', 'http://localhost:8000')
+
 if environment == 'development':
     DEBUG = True
 else:
     DEBUG = False
 
 ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
 CSRF_TRUSTED_ORIGINS = ['.ezlawyer.com.br']
 
 # Application definition
@@ -127,13 +135,20 @@ INSTALLED_APPS = [
     'channels',
     'chat',
     'ecm',
+    'dashboard',
+    'codemirror',
     'guardian',
     'billing',
     'djmoney',
+    'rest_framework',
+    'rest_framework_swagger',
+    'oauth2_provider',
+    'import_export',
     'django_dbconn_retry',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -141,7 +156,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'ezl.urls'
@@ -269,6 +284,17 @@ STATICFILES_DIRS = (
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+AWS_ACCESS_KEY_ID = 'AKIAJTB675KE6AXUTPKA'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_FILE_OVERWRITE = False
+if environment == 'production':
+    AWS_STORAGE_BUCKET_NAME = 'ezl-production'
+else:
+    AWS_STORAGE_BUCKET_NAME = 'ezl-development'
+AWS_STORAGE_BUCKET_URL = 'https://{}.s3.amazonaws.com/'.format(AWS_STORAGE_BUCKET_NAME)
 
 LOGIN_REDIRECT_URL = reverse_lazy('inicial')
 
@@ -411,3 +437,35 @@ LOGGING = {
 
 UPLOAD_DIRECTORY = 'uploads'
 ADMINS = [('EZL Erros', 'erros.ezlawyer@gmail.com')]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ('oauth2_provider.contrib.rest_framework.OAuth2Authentication',),
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend', ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 30,
+
+}
+
+OAUTH2_PROVIDER = {
+    # this is the list of available scopes
+    'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore',
+    'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'},
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,
+}
+
+OAUTH2_PROVIDER_APPLICATION_MODEL = 'core.ExternalApplication'
+
+SWAGGER_SETTINGS = {
+    'LOGIN_URL': 'rest_framework:login',
+    'LOGOUT_URL': 'rest_framework:logout',
+    'USE_SESSION_AUTH': True,
+    'DOC_EXPANSION': 'list',
+    'APIS_SORTER': 'alpha',
+    'SECURITY_DEFINITIONS': None,
+    'JSON_EDITOR': True,
+    'OPERATIONS_SORTER': 'method',
+    'SHOW_REQUEST_HEADERS': True,
+}
+
+# configuração para o django_import_export
+DATETIME_INPUT_FORMATS = ('%d/%m/%Y %H:%M', '%d/%m/%Y %H:%M',)

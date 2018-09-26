@@ -30,7 +30,7 @@ class ChatListView(ListView):
         return context
 
 
-class ChatCountMessages(CustomLoginRequiredView, View):
+class ChatCountMessages(View):
     def get(self, request, *args, **kwargs):
         has_groups = request.GET.get('has_groups', 'false') == 'true'
         data = {
@@ -45,7 +45,7 @@ class ChatCountMessages(CustomLoginRequiredView, View):
         return JsonResponse(data)
 
 
-class ChatReadMessages(CustomLoginRequiredView, View):
+class ChatReadMessages(View):
     def post(self, request, *args, **kwargs):
         chat_id = json.loads(request.body).get('chat_id')
         chat = Chat.objects.filter(pk=int(chat_id)).first()
@@ -55,7 +55,7 @@ class ChatReadMessages(CustomLoginRequiredView, View):
         return JsonResponse({'status': 'ok'})
 
 
-class ChatGetMessages(CustomLoginRequiredView, View):
+class ChatGetMessages(View):
     def post(self, request, *args, **kwargs):
         chat_id = request.POST.get('chat_id')
         qry_message = Message.objects.filter(
@@ -84,9 +84,9 @@ class ChatGetMessages(CustomLoginRequiredView, View):
         return JsonResponse(data)
 
 
-class ChatOfficeContactView(CustomLoginRequiredView, View):
+class ChatOfficeContactView(View):
     @staticmethod
-    def add_count_unread_message(user, contact_offices):        
+    def add_count_unread_message(user, contact_offices):
         min_date = datetime.strptime('1970-01-01', '%Y-%m-%d')
         for office in contact_offices:
             unread_messages = UnreadMessage.objects.filter(
@@ -97,7 +97,7 @@ class ChatOfficeContactView(CustomLoginRequiredView, View):
             if unread_messages:
                 latest_unread_message = unread_messages.latest('create_date').create_date
             office['unread_message_quanty'] = unread_message_quanty
-            office['latest_unread_message'] = int(time.mktime(latest_unread_message.timetuple()))         
+            office['latest_unread_message'] = int(time.mktime(latest_unread_message.timetuple()))
         return sorted(contact_offices, key=lambda i: i.get('latest_unread_message'), reverse=True)
 
     def get(self, request, *args, **kwargs):
@@ -110,7 +110,7 @@ class ChatOfficeContactView(CustomLoginRequiredView, View):
         return JsonResponse(data, safe=False)
 
 
-class ChatsByOfficeView(CustomLoginRequiredView, View):
+class ChatsByOfficeView(View):
     @staticmethod
     def add_count_unread_message(user, chats):
         # Pegamos todos os chats do usuário que possuem mensagens não lidas
@@ -159,13 +159,15 @@ class ChatsByOfficeView(CustomLoginRequiredView, View):
         return JsonResponse(data, safe=False)
 
 
-class ChatMenssage(CustomLoginRequiredView, View):
+class ChatMenssage(View):
     def get(self, request, *args, **kwargs):
         chat = Chat.objects.get(pk=int(request.GET.get('chat')))
-        messages = list(chat.messages.all().values(
-            'message', 'create_user__username', 'create_user_id', 'create_date'))
-        office = get_office_session(request)
-        task = chat.task_set.filter(pk=chat.label.split('-')[1]).first()
+        messages = list(chat.messages.all().values('message', 'create_user__username', 'create_user_id', 'create_date'))
+        office = get_office_session(request)        
+        if chat.tasks_company_chat.exists():
+            task = chat.tasks_company_chat.first()
+        else:
+            task = chat.task_set.filter(pk=chat.label.split('-')[1]).first()
         if task:
             if task.parent and task.parent.office == office:
                 task_id = task.parent.pk
@@ -184,28 +186,36 @@ class ChatMenssage(CustomLoginRequiredView, View):
         return JsonResponse(data, safe=False)
 
 
-class InternalChatOffices(CustomLoginRequiredView, View):
-    def get(self, request, *args, **kwargs):
+class InternalChatOffices(View):
+    def get(self, request, *args, **kwargs):        
         task = Task.objects.get(pk=int(request.GET.get('task')))
         data = []
+        if task.company_chat:
+            data.append({
+                'chat': task.company_chat.pk, # "Deve ser o pk da propria task"
+                'office_pk': task.office.pk, #"Deve ser o pk do office do parent"
+                'name': task.company_chat.company.name,
+                'logo': task.company_chat.company.logo.url
+
+            })
         if task.parent:
             data.append({
                 'chat': task.chat.pk,  # "Deve ser o pk da propria task"
                 'office_pk': task.parent.office.pk,  # "Deve ser o pk do office do parent"
-                'office_legal_name': task.parent.office.legal_name
+                'name': task.parent.office.legal_name
             })
         if task.get_child:
             task_child = task.get_child
             data.append({
                 'chat': task_child.chat.pk,  # "Deve ser o pk do chat da task filha"
                 'office_pk': task_child.office.pk,
-                'office_legal_name': task_child.office.legal_name
+                'name': task_child.office.legal_name
             })
         if not all([task.parent, task.get_child]):
             data.append({
                 'chat': task.chat.pk,  # "Deve ser o pk do chat da task filha"
                 'office_pk': task.office.pk,
-                'office_legal_name': task.office.legal_name
+                'name': task.office.legal_name
             })
         return JsonResponse(data, safe=False)
 

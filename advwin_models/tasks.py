@@ -51,6 +51,10 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
 
     new_path = ecm_path_ezl2advwin(ecm.path.name)
     file_name = get_ecm_file_name(ecm.path.name)
+
+    # Caso o arquivo não exista localmente devemos baixa-lo do s3
+    ecm.download()
+
     values = {
         'Tabela_OR': 'Agenda',
         'Codigo_OR': ecm.task.legacy_code,

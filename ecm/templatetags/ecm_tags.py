@@ -6,6 +6,7 @@ from ..models import Attachment
 
 register = template.Library()
 
+
 def get_model_name(object):
     app_label = object._meta.app_label
     model_name = object._meta.model_name

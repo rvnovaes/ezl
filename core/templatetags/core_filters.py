@@ -40,6 +40,7 @@ def get_is_active_selected(dictionary, value):
         return 'selected'
     return ''
 
+
 @register.filter
 def get_choice_format_value(choice):
     return choice[0]
@@ -72,7 +73,7 @@ def get_fields_order(fields):
 
 
 @register.filter
-def append_ast_if_req (field):
+def append_ast_if_req(field):
     if field.field.required:
         return field.label + '*'
     else:
