@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from core.views import CustomLoginRequiredView
+from core.views import CustomLoginRequiredView, OfficePermissionRequiredMixin
 from django.core.urlresolvers import reverse_lazy
 
 from django.views.generic import TemplateView
@@ -13,7 +13,7 @@ from .models import Survey, SurveyPermissions
 from .tables import SurveyTable
 
 
-class SurveyListView(CustomLoginRequiredView, PermissionRequiredMixin, SingleTableViewMixin):
+class SurveyListView(CustomLoginRequiredView, OfficePermissionRequiredMixin, SingleTableViewMixin):
     model = Survey
     table_class = SurveyTable
     ordering = ('id', )
@@ -28,8 +28,13 @@ class SurveyCreateView(AuditFormMixin, CreateView):
     object_list_url = 'survey_list'
     permission_required = (SurveyPermissions.can_edit_surveys, )
 
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
-class SurveyUpdateView(PermissionRequiredMixin, AuditFormMixin, UpdateView):
+
+class SurveyUpdateView(OfficePermissionRequiredMixin, AuditFormMixin, UpdateView):
     model = Survey
     form_class = SurveyForm
     success_url = reverse_lazy('survey_list')
@@ -43,7 +48,7 @@ class SurveyUpdateView(PermissionRequiredMixin, AuditFormMixin, UpdateView):
         return context
 
 
-class SurveyDeleteView(PermissionRequiredMixin, AuditFormMixin, MultiDeleteViewMixin):
+class SurveyDeleteView(OfficePermissionRequiredMixin, AuditFormMixin, MultiDeleteViewMixin):
     model = Survey
     success_url = reverse_lazy('survey_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(

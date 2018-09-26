@@ -11,19 +11,14 @@ from etl.utils import get_message_log_default, save_error_log
 class OrganETL(GenericETL):
     model = Organ
     import_query = """
-                    SELECT t1.descricao AS legal_name,
+                    SELECT DISTINCT t1.descricao AS legal_name,
                            t1.descricao AS name,
                            t1.codigo    AS legacy_code,
                            t1.Comarca   AS court_district
-                    FROM   {tribunal} AS t1
+                    FROM   Jurid_Tribunais AS t1
                     WHERE  t1.descricao IS NOT NULL
                            AND t1.descricao <> ''
-                           AND t1.codigo = (SELECT Min(t2.codigo)
-                                            FROM   {tribunal} AS t2
-                                            WHERE  t2.descricao IS NOT NULL
-                                                   AND t2.descricao <> ''
-                                                   AND t1.codigo = t2.codigo)
-                """.format(tribunal='Jurid_Tribunais')
+                """
 
     has_status = True
 

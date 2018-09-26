@@ -39,11 +39,11 @@ class ServicePriceTableTable(tables.Table):
 
 
 class ServicePriceTableTaskTable(tables.Table):
-    office_correspondent = tables.Column(orderable=False)
-    court_district = tables.Column(orderable=False)
-    state = tables.Column(orderable=False)
-    client = tables.Column(orderable=False)
-    value = tables.Column(orderable=False)
+    office_correspondent = tables.Column(orderable=False, verbose_name='Escritório correspondente')
+    court_district = tables.Column(orderable=False, verbose_name='Comarca')
+    state = tables.Column(orderable=False, verbose_name='UF')
+    client = tables.Column(orderable=False, verbose_name='Cliente')
+    value = tables.Column(orderable=False, verbose_name='Valor')
     office_rating = tables.Column(orderable=False, verbose_name='Avaliação*')
     office_return_rating = tables.Column(orderable=False, verbose_name='OS Retornadas')
 
@@ -52,7 +52,7 @@ class ServicePriceTableTaskTable(tables.Table):
         model = ServicePriceTable
         fields = ('office_correspondent', 'court_district', 'state', 'client', 'value', 'office_rating', 'office_return_rating')
         attrs = {"class": "table stable-striped table-bordered correspondents-table", "id": "correspondents-table"}
-        empty_text = "Não existe tabela de preços cadastrada."
+        empty_text = "Não existe tabela de preços cadastrada para o tipo de serviço selecionado."
         order_by = ("value",)
         row_attrs = {
             'id': lambda record: 'office-{}'.format(record.pk),

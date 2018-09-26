@@ -2,7 +2,6 @@ from enum import Enum
 from config.config import get_parser
 from django.db.models import Q
 import logging
-from functools import wraps
 from openpyxl import load_workbook
 import os
 from functools import wraps
@@ -10,20 +9,23 @@ from functools import wraps
 EZL_LOGGER = logging.getLogger('ezl')
 
 
-def check_environ(f):    
+def check_environ(f):
     @wraps(f)
-    def wrapper(*args, **kwargs):        
+    def wrapper(*args, **kwargs):
         parser = get_parser()
         source = dict(parser.items('etl'))
-        connection_name = source['connection_name']        
+        connection_name = source['connection_name']
         if  connection_name == 'advwin_connection' and os.environ['ENV'] == 'development':
             return 'NAO E PERMITIDO EXECUTAR ESTA OPERACAO NO BANCO ADVWIN DE PRODUCAO COM O AMBIENTE DEVELOPMENT'
         return f(*args, **kwargs)
     return wrapper
 
+
 # enumerador usado para integracao entre sistemas
 class LegacySystem(Enum):
-    ADVWIN = u"Advwin"
+    ADVWIN = "Advwin"
+    AUTOJUR = "Autojur"
+    ELAW = "eLaw"
 
 
 def filter_valid_choice_form(queryset):
@@ -39,9 +41,11 @@ def filter_valid_choice_form(queryset):
         model = queryset.model
         class_verbose_name_invalid = model._meta.verbose_name.upper() + '-INVÁLIDO'
         try:
-            invalid_registry = queryset.filter(name=class_verbose_name_invalid).first()
+            invalid_registry = queryset.filter(
+                name=class_verbose_name_invalid).first()
         except:
-            invalid_registry = queryset.filter(legacy_code='REGISTRO-INVÁLIDO').first()
+            invalid_registry = queryset.filter(
+                legacy_code='REGISTRO-INVÁLIDO').first()
         return queryset.filter(~Q(pk=invalid_registry.pk))
     except:
         return queryset
@@ -102,8 +106,10 @@ def get_office_field(request, profile=None):
             initial = DefaultOffice.objects.filter(auth_user=profile).first().office if \
                 DefaultOffice.objects.filter(auth_user=profile).first() else None
         elif request.session.get('custom_session_user'):
-            custom_session_user = list(request.session.get('custom_session_user').values())
-            queryset = Office.objects.filter(pk=custom_session_user[0]['current_office'])
+            custom_session_user = list(
+                request.session.get('custom_session_user').values())
+            queryset = Office.objects.filter(
+                pk=custom_session_user[0]['current_office'])
             initial = queryset.first().id
         else:
             queryset = request.user.person.offices.active_offices()
@@ -129,10 +135,10 @@ def get_office_related_office_field(request):
     office = get_office_session(request)
     if office:
         if office.public_office:
-            queryset = office.offices.all().order_by('legal_name') | Office.objects.filter(public_office=True)
+            queryset = office.offices.all().order_by(
+                'legal_name') | Office.objects.filter(public_office=True)
         else:
             queryset = office.offices.all().order_by('legal_name')
-
 
     return forms.ModelChoiceField(
         queryset=queryset,
@@ -142,6 +148,11 @@ def get_office_related_office_field(request):
         initial=initial
     )
 
+
+def get_office_api(request):
+    return request.auth.application.office
+
+
 def get_office_session(request):
     """
     Retorna o objeto Office de acordo com a sessão atual do usuário; Ou False caso não tenha selecionado escritório
@@ -149,11 +160,13 @@ def get_office_session(request):
     :return: Office object or False
     """
     from core.models import Office
-    office = Office.objects.none()    
+    office = Office.objects.none()
     if request:
         if request.session.get('custom_session_user'):
-            custom_session_user = list(request.session.get('custom_session_user').values())
-            office = Office.objects.filter(pk=custom_session_user[0]['current_office']).first()
+            custom_session_user = list(
+                request.session.get('custom_session_user').values())
+            office = Office.objects.filter(
+                pk=custom_session_user[0]['current_office']).first()
         else:
             office = False
 
@@ -170,8 +183,10 @@ def get_domain(request):
 
 
 def validate_xlsx_header(xls_file, headers):
+    header_is_valid = False
     if headers:
         wb = load_workbook(xls_file, data_only=True)
-        headers_in_file = list(map(lambda header:header.value, [list(sheet.rows)[0] for sheet in wb.worksheets][0]))
+        headers_in_file = list(map(lambda header: header.value, [
+                               list(sheet.rows)[0] for sheet in wb.worksheets][0]))
         header_is_valid = set(headers).issubset(set(headers_in_file))
     return header_is_valid

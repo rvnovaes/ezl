@@ -16,16 +16,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='invite',
             name='office',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='invites', to='core.Office', verbose_name='Escritório'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
+                                    related_name='invites', to='core.Office', verbose_name='Escritório'),
         ),
         migrations.AlterField(
             model_name='invite',
             name='person',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='invites', to='core.Person', verbose_name='Pessoa'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
+                                    related_name='invites', to='core.Person', verbose_name='Pessoa'),
         ),
         migrations.AlterField(
             model_name='invite',
             name='status',
-            field=models.CharField(choices=[('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED')], default='N', max_length=1, verbose_name='Status'),
+            field=models.CharField(choices=[('A', 'ACCEPTED'), ('R', 'REFUSED'), (
+                'N', 'NOT REVIEWED')], default='N', max_length=1, verbose_name='Status'),
         ),
     ]

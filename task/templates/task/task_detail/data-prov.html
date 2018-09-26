@@ -1,10 +1,10 @@
-{% load core_filters tz %}
+{% load core_filters task_filters tz %}
 <div class="table-responsive">
     <table class="table table-hover">
         <tbody>
         <tr>
             <th>Serviço solicitado</th>
-            <td>
+            <td id="type_task">
                 {{ form.instance.type_task|default_if_none:"---" }}
             </td>
         </tr>
@@ -29,7 +29,7 @@
         <tr>
             <th>Recebida em</th>
             <td>
-                {{ form.instance.delegation_date|localtime|default_if_none:"---" }}
+                {{ form.instance.requested_date|localtime|default_if_none:"---" }}
             </td>
         </tr>
         <tr>
@@ -89,12 +89,14 @@
         <tr>
             <th>Registro de atendimento</th>
             <td id="CheckinPosition">
-                {% if form.instance.geolocation.first %}
-                    Atendimento iniciado em: {{ form.instance.geolocation.all.0.date|localtime }}
-                    ({{ form.instance.geolocation.all.0.position }})
-                    {% if form.instance.geolocation.all.1 %}
-                        <br>Atendimento finalizado em: {{ form.instance.geolocation.all.1.date|localtime }}
-                        ({{ form.instance.geolocation.all.1.position }})
+                {% get_checkin form.instance.geolocation as checkin %}
+                {% get_checkout form.instance.geolocation as checkout %}
+                {% if checkin %}
+                    Atendimento iniciado em: {{ checkin.date|localtime }}
+                    ({{ checkin.position }})
+                    {% if checkout %}
+                        <br>Atendimento finalizado em: {{ checkout.date|localtime }}
+                        ({{ checkout.position }})
                     {% endif %}
                     <div class="panel panel-default">
                         <a href="#" data-perform="panel-collapse">Ver mapa</a>

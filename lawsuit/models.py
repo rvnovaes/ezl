@@ -20,6 +20,7 @@ def get_lawsuit_number():
 class TypeMovement(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, blank=False, null=False, default="", verbose_name='Nome')
     uses_wo = models.BooleanField(default=False, verbose_name='Utiliza ordem de serviço?')
+    is_default = models.BooleanField(default=False, verbose_name='Movimentação padrão para importação')
 
     objects = OfficeManager()
 
@@ -59,6 +60,7 @@ class Folder(Audit, LegacyCode, OfficeMixin):
                                     blank=True,
                                     null=True,
                                     verbose_name='Centro de custo')
+    is_default = models.BooleanField(default=False, verbose_name='Pasta padrão para importação')
 
     objects = OfficeManager()
 
@@ -111,6 +113,10 @@ class CourtDistrict(Audit, LegacyCode):
     def __str__(self):
         return '{} ({})'.format(self.name, self.state.initials)
 
+    def simple_serialize(self):
+        """Simple JSON representation of instance"""
+        return {"id": self.id, "name": self.name}
+
 
 class Organ(Person, OfficeMixin):
     """
@@ -154,7 +160,7 @@ class Organ(Person, OfficeMixin):
 
 
 class LawSuit(Audit, LegacyCode, OfficeMixin):
-    person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=False,
+    person_lawyer = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True,
                                       verbose_name='Advogado', related_name='person_lawyers')
     folder = models.ForeignKey(Folder, on_delete=models.PROTECT, blank=False, null=False, verbose_name="Pasta",
                                related_name='folders')
@@ -164,7 +170,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
                                        verbose_name='Comarca', related_name='court_districts')
     organ = models.ForeignKey(Organ, on_delete=models.PROTECT, blank=True, null=True,
                               related_name='organs', verbose_name=u'Órgão')
-    court_division = models.ForeignKey(CourtDivision, on_delete=models.PROTECT, blank=False, null=False,
+    court_division = models.ForeignKey(CourtDivision, on_delete=models.PROTECT, blank=True, null=True,
                                        verbose_name='Vara', related_name='court_divisions')
     law_suit_number = models.CharField(max_length=255, blank=False, null=False,
                                        verbose_name='Número do Processo')
@@ -177,7 +183,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
         """JSON representation of instance"""
         data = {
             "id": self.id,
-            "person_lawyer": self.person_lawyer.simple_serialize(),
+            "court_district": self.court_district.simple_serialize() if self.court_district else False,
             "law_suit_number": self.law_suit_number,
             "folder": self.folder.simple_serialize()
         }
@@ -220,7 +226,10 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
         return res
 
     def __str__(self):
-        return "{} - {}".format(self.law_suit_number, self.person_lawyer.name)
+        ret = "{}".format(self.law_suit_number)
+        if self.court_district:
+            ret = "{} - {}".format(ret, self.court_district.name)
+        return ret
 
     def save(self, *args, **kwargs):
         if not self.law_suit_number:

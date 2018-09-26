@@ -43,6 +43,10 @@ $(document).ready(function () {
             display: 'data-value-txt',
             limit: 15,
             source: getTypeaheadData
+        }).on('typeahead:asyncrequest', function() {
+            $(this).addClass('loading');
+        }).on('typeahead:asynccancel typeahead:asyncreceive', function() {
+            $(this).removeClass('loading');
         }).on('typeahead:selected', function (el, data) {
             $(this).attr('value', data.id);
             $(this).attr('data-value', data.id);

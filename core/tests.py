@@ -28,7 +28,8 @@ class PersonTest(TestCase):
         url = reverse('person_list')
         resp = self.client.get(url)
 
-        self.assertEqual(resp.status_code, 200)  # Se consegue alcancar a pagina
+        # Se consegue alcancar a pagina
+        self.assertEqual(resp.status_code, 200)
 
     def test_create_view(self):
         url = reverse('person_add')

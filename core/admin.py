@@ -1,12 +1,48 @@
 from django.contrib import admin
-from core.models import AddressType, ContactMechanismType, ContactMechanism, Team
+from core.models import AddressType, ContactMechanismType, ContactMechanism, Team, ControlFirstAccessUser, EmailTemplate
 #Todo: Remover office
-from core.models import Office, Invite, InviteOffice, OfficeRelGroup
+from core.models import Office, Invite, InviteOffice, OfficeRelGroup, CustomSettings, Company, CompanyUser
+from task.models import TaskWorkflow, TaskShowStatus
+
+
+@admin.register(EmailTemplate)
+class EmailTemplateAdmin(admin.ModelAdmin):
+    pass
+
+
+class TaskWorkflowInline(admin.TabularInline):
+    model = TaskWorkflow
+    fields = ('create_user', 'task_from', 'task_to', 'responsible_user')
+
+
+class TaskShowStatusInline(admin.TabularInline):
+    model = TaskShowStatus
+    fields = ('create_user', 'status_to_show', 'send_mail_template')
+
+
+@admin.register(CustomSettings)
+class CustomSettingsAdmin(admin.ModelAdmin):
+    list_display = ('office', 'email_to_notification', 'i_work_alone')
+    inlines = [
+        TaskShowStatusInline,
+        TaskWorkflowInline
+    ]
+
+
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(CompanyUser)
+class CompanyUserAdmin(admin.ModelAdmin):
+    list_display = ['company', 'user']
 
 
 @admin.register(ContactMechanismType)
 class ContactMechanismTypeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'create_user', 'create_date', 'alter_user', 'alter_date']
+    list_display = ['name', 'create_user',
+                    'create_date', 'alter_user', 'alter_date']
     search_fields = ['name']
     list_filter = ['name']
 
@@ -29,6 +65,7 @@ class ContactMechanism(admin.ModelAdmin):
 @admin.register(Office)
 class OfficeAdmin(admin.ModelAdmin):
     filter_horizontal = ['persons', 'offices']
+    search_fields = ['legal_name']
     list_display = ['name', 'auth_user']
 
 
@@ -48,8 +85,11 @@ class InviteOfficeAdmin(admin.ModelAdmin):
 class OfficeRelGroupAdmin(admin.ModelAdmin):
     list_display = ['pk', 'office', 'group']
 
+
 @admin.register(Team)
 class TeamAdmin(admin.ModelAdmin):
     list_display = ['pk', 'name']
 
+
 admin.site.register(AddressType)
+admin.site.register(ControlFirstAccessUser)

@@ -6,16 +6,12 @@ from etl.utils import get_message_log_default, save_error_log
 
 class TypeMovementETL(GenericETL):
     import_query = """
-                    SELECT  tm.Codigo AS legacy_code,
+                    SELECT DISTINCT tm.Codigo AS legacy_code,
                             tm.Descricao
-
                       FROM Jurid_CodMov AS tm
-
                       WHERE right(tm.Codigo, 1) <> '.'
                             AND (tm.UsarOS = 0 OR tm.UsarOS IS NULL)
                             AND tm.Status = 'Ativo'
-                            AND tm.Codigo= (SELECT MIN(tm2.codigo)
-                      FROM Jurid_CodMov AS tm2 WHERE tm.Descricao = tm2.Descricao)
 
                    """
     model = TypeMovement

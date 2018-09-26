@@ -17,7 +17,7 @@ from core.forms import BaseForm, BaseModelForm
 class TypeMovementForm(BaseForm):
     class Meta:
         model = TypeMovement
-        fields = ['office', 'name', 'is_active']
+        fields = ['office', 'name', 'is_default', 'is_active']
 
     name = forms.CharField(
         max_length=255,
@@ -65,7 +65,7 @@ class MovementForm(BaseForm):
 class FolderForm(BaseForm):
     class Meta:
         model = Folder
-        fields = ['office', 'folder_number', 'person_customer', 'cost_center', 'is_active']
+        fields = ['office', 'folder_number', 'person_customer', 'cost_center', 'is_default', 'is_active']
 
     folder_number = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
     person_customer = forms.CharField(label="Cliente",
@@ -113,8 +113,8 @@ class LawSuitForm(BaseForm):
         empty_label=u"Selecione",
         queryset=filter_valid_choice_form(
             Person.objects.filter(is_active=True, is_lawyer=True)).only('legal_name').order_by(
-            'name'), required=True
-    )
+            'name'),
+        required=False)
     court_district = forms.CharField(label='Comarca', required=True, widget=TypeaHeadForeignKeyWidget(
         model=CourtDistrict, field_related='name', name='court_district', url='/processos/courtdistrict_autocomplete'))
 
@@ -132,8 +132,8 @@ class LawSuitForm(BaseForm):
     court_division = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(CourtDivision.objects.filter(is_active=True)).order_by(
             'name'),
-        empty_label=u"Selecione", required=True
-    )
+        empty_label=u"Selecione",
+        required=False)
     opposing_party = forms.CharField(required=False)
     law_suit_number = forms.CharField(max_length=255, required=True)
     is_current_instance = CustomBooleanField(initial=False, required=False)
