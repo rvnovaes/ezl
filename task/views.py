@@ -251,7 +251,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
                 office_list, total = self.get_os_grouped_by_client()
         except:
             office_list, total = self.get_os_grouped_by_office()
-        context['offices'] = office_list
+        context['offices_report'] = office_list
         context['total'] = total
         return context
 
