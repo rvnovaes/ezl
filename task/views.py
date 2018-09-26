@@ -546,6 +546,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         if form.instance.task_status == TaskStatus.REFUSED and not form.instance.person_distributed_by:
             form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.OPEN:
+            form.instance.delegation_date = timezone.now()
             if not form.instance.person_distributed_by:
                 form.instance.person_distributed_by = self.request.user.person
             default_amount = Decimal(
