@@ -615,13 +615,14 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                                                                        TaskStatus.FINISHED]:
                 return False
         new_task = copy.copy(object_parent)
-        new_task.task_hash = uuid.uuid4()
+        new_task.task_hash = uuid.uuid4()        
         new_task.legacy_code = None
         new_task.system_prefix = None
         new_task.pk = new_task.task_number = None
         new_task.person_asked_by = None
         new_task.person_executed_by = None
         new_task.person_distributed_by = None
+        new_task.delegation_date = None
         new_task.office = office_correspondent
         new_task.task_status = TaskStatus.REQUESTED
         new_task.parent = object_parent
