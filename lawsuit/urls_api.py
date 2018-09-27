@@ -16,7 +16,10 @@ router.register(r'organ', views.OrganViewSet, base_name='organ')
 router.register(r'company/lawsuit', views.CompanyLawsuitViewSet, base_name='company-lawsuit')
 
 urlpatterns = [
-
+    # urls para tela de criacao de OS
+    url(r'lawsuit_common', views.LawsuitApiView.as_view(), name='lawsuit_common'),
+    url(r'movement_common', views.MovementApiView.as_view(), name='movement_common'),
+    url(r'task_common', views.TaskApiView.as_view(), name='task_common'),
 ]
 
 

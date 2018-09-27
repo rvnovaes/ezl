@@ -54,7 +54,7 @@ TaskForm = (function($){
             self.$lawsuit.selectpicker('refresh')
             return false;
         }
-        $.get("/v1/lawsuit/lawsuit?folder=" + value, function(data){
+        $.get("/v1/lawsuit/lawsuit_common?folder=" + value, function(data){
             var choices;
             if (data.data.length == 0) {
                 choices = ['<option value="">Sem registros</option>'];
@@ -81,7 +81,7 @@ TaskForm = (function($){
             return false;
         }
 
-        $.get("/v1/lawsuit/movement?lawsuit=" + value, function(data){
+        $.get("/v1/lawsuit/movement_common?lawsuit=" + value, function(data){
             var choices = [];
             if (data.data.length > 0) {
                 choices = ['<option value="">Selecione...</option>'];
@@ -261,7 +261,7 @@ TaskForm = (function($){
 
     TaskForm.prototype.loadTasks = function(movement){
         self.task_list.$data.tasks = [];
-        $.get("/v1/lawsuit/task?movement=" + movement, function(data){
+        $.get("/v1/lawsuit/task_common?movement=" + movement, function(data){
             self.task_list.$data.tasks = data.data;
             setTimeout(addLinkOnRows, 1000);
         });

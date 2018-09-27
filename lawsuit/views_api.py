@@ -93,7 +93,7 @@ class OrganViewSet(viewsets.ModelViewSet):
     serializer_class = OrganSerializer
 
 
-# Todo: Alterar para rest-framework
+# Não alterar view utilizada pela criacao de OS
 class LawsuitApiView(LoginRequiredMixin, ApiViewMixin):
     model = LawSuit
 
@@ -106,6 +106,7 @@ class LawsuitApiView(LoginRequiredMixin, ApiViewMixin):
         return office_filter(queryset, self.request)
 
 
+# Não alterar view utilizada pela criacao de OS
 class MovementApiView(LoginRequiredMixin, ApiViewMixin):
     model = Movement
 
@@ -118,6 +119,7 @@ class MovementApiView(LoginRequiredMixin, ApiViewMixin):
         return office_filter(queryset, self.request)
 
 
+# Não alterar view utilizada pela criacao de OS
 class TaskApiView(LoginRequiredMixin, ApiViewMixin):
     model = Task
 
