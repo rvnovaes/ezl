@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='final_deadline_date',
-            field=models.DateTimeField(default=django.utils.timezone.now, verbose_name='Prazo Fatal'),
+            field=models.DateTimeField(
+                default=django.utils.timezone.now, verbose_name='Prazo Fatal'),
         ),
     ]

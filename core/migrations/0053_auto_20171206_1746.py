@@ -17,7 +17,8 @@ class Migration(migrations.Migration):
             model_name='address',
             name='country',
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT, to='core.Country'),
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.Country'),
         ),
         migrations.AlterField(
             model_name='address',

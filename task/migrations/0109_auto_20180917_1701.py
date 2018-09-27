@@ -16,6 +16,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='typetask',
             name='office',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='typetask_office', to='core.Office', verbose_name='Escritório'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='typetask_office',
+                to='core.Office',
+                verbose_name='Escritório'),
         ),
     ]

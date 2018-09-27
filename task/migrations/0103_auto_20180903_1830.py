@@ -23,11 +23,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tasksettings',
             name='cards',
-            field=models.ManyToManyField(related_name='settings', to='task.TaskShowStatus'),
+            field=models.ManyToManyField(
+                related_name='settings', to='task.TaskShowStatus'),
         ),
         migrations.AddField(
             model_name='tasksettings',
             name='workflows',
-            field=models.ManyToManyField(related_name='settings', to='task.TaskWorkflow'),
+            field=models.ManyToManyField(
+                related_name='settings', to='task.TaskWorkflow'),
         ),
     ]

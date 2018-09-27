@@ -14,6 +14,9 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='team',
-            options={'verbose_name': 'Equipe', 'verbose_name_plural': 'Equipes'},
+            options={
+                'verbose_name': 'Equipe',
+                'verbose_name_plural': 'Equipes'
+            },
         ),
     ]

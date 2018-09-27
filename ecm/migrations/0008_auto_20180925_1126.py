@@ -15,6 +15,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='attachment',
             name='system_prefix',
-            field=models.CharField(blank=True, choices=[('Advwin', 'Advwin'), ('Autojur', 'Autojur'), ('eLaw', 'Elaw')], max_length=255, null=True, verbose_name='Prefixo do sistema'),
+            field=models.CharField(
+                blank=True,
+                choices=[('Advwin', 'Advwin'), ('Autojur', 'Autojur'),
+                         ('eLaw', 'Elaw')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do sistema'),
         ),
     ]

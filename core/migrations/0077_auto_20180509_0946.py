@@ -15,14 +15,18 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='contactmechanism',
-            options={'verbose_name': 'Mecanismo de contato',
-                     'verbose_name_plural': 'Mecanismos de contato'},
+            options={
+                'verbose_name': 'Mecanismo de contato',
+                'verbose_name_plural': 'Mecanismos de contato'
+            },
         ),
         migrations.AlterField(
             model_name='contactmechanism',
             name='contact_mechanism_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
-                                    to='core.ContactMechanismType', verbose_name='Tipo'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.ContactMechanismType',
+                verbose_name='Tipo'),
         ),
         migrations.AlterField(
             model_name='contactmechanism',

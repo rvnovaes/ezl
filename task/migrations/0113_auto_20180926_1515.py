@@ -5,21 +5,25 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 import django.utils.timezone
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
         ('task', '0112_update_requested_date'),
     ]
 
-    operations = [ 
+    operations = [
         migrations.AlterField(
             model_name='task',
             name='delegation_date',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Data de Delegação'),
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name='Data de Delegação'),
         ),
         migrations.AlterField(
             model_name='task',
             name='requested_date',
-            field=models.DateTimeField(default=django.utils.timezone.now, verbose_name='Data de Solicitação'),
+            field=models.DateTimeField(
+                default=django.utils.timezone.now,
+                verbose_name='Data de Solicitação'),
         ),
     ]

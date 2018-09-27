@@ -8,13 +8,19 @@ import logging
 logger = logging.getLogger('0114')
 
 
-def update_delegation_date(apps, schema_editor):    
-    from task.models import Task, TaskStatus   
+def update_delegation_date(apps, schema_editor):
+    from task.models import Task, TaskStatus
     for task in Task.objects.filter(
-        delegation_date__isnull=False, task_status__in=[TaskStatus.ERROR, TaskStatus.REQUESTED, TaskStatus.ACCEPTED_SERVICE]):
+            delegation_date__isnull=False,
+            task_status__in=[
+                TaskStatus.ERROR, TaskStatus.REQUESTED,
+                TaskStatus.ACCEPTED_SERVICE
+            ]):
         task.delegation_date = None
         task.save(**{'skip_signal': True, 'skip_mail': True})
-        logger.info('AJUSTADO delegation_date de OS - {} COM O STATUS {}'.format(str(task.task_number), str(task.status)))
+        logger.info(
+            'AJUSTADO delegation_date de OS - {} COM O STATUS {}'.format(
+                str(task.task_number), str(task.status)))
 
 
 class Migration(migrations.Migration):
@@ -24,5 +30,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(update_delegation_date),    
+        migrations.RunPython(update_delegation_date),
     ]

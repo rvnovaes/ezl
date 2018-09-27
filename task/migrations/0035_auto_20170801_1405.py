@@ -18,6 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='finished_date',
-            field=models.DateTimeField(null=True, verbose_name='Data de Finalização'),
+            field=models.DateTimeField(
+                null=True, verbose_name='Data de Finalização'),
         ),
     ]

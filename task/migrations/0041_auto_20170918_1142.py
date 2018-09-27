@@ -17,11 +17,14 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='reminder_deadline_date',
-            field=models.DateTimeField(default=django.utils.timezone.now, verbose_name='Primeiro Prazo'),
+            field=models.DateTimeField(
+                default=django.utils.timezone.now,
+                verbose_name='Primeiro Prazo'),
         ),
         migrations.AlterField(
             model_name='taskhistory',
             name='task',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='task.Task'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to='task.Task'),
         ),
     ]

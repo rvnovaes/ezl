@@ -14,6 +14,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='dashboardetl',
-            options={'ordering': ('-execution_date_finish',), 'verbose_name': 'Dashboard ETL', 'verbose_name_plural': 'Dashboard ETL'},
+            options={
+                'ordering': ('-execution_date_finish', ),
+                'verbose_name': 'Dashboard ETL',
+                'verbose_name_plural': 'Dashboard ETL'
+            },
         ),
     ]

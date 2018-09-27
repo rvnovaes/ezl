@@ -18,7 +18,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='costcenter',
             name='name',
-            field=models.CharField(default='', max_length=255, verbose_name='Nome'),
+            field=models.CharField(
+                default='', max_length=255, verbose_name='Nome'),
         ),
         migrations.AlterUniqueTogether(
             name='costcenter',
@@ -26,6 +27,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='servicepricetable',
-            unique_together=set([('office', 'office_correspondent', 'type_task', 'client', 'court_district', 'state')]),
+            unique_together=set([('office', 'office_correspondent',
+                                  'type_task', 'client', 'court_district',
+                                  'state')]),
         ),
     ]

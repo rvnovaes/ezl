@@ -14,40 +14,66 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='courtdistrict',
-            options={'verbose_name': 'Comarca', 'verbose_name_plural': 'Comarcas'},
+            options={
+                'verbose_name': 'Comarca',
+                'verbose_name_plural': 'Comarcas'
+            },
         ),
         migrations.AlterModelOptions(
             name='folder',
-            options={'ordering': ['-id'], 'verbose_name': 'Pasta', 'verbose_name_plural': 'Pastas'},
+            options={
+                'ordering': ['-id'],
+                'verbose_name': 'Pasta',
+                'verbose_name_plural': 'Pastas'
+            },
         ),
         migrations.AlterModelOptions(
             name='lawsuit',
-            options={'ordering': ['-id'], 'verbose_name': 'Processo', 'verbose_name_plural': 'Processos'},
+            options={
+                'ordering': ['-id'],
+                'verbose_name': 'Processo',
+                'verbose_name_plural': 'Processos'
+            },
         ),
         migrations.AlterModelOptions(
             name='movement',
-            options={'ordering': ['-id'], 'verbose_name': 'Movimentação', 'verbose_name_plural': 'Movimentação'},
+            options={
+                'ordering': ['-id'],
+                'verbose_name': 'Movimentação',
+                'verbose_name_plural': 'Movimentação'
+            },
         ),
         migrations.AlterModelOptions(
             name='task',
-            options={'ordering': ['-id'], 'verbose_name': 'Providência', 'verbose_name_plural': 'Providências'},
+            options={
+                'ordering': ['-id'],
+                'verbose_name': 'Providência',
+                'verbose_name_plural': 'Providências'
+            },
         ),
         migrations.AlterModelOptions(
             name='typemovement',
-            options={'ordering': ['-id'], 'verbose_name': 'Tipo de Movimentação',
-                     'verbose_name_plural': 'Tipos de Movimentação'},
+            options={
+                'ordering': ['-id'],
+                'verbose_name': 'Tipo de Movimentação',
+                'verbose_name_plural': 'Tipos de Movimentação'
+            },
         ),
         migrations.AlterField(
             model_name='lawsuit',
             name='folder',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.Folder',
-                                    verbose_name='Pasta'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='lawsuit.Folder',
+                verbose_name='Pasta'),
         ),
         migrations.AlterField(
             model_name='lawsuit',
             name='person_lawyer',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.Person',
-                                    verbose_name='Advogado'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.Person',
+                verbose_name='Advogado'),
         ),
         migrations.AlterField(
             model_name='movement',
@@ -57,68 +83,98 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='movement',
             name='law_suit',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.LawSuit',
-                                    verbose_name='Processo'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='lawsuit.LawSuit',
+                verbose_name='Processo'),
         ),
         migrations.AlterField(
             model_name='movement',
             name='legacy_code',
-            field=models.CharField(default='', max_length=255, unique=True, verbose_name='Código Legado'),
+            field=models.CharField(
+                default='',
+                max_length=255,
+                unique=True,
+                verbose_name='Código Legado'),
         ),
         migrations.AlterField(
             model_name='movement',
             name='person_court',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='movement_court',
-                                    to='core.Person', verbose_name='Tribunal'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='movement_court',
+                to='core.Person',
+                verbose_name='Tribunal'),
         ),
         migrations.AlterField(
             model_name='movement',
             name='person_lawyer',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='movement_lawyer',
-                                    to='core.Person', verbose_name='Advogado'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='movement_lawyer',
+                to='core.Person',
+                verbose_name='Advogado'),
         ),
         migrations.AlterField(
             model_name='movement',
             name='type_movement',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.TypeMovement',
-                                    verbose_name='Tipo de Movimentação'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='lawsuit.TypeMovement',
+                verbose_name='Tipo de Movimentação'),
         ),
         migrations.AlterField(
             model_name='task',
             name='legacy_code',
-            field=models.CharField(default='', max_length=255, unique=True, verbose_name='Código Legado'),
+            field=models.CharField(
+                default='',
+                max_length=255,
+                unique=True,
+                verbose_name='Código Legado'),
         ),
         migrations.AlterField(
             model_name='task',
             name='movement',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.Movement',
-                                    verbose_name='Movimentação'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='lawsuit.Movement',
+                verbose_name='Movimentação'),
         ),
         migrations.AlterField(
             model_name='task',
             name='person',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.Person',
-                                    verbose_name='Correspondente'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.Person',
+                verbose_name='Correspondente'),
         ),
         migrations.AlterField(
             model_name='task',
             name='type_movement',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.TypeMovement',
-                                    verbose_name='Tipo de Movimentação'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='lawsuit.TypeMovement',
+                verbose_name='Tipo de Movimentação'),
         ),
         migrations.AlterField(
             model_name='typemovement',
             name='legacy_code',
-            field=models.CharField(default='', max_length=255, unique=True, verbose_name='Código legado'),
+            field=models.CharField(
+                default='',
+                max_length=255,
+                unique=True,
+                verbose_name='Código legado'),
         ),
         migrations.AlterField(
             model_name='typemovement',
             name='name',
-            field=models.CharField(default='', max_length=255, unique=True, verbose_name='Nome'),
+            field=models.CharField(
+                default='', max_length=255, unique=True, verbose_name='Nome'),
         ),
         migrations.AlterField(
             model_name='typemovement',
             name='uses_wo',
-            field=models.BooleanField(default=False, verbose_name='Utiliza ordem de serviço?'),
+            field=models.BooleanField(
+                default=False, verbose_name='Utiliza ordem de serviço?'),
         ),
     ]

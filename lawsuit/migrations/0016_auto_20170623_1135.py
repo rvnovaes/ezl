@@ -20,7 +20,5 @@ class Migration(migrations.Migration):
             model_name='typetask',
             name='create_user',
         ),
-        migrations.DeleteModel(
-            name='TypeTask',
-        ),
+        migrations.DeleteModel(name='TypeTask', ),
     ]

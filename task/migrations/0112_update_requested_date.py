@@ -9,13 +9,13 @@ import logging
 logger = logging.getLogger('0112')
 
 
-def update_requested_date(apps, schema_editor):    
-    from task.models import Task   
+def update_requested_date(apps, schema_editor):
+    from task.models import Task
     for task in Task.objects.filter(requested_date__isnull=True):
         task.requested_date = task.create_date
         task.save(**{'skip_signal': True, 'skip_mail': True})
-        logger.info('TASK {} ALTEROU O REQUESTED_DATE PARA {}'.format(str(task.task_number), str(task.create_date)))
-
+        logger.info('TASK {} ALTEROU O REQUESTED_DATE PARA {}'.format(
+            str(task.task_number), str(task.create_date)))
 
 
 class Migration(migrations.Migration):
@@ -25,5 +25,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(update_requested_date),    
+        migrations.RunPython(update_requested_date),
     ]

@@ -17,15 +17,26 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Organ',
             fields=[
-                ('person_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='core.Person')),
-                ('court_district', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.CourtDistrict', verbose_name='Comarca')),
+                ('person_ptr',
+                 models.OneToOneField(
+                     auto_created=True,
+                     on_delete=django.db.models.deletion.CASCADE,
+                     parent_link=True,
+                     primary_key=True,
+                     serialize=False,
+                     to='core.Person')),
+                ('court_district',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='lawsuit.CourtDistrict',
+                     verbose_name='Comarca')),
             ],
             options={
                 'db_table': 'organ',
                 'verbose_name': 'Órgao',
                 'verbose_name_plural': 'Órgãos',
             },
-            bases=('core.person',),
+            bases=('core.person', ),
         ),
         migrations.RemoveField(
             model_name='lawsuit',
@@ -34,6 +45,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='lawsuit',
             name='organ',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='organs', to='lawsuit.Organ', verbose_name='Tribunal'),
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='organs',
+                to='lawsuit.Organ',
+                verbose_name='Tribunal'),
         ),
     ]

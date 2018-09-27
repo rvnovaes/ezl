@@ -17,6 +17,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='company_chat',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='tasks_company_chat', to='chat.Chat', verbose_name='Chat Company'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='tasks_company_chat',
+                to='chat.Chat',
+                verbose_name='Chat Company'),
         ),
     ]

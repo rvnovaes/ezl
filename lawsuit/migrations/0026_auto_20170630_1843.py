@@ -15,51 +15,96 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='courtdivision',
             name='legacy_code',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Código legado'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Código legado'),
         ),
         migrations.AlterField(
             model_name='courtdivision',
             name='system_prefix',
-            field=models.CharField(blank=True, choices=[('Advwin', 'Advwin')], max_length=255, null=True, verbose_name='Prefixo do sistema'),
+            field=models.CharField(
+                blank=True,
+                choices=[('Advwin', 'Advwin')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do sistema'),
         ),
         migrations.AlterField(
             model_name='folder',
             name='legacy_code',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Código legado'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Código legado'),
         ),
         migrations.AlterField(
             model_name='folder',
             name='system_prefix',
-            field=models.CharField(blank=True, choices=[('Advwin', 'Advwin')], max_length=255, null=True, verbose_name='Prefixo do sistema'),
+            field=models.CharField(
+                blank=True,
+                choices=[('Advwin', 'Advwin')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do sistema'),
         ),
         migrations.AlterField(
             model_name='lawsuitinstance',
             name='legacy_code',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Código legado'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Código legado'),
         ),
         migrations.AlterField(
             model_name='lawsuitinstance',
             name='system_prefix',
-            field=models.CharField(blank=True, choices=[('Advwin', 'Advwin')], max_length=255, null=True, verbose_name='Prefixo do sistema'),
+            field=models.CharField(
+                blank=True,
+                choices=[('Advwin', 'Advwin')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do sistema'),
         ),
         migrations.AlterField(
             model_name='movement',
             name='legacy_code',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Código legado'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Código legado'),
         ),
         migrations.AlterField(
             model_name='movement',
             name='system_prefix',
-            field=models.CharField(blank=True, choices=[('Advwin', 'Advwin')], max_length=255, null=True, verbose_name='Prefixo do sistema'),
+            field=models.CharField(
+                blank=True,
+                choices=[('Advwin', 'Advwin')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do sistema'),
         ),
         migrations.AlterField(
             model_name='typemovement',
             name='legacy_code',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Código legado'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Código legado'),
         ),
         migrations.AlterField(
             model_name='typemovement',
             name='system_prefix',
-            field=models.CharField(blank=True, choices=[('Advwin', 'Advwin')], max_length=255, null=True, verbose_name='Prefixo do sistema'),
+            field=models.CharField(
+                blank=True,
+                choices=[('Advwin', 'Advwin')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do sistema'),
         ),
     ]

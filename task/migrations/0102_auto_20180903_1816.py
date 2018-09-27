@@ -15,16 +15,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='tasksettings',
             name='name',
-            field=models.CharField(max_length=255, verbose_name='Nome da configuração'),
+            field=models.CharField(
+                max_length=255, verbose_name='Nome da configuração'),
         ),
         migrations.AlterField(
             model_name='taskshowstatus',
             name='task_settings',
-            field=models.ManyToManyField(related_name='status', to='task.TaskSettings'),
+            field=models.ManyToManyField(
+                related_name='status', to='task.TaskSettings'),
         ),
         migrations.AlterField(
             model_name='taskworkflow',
             name='task_settings',
-            field=models.ManyToManyField(related_name='workflows', to='task.TaskSettings'),
+            field=models.ManyToManyField(
+                related_name='workflows', to='task.TaskSettings'),
         ),
     ]

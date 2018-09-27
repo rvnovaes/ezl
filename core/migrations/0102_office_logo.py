@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='office',
             name='logo',
-            field=models.ImageField(blank=True, null=True, upload_to='', verbose_name='Logo'),
+            field=models.ImageField(
+                blank=True, null=True, upload_to='', verbose_name='Logo'),
         ),
     ]

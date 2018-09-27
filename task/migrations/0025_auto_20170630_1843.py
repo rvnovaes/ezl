@@ -16,26 +16,50 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='legacy_code',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Código legado'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Código legado'),
         ),
         migrations.AlterField(
             model_name='task',
             name='system_prefix',
-            field=models.CharField(blank=True, choices=[('Advwin', 'Advwin')], max_length=255, null=True, verbose_name='Prefixo do sistema'),
+            field=models.CharField(
+                blank=True,
+                choices=[('Advwin', 'Advwin')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do sistema'),
         ),
         migrations.AlterField(
             model_name='task',
             name='task_status',
-            field=models.CharField(choices=[('A Cumprir', 'Accepted'), ('Em Aberto', 'Open'), ('Retorno', 'Return'), ('Cumprida', 'Done'), ('Recusada', 'Refused')], default=task.models.TaskStatus('Em Aberto'), max_length=30, verbose_name=''),
+            field=models.CharField(
+                choices=[('A Cumprir', 'Accepted'), ('Em Aberto', 'Open'),
+                         ('Retorno', 'Return'), ('Cumprida', 'Done'),
+                         ('Recusada', 'Refused')],
+                default=task.models.TaskStatus('Em Aberto'),
+                max_length=30,
+                verbose_name=''),
         ),
         migrations.AlterField(
             model_name='typetask',
             name='legacy_code',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Código legado'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Código legado'),
         ),
         migrations.AlterField(
             model_name='typetask',
             name='system_prefix',
-            field=models.CharField(blank=True, choices=[('Advwin', 'Advwin')], max_length=255, null=True, verbose_name='Prefixo do sistema'),
+            field=models.CharField(
+                blank=True,
+                choices=[('Advwin', 'Advwin')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do sistema'),
         ),
     ]
