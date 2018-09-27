@@ -77,14 +77,16 @@ class AdressTest(TestCase):
         city = mommy.make(City, state_id=state).id
         address_type = mommy.make(AddressType, name='comercial').id
 
-        data = {'street': street,
-                'number': number,
-                'city_region': city_region,
-                'zip_code': zip_code,
-                'country': country,
-                'state': state,
-                'city': city,
-                'address_type': address_type}
+        data = {
+            'street': street,
+            'number': number,
+            'city_region': city_region,
+            'zip_code': zip_code,
+            'country': country,
+            'state': state,
+            'city': city,
+            'address_type': address_type
+        }
 
         form = AddressForm(data=data)
         print(form.errors)
@@ -111,8 +113,13 @@ class AddressTypeTest(TestCase):
 
 class UserTest(TestCase):
     def test_model(self):
-        c_isnt = mommy.make(User, first_name='Thiago', last_name='Rodrigues', username='thiago',
-                            email='thiago.ar17@gmail.com', password=123456)
+        c_isnt = mommy.make(
+            User,
+            first_name='Thiago',
+            last_name='Rodrigues',
+            username='thiago',
+            email='thiago.ar17@gmail.com',
+            password=123456)
         self.assertTrue(c_isnt, User)
 
     # def test_valid_UserCreateForm(self):
@@ -128,12 +135,13 @@ class UserTest(TestCase):
     #     self.assertTrue(form.is_valid(), form.errors)
 
     def test_invalid_senha_curta_UserCreateForm(self):
-        data = {'first_name': 'Random',
-                'last_name': 'RandomLast',
-                'username': 'random',
-                'email': 'random@random.com',
-                'password1': '12345',
-                'password2': '12345'
-                }
+        data = {
+            'first_name': 'Random',
+            'last_name': 'RandomLast',
+            'username': 'random',
+            'email': 'random@random.com',
+            'password1': '12345',
+            'password2': '12345'
+        }
         form = UserCreateForm(data=data)
         self.assertFalse(form.is_valid())

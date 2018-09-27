@@ -19,6 +19,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='lawsuit',
             name='opposing_party',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Parte adversa'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Parte adversa'),
         ),
     ]

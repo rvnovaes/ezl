@@ -17,7 +17,7 @@ from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHa
 from core.models import CompanyUser, Company
 
 
-@permission_classes((TokenHasReadWriteScope,))
+@permission_classes((TokenHasReadWriteScope, ))
 class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CourtDistrict.objects.all()
     serializer_class = CourtDistrictSerializer
@@ -26,28 +26,30 @@ class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ('name', 'state__initials')
 
 
-@permission_classes((TokenHasReadWriteScope,))
+@permission_classes((TokenHasReadWriteScope, ))
 class FolderViewSet(viewsets.ModelViewSet):
     serializer_class = FolderSerializer
 
     def get_queryset(self):
-        return Folder.objects.filter(office=self.request.auth.application.office)
+        return Folder.objects.filter(
+            office=self.request.auth.application.office)
 
 
-@permission_classes((TokenHasReadWriteScope,))
+@permission_classes((TokenHasReadWriteScope, ))
 class InstanceViewSet(viewsets.ModelViewSet):
-    queryset = Instance.objects.all()   
+    queryset = Instance.objects.all()
     serializer_class = InstanceSerializer
 
 
-@permission_classes((TokenHasReadWriteScope,))
+@permission_classes((TokenHasReadWriteScope, ))
 class LawSuitViewSet(viewsets.ModelViewSet):
     serializer_class = LawSuitSerializer
-    filter_backends = (SearchFilter,)
-    search_fields = ('folder__legacy_code',)
+    filter_backends = (SearchFilter, )
+    search_fields = ('folder__legacy_code', )
 
-    def get_queryset(self):        
-        return LawSuit.objects.filter(office=self.request.auth.application.office)
+    def get_queryset(self):
+        return LawSuit.objects.filter(
+            office=self.request.auth.application.office)
 
 
 class CompanyLawsuitViewSet(LawSuitViewSet):
@@ -55,7 +57,7 @@ class CompanyLawsuitViewSet(LawSuitViewSet):
         if self.request.user.is_authenticated():
             return LawSuit.objects.filter(
                 folder__person_customer__company__in=Company.objects.filter(
-                    users__user=self.request.user))       
+                    users__user=self.request.user))
         return []
 
 
@@ -64,30 +66,31 @@ def office_filter(queryset, request):
     return queryset.filter(office=office)
 
 
-@permission_classes((TokenHasReadWriteScope,))
+@permission_classes((TokenHasReadWriteScope, ))
 class CourtDivisionViewSet(viewsets.ModelViewSet):
     queryset = CourtDivision.objects.all()
     serializer_class = CourtDivisionSerializer
 
 
-@permission_classes((TokenHasReadWriteScope,))
+@permission_classes((TokenHasReadWriteScope, ))
 class MovementViewSet(viewsets.ModelViewSet):
     queryset = Movement.objects.all()
     serializer_class = MovementSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filter_class = MovementFilter
-    search_fields = ('law_suit__legacycode', 'law_suit__law_suit_number', 'type_movement__legacycode')
+    search_fields = ('law_suit__legacycode', 'law_suit__law_suit_number',
+                     'type_movement__legacycode')
 
 
-@permission_classes((TokenHasReadWriteScope,))
+@permission_classes((TokenHasReadWriteScope, ))
 class TypeMovementViewSet(viewsets.ModelViewSet):
     queryset = TypeMovement.objects.all()
     serializer_class = TypeMovementSerializer
-    filter_backends = (SearchFilter,)
-    search_fields = ('name',)
+    filter_backends = (SearchFilter, )
+    search_fields = ('name', )
 
 
-@permission_classes((TokenHasReadWriteScope,))
+@permission_classes((TokenHasReadWriteScope, ))
 class OrganViewSet(viewsets.ModelViewSet):
     queryset = Organ.objects.all()
     serializer_class = OrganSerializer

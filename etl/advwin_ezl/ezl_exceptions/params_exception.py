@@ -9,4 +9,3 @@ class ParamsException(Exception):
         Ex: python3.5 luigi_jobs.py -p=SENHA DO USUARIO QUE ESTA EXECUTANDO O'SCRIPT'
         """
         Exception.__init__(self, msg)
-

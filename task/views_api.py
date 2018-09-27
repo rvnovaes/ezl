@@ -13,24 +13,24 @@ from lawsuit.models import Folder, Movement
 from django.utils import timezone
 
 
-@permission_classes((TokenHasReadWriteScope,))
+@permission_classes((TokenHasReadWriteScope, ))
 class TypeTaskViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = TypeTask.objects.filter(is_active=True)
     serializer_class = TypeTaskSerializer
-    filter_backends = (SearchFilter,)
-    search_fields = ('name',)
+    filter_backends = (SearchFilter, )
+    search_fields = ('name', )
 
 
-@permission_classes((TokenHasReadWriteScope,))
+@permission_classes((TokenHasReadWriteScope, ))
 class EcmTaskViewSet(viewsets.ModelViewSet):
     queryset = Ecm.objects.all()
     serializer_class = EcmTaskSerializer
 
 
-@permission_classes((TokenHasReadWriteScope,))
+@permission_classes((TokenHasReadWriteScope, ))
 class TaskViewSet(viewsets.ModelViewSet, ApplicationView):
     queryset = Task.objects.all()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, )
     filter_class = TaskApiFilter
 
     def get_serializer_class(self):
@@ -40,7 +40,7 @@ class TaskViewSet(viewsets.ModelViewSet, ApplicationView):
 
 
 @api_view(['GET'])
-@permission_classes((TokenHasReadWriteScope,))
+@permission_classes((TokenHasReadWriteScope, ))
 def list_audience_totals(request):
     company = request.auth.application.company
     audience = {}

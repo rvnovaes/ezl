@@ -55,4 +55,5 @@ class AQualidadeBasica(Base):
     sem_tribunal = Column(Integer, nullable=False)
     sem_fase = Column(Integer, nullable=False)
     sem_valor_causa = Column(Integer, nullable=False)
-    data_referencia = relationship('data_referencia', back_populates='qualidade_basica')
+    data_referencia = relationship(
+        'data_referencia', back_populates='qualidade_basica')

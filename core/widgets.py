@@ -20,8 +20,8 @@ class MDDateTimepicker(DateTimeBaseInput):
         context = super(Input, self).get_context(name, value, attrs)
         context['widget']['type'] = self.input_type
         if self.min_date:
-            context['widget']['min_date'] = timezone.localtime(self.min_date).strftime(
-                '%d/%m/%Y %H:%M')
+            context['widget']['min_date'] = timezone.localtime(
+                self.min_date).strftime('%d/%m/%Y %H:%M')
         if self.max_date:
             context['widget']['max_date'] = True
         if value and not isinstance(value, six.string_types):
@@ -142,9 +142,9 @@ class MDRangeWidget(forms.MultiWidget):
                 widget_attrs['id'] = '%s_%s' % (id_, i)
             else:
                 widget_attrs = final_attrs
-            subwidgets.append(widget.get_context(widget_name,
-                                                 widget_value,
-                                                 widget_attrs)['widget'])
+            subwidgets.append(
+                widget.get_context(widget_name, widget_value,
+                                   widget_attrs)['widget'])
         context['widget']['subwidgets'] = subwidgets
         context['widget']['format'] = self.format
         return context
@@ -156,10 +156,11 @@ class DateTimeRangeField(forms.MultiValueField):
     def __init__(self, fields=None, format=None, label=None, *args, **kwargs):
 
         if fields is None:
-            fields = (
-                forms.DateTimeField(widget=MDDateTimepicker(
-                    attrs={'class': 'form-control'})),
-                forms.DateTimeField(widget=MDDateTimepicker(attrs={'class': 'form-control'})))
+            fields = (forms.DateTimeField(
+                widget=MDDateTimepicker(attrs={'class': 'form-control'})),
+                      forms.DateTimeField(
+                          widget=MDDateTimepicker(
+                              attrs={'class': 'form-control'})))
             super(DateTimeRangeField, self).__init__(fields, *args, **kwargs)
 
     def compress(self, data_list):
@@ -198,32 +199,35 @@ class MDSelect(ChoiceWidget):
     def _choice_has_empty_value(choice):
         """Return True if the choice's value is empty string or None."""
         value, _ = choice
-        return (
-            (isinstance(value, six.string_types) and not bool(value)) or
-            value is None
-        )
+        return ((isinstance(value, six.string_types) and not bool(value))
+                or value is None)
 
     def use_required_attribute(self, initial):
         """
         Don't render 'required' if the first <option> has a value, as that's
         invalid HTML.
         """
-        use_required_attribute = super(
-            MDSelect, self).use_required_attribute(initial)
+        use_required_attribute = super(MDSelect,
+                                       self).use_required_attribute(initial)
         # 'required' is always okay for <select multiple>.
         if self.allow_multiple_selected:
             return use_required_attribute
 
         first_choice = next(iter(self.choices), None)
-        return (use_required_attribute and
-                first_choice is not None and
-                self._choice_has_empty_value(first_choice))
+        return (use_required_attribute and first_choice is not None
+                and self._choice_has_empty_value(first_choice))
 
 
 class TypeaHeadWidget(Widget):
     template_name = 'skeleton/componentes/fields/typeahead.html'
 
-    def __init__(self, model, url=False, name=False, forward=None,  *args, **kwargs):
+    def __init__(self,
+                 model,
+                 url=False,
+                 name=False,
+                 forward=None,
+                 *args,
+                 **kwargs):
         self.model = model
         self.url = url if url else '/typeahead/search'
         self.name = name
@@ -231,18 +235,21 @@ class TypeaHeadWidget(Widget):
         super().__init__(*args, **kwargs)
 
     class Media:
-        js = ('skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js',
-              'core/js/typeahead.js')
+        js = (
+            'skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js',
+            'core/js/typeahead.js')
 
     def get_context_data(self, name, value, attrs=None):
-        return {'widget': {
-            'name': self.name or name,
-            'value': value,
-            'url': self.url,
-            'module': self.model.__module__,
-            'model': self.model.__name__,
-            'forward': self.forward
-        }}
+        return {
+            'widget': {
+                'name': self.name or name,
+                'value': value,
+                'url': self.url,
+                'module': self.model.__module__,
+                'model': self.model.__name__,
+                'forward': self.forward
+            }
+        }
 
     def render(self, name, value, attrs=None, renderer=None):
         context = self.get_context_data(name, value, attrs)
@@ -251,19 +258,37 @@ class TypeaHeadWidget(Widget):
 
 
 class TypeaHeadForeignKeyWidget(TypeaHeadWidget):
-    def __init__(self, model, field_related, url=False, name=False, forward=None, *args, **kwargs):
+    def __init__(self,
+                 model,
+                 field_related,
+                 url=False,
+                 name=False,
+                 forward=None,
+                 *args,
+                 **kwargs):
         super().__init__(model, url, name, *args, **kwargs)
         self.field_related = field_related
         self.forward = forward or ''
 
     def get_context_data(self, name, value, attrs=None):
-        return {'widget': {
-            'name': self.name or name,
-            'value': value,
-            'value_txt': self.model.objects.filter(pk=value).first() if str(value).isdigit() else '',
-            'url': self.url,
-            'module': self.model.__module__,
-            'model': self.model.__name__,
-            'field_related': self.field_related,
-            'forward': self.forward
-        }}
+        return {
+            'widget': {
+                'name':
+                self.name or name,
+                'value':
+                value,
+                'value_txt':
+                self.model.objects.filter(
+                    pk=value).first() if str(value).isdigit() else '',
+                'url':
+                self.url,
+                'module':
+                self.model.__module__,
+                'model':
+                self.model.__name__,
+                'field_related':
+                self.field_related,
+                'forward':
+                self.forward
+            }
+        }

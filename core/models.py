@@ -12,9 +12,8 @@ from core.utils import LegacySystem
 from guardian.shortcuts import get_perms
 from oauth2_provider.models import Application, AbstractApplication
 
-
-INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'),
-                 ('N', 'NOT REVIEWED'), ('E', 'EXTERNAL'))
+INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'),
+                 ('E', 'EXTERNAL'))
 INVITE_FROM = (('P', 'PERSON'), ('O', 'OFFICE'))
 INVALIDO = 1
 PHONE = 2
@@ -26,17 +25,12 @@ SITE = 7
 LINKEDIN = 8
 INSTAGRAM = 9
 SNAPCHAT = 10
-CONTACT_MECHANISM_TYPE = (
-    (INVALIDO, 'INVÁLIDO'),
-    (PHONE, 'TELEFONE'),
-    (EMAIL, 'E-MAIL'),
-    (SKYPE, 'SKYPE'),
-    (WHATSAPP, 'WHATSAPP'),
-    (FACEBOOK, 'FACEBOOK'),
-    (SITE, 'SITE'),
-    (LINKEDIN, 'LINKEDIN'),
-    (INSTAGRAM, 'INSTAGRAM'),
-    (SNAPCHAT, 'SNAPCHAT'))
+CONTACT_MECHANISM_TYPE = ((INVALIDO, 'INVÁLIDO'), (PHONE, 'TELEFONE'),
+                          (EMAIL, 'E-MAIL'), (SKYPE, 'SKYPE'), (WHATSAPP,
+                                                                'WHATSAPP'),
+                          (FACEBOOK, 'FACEBOOK'), (SITE, 'SITE'), (LINKEDIN,
+                                                                   'LINKEDIN'),
+                          (INSTAGRAM, 'INSTAGRAM'), (SNAPCHAT, 'SNAPCHAT'))
 
 
 class CorePermissions(Enum):
@@ -78,9 +72,11 @@ def _create_hash(size=False):
 class AuditCreate(models.Model):
     # auto_now_add - toda vez que for criado
     create_date = models.DateTimeField('Criado em', auto_now_add=True)
-    create_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
-                                    related_name='%(class)s_create_user',
-                                    verbose_name='Criado por')
+    create_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='%(class)s_create_user',
+        verbose_name='Criado por')
 
     class Meta:
         abstract = True
@@ -103,25 +99,31 @@ class AuditAlter(models.Model):
     # auto_now - toda vez que for salvo
     alter_date = models.DateTimeField(
         'Atualizado em', auto_now=True, blank=True, null=True)
-    alter_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True,
-                                   null=True,
-                                   related_name='%(class)s_alter_user',
-                                   verbose_name='Alterado por')
+    alter_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name='%(class)s_alter_user',
+        verbose_name='Alterado por')
 
     class Meta:
         abstract = True
 
 
 class LegacyCode(models.Model):
-    legacy_code = models.CharField(max_length=255, blank=True, null=True,
-                                   verbose_name='Código legado')
-    system_prefix = models.CharField(max_length=255, blank=True, null=True,
-                                     verbose_name='Prefixo do sistema',
-                                     choices=((x.value, x.name.title()) for x in LegacySystem))
+    legacy_code = models.CharField(
+        max_length=255, blank=True, null=True, verbose_name='Código legado')
+    system_prefix = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='Prefixo do sistema',
+        choices=((x.value, x.name.title()) for x in LegacySystem))
 
     class Meta:
         abstract = True
-        unique_together = (('legacy_code', 'system_prefix'),)
+        unique_together = (('legacy_code', 'system_prefix'), )
 
 
 class Audit(AuditCreate, AuditAlter):
@@ -190,17 +192,21 @@ class City(Audit):
     state = models.ForeignKey(
         State, on_delete=models.PROTECT, blank=False, null=False)
 
-    court_district = models.ForeignKey('lawsuit.CourtDistrict', on_delete=models.PROTECT,
-                                       blank=False, null=False,
-                                       verbose_name='Comarca')
+    court_district = models.ForeignKey(
+        'lawsuit.CourtDistrict',
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
+        verbose_name='Comarca')
 
     class Meta:
         db_table = 'city'
         verbose_name = 'Cidade'
-        unique_together = (('name', 'state'),)
+        unique_together = (('name', 'state'), )
 
     def __str__(self):
-        return '{} - {} - {}'.format(self.name, self.state.initials, self.state.country.name)
+        return '{} - {} - {}'.format(self.name, self.state.initials,
+                                     self.state.country.name)
 
 
 class AbstractPerson(Audit, LegacyCode):
@@ -209,27 +215,42 @@ class AbstractPerson(Audit, LegacyCode):
     REQUESTER_GROUP = 'Solicitante'
     SERVICE_GROUP = 'Service'
     SUPERVISOR_GROUP = 'Supervisor'
-    legal_name = models.CharField(max_length=255, blank=False,
-                                  verbose_name='Razão social/Nome completo')
-    name = models.CharField(max_length=255, null=True, blank=True,
-                            verbose_name='Nome Fantasia/Apelido')
+    legal_name = models.CharField(
+        max_length=255, blank=False, verbose_name='Razão social/Nome completo')
+    name = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name='Nome Fantasia/Apelido')
     is_lawyer = models.BooleanField(
         null=False, default=False, verbose_name='É Advogado?')
-    legal_type = models.CharField(null=False, verbose_name='Tipo', max_length=1,
-                                  choices=((x.value, x.format(x.value))
-                                           for x in LegalType),
-                                  default=LegalType.JURIDICA)
-    cpf_cnpj = models.CharField(max_length=255, blank=True, null=True,
-                                unique=True, verbose_name='CPF/CNPJ')
-    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                                     blank=True, null=True,
-                                     verbose_name='Usuário do sistema')
+    legal_type = models.CharField(
+        null=False,
+        verbose_name='Tipo',
+        max_length=1,
+        choices=((x.value, x.format(x.value)) for x in LegalType),
+        default=LegalType.JURIDICA)
+    cpf_cnpj = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        unique=True,
+        verbose_name='CPF/CNPJ')
+    auth_user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        verbose_name='Usuário do sistema')
     is_customer = models.BooleanField(
         null=False, default=False, verbose_name='É Cliente?')
     is_supplier = models.BooleanField(
         null=False, default=False, verbose_name='É Fornecedor?')
-    import_from_legacy = models.BooleanField(null=False, default=False,
-                                             verbose_name='Importar OSs do sistema de origem para esse cliente', )
+    import_from_legacy = models.BooleanField(
+        null=False,
+        default=False,
+        verbose_name='Importar OSs do sistema de origem para esse cliente',
+    )
 
     @property
     def cpf(self):
@@ -268,8 +289,8 @@ class AbstractPerson(Audit, LegacyCode):
 
     def get_emails(self):
         emails = set(self.contact_mechanism_by_type('e-mail', formated=False))
-        if (self.auth_user and self.auth_user.email and
-                self.auth_user.email.strip()):
+        if (self.auth_user and self.auth_user.email
+                and self.auth_user.email.strip()):
             emails.add(self.auth_user.email.strip())
         return list(emails)
 
@@ -324,8 +345,10 @@ class Company(models.Model):
 
 
 class CompanyUser(models.Model):
-    user = models.ForeignKey(User, verbose_name='Usuário', related_name='companys')
-    company = models.ForeignKey(Company, verbose_name='Empresa', related_name='users')
+    user = models.ForeignKey(
+        User, verbose_name='Usuário', related_name='companys')
+    company = models.ForeignKey(
+        Company, verbose_name='Empresa', related_name='users')
 
     class Meta:
         verbose_name = 'Usuario da empresa'
@@ -338,17 +361,30 @@ class CompanyUser(models.Model):
 class Person(AbstractPerson):
     objects = PersonManager()
 
-    cpf_cnpj = models.CharField(max_length=255, blank=True, null=True, unique=False,
-                                verbose_name='CPF/CNPJ')
-    create_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                                related_name='%(class)s_create_user',
-                                verbose_name='Criado por')
-    alter_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True,
-                                   null=True,
-                                   related_name='%(class)s_alter_user',
-                                   verbose_name='Alterado por')
+    cpf_cnpj = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        unique=False,
+        verbose_name='CPF/CNPJ')
+    create_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='%(class)s_create_user',
+        verbose_name='Criado por')
+    alter_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name='%(class)s_alter_user',
+        verbose_name='Alterado por')
 
-    company = models.ForeignKey(Company, verbose_name='Compartilhar com empresa', null=True, blank=True)
+    company = models.ForeignKey(
+        Company,
+        verbose_name='Compartilhar com empresa',
+        null=True,
+        blank=True)
 
     class Meta:
         db_table = 'person'
@@ -358,7 +394,11 @@ class Person(AbstractPerson):
 
     def simple_serialize(self):
         """Simple JSON representation of instance"""
-        return {"id": self.id, "legal_name": self.legal_name, "name": self.name}
+        return {
+            "id": self.id,
+            "legal_name": self.legal_name,
+            "name": self.name
+        }
 
     @property
     def get_person_permissions(self):
@@ -380,8 +420,14 @@ class Office(AbstractPerson):
     offices = models.ManyToManyField('self', blank=True)
     public_office = models.BooleanField(
         default=False, verbose_name='Escritório público')
-    use_service = models.BooleanField(default=True, verbose_name='Possuo equipe de conferência de dados na delegação e validação da OS')
-    use_etl = models.BooleanField(default=True, verbose_name='Possuo processo de importação de dados de outros sistemas')
+    use_service = models.BooleanField(
+        default=True,
+        verbose_name=
+        'Possuo equipe de conferência de dados na delegação e validação da OS')
+    use_etl = models.BooleanField(
+        default=True,
+        verbose_name='Possuo processo de importação de dados de outros sistemas'
+    )
 
     class Meta:
         verbose_name = 'Escritório'
@@ -391,10 +437,13 @@ class Office(AbstractPerson):
 
 
 class OfficeMixin(models.Model):
-    office = models.ForeignKey(Office, on_delete=models.PROTECT, blank=False,
-                               null=False,
-                               related_name='%(class)s_office',
-                               verbose_name='Escritório')
+    office = models.ForeignKey(
+        Office,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
+        related_name='%(class)s_office',
+        verbose_name='Escritório')
 
     class Meta:
         abstract = True
@@ -422,9 +471,12 @@ class OfficeRelGroup(models.Model):
 
 
 class DefaultOffice(OfficeMixin, Audit):
-    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                                     blank=False, null=False,
-                                     verbose_name='Usuário do sistema')
+    auth_user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False,
+        verbose_name='Usuário do sistema')
 
     objects = OfficeManager()
 
@@ -434,20 +486,43 @@ class DefaultOffice(OfficeMixin, Audit):
 
 
 class Invite(Audit):
-    person = models.ForeignKey(Person, blank=True, null=True,
-                               on_delete=models.CASCADE, related_name='invites', verbose_name='Pessoa')
-    office = models.ForeignKey(Office, blank=False, null=False,
-                               on_delete=models.PROTECT, related_name='invites', verbose_name='Escritório')
-    status = models.CharField(choices=INVITE_STATUS,
-                              default='N', max_length=1, verbose_name='Status')
-    email = models.EmailField(verbose_name='E-mail',
-                              blank=True, null=True,
-                              max_length=255,
-                              )
-    invite_code = models.CharField(blank=True, null=True, verbose_name='Código do convite', max_length=50,
-                                   default=_create_hash, unique=True)
+    person = models.ForeignKey(
+        Person,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name='invites',
+        verbose_name='Pessoa')
+    office = models.ForeignKey(
+        Office,
+        blank=False,
+        null=False,
+        on_delete=models.PROTECT,
+        related_name='invites',
+        verbose_name='Escritório')
+    status = models.CharField(
+        choices=INVITE_STATUS,
+        default='N',
+        max_length=1,
+        verbose_name='Status')
+    email = models.EmailField(
+        verbose_name='E-mail',
+        blank=True,
+        null=True,
+        max_length=255,
+    )
+    invite_code = models.CharField(
+        blank=True,
+        null=True,
+        verbose_name='Código do convite',
+        max_length=50,
+        default=_create_hash,
+        unique=True)
     invite_from = models.CharField(
-        choices=INVITE_FROM, default='O', max_length=1, verbose_name='Origem do convite')
+        choices=INVITE_FROM,
+        default='O',
+        max_length=1,
+        verbose_name='Origem do convite')
 
     class Meta:
         verbose_name = 'Convite'
@@ -457,10 +532,17 @@ class Invite(Audit):
 
 
 class InviteOffice(Audit, OfficeMixin):
-    office_invite = models.ForeignKey(Office, blank=False, null=False, related_name='invites_offices',
-                                      verbose_name='Escritório convidado')
-    status = models.CharField(choices=INVITE_STATUS,
-                              default='N', max_length=1, verbose_name='Status')
+    office_invite = models.ForeignKey(
+        Office,
+        blank=False,
+        null=False,
+        related_name='invites_offices',
+        verbose_name='Escritório convidado')
+    status = models.CharField(
+        choices=INVITE_STATUS,
+        default='N',
+        max_length=1,
+        verbose_name='Status')
 
     def __str__(self):
         return self.office_invite.legal_name
@@ -471,7 +553,10 @@ class InviteOffice(Audit, OfficeMixin):
 
 class Address(Audit):
     address_type = models.ForeignKey(
-        AddressType, on_delete=models.PROTECT, blank=False, null=False,
+        AddressType,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
         verbose_name='Tipo')
     street = models.CharField(max_length=255, verbose_name='Logradouro')
     number = models.CharField(max_length=255, verbose_name='Número')
@@ -482,12 +567,24 @@ class Address(Audit):
     notes = models.TextField(blank=True, verbose_name='Observação')
     home_address = models.BooleanField(default=False, blank=True)
     business_address = models.BooleanField(default=False, blank=True)
-    city = models.ForeignKey(City, on_delete=models.PROTECT, blank=False, null=False,
-                             verbose_name='Cidade')
-    state = models.ForeignKey(State, on_delete=models.PROTECT, blank=False, null=False,
-                              verbose_name='Estado')
-    country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=False, null=False,
-                                verbose_name='País')
+    city = models.ForeignKey(
+        City,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
+        verbose_name='Cidade')
+    state = models.ForeignKey(
+        State,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
+        verbose_name='Estado')
+    country = models.ForeignKey(
+        Country,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
+        verbose_name='País')
     person = models.ForeignKey(
         Person, on_delete=models.CASCADE, blank=True, null=True)
     office = models.ForeignKey(
@@ -501,11 +598,13 @@ class Address(Audit):
     def __str__(self):
         tpl = '{street}, {number}{complement} - {city_region} - {city} - {state} - CEP {zip_code}'
         return tpl.format(
-            number=self.number, street=self.street, city_region=self.city_region,
+            number=self.number,
+            street=self.street,
+            city_region=self.city_region,
             city=self.city.name,
-            state=self.state.name, zip_code=self.zip_code,
-            complement='/' + self.complement if self.complement else ''
-        )
+            state=self.state.name,
+            zip_code=self.zip_code,
+            complement='/' + self.complement if self.complement else '')
 
 
 class ContactMechanismType(Audit):
@@ -528,22 +627,26 @@ class ContactMechanismType(Audit):
 
 class ContactMechanism(Audit):
     contact_mechanism_type = models.ForeignKey(
-        ContactMechanismType, on_delete=models.PROTECT, blank=False, null=False,
+        ContactMechanismType,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
         verbose_name="Tipo")
     description = models.CharField(
         max_length=255, null=False, verbose_name="Descrição")
-    notes = models.CharField(max_length=400, blank=True,
-                             verbose_name="Observações")
+    notes = models.CharField(
+        max_length=400, blank=True, verbose_name="Observações")
     person = models.ForeignKey(
         Person, on_delete=models.CASCADE, blank=True, null=True)
     office = models.ForeignKey(
         Office, on_delete=models.PROTECT, blank=True, null=True)
+
     class Meta:
         db_table = 'contact_mechanism'
         verbose_name = 'Mecanismo de contato'
         verbose_name_plural = 'Mecanismos de contato'
-        unique_together = (('description', 'person'),
-                           ('description', 'office'))
+        unique_together = (('description', 'person'), ('description',
+                                                       'office'))
 
     def __str__(self):
         return self.description
@@ -578,7 +681,7 @@ class Team(Audit, OfficeMixin):
     class Meta:
         verbose_name = 'Equipe'
         verbose_name_plural = 'Equipes'
-        unique_together = (('office', 'name'),)
+        unique_together = (('office', 'name'), )
 
     def __str__(self):
         return self.name
@@ -598,7 +701,8 @@ class ImportXlsFile(Audit, OfficeMixin):
     end = models.DateTimeField('Fim processo', null=True)
 
     def __str__(self):
-        return self.file_xls.file.name + ' - ' + 'Início: ' + str(self.start) + ' - ' + 'Fim: ' + str(self.end)
+        return self.file_xls.file.name + ' - ' + 'Início: ' + str(
+            self.start) + ' - ' + 'Fim: ' + str(self.end)
 
     class Meta:
         verbose_name = 'Arquivos Importados para inserção em lote'
@@ -608,8 +712,7 @@ class ExternalApplication(AbstractApplication):
     office = models.ForeignKey(
         Office, verbose_name='Escritório', blank=True, null=True)
     company = models.ForeignKey(
-        Company, verbose_name='Empresa', blank=True, null=True
-        )
+        Company, verbose_name='Empresa', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Aplicação externa'
@@ -620,10 +723,14 @@ class ExternalApplication(AbstractApplication):
 
 
 class ControlFirstAccessUser(models.Model):
-    auth_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
-                                     blank=False, null=False,
-                                     verbose_name='Usuário do sistema')
-    first_login = models.DateTimeField("Data do primeiro acesso.", auto_now_add=True)
+    auth_user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
+        verbose_name='Usuário do sistema')
+    first_login = models.DateTimeField(
+        "Data do primeiro acesso.", auto_now_add=True)
 
     def __str__(self):
         return self.auth_user.username
@@ -636,11 +743,12 @@ class ControlFirstAccessUser(models.Model):
 class CustomSettings(Audit):
     office = models.OneToOneField(Office, verbose_name='Escritório')
     default_user = models.OneToOneField(User, verbose_name='Usuário default')
-    email_to_notification = models.EmailField(verbose_name='E-mail para receber notificações')
+    email_to_notification = models.EmailField(
+        verbose_name='E-mail para receber notificações')
     i_work_alone = models.BooleanField(default=True)
 
     class Meta:
-        verbose_name='Configurações por escritório'
+        verbose_name = 'Configurações por escritório'
 
     def __str__(self):
         return self.office.legal_name
@@ -648,11 +756,11 @@ class CustomSettings(Audit):
 
 class EmailTemplate(models.Model):
     name = models.CharField(verbose_name='Nome do template', max_length=255)
-    template_id = models.CharField(verbose_name='Id do tempĺate (sendgrid)', max_length=255)
-
+    template_id = models.CharField(
+        verbose_name='Id do tempĺate (sendgrid)', max_length=255)
 
     class Meta:
-        verbose_name='E-mail templates'
+        verbose_name = 'E-mail templates'
 
     def __str__(self):
         return self.name

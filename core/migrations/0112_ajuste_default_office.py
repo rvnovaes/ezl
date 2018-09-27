@@ -8,15 +8,18 @@ import logging
 logger = logging.getLogger('0112_ajuste_default_office')
 
 
-def remove_invalid_default_office(apps, schema_editor):    
-    from core.models import DefaultOffice   
+def remove_invalid_default_office(apps, schema_editor):
+    from core.models import DefaultOffice
     for user in User.objects.all():
         try:
-            if not user.person.offices.active_offices().filter(pk=user.defaultoffice.office.pk).exists():
+            if not user.person.offices.active_offices().filter(
+                    pk=user.defaultoffice.office.pk).exists():
                 user.defaultoffice.delete()
-                if len(user.person.offices.active_offices()) == 1: 
+                if len(user.person.offices.active_offices()) == 1:
                     defaultoffice = DefaultOffice(
-                        create_user_id=user.pk, auth_user=user, office=user.person.offices.active_offices().first())
+                        create_user_id=user.pk,
+                        auth_user=user,
+                        office=user.person.offices.active_offices().first())
                     defaultoffice.save()
                 logger.info('AJUSTADO USUARIO {}'.format(user.username))
         except:

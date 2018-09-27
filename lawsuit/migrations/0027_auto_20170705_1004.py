@@ -15,81 +15,97 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='courtdistrict',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AlterField(
             model_name='courtdistrict',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name='Criado em'),
         ),
         migrations.AlterField(
             model_name='courtdivision',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AlterField(
             model_name='courtdivision',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name='Criado em'),
         ),
         migrations.AlterField(
             model_name='folder',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AlterField(
             model_name='folder',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name='Criado em'),
         ),
         migrations.AlterField(
             model_name='instance',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AlterField(
             model_name='instance',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name='Criado em'),
         ),
         migrations.AlterField(
             model_name='lawsuit',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AlterField(
             model_name='lawsuit',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name='Criado em'),
         ),
         migrations.AlterField(
             model_name='lawsuitinstance',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AlterField(
             model_name='lawsuitinstance',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name='Criado em'),
         ),
         migrations.AlterField(
             model_name='movement',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AlterField(
             model_name='movement',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name='Criado em'),
         ),
         migrations.AlterField(
             model_name='typemovement',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AlterField(
             model_name='typemovement',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name='Criado em'),
         ),
     ]

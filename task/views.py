@@ -54,11 +54,7 @@ from django.shortcuts import render
 import logging
 logger = logging.getLogger(__name__)
 
-
-mapOrder = {
-    'asc': '',
-    'desc': '-'
-}
+mapOrder = {'asc': '', 'desc': '-'}
 
 
 class TaskListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -83,9 +79,10 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         if form.cleaned_data['documents']:
             for document in form.cleaned_data['documents']:
                 file_name = document.name.replace(' ', '_')
-                task.ecm_set.create(path=document,
-                                    exhibition_name=file_name,
-                                    create_user=task.create_user)
+                task.ecm_set.create(
+                    path=document,
+                    exhibition_name=file_name,
+                    create_user=task.create_user)
 
         form.delete_temporary_files()
 
@@ -139,18 +136,22 @@ class TaskCreateView(AuditFormMixin, CreateView):
         if form.cleaned_data['documents']:
             for document in form.cleaned_data['documents']:
                 file_name = document.name.replace(' ', '_')
-                task.ecm_set.create(path=document,
-                                    exhibition_name=file_name,
-                                    create_user=task.create_user)
+                task.ecm_set.create(
+                    path=document,
+                    exhibition_name=file_name,
+                    create_user=task.create_user)
 
         form.delete_temporary_files()
 
         return response
 
     def get_success_url(self):
-        return reverse('movement_update',
-                       kwargs={'lawsuit': self.kwargs['lawsuit'],
-                               'pk': self.kwargs['movement']})
+        return reverse(
+            'movement_update',
+            kwargs={
+                'lawsuit': self.kwargs['lawsuit'],
+                'pk': self.kwargs['movement']
+            })
 
 
 class TaskToAssignView(AuditFormMixin, UpdateView):
@@ -185,8 +186,12 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
             lawsuit_id = Movement.objects.get(
                 id=self.kwargs.get('movement')).law_suit_id
             self.kwargs['lawsuit'] = lawsuit_id
-            self.success_url = reverse('movement_update', kwargs={'lawsuit': self.kwargs['lawsuit'],
-                                                                  'pk': self.kwargs['movement']})
+            self.success_url = reverse(
+                'movement_update',
+                kwargs={
+                    'lawsuit': self.kwargs['lawsuit'],
+                    'pk': self.kwargs['movement']
+                })
         if isinstance(self, CreateView):
             self.form_class.declared_fields['is_active'].initial = True
             self.form_class.declared_fields['is_active'].disabled = True
@@ -209,9 +214,10 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
         if form.cleaned_data['documents']:
             for document in form.cleaned_data['documents']:
                 file_name = document.name.replace(' ', '_')
-                task.ecm_set.create(path=document,
-                                    exhibition_name=file_name,
-                                    create_user=task.create_user)
+                task.ecm_set.create(
+                    path=document,
+                    exhibition_name=file_name,
+                    create_user=task.create_user)
 
         form.delete_temporary_files()
         return HttpResponseRedirect(self.success_url)
@@ -223,7 +229,8 @@ class TaskUpdateView(AuditFormMixin, UpdateView):
         return context
 
 
-class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteViewMixin):
+class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView,
+                     MultiDeleteViewMixin):
     model = Task
     success_message = DELETE_SUCCESS_MESSAGE.format(
         model._meta.verbose_name_plural)
@@ -233,8 +240,9 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView, MultiDeleteVi
         return super(TaskDeleteView, self).post(request, *args, **kwargs)
 
 
-class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateView):
-    permission_required = ('core.view_all_tasks',)
+class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
+                     TemplateView):
+    permission_required = ('core.view_all_tasks', )
     template_name = None
     filter_class = None
     datetime_field = None
@@ -260,15 +268,14 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
         queryset = Task.objects.filter(
             office=office,
             task_status=TaskStatus.FINISHED,
-            child__isnull=False
-        )
+            child__isnull=False)
         queryset = self.filter_queryset(queryset)
         return queryset.order_by('child__office__name')
 
     def filter_queryset(self, queryset):
         if not self.task_filter.form.is_valid():
-            messages.add_message(
-                self.request, messages.ERROR, 'Formulário inválido.')
+            messages.add_message(self.request, messages.ERROR,
+                                 'Formulário inválido.')
         else:
             data = self.task_filter.form.cleaned_data
             query = Q()
@@ -280,24 +287,28 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView, TemplateV
 
             if data['client']:
                 query.add(
-                    Q(movement__law_suit__folder__person_customer__legal_name__unaccent__icontains=data['client']),
-                    Q.AND)
+                    Q(movement__law_suit__folder__person_customer__legal_name__unaccent__icontains
+                      =data['client']), Q.AND)
 
             if data['office']:
                 if isinstance(self, ToReceiveTaskReportView):
                     query.add(
-                        Q(parent__office__name__unaccent__icontains=data['office']), Q.AND)
+                        Q(parent__office__name__unaccent__icontains=data[
+                            'office']), Q.AND)
                 else:
                     query.add(
-                        Q(office__name__unaccent__icontains=data['office']), Q.AND)
+                        Q(office__name__unaccent__icontains=data['office']),
+                        Q.AND)
 
             if data['finished_in']:
                 if data['finished_in'].start:
                     finished_query.add(
-                        Q(finished_date__gte=data['finished_in'].start.replace(hour=0, minute=0)), Q.AND)
+                        Q(finished_date__gte=data['finished_in'].start.replace(
+                            hour=0, minute=0)), Q.AND)
                 if data['finished_in'].stop:
                     finished_query.add(
-                        Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                        Q(finished_date__lte=data['finished_in'].stop.replace(
+                            hour=23, minute=59)), Q.AND)
 
             if query or finished_query:
                 query.add(Q(finished_query), Q.AND)
@@ -392,8 +403,7 @@ class ToReceiveTaskReportView(TaskReportBase):
         queryset = Task.objects.filter(
             office=office,
             task_status=TaskStatus.FINISHED,
-            parent__isnull=False
-        )
+            parent__isnull=False)
         queryset = self.filter_queryset(queryset)
         return queryset.order_by('parent__office__name')
 
@@ -426,8 +436,7 @@ class ToPayTaskReportView(TaskReportBase):
         queryset = Task.objects.filter(
             parent__office=office,
             task_status=TaskStatus.FINISHED,
-            parent__isnull=False
-        )
+            parent__isnull=False)
         queryset = self.filter_queryset(queryset)
         return queryset.order_by('child__office__name')
 
@@ -452,9 +461,7 @@ class ToPayTaskReportView(TaskReportBase):
 
 class DashboardView(CustomLoginRequiredView, TemplateView):
     template_name = 'task/task_dashboard.html'
-    table_pagination = {
-        'per_page': 5
-    }
+    table_pagination = {'per_page': 5}
     ret_status_dict = {}
 
     def get_context_data(self, *args, **kwargs):
@@ -465,16 +472,18 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
         context['cards_to_show'] = []
         if custom_settings and custom_settings.task_status_show:
             context['cards_to_show'] = list(
-                custom_settings.task_status_show.values_list('status_to_show', flat=True))
+                custom_settings.task_status_show.values_list(
+                    'status_to_show', flat=True))
         person = Person.objects.get(auth_user=self.request.user)
         checker = ObjectPermissionChecker(person.auth_user)
         ret_status_dict, office_session = self.get_data(person, checker)
         context['ret_status_dict'] = ret_status_dict
 
         if not self.request.user.get_all_permissions():
-            context['messages'] = [
-                {'tags': 'error', 'message': NO_PERMISSIONS_DEFINED}
-            ]
+            context['messages'] = [{
+                'tags': 'error',
+                'message': NO_PERMISSIONS_DEFINED
+            }]
         return context
 
     def get_data(self, person, checker):
@@ -509,8 +518,9 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
         for status_key in sorted(status_dict.keys()):
             ret_status_dict[str(status_key)] = status_dict[status_key]
         ret_status_dict['total'] = total
-        ret_status_dict['total_requested_month'] = data.filter(requested_date__year=datetime.today().year,
-                                                               requested_date__month=datetime.today().month).count()
+        ret_status_dict['total_requested_month'] = data.filter(
+            requested_date__year=datetime.today().year,
+            requested_date__month=datetime.today().month).count()
 
         return ret_status_dict
 
@@ -528,16 +538,24 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             form.is_valid = False
             messages.error(self.request, "Favor Selecionar um correspondente")
             return self.form_invalid(form)
-        form.instance.task_status = TaskStatus[self.request.POST['action']
-                                               ] or TaskStatus.INVALID
+        form.instance.task_status = TaskStatus[
+            self.request.POST['action']] or TaskStatus.INVALID
         form.instance.alter_user = User.objects.get(id=self.request.user.id)
-        notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None
+        notes = form.cleaned_data['notes'] if form.cleaned_data[
+            'notes'] else None
         execution_date = (form.cleaned_data['execution_date']
-                          if form.cleaned_data['execution_date'] else form.initial['execution_date'])
+                          if form.cleaned_data['execution_date'] else
+                          form.initial['execution_date'])
         survey_result = (form.cleaned_data['survey_result']
-                         if form.cleaned_data['survey_result'] else form.initial['survey_result'])
-        send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
-                                       execution_date=execution_date, survey_result=survey_result, **{'external_task': True})        
+                         if form.cleaned_data['survey_result'] else
+                         form.initial['survey_result'])
+        send_notes_execution_date.send(
+            sender=self.__class__,
+            notes=notes,
+            instance=form.instance,
+            execution_date=execution_date,
+            survey_result=survey_result,
+            **{'external_task': True})
         form.instance.__server = get_domain(self.request)
         if form.instance.task_status == TaskStatus.ACCEPTED_SERVICE:
             form.instance.person_distributed_by = self.request.user.person
@@ -551,10 +569,12 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 form.instance.person_distributed_by = self.request.user.person
             default_amount = Decimal(
                 '0.00') if not form.instance.amount else form.instance.amount
-            form.instance.amount = (
-                form.cleaned_data['amount'] if form.cleaned_data['amount'] else default_amount)
+            form.instance.amount = (form.cleaned_data['amount']
+                                    if form.cleaned_data['amount'] else
+                                    default_amount)
             servicepricetable_id = (
-                self.request.POST['servicepricetable_id'] if self.request.POST['servicepricetable_id'] else None)
+                self.request.POST['servicepricetable_id']
+                if self.request.POST['servicepricetable_id'] else None)
             servicepricetable = ServicePriceTable.objects.filter(
                 id=servicepricetable_id).first()
             get_task_attachment(self, form)
@@ -589,11 +609,14 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                                   if self.object.type_task.survey else None)
         if self.object.parent:
             context['survey_data'] = (self.object.parent.type_task.survey.data
-                                      if self.object.parent.type_task.survey else None)
+                                      if self.object.parent.type_task.survey
+                                      else None)
         office_session = get_office_session(self.request)
-        get_correspondents_table = CorrespondentsTable(
-            self.object, office_session)
-        context['correspondents_table'] = get_correspondents_table.get_correspondents_table()
+        get_correspondents_table = CorrespondentsTable(self.object,
+                                                       office_session)
+        context[
+            'correspondents_table'] = get_correspondents_table.get_correspondents_table(
+            )
         type_task_field = get_correspondents_table.get_type_task_field()
         if type_task_field:
             context['form'].fields['type_task_field'] = type_task_field
@@ -611,11 +634,13 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         :return:
         """
         if object_parent.get_child:
-            if TaskStatus(object_parent.get_child.task_status) not in [TaskStatus.REFUSED, TaskStatus.REFUSED_SERVICE,
-                                                                       TaskStatus.FINISHED]:
+            if TaskStatus(object_parent.get_child.task_status) not in [
+                    TaskStatus.REFUSED, TaskStatus.REFUSED_SERVICE,
+                    TaskStatus.FINISHED
+            ]:
                 return False
         new_task = copy.copy(object_parent)
-        new_task.task_hash = uuid.uuid4()        
+        new_task.task_hash = uuid.uuid4()
         new_task.legacy_code = None
         new_task.system_prefix = None
         new_task.pk = new_task.task_number = None
@@ -634,9 +659,12 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
     def dispatch(self, request, *args, **kwargs):
         res = super().dispatch(request, *args, **kwargs)
         office_session = get_office_session(request)
-        if office_session != Task.objects.filter(pk=kwargs.get('pk')).first().office:
-            messages.error(self.request, "A OS que está tentando acessar, não pertence ao escritório selecionado."
-                                         " Favor selecionar o escritório correto")
+        if office_session != Task.objects.filter(
+                pk=kwargs.get('pk')).first().office:
+            messages.error(
+                self.request,
+                "A OS que está tentando acessar, não pertence ao escritório selecionado."
+                " Favor selecionar o escritório correto")
             if request.session.get('custom_session_user'):
                 del request.session['custom_session_user']
                 request.session.modified = True
@@ -648,81 +676,106 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
     def post(self, request, *args, **kwargs):
         files = request.FILES.getlist('path')
         task = kwargs['pk']
-        data = {'success': False,
-                'message': exception_create()}
+        data = {'success': False, 'message': exception_create()}
 
         for file in files:
             file_name = file._name.replace(' ', '_')
             obj_task = Task.objects.get(id=task)
-            ecm = Ecm(path=file,
-                      task=obj_task,
-                      exhibition_name=file_name,
-                      create_user_id=str(request.user.id),
-                      create_date=timezone.now())
+            ecm = Ecm(
+                path=file,
+                task=obj_task,
+                exhibition_name=file_name,
+                create_user_id=str(request.user.id),
+                create_date=timezone.now())
 
             try:
                 ecm.save()
-                data = {'success': True,
-                        'id': ecm.id,
-                        'name': str(file),
-                        'user': str(self.request.user),
-                        'username': str(self.request.user.first_name + ' ' +
-                                        self.request.user.last_name),
-                        'filename': str(ecm.exhibition_name),
-                        'task_id': str(task),
-                        'message': success_sent()
-                        }
+                data = {
+                    'success':
+                    True,
+                    'id':
+                    ecm.id,
+                    'name':
+                    str(file),
+                    'user':
+                    str(self.request.user),
+                    'username':
+                    str(self.request.user.first_name + ' ' +
+                        self.request.user.last_name),
+                    'filename':
+                    str(ecm.exhibition_name),
+                    'task_id':
+                    str(task),
+                    'message':
+                    success_sent()
+                }
 
             except OperationalError:
-                data = {'success': False,
-                        'message': operational_error_create()}
+                data = {
+                    'success': False,
+                    'message': operational_error_create()
+                }
 
             except IOError:
 
-                data = {'is_deleted': False,
-                        'message': ioerror_create()}
+                data = {'is_deleted': False, 'message': ioerror_create()}
 
             except Exception:
-                data = {'success': False,
-                        'message': exception_create()}
+                data = {'success': False, 'message': exception_create()}
 
         return JsonResponse(data)
 
 
-@login_required
+
 def delete_ecm(request, pk):
     try:
         ecm = Ecm.objects.get(id=pk)
         task_id = ecm.task.pk
         ecm.delete()
         num_ged = Ecm.objects.filter(task_id=task_id).count()
-        data = {'is_deleted': True,
-                'num_ged': num_ged,
-                'message': success_delete()
-                }
+        data = {
+            'is_deleted': True,
+            'num_ged': num_ged,
+            'message': success_delete()
+        }
     except IntegrityError:
-        data = {'is_deleted': False,
-                'num_ged': 1,
-                'message': integrity_error_delete()
-                }
+        data = {
+            'is_deleted': False,
+            'num_ged': 1,
+            'message': integrity_error_delete()
+        }
     except Ecm.DoesNotExist:
-        data = {'is_deleted': False,
-                'num_ged': 1,
-                'message': "Anexo já foi excluído ou não existe.",
-                }
+        data = {
+            'is_deleted': False,
+            'num_ged': 1,
+            'message': "Anexo já foi excluído ou não existe.",
+        }
     except ValidationError as error:
-        data = {'is_deleted': False,
-                'num_ged': 1,
-                'message': error.args[0],
-                }
+        data = {
+            'is_deleted': False,
+            'num_ged': 1,
+            'message': error.args[0],
+        }
     except Exception as ex:
-        data = {'is_deleted': False,
-                'num_ged': 1,
-                'message': DELETE_EXCEPTION_MESSAGE + '\n' + ex.args[0],
-                }
+        data = {
+            'is_deleted': False,
+            'num_ged': 1,
+            'message': DELETE_EXCEPTION_MESSAGE + '\n' + ex.args[0],
+        }
 
     return JsonResponse(data)
 
+@login_required
+def delete_internal_ecm(request, pk):
+    return delete_ecm(request, pk)
+
+def delete_external_ecm(request, task_hash, pk):
+    # Para usuario que apenas acessam a task por hash, sem autenticar
+    task = Task.objects.get(task_hash=task_hash)
+    ecm = Ecm.objects.get(pk=pk)
+    if ecm.task.task_hash.hex == task_hash:
+        return delete_ecm(request, pk)
+    return JsonResponse({'message': 'Hash inválido'})
 
 class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
     model = DashboardViewModel
@@ -766,11 +819,14 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 finished_dynamic_query = Q()
                 team_dynamic_query = Q()
 
-                if not checker.has_perm('can_distribute_tasks', office_session):
-                    if checker.has_perm('view_delegated_tasks', office_session):
+                if not checker.has_perm('can_distribute_tasks',
+                                        office_session):
+                    if checker.has_perm('view_delegated_tasks',
+                                        office_session):
                         person_dynamic_query.add(
                             Q(person_executed_by=person.id), Q.OR)
-                    if checker.has_perm('view_requested_tasks', office_session):
+                    if checker.has_perm('view_requested_tasks',
+                                        office_session):
                         person_dynamic_query.add(
                             Q(person_asked_by=person.id), Q.OR)
                 if data['office_executed_by']:
@@ -778,13 +834,16 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         Q(child__office_id=data['office_executed_by']), Q.AND)
                 if data['state']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__court_district__state=data['state']), Q.AND)
+                        Q(movement__law_suit__court_district__state=data[
+                            'state']), Q.AND)
                 if data['court_district']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__court_district=data['court_district']), Q.AND)
+                        Q(movement__law_suit__court_district=data[
+                            'court_district']), Q.AND)
                 if data['task_status']:
-                    status = [getattr(TaskStatus, s)
-                              for s in data['task_status']]
+                    status = [
+                        getattr(TaskStatus, s) for s in data['task_status']
+                    ]
                     task_dynamic_query.add(Q(task_status__in=status), Q.AND)
                 if data['type_task']:
                     task_dynamic_query.add(
@@ -794,34 +853,44 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         Q(movement__law_suit__organ=data['court']), Q.AND)
                 if data['cost_center']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__folder__cost_center=data['cost_center']), Q.AND)
+                        Q(movement__law_suit__folder__cost_center=data[
+                            'cost_center']), Q.AND)
                 if data['folder_number']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__folder__folder_number=data['folder_number']), Q.AND)
+                        Q(movement__law_suit__folder__folder_number=data[
+                            'folder_number']), Q.AND)
                 if data['folder_legacy_code']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__folder__legacy_code=data['folder_legacy_code']), Q.AND)
+                        Q(movement__law_suit__folder__legacy_code=data[
+                            'folder_legacy_code']), Q.AND)
                 if data['client']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__folder__person_customer__id=data['client']), Q.AND)
+                        Q(movement__law_suit__folder__person_customer__id=data[
+                            'client']), Q.AND)
                 if data['law_suit_number']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__law_suit_number=data['law_suit_number']), Q.AND)
+                        Q(movement__law_suit__law_suit_number=data[
+                            'law_suit_number']), Q.AND)
                 if data['task_number']:
                     task_dynamic_query.add(
                         Q(task_number=data['task_number']), Q.AND)
                 if data['task_origin_code']:
-                    task_dynamic_query.add(Q(Q(legacy_code=data['task_origin_code'])
-                                             | Q(parent_task_number=data['task_origin_code'])), Q.AND)
+                    task_dynamic_query.add(
+                        Q(
+                            Q(legacy_code=data['task_origin_code'])
+                            | Q(parent_task_number=data['task_origin_code'])),
+                        Q.AND)
                 if data['person_executed_by']:
                     task_dynamic_query.add(
-                        Q(person_executed_by=data['person_executed_by']), Q.AND)
+                        Q(person_executed_by=data['person_executed_by']),
+                        Q.AND)
                 if data['person_asked_by']:
                     task_dynamic_query.add(
                         Q(person_asked_by=data['person_asked_by']), Q.AND)
                 if data['person_distributed_by']:
                     task_dynamic_query.add(
-                        Q(person_distributed_by=data['person_distributed_by']), Q.AND)
+                        Q(person_distributed_by=data['person_distributed_by']),
+                        Q.AND)
                 if data['team']:
                     rule_view = RuleViewTask(self.request)
                     team_dynamic_query.add(
@@ -829,91 +898,110 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 if data['requested_in']:
                     if data['requested_in'].start:
                         requested_dynamic_query.add(
-                            Q(requested_date__gte=data['requested_in'].start.replace(hour=0, minute=0)), Q.AND)
+                            Q(requested_date__gte=data['requested_in'].start.
+                              replace(hour=0, minute=0)), Q.AND)
                     if data['requested_in'].stop:
                         requested_dynamic_query.add(
-                            Q(requested_date__lte=data['requested_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                            Q(requested_date__lte=data['requested_in'].stop.
+                              replace(hour=23, minute=59)), Q.AND)
                 if data['accepted_service_in']:
                     if data['accepted_service_in'].start:
                         accepted_service_dynamic_query.add(
-                            Q(acceptance_service_date__gte=data['accepted_service_in'].start.replace(
-                                hour=0, minute=0)),
-                            Q.AND)
+                            Q(acceptance_service_date__gte=data[
+                                'accepted_service_in'].start.replace(
+                                    hour=0, minute=0)), Q.AND)
                     if data['accepted_service_in'].stop:
                         accepted_service_dynamic_query.add(
-                            Q(acceptance_service_date__lte=data['accepted_service_in'].stop.replace(hour=23,
-                                                                                                    minute=59)), Q.AND)
+                            Q(acceptance_service_date__lte=data[
+                                'accepted_service_in'].stop.replace(
+                                    hour=23, minute=59)), Q.AND)
                 if data['refused_service_in']:
                     if data['refused_service_in'].start:
                         refused_service_query.add(
-                            Q(refused_service_date__gte=data['refused_service_in'].start.replace(
-                                hour=0, minute=0)),
-                            Q.AND)
+                            Q(refused_service_date__gte=data[
+                                'refused_service_in'].start.replace(
+                                    hour=0, minute=0)), Q.AND)
                     if data['refused_service_in'].stop:
                         refused_service_query.add(
-                            Q(refused_service_date__lte=data['refused_service_in'].stop.replace(
-                                hour=23, minute=59)),
-                            Q.AND)
+                            Q(refused_service_date__lte=data[
+                                'refused_service_in'].stop.replace(
+                                    hour=23, minute=59)), Q.AND)
                 if data['open_in']:
                     if data['open_in'].start:
                         open_dynamic_query.add(
-                            Q(delegation_date__gte=data['open_in'].start.replace(hour=0, minute=0)), Q.AND)
+                            Q(delegation_date__gte=data['open_in'].start.
+                              replace(hour=0, minute=0)), Q.AND)
                     if data['open_in'].stop:
                         open_dynamic_query.add(
-                            Q(delegation_date__lte=data['open_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                            Q(delegation_date__lte=data['open_in'].stop.
+                              replace(hour=23, minute=59)), Q.AND)
                 if data['accepted_in']:
                     if data['accepted_in'].start:
                         accepted_dynamic_query.add(
-                            Q(acceptance_date__gte=data['accepted_in'].start.replace(hour=0, minute=0)), Q.AND)
+                            Q(acceptance_date__gte=data['accepted_in'].start.
+                              replace(hour=0, minute=0)), Q.AND)
                     if data['accepted_in'].stop:
                         accepted_dynamic_query.add(
-                            Q(acceptance_date__lte=data['accepted_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                            Q(acceptance_date__lte=data['accepted_in'].stop.
+                              replace(hour=23, minute=59)), Q.AND)
                 if data['refused_in']:
                     if data['refused_in'].start:
                         refused_dynamic_query.add(
-                            Q(refused_date__gte=data['refused_in'].start.replace(hour=0, minute=0)), Q.AND)
+                            Q(refused_date__gte=data['refused_in'].start.
+                              replace(hour=0, minute=0)), Q.AND)
                     if data['refused_in'].stop:
                         refused_dynamic_query.add(
-                            Q(refused_date__lte=data['refused_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                            Q(refused_date__lte=data['refused_in'].stop.
+                              replace(hour=23, minute=59)), Q.AND)
                 if data['return_in']:
                     if data['return_in'].start:
                         return_dynamic_query.add(
-                            Q(return_date__gte=data['return_in'].start.replace(hour=0, minute=0)), Q.AND)
+                            Q(return_date__gte=data['return_in'].start.replace(
+                                hour=0, minute=0)), Q.AND)
                     if data['return_in'].stop:
                         return_dynamic_query.add(
-                            Q(return_date__lte=data['return_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                            Q(return_date__lte=data['return_in'].stop.replace(
+                                hour=23, minute=59)), Q.AND)
                 if data['done_in']:
                     if data['done_in'].start:
                         done_dynamic_query.add(
-                            Q(execution_date__gte=data['done_in'].start.replace(hour=0, minute=0)), Q.AND)
+                            Q(execution_date__gte=data['done_in'].start.
+                              replace(hour=0, minute=0)), Q.AND)
                     if data['done_in'].stop:
                         done_dynamic_query.add(
-                            Q(execution_date__lte=data['done_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                            Q(execution_date__lte=data['done_in'].stop.replace(
+                                hour=23, minute=59)), Q.AND)
                 if data['blocked_payment_in']:
                     if data['blocked_payment_in'].start:
                         blocked_payment_dynamic_query.add(
-                            Q(blocked_payment_date__gte=data['blocked_payment_in'].start.replace(
-                                hour=0, minute=0)),
-                            Q.AND)
+                            Q(blocked_payment_date__gte=data[
+                                'blocked_payment_in'].start.replace(
+                                    hour=0, minute=0)), Q.AND)
                     if data['blocked_payment_in'].stop:
                         blocked_payment_dynamic_query.add(
-                            Q(blocked_payment_date__lte=data['blocked_payment_in'].stop.replace(
-                                hour=23, minute=59)),
-                            Q.AND)
+                            Q(blocked_payment_date__lte=data[
+                                'blocked_payment_in'].stop.replace(
+                                    hour=23, minute=59)), Q.AND)
                 if data['finished_in']:
                     if data['finished_in'].start:
                         finished_dynamic_query.add(
-                            Q(finished_date__gte=data['finished_in'].start.replace(hour=0, minute=0)), Q.AND)
+                            Q(finished_date__gte=data['finished_in'].start.
+                              replace(hour=0, minute=0)), Q.AND)
                     if data['finished_in'].stop:
                         finished_dynamic_query.add(
-                            Q(finished_date__lte=data['finished_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                            Q(finished_date__lte=data['finished_in'].stop.
+                              replace(hour=23, minute=59)), Q.AND)
                 if data['final_deadline_date_in']:
                     if data['final_deadline_date_in'].start:
                         finished_dynamic_query.add(
-                            Q(final_deadline_date__gte=data['final_deadline_date_in'].start.replace(hour=0, minute=0)), Q.AND)
+                            Q(final_deadline_date__gte=data[
+                                'final_deadline_date_in'].start.replace(
+                                    hour=0, minute=0)), Q.AND)
                     if data['final_deadline_date_in'].stop:
                         finished_dynamic_query.add(
-                            Q(final_deadline_date__lte=data['final_deadline_date_in'].stop.replace(hour=23, minute=59)), Q.AND)
+                            Q(final_deadline_date__lte=data[
+                                'final_deadline_date_in'].stop.replace(
+                                    hour=23, minute=59)), Q.AND)
 
                 person_dynamic_query.add(Q(client_query), Q.AND) \
                     .add(Q(task_dynamic_query), Q.AND) \
@@ -929,8 +1017,8 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     .add(Q(blocked_payment_dynamic_query), Q.AND) \
                     .add(Q(finished_dynamic_query), Q.AND)
 
-                office_id = (get_office_session(
-                    self.request).id if get_office_session(self.request) else 0)
+                office_id = (get_office_session(self.request).id
+                             if get_office_session(self.request) else 0)
                 query_set = DashboardViewModel.objects.filter(
                     office_id=office_id).filter(person_dynamic_query)
 
@@ -939,15 +1027,19 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     filter_name = data['custom_filter_name']
                     filter_description = data['custom_filter_description']
                     q = pickle.dumps(person_dynamic_query)
-                    new_filter = Filter(name=filter_name, query=q, description=filter_description,
-                                        create_user=self.request.user, create_date=timezone.now())
+                    new_filter = Filter(
+                        name=filter_name,
+                        query=q,
+                        description=filter_description,
+                        create_user=self.request.user,
+                        create_date=timezone.now())
                     new_filter.save()
             except IntegrityError:
-                messages.add_message(
-                    self.request, messages.ERROR, 'Já existe filtro com este nome.')
+                messages.add_message(self.request, messages.ERROR,
+                                     'Já existe filtro com este nome.')
         else:
-            messages.add_message(
-                self.request, messages.ERROR, 'Formulário inválido.')
+            messages.add_message(self.request, messages.ERROR,
+                                 'Formulário inválido.')
         return query_set, task_filter
 
     def get_queryset(self, **kwargs):
@@ -967,22 +1059,23 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
     def get(self, request):
         checker = ObjectPermissionChecker(self.request.user)
-        if (self.request.GET.get('export_answers') and
-                checker.has_perm('can_view_survey_results', get_office_session(request))):
+        if (self.request.GET.get('export_answers') and checker.has_perm(
+                'can_view_survey_results', get_office_session(request))):
             return self._export_answers(request)
 
         return super().get(request)
 
     def _export_answers(self, request):
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="respostas_dos_formularios.csv"'
+        response[
+            'Content-Disposition'] = 'attachment; filename="respostas_dos_formularios.csv"'
         writer = csv.writer(response)
 
         queryset = self.get_queryset().filter(survey_result__isnull=False)
         tasks = self._fill_tasks_answers(queryset)
         columns = self._get_answers_columns(tasks)
-        writer.writerow(
-            ['N° da OS', 'N° da OS no sistema de origem'] + columns)
+        writer.writerow(['N° da OS', 'N° da OS no sistema de origem'] +
+                        columns)
 
         for task in tasks:
             self._export_answers_write_task(writer, task, columns)
@@ -1019,7 +1112,6 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
 
 class DashboardStatusCheckView(CustomLoginRequiredView, View):
-
     def get(self, request, *args, **kwargs):
         checker = ObjectPermissionChecker(request.user)
         office_session = get_office_session(request)
@@ -1032,13 +1124,14 @@ class DashboardStatusCheckView(CustomLoginRequiredView, View):
         ret = {'office': office_session.legal_name}
         total = 0
         for status in status_totals:
-            ret[status['task_status'].replace(
-                ' ', '_').lower()] = status['total']
+            ret[status['task_status'].replace(' ',
+                                              '_').lower()] = status['total']
             total += status['total']
 
         ret['total'] = total
-        ret['total_requested_month'] = data.filter(requested_date__year=datetime.today().year,
-                                                   requested_date__month=datetime.today().month).count()
+        ret['total_requested_month'] = data.filter(
+            requested_date__year=datetime.today().year,
+            requested_date__month=datetime.today().month).count()
 
         return JsonResponse(ret)
 
@@ -1058,25 +1151,33 @@ def ajax_get_task_data_table(request):
     dash.request = request
     rule_view = RuleViewTask(request=request)
     dynamic_query = rule_view.get_dynamic_query(request.user.person, checker)
-    values_list = ['pk', 'task_number', 'final_deadline_date', 'type_task__name', 'movement__law_suit__law_suit_number',
-                   'movement__law_suit__court_district__name', 'movement__law_suit__court_district__state__initials',
-                   'movement__law_suit__folder__person_customer__legal_name', 'movement__law_suit__opposing_party',
-                   'delegation_date', 'task_original']
+    values_list = [
+        'pk', 'task_number', 'final_deadline_date', 'type_task__name',
+        'movement__law_suit__law_suit_number',
+        'movement__law_suit__court_district__name',
+        'movement__law_suit__court_district__state__initials',
+        'movement__law_suit__folder__person_customer__legal_name',
+        'movement__law_suit__opposing_party', 'delegation_date',
+        'task_original'
+    ]
     if status == 'Erro no sistema de origem':
         values_list.extend(
             ['inconsistencyetl__inconsistency', 'inconsistencyetl__solution'])
-    query = Task.objects.filter(dynamic_query).filter(is_active=True, task_status=status,
-                                                      office=get_office_session(request)).select_related(
-        'type_task', 'movement__law_suit', 'movement__law_suit__court_district',
-        'movement__law_suit__court_district__state', 'movement__law_suit__folder__person_customer', 'parent'
-    ).annotate(
-        task_original=Case(
-            When(parent_id__isnull=False, then=Cast(
-                'parent__task_number', CharField(max_length=255))),
-            default=Cast('legacy_code', CharField(max_length=255)),
-            output_field=CharField(max_length=255),
-        ),
-    ).values(*values_list)
+    query = Task.objects.filter(dynamic_query).filter(
+        is_active=True, task_status=status,
+        office=get_office_session(request)).select_related(
+            'type_task', 'movement__law_suit',
+            'movement__law_suit__court_district',
+            'movement__law_suit__court_district__state',
+            'movement__law_suit__folder__person_customer', 'parent').annotate(
+                task_original=Case(
+                    When(
+                        parent_id__isnull=False,
+                        then=Cast('parent__task_number',
+                                  CharField(max_length=255))),
+                    default=Cast('legacy_code', CharField(max_length=255)),
+                    output_field=CharField(max_length=255),
+                ), ).values(*values_list)
 
     # criando o filtro de busca a partir do valor enviado no campo de pesquisa
     search_value = search_dict.get('value', None)
@@ -1088,7 +1189,8 @@ def ajax_get_task_data_table(request):
                 key = '{}__icontains'.format(column.get('data'))
                 search_dict_query[key] = search_value
         reduced_filter = reduce(
-            operator.or_, (Q(**d) for d in [dict([i]) for i in search_dict_query.items()]))
+            operator.or_,
+            (Q(**d) for d in [dict([i]) for i in search_dict_query.items()]))
 
     # criando lista de ordered
     ordered_list = list(map(lambda i: '{}{}'.format(
@@ -1128,7 +1230,8 @@ def ajax_get_correspondents_table(request):
         type_task = get_correspondents_table.update_type_task(type_task)
         type_task_name = type_task.name
         type_task_id = type_task.id
-        correspondents_table = get_correspondents_table.get_correspondents_table()
+        correspondents_table = get_correspondents_table.get_correspondents_table(
+        )
         correspondents_table_list = list(map(lambda x: {
             'pk': x.pk,
             'office': x.office.legal_name,
@@ -1156,20 +1259,24 @@ def get_ecms(task_id):
     ecms = Ecm.objects.filter(task_id=task_id)
     for ecm in ecms:
         data_list.append({
-            'task_id': ecm.task_id,
-            'pk': ecm.pk,
-            'url': ecm.path.name,
-            'filename': ecm.filename,
-            'exhibition_name': ecm.exhibition_name if ecm.exhibition_name else ecm.filename,
-            'user': ecm.create_user.username,
-            'data': timezone.localtime(ecm.create_date).strftime('%d/%m/%Y %H:%M'),
-            'state': ecm.task.get_task_status_display(),
+            'task_id':
+            ecm.task_id,
+            'pk':
+            ecm.pk,
+            'url':
+            ecm.path.name,
+            'filename':
+            ecm.filename,
+            'exhibition_name':
+            ecm.exhibition_name if ecm.exhibition_name else ecm.filename,
+            'user':
+            ecm.create_user.username,
+            'data':
+            timezone.localtime(ecm.create_date).strftime('%d/%m/%Y %H:%M'),
+            'state':
+            ecm.task.get_task_status_display(),
         })
-    data = {
-        'task_id': task_id,
-        'total_ecms': ecms.count(),
-        'ecms': data_list
-    }
+    data = {'task_id': task_id, 'total_ecms': ecms.count(), 'ecms': data_list}
     return JsonResponse(data)
 
 
@@ -1196,11 +1303,15 @@ class FilterListView(CustomLoginRequiredView, SingleTableViewMixin):
         """
         context = super(FilterListView, self).get_context_data(**kwargs)
         checker = ObjectPermissionChecker(self.request.user)
-        if not checker.has_perm('group_admin', get_office_session(self.request)):
+        if not checker.has_perm('group_admin', get_office_session(
+                self.request)):
             context['table'] = self.table_class(
-                context['table'].data.data.filter(create_user=self.request.user))
-        RequestConfig(self.request, paginate={
-                      'per_page': 10}).configure(context['table'])
+                context['table'].data.data.filter(
+                    create_user=self.request.user))
+        RequestConfig(
+            self.request, paginate={
+                'per_page': 10
+            }).configure(context['table'])
         return context
 
 
@@ -1246,7 +1357,6 @@ class FilterDeleteView(AuditFormMixin, MultiDeleteViewMixin):
 
 
 class GeolocationTaskCreate(CustomLoginRequiredView, View):
-
     def post(self, request):
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
@@ -1264,22 +1374,27 @@ class GeolocationTaskCreate(CustomLoginRequiredView, View):
                 taskgeolocation.alter_user = request.user
                 taskgeolocation.save()
             else:
-                TaskGeolocation.objects.create(latitude=Decimal(latitude),
-                                               longitude=Decimal(longitude),
-                                               create_user=request.user,
-                                               date=check_date,
-                                               checkpointtype=checkpointtype,
-                                               task=task
-                                               )
-            return JsonResponse({"ok": True,
-                                 "latitude": latitude,
-                                 "longitude": longitude,
-                                 "check_date": date_format(timezone.localtime(check_date), 'DATETIME_FORMAT')})
+                TaskGeolocation.objects.create(
+                    latitude=Decimal(latitude),
+                    longitude=Decimal(longitude),
+                    create_user=request.user,
+                    date=check_date,
+                    checkpointtype=checkpointtype,
+                    task=task)
+            return JsonResponse({
+                "ok":
+                True,
+                "latitude":
+                latitude,
+                "longitude":
+                longitude,
+                "check_date":
+                date_format(timezone.localtime(check_date), 'DATETIME_FORMAT')
+            })
         return JsonResponse({"ok": False})
 
 
 class GeolocationTaskFinish(CustomLoginRequiredView, View):
-
     def post(self, request):
         finished_date = timezone.now()
         task_id = request.POST.get('task_id')
@@ -1290,8 +1405,13 @@ class GeolocationTaskFinish(CustomLoginRequiredView, View):
                 taskgeolocation.finished_date = finished_date
                 taskgeolocation.alter_user = request.user
                 taskgeolocation.save()
-            return JsonResponse({"ok": True,
-                                 "finished_date": date_format(timezone.localtime(finished_date), 'DATETIME_FORMAT')})
+            return JsonResponse({
+                "ok":
+                True,
+                "finished_date":
+                date_format(
+                    timezone.localtime(finished_date), 'DATETIME_FORMAT')
+            })
         return JsonResponse({"ok": False})
 
 
@@ -1363,7 +1483,6 @@ class TypeTaskDeleteView(AuditFormMixin, MultiDeleteViewMixin):
 
 
 class GetTypeTaskMainCharacteristics(CustomLoginRequiredView, View):
-
     def get(self, request, pk):
         type_task_main = TypeTaskMain.objects.filter(pk=pk).first()
         characteristics = type_task_main.characteristics if type_task_main else None
@@ -1395,9 +1514,7 @@ class ExternalTaskView(UpdateView):
                        if self.object.type_task.survey else None)
         self.execution_date = timezone.now()
         return render(
-            request,
-            self.template_name,
-            {
+            request, self.template_name, {
                 'object': self.object,
                 'task': self.object,
                 'form': TaskDetailForm(instance=self.object),
@@ -1406,83 +1523,101 @@ class ExternalTaskView(UpdateView):
                 'task_history': task_history,
                 'survey_data': survey_data,
                 'custom_settings': custom_settings
-            }
-        )
+            })
 
     def post(self, request, task_hash, *args, **kwargs):
         task = Task.objects.filter(task_hash=task_hash).first()
         custom_settings = CustomSettings.objects.filter(office=task.office)
         form = self.form_class(request.POST, instance=task)
         if custom_settings.exists():
-            form.instance.alter_user = custom_settings.first().default_user        
-        form.instance.task_status = TaskStatus[self.request.POST['action']
-                                               ] or TaskStatus.INVALID
+            form.instance.alter_user = custom_settings.first().default_user
+        form.instance.task_status = TaskStatus[
+            self.request.POST['action']] or TaskStatus.INVALID
         if form.is_valid():
-            notes = form.cleaned_data['notes'] if form.cleaned_data['notes'] else None
+            notes = form.cleaned_data['notes'] if form.cleaned_data[
+                'notes'] else None
             logger.info('*send_notes_execution_date*: {}'.format(notes))
             execution_date = (form.cleaned_data['execution_date']
-                              if form.cleaned_data['execution_date'] else form.initial['execution_date'])
+                              if form.cleaned_data['execution_date'] else
+                              form.initial['execution_date'])
             survey_result = (form.cleaned_data['survey_result']
-                             if form.cleaned_data['survey_result'] else form.initial['survey_result'])
-            send_notes_execution_date.send(sender=self.__class__, notes=notes, instance=form.instance,
-                                           execution_date=execution_date, survey_result=survey_result, **{'external_task': True})
-            form.instance.__external_task = True            
+                             if form.cleaned_data['survey_result'] else
+                             form.initial['survey_result'])
+            send_notes_execution_date.send(
+                sender=self.__class__,
+                notes=notes,
+                instance=form.instance,
+                execution_date=execution_date,
+                survey_result=survey_result,
+                **{'external_task': True})
+            form.instance.__external_task = True
             form.save()
         return HttpResponseRedirect(
-            reverse('external-task-detail', args=[form.instance.task_hash.hex]))
+            reverse(
+                'external-task-detail', args=[form.instance.task_hash.hex]))
 
 
 class EcmExternalCreateView(CreateView):
-
     def post(self, request, task_hash, *args, **kwargs):
         files = request.FILES.getlist('path')
         task = Task.objects.filter(task_hash=task_hash).first()
         custom_settings = CustomSettings.objects.filter(
             office=task.office).first()
         request.user = custom_settings.default_user
-        data = {'success': False,
-                'message': exception_create()}
+        data = {'success': False, 'message': exception_create()}
 
         for file in files:
             file_name = file._name.replace(' ', '_')
-            ecm = Ecm(path=file,
-                      task=task,
-                      exhibition_name=file_name,
-                      create_user_id=str(request.user.id),
-                      create_date=timezone.now())
+            ecm = Ecm(
+                path=file,
+                task=task,
+                exhibition_name=file_name,
+                create_user_id=str(request.user.id),
+                create_date=timezone.now())
 
             try:
                 ecm.save()
-                data = {'success': True,
-                        'id': ecm.id,
-                        'task_hash': ecm.task.task_hash.hex,
-                        'name': str(file),
-                        'user': str(self.request.user),
-                        'username': str(self.request.user.first_name + ' ' +
-                                        self.request.user.last_name),
-                        'filename': str(ecm.exhibition_name),
-                        'task_id': str(task.pk),
-                        'message': success_sent()
-                        }
+                data = {
+                    'success':
+                    True,
+                    'id':
+                    ecm.id,
+                    'task_hash':
+                    ecm.task.task_hash.hex,
+                    'name':
+                    str(file),
+                    'user':
+                    str(self.request.user),
+                    'username':
+                    str(self.request.user.first_name + ' ' +
+                        self.request.user.last_name),
+                    'filename':
+                    str(ecm.exhibition_name),
+                    'task_id':
+                    str(task.pk),
+                    'message':
+                    success_sent()
+                }
 
             except OperationalError:
-                data = {'success': False,
-                        'message': operational_error_create()}
+                data = {
+                    'success': False,
+                    'message': operational_error_create()
+                }
 
             except IOError:
 
-                data = {'is_deleted': False,
-                        'message': ioerror_create()}
+                data = {'is_deleted': False, 'message': ioerror_create()}
 
             except Exception:
-                data = {'success': False,
-                        'message': exception_create()}
+                data = {'success': False, 'message': exception_create()}
 
         return JsonResponse(data)
 
 
-class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView, TemplateView):
-    permission_required = ('core.group_admin',)
+class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView,
+                     TemplateView):
+    permission_required = ('core.group_admin', )
     template_name = 'task/import_task_list.html'
     form_class = ImportTaskListForm
 

@@ -25,8 +25,8 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         attrs = AttributeDict(default, **(specific or general or {}))
         attrs['selectable'] = True
         return mark_safe(
-            ('<input %s id="selection_header"  onclick="toggle(this)"/>')
-            % attrs.as_html())
+            ('<input %s id="selection_header"  onclick="toggle(this)"/>') %
+            attrs.as_html())
 
     def render(self, value, bound_column, record):
         default = {
@@ -44,9 +44,8 @@ class CheckBoxMaterial(tables.CheckBoxColumn):
         attrs = AttributeDict(default, **(specific or general or {}))
         attrs['id'] = record.id
         return mark_safe(
-            '<input name="selection" type="checkbox" %s onclick="showDeleteButton(this)"/>' % attrs.as_html(
-            )
-        )
+            '<input name="selection" type="checkbox" %s onclick="showDeleteButton(this)"/>'
+            % attrs.as_html())
 
 
 class AddressTable(tables.Table):
@@ -54,24 +53,27 @@ class AddressTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequecence = (
-            'selection', 'street', 'number', 'complement', 'city_region', 'zip_code',
-            'city',
-            'state', 'country', 'notes', 'address_type', 'is_active')
+        sequecence = ('selection', 'street', 'number', 'complement',
+                      'city_region', 'zip_code', 'city', 'state', 'country',
+                      'notes', 'address_type', 'is_active')
         model = Address
-        fields = ['selection', 'street', 'number', 'complement', 'city_region', 'zip_code',
-                  'city',
-                  'state', 'country', 'notes', 'address_type', 'is_active']
+        fields = [
+            'selection', 'street', 'number', 'complement', 'city_region',
+            'zip_code', 'city', 'state', 'country', 'notes', 'address_type',
+            'is_active'
+        ]
         attrs = {"class": "table-striped table-bordered"}
         row_attrs = {
-            'data_href': lambda record: '/pessoas/' + str(record.person.pk) + '/enderecos/' + str(record.pk) + '/'
+            'data_href':
+            lambda record: '/pessoas/' + str(record.person.pk) + '/enderecos/' + str(record.pk) + '/'
         }
 
 
 class AddressOfficeTable(AddressTable):
     class Meta:
         row_attrs = {
-            'data_href': lambda record: '/escritorios/' + str(record.office.pk) + '/enderecos/' + str(record.pk) + '/'
+            'data_href':
+            lambda record: '/escritorios/' + str(record.office.pk) + '/enderecos/' + str(record.pk) + '/'
         }
 
 
@@ -79,13 +81,15 @@ class PersonTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequecence = (
-            'selection', 'legal_name', 'name', 'is_lawyer', 'legal_type',
-            'cpf_cnpj', 'is_active', 'is_customer', 'is_supplier', 'auth_user', 'legacy_code')
+        sequecence = ('selection', 'legal_name', 'name', 'is_lawyer',
+                      'legal_type', 'cpf_cnpj', 'is_active', 'is_customer',
+                      'is_supplier', 'auth_user', 'legacy_code')
         model = Person
-        fields = ['selection', 'legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_lawyer',
-                  'is_customer', 'is_supplier', 'auth_user', 'is_active',
-                  'legacy_code']
+        fields = [
+            'selection', 'legal_name', 'name', 'legal_type', 'cpf_cnpj',
+            'is_lawyer', 'is_customer', 'is_supplier', 'auth_user',
+            'is_active', 'legacy_code'
+        ]
         attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem pessoas cadastradas"
         row_attrs = {
@@ -99,8 +103,14 @@ class UserTable(tables.Table):
     is_staff = tables.BooleanColumn()
     is_superuser = tables.BooleanColumn()
 
-    def __init__(self, *args, first_name='Nome', last_name='Sobrenome', is_active="Ativo",
-                 username="Nome de usuário (login)", email="e-mail", last_login="Último acesso",
+    def __init__(self,
+                 *args,
+                 first_name='Nome',
+                 last_name='Sobrenome',
+                 is_active="Ativo",
+                 username="Nome de usuário (login)",
+                 email="e-mail",
+                 last_login="Último acesso",
                  date_joined="Data de registro",
                  **kwargs):
         super().__init__(*args, **kwargs)
@@ -116,8 +126,10 @@ class UserTable(tables.Table):
     class Meta:
 
         model = User
-        fields = ['selection', 'first_name', 'last_name', 'username', 'email',
-                  'last_login', 'date_joined', 'is_active']
+        fields = [
+            'selection', 'first_name', 'last_name', 'username', 'email',
+            'last_login', 'date_joined', 'is_active'
+        ]
         attrs = {"class": "table-striped table-bordered"}
 
         empty_text = "Não existem usuários cadastradas"
@@ -136,8 +148,9 @@ class OfficeTable(tables.Table):
 
     class Meta:
         exclude = ('id', 'create_date', 'create_user', 'auth_user',
-                   'alter_user', 'is_customer', 'is_supplier', 'alter_date', 'legacy_code',
-                   'system_prefix', 'is_lawyer', 'import_from_legacy', 'public_office', 'use_service',
+                   'alter_user', 'is_customer', 'is_supplier', 'alter_date',
+                   'legacy_code', 'system_prefix', 'is_lawyer',
+                   'import_from_legacy', 'public_office', 'use_service',
                    'use_etl')
         sequence = ('selection', 'legal_name', 'name', 'legal_type',
                     'cpf_cnpj')
@@ -166,7 +179,7 @@ class OfficeMembershipTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        paginate=False
+        paginate = False
         model = OfficeMembership
         fields = ('selection', 'person.legal_name', 'person.legal_type',
                   'person.cpf_cnpj', 'person.auth_user.username')
@@ -188,21 +201,25 @@ class ContactMechanismTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequecence = ('selection', 'contact_mechanism_type',
-                      'description', 'notes', 'is_active')
+        sequecence = ('selection', 'contact_mechanism_type', 'description',
+                      'notes', 'is_active')
         model = ContactMechanism
-        fields = ['selection', 'contact_mechanism_type',
-                  'description', 'notes', 'is_active']
+        fields = [
+            'selection', 'contact_mechanism_type', 'description', 'notes',
+            'is_active'
+        ]
         attrs = {"class": "table-striped table-bordered"}
         row_attrs = {
-            'data_href': lambda record: '/pessoas/' + str(record.person.pk) + '/contatos/' + str(record.pk) + '/'
+            'data_href':
+            lambda record: '/pessoas/' + str(record.person.pk) + '/contatos/' + str(record.pk) + '/'
         }
 
 
 class ContactMechanismOfficeTable(ContactMechanismTable):
     class Meta:
         row_attrs = {
-            'data_href': lambda record: '/escritorios/' + str(record.office.pk) + '/contatos/' + str(record.pk) + '/'
+            'data_href':
+            lambda record: '/escritorios/' + str(record.office.pk) + '/contatos/' + str(record.pk) + '/'
         }
 
 

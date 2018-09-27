@@ -17,6 +17,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='person_distributed_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='core.Person', verbose_name='Service'),
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.Person',
+                verbose_name='Service'),
         ),
     ]

@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='contactmechanism',
-            unique_together=set(
-                [('description', 'person'), ('description', 'office')]),
+            unique_together=set([('description', 'person'),
+                                 ('description', 'office')]),
         ),
     ]

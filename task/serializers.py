@@ -11,17 +11,20 @@ class TypeTaskSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Task        
+        model = Task
         fields = '__all__'
 
 
-class TaskCreateSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
+class TaskCreateSerializer(serializers.ModelSerializer,
+                           CreateUserSerializerMixin, OfficeSerializerMixin):
     class Meta:
         model = Task
-        exclude = ('create_date', 'alter_date', 'system_prefix', 'is_active', 'survey_result', 'chat', 'task_number')   
+        exclude = ('create_date', 'alter_date', 'system_prefix', 'is_active',
+                   'survey_result', 'chat', 'task_number')
 
 
-class EcmTaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):
+class EcmTaskSerializer(serializers.ModelSerializer,
+                        CreateUserSerializerMixin):
     class Meta:
         model = Ecm
         exclude = ('create_date', 'alter_date', 'system_prefix', 'is_active')

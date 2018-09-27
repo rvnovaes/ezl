@@ -16,6 +16,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='servicepricetable',
             name='type_task',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='servicepricetable_type_task', to='task.TypeTask', verbose_name='Tipo de Serviço'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='servicepricetable_type_task',
+                to='task.TypeTask',
+                verbose_name='Tipo de Serviço'),
         ),
     ]

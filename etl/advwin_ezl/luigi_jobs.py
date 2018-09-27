@@ -42,8 +42,7 @@ def get_target_path(task):
 
 def load_fixtures():
     # A ordem de inclusão das fixtures é importante, favor não alterar
-    fixtures = ['country.xml', 'state.xml', 'city.xml',
-                'type_movement.xml']
+    fixtures = ['country.xml', 'state.xml', 'city.xml', 'type_movement.xml']
 
     for fixture in fixtures:
         call_command(loaddata.Command(), fixture, verbosity=0)

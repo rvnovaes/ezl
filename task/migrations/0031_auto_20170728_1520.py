@@ -16,23 +16,31 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='survey_result',
-            field=models.TextField(blank=True, null=True, verbose_name='Respotas do Formulário'),
+            field=models.TextField(
+                blank=True, null=True, verbose_name='Respotas do Formulário'),
         ),
         migrations.AlterField(
             model_name='task',
             name='task_status',
             field=models.CharField(
-                choices=[('A Cumprir', 'Accepted'), ('Em Aberto', 'Open'), ('Retorno', 'Return'), ('Cumprida', 'Done'),
-                         ('Recusada', 'Refused'), ('Glosada', 'Refusedpayment'), ('Válida', 'Validated'),
-                         ('Inválida', 'Invalid')], default=task.models.TaskStatus('Em Aberto'), max_length=30,
+                choices=[('A Cumprir', 'Accepted'), ('Em Aberto', 'Open'),
+                         ('Retorno', 'Return'), ('Cumprida', 'Done'),
+                         ('Recusada', 'Refused'), ('Glosada',
+                                                   'Refusedpayment'),
+                         ('Válida', 'Validated'), ('Inválida', 'Invalid')],
+                default=task.models.TaskStatus('Em Aberto'),
+                max_length=30,
                 verbose_name=''),
         ),
         migrations.AlterField(
             model_name='taskhistory',
             name='status',
             field=models.CharField(
-                choices=[('A Cumprir', 'ACCEPTED'), ('Em Aberto', 'OPEN'), ('Retorno', 'RETURN'), ('Cumprida', 'DONE'),
-                         ('Recusada', 'REFUSED'), ('Glosada', 'BLOCKEDPAYMENT'), ('Válida', 'FINISHED'),
-                         ('Inválida', 'INVALID')], max_length=10),
+                choices=[('A Cumprir', 'ACCEPTED'), ('Em Aberto', 'OPEN'),
+                         ('Retorno', 'RETURN'), ('Cumprida', 'DONE'),
+                         ('Recusada', 'REFUSED'), ('Glosada',
+                                                   'BLOCKEDPAYMENT'),
+                         ('Válida', 'FINISHED'), ('Inválida', 'INVALID')],
+                max_length=10),
         ),
     ]

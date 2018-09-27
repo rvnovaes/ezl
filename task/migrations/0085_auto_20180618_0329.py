@@ -14,6 +14,29 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='task',
-            options={'ordering': ['-alter_date'], 'permissions': [('view_delegated_tasks', 'Can view tasks delegated to the user'), ('view_all_tasks', 'Can view all tasks'), ('return_all_tasks', 'Can return tasks'), ('validate_all_tasks', 'Can validade tasks'), ('view_requested_tasks', 'Can view tasks requested by the user'), ('block_payment_tasks', 'Can block tasks payment'), ('can_access_general_data', 'Can access general data screens'), ('view_distributed_tasks', 'Can view tasks distributed by the user'), ('can_distribute_tasks', 'Can distribute tasks to another user'), ('can_see_tasks_from_team_members', 'Can see tasks from your team members')], 'verbose_name': 'Providência', 'verbose_name_plural': 'Providências'},
+            options={
+                'ordering': ['-alter_date'],
+                'permissions': [('view_delegated_tasks',
+                                 'Can view tasks delegated to the user'),
+                                ('view_all_tasks', 'Can view all tasks'),
+                                ('return_all_tasks', 'Can return tasks'),
+                                ('validate_all_tasks', 'Can validade tasks'),
+                                ('view_requested_tasks',
+                                 'Can view tasks requested by the user'),
+                                ('block_payment_tasks',
+                                 'Can block tasks payment'),
+                                ('can_access_general_data',
+                                 'Can access general data screens'),
+                                ('view_distributed_tasks',
+                                 'Can view tasks distributed by the user'),
+                                ('can_distribute_tasks',
+                                 'Can distribute tasks to another user'),
+                                ('can_see_tasks_from_team_members',
+                                 'Can see tasks from your team members')],
+                'verbose_name':
+                'Providência',
+                'verbose_name_plural':
+                'Providências'
+            },
         ),
     ]

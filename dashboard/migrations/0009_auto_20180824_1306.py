@@ -16,16 +16,31 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='card',
             name='schema',
-            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, default='{\n    "title": "string",\n    "subtitle": "string",\n    "value": "string",\n    "percent": "string",\n    "direction": "string"\n}', null=True, verbose_name='Schema'),
+            field=django.contrib.postgres.fields.jsonb.JSONField(
+                blank=True,
+                default=
+                '{\n    "title": "string",\n    "subtitle": "string",\n    "value": "string",\n    "percent": "string",\n    "direction": "string"\n}',
+                null=True,
+                verbose_name='Schema'),
         ),
         migrations.AlterField(
             model_name='doughnutchart',
             name='schema',
-            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, default='{\n    "title": "string",\n    "labels": "list",\n    "values": "list"\n}', null=True, verbose_name='Schema'),
+            field=django.contrib.postgres.fields.jsonb.JSONField(
+                blank=True,
+                default=
+                '{\n    "title": "string",\n    "labels": "list",\n    "values": "list"\n}',
+                null=True,
+                verbose_name='Schema'),
         ),
         migrations.AlterField(
             model_name='linechart',
             name='schema',
-            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, default='{\n    "labels": [\n        "PONTOS DA LINHA EX: [JANEIRO, FEVEREIRO, MARCO]"\n    ],\n    "datasets": [\n        {\n            "label": "LABEL DO INDICADOR EX: (AUDI\\u00caCIAS POR M\\u00caS)",\n            "data": [\n                "VALORES DO INDICADOR EX: 20, 47, 50"\n            ],\n            "backgroundColor": "COR DO BACKGROUND DE FUNDO CASO FILL = True, EX: blue",\n            "borderColor": "COR DA BORDA DA LINHA EX: blue",\n            "fill": false\n        }\n    ]\n}', null=True, verbose_name='Schema'),
+            field=django.contrib.postgres.fields.jsonb.JSONField(
+                blank=True,
+                default=
+                '{\n    "labels": [\n        "PONTOS DA LINHA EX: [JANEIRO, FEVEREIRO, MARCO]"\n    ],\n    "datasets": [\n        {\n            "label": "LABEL DO INDICADOR EX: (AUDI\\u00caCIAS POR M\\u00caS)",\n            "data": [\n                "VALORES DO INDICADOR EX: 20, 47, 50"\n            ],\n            "backgroundColor": "COR DO BACKGROUND DE FUNDO CASO FILL = True, EX: blue",\n            "borderColor": "COR DA BORDA DA LINHA EX: blue",\n            "fill": false\n        }\n    ]\n}',
+                null=True,
+                verbose_name='Schema'),
         ),
     ]

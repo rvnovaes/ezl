@@ -45,8 +45,10 @@ class PersonETL(GenericETL):
 						   (cf.tipocf = 'A' and Status = 'Ativo' and StatusFornecedor = 'Ativo'))
                            AND cf.razao IS NOT NULL
                            AND cf.razao <> ''
-                """.format(tribunal='Jurid_Tribunais', advogado='Jurid_Advogado',
-                           clifor='Jurid_Clifor')
+                """.format(
+        tribunal='Jurid_Tribunais',
+        advogado='Jurid_Advogado',
+        clifor='Jurid_Clifor')
 
     has_status = True
 
@@ -58,18 +60,19 @@ class PersonETL(GenericETL):
         :param user: Usuario do django responsavel por persistir os dados
         :param rows_count: Quantidade de dados que foram lidos do advwin
         """
-        correspondent_group, nil = Group.objects.get_or_create(name=Person.CORRESPONDENT_GROUP)
+        correspondent_group, nil = Group.objects.get_or_create(
+            name=Person.CORRESPONDENT_GROUP)
 
         for row in rows:
             rows_count -= 1
-            try:                    
+            try:
                 legal_name = row['legal_name'] or row['name']
                 name = row['name'] or row['legal_name']
                 legacy_code = row['legacy_code']
                 legal_type = row['legal_type']
                 customer_supplier = row['customer_supplier']
                 is_lawyer = row['is_lawyer']
-                cpf_cnpj = None                
+                cpf_cnpj = None
                 if legal_type != 'F' and legal_type != 'J':
                     if str(legacy_code).isnumeric():
                         # se for maior que 11 provavelmente é o cnpj
@@ -109,17 +112,13 @@ class PersonETL(GenericETL):
                 if instance:
                     # use update_fields to specify which fields to save
                     # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
-                    update_fields = ['alter_date',
-                                    'legal_name',
-                                    'name',                                       
-                                    'legal_type',
-                                    'cpf_cnpj',
-                                    'alter_user',
-                                    'is_active',
-                                    'is_customer',
-                                    'is_supplier']
+                    update_fields = [
+                        'alter_date', 'legal_name', 'name', 'legal_type',
+                        'cpf_cnpj', 'alter_user', 'is_active', 'is_customer',
+                        'is_supplier'
+                    ]
                     instance.legal_name = legal_name
-                    instance.name = name                    
+                    instance.name = name
                     if not instance.is_lawyer:
                         instance.is_lawyer = is_lawyer
                         update_fields.append('is_lawyer')
@@ -131,37 +130,43 @@ class PersonETL(GenericETL):
                     instance.is_active = is_active
                     instance.save(update_fields=update_fields)
                     if not default_office.persons.filter(pk=instance.pk):
-                        OfficeMembership.objects.update_or_create(person=instance,
-                                                                  office=default_office,
-                                                                  defaults={'create_user': user,
-                                                                            'is_active': is_active})
+                        OfficeMembership.objects.update_or_create(
+                            person=instance,
+                            office=default_office,
+                            defaults={
+                                'create_user': user,
+                                'is_active': is_active
+                            })
                 else:
-                    obj = self.model(legal_name=legal_name,
-                                     name=name,
-                                     is_lawyer=is_lawyer,
-                                     legal_type=legal_type,
-                                     cpf_cnpj=cpf_cnpj,
-                                     alter_user=user,
-                                     create_user=user,
-                                     is_customer=is_customer,
-                                     is_supplier=is_supplier,
-                                     is_active=is_active,
-                                     legacy_code=legacy_code,
-                                     system_prefix=LegacySystem.ADVWIN.value)
+                    obj = self.model(
+                        legal_name=legal_name,
+                        name=name,
+                        is_lawyer=is_lawyer,
+                        legal_type=legal_type,
+                        cpf_cnpj=cpf_cnpj,
+                        alter_user=user,
+                        create_user=user,
+                        is_customer=is_customer,
+                        is_supplier=is_supplier,
+                        is_active=is_active,
+                        legacy_code=legacy_code,
+                        system_prefix=LegacySystem.ADVWIN.value)
 
-                    obj.save()                    
+                    obj.save()
                     if not default_office.persons.filter(pk=obj.pk):
-                        OfficeMembership.objects.create(person=obj,
-                                                        office=default_office,
-                                                        create_user=user,
-                                                        is_active=is_active)
+                        OfficeMembership.objects.create(
+                            person=obj,
+                            office=default_office,
+                            create_user=user,
+                            is_active=is_active)
 
                 self.debug_logger.debug(
-                    'Pessoa,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (
-                        str(legal_name), str(name), str(is_lawyer), str(legal_type),
-                        str(cpf_cnpj), str(user.id), str(user.id), str(is_customer),
-                        str(is_supplier), str(is_active), str(legacy_code),
-                        str(LegacySystem.ADVWIN.value), self.timestr))
+                    'Pessoa,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s'
+                    % (str(legal_name), str(name), str(is_lawyer),
+                       str(legal_type), str(cpf_cnpj), str(user.id),
+                       str(user.id), str(is_customer), str(is_supplier),
+                       str(is_active), str(legacy_code),
+                       str(LegacySystem.ADVWIN.value), self.timestr))
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,
                                               rows_count, e, self.timestr)

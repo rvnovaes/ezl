@@ -36,11 +36,13 @@ class FolderETL(GenericETL):
 
     @property
     def import_query(self):
-        return self._import_query.format(cliente="','".join(get_clients_to_import()))
+        return self._import_query.format(
+            cliente="','".join(get_clients_to_import()))
 
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):
-        invalid_cost_center = InvalidObjectFactory.get_invalid_model(CostCenter)
+        invalid_cost_center = InvalidObjectFactory.get_invalid_model(
+            CostCenter)
         for row in rows:
             rows_count -= 1
             try:
@@ -58,16 +60,16 @@ class FolderETL(GenericETL):
                         pass
 
                 instance = self.model.objects.filter(
-                  legacy_code=legacy_code,
-                  legacy_code__isnull=False,
-                  office=default_office,
-                  system_prefix=LegacySystem.ADVWIN.value).first()
+                    legacy_code=legacy_code,
+                    legacy_code__isnull=False,
+                    office=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first()
 
                 person_customer = Person.objects.filter(
-                  legacy_code=customer_code,
-                  legacy_code__isnull=False,
-                  offices=default_office,
-                  system_prefix=LegacySystem.ADVWIN.value).first()
+                    legacy_code=customer_code,
+                    legacy_code__isnull=False,
+                    offices=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first()
 
                 if person_customer:
                     if instance:
@@ -78,27 +80,27 @@ class FolderETL(GenericETL):
                         instance.alter_user = user
                         instance.cost_center = cost_center_instance
                         instance.office = default_office
-                        instance.save(
-                            update_fields=['person_customer',
-                                           'is_active',
-                                           'alter_date',
-                                           'alter_user',
-                                           'cost_center',
-                                           'office'])
+                        instance.save(update_fields=[
+                            'person_customer', 'is_active', 'alter_date',
+                            'alter_user', 'cost_center', 'office'
+                        ])
                     else:
-                        obj = self.model(person_customer=person_customer,
-                                         is_active=True,
-                                         legacy_code=legacy_code,
-                                         system_prefix=LegacySystem.ADVWIN.value,
-                                         create_user=user,
-                                         cost_center=cost_center_instance,
-                                         alter_user=user,
-                                         office=default_office)
+                        obj = self.model(
+                            person_customer=person_customer,
+                            is_active=True,
+                            legacy_code=legacy_code,
+                            system_prefix=LegacySystem.ADVWIN.value,
+                            create_user=user,
+                            cost_center=cost_center_instance,
+                            alter_user=user,
+                            office=default_office)
                         obj.save()
 
-                self.debug_logger.debug("Pastas,%s,%s,%s,%s,%s,%s,%s"%(str(person_customer.id),str(True),str(legacy_code),
-                                                                str(LegacySystem.ADVWIN.value),str(user.id),str(user.id),
-                                                                self.timestr))
+                self.debug_logger.debug(
+                    "Pastas,%s,%s,%s,%s,%s,%s,%s"
+                    % (str(person_customer.id), str(True), str(legacy_code),
+                       str(LegacySystem.ADVWIN.value), str(user.id),
+                       str(user.id), self.timestr))
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,
                                               rows_count, e)

@@ -57,7 +57,6 @@ from billing.models import Plan, PlanOffice
 from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
-
 class AutoCompleteView(autocomplete.Select2QuerySetView):
     model = abstractproperty()
     lookups = abstractproperty()
@@ -122,8 +121,9 @@ class StartUserView(TemplateView):
             context['rating'] = metrics['rating']
             context['returned_os'] = metrics['returned_os_rate']
 
-        office_pks = self.request.user.person.offices.active_offices().values_list('pk',
-                                                                                   flat=True)
+        office_pks = self.request.user.person.offices.active_offices(
+        ).values_list(
+            'pk', flat=True)
         context['person_invites'] = Invite.objects.filter(
             invite_from='P', office_id__in=office_pks, status='N').all()
 
@@ -158,9 +158,10 @@ class MultiDeleteViewMixin(DeleteView):
                 messages.success(self.request, self.success_message)
             except ProtectedError as e:
                 qs = e.protected_objects.first()
-                messages.error(self.request,
-                               delete_error_protected(str(self.model._meta.verbose_name),
-                                                      qs.__str__()))
+                messages.error(
+                    self.request,
+                    delete_error_protected(
+                        str(self.model._meta.verbose_name), qs.__str__()))
 
         # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
         if self.success_url:
@@ -186,9 +187,11 @@ class MultiDeleteView(DeleteView):
                 except ProtectedError as e:
                     qs = e.protected_objects.first()
                     if self.error_message:
-                        msg_error = self.error_message % (qs._meta.object_name, item)
+                        msg_error = self.error_message % (qs._meta.object_name,
+                                                          item)
                     else:
-                        delete_error_protected(str(self.model._meta.verbose_name), qs.__str__())
+                        delete_error_protected(
+                            str(self.model._meta.verbose_name), qs.__str__())
                     messages.error(self.request, msg_error)
 
         # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
@@ -210,7 +213,8 @@ def remove_invalid_registry(f):
     def wrapper(*args, **kwargs):
         try:
             model = args[0].model
-            class_verbose_name_invalid = model._meta.verbose_name.upper() + '-INVÁLIDO'
+            class_verbose_name_invalid = model._meta.verbose_name.upper(
+            ) + '-INVÁLIDO'
             try:
                 invalid_registry = model.objects.filter(
                     name=class_verbose_name_invalid).first()
@@ -243,7 +247,6 @@ class LoginCustomView(LoginView):
         """
         return super(LoginCustomView, self).form_valid(form)
 
-
     def dispatch(self, request, *args, **kwargs):
         res = super().dispatch(request, *args, **kwargs)
         set_first_login_user(request)
@@ -253,7 +256,8 @@ class LoginCustomView(LoginView):
 def set_first_login_user(request):
     created = False
     if request.user.is_authenticated:
-        obj, created = ControlFirstAccessUser.objects.get_or_create(auth_user=request.user)
+        obj, created = ControlFirstAccessUser.objects.get_or_create(
+            auth_user=request.user)
     request.session['first_login_user'] = created
 
 
@@ -262,7 +266,9 @@ def set_office_session(request):
         if not hasattr(request.user, 'defaultoffice'):
             return HttpResponseRedirect(reverse('office_instance'))
         request.session['custom_session_user'] = {
-            request.user.pk: {'current_office': request.user.defaultoffice.office.pk}
+            request.user.pk: {
+                'current_office': request.user.defaultoffice.office.pk
+            }
         }
 
 
@@ -299,7 +305,8 @@ class AuditFormMixin(CustomLoginRequiredView, SuccessMessageMixin):
 
     def get_context_data(self, **kwargs):
         kwargs.update({'form_attachment': AttachmentForm})
-        return super().get_context_data(object_list_url=self.get_object_list_url(), **kwargs)
+        return super().get_context_data(
+            object_list_url=self.get_object_list_url(), **kwargs)
 
     def get_object_list_url(self):
         if self.object_list_url:
@@ -344,7 +351,10 @@ class ViewRelatedMixin(AuditFormMixin):
         Exemplo: Cadastro de pessoa com os cadastros de endereço e mecanismo de contato.
     """
 
-    def __init__(self, related_model=None, related_field_pk=False, related_model_name=''):
+    def __init__(self,
+                 related_model=None,
+                 related_field_pk=False,
+                 related_model_name=''):
         self.related_model = related_model
         self.related_model_name = related_model_name
         self.related_field_pk = related_field_pk
@@ -365,13 +375,15 @@ class ViewRelatedMixin(AuditFormMixin):
             # TODO - Verificar se é a melhor forma de tratar duplicidades
             return super().form_valid(form)
         except IntegrityError as e:
-            messages.add_message(
-                self.request, messages.ERROR, 'Registro já existente.')
+            messages.add_message(self.request, messages.ERROR,
+                                 'Registro já existente.')
             return self.form_invalid(form)
 
     def get_object_list_url(self):
         # TODO: Este método parece ser inútil, success_url pode ser usado.
-        return reverse('{}_update'.format(self.related_model_name), args=(self.object_related.pk,))
+        return reverse(
+            '{}_update'.format(self.related_model_name),
+            args=(self.object_related.pk, ))
 
 
 class AddressCreateView(ViewRelatedMixin, CreateView):
@@ -380,11 +392,13 @@ class AddressCreateView(ViewRelatedMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
 
     def __init__(self):
-        super().__init__(related_model=Person, related_model_name='person',
-                         related_field_pk='person')
+        super().__init__(
+            related_model=Person,
+            related_model_name='person',
+            related_field_pk='person')
 
     def get_success_url(self):
-        return reverse('person_update', args=(self.kwargs.get('person_pk'),))
+        return reverse('person_update', args=(self.kwargs.get('person_pk'), ))
 
 
 class AddressOfficeCreateView(ViewRelatedMixin, CreateView):
@@ -393,11 +407,13 @@ class AddressOfficeCreateView(ViewRelatedMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
 
     def __init__(self):
-        super().__init__(related_model=Office, related_model_name='office',
-                         related_field_pk='office')
+        super().__init__(
+            related_model=Office,
+            related_model_name='office',
+            related_field_pk='office')
 
     def get_success_url(self):
-        return reverse('office_update', args=(self.kwargs.get('office_pk'),))
+        return reverse('office_update', args=(self.kwargs.get('office_pk'), ))
 
 
 class AddressUpdateView(UpdateView):
@@ -406,16 +422,16 @@ class AddressUpdateView(UpdateView):
     success_message = UPDATE_SUCCESS_MESSAGE
 
     def get_success_url(self):
-        return reverse('person_update', args=(self.kwargs.get('person_pk'),))
+        return reverse('person_update', args=(self.kwargs.get('person_pk'), ))
 
     def get_object_list_url(self):
         # TODO: Este método parece ser inútil, success_url pode ser usado.
-        return reverse('person_update', args=(self.kwargs.get('person_pk'),))
+        return reverse('person_update', args=(self.kwargs.get('person_pk'), ))
 
 
 class AddressOfficeUpdateView(AddressUpdateView):
     def get_success_url(self):
-        return reverse('office_update', args=(self.kwargs.get('office_pk'),))
+        return reverse('office_update', args=(self.kwargs.get('office_pk'), ))
 
 
 class AddressDeleteView(MultiDeleteViewMixin):
@@ -425,7 +441,8 @@ class AddressDeleteView(MultiDeleteViewMixin):
         model._meta.verbose_name_plural)
 
     def get_success_url(self):
-        return reverse('person_update', kwargs={'pk': self.kwargs['person_pk']})
+        return reverse(
+            'person_update', kwargs={'pk': self.kwargs['person_pk']})
 
 
 class AddressOfficeDeleteView(AddressDeleteView):
@@ -435,7 +452,8 @@ class AddressOfficeDeleteView(AddressDeleteView):
         model._meta.verbose_name_plural)
 
     def get_success_url(self):
-        return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})
+        return reverse(
+            'office_update', kwargs={'pk': self.kwargs['office_pk']})
 
 
 class SingleTableViewMixin(SingleTableView):
@@ -464,17 +482,21 @@ class SingleTableViewMixin(SingleTableView):
 
         custom_session_user = self.request.session.get('custom_session_user')
         office = False
-        if custom_session_user and custom_session_user.get(str(self.request.user.pk)):
+        if custom_session_user and custom_session_user.get(
+                str(self.request.user.pk)):
             current_office_session = custom_session_user.get(
                 str(self.request.user.pk))
-            office = Office.objects.filter(pk=int(current_office_session.get(
-                'current_office'))).values_list('id', flat=True).first()
+            office = Office.objects.filter(
+                pk=int(current_office_session.get(
+                    'current_office'))).values_list(
+                        'id', flat=True).first()
         if not office:
-            office = self.request.user.person.offices.active_offices().values_list('id',
-                                                                                   flat=True).first()
+            office = self.request.user.person.offices.active_offices(
+            ).values_list(
+                'id', flat=True).first()
 
-        generic_search = GenericSearchFormat(
-            self.request, self.model, self.model._meta.fields)
+        generic_search = GenericSearchFormat(self.request, self.model,
+                                             self.model._meta.fields)
         args = generic_search.despatch(office=office)
         if args:
             table = eval(args)
@@ -494,8 +516,10 @@ class SingleTableViewMixin(SingleTableView):
                 qs = self.filter_queryset(qs)
                 table = self.table_class(qs)
         total_colums = len(table.columns.items())
-        RequestConfig(self.request, paginate={
-                      'per_page': self.paginate_by}).configure(table)
+        RequestConfig(
+            self.request, paginate={
+                'per_page': self.paginate_by
+            }).configure(table)
         context['table'] = table
         context['total_columns'] = total_colums
         return context
@@ -513,15 +537,11 @@ def address_update(request, pk):
         'state': str(form.instance.state),
         'country': str(form.instance.country),
         'address_type': str(form.instance.address_type)
-
     }
 
     if form.is_valid():
         form.save()
-        data = {
-            'result': True,
-            'message': ADDRESS_UPDATE_SUCCESS_MESSAGE
-        }
+        data = {'result': True, 'message': ADDRESS_UPDATE_SUCCESS_MESSAGE}
 
     return JsonResponse(data)
 
@@ -529,7 +549,10 @@ def address_update(request, pk):
 class PersonListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Person
     table_class = PersonTable
-    ordering = ('legal_name', 'name',)
+    ordering = (
+        'legal_name',
+        'name',
+    )
 
     @remove_invalid_registry
     def get_context_data(self, **kwargs):
@@ -542,15 +565,17 @@ class PersonListView(CustomLoginRequiredView, SingleTableViewMixin):
         """
         context = super(PersonListView, self).get_context_data(**kwargs)
         office_session = get_office_session(request=self.request)
-        only_linked_person =  True if self.request.GET.get("only_linked_person") else False
+        only_linked_person = True if self.request.GET.get(
+            "only_linked_person") else False
         if only_linked_person:
-            table = self.table_class(
-                context['table'].data.data.filter(offices=office_session, officemembership__is_active=True).exclude(
+            table = self.table_class(context['table'].data.data.filter(
+                offices=office_session,
+                officemembership__is_active=True).exclude(
                     pk__in=Organ.objects.all()).order_by('-pk'))
         else:
-            table = self.table_class(
-                            context['table'].data.data.filter(offices=office_session).exclude(
-                                pk__in=Organ.objects.all()).order_by('-pk'))
+            table = self.table_class(context['table'].data.data.filter(
+                offices=office_session).exclude(
+                    pk__in=Organ.objects.all()).order_by('-pk'))
         context['table'] = table
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         return context
@@ -585,9 +610,8 @@ class PersonCreateView(AuditFormMixin, CreateView):
             self.object = form.save(commit=False)
             office_session = get_office_session(self.request)
             if person_exists(self.object.cpf_cnpj, office_session):
-                form._errors[forms.forms.NON_FIELD_ERRORS] = ErrorList([
-                    person_cpf_cnpj_already_exists()
-                ])
+                form._errors[forms.forms.NON_FIELD_ERRORS] = ErrorList(
+                    [person_cpf_cnpj_already_exists()])
                 return self.form_invalid(form)
 
             self.object = form.save()
@@ -605,8 +629,10 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         kwargs.update({
-            'table': AddressTable(self.object.address_set.all()),
-            'table_contact_mechanism': ContactMechanismTable(self.object.contactmechanism_set.all()),
+            'table':
+            AddressTable(self.object.address_set.all()),
+            'table_contact_mechanism':
+            ContactMechanismTable(self.object.contactmechanism_set.all()),
         })
         return super().get_context_data(**kwargs)
 
@@ -614,12 +640,12 @@ class PersonUpdateView(AuditFormMixin, UpdateView):
         kw = super().get_form_kwargs()
         user = User.objects.get(id=self.request.user.id)
         checker = ObjectPermissionChecker(user)
-        kw['is_admin'] = checker.has_perm(
-            'group_admin', get_office_session(self.request))
+        kw['is_admin'] = checker.has_perm('group_admin',
+                                          get_office_session(self.request))
         return kw
 
     def get_success_url(self):
-        return reverse('person_update', args=(self.object.id,))
+        return reverse('person_update', args=(self.object.id, ))
 
 
 class PersonDeleteView(AuditFormMixin, MultiDeleteView):
@@ -640,8 +666,10 @@ class GenericAutocompleteForeignKey(autocomplete.Select2QuerySetView):
             if self.q:
                 generic_search = GenericSearchForeignKey(model)
                 ids = generic_search.get_related_values(self.q, field_name)
-                qs = list(filter(lambda i: i.id in ids,
-                                 eval('model.{0}.get_queryset()'.format(field_name))))
+                qs = list(
+                    filter(lambda i: i.id in ids,
+                           eval(
+                               'model.{0}.get_queryset()'.format(field_name))))
             return qs
         except:
             return []
@@ -649,27 +677,36 @@ class GenericAutocompleteForeignKey(autocomplete.Select2QuerySetView):
 
 @login_required
 def person_address_search_country(request):
-    countries = Country.objects.filter(
-        id__gt=1).values('name', 'id').order_by('name')
-    countries_json = json.dumps({'number': len(countries), 'countries': list(countries)},
+    countries = Country.objects.filter(id__gt=1).values('name',
+                                                        'id').order_by('name')
+    countries_json = json.dumps({
+        'number': len(countries),
+        'countries': list(countries)
+    },
                                 cls=DjangoJSONEncoder)
     return JsonResponse(countries_json, safe=False)
 
 
 @login_required
 def person_address_search_state(request, pk):
-    states = State.objects.filter(country_id=pk).values(
-        'name', 'id').order_by('name')
-    states_json = json.dumps({'number': len(states), 'states': list(states)},
+    states = State.objects.filter(country_id=pk).values('name',
+                                                        'id').order_by('name')
+    states_json = json.dumps({
+        'number': len(states),
+        'states': list(states)
+    },
                              cls=DjangoJSONEncoder)
     return JsonResponse(states_json, safe=False)
 
 
 @login_required
 def person_address_search_city(request, pk):
-    cities = City.objects.filter(state_id=pk).values(
-        'name', 'id').order_by('name')
-    cities_json = json.dumps({'number': len(cities), 'cities': list(cities)},
+    cities = City.objects.filter(state_id=pk).values('name',
+                                                     'id').order_by('name')
+    cities_json = json.dumps({
+        'number': len(cities),
+        'cities': list(cities)
+    },
                              cls=DjangoJSONEncoder)
     return JsonResponse(cities_json, safe=False)
 
@@ -700,9 +737,7 @@ def person_address_information(request, pk):
             'is_active': address.is_active
         }
     except:
-        data = {
-            'result': False
-        }
+        data = {'result': False}
 
     return JsonResponse(data)
 
@@ -710,10 +745,11 @@ def person_address_information(request, pk):
 @login_required
 def person_address_search_address_type(request):
     addresses_types = AddressType.objects.all().values('name', 'id')
-    addresses_types_json = json.dumps(
-        {'number': len(addresses_types),
-         'addresses_types': list(addresses_types)},
-        cls=DjangoJSONEncoder)
+    addresses_types_json = json.dumps({
+        'number': len(addresses_types),
+        'addresses_types': list(addresses_types)
+    },
+                                      cls=DjangoJSONEncoder)
     return JsonResponse(addresses_types_json, safe=False)
 
 
@@ -774,25 +810,30 @@ class GenericFormOneToMany(FormView, SingleTableView):
         context['model'] = self.related_model.__name__
         context['nav_' + self.related_model._meta.verbose_name] = True
         context['form_name'] = self.related_model._meta.verbose_name
-        context['form_name_plural'] = self.related_model._meta.verbose_name_plural
+        context[
+            'form_name_plural'] = self.related_model._meta.verbose_name_plural
         fields_related = list(
             filter(lambda i: i.get_internal_type() == 'ForeignKey',
                    self.related_model._meta.fields))
-        field_related = list(filter(lambda i: i.related_model == self.model,
-                                    fields_related))[0]
-        generic_search = GenericSearchFormat(request=self.request, model=self.related_model,
-                                             fields=self.related_model._meta.fields,
-                                             related_id=related_model_id,
-                                             field_name_related=field_related.name)
+        field_related = list(
+            filter(lambda i: i.related_model == self.model, fields_related))[0]
+        generic_search = GenericSearchFormat(
+            request=self.request,
+            model=self.related_model,
+            fields=self.related_model._meta.fields,
+            related_id=related_model_id,
+            field_name_related=field_related.name)
         generic_search_args = generic_search.despatch()
         if generic_search_args:
-            table = eval(generic_search_args.replace('.model.', '.related_model.'))
+            table = eval(
+                generic_search_args.replace('.model.', '.related_model.'))
         else:
             table = self.table_class(self.related_model.objects.none())
             if related_model_id:
-                lookups = {'{}__id'.format(
-                    field_related.name): related_model_id,
-                           'office__id': get_office_session(self.request).id}
+                lookups = {
+                    '{}__id'.format(field_related.name): related_model_id,
+                    'office__id': get_office_session(self.request).id
+                }
                 qs = self.related_model.objects.filter(**lookups)
 
                 if self.related_ordering:
@@ -808,28 +849,39 @@ class GenericFormOneToMany(FormView, SingleTableView):
 
 
 def recover_database(request):
-    return render(request, 'core/recover_database.html',
-                  {'request': False,
-                   'host': settings.LINK_TO_RESTORE_DB_DEMO,
-                   'timeout': 45000
-                   }
-                  )
+    return render(
+        request, 'core/recover_database.html', {
+            'request': False,
+            'host': settings.LINK_TO_RESTORE_DB_DEMO,
+            'timeout': 45000
+        })
 
 
 class UserListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = User
     table_class = UserTable
     template_name = 'auth/user_list.html'
-    ordering = ('first_name', 'last_name', 'username', 'email',)
+    ordering = (
+        'first_name',
+        'last_name',
+        'username',
+        'email',
+    )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         table_data = context['table'].data.data
         context['table'] = self.table_class(
-            list(map(lambda i: i.auth_user, get_office_session(self.request).persons.filter(auth_user__in=table_data,
-                                                                                            auth_user__is_superuser=False))))
-        RequestConfig(self.request, paginate={
-                      'per_page': 10}).configure(context['table'])
+            list(
+                map(
+                    lambda i: i.auth_user,
+                    get_office_session(self.request).persons.filter(
+                        auth_user__in=table_data,
+                        auth_user__is_superuser=False))))
+        RequestConfig(
+            self.request, paginate={
+                'per_page': 10
+            }).configure(context['table'])
         return context
 
 
@@ -850,8 +902,8 @@ class UserCreateView(AuditFormMixin, CreateView):
         if form.is_valid:
             have_group = False
             for office in self.request.user.person.offices.all():
-                groups = self.request.POST.getlist(
-                    'office_' + str(office.id), '')
+                groups = self.request.POST.getlist('office_' + str(office.id),
+                                                   '')
                 if groups and not form.instance.id:
                     form.save()
                     for group_office in office.office_groups.all():
@@ -863,13 +915,18 @@ class UserCreateView(AuditFormMixin, CreateView):
                             have_group = True
             if not have_group:
                 messages.error(
-                    self.request, "O usuário deve pertencer a pelo menos um grupo")
+                    self.request,
+                    "O usuário deve pertencer a pelo menos um grupo")
                 return self.form_invalid(form)
 
             for office in offices_user:
                 member, created = OfficeMembership.objects.get_or_create(
-                    person=form.instance.person, office=office,
-                    defaults={'create_user': self.request.user, 'is_active': True})
+                    person=form.instance.person,
+                    office=office,
+                    defaults={
+                        'create_user': self.request.user,
+                        'is_active': True
+                    })
                 if not created:
                     # Caso o relacionamento exista mas esta inativo
                     member.is_active = True
@@ -882,8 +939,10 @@ class UserCreateView(AuditFormMixin, CreateView):
                 obj.alter_user = self.request.user
                 obj.save()
             else:
-                DefaultOffice.objects.create(auth_user=form.instance, office=default_office,
-                                             create_user=self.request.user)
+                DefaultOffice.objects.create(
+                    auth_user=form.instance,
+                    office=default_office,
+                    create_user=self.request.user)
 
         super(UserCreateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
@@ -917,7 +976,8 @@ class UserUpdateView(AuditFormMixin, UpdateView):
                     if not groups:
                         messages.error(
                             self.request,
-                            "O usuário deve pertencer a pelo menos um grupo. Verifique as permissões do escritório %s" % office)
+                            "O usuário deve pertencer a pelo menos um grupo. Verifique as permissões do escritório %s"
+                            % office)
                         return self.form_invalid(form)
 
                     for group_office in office.office_groups.all():
@@ -934,8 +994,10 @@ class UserUpdateView(AuditFormMixin, UpdateView):
                 obj.alter_user = self.request.user
                 obj.save()
             else:
-                DefaultOffice.objects.create(auth_user=form.instance, office=default_office,
-                                             create_user=self.request.user)
+                DefaultOffice.objects.create(
+                    auth_user=form.instance,
+                    office=default_office,
+                    create_user=self.request.user)
 
         super(UserUpdateView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
@@ -986,10 +1048,12 @@ class PasswordResetViewMixin(PasswordResetView, FormView):
 
     def form_valid(self, form):
         context = form.save(self.request)
-        return render(self.request, 'account/password_reset_done.html', context)
+        return render(self.request, 'account/password_reset_done.html',
+                      context)
 
     def form_invalid(self, form):
-        return render(self.request, 'account/password_reset_done_error.html', {})
+        return render(self.request, 'account/password_reset_done_error.html',
+                      {})
 
 
 class OfficeListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -1004,8 +1068,10 @@ class OfficeListView(CustomLoginRequiredView, SingleTableViewMixin):
                 pks.append(office.pk)
         context['table'] = self.table_class(
             context['table'].data.data.filter(pk__in=pks))
-        RequestConfig(self.request, paginate={
-                      'per_page': 10}).configure(context['table'])
+        RequestConfig(
+            self.request, paginate={
+                'per_page': 10
+            }).configure(context['table'])
         return context
 
 
@@ -1033,30 +1099,43 @@ class OfficeUpdateView(AuditFormMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         kwargs.update({
-            'table': AddressOfficeTable(self.object.get_address()),
-            'table_members': OfficeMembershipTable(
-                self.object.officemembership_set.filter(is_active=True, person__auth_user__isnull=False,
-                                                        person__auth_user__is_superuser=False)
-                .exclude(person__auth_user=self.request.user)),
-            'table_offices': OfficeTable(
-                Office.objects.get(pk=self.kwargs.get('pk')).offices.all().order_by('legal_name')),
-            'table_contact_mechanism': ContactMechanismOfficeTable(self.object.contactmechanism_set.all()),
+            'table':
+            AddressOfficeTable(self.object.get_address()),
+            'table_members':
+            OfficeMembershipTable(
+                self.object.officemembership_set.filter(
+                    is_active=True,
+                    person__auth_user__isnull=False,
+                    person__auth_user__is_superuser=False).exclude(
+                        person__auth_user=self.request.user)),
+            'table_offices':
+            OfficeTable(
+                Office.objects.get(pk=self.kwargs.get('pk')).offices.all().
+                order_by('legal_name')),
+            'table_contact_mechanism':
+            ContactMechanismOfficeTable(
+                self.object.contactmechanism_set.all()),
         })
         data = super().get_context_data(**kwargs)
         data['inviteofficeform'] = InviteForm(self.request.POST) \
             if InviteForm(self.request.POST).is_valid() else InviteForm()
-        RequestConfig(self.request, paginate=False).configure(
-            kwargs.get('table_members'))
-        RequestConfig(self.request, paginate=False).configure(
-            kwargs.get('table_offices'))
+        RequestConfig(
+            self.request, paginate=False).configure(
+                kwargs.get('table_members'))
+        RequestConfig(
+            self.request, paginate=False).configure(
+                kwargs.get('table_offices'))
         return data
 
     def dispatch(self, request, *args, **kwargs):
         office_instance = Office.objects.filter(
             pk=int(kwargs.get('pk', None))).first()
-        if not self.request.user.has_perm('can_access_general_data', office_instance):
-            messages.error(self.request, "Você não possui permissão para editar o escritório selecionado."
-                                         " Favor selecionar o escritório correto")
+        if not self.request.user.has_perm('can_access_general_data',
+                                          office_instance):
+            messages.error(
+                self.request,
+                "Você não possui permissão para editar o escritório selecionado."
+                " Favor selecionar o escritório correto")
             del self.request.session['custom_session_user']
             self.request.session.modified = True
             return HttpResponseRedirect(reverse('office_instance'))
@@ -1090,11 +1169,17 @@ class RegisterNewUser(CreateView):
         email = request.POST.get('email')
         errors = []
         if first_name == '' or last_name == '':
-            errors.append({'title': 'Identificação do Usuário',
-                           'error': 'Os campos Nome e Sobrenome são obrigatórios'})
+            errors.append({
+                'title':
+                'Identificação do Usuário',
+                'error':
+                'Os campos Nome e Sobrenome são obrigatórios'
+            })
         if not password == confirm_password:
-            errors.append(
-                {'title': 'Senha', 'error': 'As senhas digitadas não conferem'})
+            errors.append({
+                'title': 'Senha',
+                'error': 'As senhas digitadas não conferem'
+            })
         else:
             try:
                 password_validation.validate_password(password)
@@ -1105,32 +1190,51 @@ class RegisterNewUser(CreateView):
         selected_plan = request.POST.get('plan')
         office_pks = request.POST.getlist('office_checkbox')
         if select_office_register == "":
-            errors.append({'title': 'Forma de Trabalho',
-                           'error': 'Nenhuma Forma de trabalho selecionada'})
+            errors.append({
+                'title': 'Forma de Trabalho',
+                'error': 'Nenhuma Forma de trabalho selecionada'
+            })
         if select_office_register == '1':
             if not office_pks:
-                errors.append(
-                    {'title': 'Escritório', 'error': 'Nenhum escritório selecionado, para vincular com o usuário criado'})
+                errors.append({
+                    'title':
+                    'Escritório',
+                    'error':
+                    'Nenhum escritório selecionado, para vincular com o usuário criado'
+                })
         elif select_office_register == '2' or select_office_register == '3':
             if selected_plan == "":
-                errors.append({'title': 'Plano de acesso',
-                               'error': 'Nenhum plano selecionado'})
+                errors.append({
+                    'title': 'Plano de acesso',
+                    'error': 'Nenhum plano selecionado'
+                })
 
-        if select_office_register == '2' and request.POST.get('legal_name') == '':
-            errors.append({'title': 'Cadastro de escritório',
-                           'error': 'É obrigatório que o escrtório cadastrado possua um nome'})
+        if select_office_register == '2' and request.POST.get(
+                'legal_name') == '':
+            errors.append({
+                'title':
+                'Cadastro de escritório',
+                'error':
+                'É obrigatório que o escrtório cadastrado possua um nome'
+            })
 
         if errors:
             return render(request, 'account/register.html', {'errors': errors})
 
-        form = RegisterNewUserForm(
-            {'username': username, 'first_name': first_name, 'last_name': last_name, 'email': email,
-             'password1': password, 'password2': password})
+        form = RegisterNewUserForm({
+            'username': username,
+            'first_name': first_name,
+            'last_name': last_name,
+            'email': email,
+            'password1': password,
+            'password2': password
+        })
         if form.is_valid():
             instance = form.save()
             if invite_code or Invite.objects.filter(email=instance.email):
-                for invite in Invite.objects.filter(Q(Q(status='N') | Q(status='E')),
-                                                    Q(email=instance.email) | Q(invite_code=invite_code)):
+                for invite in Invite.objects.filter(
+                        Q(Q(status='N') | Q(status='E')),
+                        Q(email=instance.email) | Q(invite_code=invite_code)):
                     invite.person = Person.objects.filter(
                         auth_user=instance).first()
                     invite.status = 'N'
@@ -1143,54 +1247,65 @@ class RegisterNewUser(CreateView):
         office_instance = None
         if select_office_register == '1':
             for office in Office.objects.filter(id__in=office_pks):
-                Invite.objects.create(office=office,
-                                      person=instance.person,
-                                      status='N',
-                                      create_user=instance,
-                                      invite_from='P',
-                                      is_active=True)
+                Invite.objects.create(
+                    office=office,
+                    person=instance.person,
+                    status='N',
+                    create_user=instance,
+                    invite_from='P',
+                    is_active=True)
         elif select_office_register == '2':
-            legal_name = request.POST.get('legal_name') if request.POST.get(
-                'legal_name') != '' else None
+            legal_name = request.POST.get(
+                'legal_name') if request.POST.get('legal_name') != '' else None
             office_name = request.POST.get('office_name') if request.POST.get(
                 'office_name') != '' else None
-            legal_type = request.POST.get('legal_type') if request.POST.get(
-                'legal_type') != '' else None
-            cpf_cnpj = request.POST.get('cpf_cnpj') if request.POST.get(
-                'cpf_cnpj') != '' else None
-            office_instance = Office.objects.create(legal_name=legal_name,
-                                                    name=office_name,
-                                                    legal_type=legal_type,
-                                                    cpf_cnpj=cpf_cnpj,
-                                                    is_active=True,
-                                                    create_user=instance)
-            DefaultOffice.objects.create(auth_user=instance, office=office_instance,
-                                         create_user=instance)
+            legal_type = request.POST.get(
+                'legal_type') if request.POST.get('legal_type') != '' else None
+            cpf_cnpj = request.POST.get(
+                'cpf_cnpj') if request.POST.get('cpf_cnpj') != '' else None
+            office_instance = Office.objects.create(
+                legal_name=legal_name,
+                name=office_name,
+                legal_type=legal_type,
+                cpf_cnpj=cpf_cnpj,
+                is_active=True,
+                create_user=instance)
+            DefaultOffice.objects.create(
+                auth_user=instance,
+                office=office_instance,
+                create_user=instance)
         elif select_office_register == '3':
             legal_name = '{} {}'.format(first_name, last_name)
             office_name = legal_name
             legal_type = 'F'
-            office_instance = Office.objects.create(legal_name=legal_name,
-                                                    use_service=False,
-                                                    use_etl=False,
-                                                    name=office_name,
-                                                    legal_type=legal_type,
-                                                    is_active=True,
-                                                    create_user=instance)
+            office_instance = Office.objects.create(
+                legal_name=legal_name,
+                use_service=False,
+                use_etl=False,
+                name=office_name,
+                legal_type=legal_type,
+                is_active=True,
+                create_user=instance)
             # Isto cria as configuracoes basicas de um Office que trabalha sozinho
             CustomSettings.objects.create(
-                create_user=instance, office=office_instance, default_user=instance,
-                email_to_notification=instance.email, i_work_alone=True)
+                create_user=instance,
+                office=office_instance,
+                default_user=instance,
+                email_to_notification=instance.email,
+                i_work_alone=True)
 
-            DefaultOffice.objects.create(auth_user=instance, office=office_instance,
-                                         create_user=instance)
+            DefaultOffice.objects.create(
+                auth_user=instance,
+                office=office_instance,
+                create_user=instance)
         if office_instance:
             plan = Plan.objects.get(pk=selected_plan)
-            PlanOffice.objects.create(office=office_instance,
-                                      plan=plan,
-                                      month_value=plan.month_value,
-                                      task_limit=plan.task_limit,
-                                      create_user=instance)
+            PlanOffice.objects.create(
+                office=office_instance,
+                plan=plan,
+                month_value=plan.month_value,
+                task_limit=plan.task_limit,
+                create_user=instance)
 
         messages.add_message(request, messages.SUCCESS,
                              "Registro concluído com sucesso!", 'add_new_user')
@@ -1229,7 +1344,9 @@ class CustomSession(View):
                 data['modified'] = True
             current_office = request.POST.get('current_office')
             request.session['custom_session_user'] = {
-                self.request.user.pk: {'current_office': current_office}
+                self.request.user.pk: {
+                    'current_office': current_office
+                }
             }
             office = Office.objects.filter(pk=int(current_office)).first()
             if office:
@@ -1249,11 +1366,12 @@ class CustomSession(View):
         """
         data = {}
         custom_session_user = request.session.get('custom_session_user')
-        if custom_session_user and custom_session_user.get(str(request.user.pk)):
+        if custom_session_user and custom_session_user.get(
+                str(request.user.pk)):
             current_office_session = custom_session_user.get(
                 str(request.user.pk))
-            office = Office.objects.filter(pk=int(current_office_session.get(
-                'current_office'))).first()
+            office = Office.objects.filter(
+                pk=int(current_office_session.get('current_office'))).first()
             if office:
                 data['current_office_pk'] = office.pk
                 data['current_office_name'] = office.legal_name
@@ -1315,9 +1433,13 @@ class InviteOfficeCreateView(AuditFormMixin, CreateView):
         office_invite = request.POST.get('office_invite')
         office = request.POST.get('office')
         if office == office_invite:
-            return JsonResponse({'error': 'Não é possível convidar o mesmo escritório!'})
-        if not InviteOffice.objects.filter(office_invite__pk=office_invite, office__pk=office,
-                                           status='N'):
+            return JsonResponse({
+                'error':
+                'Não é possível convidar o mesmo escritório!'
+            })
+        if not InviteOffice.objects.filter(
+                office_invite__pk=office_invite, office__pk=office,
+                status='N'):
             form.instance.office = Office.objects.get(
                 pk=request.POST.get('office'))
             form.instance.office_invite = Office.objects.get(
@@ -1331,16 +1453,23 @@ class InviteUpdateView(UpdateView):
         invite = Invite.objects.get(pk=int(request.POST.get('invite_pk')))
         invite.status = request.POST.get('status')
         if invite.status == 'A':
-            OfficeMembership.objects.update_or_create(person=invite.person,
-                                                      office=invite.office,
-                                                      defaults={'create_user': self.request.user,
-                                                                'is_active': True})
-            groups_list = {group for group, perms in
-                          get_groups_with_perms(invite.office, attach_perms=True).items() if 'view_delegated_tasks' in perms}
+            OfficeMembership.objects.update_or_create(
+                person=invite.person,
+                office=invite.office,
+                defaults={
+                    'create_user': self.request.user,
+                    'is_active': True
+                })
+            groups_list = {
+                group
+                for group, perms in get_groups_with_perms(
+                    invite.office, attach_perms=True).items()
+                if 'view_delegated_tasks' in perms
+            }
             for group in groups_list:
                 if group not in invite.person.auth_user.groups.all() and \
                     group.name.startswith(invite.office.CORRESPONDENT_GROUP):
-                        invite.person.auth_user.groups.add(group)
+                    invite.person.auth_user.groups.add(group)
 
         invite.save()
         return HttpResponse('ok')
@@ -1368,8 +1497,10 @@ class InviteTableView(CustomLoginRequiredView, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        table = InviteTable(Invite.objects.filter(
-            office__id=self.kwargs.get('office_pk'), invite_from='O').order_by('-pk'))
+        table = InviteTable(
+            Invite.objects.filter(
+                office__id=self.kwargs.get('office_pk'),
+                invite_from='O').order_by('-pk'))
         RequestConfig(self.request).configure(table)
         context['table'] = table
         return context
@@ -1381,8 +1512,9 @@ class InviteOfficeTableView(CustomLoginRequiredView, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        table = InviteOfficeTable(InviteOffice.objects.filter(
-            office__id=self.kwargs.get('office_pk')).order_by('-pk'))
+        table = InviteOfficeTable(
+            InviteOffice.objects.filter(
+                office__id=self.kwargs.get('office_pk')).order_by('-pk'))
         RequestConfig(self.request).configure(table)
         context['table'] = table
         return context
@@ -1392,15 +1524,22 @@ class InviteVerify(View):
     def get(self, request):
         user = request.user
         person = user.person
-        office_pks = person.offices.active_offices().values_list('pk', flat=True)
+        office_pks = person.offices.active_offices().values_list(
+            'pk', flat=True)
 
         data = []
 
-        for invite in Invite.objects.filter(Q(status='N'),
-                                            Q(Q(Q(office_id__in=office_pks), Q(invite_from='P')) |
-                                              Q(Q(person=person), Q(invite_from='O')))):
-            data.append({'id': invite.pk, 'office': invite.office.legal_name, 'person': invite.person.legal_name,
-                         'invite_from': invite.invite_from})
+        for invite in Invite.objects.filter(
+                Q(status='N'),
+                Q(
+                    Q(Q(office_id__in=office_pks), Q(invite_from='P'))
+                    | Q(Q(person=person), Q(invite_from='O')))):
+            data.append({
+                'id': invite.pk,
+                'office': invite.office.legal_name,
+                'person': invite.person.legal_name,
+                'invite_from': invite.invite_from
+            })
 
         return JsonResponse(data, safe=False)
 
@@ -1432,7 +1571,6 @@ class PopupSuccessView(LoginRequiredMixin, TemplateView):
 
 
 class PopupMixin:
-
     @property
     def is_popup(self):
         return self.request.GET.get('popup', False)
@@ -1445,8 +1583,8 @@ class PopupMixin:
 
 class ListUsersToInviteView(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
-        users = User.objects.all().values(
-            'pk', 'username', 'email', 'person__name', 'person__pk')
+        users = User.objects.all().values('pk', 'username', 'email',
+                                          'person__name', 'person__pk')
         return JsonResponse({'data': list(users)})
 
 
@@ -1454,15 +1592,21 @@ class InviteMultipleUsersView(CustomLoginRequiredView, CreateView):
     form_class = InviteForm
 
     def post(self, request, *args, **kwargs):
-        if self.request.POST.get('persons') and self.request.POST.get('office'):
+        if self.request.POST.get('persons') and self.request.POST.get(
+                'office'):
             persons = self.request.POST.getlist('persons')
             office_pk = self.request.POST.get('office')
             for person_pk in persons:
                 person = Person.objects.get(pk=person_pk)
                 office = Office.objects.get(pk=office_pk)
-                Invite.objects.create(create_user=request.user, person=person,
-                                      office=office, status='N', invite_from='O')
-            return HttpResponseRedirect(reverse_lazy('office_update', kwargs={'pk': office_pk}))
+                Invite.objects.create(
+                    create_user=request.user,
+                    person=person,
+                    office=office,
+                    status='N',
+                    invite_from='O')
+            return HttpResponseRedirect(
+                reverse_lazy('office_update', kwargs={'pk': office_pk}))
         return reverse_lazy('office_list')
 
 
@@ -1478,28 +1622,30 @@ class TypeaHeadGenericSearch(View):
         q = request.GET.get('q')
         extra_params = json.loads(self.request.GET.get('extra_params', {}))
         office = get_office_session(self.request)
-        forward = request.GET.get('forward') if request.GET.get(
-            'forward') != 'undefined' else None
+        forward = request.GET.get(
+            'forward') if request.GET.get('forward') != 'undefined' else None
         forward_value = request.GET.get('forwardValue')
         forward_params = ''
         if forward:
-            if model._meta.get_field(forward).get_internal_type() == 'ForeignKey':
+            if model._meta.get_field(
+                    forward).get_internal_type() == 'ForeignKey':
                 forward = '{}__id'.format(forward)
         if forward and int(forward_value):
             forward_params = {
                 '{}'.format(forward): forward_value,
             }
-        data = self.get_data(module, model, field, q, office,
-                             forward_params, extra_params, *args, **kwargs)
+        data = self.get_data(module, model, field, q, office, forward_params,
+                             extra_params, *args, **kwargs)
         return JsonResponse(data, safe=False)
 
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
+    def get_data(module, model, field, q, office, forward_params, extra_params,
+                 *args, **kwargs):
         params = {
             '{}__unaccent__icontains'.format(field): q,
         }
-        data = model.objects.filter(
-            **params).annotate(value=F(field)).values('id', 'value').order_by(field)
+        data = model.objects.filter(**params).annotate(value=F(field)).values(
+            'id', 'value').order_by(field)
         if issubclass(model, OfficeMixin) or hasattr(model, 'offices'):
             data.filter(office=office)
         return list(data)
@@ -1507,102 +1653,122 @@ class TypeaHeadGenericSearch(View):
 
 class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
+    def get_data(module, model, field, q, office, forward_params, extra_params,
+                 *args, **kwargs):
         data = []
         for user in User.objects.filter(
-                Q(person__legal_name__unaccent__icontains=q) | Q(
-                    username__unaccent__icontains=q)
+                Q(person__legal_name__unaccent__icontains=q)
+                | Q(username__unaccent__icontains=q)
                 | Q(email__unaccent__icontains=q)):
-            data.append({'id': user.person.id, 'value': user.person.legal_name + ' ({})'.format(user.username),
-                         'data-value-txt': user.person.legal_name + ' ({} - {})'.format(user.username, user.email)})
+            data.append({
+                'id':
+                user.person.id,
+                'value':
+                user.person.legal_name + ' ({})'.format(user.username),
+                'data-value-txt':
+                user.person.legal_name + ' ({} - {})'.format(
+                    user.username, user.email)
+            })
         return list(data)
 
 
 class CityAutoCompleteView(TypeaHeadGenericSearch):
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
+    def get_data(module, model, field, q, office, forward_params, extra_params,
+                 *args, **kwargs):
         data = []
-        for city in City.objects.filter(Q(name__unaccent__icontains=q) |
-                                        Q(state__initials__exact=q) |
-                                        Q(state__country__name__unaccent__contains=q)):
+        for city in City.objects.filter(
+                Q(name__unaccent__icontains=q) | Q(state__initials__exact=q)
+                | Q(state__country__name__unaccent__contains=q)):
             data.append({'id': city.id, 'data-value-txt': city.__str__()})
         return list(data)
 
 
 class ClientAutocomplete(TypeaHeadGenericSearch):
-
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
+    def get_data(module, model, field, q, office, forward_params, extra_params,
+                 *args, **kwargs):
         data = []
-        for client in Person.objects.filter(Q(legal_name__unaccent__icontains=q),
-                                            Q(is_customer=True, ),
-                                            Q(offices=office)):
+        for client in Person.objects.filter(
+                Q(legal_name__unaccent__icontains=q), Q(is_customer=True, ),
+                Q(offices=office)):
             data.append({'id': client.id, 'data-value-txt': client.__str__()})
         return list(data)
 
 
 class OfficeAutocomplete(TypeaHeadGenericSearch):
-
     @staticmethod
     def get_data(module, model, field, q, office, forward_params):
         data = []
-        for item in Office.objects.filter(Q(name__unaccent__icontains=q),
-                                          Q(offices=office)):
+        for item in Office.objects.filter(
+                Q(name__unaccent__icontains=q), Q(offices=office)):
             data.append({'id': item.id, 'data-value-txt': item.__str__()})
         return list(data)
 
 
 class CorrespondentAutocomplete(TypeaHeadGenericSearch):
-
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
+    def get_data(module, model, field, q, office, forward_params, extra_params,
+                 *args, **kwargs):
         data = []
-        for correspondent in Person.objects.active().correspondents().filter(Q(legal_name__unaccent__icontains=q),
-                                                                             Q(offices=office)):
-            data.append({'id': correspondent.id,
-                         'data-value-txt': correspondent.__str__()})
+        for correspondent in Person.objects.active().correspondents().filter(
+                Q(legal_name__unaccent__icontains=q), Q(offices=office)):
+            data.append({
+                'id': correspondent.id,
+                'data-value-txt': correspondent.__str__()
+            })
         return list(data)
 
 
 class OfficeCorrespondentAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
+    def get_data(module, model, field, q, office, forward_params, extra_params,
+                 *args, **kwargs):
         data = []
-        for office_correspondent in office.offices.filter(Q(legal_name__unaccent__icontains=q)):
-            data.append({'id': office_correspondent.id,
-                         'data-value-txt': office_correspondent.__str__()})
+        for office_correspondent in office.offices.filter(
+                Q(legal_name__unaccent__icontains=q)):
+            data.append({
+                'id': office_correspondent.id,
+                'data-value-txt': office_correspondent.__str__()
+            })
         return list(data)
 
 
 class RequesterAutocomplete(TypeaHeadGenericSearch):
-
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
+    def get_data(module, model, field, q, office, forward_params, extra_params,
+                 *args, **kwargs):
         data = []
-        for requester in Person.objects.active().requesters().filter(Q(legal_name__unaccent__icontains=q),
-                                                                     Q(offices=office)):
-            data.append(
-                {'id': requester.id, 'data-value-txt': requester.__str__()})
+        for requester in Person.objects.active().requesters().filter(
+                Q(legal_name__unaccent__icontains=q), Q(offices=office)):
+            data.append({
+                'id': requester.id,
+                'data-value-txt': requester.__str__()
+            })
         return list(data)
 
 
 class ServiceAutocomplete(TypeaHeadGenericSearch):
-
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
+    def get_data(module, model, field, q, office, forward_params, extra_params,
+                 *args, **kwargs):
         data = []
-        for service in Person.objects.active().services().filter(Q(legal_name__unaccent__icontains=q),
-                                                                 Q(offices=office)):
-            data.append(
-                {'id': service.id, 'data-value-txt': service.__str__()})
+        for service in Person.objects.active().services().filter(
+                Q(legal_name__unaccent__icontains=q), Q(offices=office)):
+            data.append({
+                'id': service.id,
+                'data-value-txt': service.__str__()
+            })
         return list(data)
 
 
 class TypeaHeadInviteOfficeSearch(TypeaHeadGenericSearch):
     @staticmethod
-    def get_data(module, model, field, q, office, forward_params, extra_params, *args, **kwargs):
+    def get_data(module, model, field, q, office, forward_params, extra_params,
+                 *args, **kwargs):
         data = []
-        for office in Office.objects.filter(Q(legal_name__unaccent__icontains=q)):
+        for office in Office.objects.filter(
+                Q(legal_name__unaccent__icontains=q)):
             data.append({'id': office.id, 'data-value-txt': office.legal_name})
         return list(data)
 
@@ -1617,29 +1783,37 @@ class OfficeMembershipInactiveView(UpdateView):
 
             try:
                 for record in self.model.objects.filter(pk__in=pks):
-                    if not Task.objects.filter(~Q(Q(task_status=TaskStatus.FINISHED) |
-                                                  Q(task_status=TaskStatus.REFUSED) |
-                                                  Q(task_status=TaskStatus.REFUSED_SERVICE) |
-                                                  Q(task_status=TaskStatus.BLOCKEDPAYMENT)),
-                                               Q(Q(person_asked_by=record.person) |
-                                                 Q(person_executed_by=record.person) |
-                                                 Q(person_distributed_by=record.person))):
+                    if not Task.objects.filter(
+                            ~Q(
+                                Q(task_status=TaskStatus.FINISHED)
+                                | Q(task_status=TaskStatus.REFUSED)
+                                | Q(task_status=TaskStatus.REFUSED_SERVICE)
+                                | Q(task_status=TaskStatus.BLOCKEDPAYMENT)),
+                            Q(
+                                Q(person_asked_by=record.person)
+                                | Q(person_executed_by=record.person)
+                                | Q(person_distributed_by=record.person))):
                         record.is_active = False
                         record.save()
                         try:
                             DefaultOffice.objects.filter(
-                                auth_user=record.person.auth_user, office=record.office).delete()
+                                auth_user=record.person.auth_user,
+                                office=record.office).delete()
                         except:
                             pass
                     else:
-                        messages.error(self.request, "O usuário {} não pode ser desvinculado do escritório, uma vez que"
-                                                     " ainda existem OS a serem cumpridas por ele".format(record.person))
+                        messages.error(
+                            self.request,
+                            "O usuário {} não pode ser desvinculado do escritório, uma vez que"
+                            " ainda existem OS a serem cumpridas por ele".
+                            format(record.person))
                 messages.success(self.request, self.success_message)
             except ProtectedError as e:
                 qs = e.protected_objects.first()
-                messages.error(self.request,
-                               delete_error_protected(str(self.model._meta.verbose_name),
-                                                      qs.__str__()))
+                messages.error(
+                    self.request,
+                    delete_error_protected(
+                        str(self.model._meta.verbose_name), qs.__str__()))
 
         # http://django-tables2.readthedocs.io/en/latest/pages/generic-mixins.html
         if self.success_url:
@@ -1648,7 +1822,8 @@ class OfficeMembershipInactiveView(UpdateView):
             return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})
+        return reverse(
+            'office_update', kwargs={'pk': self.kwargs['office_pk']})
 
 
 class OfficeOfficesInactiveView(UpdateView):
@@ -1660,19 +1835,21 @@ class OfficeOfficesInactiveView(UpdateView):
             pks = request.POST.getlist('selection')
             try:
                 for record in self.model.objects.filter(pk__in=pks):
-                    if not Task.objects.filter((Q(Q(task_status=TaskStatus.REQUESTED) |
-                                                  Q(task_status=TaskStatus.ACCEPTED_SERVICE) |
-                                                  Q(task_status=TaskStatus.RETURN) |
-                                                  Q(task_status=TaskStatus.OPEN) |
-                                                  Q(task_status=TaskStatus.ACCEPTED) |
-                                                  Q(task_status=TaskStatus.DONE)) |
-                                                Q(Q(parent__task_status=TaskStatus.OPEN) |
-                                                  Q(parent__task_status=TaskStatus.ACCEPTED) |
-                                                  Q(parent__task_status=TaskStatus.REQUESTED) |
-                                                  Q(parent__task_status=TaskStatus.DONE)
-                                                  )),
-                                               parent__office=self.kwargs['office_pk'],
-                                               office=record.pk):
+                    if not Task.objects.filter(
+                        (Q(
+                            Q(task_status=TaskStatus.REQUESTED)
+                            | Q(task_status=TaskStatus.ACCEPTED_SERVICE)
+                            | Q(task_status=TaskStatus.RETURN)
+                            | Q(task_status=TaskStatus.OPEN)
+                            | Q(task_status=TaskStatus.ACCEPTED)
+                            | Q(task_status=TaskStatus.DONE))
+                         | Q(
+                             Q(parent__task_status=TaskStatus.OPEN)
+                             | Q(parent__task_status=TaskStatus.ACCEPTED)
+                             | Q(parent__task_status=TaskStatus.REQUESTED)
+                             | Q(parent__task_status=TaskStatus.DONE))),
+                            parent__office=self.kwargs['office_pk'],
+                            office=record.pk):
                         current_office = Office.objects.get(
                             pk=self.kwargs['office_pk'])
                         current_office.offices.remove(record)
@@ -1684,16 +1861,20 @@ class OfficeOfficesInactiveView(UpdateView):
                         if service_price_table:
                             service_price_table.update(is_active=False)
 
-                        messages.success(
-                            self.request, self.success_message.format(record))
+                        messages.success(self.request,
+                                         self.success_message.format(record))
                     else:
-                        messages.error(self.request, "O escritório {} não pode ser desvinculado, uma vez que"
-                                                     " ainda existem OS a serem cumpridas por ele".format(record))
+                        messages.error(
+                            self.request,
+                            "O escritório {} não pode ser desvinculado, uma vez que"
+                            " ainda existem OS a serem cumpridas por ele".
+                            format(record))
             except ProtectedError as e:
                 qs = e.protected_objects.first()
-                messages.error(self.request,
-                               delete_error_protected(str(self.model._meta.verbose_name),
-                                                      qs.__str__()))
+                messages.error(
+                    self.request,
+                    delete_error_protected(
+                        str(self.model._meta.verbose_name), qs.__str__()))
 
         if self.success_url:
             return HttpResponseRedirect(self.success_url)
@@ -1701,7 +1882,8 @@ class OfficeOfficesInactiveView(UpdateView):
             return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})
+        return reverse(
+            'office_update', kwargs={'pk': self.kwargs['office_pk']})
 
 
 class TagsInputPermissionsView(View):
@@ -1709,10 +1891,7 @@ class TagsInputPermissionsView(View):
         groups = Office.objects.get(pk=office_pk).office_groups.all()
         data = []
         for group in groups:
-            data.append({
-                'value': group.group.pk,
-                'text': group.label_group
-            })
+            data.append({'value': group.group.pk, 'text': group.label_group})
         return JsonResponse(data, safe=False)
 
 
@@ -1723,15 +1902,13 @@ class OfficeSessionSearch(View):
             offices = request.user.person.offices.all()
         else:
             offices = Office.objects.all()
-        selected_offices = list(offices.filter(
-            legal_name__icontains=q).values_list('id', flat=True))
+        selected_offices = list(
+            offices.filter(legal_name__icontains=q).values_list(
+                'id', flat=True))
         data = []
         for office in offices:
             show = True if office.pk in selected_offices else False
-            data.append({
-                'id': office.pk,
-                'show': show
-            })
+            data.append({'id': office.pk, 'show': show})
         return JsonResponse(data, safe=False)
 
 
@@ -1740,17 +1917,15 @@ class OfficeSearch(View):
         q_string = request.GET.get('office_legal_name', '')
         offices = Office.objects.all()
         if q_string != '':
-            selected_offices = list(offices.filter(
-                legal_name__icontains=q_string).values_list('id', flat=True))
+            selected_offices = list(
+                offices.filter(legal_name__icontains=q_string).values_list(
+                    'id', flat=True))
         else:
             selected_offices = []
         data = []
         for office in offices:
             show = True if office.pk in selected_offices else False
-            data.append({
-                'id': office.pk,
-                'show': show
-            })
+            data.append({'id': office.pk, 'show': show})
         return JsonResponse(data, safe=False)
 
 
@@ -1796,11 +1971,13 @@ class ContactMechanismCreateView(ViewRelatedMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
 
     def __init__(self):
-        super().__init__(related_model=Person, related_model_name='person',
-                         related_field_pk='person')
+        super().__init__(
+            related_model=Person,
+            related_model_name='person',
+            related_field_pk='person')
 
     def get_success_url(self):
-        return reverse('person_update', args=(self.kwargs.get('person_pk'),))
+        return reverse('person_update', args=(self.kwargs.get('person_pk'), ))
 
     def form_valid(self, form):
         # Se tipo do mecanismo de contato for e-mail validar se é válido
@@ -1808,10 +1985,8 @@ class ContactMechanismCreateView(ViewRelatedMixin, CreateView):
             try:
                 validate_email(form.instance.description)
             except ValidationError as e:
-                messages.add_message(
-                    self.request,
-                    messages.ERROR,
-                    'Informe um endereço de e-mail válido.')
+                messages.add_message(self.request, messages.ERROR,
+                                     'Informe um endereço de e-mail válido.')
                 return self.form_invalid(form)
         return super().form_valid(form)
 
@@ -1822,24 +1997,22 @@ class ContactMechanismUpdateView(UpdateView):
     success_message = UPDATE_SUCCESS_MESSAGE
 
     def get_success_url(self):
-        return reverse('person_update', args=(self.kwargs.get('person_pk'),))
+        return reverse('person_update', args=(self.kwargs.get('person_pk'), ))
 
     def form_valid(self, form):
         if form.instance.contact_mechanism_type.is_email():
             try:
                 validate_email(form.instance.description)
             except ValidationError as e:
-                messages.add_message(
-                    self.request,
-                    messages.ERROR,
-                    'Informe um endereço de e-mail válido.')
+                messages.add_message(self.request, messages.ERROR,
+                                     'Informe um endereço de e-mail válido.')
                 return self.form_invalid(form)
         try:
             # TODO - Verificar se é a melhor forma de tratar duplicidades
             return super().form_valid(form)
         except IntegrityError as e:
-            messages.add_message(
-                self.request, messages.ERROR, 'Registro já existente.')
+            messages.add_message(self.request, messages.ERROR,
+                                 'Registro já existente.')
             return self.form_invalid(form)
 
 
@@ -1850,7 +2023,8 @@ class ContactMechanismDeleteView(MultiDeleteViewMixin):
         model._meta.verbose_name_plural)
 
     def get_success_url(self):
-        return reverse('person_update', kwargs={'pk': self.kwargs['person_pk']})
+        return reverse(
+            'person_update', kwargs={'pk': self.kwargs['person_pk']})
 
 
 class ContactMechanismOfficeCreateView(ViewRelatedMixin, CreateView):
@@ -1859,11 +2033,13 @@ class ContactMechanismOfficeCreateView(ViewRelatedMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
 
     def __init__(self):
-        super().__init__(related_model=Office, related_model_name='office',
-                         related_field_pk='office')
+        super().__init__(
+            related_model=Office,
+            related_model_name='office',
+            related_field_pk='office')
 
     def get_success_url(self):
-        return reverse('office_update', args=(self.kwargs.get('office_pk'),))
+        return reverse('office_update', args=(self.kwargs.get('office_pk'), ))
 
     def form_valid(self, form):
         # Se tipo do mecanismo de contato for e-mail validar se é válido
@@ -1871,17 +2047,15 @@ class ContactMechanismOfficeCreateView(ViewRelatedMixin, CreateView):
             try:
                 validate_email(form.instance.description)
             except ValidationError as e:
-                messages.add_message(
-                    self.request,
-                    messages.ERROR,
-                    'Informe um endereço de e-mail válido.')
+                messages.add_message(self.request, messages.ERROR,
+                                     'Informe um endereço de e-mail válido.')
                 return self.form_invalid(form)
         return super().form_valid(form)
 
 
 class ContactMechanismOfficeUpdateView(ContactMechanismUpdateView):
     def get_success_url(self):
-        return reverse('office_update', args=(self.kwargs.get('office_pk'),))
+        return reverse('office_update', args=(self.kwargs.get('office_pk'), ))
 
 
 class ContactMechanismOfficeDeleteView(ContactMechanismDeleteView):
@@ -1891,7 +2065,8 @@ class ContactMechanismOfficeDeleteView(ContactMechanismDeleteView):
         model._meta.verbose_name_plural)
 
     def get_success_url(self):
-        return reverse('office_update', kwargs={'pk': self.kwargs['office_pk']})
+        return reverse(
+            'office_update', kwargs={'pk': self.kwargs['office_pk']})
 
 
 class TeamListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -1942,13 +2117,14 @@ class CustomSettingsCreateView(AuditFormMixin, CreateView):
 
     def get_success_url(self):
         if self.object and self.object.pk:
-            return reverse('custom_settings_update', args=(self.object.pk,))
+            return reverse('custom_settings_update', args=(self.object.pk, ))
         return reverse('custom_settings_create')
 
     def get(self, request, *args, **kwargs):
         office_session = get_office_session(request)
         if CustomSettings.objects.filter(office=office_session).exists():
-            self.object = CustomSettings.objects.filter(office=office_session).first()
+            self.object = CustomSettings.objects.filter(
+                office=office_session).first()
             return HttpResponseRedirect(self.get_success_url())
         return super().get(self, request)
 
@@ -1964,22 +2140,22 @@ class CustomSettingsUpdateView(AuditFormMixin, UpdateView):
         return kw
 
     def get_success_url(self):
-        return reverse('custom_settings_update', args=(self.object.pk,))
+        return reverse('custom_settings_update', args=(self.object.pk, ))
 
 
 class MediaFileView(LoginRequiredMixin, View):
-
     def get(self, request, path):
         if os.path.exists(os.path.join(settings.MEDIA_ROOT, path)):
-            return static_serve_view(self.request, path, document_root=settings.MEDIA_ROOT)
-        return HttpResponseRedirect(urljoin(settings.AWS_STORAGE_BUCKET_URL, path))
-
+            return static_serve_view(
+                self.request, path, document_root=settings.MEDIA_ROOT)
+        return HttpResponseRedirect(
+            urljoin(settings.AWS_STORAGE_BUCKET_URL, path))
 
 
 class OfficePermissionRequiredMixin(PermissionRequiredMixin):
     def has_permission(self):
         guardian = ObjectPermissionChecker(self.request.user)
-        office_session = get_office_session(self.request)        
+        office_session = get_office_session(self.request)
         perms = self.get_permission_required()
         for perm in perms:
             if not guardian.has_perm(perm.name, office_session):

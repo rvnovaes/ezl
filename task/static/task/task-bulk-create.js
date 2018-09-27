@@ -269,16 +269,17 @@ TaskForm = (function($){
 
     TaskForm.prototype.fillForm = function(params){
         if (params.folder != undefined && params.folderLabel != undefined){
-            $('#id_folder').attr('data-value', decodeURI(params.folder))
-            $('#id_folder').attr('data-value-txt', decodeURI(params.folderLabel))
-            $('#id_folder').attr('value', decodeURI(params.folder))
-            $('#id_folder').val(decodeURI(params.folderLabel))
+            var id_folder_field = $('#id_folder');
+            id_folder_field.attr('data-value', decodeURI(params.folder));
+            id_folder_field.attr('data-value-txt', decodeURI(params.folderLabel));
+            id_folder_field.attr('value', decodeURI(params.folder));
+            id_folder_field.val(decodeURI(params.folderLabel));
             self.enableAdd('lawsuit');
             self.$btn_add_lawsuit.removeClass('disabled-btn');
         }
 
         self.eventChangeFolder(params.folder, function(){
-            self.$lawsuit.val(params.lawsuit);
+            self.$lawsuit.val(params.lawsuit).trigger('change');
             self.eventChangeLawsuit(params.lawsuit, function(){
                 self.$movement.val(params.movement);
                 self.eventChangeMovement(params.movement);
