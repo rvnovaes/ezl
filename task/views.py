@@ -730,7 +730,7 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
         return JsonResponse(data)
 
 
-@login_required
+
 def delete_ecm(request, pk):
     try:
         ecm = Ecm.objects.get(id=pk)
@@ -769,6 +769,17 @@ def delete_ecm(request, pk):
 
     return JsonResponse(data)
 
+@login_required
+def delete_internal_ecm(request, pk):
+    return delete_ecm(request, pk)
+
+def delete_external_ecm(request, task_hash, pk):    
+    # Para usuario que apenas acessam a task por hash, sem autenticar
+    task = Task.objects.get(task_hash=task_hash)
+    ecm = Ecm.objects.get(pk=pk)
+    if ecm.task.task_hash.hex == task_hash:
+        return delete_ecm(request, pk)    
+    return JsonResponse({'message': 'Hash inválido'})
 
 class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
     model = DashboardViewModel
