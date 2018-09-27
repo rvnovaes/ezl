@@ -26,7 +26,8 @@ class CreateUserDefault(object):
 
 class OfficeDefault(object):
     def set_context(self, serializer_field):
-        self.office = serializer_field.context['request'].auth.application.office
+        self.office = serializer_field.context[
+            'request'].auth.application.office
 
     def __call__(self):
         return self.office
@@ -43,21 +44,18 @@ class OfficeSerializerMixin(serializers.Serializer):
     office = serializers.HiddenField(default=OfficeDefault())
 
 
-class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):    
-    cpf_cnpj = SlugField(        
+class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):
+    cpf_cnpj = SlugField(
         validators=[
-            CpfCnpjOfficeUniqueValidator(
-                queryset=Person.objects.filter()
-            )
+            CpfCnpjOfficeUniqueValidator(queryset=Person.objects.filter())
         ],
-        required=False
-    )
+        required=False)
 
     def create(self, validate_data):
         office_session = get_office_api(self.context.get('request'))
         person = super().create(validate_data)
-        create_person_office_relation(
-            person, person.create_user, office_session)
+        create_person_office_relation(person, person.create_user,
+                                      office_session)
         return person
 
     def validate_cpf_cnpj(self, value):
@@ -68,9 +66,9 @@ class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):
 
     class Meta:
         model = Person
-        fields = ('id', 'name', 'legal_name', 'legal_type', 'cpf_cnpj', 'is_lawyer', 'is_customer', 'is_supplier',
-                  'is_active', 'legacy_code', 'create_user')
-
+        fields = ('id', 'name', 'legal_name', 'legal_type', 'cpf_cnpj',
+                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active',
+                  'legacy_code', 'create_user')
 
 
 class CompanySerializer(serializers.ModelSerializer):

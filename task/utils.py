@@ -21,12 +21,16 @@ def get_task_attachment(self, form):
         Q(Q(type_task=form.instance.type_task) | Q(type_task=None)),
         Q(Q(person_customer=form.instance.client) | Q(person_customer=None)),
         Q(Q(state=form.instance.court_district.state) | Q(state=None)),
-        Q(Q(court_district=form.instance.court_district) | Q(court_district=None)),
-        Q(Q(city=(form.instance.movement.law_suit.organ.address_set.first().city if
-                  form.instance.movement and
-                  form.instance.movement.law_suit and
-                  form.instance.movement.law_suit.organ and
-                  form.instance.movement.law_suit.organ.address_set.first() else None)) | Q(city=None)))
+        Q(
+            Q(court_district=form.instance.court_district)
+            | Q(court_district=None)),
+        Q(
+            Q(
+                city=(form.instance.movement.law_suit.organ.address_set.
+                      first().city if form.instance.movement and form.instance.
+                      movement.law_suit and form.instance.movement.law_suit.
+                      organ and form.instance.movement.law_suit.organ.
+                      address_set.first() else None)) | Q(city=None)))
 
     for rule in attachmentrules:
         attachments = Attachment.objects.filter(
@@ -36,13 +40,14 @@ def get_task_attachment(self, form):
             if new_file:
                 file_name = os.path.basename(attachment.file.name)
                 new_file.name = file_name
-                if not Ecm.objects.filter(exhibition_name=file_name, task_id=form.instance.id):
-                    obj = Ecm(path=new_file,
-                              task=Task.objects.get(id=form.instance.id),
-                              create_user_id=self.request.user.id,
-                              create_date=timezone.now(),
-                              exhibition_name=file_name
-                              )
+                if not Ecm.objects.filter(
+                        exhibition_name=file_name, task_id=form.instance.id):
+                    obj = Ecm(
+                        path=new_file,
+                        task=Task.objects.get(id=form.instance.id),
+                        create_user_id=self.request.user.id,
+                        create_date=timezone.now(),
+                        exhibition_name=file_name)
                     obj.save()
 
 
@@ -76,11 +81,13 @@ def copy_ecm(ecm, task):
             body = u'{}'.format(body)
             send_mail.delay(recipients, subject, body)
         except Exception as e:
-            logger.error('OCORREU UM ERRO AO COPIAR O ECM E NAO FOI POSSIVEL NOTIFICAR POR E-MAIL')
+            logger.error(
+                'OCORREU UM ERRO AO COPIAR O ECM E NAO FOI POSSIVEL NOTIFICAR POR E-MAIL'
+            )
             logger.error(e)
 
 
-def get_file_content_copy(filefield):    
+def get_file_content_copy(filefield):
     local_file_path = os.path.join(settings.MEDIA_ROOT, filefield.name)
     if os.path.exists(local_file_path):
         with open(local_file_path, 'rb') as local_file:
@@ -93,21 +100,24 @@ def get_file_content_copy(filefield):
     return content
 
 
-def task_send_mail(instance, number, project_link, short_message, custom_text, mail_list):
+def task_send_mail(instance, number, project_link, short_message, custom_text,
+                   mail_list):
     mail = SendMail()
-    mail.subject = 'Easy Lawyer - OS {} - {} - Prazo: {} - {}'.format(number, str(instance.type_task).title(),
-                                                                      instance.final_deadline_date.strftime(
-                                                                          '%d/%m/%Y'),
-                                                                      instance.task_status)
-    mail.message = render_to_string('mail/base.html',
-                                    {'server': project_link,
-                                     'pk': instance.pk,
-                                     'project_name': settings.PROJECT_NAME,
-                                     'number': str(number),
-                                     'short_message': short_message,
-                                     'custom_text': custom_text,
-                                     'task': instance
-                                     })
+    mail.subject = 'Easy Lawyer - OS {} - {} - Prazo: {} - {}'.format(
+        number,
+        str(instance.type_task).title(),
+        instance.final_deadline_date.strftime('%d/%m/%Y'),
+        instance.task_status)
+    mail.message = render_to_string(
+        'mail/base.html', {
+            'server': project_link,
+            'pk': instance.pk,
+            'project_name': settings.PROJECT_NAME,
+            'number': str(number),
+            'short_message': short_message,
+            'custom_text': custom_text,
+            'task': instance
+        })
     mail.to_mail = list(set(mail_list))
     try:
         mail.send()
@@ -133,8 +143,9 @@ def get_dashboard_tasks(request, office_session, checker, person):
                 exclude_status.append(TaskStatus.REFUSED_SERVICE.value)
             if not office_session.use_etl:
                 exclude_status.append(TaskStatus.ERROR.value)
-            data = Task.objects.filter(dynamic_query).filter(is_active=True, office_id=office_session.id).filter(
-                ~Q(task_status__in=exclude_status))
+            data = Task.objects.filter(dynamic_query).filter(
+                is_active=True, office_id=office_session.id).filter(~Q(
+                    task_status__in=exclude_status))
 
     return data, exclude_status
 

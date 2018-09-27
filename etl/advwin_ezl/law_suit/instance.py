@@ -25,18 +25,20 @@ class InstanceETL(GenericETL):
                 name = row['Descicao']
 
                 instance = self.model.objects.filter(
-                  legacy_code=code, 
-                  legacy_code__isnull=False,
-                  office=default_office,
-                  system_prefix=LegacySystem.ADVWIN.value).first()
+                    legacy_code=code,
+                    legacy_code__isnull=False,
+                    office=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first()
 
                 if instance:
                     instance.name = name
                     instance.is_active = True
                     instance.alter_user = user
                     instance.office = default_office
-                    instance.save(update_fields=['is_active', 'name', 'is_active', 'alter_user', 'alter_date',
-                                                 'office'])
+                    instance.save(update_fields=[
+                        'is_active', 'name', 'is_active', 'alter_user',
+                        'alter_date', 'office'
+                    ])
 
                 else:
                     self.model.objects.create(
@@ -49,8 +51,10 @@ class InstanceETL(GenericETL):
                         office=default_office)
 
                 self.debug_logger.debug(
-                    "Instancias,%s,%s,%s,%s,%s,%s,%s" % (str(name), str(True), str(code),str(user.id), str(user.id),
-                                                     str(LegacySystem.ADVWIN.value), self.timestr))
+                    "Instancias,%s,%s,%s,%s,%s,%s,%s"
+                    % (str(name), str(True), str(code), str(user.id),
+                       str(user.id), str(LegacySystem.ADVWIN.value),
+                       self.timestr))
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,
                                               rows_count, e, self.timestr)

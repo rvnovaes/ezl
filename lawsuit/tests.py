@@ -10,7 +10,6 @@ from lawsuit.forms import LawSuitForm, CourtDivisionForm, InstanceForm, FolderFo
 from lawsuit.models import LawSuit, CourtDistrict, CourtDivision, Folder, Instance, State, \
     Movement, TypeMovement, Organ
 
-
 # TODO LawSuit, Views
 
 # Status 200: conseguiu acessar a pagina
@@ -19,8 +18,8 @@ from lawsuit.models import LawSuit, CourtDistrict, CourtDivision, Folder, Instan
 # model_mommy serve apenas para testes em modelos. Testes na view tem que ser feitos da maneira
 # convencional
 
-class LawSuitTest(TestCase):
 
+class LawSuitTest(TestCase):
     def setUp(self):
         User.objects.create_user(username='username', password='password')
         self.client.login(username='username', password='password')
@@ -30,7 +29,8 @@ class LawSuitTest(TestCase):
         self.assertTrue(isinstance(c_inst, LawSuit))
 
     def test_valid_LawSuitForm(self):
-        person_lawyer = mommy.make(Person, name='Adv', is_lawyer=True, is_active=True).id
+        person_lawyer = mommy.make(
+            Person, name='Adv', is_lawyer=True, is_active=True).id
         folder = mommy.make(Folder).id
         instance = mommy.make(Instance).id
         court_district = mommy.make(CourtDistrict).id
@@ -38,13 +38,15 @@ class LawSuitTest(TestCase):
         court_division = mommy.make(CourtDivision, is_active=True).id
         law_suit_number = '12345'
 
-        data = {'person_lawyer': person_lawyer,
-                'folder': folder,
-                'instance': instance,
-                'court_district': court_district,
-                'organ': organ,
-                'court_division': court_division,
-                'law_suit_number': law_suit_number}
+        data = {
+            'person_lawyer': person_lawyer,
+            'folder': folder,
+            'instance': instance,
+            'court_district': court_district,
+            'organ': organ,
+            'court_division': court_division,
+            'law_suit_number': law_suit_number
+        }
 
         form = LawSuitForm(data=data)
         self.assertTrue(form.is_valid(), form.errors)
@@ -63,7 +65,12 @@ class LawSuitTest(TestCase):
 
     def test_update_view(self):
         c_inst = mommy.make(LawSuit)
-        url = reverse('lawsuit_update', kwargs={'folder': c_inst.folder.id, 'pk': c_inst.id})
+        url = reverse(
+            'lawsuit_update',
+            kwargs={
+                'folder': c_inst.folder.id,
+                'pk': c_inst.id
+            })
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 200)
@@ -137,11 +144,14 @@ class FolderTest(TestCase):
 
     def test_valid_FolderForm(self):
         legacy_code = '9999'
-        person_customer = mommy.make(Person, name='Joao', is_active=True, is_customer=True).id
+        person_customer = mommy.make(
+            Person, name='Joao', is_active=True, is_customer=True).id
 
-        data = {'legacy_code': legacy_code,
-                'person_customer': person_customer,
-                'cost_center': None}
+        data = {
+            'legacy_code': legacy_code,
+            'person_customer': person_customer,
+            'cost_center': None
+        }
         form = FolderForm(data=data)
         self.assertTrue(form.is_valid())
 
@@ -281,10 +291,12 @@ class MovementTest(TestCase):
 
         law_suit = mommy.make(LawSuit, is_active=True).id
         type_movement = mommy.make(TypeMovement, is_active=True).id
-        data = {'legacy_code': legacy_code,
-                'person_lawyer': person_lawyer,
-                'law_suit': law_suit,
-                'type_movement': type_movement}
+        data = {
+            'legacy_code': legacy_code,
+            'person_lawyer': person_lawyer,
+            'law_suit': law_suit,
+            'type_movement': type_movement
+        }
 
         form = MovementForm(data=data)
         print(form.errors)
@@ -305,7 +317,12 @@ class MovementTest(TestCase):
 
     def test_update_view(self):
         c_inst = mommy.make(Movement)
-        url = reverse('movement_update', kwargs={'pk': c_inst.id, 'lawsuit': c_inst.law_suit.id})
+        url = reverse(
+            'movement_update',
+            kwargs={
+                'pk': c_inst.id,
+                'lawsuit': c_inst.law_suit.id
+            })
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 200)
