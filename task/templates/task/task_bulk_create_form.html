@@ -151,30 +151,7 @@
                                                               </div>
                                                           </div>
                                                       {% elif field_type != 'clearablefile' and field.name != 'documents' %}
-                                                        {% if field.name == 'type_task' %}
-                                                          <script>
-                                                            var selectedItem = '{{form.type_task.value}}';
-                                                            var typeTaskList = []
-                                                            {% for data in field.field.queryset %}
-                                                                var setTypeTaskList = function (pk, name, simple_service) {
-                                                                  typeTaskList.push({
-                                                                    pk: pk,
-                                                                    name: name,
-                                                                    simple_service: simple_service
-                                                                  })
-                                                                }
-                                                                setTypeTaskList('{{data.pk}}', '{{data.name}}', '{{data.simple_service}}')
-                                                            {% endfor %}
-                                                          </script>
-                                                          <div class="form-group col-sm-6 ezl-required">
-                                                            <label class="control-label" for="id_type_task">Tipo de Serviço</label>
-                                                            <select name="type_task" class="form-control" title="" required="" id="id_type_task">
-                                                              <option value="" selected="">Selecione...</option>
-                                                            </select>
-                                                          </div>
-                                                        {% else %}
-                                                          {% bootstrap_field field form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
-                                                        {% endif %}
+                                                        {% bootstrap_field field form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
                                                       {% endif %}
                                                   {% endfor %}
                                                 </div>
@@ -199,45 +176,6 @@
                 </div>
             </div>
     </form>
-    {%block extra_form %}
-    <!-- Modal -->
-    <div class="modal fade" id="modal-type-task" tabindex="-1" role="dialog" aria-labelledby="modal-type-task-label">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="modal-type-task-label">Selecione o tipo de serviço</h4>
-          </div>
-          <div class="modal-body">
-            <div class="table-responsive">
-              <table id='table-type-task' class="table-hover">
-                <thead>
-                  <tr>
-                    <th>Tipo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for type_task in form.type_task.field.queryset %}
-                    {% if not type_task.simple_service %}
-                        <tr id="{{type_task.pk}}" data-label="{{type_task.name}}">
-                          <td>
-                            {{type_task.name}}
-                          </td>
-                        </tr>
-                    {% endif %}
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
-            <button type="button" class="btn btn-primary">Salvar</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    {%endblock%}
 {% endblock content %}
 
 
@@ -252,7 +190,6 @@
     </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
     <script src="{% static 'task/task-bulk-create.js' %}"></script>
-    <script src="{% static 'task/task-typetask.js' %}"></script>
     <script src="{% static 'skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js' %}"></script>
     <script src="{% static 'core/js/typeahead.js' %}"></script>
     <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
