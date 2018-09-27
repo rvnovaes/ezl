@@ -164,21 +164,25 @@ class CorrespondentsTable(object):
     def get_type_task(self, task):
         type_task = task.type_task
         type_task_main = task.type_task.main_tasks
-        self.type_task_qs = TypeTask.objects.filter(office=self.office_session, type_task_main__in=type_task_main)
-        if type_task.office != self.office_session:
-            if self.type_task_qs.count() == 1:
-                type_task = self.type_task_qs.first()
-                type_task_main = type_task.main_tasks
-                self.type_task_qs = None
-            else:
-                type_task = None
+        if task.parent:
+            self.type_task_qs = TypeTask.objects.filter(office=self.office_session, type_task_main__in=type_task_main)
+            if type_task.office != self.office_session:
+                if self.type_task_qs.count() == 1:
+                    type_task = self.type_task_qs.first()
+                    type_task_main = type_task.main_tasks
+                else:
+                    type_task = None
         return type_task, type_task_main
 
     def get_type_task_field(self):
-        if not self.type_task_qs or self.type_task_qs.count() == 1:
+        if not self.type_task_qs:
             type_task_field = None
         else:
-            initial = self.type_task.id if self.type_task in self.type_task_qs else None
+            initial = None
+            if self.type_task in self.type_task_qs:
+                initial = self.type_task.id
+            elif self.type_task_qs.count() == 1:
+                initial = self.type_task_qs.first().id
             type_task_field = forms.ModelChoiceField(
                 queryset=self.type_task_qs,
                 empty_label='',

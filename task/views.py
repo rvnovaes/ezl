@@ -626,9 +626,6 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.office = office_correspondent
         new_task.task_status = TaskStatus.REQUESTED
         new_task.parent = object_parent
-        new_type_task = TypeTask.objects.filter(
-            name=object_parent.type_task.name, survey=object_parent.type_task.survey).latest('pk')
-        new_task.type_task = new_type_task
         new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
         new_task.save()
         for ecm in object_parent.ecm_set.all():
