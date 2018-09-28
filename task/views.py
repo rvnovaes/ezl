@@ -76,8 +76,9 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         form.instance.__server = get_domain(self.request)
         response = super(TaskBulkCreateView, self).form_valid(form)
 
-        if form.cleaned_data['documents']:
-            for document in form.cleaned_data['documents']:
+        documents = self.request.FILES.getlist('file')
+        if documents:
+            for document in documents:
                 file_name = document.name.replace(' ', '_')
                 task.ecm_set.create(
                     path=document,
@@ -131,10 +132,11 @@ class TaskCreateView(AuditFormMixin, CreateView):
         form.instance.movement_id = self.kwargs.get('movement')
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
         form.instance.__server = get_domain(self.request)
-
         response = super(TaskCreateView, self).form_valid(form)
-        if form.cleaned_data['documents']:
-            for document in form.cleaned_data['documents']:
+
+        documents = self.request.FILES.getlist('file')
+        if documents:
+            for document in documents:
                 file_name = document.name.replace(' ', '_')
                 task.ecm_set.create(
                     path=document,
