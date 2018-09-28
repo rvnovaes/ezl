@@ -1,10 +1,13 @@
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
-
+from django.conf import settings
 from task import views
 
 urlpatterns = [
     # Providências
+    url(r'^{}(?P<path>.*)/(?P<task_hash>[-\w\W\d]+)/$'.format(settings.MEDIA_URL.lstrip('/')),
+        views.ExternalMediaFileView.as_view(),
+        name='external-media'),    
     url(r'^providencias/listar/$',
         login_required(views.TaskListView.as_view()),
         name='task_list'),

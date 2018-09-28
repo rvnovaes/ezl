@@ -8,7 +8,7 @@ from . import views
 urlpatterns = [
     url(r'^{}(?P<path>.*)$'.format(settings.MEDIA_URL.lstrip('/')),
         views.MediaFileView.as_view(),
-        name='media'),
+        name='media'),   
     url(r'city/autocomplete/$',
         login_required(views.CityAutoCompleteView.as_view()),
         name='city_autocomplete'),

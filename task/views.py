@@ -17,7 +17,7 @@ from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
 from django.db.models import Q, Case, When, CharField, IntegerField, Count
 from django.db.models.functions import Cast
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.utils.formats import date_format
@@ -51,6 +51,11 @@ from guardian.core import ObjectPermissionChecker
 from functools import reduce
 import operator
 from django.shortcuts import render
+import os
+from django.conf import settings
+from urllib.parse import urljoin
+
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -1255,28 +1260,26 @@ def ajax_get_correspondents_table(request):
     }
     return JsonResponse(data)
 
+def get_ecm_url(ecm, external=False):
+    if external: 
+        return '{path}/{task_hash}/'.format(path=ecm.path.name, task_hash=ecm.task.task_hash.hex)
+    return ecm.path.name
 
-def get_ecms(task_id):
+
+def get_ecms(task_id, external=False):
     data_list = []
     ecms = Ecm.objects.filter(task_id=task_id)
     for ecm in ecms:
         data_list.append({
-            'task_id':
-            ecm.task_id,
-            'pk':
-            ecm.pk,
-            'url':
-            ecm.path.name,
-            'filename':
-            ecm.filename,
-            'exhibition_name':
-            ecm.exhibition_name if ecm.exhibition_name else ecm.filename,
-            'user':
-            ecm.create_user.username,
-            'data':
-            timezone.localtime(ecm.create_date).strftime('%d/%m/%Y %H:%M'),
-            'state':
-            ecm.task.get_task_status_display(),
+            'task_id': ecm.task_id,
+            'pk': ecm.pk,
+            'url': get_ecm_url(ecm, external=external),
+            'base_external_url': '/providencias' if external else '',
+            'filename': ecm.filename,
+            'exhibition_name': ecm.exhibition_name if ecm.exhibition_name else ecm.filename,
+            'user': ecm.create_user.username,
+            'data': timezone.localtime(ecm.create_date).strftime('%d/%m/%Y %H:%M'),
+            'state': ecm.task.get_task_status_display(),
         })
     data = {'task_id': task_id, 'total_ecms': ecms.count(), 'ecms': data_list}
     return JsonResponse(data)
@@ -1289,7 +1292,19 @@ def ajax_get_ecms(request):
 
 def get_external_ecms(request):
     task = Task.objects.filter(task_hash=request.GET.get('task_hash')).first()
-    return get_ecms(task.pk)
+    return get_ecms(task.pk, external=True)
+
+
+class ExternalMediaFileView(View):
+    def get(self, request, path, task_hash):
+        if Ecm.objects.filter(task__task_hash=task_hash, path=path).exists():            
+            if os.path.exists(os.path.join(settings.MEDIA_ROOT, path)):
+                return static_serve_view(
+                    self.request, path, document_root=settings.MEDIA_ROOT)
+            return HttpResponseRedirect(
+                urljoin(settings.AWS_STORAGE_BUCKET_URL, path))
+        raise Http404('Arquivo não existe')
+        
 
 
 class FilterListView(CustomLoginRequiredView, SingleTableViewMixin):

@@ -11,7 +11,7 @@
                         '       <h4><i class="fa fa-file-o"></i> ${exhibition_name}</h4>\n' +
                         '    </td>\n' +
                         '    <td class="text-right">\n' +
-                        '       <button onclick="window.open(\'/media/${url}\', \'_new\')" data-toggle="tooltip" title="Baixar arquivo"  type="button" class="btn btn-info btn-outline btn-circle btn-sm m-r-5"><i class="icon-cloud-download"></i></button>\n' +
+                        '       <button onclick="window.open(\'${base_external_url}/media/${url}\', \'_new\')" data-toggle="tooltip" title="Baixar arquivo"  type="button" class="btn btn-info btn-outline btn-circle btn-sm m-r-5"><i class="icon-cloud-download"></i></button>\n' +
                         '       <button onclick="deleteFile(${task_id}, ${pk}, \'${filename}\')" data-toggle="modal" type="button" class="btn btn-danger btn-outline btn-circle btn-sm m-r-5"\n' +
                         '               data-type="deleteFile" data-pk="${pk}" data-filename="${filename}">\n' +
                         '           <i class="icon-trash"></i>\n' +
