@@ -281,7 +281,7 @@ TaskForm = (function($){
         self.eventChangeFolder(params.folder, function(){
             self.$lawsuit.val(params.lawsuit).trigger('change');
             self.eventChangeLawsuit(params.lawsuit, function(){
-                self.$movement.val(params.movement);
+                self.$movement.val(params.movement).trigger('change');
                 self.eventChangeMovement(params.movement);
                 self.$movement.selectpicker('refresh')
             });
