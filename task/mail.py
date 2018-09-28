@@ -66,6 +66,8 @@ class TaskFinishedEmail(object):
             return {
                 "task_number":
                 self.task.task_number,
+                "type_task":
+                self.task.type_task.name,                
                 "title_type_service":
                 "OS {task_number} - {type_task} ".format(
                     task_number=self.task.task_number,
@@ -162,6 +164,8 @@ class TaskAcceptedMailTemplate(object):
         return {
             "task_number":
             self.task.task_number,
+            "type_task":
+            self.task.type_task.name,            
             "title_type_service":
             "OS {task_number} - {type_task} ".format(
                 task_number=self.task.task_number,

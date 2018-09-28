@@ -1338,8 +1338,8 @@ class CustomSession(View):
             custom_session_user = self.request.session.get(
                 'custom_session_user')
             if not custom_session_user:
-                data['modified'] = True
-            elif custom_session_user.get(str(self.request.user.pk)).get('current_office') \
+                data['modified'] = True            
+            elif custom_session_user.get(str(self.request.user.pk), {}).get('current_office') \
                     != request.POST.get('current_office'):
                 data['modified'] = True
             current_office = request.POST.get('current_office')

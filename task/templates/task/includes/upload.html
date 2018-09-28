@@ -84,18 +84,21 @@
             confirmButtonColor: "#DD6B55",
             confirmButtonText: "Sim, excluir o arquivo.",
             cancelButtonText: "Cancelar",
-            closeOnConfirm: false
+            closeOnConfirm: true,
         }, function(){
-            $('#deleting').modal('show');
+            $('#processing').modal('show');
             $.ajax({
                 url: getUrlDelete(pk),
                 dataType: 'json',
 
-                success: function (data) {
-                    if (data.is_deleted) {
-                        $('#deleting').modal('hide');
-                        get_internal_ecms(task_id);
-                        swal.close()
+                success: function (data) {                    
+                    if (data.is_deleted) {                        
+                        if (location.href.indexOf('external-task') != -1) {
+                            let hash = location.pathname.split('/')[3];
+                            get_external_ecms(hash);
+                        } else {
+                            get_internal_ecms(task_id);
+                        }                                                                     
                     }
                     else {
                         $('#deleting').modal('hide');
@@ -106,7 +109,8 @@
                         $('#deleting').modal('hide');
                         $('#no-providence').removeClass('hide')
                         $('.js-batch-download-files').show()
-                    }
+                    }                    
+                    $('#processing').modal('hide');
                 }
             })
         });
