@@ -143,6 +143,17 @@ class CourtDistrict(Audit, LegacyCode):
         return {"id": self.id, "name": self.name}
 
 
+class CourtDistrictComplement(Audit, LegacyCode, OfficeMixin):
+    name = models.CharField(max_length=255, null=False, verbose_name="Nome")
+    court_district = models.ForeignKey(CourtDistrict, on_delete=models.PROTECT, verbose_name='Comarca')
+
+    class Meta:
+        ordering = ('office', 'name',)
+        verbose_name = "Complemento de comarca"
+        verbose_name_plural = "Complementos de comarca"
+        unique_together = (('name', 'court_district', 'office'),)
+
+
 class Organ(Person, OfficeMixin):
     """
     Classe responsavel por manter o cadastro dos tribunais.
