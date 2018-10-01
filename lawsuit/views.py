@@ -916,6 +916,9 @@ class TypeaHeadCourtDistrictComplementSearch(TypeaHeadGenericSearch):
             court_district = court_district.split(' (')[0]
         complements = complements.filter(Q(name__unaccent__icontains=complement_name)|
                                          Q(court_district__name__unaccent__icontains=court_district))
+        state = extra_params.get('state', None)
+        if state:
+            complements = complements.filter(Q(court_district__state__id=state))
         forward_field = extra_params.get('forward_field', None)
         if forward_field:
             forward_field = forward_field.replace('__', '.')
