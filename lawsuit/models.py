@@ -147,6 +147,8 @@ class CourtDistrictComplement(Audit, LegacyCode, OfficeMixin):
     name = models.CharField(max_length=255, null=False, verbose_name="Nome")
     court_district = models.ForeignKey(CourtDistrict, on_delete=models.PROTECT, verbose_name='Comarca')
 
+    objects = OfficeManager()
+
     class Meta:
         ordering = ('office', 'name',)
         verbose_name = "Complemento de comarca"

@@ -14,14 +14,12 @@ from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixi
     GenericFormOneToMany, AddressCreateView, AddressUpdateView, AddressDeleteView
 from task.models import Task
 from task.tables import TaskTable
-from .forms import (TypeMovementForm, InstanceForm, MovementForm, FolderForm,
-                    LawSuitForm, CourtDistrictForm, OrganForm,
-                    CourtDivisionForm)
-from .models import (Instance, Movement, LawSuit, Folder, CourtDistrict,
-                     CourtDivision, TypeMovement, Organ)
-from .tables import (MovementTable, FolderTable, LawSuitTable,
-                     CourtDistrictTable, InstanceTable, CourtDivisionTable,
-                     TypeMovementTable, OrganTable, AddressOrganTable)
+from .forms import (TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm, OrganForm,
+                    CourtDivisionForm, CourtDistrictComplementForm)
+from .models import (Instance, Movement, LawSuit, Folder, CourtDistrict, CourtDivision, TypeMovement, Organ,
+                     CourtDistrictComplement)
+from .tables import (MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, InstanceTable, CourtDivisionTable,
+                     TypeMovementTable, OrganTable, AddressOrganTable, CourtDistrictComplementTable)
 from core.views import remove_invalid_registry, PopupMixin
 from django.core.cache import cache
 from dal import autocomplete
@@ -864,3 +862,39 @@ class TypeaHeadCourtDistrictSearch(TypeaHeadGenericSearch):
                 'data-value-txt': court_district.__str__()
             })
         return list(data)
+
+
+class CourtDistrictComplementListView(CustomLoginRequiredView, SingleTableViewMixin):
+    model = CourtDistrictComplement
+    table_class = CourtDistrictComplementTable
+
+
+class CourtDistrictComplementCreateView(AuditFormMixin, CreateView):
+    model = CourtDistrictComplement
+    form_class = CourtDistrictComplementForm
+    success_url = reverse_lazy('complement_list')
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+
+class CourtDistrictComplementUpdateView(AuditFormMixin, UpdateView):
+    model = CourtDistrictComplement
+    form_class = CourtDistrictComplementForm
+    success_url = reverse_lazy('complement_list')
+    success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+
+class CourtDistrictComplementDeleteView(AuditFormMixin, MultiDeleteViewMixin):
+    model = CourtDistrictComplement
+    success_url = reverse_lazy('complement_list')
+    success_message = DELETE_SUCCESS_MESSAGE.format(
+        model._meta.verbose_name_plural)

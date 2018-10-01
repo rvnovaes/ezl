@@ -3,8 +3,8 @@ from django.forms import ModelForm
 from core.fields import CustomBooleanField
 from core.models import Person, State, Address, Office
 from financial.models import CostCenter
-from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict,
-                     LawSuit, CourtDivision, Organ)
+from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict, LawSuit, CourtDivision, Organ,
+                     CourtDistrictComplement)
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
 from dal import autocomplete
 from localflavor.br.forms import BRCNPJField
@@ -207,3 +207,20 @@ class OrganForm(BaseForm):
         fields = [
             'office', 'legal_name', 'cpf_cnpj', 'court_district', 'is_active'
         ]
+
+
+class CourtDistrictComplementForm(BaseForm):
+    court_district = forms.CharField(label="Comarca",
+                                     required=False,
+                                     widget=TypeaHeadForeignKeyWidget(model=CourtDistrict,
+                                                                      field_related='name',
+                                                                      name='court_district',
+                                                                      url='/processos/typeahead/search/comarca'))
+
+    class Meta:
+        model = CourtDistrictComplement
+        fields = ['office', 'name', 'court_district', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
