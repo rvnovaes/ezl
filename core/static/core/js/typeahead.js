@@ -21,7 +21,10 @@ $(document).ready(function () {
                 },
                 replace: function (url, query) {
                     if (forward && forward !== 'None'){
-                        forwardValue = $("[name=" + forward + "]").val();
+                        var forwardValue = $("[name=" + forward + "]").attr('data-value');
+                        if (!forwardValue){
+                            forwardValue = $("[name=" + forward + "]").val();
+                        }
                         if (forwardValue == ''){
                             forwardValue = 0;
                         }

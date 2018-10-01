@@ -85,15 +85,14 @@ class LawSuitTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'law_suit_number', 'opposing_party',
+        sequence = ('selection', 'type_lawsuit', 'law_suit_number', 'opposing_party',
                     'court_district', 'instance', 'organ', 'court_division',
                     'person_lawyer', 'is_current_instance', 'is_active',
                     'legacy_code')
         model = LawSuit
         fields = [
-            'selection', 'instance', 'court_district', 'organ',
-            'court_division', 'law_suit_number', 'person_lawyer', 'is_active',
-            'is_current_instance', 'legacy_code', 'opposing_party'
+            'selection', 'instance', 'court_district', 'organ', 'court_division', 'law_suit_number', 'person_lawyer',
+            'is_active', 'is_current_instance', 'legacy_code', 'opposing_party', 'type_lawsuit'
         ]
         # attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem processos cadastrados"

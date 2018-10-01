@@ -8,7 +8,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('core', '0113_auto_20180925_1126'),
@@ -23,13 +22,23 @@ class Migration(migrations.Migration):
                 ('create_date', models.DateTimeField(auto_now_add=True, verbose_name='Criado em')),
                 ('alter_date', models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em')),
                 ('legacy_code', models.CharField(blank=True, max_length=255, null=True, verbose_name='Código legado')),
-                ('system_prefix', models.CharField(blank=True, choices=[('Advwin', 'Advwin'), ('Autojur', 'Autojur'), ('eLaw', 'Elaw')], max_length=255, null=True, verbose_name='Prefixo do sistema')),
+                ('system_prefix',
+                 models.CharField(blank=True, choices=[('Advwin', 'Advwin'), ('Autojur', 'Autojur'), ('eLaw', 'Elaw')],
+                                  max_length=255, null=True, verbose_name='Prefixo do sistema')),
                 ('is_active', models.BooleanField(default=True, verbose_name='Ativo')),
                 ('name', models.CharField(max_length=255, verbose_name='Nome')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='courtdistrictcomplement_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por')),
-                ('court_district', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.CourtDistrict', verbose_name='Comarca')),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='courtdistrictcomplement_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por')),
-                ('office', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='courtdistrictcomplement_office', to='core.Office', verbose_name='Escritório')),
+                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
+                                                 related_name='courtdistrictcomplement_alter_user',
+                                                 to=settings.AUTH_USER_MODEL, verbose_name='Alterado por')),
+                ('court_district',
+                 models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.CourtDistrict',
+                                   verbose_name='Comarca')),
+                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
+                                                  related_name='courtdistrictcomplement_create_user',
+                                                  to=settings.AUTH_USER_MODEL, verbose_name='Criado por')),
+                ('office', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
+                                             related_name='courtdistrictcomplement_office', to='core.Office',
+                                             verbose_name='Escritório')),
             ],
             options={
                 'verbose_name': 'Complemento de comarca',
