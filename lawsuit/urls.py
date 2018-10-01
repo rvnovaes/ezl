@@ -41,6 +41,9 @@ urlpatterns = [
         login_required(views.CourtDistrictComplementUpdateView.as_view())), name='complement_update'),
     url(r'^complemento/excluir$', login_required(login_required(views.CourtDistrictComplementDeleteView.as_view())),
         name='complement_delete'),
+    url(r'^typeahead/search/complemento$',
+        login_required(views.TypeaHeadCourtDistrictComplementSearch.as_view()),
+        name='typeahead_complemento'),
 
     # Varas
     url(r'^varas/$',

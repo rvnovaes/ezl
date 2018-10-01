@@ -264,31 +264,25 @@ class TypeaHeadForeignKeyWidget(TypeaHeadWidget):
                  url=False,
                  name=False,
                  forward=None,
+                 forward_id=None,
                  *args,
                  **kwargs):
         super().__init__(model, url, name, *args, **kwargs)
         self.field_related = field_related
         self.forward = forward or ''
+        self.forward_id = forward_id or ''
 
     def get_context_data(self, name, value, attrs=None):
         return {
             'widget': {
-                'name':
-                self.name or name,
-                'value':
-                value,
-                'value_txt':
-                self.model.objects.filter(
-                    pk=value).first() if str(value).isdigit() else '',
-                'url':
-                self.url,
-                'module':
-                self.model.__module__,
-                'model':
-                self.model.__name__,
-                'field_related':
-                self.field_related,
-                'forward':
-                self.forward
+                'name': self.name or name,
+                'value': value,
+                'value_txt': self.model.objects.filter(pk=value).first() if str(value).isdigit() else '',
+                'url': self.url,
+                'module': self.model.__module__,
+                'model': self.model.__name__,
+                'field_related': self.field_related,
+                'forward': self.forward,
+                'forward_id': self.forward_id
             }
         }

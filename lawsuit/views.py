@@ -853,13 +853,16 @@ class TypeaHeadCourtDistrictSearch(TypeaHeadGenericSearch):
         court_districts = CourtDistrict.objects.filter(
             **
             forward_params) if forward_params else CourtDistrict.objects.all()
-        court_districts = court_districts.filter(
-            Q(name__unaccent__icontains=q)
-            | Q(state__initials__unaccent__icontains=q))
+        court_districts = court_districts.filter(Q(name__unaccent__icontains=q) |
+                                                 Q(state__initials__unaccent__icontains=q))
+        forward_field = extra_params.get('forward_field', None)
+        if forward_field:
+            forward_field = forward_field.replace('__', '.')
         for court_district in court_districts:
             data.append({
                 'id': court_district.id,
-                'data-value-txt': court_district.__str__()
+                'data-value-txt': court_district.__str__(),
+                'data-forward-id': eval('court_district.{}'.format(forward_field)) if forward_field else 0
             })
         return list(data)
 
@@ -898,3 +901,29 @@ class CourtDistrictComplementDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_url = reverse_lazy('complement_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(
         model._meta.verbose_name_plural)
+
+
+class TypeaHeadCourtDistrictComplementSearch(TypeaHeadGenericSearch):
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params, extra_params,
+                 *args, **kwargs):
+        data = []
+        complements = CourtDistrictComplement.objects.get_queryset(office=[office.id]).filter(
+            **forward_params) if forward_params else CourtDistrictComplement.objects.get_queryset(office=[office.id])
+        complement_name = court_district = q
+        if len(q.split(' - ')) == 2:
+            complement_name, court_district = q.split(' - ')
+            court_district = court_district.split(' (')[0]
+        complements = complements.filter(Q(name__unaccent__icontains=complement_name)|
+                                         Q(court_district__name__unaccent__icontains=court_district))
+        forward_field = extra_params.get('forward_field', None)
+        if forward_field:
+            forward_field = forward_field.replace('__', '.')
+        for complement in complements:
+            data.append({
+                'id': complement.id,
+                'data-value-txt': '{} - {}'.format(complement.name, complement.court_district.__str__()),
+                'data-forward-id': eval('complement.{}'.format(forward_field)) if forward_field else 0,
+                'data-extra-params': complement.court_district.state.id
+            })
+        return list(data)

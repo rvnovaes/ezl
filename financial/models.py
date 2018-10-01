@@ -70,6 +70,14 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         verbose_name="Valor",
         default=Decimal('0.00')
     )
+    court_district_complement = models.ForeignKey(
+        'lawsuit.CourtDistrictComplement',
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name='%(class)s_court_district_complement',
+        verbose_name='Complemento de comarca'
+    )
 
     objects = OfficeManager()
 
