@@ -229,7 +229,7 @@ class OrganForm(BaseForm):
 
 class CourtDistrictComplementForm(BaseForm):
     court_district = forms.CharField(label="Comarca",
-                                     required=False,
+                                     required=True,
                                      widget=TypeaHeadForeignKeyWidget(model=CourtDistrict,
                                                                       field_related='name',
                                                                       name='court_district',

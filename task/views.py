@@ -733,7 +733,6 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
         return JsonResponse(data)
 
 
-
 def delete_ecm(request, pk):
     try:
         ecm = Ecm.objects.get(id=pk)
@@ -771,6 +770,7 @@ def delete_ecm(request, pk):
         }
 
     return JsonResponse(data)
+
 
 @login_required
 def delete_internal_ecm(request, pk):
@@ -1170,7 +1170,7 @@ def ajax_get_task_data_table(request):
         'movement__law_suit__court_district__name',
         'movement__law_suit__court_district__state__initials',
         'movement__law_suit__folder__person_customer__legal_name',
-        'movement__law_suit__opposing_party', 'delegation_date',
+        'movement__law_suit__opposing_party', 'movement__law_suit__court_district_complement__name',
         'task_original'
     ]
     if status == 'Erro no sistema de origem':
@@ -1182,7 +1182,7 @@ def ajax_get_task_data_table(request):
             'type_task', 'movement__law_suit',
             'movement__law_suit__court_district',
             'movement__law_suit__court_district__state',
-            'movement__law_suit__folder__person_customer', 'parent').annotate(
+            'movement__law_suit__folder__person_customer', 'movement__law_suit__court_district_complement__name', 'parent').annotate(
                 task_original=Case(
                     When(
                         parent_id__isnull=False,
@@ -1266,6 +1266,7 @@ def ajax_get_correspondents_table(request):
     }
     return JsonResponse(data)
 
+
 def get_ecm_url(ecm, external=False):
     if external: 
         return '{path}/{task_hash}/'.format(path=ecm.path.name, task_hash=ecm.task.task_hash.hex)
@@ -1311,7 +1312,6 @@ class ExternalMediaFileView(View):
                 urljoin(settings.AWS_STORAGE_BUCKET_URL, path))
         raise Http404('Arquivo não existe')
         
-
 
 class FilterListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Filter

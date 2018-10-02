@@ -7,11 +7,11 @@ var getColumns = function(status) {
         {'data': 'final_deadline_date', 'name': 'final_deadline_date'},
         {'data': 'type_task__name', 'name': 'type_task__name'},
         {'data': 'movement__law_suit__law_suit_number', 'name': 'movement__law_suit__law_suit_number'},
-        {'data': 'movement__law_suit__court_district__name', 'name': 'movement__law_suit__court_district__name'},
         {'data': 'movement__law_suit__court_district__state__initials', 'name': 'movement__law_suit__court_district__state__initials'},
+        {'data': 'movement__law_suit__court_district__name', 'name': 'movement__law_suit__court_district__name'},
+        {'data': 'movement__law_suit__court_district_complement__name', 'name': 'movement__law_suit__court_district_complement__name'},
         {'data': 'movement__law_suit__folder__person_customer__legal_name', 'name': 'movement__law_suit__folder__person_customer__legal_name'},
         {'data': 'movement__law_suit__opposing_party', 'name': 'movement__law_suit__opposing_party'},
-        {'data': 'delegation_date', 'name': 'delegation_date'},
         {'data': 'task_original', 'name': 'task_original'},
         {'data': 'task_original', 'name': 'task_original'},
         {'data': 'task_original', 'name': 'task_original'},
@@ -25,7 +25,7 @@ var getColumns = function(status) {
             { 'targets': [ 0 ], 'visible': false, 'searchable': false, 'orderable': false  },
             { 'targets': [ 11 ], 'visible': false, 'searchable': false, 'orderable': false  },
             { 'targets': [ 12 ], 'visible': false, 'searchable': false, 'orderable': false  },
-            { 'targets': [ 2, 9 ],
+            { 'targets': [ 2 ],
                 render: function ( data, type, row, meta ) {
                     if(type === 'display'){
                         data = moment(data).format('DD/MM/YYYY HH:mm');
