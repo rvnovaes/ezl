@@ -377,6 +377,14 @@ class Task(Audit, LegacyCode, OfficeMixin):
         return self.movement.law_suit.court_district
 
     @property
+    def court_district_complement(self):
+        return self.movement.law_suit.court_district_complement
+
+    @property
+    def city(self):
+        return self.movement.law_suit.city
+
+    @property
     def court(self):
         return self.movement.law_suit.organ
 
