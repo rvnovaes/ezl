@@ -57,6 +57,24 @@
             </td>
         </tr>
         <tr>
+            <th>Cidade</th>
+            <td>
+                {{ form.instance.city|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Complemento Comarca</th>
+            <td>
+                {{ form.instance.court_district_complement|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Local de cumprimento</th>
+            <td>
+                {{ form.instance.performance_place|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
             <th>Vara</th>
             <td>
                 {{ form.instance.court_division|default_if_none:"---" }}

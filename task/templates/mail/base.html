@@ -503,11 +503,20 @@
                                                             <strong>Cliente:</strong>
                                                             {{ task.movement.law_suit.folder.person_customer|lower|title }}
                                                         <br>
+                                                            <strong>Comarca:</strong>
+                                                            {{ task.movement.law_suit.court_district|default_if_none:'' }}
+                                                        <br>
                                                             <strong>UF:</strong>
                                                             {{ task.movement.law_suit.court_district.state|default_if_none:'' }}
                                                         <br>
-                                                            <strong>Comarca:</strong>
-                                                            {{ task.movement.law_suit.court_district|default_if_none:'' }}
+                                                            <strong>Cidade:</strong>
+                                                            {{ task.movement.law_suit.city|default_if_none:'' }}
+                                                        <br>
+                                                            <strong>Complemento comarca:</strong>
+                                                            {{ task.movement.law_suit.court_district_complement|default_if_none:'' }}
+                                                        <br>
+                                                            <strong>Local de cumprimento:</strong>
+                                                            {{ task.performance_place|default_if_none:'' }}
                                                         <br>
                                                         {% if task.parent %}
                                                             <br><h2>Escritório solicitante</h2>
