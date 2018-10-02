@@ -36,6 +36,7 @@
 </style>
 
 <script>
+  window.user_id = {{user.pk}}
   var parent_id = false;
   var child_id = false;
   {% if object.parent  %}
@@ -74,16 +75,20 @@
             <div class="chat-box" id="chatBox">
               <div class="chat-list" style="overflow: hidden;" tabindex="5005" id="messageList">
                 <div class="slimscroll" ng-if="$ctrl.in_office_list">
-                  <div ng-repeat="office in $ctrl.offices">
+                  <div ng-repeat="office in $ctrl.offices track by office.name">
                     <a href="#" style="color:#000;text-decoration: none;" ng-click="$ctrl.getMessages(office.chat)" class="get-message">
                       <div class="row">
                         <div class="col-md-2">
-                          <div class="circle circle-sm bg-success di">
+                        <div class="er-pic" ng-if="office.logo">
+                          <img ng-src="{{office.logo}}" alt="varun" width="60" class="img-circle">
+                        </div>
+                         <div class="er-pic circle circle-sm bg-success di" ng-if="!office.logo">
+                            <img ng-src="{{office.logo}}" class="img img-responsive img-circle" ng-if="office.logo"></img>
                             <i class="fa fa-building-o"></i>
-                          </div>
+                        </div>
                         </div>
                         <div class="col-md-10 chat-title">
-                          {{office.office_legal_name | uppercase}}
+                          {{office.name | uppercase}}
                         </div>
                       </div>
                     </a>

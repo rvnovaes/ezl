@@ -15,7 +15,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='attachment',
             name='exibition_name',
-            field=models.CharField(default='exibition_name', max_length=255, verbose_name='Nome de Exibição'),
+            field=models.CharField(
+                default='exibition_name',
+                max_length=255,
+                verbose_name='Nome de Exibição'),
             preserve_default=False,
         ),
     ]

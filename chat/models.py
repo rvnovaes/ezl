@@ -1,11 +1,13 @@
 from django.db import models
-from core.models import Audit, OfficeMixin, Office
+from core.models import Audit, OfficeMixin, Office, Company
 from django.contrib.auth.models import User
-
 
 # Create your models here.
 
+
 class Chat(Audit):
+    company = models.ForeignKey(
+        Company, related_name='company_chats', null=True, blank=True)
     offices = models.ManyToManyField(Office, related_name='chats')
     label = models.SlugField(unique=True)
     title = models.CharField(max_length=100)
@@ -37,6 +39,9 @@ class UserByChat(Audit):
     def __str__(self):
         return self.user_by_chat.username
 
+    class Meta:
+        indexes = [models.Index(fields=['user_by_chat_id'])]
+
 
 class UnreadMessage(Audit):
     message = models.ForeignKey(Message)
@@ -44,3 +49,6 @@ class UnreadMessage(Audit):
 
     def __str__(self):
         return self.user_by_message.user_by_chat.username
+
+    class Meta:
+        indexes = [models.Index(fields=['user_by_message_id'])]

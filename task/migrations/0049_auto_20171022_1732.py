@@ -26,12 +26,34 @@ class Migration(migrations.Migration):
 
     operations = [migrations.RunSQL(sql_1), migrations.RunSQL(sql_2)]
 
-    operations.append(migrations.AlterModelOptions(
+    operations.append(
+        migrations.AlterModelOptions(
             name='task',
-            options={'ordering': ['-alter_date'], 'permissions': (('view_delegated_tasks', 'Can view tasks delegated to the user'), ('view_all_tasks', 'Can view all tasks'), ('return_all_tasks', 'Can return tasks'), ('validate_all_tasks', 'Can validade tasks'), ('view_requested_tasks', 'Can view tasks requested by the user'), ('block_payment_tasks', 'Can block tasks payment'), ('crud_system', 'Can access general data screens')), 'verbose_name': 'Providência', 'verbose_name_plural': 'Providências'},
+            options={
+                'ordering': ['-alter_date'],
+                'permissions':
+                (('view_delegated_tasks',
+                  'Can view tasks delegated to the user'),
+                 ('view_all_tasks', 'Can view all tasks'),
+                 ('return_all_tasks',
+                  'Can return tasks'), ('validate_all_tasks',
+                                        'Can validade tasks'),
+                 ('view_requested_tasks',
+                  'Can view tasks requested by the user'),
+                 ('block_payment_tasks', 'Can block tasks payment'),
+                 ('crud_system', 'Can access general data screens')),
+                'verbose_name':
+                'Providência',
+                'verbose_name_plural':
+                'Providências'
+            },
         ))
-    operations.append(migrations.AlterModelOptions(
+    operations.append(
+        migrations.AlterModelOptions(
             name='typetask',
-            options={'ordering': ('name',), 'verbose_name': 'Tipo de Serviço', 'verbose_name_plural': 'Tipos de Serviço'},
-        )
-    )
+            options={
+                'ordering': ('name', ),
+                'verbose_name': 'Tipo de Serviço',
+                'verbose_name_plural': 'Tipos de Serviço'
+            },
+        ))

@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='dashboardetl',
             name='executed_query',
-            field=models.TextField(blank=True, null=True, verbose_name='Query executada'),
+            field=models.TextField(
+                blank=True, null=True, verbose_name='Query executada'),
         ),
     ]

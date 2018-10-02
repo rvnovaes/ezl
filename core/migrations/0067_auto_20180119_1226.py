@@ -16,11 +16,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='contactmechanism',
             name='office',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='core.Office'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.Office'),
         ),
         migrations.AlterField(
             model_name='contactmechanism',
             name='person',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='core.Person'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.Person'),
         ),
     ]

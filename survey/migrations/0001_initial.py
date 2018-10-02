@@ -9,16 +9,23 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
             name='Survey',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=128, verbose_name='Nome')),
-                ('data', models.TextField(blank=True, null=True, verbose_name='Conteúdo')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('name', models.CharField(max_length=128,
+                                          verbose_name='Nome')),
+                ('data',
+                 models.TextField(
+                     blank=True, null=True, verbose_name='Conteúdo')),
             ],
             options={
                 'verbose_name': 'Pesquisa',

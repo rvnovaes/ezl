@@ -18,15 +18,53 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='InviteOffice',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('create_date', models.DateTimeField(auto_now_add=True, verbose_name='Criado em')),
-                ('alter_date', models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('status', models.CharField(choices=[('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED')], default='N', max_length=1, verbose_name='Status')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='inviteoffice_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por')),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='inviteoffice_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por')),
-                ('office', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='inviteoffice_office', to='core.Office', verbose_name='Escritório')),
-                ('office_invite', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='invites_offices', to='core.Office', verbose_name='Escritório convidado')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('create_date',
+                 models.DateTimeField(
+                     auto_now_add=True, verbose_name='Criado em')),
+                ('alter_date',
+                 models.DateTimeField(
+                     auto_now=True, null=True, verbose_name='Atualizado em')),
+                ('is_active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('status',
+                 models.CharField(
+                     choices=[('A', 'ACCEPTED'), ('R', 'REFUSED'),
+                              ('N', 'NOT REVIEWED')],
+                     default='N',
+                     max_length=1,
+                     verbose_name='Status')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='inviteoffice_alter_user',
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Alterado por')),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='inviteoffice_create_user',
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Criado por')),
+                ('office',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='inviteoffice_office',
+                     to='core.Office',
+                     verbose_name='Escritório')),
+                ('office_invite',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     related_name='invites_offices',
+                     to='core.Office',
+                     verbose_name='Escritório convidado')),
             ],
             options={
                 'abstract': False,

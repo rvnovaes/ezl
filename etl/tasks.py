@@ -9,6 +9,9 @@ from etl.models import DashboardETL
 def remove_old_etldashboard():
     date_limit = timezone.now() - timedelta(days=15)
     dashboards = DashboardETL.objects.filter(create_date__lte=date_limit)
-    ret = {'total': DashboardETL.objects.all().count(), 'excluidos': dashboards.count()}
+    ret = {
+        'total': DashboardETL.objects.all().count(),
+        'excluidos': dashboards.count()
+    }
     dashboards.delete()
     return ret

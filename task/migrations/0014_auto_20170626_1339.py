@@ -16,11 +16,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='task_status',
-            field=models.CharField(default='-', max_length=30, null=True, verbose_name='Status'),
+            field=models.CharField(
+                default='-', max_length=30, null=True, verbose_name='Status'),
         ),
         migrations.AlterField(
             model_name='ecm',
             name='task',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='task.Task'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, to='task.Task'),
         ),
     ]

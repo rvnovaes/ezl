@@ -15,11 +15,20 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ecm',
             name='legacy_code',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Código legado'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Código legado'),
         ),
         migrations.AddField(
             model_name='ecm',
             name='system_prefix',
-            field=models.CharField(blank=True, choices=[('Advwin', 'Advwin')], max_length=255, null=True, verbose_name='Prefixo do sistema'),
+            field=models.CharField(
+                blank=True,
+                choices=[('Advwin', 'Advwin')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do sistema'),
         ),
     ]

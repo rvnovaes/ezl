@@ -7,6 +7,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -18,9 +19,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='servicepricetable',
             name='office',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
-                                    related_name='servicepricetable_office', to='core.Office',
-                                    verbose_name='Escritório'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='servicepricetable_office',
+                to='core.Office',
+                verbose_name='Escritório'),
             preserve_default=False,
         ),
     ]

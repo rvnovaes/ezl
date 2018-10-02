@@ -13,14 +13,18 @@ metadata = Base.metadata
 
 class JuridDistribuicao(Base):
     __tablename__ = 'Jurid_Distribuicao'
-    __table_args__ = (
-        Index('D_Distribuicao', 'Codigo_Comp', 'D_Codigo_Inst', 'D_NumPrc', unique=True),
-    )
+    __table_args__ = (Index(
+        'D_Distribuicao',
+        'Codigo_Comp',
+        'D_Codigo_Inst',
+        'D_NumPrc',
+        unique=True), )
 
     # http://docs.sqlalchemy.org/en/latest/faq/ormconfiguration.html#how-do-i-map-a-table-that-has-no-primary-key
     # Declarei esta coluna como PK uma vez que é a melhor candidata por não se repetir e ser unique
     D_Codigo = Column(Integer, nullable=False, unique=True, primary_key=True)
-    Codigo_Comp = Column(String(20, 'Latin1_General_CI_AS'), nullable=False, index=True)
+    Codigo_Comp = Column(
+        String(20, 'Latin1_General_CI_AS'), nullable=False, index=True)
     D_Codigo_Inst = Column(String(10, 'Latin1_General_CI_AS'), nullable=False)
     D_NumPrc = Column(String(50, 'Latin1_General_CI_AS'), index=True)
     D_Data_Ent = Column(DateTime)
@@ -39,7 +43,8 @@ class JuridDistribuicao(Base):
     num_vara = Column(Integer)
     SiglaIsisRobot = Column(String(10, 'Latin1_General_CI_AS'))
     D_NumPrc_Sonumeros = Column(String(50, 'Latin1_General_CI_AS'), index=True)
-    D_Protocolo_Sonumeros = Column(String(30, 'Latin1_General_CI_AS'), index=True)
+    D_Protocolo_Sonumeros = Column(
+        String(30, 'Latin1_General_CI_AS'), index=True)
     IsisRobotID = Column(Integer)
     IsisDataUlt = Column(DateTime)
     ChaveIsisRobot = Column(String(100, 'Latin1_General_CI_AS'))
@@ -55,10 +60,10 @@ class JuridGedMain(Base):
     # SEM PK - usei ID_doc por ser unique, not null e sequencial
 
     __tablename__ = 'Jurid_Ged_Main'
-    __table_args__ = (
-        Index('IX_Jurid_Ged_Main_Responsavel', 'Responsavel', 'Link', 'ID_doc', 'Arq_Versao'),
-        {'implicit_returning': False}
-    )
+    __table_args__ = (Index('IX_Jurid_Ged_Main_Responsavel', 'Responsavel',
+                            'Link', 'ID_doc', 'Arq_Versao'), {
+                                'implicit_returning': False
+                            })
     Tabela_OR = Column(String(60, 'Latin1_General_CI_AS'))
     Codigo_OR = Column(String(50, 'Latin1_General_CI_AS'), index=True)
     Id_OR = Column(Integer)
@@ -73,7 +78,10 @@ class JuridGedMain(Base):
     Arquivo = Column(LargeBinary)
     Arq_tipo = Column(String(40, 'Latin1_General_CI_AS'))
     Arq_Versao = Column(Integer, nullable=False, server_default=text("(0)"))
-    Arq_Status = Column(String(30, 'Latin1_General_CI_AS'), nullable=False, server_default=text("('N_Processado')"))
+    Arq_Status = Column(
+        String(30, 'Latin1_General_CI_AS'),
+        nullable=False,
+        server_default=text("('N_Processado')"))
     Arq_usuario = Column(String(100, 'Latin1_General_CI_AS'))
     Arq_nick = Column(String(500, 'Latin1_General_CI_AS'))
     Data_morto = Column(DateTime)
@@ -87,9 +95,7 @@ class JuridGedMain(Base):
 
 class JuridGEDLig(Base):
     __tablename__ = 'Jurid_GEDLig'
-    __table_args__ = (
-        {'implicit_returning': False},
-    )
+    __table_args__ = ({'implicit_returning': False}, )
     ID_lig = Column(Integer, nullable=False, unique=True, primary_key=True)
     Id_tabela_or = Column(String(60, 'Latin1_General_CI_AS'))
     Id_codigo_or = Column(String(60, 'Latin1_General_CI_AS'))
@@ -99,34 +105,38 @@ class JuridGEDLig(Base):
     usuario_insercao = Column(String(60, 'Latin1_General_CI_AS'))
 
 
-
-
-
 class JuridPastas(Base):
     # SEM PK - USEI Codigo_Comp por ser unique
 
     __tablename__ = 'Jurid_Pastas'
-    __table_args__ = (
-        Index('IDX_Jurid_Pastas_001', 'Cliente', 'Unidade', 'Codigo_Comp', 'Dt_Cad', 'Status', 'Comarca', 'UF',
-              'Tribunal', 'NumPrc1', 'ValorCausa', 'ValorPCausa', 'Dt_Saida', 'TipoP', 'FaseP', 'PRConta', 'Planta',
-              'Varas', 'RefCliente', 'Config3', 'Dt_RefValor', 'id_pasta', 'PA_Workflowstatus', 'PA_WSub_Descricao',
-              'PA_DT_INSERIDO'),
-        Index('IX_Jurid_Pastas_Advogado_id_pasta', 'Advogado', 'id_pasta'),
-        Index('IX_Jurid_Pastas_Cliente_id_pasta', 'Cliente', 'id_pasta')
-    )
+    __table_args__ = (Index(
+        'IDX_Jurid_Pastas_001', 'Cliente', 'Unidade', 'Codigo_Comp', 'Dt_Cad',
+        'Status', 'Comarca', 'UF', 'Tribunal', 'NumPrc1', 'ValorCausa',
+        'ValorPCausa', 'Dt_Saida', 'TipoP', 'FaseP', 'PRConta', 'Planta',
+        'Varas', 'RefCliente', 'Config3', 'Dt_RefValor', 'id_pasta',
+        'PA_Workflowstatus', 'PA_WSub_Descricao', 'PA_DT_INSERIDO'),
+                      Index('IX_Jurid_Pastas_Advogado_id_pasta', 'Advogado',
+                            'id_pasta'),
+                      Index('IX_Jurid_Pastas_Cliente_id_pasta', 'Cliente',
+                            'id_pasta'))
 
     Codigo = Column(String(10, 'Latin1_General_CI_AS'), nullable=False)
     Numero = Column(String(15, 'Latin1_General_CI_AS'), nullable=False)
     # http://docs.sqlalchemy.org/en/latest/faq/ormconfiguration.html#how-do-i-map-a-table-that-has-no-primary-key
     # Declarei esta coluna como PK uma vez que é a melhor candidata por não se repetir e ser unique
-    Codigo_Comp = Column(String(20, 'Latin1_General_CI_AS'), unique=True, primary_key=True)
+    Codigo_Comp = Column(
+        String(20, 'Latin1_General_CI_AS'), unique=True, primary_key=True)
     Dt_Cad = Column(DateTime)
-    Cliente = Column(String(14, 'Latin1_General_CI_AS'), nullable=False, index=True)
+    Cliente = Column(
+        String(14, 'Latin1_General_CI_AS'), nullable=False, index=True)
     Descricao = Column(String(90, 'Latin1_General_CI_AS'))
     Advogado = Column(String(14, 'Latin1_General_CI_AS'))
     Filer = Column(String(55, 'Latin1_General_CI_AS'))
     Obs = Column(Text(2147483647, 'Latin1_General_CI_AS'))
-    Status = Column(String(15, 'Latin1_General_CI_AS'), index=True, server_default=text("('Ativa')"))
+    Status = Column(
+        String(15, 'Latin1_General_CI_AS'),
+        index=True,
+        server_default=text("('Ativa')"))
     Local = Column(String(35, 'Latin1_General_CI_AS'))
     Cad_Por = Column(String(8, 'Latin1_General_CI_AS'))
     Comarca = Column(String(40, 'Latin1_General_CI_AS'))
@@ -134,7 +144,8 @@ class JuridPastas(Base):
     Instancia = Column(String(10, 'Latin1_General_CI_AS'))
     Tribunal = Column(String(30, 'Latin1_General_CI_AS'))
     Unidade = Column(String(20, 'Latin1_General_CI_AS'))
-    StatusPrc = Column(String(15, 'Latin1_General_CI_AS'), server_default=text("('Ativo')"))
+    StatusPrc = Column(
+        String(15, 'Latin1_General_CI_AS'), server_default=text("('Ativo')"))
     NumPrc1 = Column(String(40, 'Latin1_General_CI_AS'), index=True)
     NumPrc2 = Column(String(40, 'Latin1_General_CI_AS'))
     NumPrc3 = Column(String(40, 'Latin1_General_CI_AS'))
@@ -194,7 +205,8 @@ class JuridPastas(Base):
     NumProto_3 = Column(String(30, 'Latin1_General_CI_AS'))
     Status_Arquivo = Column(String(15, 'Latin1_General_CI_AS'))
     VolumePasta = Column(String(20, 'Latin1_General_CI_AS'))
-    OutraParte_Tab = Column(String(15, 'Latin1_General_CI_AS'), server_default=text("(null)"))
+    OutraParte_Tab = Column(
+        String(15, 'Latin1_General_CI_AS'), server_default=text("(null)"))
     AdvogadoSocio = Column(String(14, 'Latin1_General_CI_AS'))
     Config1 = Column(String(100, 'Latin1_General_CI_AS'))
     Config2 = Column(String(100, 'Latin1_General_CI_AS'))
@@ -255,8 +267,10 @@ class JuridPastas(Base):
     UltSincronia = Column(DateTime)
     Cod_Regra = Column(Integer)
     id_pasta = Column(Integer, nullable=False, index=True)
-    PA_Workflowstatus = Column(Integer, nullable=False, index=True, server_default=text("((0))"))
-    PA_WSub_Descricao = Column(ForeignKey('Jurid_pastas_Workflow_subStatus.WSub_descricao'))
+    PA_Workflowstatus = Column(
+        Integer, nullable=False, index=True, server_default=text("((0))"))
+    PA_WSub_Descricao = Column(
+        ForeignKey('Jurid_pastas_Workflow_subStatus.WSub_descricao'))
     PA_Work_datalimite = Column(DateTime)
     PA_DT_INSERIDO = Column(DateTime, server_default=text("(getdate())"))
     PrcDigital = Column(BIT, server_default=text("((0))"))
@@ -264,7 +278,8 @@ class JuridPastas(Base):
     nr_pasta_temp = Column(String(20, 'Latin1_General_CI_AS'))
 
     def __repr__(self):
-        return "Pasta: Codigo_Comp={0}, Status={1}".format(self.Codigo_Comp, self.Status)
+        return "Pasta: Codigo_Comp={0}, Status={1}".format(
+            self.Codigo_Comp, self.Status)
 
         # Jurid_pastas_Workflow_subStatus = relationship('JuridPastasWorkflowSubStatus')
 
@@ -272,17 +287,18 @@ class JuridPastas(Base):
 class JuridProcMov(Base):
     # Sem PK - Usei Ident por ser IDENTITY
     __tablename__ = 'Jurid_ProcMov'
-    __table_args__ = (
-        Index('IX_Jurid_ProcMov_Ident', 'Ident', 'CodMov'),
-        Index('IX_Jurid_ProcMov_CodMov_Data_Mov2', 'CodMov', 'Data_Mov', 'Codigo_Comp'),
-        Index('Idx_Ordem', 'Codigo_Comp', 'Data', 'Ident'),
-        Index('IX_Jurid_ProcMov_Ident1', 'Ident', 'CodMov')
-    )
+    __table_args__ = (Index('IX_Jurid_ProcMov_Ident', 'Ident', 'CodMov'),
+                      Index('IX_Jurid_ProcMov_CodMov_Data_Mov2', 'CodMov',
+                            'Data_Mov', 'Codigo_Comp'),
+                      Index('Idx_Ordem', 'Codigo_Comp', 'Data', 'Ident'),
+                      Index('IX_Jurid_ProcMov_Ident1', 'Ident', 'CodMov'))
 
-    Codigo_Comp = Column(String(20, 'Latin1_General_CI_AS'), nullable=False, index=True)
+    Codigo_Comp = Column(
+        String(20, 'Latin1_General_CI_AS'), nullable=False, index=True)
     Data = Column(DateTime, nullable=False, index=True)
     Advogado = Column(String(14, 'Latin1_General_CI_AS'), index=True)
-    CodMov = Column(String(15, 'Latin1_General_CI_AS'), nullable=False, index=True)
+    CodMov = Column(
+        String(15, 'Latin1_General_CI_AS'), nullable=False, index=True)
     Valor = Column(MONEY)
     Documento = Column(String(400, 'Latin1_General_CI_AS'))
     MCliente = Column(BIT, nullable=False, server_default=text("(1)"))
@@ -312,9 +328,8 @@ class JuridProcMov(Base):
 
 class JuridAgendaTable(Base):
     __tablename__ = 'Jurid_agenda_table'
-    __table_args__ = (
-        Index('IX_Jurid_agenda_table_Advogado_Status', 'Advogado', 'Status'),
-    )
+    __table_args__ = (Index('IX_Jurid_agenda_table_Advogado_Status',
+                            'Advogado', 'Status'), )
 
     Pasta = Column(String(70, 'Latin1_General_CI_AS'), index=True)
     Mov = Column(Integer)
@@ -362,14 +377,18 @@ class JuridAgendaTable(Base):
     Data_backoffice = Column(DateTime)
     Data_confirmacao = Column(DateTime)
     envio_alerta = Column(BIT, server_default=text("((0))"))
-    lat_cumpri_prazo = Column(Float(24), nullable=False, server_default=text("((0))"))
-    lon_cumpri_prazo = Column(Float(24), nullable=False, server_default=text("((0))"))
+    lat_cumpri_prazo = Column(
+        Float(24), nullable=False, server_default=text("((0))"))
+    lon_cumpri_prazo = Column(
+        Float(24), nullable=False, server_default=text("((0))"))
 
 
 class JuridCorrespondenteHist(Base):
     __tablename__ = 'Jurid_Correspondente_Hist'
-    __table_args__ = {'implicit_returning': False} # Não remover cancela o OUTPUT devido a trigger para envio de email do advwin
-    codigo = Column(Integer,primary_key=True,autoincrement=True)
+    __table_args__ = {
+        'implicit_returning': False
+    }  # Não remover cancela o OUTPUT devido a trigger para envio de email do advwin
+    codigo = Column(Integer, primary_key=True, autoincrement=True)
     codigo_adv_correspondente = Column(String(70, 'Latin1_General_CI_AS'))
     ident_agenda = Column(Integer)
     status = Column(Integer, nullable=False)
@@ -386,7 +405,7 @@ class JuridCorrespondenteHist(Base):
 class JuridFMAlvaraCorrespondente(Base):
     __tablename__ = 'Jurid_FM_alvaraCorrespondente'
 
-    id = Column(Integer, primary_key=True,autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     versao = Column(String(10, 'Latin1_General_CI_AS'), nullable=False)
     agenda_id = Column(Integer, nullable=False)
     alvaraRetiradoAutos = Column(String(255, 'Latin1_General_CI_AS'))
@@ -406,7 +425,7 @@ class JuridFMAlvaraCorrespondente(Base):
 class JuridFMAudienciaCorrespondente(Base):
     __tablename__ = 'Jurid_FM_audienciaCorrespondente'
 
-    id = Column(Integer, primary_key=True,autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     versao = Column(String(10, 'Latin1_General_CI_AS'), nullable=False)
     agenda_id = Column(Integer, nullable=False)
     comparecimentoAudiencia = Column(String(255, 'Latin1_General_CI_AS'))
@@ -433,7 +452,7 @@ class JuridFMAudienciaCorrespondente(Base):
 class JuridFMDiligenciaCorrespondente(Base):
     __tablename__ = 'Jurid_FM_diligenciaCorrespondente'
 
-    id = Column(Integer, primary_key=True,autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     versao = Column(String(10, 'Latin1_General_CI_AS'))
     agenda_id = Column(Integer, nullable=False)
     cumprimento = Column(String(255, 'Latin1_General_CI_AS'))
@@ -441,7 +460,8 @@ class JuridFMDiligenciaCorrespondente(Base):
     despReembolsaveis = Column(String(255, 'Latin1_General_CI_AS'))
     obsRelevantes = Column(Text(2147483647, 'Latin1_General_CI_AS'))
     motivoCumprimentoParcial = Column(String(255, 'Latin1_General_CI_AS'))
-    justificativaNCumprimento = Column(Text(2147483647, 'Latin1_General_CI_AS'))
+    justificativaNCumprimento = Column(
+        Text(2147483647, 'Latin1_General_CI_AS'))
     status = Column(Integer)
     paginas = Column(String(255, 'Latin1_General_CI_AS'))
 
@@ -449,7 +469,7 @@ class JuridFMDiligenciaCorrespondente(Base):
 class JuridFMProtocoloCorrespondente(Base):
     __tablename__ = 'Jurid_FM_protocoloCorrespondente'
 
-    id = Column(Integer, primary_key=True,autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     versao = Column(String(10, 'Latin1_General_CI_AS'))
     agenda_id = Column(Integer, nullable=False)
     protocoloRealizado = Column(String(255, 'Latin1_General_CI_AS'))

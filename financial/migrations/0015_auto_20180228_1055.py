@@ -16,11 +16,21 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='servicepricetable',
             name='correspondent',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='servicepricetable_correspondent', to='core.Person', verbose_name='Correspondente'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='servicepricetable_correspondent',
+                to='core.Person',
+                verbose_name='Correspondente'),
         ),
         migrations.AlterField(
             model_name='servicepricetable',
             name='office_correspondent',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='office_correspondent', to='core.Office', verbose_name='Escritório Correspondente'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='office_correspondent',
+                to='core.Office',
+                verbose_name='Escritório Correspondente'),
         ),
     ]

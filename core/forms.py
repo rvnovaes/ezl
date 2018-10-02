@@ -17,7 +17,7 @@ from allauth.account.adapter import get_adapter
 from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, user_email
 from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, City, ContactMechanism, ContactMechanismType, AddressType, \
-    LegalType, Office, Invite, InviteOffice, Team
+    LegalType, Office, Invite, InviteOffice, Team, CustomSettings
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session, get_domain
 from core.widgets import TypeaHeadForeignKeyWidget
 from core.models import OfficeMixin
@@ -25,11 +25,11 @@ from django_file_form.forms import MultipleUploadedFileField, FileFormMixin
 from core.utils import validate_xlsx_header
 from django.core.exceptions import ValidationError
 
-class BaseModelForm(FileFormMixin, forms.ModelForm):
 
+class BaseModelForm(FileFormMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
-        super().__init__(*args, **kwargs)        
+        super().__init__(*args, **kwargs)
         if self.request:
             self.set_office_queryset()
         usermodel = self._meta.model._meta.app_label == 'auth'
@@ -46,20 +46,23 @@ class BaseModelForm(FileFormMixin, forms.ModelForm):
         return self._meta.model._meta.verbose_name
 
     def set_office_queryset(self):
-        if get_office_session(self.request) and self.request.method == 'GET':            
+        if get_office_session(self.request) and self.request.method == 'GET':
             for field in self.fields:
                 if hasattr(self.fields[field], 'queryset'):
-                    if issubclass(self.fields[field].queryset.model, OfficeMixin):
+                    if issubclass(self.fields[field].queryset.model,
+                                  OfficeMixin):
                         try:
-                            self.fields[field].queryset = self.fields[field].queryset.filter(
-                                office=get_office_session(request=self.request))
+                            self.fields[field].queryset = self.fields[
+                                field].queryset.filter(
+                                    office=get_office_session(
+                                        request=self.request))
                         except:
                             pass
                     if hasattr(self.fields[field].queryset.model, 'offices'):
                         try:
-                            self.fields[field].queryset = self.fields[field].queryset.filter(
-                                offices=get_office_session(self.request)
-                            )
+                            self.fields[field].queryset = self.fields[
+                                field].queryset.filter(
+                                    offices=get_office_session(self.request))
                         except:
                             pass
 
@@ -73,7 +76,8 @@ class BaseModelForm(FileFormMixin, forms.ModelForm):
         for field, obj in self.base_fields.items():
             if isinstance(obj.widget, TypeaHeadForeignKeyWidget):
                 record_id = res.get(field) if res.get(field) else 0
-                res[field] = obj.widget.model.objects.filter(pk=record_id).first()
+                res[field] = obj.widget.model.objects.filter(
+                    pk=record_id).first()
         return res
 
 
@@ -81,9 +85,7 @@ class BaseForm(BaseModelForm):
     """
     Cria uma Form referência e adiciona o mesmo style a todos os widgets
     """
-    is_active = CustomBooleanField(
-        required=False,
-    )
+    is_active = CustomBooleanField(required=False, )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -93,10 +95,12 @@ class BaseForm(BaseModelForm):
                 if field.widget.input_type != 'checkbox':
                     field.widget.attrs['class'] = 'form-control'
                 if field.widget.input_type == 'text':
-                    field.widget.attrs['style'] = 'width: 100%; display: table-cell; '
+                    field.widget.attrs[
+                        'style'] = 'width: 100%; display: table-cell; '
                 # Preenche o o label de cada field do form de acordo com o verbose_name preenchido no modelo
                 try:
-                    field.label = (self._meta.model._meta.get_field(field_name).verbose_name
+                    field.label = (self._meta.model._meta.get_field(
+                        field_name).verbose_name
                                    if not field.label else field.label)
                 except FieldDoesNotExist:
                     pass
@@ -113,34 +117,32 @@ class ContactForm(ModelForm):
         label=u'Nome',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
-    )
+        widget=forms.TextInput(attrs={'class': 'form-control input-sm'}))
 
     email = forms.CharField(
         label=u'E-mail',
         required=True,
         max_length=255,
-        widget=forms.EmailInput(attrs={'class': 'form-control input-sm'})
-    )
+        widget=forms.EmailInput(attrs={'class': 'form-control input-sm'}))
 
     phone_number = forms.CharField(
         label=u'Telefone',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
-    )
+        widget=forms.TextInput(attrs={'class': 'form-control input-sm'}))
 
     message = forms.CharField(
         label=u'Mensagem',
         required=True,
-        widget=forms.Textarea(attrs={'class': 'form-control input-sm'})
-    )
+        widget=forms.Textarea(attrs={'class': 'form-control input-sm'}))
 
 
-class ContactMechanismForm(BaseModelForm):        
+class ContactMechanismForm(BaseModelForm):
     class Meta:
         model = ContactMechanism
-        fields = ['contact_mechanism_type', 'description', 'notes', 'is_active']
+        fields = [
+            'contact_mechanism_type', 'description', 'notes', 'is_active'
+        ]
 
     contact_mechanism_type = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(ContactMechanismType.objects.all()),
@@ -153,29 +155,30 @@ class ContactMechanismForm(BaseModelForm):
         label=u'Descrição',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control input-sm'})
-    )
+        widget=forms.TextInput(attrs={'class': 'form-control input-sm'}))
 
     notes = forms.CharField(
         label=u'Observação',
         required=False,
-        widget=forms.Textarea(attrs={'class': 'form-control input-sm'})
-    )
+        widget=forms.Textarea(attrs={'class': 'form-control input-sm'}))
 
     is_active = CustomBooleanField(
         required=False,
         label='Ativo',
-        widget=CheckboxInput(attrs={'class': 'filled-in', })
-    )    
+        widget=CheckboxInput(attrs={
+            'class': 'filled-in',
+        }))
 
 
 class AddressForm(BaseModelForm):
-    city = forms.CharField(label="Cidade",
-                           required=True,
-                           widget=TypeaHeadForeignKeyWidget(model=City,
-                                                            field_related='name',
-                                                            name='city',
-                                                            url='/city/autocomplete/'))
+    city = forms.CharField(
+        label="Cidade",
+        required=True,
+        widget=TypeaHeadForeignKeyWidget(
+            model=City,
+            field_related='name',
+            name='city',
+            url='/city/autocomplete/'))
     address_type = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(AddressType.objects.all()),
         empty_label='',
@@ -186,8 +189,9 @@ class AddressForm(BaseModelForm):
     is_active = CustomBooleanField(
         required=False,
         label='Ativo',
-        widget=CheckboxInput(attrs={'class': 'filled-in', })
-    )
+        widget=CheckboxInput(attrs={
+            'class': 'filled-in',
+        }))
 
     layout = Layout(
         Row('address_type'),
@@ -201,7 +205,10 @@ class AddressForm(BaseModelForm):
         model = Address
         fields = [
             'city',
-            'address_type', 'street', 'number', 'complement',
+            'address_type',
+            'street',
+            'number',
+            'complement',
             'zip_code',
             'city_region',
             'notes',
@@ -225,7 +232,8 @@ class PersonForm(BaseModelForm):
     )
 
     auth_user = forms.ModelChoiceField(
-        queryset=filter_valid_choice_form(User.objects.all().order_by('username')),
+        queryset=filter_valid_choice_form(
+            User.objects.all().order_by('username')),
         empty_label='',
         required=False,
         label='Usuário do sistema',
@@ -233,8 +241,11 @@ class PersonForm(BaseModelForm):
 
     class Meta:
         model = Person
-        fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj',
-                  'is_lawyer', 'is_customer', 'is_supplier', 'is_active', 'import_from_legacy', 'auth_user']
+        fields = [
+            'legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_lawyer',
+            'is_customer', 'is_supplier', 'is_active', 'import_from_legacy',
+            'auth_user', 'company'
+        ]
 
     def clean(self):
         cleaned_data = super().clean()
@@ -269,12 +280,12 @@ class PersonForm(BaseModelForm):
             )
         else:
             self.layout = Layout(
-                Row('legal_name', 'name'),
-                Row('legal_type', 'cpf_cnpj'),
+                Row('legal_name', 'name'), Row('legal_type', 'cpf_cnpj'),
                 Row('is_lawyer', 'is_customer', 'is_supplier', 'is_active'))
 
 
-AddressFormSet = inlineformset_factory(Person, Address, form=AddressForm, extra=1, max_num=1)
+AddressFormSet = inlineformset_factory(
+    Person, Address, form=AddressForm, extra=1, max_num=1)
 
 
 class UserCreateForm(BaseForm, UserCreationForm):
@@ -282,47 +293,54 @@ class UserCreateForm(BaseForm, UserCreationForm):
         label='Nome',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autofocus': ''})
-    )
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'autofocus': ''
+        }))
 
     last_name = forms.CharField(
         label='Sobrenome',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     email = forms.EmailField(
         label='E-mail',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     username = forms.CharField(
         label='Nome de usuário (login)',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     password1 = forms.CharField(
         label=_('Senha'),
         strip=False,
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'type': 'password'}),
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'type': 'password'
+        }),
         help_text=password_validation.password_validators_help_text_html(),
     )
     password2 = forms.CharField(
         label=_('Confirmação de Senha'),
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'type': 'password'}),
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'type': 'password'
+        }),
         strip=False,
         help_text=_('Enter the same password as before, for verification.'),
     )
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2',
-                  'groups', 'is_active']
+        fields = [
+            'first_name', 'last_name', 'username', 'email', 'password1',
+            'password2', 'groups', 'is_active'
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -335,51 +353,49 @@ class UserUpdateForm(UserChangeForm):
         label='Nome',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     last_name = forms.CharField(
         label='Sobrenome',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     email = forms.CharField(
         label='E-mail',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     username = forms.CharField(
         label='Nome de usuário (login)',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
 
-    is_active = CustomBooleanField(
-        required=False,
-        label='Ativo'
-    )
+    is_active = CustomBooleanField(required=False, label='Ativo')
 
     password = forms.CharField(
         label='Senha',
         max_length=255,
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'password'})
-    )
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'type': 'password'
+        }))
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'password',
-                  'is_active']
+        fields = [
+            'first_name', 'last_name', 'username', 'email', 'password',
+            'is_active'
+        ]
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        self.fields['office'] = get_office_field(self.request, profile=kwargs['instance'])
+        self.fields['office'] = get_office_field(
+            self.request, profile=kwargs['instance'])
         self.fields['office'].label = 'Escritório padrão'
 
 
@@ -390,17 +406,18 @@ class ResetPasswordFormMixin(forms.Form):
         widget=forms.TextInput(attrs={
             "size": "30",
             "placeholder": _("Username"),
-        })
-    )
+        }))
 
     def clean_username(self):
         username = self.cleaned_data["username"]
         self.users = filter_users_by_username(username)
         if not self.users:
-            raise forms.ValidationError(_(u"O Usuário informado não está vinculado"
-                                          " a nenhuma conta"))
+            raise forms.ValidationError(
+                _(u"O Usuário informado não está vinculado"
+                  " a nenhuma conta"))
         if not self.users[0].email or self.users[0].email == ' ':
-            raise forms.ValidationError(_(u"O Usuário informado não possui e-mail registrado"))
+            raise forms.ValidationError(
+                _(u"O Usuário informado não possui e-mail registrado"))
 
         self.email = self.users[0].email
         return self.cleaned_data["username"]
@@ -416,27 +433,27 @@ class ResetPasswordFormMixin(forms.Form):
         for user in self.users:
             temp_key = token_generator.make_token(user)
 
-            # send the password reset email            
+            # send the password reset email
             try:
-                base_url = request.META.get('HTTP_REFERER')[:-1]                
-            except: 
+                base_url = request.META.get('HTTP_REFERER')[:-1]
+            except:
                 base_url = get_domain(request)
-            path = reverse("account_reset_password_from_key",
-                           kwargs=dict(uidb36=user_pk_to_url_str(user),
-                                       key=temp_key))            
+            path = reverse(
+                "account_reset_password_from_key",
+                kwargs=dict(uidb36=user_pk_to_url_str(user), key=temp_key))
             url = '{}{}'.format(base_url, path)
 
-            context = {"current_site": current_site,
-                       "user": user,
-                       "password_reset_url": url,
-                       "request": request,
-                       'username': username}
+            context = {
+                "current_site": current_site,
+                "user": user,
+                "password_reset_url": url,
+                "request": request,
+                'username': username
+            }
 
             email = user_email(user)
-            get_adapter(request).send_mail(
-                'account/email/password_reset_key',
-                email,
-                context)
+            get_adapter(request).send_mail('account/email/password_reset_key',
+                                           email, context)
             self.context = context
         return self.context
 
@@ -446,65 +463,79 @@ class RegisterNewUserForm(UserCreationForm):
         label='Nome',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autofocus': ''})
-    )
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'autofocus': ''
+        }))
 
     last_name = forms.CharField(
         label='Sobrenome',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     email = forms.EmailField(
         label='E-mail',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     username = forms.CharField(
         label='Nome de usuário (login)',
         required=True,
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     password1 = forms.CharField(
         label=_('Senha'),
         strip=False,
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'type': 'password'}),
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'type': 'password'
+        }),
         help_text=password_validation.password_validators_help_text_html(),
     )
     password2 = forms.CharField(
         label=_('Confirmação de Senha'),
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'type': 'password'}),
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'type': 'password'
+        }),
         strip=False,
         help_text=_('Enter the same password as before, for verification.'),
     )
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2']
+        fields = [
+            'first_name', 'last_name', 'username', 'email', 'password1',
+            'password2'
+        ]
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
         username = self.cleaned_data.get('username')
-        if email and User.objects.filter(email=email).exclude(username=username).exists():
-            raise forms.ValidationError('Já existe usuário cadastrado com este e-mail.')
+        if email and User.objects.filter(email=email).exclude(
+                username=username).exists():
+            raise forms.ValidationError(
+                'Já existe usuário cadastrado com este e-mail.')
         return email
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
         if User.objects.filter(username=username).exists():
-            raise forms.ValidationError('O valor informado no campo usuário não está disponível')
+            raise forms.ValidationError(
+                'O valor informado no campo usuário não está disponível')
         return username
 
 
 class OfficeForm(BaseModelForm):
     class Meta:
         model = Office
-        fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj', 'use_service', 'use_etl', 'is_active']
+        fields = [
+            'legal_name', 'name', 'legal_type', 'cpf_cnpj', 'use_service',
+            'use_etl', 'is_active'
+        ]
 
     def clean(self):
         cleaned_data = super().clean()
@@ -528,8 +559,9 @@ class OfficeForm(BaseModelForm):
 
 
 class InviteForm(forms.ModelForm):
-    person = forms.CharField(widget=TypeaHeadForeignKeyWidget(model=Person,
-                                                              field_related='legal_name', name='person'))
+    person = forms.CharField(
+        widget=TypeaHeadForeignKeyWidget(
+            model=Person, field_related='legal_name', name='person'))
 
     class Meta:
         model = Invite
@@ -537,12 +569,14 @@ class InviteForm(forms.ModelForm):
         exclude = ['is_active']
 
 
-InviteOfficeFormSet = inlineformset_factory(Office, Invite, form=InviteForm, extra=1, max_num=1)
+InviteOfficeFormSet = inlineformset_factory(
+    Office, Invite, form=InviteForm, extra=1, max_num=1)
 
 
 class InviteOfficeForm(BaseForm):
     office_invite = forms.CharField(
-        widget=TypeaHeadForeignKeyWidget(model=Office, field_related='legal_name', name='office_invite'))
+        widget=TypeaHeadForeignKeyWidget(
+            model=Office, field_related='legal_name', name='office_invite'))
 
     class Meta:
         model = InviteOffice
@@ -551,7 +585,7 @@ class InviteOfficeForm(BaseForm):
 
 
 class TeamMultipleChoiceField(forms.ModelMultipleChoiceField):
-    def label_from_instance(self, obj):        
+    def label_from_instance(self, obj):
         if hasattr(obj, 'person'):
             return obj.person.legal_name
         return obj.username
@@ -559,7 +593,8 @@ class TeamMultipleChoiceField(forms.ModelMultipleChoiceField):
 
 class TeamForm(BaseForm):
     members = TeamMultipleChoiceField(queryset=User.objects.all())
-    supervisors = TeamMultipleChoiceField(queryset=User.objects.filter(groups__name__contains='Supervisor'))
+    supervisors = TeamMultipleChoiceField(
+        queryset=User.objects.filter(groups__name__contains='Supervisor'))
 
     class Meta:
         model = Team
@@ -567,12 +602,14 @@ class TeamForm(BaseForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['office'] = get_office_field(self.request)        
-        self.fields['supervisors'].queryset = self.fields['supervisors'].queryset.filter(
-                Q(person__offices=get_office_session(request=self.request)), 
+        self.fields['office'] = get_office_field(self.request)
+        self.fields['supervisors'].queryset = self.fields[
+            'supervisors'].queryset.filter(
+                Q(person__offices=get_office_session(request=self.request)),
                 ~Q(username__in=['admin', 'invalid_user']))
-        self.fields['members'].queryset = self.fields['members'].queryset.filter(
-                Q(person__offices=get_office_session(request=self.request)), 
+        self.fields['members'].queryset = self.fields[
+            'members'].queryset.filter(
+                Q(person__offices=get_office_session(request=self.request)),
                 ~Q(username__in=['admin', 'invalid_user']))
 
 
@@ -580,6 +617,7 @@ class XlsxFileField(forms.FileField):
     """
     Field to validate xlsx extension and header 
     """
+
     def __init__(self, headers_to_check, *args, **kwargs):
         self.headers_to_check = headers_to_check
         super().__init__(*args, **kwargs)
@@ -587,9 +625,18 @@ class XlsxFileField(forms.FileField):
     def validate(self, value):
         super().validate(value)
         if not value.name.endswith('.xlsx'):
-            raise ValidationError(
-                    ('Extensão inválida'), code='invalid'
-                )
+            raise ValidationError(('Extensão inválida'), code='invalid')
         if not validate_xlsx_header(value, self.headers_to_check):
-            msg = 'Cabeçalho inválido. O arquivo deve conter por padrão o seguinte cabeçalho: {}'.format(' | '.join(self.headers_to_check))
-            raise ValidationError((msg), code='invalid')        
+            msg = 'Cabeçalho inválido. O arquivo deve conter por padrão o seguinte cabeçalho: {}'.format(
+                ' | '.join(self.headers_to_check))
+            raise ValidationError((msg), code='invalid')
+
+
+class CustomSettingsForm(BaseForm):
+    class Meta:
+        model = CustomSettings
+        fields = ('office', 'email_to_notification')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)

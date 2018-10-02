@@ -18,15 +18,42 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Filter',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('create_date', models.DateTimeField(auto_now_add=True, verbose_name='Criado em')),
-                ('alter_date', models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('name', models.TextField(max_length=255, verbose_name='Nome')),
-                ('description', models.TextField(blank=True, null=True, verbose_name='Descrição')),
-                ('query', models.BinaryField(blank=True, null=True, verbose_name='query')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='filter_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por')),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='filter_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('create_date',
+                 models.DateTimeField(
+                     auto_now_add=True, verbose_name='Criado em')),
+                ('alter_date',
+                 models.DateTimeField(
+                     auto_now=True, null=True, verbose_name='Atualizado em')),
+                ('is_active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('name', models.TextField(max_length=255,
+                                          verbose_name='Nome')),
+                ('description',
+                 models.TextField(
+                     blank=True, null=True, verbose_name='Descrição')),
+                ('query',
+                 models.BinaryField(
+                     blank=True, null=True, verbose_name='query')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='filter_alter_user',
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Alterado por')),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='filter_create_user',
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Criado por')),
             ],
             options={
                 'verbose_name': 'Filtro',

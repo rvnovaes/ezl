@@ -11,5 +11,4 @@ class Migration(migrations.Migration):
         ('core', '0032_merge_20170626_1551'),
     ]
 
-    operations = [
-    ]
+    operations = []

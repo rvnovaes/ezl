@@ -17,16 +17,31 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TaskHistory',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
-                ('notes', models.TextField(blank=True, null=True, verbose_name='Observações')),
-                ('status', models.CharField(
-                    choices=[('A Cumprir', 'ACCEPTED'), ('Em Aberto', 'OPEN'), ('Retorno', 'RETURN'),
-                             ('Cumprida', 'DONE'), ('Recusada', 'REFUSED')], max_length=10)),
+                ('notes',
+                 models.TextField(
+                     blank=True, null=True, verbose_name='Observações')),
+                ('status',
+                 models.CharField(
+                     choices=[('A Cumprir', 'ACCEPTED'), ('Em Aberto', 'OPEN'),
+                              ('Retorno', 'RETURN'), ('Cumprida', 'DONE'),
+                              ('Recusada', 'REFUSED')],
+                     max_length=10)),
                 ('create_user',
-                 models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='taskhistory_create_user',
-                                   to=settings.AUTH_USER_MODEL)),
-                ('task', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='task.Task')),
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='taskhistory_create_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('task',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='task.Task')),
             ],
             options={
                 'verbose_name': 'Histórico da Providência',

@@ -11,4 +11,5 @@ class PlanAdmin(admin.ModelAdmin):
         verbose_name = 'Plano'
         verbose_name_plural = 'Planos'
 
+
 admin.site.register(PlanOffice)

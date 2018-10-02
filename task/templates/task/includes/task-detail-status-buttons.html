@@ -5,7 +5,7 @@
     {% get_obj_perms request.user for office_session as "office_session_perms" %}
     {% if not office_session.use_service %}
         {% include 'task/includes/task-detail-status-buttons-no-use-service.html' with  office_session_perms=office_session_perms %}
-    {% else %}
+    {% else %}        
         {% if 'can_distribute_tasks' in office_session_perms %}
             <button type="button" id="ACCEPTED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"
                     class="text-white btn btn-ezl-accepted_service align-middle {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">

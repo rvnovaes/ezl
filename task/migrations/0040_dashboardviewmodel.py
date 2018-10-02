@@ -18,21 +18,67 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DashboardViewModel',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('delegation_date', models.DateTimeField(default=django.utils.timezone.now, verbose_name='Data de Delegação')),
-                ('acceptance_date', models.DateTimeField(null=True, verbose_name='Data de Aceitação')),
-                ('reminder_deadline_date', models.DateTimeField(null=True, verbose_name='Primeiro Prazo')),
-                ('final_deadline_date', models.DateTimeField(null=True, verbose_name='Segundo Prazo')),
-                ('execution_date', models.DateTimeField(null=True, verbose_name='Data de Cumprimento')),
-                ('return_date', models.DateTimeField(null=True, verbose_name='Data de Retorno')),
-                ('refused_date', models.DateTimeField(null=True, verbose_name='Data de Recusa')),
-                ('blocked_payment_date', models.DateTimeField(null=True, verbose_name='Data da Glosa')),
-                ('finished_date', models.DateTimeField(null=True, verbose_name='Data de Finalização')),
-                ('description', models.TextField(blank=True, null=True, verbose_name='Descrição do serviço')),
-                ('task_status', models.CharField(choices=[('A Cumprir', 'Accepted'), ('Em Aberto', 'Open'), ('Retorno', 'Return'), ('Cumprida', 'Done'), ('Recusada', 'Refused'), ('Glosada', 'Blockedpayment'), ('Finalizada', 'Finished'), ('Inválida', 'Invalid')], default=task.models.TaskStatus('Em Aberto'), max_length=30, verbose_name='')),
-                ('client', models.CharField(max_length=255, null=True, verbose_name='Cliente')),
-                ('type_service', models.CharField(max_length=255, null=True, verbose_name='Serviço')),
-                ('survey_result', models.TextField(blank=True, null=True, verbose_name='Respotas do Formulário')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('delegation_date',
+                 models.DateTimeField(
+                     default=django.utils.timezone.now,
+                     verbose_name='Data de Delegação')),
+                ('acceptance_date',
+                 models.DateTimeField(
+                     null=True, verbose_name='Data de Aceitação')),
+                ('reminder_deadline_date',
+                 models.DateTimeField(
+                     null=True, verbose_name='Primeiro Prazo')),
+                ('final_deadline_date',
+                 models.DateTimeField(null=True,
+                                      verbose_name='Segundo Prazo')),
+                ('execution_date',
+                 models.DateTimeField(
+                     null=True, verbose_name='Data de Cumprimento')),
+                ('return_date',
+                 models.DateTimeField(
+                     null=True, verbose_name='Data de Retorno')),
+                ('refused_date',
+                 models.DateTimeField(
+                     null=True, verbose_name='Data de Recusa')),
+                ('blocked_payment_date',
+                 models.DateTimeField(null=True,
+                                      verbose_name='Data da Glosa')),
+                ('finished_date',
+                 models.DateTimeField(
+                     null=True, verbose_name='Data de Finalização')),
+                ('description',
+                 models.TextField(
+                     blank=True,
+                     null=True,
+                     verbose_name='Descrição do serviço')),
+                ('task_status',
+                 models.CharField(
+                     choices=[('A Cumprir', 'Accepted'), ('Em Aberto', 'Open'),
+                              ('Retorno', 'Return'), ('Cumprida', 'Done'),
+                              ('Recusada', 'Refused'),
+                              ('Glosada', 'Blockedpayment'),
+                              ('Finalizada', 'Finished'),
+                              ('Inválida', 'Invalid')],
+                     default=task.models.TaskStatus('Em Aberto'),
+                     max_length=30,
+                     verbose_name='')),
+                ('client',
+                 models.CharField(
+                     max_length=255, null=True, verbose_name='Cliente')),
+                ('type_service',
+                 models.CharField(
+                     max_length=255, null=True, verbose_name='Serviço')),
+                ('survey_result',
+                 models.TextField(
+                     blank=True,
+                     null=True,
+                     verbose_name='Respotas do Formulário')),
             ],
             options={
                 'managed': False,
@@ -87,4 +133,3 @@ class Migration(migrations.Migration):
     operations.append(migrations.RunSQL(sql))
 
     operations.append(UnaccentExtension())
-

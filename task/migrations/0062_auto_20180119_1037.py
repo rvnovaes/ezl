@@ -16,6 +16,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='parent',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='child', to='task.Task'),
+            field=models.OneToOneField(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='child',
+                to='task.Task'),
         ),
     ]
