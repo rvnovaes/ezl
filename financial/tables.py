@@ -43,7 +43,7 @@ class ServicePriceTableTable(tables.Table):
 class ServicePriceTableTaskTable(tables.Table):
     office_correspondent = tables.Column(orderable=False, verbose_name='Escritório correspondente')
     court_district = tables.Column(orderable=False, verbose_name='Comarca')
-    court_district_complement = tables.Column(orderable=False, verbose_name='Complemento Comarca')
+    court_district_complement = tables.Column(orderable=False, verbose_name='Complemento da comarca')
     state = tables.Column(orderable=False, verbose_name='UF')
     client = tables.Column(orderable=False, verbose_name='Cliente')
     value = tables.Column(orderable=False, verbose_name='Valor')
