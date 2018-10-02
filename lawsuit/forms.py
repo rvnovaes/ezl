@@ -127,7 +127,7 @@ class LawSuitForm(BaseForm):
         required=False)
     court_district = forms.CharField(
         label='Comarca',
-        required=True,
+        required=False,
         widget=TypeaHeadForeignKeyWidget(
             model=CourtDistrict,
             field_related='name',
@@ -166,7 +166,7 @@ class LawSuitForm(BaseForm):
         queryset=filter_valid_choice_form(
             Instance.objects.filter(is_active=True)).order_by('name'),
         empty_label=u"Selecione",
-        required=True)
+        required=False)
     court_division = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(
             CourtDivision.objects.filter(is_active=True)).order_by('name'),

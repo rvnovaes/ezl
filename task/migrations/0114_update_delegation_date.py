@@ -3,13 +3,17 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+from django.db.models.signals import post_save
+from task.signals import post_save_task
 import django.utils.timezone
 import logging
 logger = logging.getLogger('0114')
 
 
 def update_delegation_date(apps, schema_editor):
-    from task.models import Task, TaskStatus
+    Task = apps.get_model('task', 'Task')
+    from task.models import TaskStatus
+    post_save.disconnect(post_save_task, sender=Task)
     for task in Task.objects.filter(
             delegation_date__isnull=False,
             task_status__in=[
@@ -17,10 +21,11 @@ def update_delegation_date(apps, schema_editor):
                 TaskStatus.ACCEPTED_SERVICE
             ]):
         task.delegation_date = None
-        task.save(**{'skip_signal': True, 'skip_mail': True})
+        task.save()
         logger.info(
             'AJUSTADO delegation_date de OS - {} COM O STATUS {}'.format(
-                str(task.task_number), str(task.status)))
+                str(task.task_number), str(TaskStatus(task.task_status))))
+    post_save.connect(post_save_task, sender=Task)
 
 
 class Migration(migrations.Migration):

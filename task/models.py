@@ -336,6 +336,11 @@ class Task(Audit, LegacyCode, OfficeMixin):
         related_name='tasks_company_chat')
     billing_date = models.DateTimeField(null=True, blank=True)
     receipt_date = models.DateTimeField(null=True, blank=True)
+    performance_place = models.CharField(
+        null=False,
+        blank=False,
+        max_length=255,
+        verbose_name='Local de cumprimento')
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient

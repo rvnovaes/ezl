@@ -233,15 +233,15 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
     instance = models.ForeignKey(
         Instance,
         on_delete=models.PROTECT,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         verbose_name='Instância',
         related_name='instances')
     court_district = models.ForeignKey(
         CourtDistrict,
         on_delete=models.PROTECT,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         verbose_name='Comarca',
         related_name='court_districts')
     organ = models.ForeignKey(
@@ -286,11 +286,6 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
         on_delete=models.PROTECT,
         related_name='%(class)s_court_district_complement',
         verbose_name='Complemento de comarca')
-    performance_place = models.CharField(
-        null=True,
-        blank=True,
-        max_length=255,
-        verbose_name='Local de cumprimento')
 
     objects = OfficeManager()
 
