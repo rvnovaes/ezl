@@ -1,5 +1,5 @@
 from django.forms import Select, Textarea, RadioSelect
-from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter
+from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, BooleanFilter
 from django import forms
 
 from core.models import Person, State, Office, Team
@@ -195,7 +195,17 @@ class TaskToPayFilter(TaskReportFilterBase):
             ('false', 'Somente não faturadas'),
         ))
     group_by_tasks = ChoiceFilter(
-        empty_label=None, choices=GROUP_BY_TASK_TO_PAY_TYPE)
+        empty_label=None,
+        choices=GROUP_BY_TASK_TO_PAY_TYPE
+    )
+    refunds_correspondent_service = ChoiceFilter(
+        label='Cliente reembolsa valor gasto com serviço de correspondência',
+        empty_label='Todos',
+        choices=(
+            (True, 'Somente clientes que reembolsam'),
+            (False, 'Somente clientes que não reembolsam'),
+            )
+        )
 
 
 class TaskToReceiveFilter(TaskReportFilterBase):

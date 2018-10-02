@@ -241,6 +241,8 @@ class PersonForm(BaseModelForm):
 
     class Meta:
         model = Person
+        fields = ['legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_lawyer', 'is_customer', 'is_supplier',
+                  'is_active', 'import_from_legacy', 'refunds_correspondent_service', 'auth_user', 'company']
         fields = [
             'legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_lawyer',
             'is_customer', 'is_supplier', 'is_active', 'import_from_legacy',
