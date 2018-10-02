@@ -27,7 +27,7 @@ class TaskForm(BaseForm):
         model = Task
         fields = [
             'office', 'task_number', 'person_asked_by', 'type_task',
-            'final_deadline_date', 'description', 'is_active'
+            'final_deadline_date', 'performance_place', 'description', 'is_active'
         ]
 
     person_asked_by = forms.ModelChoiceField(
@@ -56,6 +56,8 @@ class TaskForm(BaseForm):
             'rows': '5',
             'id': 'details_id'
         }))
+
+    performance_place = forms.CharField(required=True)
     documents = MultipleUploadedFileField(required=False)
 
     def __init__(self, *args, **kwargs):
