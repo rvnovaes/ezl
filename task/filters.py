@@ -6,7 +6,7 @@ from core.models import Person, State, Office, Team
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
 from financial.models import CostCenter
-from lawsuit.models import CourtDistrict, Organ
+from lawsuit.models import CourtDistrict, Organ, CourtDistrictComplement
 from task.models import TypeTask, Task, Filter, TaskStatus
 from .models import DashboardViewModel
 from core.utils import get_office_session
@@ -44,7 +44,15 @@ class TaskFilter(FilterSet):
             forward='state',
             name='court_district',
             url='/processos/courtdistrict_autocomplete'))
-
+    court_district_complement = CharFilter(
+        label="Complemento de Comarca",
+        required=False,
+        widget=TypeaHeadForeignKeyWidget(
+            model=CourtDistrictComplement,
+            field_related='name',
+            forward='court_district',
+            name='court_district_complement',
+            url='/processos/typeahead/search/complemento',))
     task_status = MultipleChoiceFilter(
         label="Status",
         required=False,

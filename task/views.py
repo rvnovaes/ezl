@@ -776,6 +776,7 @@ def delete_ecm(request, pk):
 def delete_internal_ecm(request, pk):
     return delete_ecm(request, pk)
 
+
 def delete_external_ecm(request, task_hash, pk):
     # Para usuario que apenas acessam a task por hash, sem autenticar
     task = Task.objects.get(task_hash=task_hash)
@@ -783,6 +784,7 @@ def delete_external_ecm(request, task_hash, pk):
     if ecm.task.task_hash.hex == task_hash:
         return delete_ecm(request, pk)
     return JsonResponse({'message': 'Hash inválido'})
+
 
 class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
     model = DashboardViewModel
@@ -847,6 +849,10 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     task_dynamic_query.add(
                         Q(movement__law_suit__court_district=data[
                             'court_district']), Q.AND)
+                if data['court_district_complement']:
+                    task_dynamic_query.add(
+                        Q(movement__law_suit__court_district_complement=data[
+                            'court_district_complement']), Q.AND)
                 if data['task_status']:
                     status = [
                         getattr(TaskStatus, s) for s in data['task_status']
