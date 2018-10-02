@@ -15,7 +15,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='movement',
             name='law_suit_instance',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.LawSuitInstance',
-                                    verbose_name='Instância do Processo'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='lawsuit.LawSuitInstance',
+                verbose_name='Instância do Processo'),
         ),
     ]

@@ -15,21 +15,34 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='dashboardetl',
-            options={'ordering': ('-execution_date_start',), 'verbose_name': 'Dashboard ETL', 'verbose_name_plural': 'Dashboard ETL'},
+            options={
+                'ordering': ('-execution_date_start', ),
+                'verbose_name': 'Dashboard ETL',
+                'verbose_name_plural': 'Dashboard ETL'
+            },
         ),
         migrations.AlterField(
             model_name='dashboardetl',
             name='execution_date_start',
-            field=models.DateTimeField(auto_now_add=True, null=True, verbose_name='Inicio'),
+            field=models.DateTimeField(
+                auto_now_add=True, null=True, verbose_name='Inicio'),
         ),
         migrations.AlterField(
             model_name='erroretl',
             name='error',
-            field=models.TextField(blank=True, editable=False, null=True, verbose_name='Descrição do erro'),
+            field=models.TextField(
+                blank=True,
+                editable=False,
+                null=True,
+                verbose_name='Descrição do erro'),
         ),
         migrations.AlterField(
             model_name='erroretl',
             name='log',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='errors', to='etl.DashboardETL', verbose_name='Erros'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='errors',
+                to='etl.DashboardETL',
+                verbose_name='Erros'),
         ),
     ]

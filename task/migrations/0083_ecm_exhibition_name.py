@@ -24,12 +24,20 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ecm',
             name='exhibition_name',
-            field=models.CharField(blank=True, null=True, max_length=255, verbose_name='Nome de Exibição'),
+            field=models.CharField(
+                blank=True,
+                null=True,
+                max_length=255,
+                verbose_name='Nome de Exibição'),
         ),
         migrations.RunPython(get_exhibition_name),
         migrations.AlterField(
             model_name='ecm',
             name='exhibition_name',
-            field=models.CharField(blank=False, null=False, max_length=255, verbose_name='Nome de Exibição'),
+            field=models.CharField(
+                blank=False,
+                null=False,
+                max_length=255,
+                verbose_name='Nome de Exibição'),
         ),
     ]

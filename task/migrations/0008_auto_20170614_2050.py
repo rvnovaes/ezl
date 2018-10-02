@@ -19,11 +19,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='ecm',
             name='path',
-            field=models.FileField(max_length=255, unique=True, upload_to='GEDs/'),
+            field=models.FileField(
+                max_length=255, unique=True, upload_to='GEDs/'),
         ),
         migrations.AlterField(
             model_name='ecm',
             name='task',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='task.Task'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, to='task.Task'),
         ),
     ]

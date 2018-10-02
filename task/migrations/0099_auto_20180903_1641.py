@@ -16,6 +16,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='taskworkflow',
             name='custtom_settings',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='task_workflows', to='core.CustomSettings'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='task_workflows',
+                to='core.CustomSettings'),
         ),
     ]

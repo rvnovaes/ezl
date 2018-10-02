@@ -22,6 +22,9 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelOptions(
             name='state',
-            options={'ordering': ['name'], 'verbose_name': 'Estado'},
+            options={
+                'ordering': ['name'],
+                'verbose_name': 'Estado'
+            },
         ),
     ]

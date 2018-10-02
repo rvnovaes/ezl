@@ -15,6 +15,17 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='taskhistory',
             name='status',
-            field=models.CharField(choices=[('Solicitada', 'REQUESTED'), ('Aceita pelo Service', 'ACCEPTED_SERVICE'), ('Em Aberto', 'OPEN'), ('A Cumprir', 'ACCEPTED'), ('Cumprida', 'DONE'), ('Retorno', 'RETURN'), ('Finalizada', 'FINISHED'), ('Recusada pelo Service', 'REFUSED_SERVICE'), ('Recusada', 'REFUSED'), ('Glosada', 'BLOCKEDPAYMENT'), ('Inválida', 'INVALID'), ('Erro no sistema de origem', 'ERROR')], max_length=30),
+            field=models.CharField(
+                choices=[('Solicitada', 'REQUESTED'),
+                         ('Aceita pelo Service', 'ACCEPTED_SERVICE'),
+                         ('Em Aberto', 'OPEN'), ('A Cumprir', 'ACCEPTED'),
+                         ('Cumprida', 'DONE'), ('Retorno', 'RETURN'),
+                         ('Finalizada', 'FINISHED'),
+                         ('Recusada pelo Service', 'REFUSED_SERVICE'),
+                         ('Recusada', 'REFUSED'), ('Glosada',
+                                                   'BLOCKEDPAYMENT'),
+                         ('Inválida', 'INVALID'),
+                         ('Erro no sistema de origem', 'ERROR')],
+                max_length=30),
         ),
     ]

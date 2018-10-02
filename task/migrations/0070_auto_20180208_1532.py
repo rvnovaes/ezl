@@ -16,7 +16,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='typetask',
             name='name',
-            field=models.CharField(max_length=255, verbose_name='Tipo de Serviço'),
+            field=models.CharField(
+                max_length=255, verbose_name='Tipo de Serviço'),
         ),
         migrations.AlterUniqueTogether(
             name='typetask',

@@ -11,7 +11,7 @@
                         '       <h4><i class="fa fa-file-o"></i> ${exhibition_name}</h4>\n' +
                         '    </td>\n' +
                         '    <td class="text-right">\n' +
-                        '       <button onclick="window.open(\'/media/${url}\', \'_new\')" data-toggle="tooltip" title="Baixar arquivo"  type="button" class="btn btn-info btn-outline btn-circle btn-sm m-r-5"><i class="icon-cloud-download"></i></button>\n' +
+                        '       <button onclick="window.open(\'${base_external_url}/media/${url}\', \'_new\')" data-toggle="tooltip" title="Baixar arquivo"  type="button" class="btn btn-info btn-outline btn-circle btn-sm m-r-5"><i class="icon-cloud-download"></i></button>\n' +
                         '       <button onclick="deleteFile(${task_id}, ${pk}, \'${filename}\')" data-toggle="modal" type="button" class="btn btn-danger btn-outline btn-circle btn-sm m-r-5"\n' +
                         '               data-type="deleteFile" data-pk="${pk}" data-filename="${filename}">\n' +
                         '           <i class="icon-trash"></i>\n' +
@@ -66,6 +66,15 @@
         }
     };
 
+    var getUrlDelete = function(pk) {
+        if (location.href.indexOf('external-task') != -1){
+            let hash = location.pathname.split('/')[3];
+            return `/providencias/ecm/${hash}/${pk}/excluir`;          
+        } else {
+            return `/providencias/ecm/${pk}/excluir`;
+        }
+    };
+
     function deleteFile(task_id, pk, file) {
         swal({
             title: file,
@@ -75,18 +84,21 @@
             confirmButtonColor: "#DD6B55",
             confirmButtonText: "Sim, excluir o arquivo.",
             cancelButtonText: "Cancelar",
-            closeOnConfirm: false
+            closeOnConfirm: true,
         }, function(){
-            $('#deleting').modal('show');
+            $('#processing').modal('show');
             $.ajax({
-                url: '/providencias/ecm/' + pk + '/excluir',
+                url: getUrlDelete(pk),
                 dataType: 'json',
 
-                success: function (data) {
-                    if (data.is_deleted) {
-                        $('#deleting').modal('hide');
-                        get_internal_ecms(task_id);
-                        swal.close()
+                success: function (data) {                    
+                    if (data.is_deleted) {                        
+                        if (location.href.indexOf('external-task') != -1) {
+                            let hash = location.pathname.split('/')[3];
+                            get_external_ecms(hash);
+                        } else {
+                            get_internal_ecms(task_id);
+                        }                                                                     
                     }
                     else {
                         $('#deleting').modal('hide');
@@ -97,7 +109,8 @@
                         $('#deleting').modal('hide');
                         $('#no-providence').removeClass('hide')
                         $('.js-batch-download-files').show()
-                    }
+                    }                    
+                    $('#processing').modal('hide');
                 }
             })
         });

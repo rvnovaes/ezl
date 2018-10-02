@@ -15,12 +15,18 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='office',
             name='use_service',
-            field=models.BooleanField(default=True, verbose_name='Possuo equipe de conferência de dados na delegação e validação da OS'),
+            field=models.BooleanField(
+                default=True,
+                verbose_name=
+                'Possuo equipe de conferência de dados na delegação e validação da OS'
+            ),
         ),
         migrations.AddField(
             model_name='office',
             name='use_etl',
-            field=models.BooleanField(default=True,
-                                      verbose_name='Possuo processo de importação de dados de outros sistemas'),
+            field=models.BooleanField(
+                default=True,
+                verbose_name=
+                'Possuo processo de importação de dados de outros sistemas'),
         ),
     ]

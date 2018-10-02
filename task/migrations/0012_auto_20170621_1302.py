@@ -17,11 +17,15 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='ecm',
             name='path',
-            field=models.FileField(max_length=255, unique=True, upload_to=task.models.get_dir_name),
+            field=models.FileField(
+                max_length=255,
+                unique=True,
+                upload_to=task.models.get_dir_name),
         ),
         migrations.AlterField(
             model_name='ecm',
             name='task',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='task.Task'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to='task.Task'),
         ),
     ]

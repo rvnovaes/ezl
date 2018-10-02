@@ -23,10 +23,7 @@ class TaskShowStatusInline(admin.TabularInline):
 @admin.register(CustomSettings)
 class CustomSettingsAdmin(admin.ModelAdmin):
     list_display = ('office', 'email_to_notification', 'i_work_alone')
-    inlines = [
-        TaskShowStatusInline,
-        TaskWorkflowInline
-    ]
+    inlines = [TaskShowStatusInline, TaskWorkflowInline]
 
 
 @admin.register(Company)
@@ -41,8 +38,9 @@ class CompanyUserAdmin(admin.ModelAdmin):
 
 @admin.register(ContactMechanismType)
 class ContactMechanismTypeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'create_user',
-                    'create_date', 'alter_user', 'alter_date']
+    list_display = [
+        'name', 'create_user', 'create_date', 'alter_user', 'alter_date'
+    ]
     search_fields = ['name']
     list_filter = ['name']
 

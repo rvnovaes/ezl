@@ -17,11 +17,21 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='person',
             name='alter_user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='person_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='person_alter_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Alterado por'),
         ),
         migrations.AlterField(
             model_name='person',
             name='create_user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='person_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='person_create_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Criado por'),
         ),
     ]

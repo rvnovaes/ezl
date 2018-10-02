@@ -16,11 +16,23 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='lawsuit',
             name='court_division',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='court_divisions', to='lawsuit.CourtDivision', verbose_name='Vara'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='court_divisions',
+                to='lawsuit.CourtDivision',
+                verbose_name='Vara'),
         ),
         migrations.AlterField(
             model_name='lawsuit',
             name='person_lawyer',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='person_lawyers', to='core.Person', verbose_name='Advogado'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='person_lawyers',
+                to='core.Person',
+                verbose_name='Advogado'),
         ),
     ]

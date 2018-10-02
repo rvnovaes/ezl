@@ -15,9 +15,11 @@ def check_environ(f):
         parser = get_parser()
         source = dict(parser.items('etl'))
         connection_name = source['connection_name']
-        if  connection_name == 'advwin_connection' and os.environ['ENV'] == 'development':
+        if connection_name == 'advwin_connection' and os.environ[
+                'ENV'] == 'development':
             return 'NAO E PERMITIDO EXECUTAR ESTA OPERACAO NO BANCO ADVWIN DE PRODUCAO COM O AMBIENTE DEVELOPMENT'
         return f(*args, **kwargs)
+
     return wrapper
 
 
@@ -39,7 +41,8 @@ def filter_valid_choice_form(queryset):
     """
     try:
         model = queryset.model
-        class_verbose_name_invalid = model._meta.verbose_name.upper() + '-INVÁLIDO'
+        class_verbose_name_invalid = model._meta.verbose_name.upper(
+        ) + '-INVÁLIDO'
         try:
             invalid_registry = queryset.filter(
                 name=class_verbose_name_invalid).first()
@@ -123,8 +126,7 @@ def get_office_field(request, profile=None):
         empty_label='',
         required=True,
         label=u'Escritório',
-        initial=initial
-    )
+        initial=initial)
 
 
 def get_office_related_office_field(request):
@@ -145,8 +147,7 @@ def get_office_related_office_field(request):
         empty_label='',
         required=True,
         label=u'Escritório',
-        initial=initial
-    )
+        initial=initial)
 
 
 def get_office_api(request):
@@ -175,8 +176,12 @@ def get_office_session(request):
 
 def get_domain(request):
     try:
-        if request.META.get('HTTP_X_FORWARDED_HOST') or request.META.get('HTTP_HOST'):
-            return '{}://{}'.format(request.scheme, request.META.get('HTTP_X_FORWARDED_HOST', request.META.get('HTTP_HOST')))
+        if request.META.get('HTTP_X_FORWARDED_HOST') or request.META.get(
+                'HTTP_HOST'):
+            return '{}://{}'.format(
+                request.scheme,
+                request.META.get('HTTP_X_FORWARDED_HOST',
+                                 request.META.get('HTTP_HOST')))
         return request.META.get('HTTP_REFERER')[:-1]
     except:
         return '{}://{}'.format(request.scheme, request.get_host())
@@ -186,7 +191,8 @@ def validate_xlsx_header(xls_file, headers):
     header_is_valid = False
     if headers:
         wb = load_workbook(xls_file, data_only=True)
-        headers_in_file = list(map(lambda header: header.value, [
-                               list(sheet.rows)[0] for sheet in wb.worksheets][0]))
+        headers_in_file = list(
+            map(lambda header: header.value,
+                [list(sheet.rows)[0] for sheet in wb.worksheets][0]))
         header_is_valid = set(headers).issubset(set(headers_in_file))
     return header_is_valid

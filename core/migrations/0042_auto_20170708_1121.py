@@ -32,13 +32,21 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='person',
             name='legal_type',
-            field=models.CharField(choices=[('F', 'Fisica'), ('J', 'Juridica')], default=core.models.LegalType(
-                'J'), max_length=1, verbose_name='Tipo'),
+            field=models.CharField(
+                choices=[('F', 'Fisica'), ('J', 'Juridica')],
+                default=core.models.LegalType('J'),
+                max_length=1,
+                verbose_name='Tipo'),
         ),
         migrations.AlterField(
             model_name='person',
             name='name',
-            field=models.CharField(blank=True, default=models.CharField(
-                max_length=255, verbose_name='Razão social/Nome completo'), max_length=255, null=True, verbose_name='Nome Fantasia/Apelido'),
+            field=models.CharField(
+                blank=True,
+                default=models.CharField(
+                    max_length=255, verbose_name='Razão social/Nome completo'),
+                max_length=255,
+                null=True,
+                verbose_name='Nome Fantasia/Apelido'),
         ),
     ]

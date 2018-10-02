@@ -17,6 +17,9 @@ class Migration(migrations.Migration):
             model_name='address',
             name='office',
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='core.Office'),
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.Office'),
         ),
     ]

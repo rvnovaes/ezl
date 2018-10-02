@@ -17,11 +17,12 @@ def add_admin_to_offices(apps, schema_editor):
         offices = Office.objects.exclude(
             officemembership__person=super_user.person).all()
         for office in offices:
-            OfficeMembership(office=office,
-                             person=super_user.person,
-                             create_user=super_user,
-                             is_active=True,
-                             create_date=timezone.now()).save()
+            OfficeMembership(
+                office=office,
+                person=super_user.person,
+                create_user=super_user,
+                is_active=True,
+                create_date=timezone.now()).save()
 
 
 class Migration(migrations.Migration):

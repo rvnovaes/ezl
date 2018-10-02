@@ -18,12 +18,30 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TaskFeedback',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('feedback_date', models.DateTimeField(auto_now_add=True)),
-                ('rating', models.SmallIntegerField(choices=[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)], verbose_name='Nota')),
-                ('comment', models.TextField(null=True, verbose_name='Comentário')),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='taskfeedback_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por')),
-                ('task', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='task.Task', verbose_name='OS')),
+                ('rating',
+                 models.SmallIntegerField(
+                     choices=[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)],
+                     verbose_name='Nota')),
+                ('comment',
+                 models.TextField(null=True, verbose_name='Comentário')),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='taskfeedback_create_user',
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Criado por')),
+                ('task',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     to='task.Task',
+                     verbose_name='OS')),
             ],
         ),
     ]
