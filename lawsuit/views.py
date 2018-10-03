@@ -3,13 +3,14 @@ from urllib.parse import urlparse
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.validators import ValidationError
 # project imports
 from django.db.models import ProtectedError
 from django.http import HttpResponseRedirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
-    delete_error_protected, record_from_wrong_office
+    delete_error_protected
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin, \
     GenericFormOneToMany, AddressCreateView, AddressUpdateView, AddressDeleteView
 from task.models import Task
@@ -24,8 +25,6 @@ from core.views import remove_invalid_registry, PopupMixin
 from django.core.cache import cache
 from dal import autocomplete
 from django.db.models import Q
-from core.utils import get_office_session
-from ecm.utils import attachment_form_valid
 
 from core.views import CustomLoginRequiredView, TypeaHeadGenericSearch
 
@@ -501,6 +500,14 @@ class LawsuitMovementCreateView(PopupMixin, AuditFormMixin,
         kw['request'] = self.request
         return kw
 
+    def form_valid(self, form):
+        try:
+            res = super().form_valid(form)
+        except ValidationError as e:
+            form.add_error(field=None, error=e)
+            return super().form_invalid(form)
+        return res
+
 
 class LawsuitMovementUpdateView(SuccessMessageMixin, CustomLoginRequiredView,
                                 GenericFormOneToMany, UpdateView):
@@ -542,6 +549,18 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, CustomLoginRequiredView,
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
+
+    def form_invalid(self, form):
+        messages.error(self.request, form.errors)
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        try:
+            res = super().form_valid(form)
+        except ValidationError as e:
+            form.add_error(field=None, error=e)
+            return super().form_invalid(form)
+        return res
 
 
 class MovementListView(CustomLoginRequiredView, SingleTableViewMixin):

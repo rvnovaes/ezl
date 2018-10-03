@@ -333,13 +333,13 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
                                       folder__person_customer=self.folder.person_customer):
                 raise ValidationError({
                     NON_FIELD_ERRORS: [
-                        'Processo com valores duplicados para os campos office, instance, law_suit_number, '
-                        'type_lawsuit, folder__folder_number e folder__person_customer'
-                        'DETAIL: Key(office, instance, law_suit_number, folder__folder_number, '
-                        'folder__person_customer)=({}, {}, {}, {}, {}, {})'.format(
-                            self.office, self.instance, self.law_suit_number, self.type_lawsuit,
-                            self.folder.folder_number, self.folder.person_customer)
-                    ]
+                        'Já existe outro processo com o mesmo número, do mesmo tipo para a mesma instância cadastrado '
+                        'nessa pasta. '
+                    ],
+                    'type_lawsuit': ['Favor verificar o tipo do processo'],
+                    'law_suit_number': ['Favor verificar o número do processo'],
+                    'instance': ['Favor verificar a instância do processo']
+
                 })
         except ObjectDoesNotExist:
             pass
