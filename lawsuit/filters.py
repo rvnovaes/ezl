@@ -1,4 +1,4 @@
-from .models import CourtDistrict, State, Movement
+from .models import CourtDistrict, State, Movement, LawSuit
 import django_filters
 from django_filters import rest_framework as filters
 
@@ -22,3 +22,10 @@ class MovementFilter(filters.FilterSet):
     class Meta:
         model = Movement
         fields = ['legacycode', 'law_suit_number', 'type_movement_legacy_code']
+
+
+class LawsuitFilter(filters.FilterSet):
+    company_id = filters.CharFilter(name='folder__person_customer__company_id')
+    class Meta:
+        model = LawSuit
+        fields = ['company_id']    

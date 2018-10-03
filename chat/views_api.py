@@ -15,9 +15,9 @@ class UnreadMessageViewSet(viewsets.ModelViewSet):
     queryset = UnreadMessage.objects.all()
     serializer_class = UnreadMessageSerializer
     filter_backends = (DjangoFilterBackend, )
-    filter_fields = ('user_by_message__user_by_chat_id', 'message__message')
+    filter_fields = ('user_by_message__user_by_chat_id', 'message__message', 'message__chat__company_id')
 
-    def get_queryset(self):
-        user = self.request.user
-        return UnreadMessage.objects.filter(
-            user_by_message__user_by_chat_id=user.pk).order_by('-id')
+    # def get_queryset(self):
+    #     user = self.request.user
+    #     return UnreadMessage.objects.filter(
+    #         user_by_message__user_by_chat_id=user.pk).order_by('-id')
