@@ -8,7 +8,7 @@ from django.core.exceptions import MultipleObjectsReturned
 from advwin_models.tasks import export_ecm, export_task, export_task_history, delete_ecm
 from django.conf import settings
 from task.models import Task, Ecm, EcmTask, TaskStatus, TaskHistory
-from task.utils import task_send_mail, copy_ecm
+from task.utils import task_send_mail, create_ecm_task
 from task.workflow import get_parent_status, get_child_status, get_parent_fields, get_child_recipients, \
     get_parent_recipients
 from chat.models import Chat, UserByChat
@@ -324,26 +324,26 @@ def post_save_task(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=EcmTask)
-def export_ecm_path(sender, instance, created, **kwargs):
-    if created and instance.ecm.legacy_code is None and instance.task.legacy_code:
+def ecm_task_post_save(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    # Copia o Ecm para o sistema de origem
+    if instance.ecm.legacy_code is None and instance.task.legacy_code:
         export_ecm.delay(instance.ecm.id, instance.task.id)
 
+    # Copia o EcmTask para todos os pais e filhos recursivamente
+    if instance.task.parent:
+        create_ecm_task(instance.ecm, instance.task.parent)
+    if instance.task.get_child:
+        create_ecm_task(instance.ecm, instance.task.get_child)
+
 
 @receiver(post_save, sender=Ecm)
-def create_ecm_task(sender, instance, created, **kwargs):
-    if created:
-        EcmTask.objects.get_or_create(ecm=instance, task=instance.task)
-
-
-@receiver(post_save, sender=Ecm)
-def copy_ecm_related(sender, instance, created, **kwargs):
+def create_ecm_task_for_ecm(sender, instance, created, **kwargs):
+    """Cria o EcmTask para o Ecm assim que o Ecm for criado"""
     if created and instance.path:
-        if instance.task.parent:
-            transaction.on_commit(
-                lambda: copy_ecm(instance, instance.task.parent))
-        if instance.task.get_child:
-            transaction.on_commit(
-                lambda: copy_ecm(instance, instance.task.get_child))
+        create_ecm_task(instance, instance.task)
 
 
 @receiver(post_delete, sender=Ecm)

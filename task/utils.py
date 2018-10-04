@@ -51,11 +51,6 @@ def get_task_attachment(self, form):
                     obj.save()
 
 
-@retry(stop_max_attempt_number=4, wait_fixed=1000)
-def copy_ecm(ecm, task):
-    EcmTask.objects.get_or_create(ecm=ecm, task=task)
-
-
 def get_file_content_copy(filefield):
     local_file_path = os.path.join(settings.MEDIA_ROOT, filefield.name)
     if os.path.exists(local_file_path):
@@ -136,3 +131,12 @@ def create_default_type_tasks(office, create_user=None):
 
 def get_task_ecms(task_id):
     return Ecm.objects.filter(Q(tasks__id=task_id) | Q(task_id=task_id)).distinct('id')
+
+
+def create_ecm_task(ecm, task):
+    EcmTask.objects.get_or_create(ecm=ecm, task=task)
+
+
+def clone_task_ecms(task_from, task_to):
+    for ecm in get_task_ecms(task_from.id):
+        create_ecm_task(ecm, task_to)

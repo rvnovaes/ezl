@@ -45,7 +45,7 @@ from task.workflow import CorrespondentsTable
 from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
 from core.utils import get_office_session, get_domain
-from task.utils import get_task_attachment, copy_ecm, get_dashboard_tasks, get_task_ecms
+from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -660,8 +660,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.parent = object_parent
         new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
         new_task.save()
-        for ecm in get_task_ecms(object_parent.id):
-            new_ecm = copy_ecm(ecm, new_task)
+        clone_task_ecms(object_parent, new_task)
 
     def dispatch(self, request, *args, **kwargs):
         res = super().dispatch(request, *args, **kwargs)
@@ -684,7 +683,6 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
         files = request.FILES.getlist('path')
         task = kwargs['pk']
         data = {'success': False, 'message': exception_create()}
-
         for file in files:
             file_name = file._name.replace(' ', '_')
             obj_task = Task.objects.get(id=task)
@@ -712,11 +710,8 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
                     'success': False,
                     'message': operational_error_create()
                 }
-
             except IOError:
-
                 data = {'is_deleted': False, 'message': ioerror_create()}
-
             except Exception:
                 data = {'success': False, 'message': exception_create()}
 
