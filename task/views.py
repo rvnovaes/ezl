@@ -1421,17 +1421,15 @@ class GeolocationTaskFinish(CustomLoginRequiredView, View):
 def ecm_batch_download(request, pk):
     # https://stackoverflow.com/questions/12881294/django-create-a-zip-of-multiple-files-and-make-it-downloadable
     # http://mypythondjango.blogspot.com/2018/01/how-to-zip-files-in-filefield-and.html
-    ecms = Ecm.objects.filter(task_id=pk).select_related('task')
+    task = Task.objects.get(pk=pk)
     try:
         buff = io.BytesIO()
         zf = ZipFile(buff, mode='a')
-        zip_filename = None
-        for ecm in ecms:
+        zip_filename = 'Anexos_OS_{}.zip'.format(task.task_number)
+        for ecm in get_task_ecms(pk):
             output = io.BytesIO(ecm.get_file_content())
             output.seek(0)
             zf.writestr(ecm.path.name, output.getvalue())
-            if not zip_filename:
-                zip_filename = 'Anexos_OS_%s.zip' % (ecm.task.task_number)
         zf.close()
         buff.seek(0)
         data = buff.read()
