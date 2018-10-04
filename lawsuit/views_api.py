@@ -15,6 +15,7 @@ from .filters import CourtDistrictFilter, MovementFilter, LawsuitFilter
 from rest_framework.decorators import permission_classes
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope, TokenHasReadWriteScope
 from core.models import CompanyUser, Company
+from core.views import remove_invalid_registry
 
 
 @permission_classes((TokenHasReadWriteScope, ))
@@ -30,15 +31,26 @@ class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
 class FolderViewSet(viewsets.ModelViewSet):
     serializer_class = FolderSerializer
 
-    def get_queryset(self):
-        return Folder.objects.filter(
-            office=self.request.auth.application.office)
+    @remove_invalid_registry
+    def get_queryset(self, *args, **kwargs):
+        invalid_registry = kwargs.get('remove_invalid', None)
+        if invalid_registry:
+            self.queryset = self.queryset.exclude(id=invalid_registry)
+        return Folder.objects.filter(office=self.request.auth.application.office)
 
 
 @permission_classes((TokenHasReadWriteScope, ))
 class InstanceViewSet(viewsets.ModelViewSet):
     queryset = Instance.objects.all()
     serializer_class = InstanceSerializer
+    model = Instance
+
+    @remove_invalid_registry
+    def get_queryset(self, *args, **kwargs):
+        invalid_registry = kwargs.get('remove_invalid', None)
+        if invalid_registry:
+            self.queryset = self.queryset.exclude(id=invalid_registry)
+        return self.queryset.filter(office=self.request.auth.application.office)
 
 
 @permission_classes((TokenHasReadWriteScope, ))
@@ -46,11 +58,15 @@ class LawSuitViewSet(viewsets.ModelViewSet):
     serializer_class = LawSuitSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filter_class = LawsuitFilter
-    search_fields = ('folder__legacy_code',)    
+    search_fields = ('folder__legacy_code',)
+    model = LawSuit
 
-    def get_queryset(self):
-        return LawSuit.objects.filter(
-            office=self.request.auth.application.office)
+    @remove_invalid_registry
+    def get_queryset(self, *args, **kwargs):
+        invalid_registry = kwargs.get('remove_invalid', None)
+        if invalid_registry:
+            self.queryset = self.queryset.exclude(id=invalid_registry)
+        return self.queryset.filter(office=self.request.auth.application.office)
 
 
 class CompanyLawsuitViewSet(LawSuitViewSet):
