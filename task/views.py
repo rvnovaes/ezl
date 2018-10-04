@@ -35,7 +35,7 @@ from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixi
 from lawsuit.models import Movement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, ImportTaskListForm
-from task.models import Task, TaskStatus, Ecm, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
+from task.models import Task, Ecm, EcmTask, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation, TypeTaskMain
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
@@ -663,6 +663,7 @@ class EcmCreateView(CustomLoginRequiredView, CreateView):
 
             try:
                 ecm.save()
+                EcmTask.objects.create(ecm=ecm, task=obj_task)
                 data = {'success': True,
                         'id': ecm.id,
                         'name': str(file),
