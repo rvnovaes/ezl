@@ -507,7 +507,11 @@
                                                             {{ task.movement.law_suit.court_district|default_if_none:'' }}
                                                         <br>
                                                             <strong>UF:</strong>
-                                                            {{ task.movement.law_suit.court_district.state|default_if_none:'' }}
+                                                            {% if task.movement.law_suit.court_district %}
+                                                                {{ task.movement.law_suit.court_district.state|default_if_none:'' }}
+                                                            {% else %}
+                                                                &nbsp;
+                                                            {% endif %}
                                                         <br>
                                                             <strong>Cidade:</strong>
                                                             {{ task.movement.law_suit.city|default_if_none:'' }}

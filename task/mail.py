@@ -117,7 +117,8 @@ class TaskOpenMailTemplate(object):
             "client":
                 get_str_or_blank(self.task.client),
             "state":
-                get_str_or_blank(self.task.movement.law_suit.court_district.state),
+                get_str_or_blank(
+                    self.task.movement.law_suit.court_district.state) if self.task.movement.law_suit.court_district else '',
             "court_district":
                 get_str_or_blank(self.task.movement.law_suit.court_district),
             "city":

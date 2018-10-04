@@ -126,7 +126,7 @@ class CorrespondentsTable(object):
         if type_task:
             complement = task.movement.law_suit.court_district_complement
             court_district = task.movement.law_suit.court_district
-            state = task.movement.law_suit.court_district.state
+            state = court_district.state if court_district else None
             client = task.movement.law_suit.folder.person_customer
             offices_related = task.office.offices.all()
             qs = ServicePriceTable.objects.filter(

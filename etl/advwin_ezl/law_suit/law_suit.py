@@ -1,6 +1,6 @@
-from core.models import Person, State
+from core.models import Person, State, City
 from core.utils import LegacySystem
-from lawsuit.models import Organ
+from lawsuit.models import Organ, CourtDistrictComplement, TypeLawsuit
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory, INVALID_ORGAN
 from etl.utils import get_clients_to_import
@@ -75,6 +75,7 @@ class LawsuitETL(GenericETL):
 
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):
+        insert_records = []
         for row in rows:
             rows_count -= 1
 
@@ -113,6 +114,12 @@ class LawsuitETL(GenericETL):
                 court_district = CourtDistrict.objects.filter(
                     name__unaccent__iexact=court_district_legacy_code,
                     state=state).first()
+                city = City.objects.filter(
+                    name__unaccent__iexact=court_district_legacy_code,
+                    state=state).first()
+                court_district_complement = CourtDistrictComplement.objects.filter(
+                    name__unaccent__iexact=court_district_legacy_code,
+                    court_district__state=state).first()
                 organ = Organ.objects.filter(
                     legacy_code=person_court_legacy_code,
                     legacy_code__isnull=False,
@@ -131,9 +138,13 @@ class LawsuitETL(GenericETL):
                         Person)
                 if not instance:
                     instance = InvalidObjectFactory.get_invalid_model(Instance)
-                if not court_district:
+                type_lawsuit = TypeLawsuit.JUDICIAL.name
+                if not (court_district or city or court_district_complement) and court_district_legacy_code:
                     court_district = InvalidObjectFactory.get_invalid_model(
                         CourtDistrict)
+                else:
+                    if not court_district and city:
+                        type_lawsuit = TypeLawsuit.ADMINISTRATIVE.name
                 if not organ:
                     organ = Organ.objects.filter(
                         legal_name=INVALID_ORGAN).first()
@@ -161,16 +172,18 @@ class LawsuitETL(GenericETL):
                     lawsuit.opposing_party = opposing_party
                     lawsuit.office = default_office
                     lawsuit.alter_user = user
+                    lawsuit.city = city
+                    lawsuit.court_district_complement = court_district_complement
+                    lawsuit.type_lawsuit = type_lawsuit
                     # use update_fields to specify which fields to save
                     # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
                     lawsuit.save(update_fields=[
-                        'legacy_code', 'is_active', 'folder', 'person_lawyer',
-                        'instance', 'court_district', 'court_division',
-                        'organ', 'law_suit_number', 'alter_user', 'alter_date',
-                        'is_current_instance', 'opposing_party', 'office'
+                        'legacy_code', 'is_active', 'folder', 'person_lawyer', 'instance', 'court_district',
+                        'court_division', 'organ', 'law_suit_number', 'alter_user', 'alter_date','is_current_instance',
+                        'opposing_party', 'office', 'city', 'court_district_complement', 'type_lawsuit'
                     ])
                 else:
-                    self.model.objects.create(
+                    insert_records.append(self.model(
                         folder=folder,
                         person_lawyer=person_lawyer,
                         instance=instance,
@@ -185,11 +198,14 @@ class LawsuitETL(GenericETL):
                         legacy_code=legacy_code,
                         system_prefix=LegacySystem.ADVWIN.value,
                         opposing_party=opposing_party,
-                        office=default_office)
+                        office=default_office,
+                        city=city,
+                        court_district_complement=court_district_complement,
+                        type_lawsuit=type_lawsuit))
                 self.debug_logger.debug(
                     "LawSuit,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s"
                     % (str(folder.id), str(person_lawyer.id), str(instance.id),
-                       str(court_district.id), str(court_division.id),
+                       str(court_district.id if court_district else 0), str(court_division.id),
                        str(organ.id), law_suit_number, str(user.id),
                        str(user.id), str(True), str(is_current_instance),
                        legacy_code, str(LegacySystem.ADVWIN.value),
@@ -200,6 +216,8 @@ class LawsuitETL(GenericETL):
                                               rows_count, e, self.timestr)
                 self.error_logger.error(msg)
                 save_error_log(log, user, msg)
+        if insert_records:
+            self.model.objects.bulk_create(insert_records, batch_size=1000)
 
 
 if __name__ == "__main__":

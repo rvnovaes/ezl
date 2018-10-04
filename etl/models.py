@@ -7,13 +7,18 @@ from task.models import Task
 solution_dict = dict(
     TASKLESSMOVEMENT='Preencher a movimentação na OS',
     MOVEMENTLESSPROCESS='Preencher o processo na movimentação',
-    TASKINATIVEFOLDER='Alterar o status da pasta para "Especial"')
+    TASKINATIVEFOLDER='Alterar o status da pasta para "Especial"',
+    INVALIDCOURTDISTRICT='Preencher o campo comarca com um valor válido para Comarca, Cidade ou Complemento de comarca',
+    BLANKCOURTDISTRICT='Preencher o campo comarca com um valor válido para Comarca, Cidade ou Complemento de comarca',)
 
 
 class Inconsistencies(Enum):
     TASKLESSMOVEMENT = 'OS sem movimentação'
     MOVEMENTLESSPROCESS = 'Movimentação sem processo'
     TASKINATIVEFOLDER = 'OS em Pasta Inativa'
+    INVALIDCOURTDISTRICT = 'O valor preenchido no campo comarca não foi encontrado como Comarca, Cidade ou ' \
+                           'Complemento de comarca'
+    BLANKCOURTDISTRICT = 'O campo comarca não foi preenchido'
 
     def get_solution(self):
         return solution_dict[self.name]
@@ -83,7 +88,7 @@ class InconsistencyETL(Audit, OfficeMixin):
         verbose_name=u'Inconsistência',
         blank=True,
         null=True,
-        max_length=50,
+        max_length=150,
         choices=((x.value, x.name.title()) for x in Inconsistencies))
     solution = models.CharField(
         verbose_name=u'Solução', blank=True, null=True, max_length=100)
