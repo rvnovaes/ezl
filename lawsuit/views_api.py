@@ -11,7 +11,7 @@ from rest_framework import viewsets, mixins
 from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from .filters import CourtDistrictFilter, MovementFilter
+from .filters import CourtDistrictFilter, MovementFilter, LawsuitFilter
 from rest_framework.decorators import permission_classes
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope, TokenHasReadWriteScope
 from core.models import CompanyUser, Company
@@ -44,8 +44,9 @@ class InstanceViewSet(viewsets.ModelViewSet):
 @permission_classes((TokenHasReadWriteScope, ))
 class LawSuitViewSet(viewsets.ModelViewSet):
     serializer_class = LawSuitSerializer
-    filter_backends = (SearchFilter, )
-    search_fields = ('folder__legacy_code', )
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filter_class = LawsuitFilter
+    search_fields = ('folder__legacy_code',)    
 
     def get_queryset(self):
         return LawSuit.objects.filter(

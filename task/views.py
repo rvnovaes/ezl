@@ -266,7 +266,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
                 office_list, total = self.get_os_grouped_by_client()
         except:
             office_list, total = self.get_os_grouped_by_office()
-        context['offices'] = office_list
+        context['offices_report'] = office_list
         context['total'] = total
         return context
 
@@ -317,6 +317,12 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
                         Q(finished_date__lte=data['finished_in'].stop.replace(
                             hour=23, minute=59)), Q.AND)
 
+            if 'refunds_correspondent_service' in data and data['refunds_correspondent_service']:
+                refunds = (data['refunds_correspondent_service'] == 'True')
+                query.add(
+                    Q(movement__law_suit__folder__person_customer__refunds_correspondent_service=refunds),
+                    Q.AND)
+
             if query or finished_query:
                 query.add(Q(finished_query), Q.AND)
                 queryset = queryset.filter(query)
@@ -348,6 +354,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
                 offices.append({
                     'office_name': office.name,
                     'client_name': client.name,
+                    'client_refunds': client.refunds_correspondent_service,
                     'tasks': tasks,
                     "client_total": client_total,
                     "office_total": 0,
