@@ -23,7 +23,8 @@ class FolderSerializer(serializers.ModelSerializer, CreateUserSerializerMixin,
         return value
 
 
-class InstanceSerializer(serializers.ModelSerializer):
+class InstanceSerializer(serializers.ModelSerializer, CreateUserSerializerMixin,
+                       OfficeSerializerMixin):
     class Meta:
         model = Instance
         fields = ('id', 'name', 'office', 'create_user', 'legacy_code')

@@ -11,7 +11,7 @@ from rest_framework import viewsets, mixins
 from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from .filters import CourtDistrictFilter, MovementFilter, LawsuitFilter
+from .filters import CourtDistrictFilter, MovementFilter, LawsuitFilter, InstanceFilter
 from rest_framework.decorators import permission_classes
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope, TokenHasReadWriteScope
 from core.models import CompanyUser, Company
@@ -30,13 +30,14 @@ class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
 @permission_classes((TokenHasReadWriteScope, ))
 class FolderViewSet(viewsets.ModelViewSet):
     serializer_class = FolderSerializer
+    model = Folder
 
     @remove_invalid_registry
     def get_queryset(self, *args, **kwargs):
         invalid_registry = kwargs.get('remove_invalid', None)
         if invalid_registry:
             self.queryset = self.queryset.exclude(id=invalid_registry)
-        return Folder.objects.filter(office=self.request.auth.application.office)
+        return self.queryset.filter(office=self.request.auth.application.office)
 
 
 @permission_classes((TokenHasReadWriteScope, ))
@@ -44,6 +45,9 @@ class InstanceViewSet(viewsets.ModelViewSet):
     queryset = Instance.objects.all()
     serializer_class = InstanceSerializer
     model = Instance
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filter_class = InstanceFilter
+    search_fields = ('name', 'legacy_code')
 
     @remove_invalid_registry
     def get_queryset(self, *args, **kwargs):
