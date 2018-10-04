@@ -37,19 +37,23 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='taskshowstatus',
             name='custtom_settings',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='task_status_show', to='core.CustomSettings'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='task_status_show',
+                to='core.CustomSettings'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='taskworkflow',
             name='custtom_settings',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='task_workflows', to='core.CustomSettings'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='task_workflows',
+                to='core.CustomSettings'),
             preserve_default=False,
         ),
-        migrations.DeleteModel(
-            name='TaskSettings',
-        ),
-        migrations.DeleteModel(
-            name='WorkflowTask',
-        ),
+        migrations.DeleteModel(name='TaskSettings', ),
+        migrations.DeleteModel(name='WorkflowTask', ),
     ]

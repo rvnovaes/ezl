@@ -21,11 +21,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='team',
             name='members',
-            field=models.ManyToManyField(related_name='team_members', to=settings.AUTH_USER_MODEL),
+            field=models.ManyToManyField(
+                related_name='team_members', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='team',
             name='supervisors',
-            field=models.ManyToManyField(related_name='team_supervisors', to=settings.AUTH_USER_MODEL),
+            field=models.ManyToManyField(
+                related_name='team_supervisors', to=settings.AUTH_USER_MODEL),
         ),
     ]

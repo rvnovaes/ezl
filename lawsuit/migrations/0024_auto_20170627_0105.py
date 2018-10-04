@@ -14,37 +14,61 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='courtdivision',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], max_length=255, null=True, unique=True,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                max_length=255,
+                null=True,
+                unique=True,
+                verbose_name='Prefixo do Sistema'),
         ),
         migrations.AddField(
             model_name='folder',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], max_length=255, null=True, unique=True,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                max_length=255,
+                null=True,
+                unique=True,
+                verbose_name='Prefixo do Sistema'),
         ),
         migrations.AddField(
             model_name='lawsuitinstance',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], max_length=255, null=True, unique=True,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                max_length=255,
+                null=True,
+                unique=True,
+                verbose_name='Prefixo do Sistema'),
         ),
         migrations.AddField(
             model_name='movement',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], max_length=255, null=True, unique=True,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                max_length=255,
+                null=True,
+                unique=True,
+                verbose_name='Prefixo do Sistema'),
         ),
         migrations.AddField(
             model_name='typemovement',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], max_length=255, null=True, unique=True,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                max_length=255,
+                null=True,
+                unique=True,
+                verbose_name='Prefixo do Sistema'),
         ),
         migrations.AddField(
             model_name='typetask',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], max_length=255, null=True, unique=True,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                max_length=255,
+                null=True,
+                unique=True,
+                verbose_name='Prefixo do Sistema'),
         ),
     ]

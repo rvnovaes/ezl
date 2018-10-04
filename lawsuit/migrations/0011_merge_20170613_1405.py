@@ -12,5 +12,4 @@ class Migration(migrations.Migration):
         ('lawsuit', '0010_auto_20170613_1358'),
     ]
 
-    operations = [
-    ]
+    operations = []

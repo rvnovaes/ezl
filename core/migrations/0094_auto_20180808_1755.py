@@ -17,11 +17,21 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='externalapplication',
             name='office',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.Office', verbose_name='Escritório'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to='core.Office',
+                verbose_name='Escritório'),
         ),
         migrations.AlterField(
             model_name='externalapplication',
             name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='core_externalapplication', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='core_externalapplication',
+                to=settings.AUTH_USER_MODEL),
         ),
     ]

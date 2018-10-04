@@ -18,14 +18,43 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Invite',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('create_date', models.DateTimeField(auto_now_add=True, verbose_name='Criado em')),
-                ('alter_date', models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='invite_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por')),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='invite_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por')),
-                ('office', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.Office')),
-                ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='invites', to='core.Person')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('create_date',
+                 models.DateTimeField(
+                     auto_now_add=True, verbose_name='Criado em')),
+                ('alter_date',
+                 models.DateTimeField(
+                     auto_now=True, null=True, verbose_name='Atualizado em')),
+                ('is_active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='invite_alter_user',
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Alterado por')),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='invite_create_user',
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Criado por')),
+                ('office',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     to='core.Office')),
+                ('person',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     related_name='invites',
+                     to='core.Person')),
             ],
             options={
                 'verbose_name': 'Convite',

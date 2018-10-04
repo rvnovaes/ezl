@@ -21,26 +21,32 @@ def ws_connect(message, label):
     else:
         message.reply_channel.send({"close": True})
 
+
 @channel_session_user
 def ws_message(message, label):
-    try:        
+    try:
         data = json.loads(message['text'])
-        user_message = message.user        
+        user_message = message.user
         if data.get('user_id'):
             user_message = User.objects.get(pk=data.get('user_id'))
         chat, created = Chat.objects.get_or_create(pk=int(data.get('chat')))
-        chat_message = chat.messages.create(create_user=user_message, message=data.get('text'))
+        chat_message = chat.messages.create(
+            create_user=user_message, message=data.get('text'))
         chat.save()
-        for user in UserByChat.objects.filter(~Q(user_by_chat=user_message), chat=chat, is_active=True):
-            UnreadMessage.objects.create(create_user=user_message, user_by_message=user,
-                                         message=chat_message)
-        data['create_date'] = timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M')
+        for user in UserByChat.objects.filter(
+                ~Q(user_by_chat=user_message), chat=chat, is_active=True):
+            UnreadMessage.objects.create(
+                create_user=user_message,
+                user_by_message=user,
+                message=chat_message)
+        data['create_date'] = timezone.localtime(
+            timezone.now()).strftime('%d/%m/%Y %H:%M')
         data['create_user_id'] = chat_message.create_user.id
         data['create_user__username'] = chat_message.create_user.username
         data['message'] = chat_message.message
         Group(data.get('label')).send({
-                'text': json.dumps(data),
-                })
+            'text': json.dumps(data),
+        })
     except JSONDecodeError:
         Group('chat').send({
             'text': message['text'],

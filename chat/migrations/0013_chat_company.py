@@ -17,6 +17,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='chat',
             name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='company_chats', to='core.Company'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='company_chats',
+                to='core.Company'),
         ),
     ]

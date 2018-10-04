@@ -20,7 +20,6 @@ from .schemas import *
 from django.contrib.postgres.fields import JSONField
 
 
-
 class Permissions(Enum):
     can_access_settings = 'Can access custom settings'
     view_delegated_tasks = 'Can view tasks delegated to the user'
@@ -32,7 +31,7 @@ class Permissions(Enum):
     can_access_general_data = 'Can access general data screens'
     view_distributed_tasks = 'Can view tasks distributed by the user'
     can_distribute_tasks = 'Can distribute tasks to another user'
-    can_see_tasks_from_team_members ='Can see tasks from your team members'
+    can_see_tasks_from_team_members = 'Can see tasks from your team members'
 
 
 # Dicionário para retornar o icone referente ao status da providencia
@@ -44,7 +43,7 @@ icon_dict = {
     'REFUSED': 'mdi mdi-clipboard-alert',
     'INVALID': 'mdi mdi-exclamation',
     'FINISHED': 'mdi mdi-gavel',
-    'BLOCKEDPAYMENT':'mdi mdi-currency-usd-off',
+    'BLOCKEDPAYMENT': 'mdi mdi-currency-usd-off',
     'ERROR': 'mdi mdi-close-circle-outline',
     'REQUESTED': 'mdi mdi-playlist-play',
     'ACCEPTED_SERVICE': 'mdi mdi-thumb-up-outline',
@@ -162,12 +161,20 @@ class CheckPointType(Enum):
 
 class TypeTaskMain(models.Model):
     is_hearing = models.BooleanField(verbose_name='É audiência', default=False)
-    name = models.CharField(max_length=255, null=False, blank=False, unique=True, verbose_name='Tipo de Serviço')
-    characteristics = JSONField(null=True, blank=True, verbose_name='Características disponíveis',
-                                default=json.dumps(CHARACTERISTICS, indent=4))
+    name = models.CharField(
+        max_length=255,
+        null=False,
+        blank=False,
+        unique=True,
+        verbose_name='Tipo de Serviço')
+    characteristics = JSONField(
+        null=True,
+        blank=True,
+        verbose_name='Características disponíveis',
+        default=json.dumps(CHARACTERISTICS, indent=4))
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('name', )
         verbose_name = 'Tipo de Serviço Principal'
         verbose_name_plural = 'Tipos de Serviço Principais'
 
@@ -176,21 +183,34 @@ class TypeTaskMain(models.Model):
 
 
 class TypeTask(Audit, LegacyCode, OfficeMixin):
-    type_task_main = models.ManyToManyField(TypeTaskMain, verbose_name='Tipo de Serviço Principal',
-                                            related_name='type_tasks')
-    name = models.CharField(max_length=255, null=False, blank=False, verbose_name='Tipo de Serviço')
-    survey = models.ForeignKey('survey.Survey', null=True, blank=True, verbose_name='Tipo de Formulário')
+    type_task_main = models.ManyToManyField(
+        TypeTaskMain,
+        verbose_name='Tipo de Serviço Principal',
+        related_name='type_tasks')
+    name = models.CharField(
+        max_length=255,
+        null=False,
+        blank=False,
+        verbose_name='Tipo de Serviço')
+    survey = models.ForeignKey(
+        'survey.Survey',
+        null=True,
+        blank=True,
+        verbose_name='Tipo de Formulário')
 
-    office = models.ForeignKey(Office, on_delete=models.CASCADE, blank=False,
-                               null=False,
-                               related_name='%(class)s_office',
-                               verbose_name='Escritório')
+    office = models.ForeignKey(
+        Office,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False,
+        related_name='%(class)s_office',
+        verbose_name='Escritório')
 
     objects = OfficeManager()
 
     class Meta:
         db_table = 'type_task'
-        ordering = ('name',)
+        ordering = ('name', )
         verbose_name = 'Tipo de Serviço'
         verbose_name_plural = 'Tipos de Serviço'
 
@@ -210,51 +230,110 @@ class Task(Audit, LegacyCode, OfficeMixin):
     task_hash = models.UUIDField(default=uuid.uuid4, editable=False)
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='child')
+    parent = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name='child')
 
-    task_number = models.PositiveIntegerField(verbose_name='Número da Providência',
-                                              unique=False)
+    task_number = models.PositiveIntegerField(
+        verbose_name='Número da Providência', unique=False)
 
-    movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
-                                 verbose_name='Movimentação')
-    person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=True,
-                                        related_name='%(class)s_asked_by',
-                                        verbose_name='Solicitante')
-    person_executed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=True, null=True,
-                                           related_name='%(class)s_executed_by',
-                                           verbose_name='Correspondente')
-    person_distributed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False,
-                                              null=True,
-                                              verbose_name='Contratante')
-    type_task = models.ForeignKey(TypeTask, on_delete=models.PROTECT, blank=False, null=False,
-                                  verbose_name='Tipo de Serviço')
-    delegation_date = models.DateTimeField(null=True, default=timezone.now, blank=True, verbose_name='Data de Delegação')
-    acceptance_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação')
-    final_deadline_date = models.DateTimeField(null=False, blank=False, default=timezone.now, verbose_name='Prazo Fatal')
-    execution_date = models.DateTimeField(null=True, verbose_name='Data de Cumprimento')
+    movement = models.ForeignKey(
+        Movement,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
+        verbose_name='Movimentação')
+    person_asked_by = models.ForeignKey(
+        Person,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=True,
+        related_name='%(class)s_asked_by',
+        verbose_name='Solicitante')
+    person_executed_by = models.ForeignKey(
+        Person,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name='%(class)s_executed_by',
+        verbose_name='Correspondente')
+    person_distributed_by = models.ForeignKey(
+        Person,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=True,
+        verbose_name='Contratante')
+    type_task = models.ForeignKey(
+        TypeTask,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
+        verbose_name='Tipo de Serviço')
+    delegation_date = models.DateTimeField(
+        null=True, blank=True, verbose_name='Data de Delegação')
+    acceptance_date = models.DateTimeField(
+        null=True, verbose_name='Data de Aceitação')
+    final_deadline_date = models.DateTimeField(
+        null=False,
+        blank=False,
+        default=timezone.now,
+        verbose_name='Prazo Fatal')
+    execution_date = models.DateTimeField(
+        null=True, verbose_name='Data de Cumprimento')
 
-    requested_date = models.DateTimeField(null=True, verbose_name='Data de Solicitação')
-    acceptance_service_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação pelo Contratante')
-    refused_service_date = models.DateTimeField(null=True, verbose_name='Data de Recusa pelo Contratante')
-    return_date = models.DateTimeField(null=True, verbose_name='Data de Retorno')
-    refused_date = models.DateTimeField(null=True, verbose_name='Data de Recusa')
+    requested_date = models.DateTimeField(
+        null=False,
+        blank=False,
+        default=timezone.now,
+        verbose_name='Data de Solicitação')
+    acceptance_service_date = models.DateTimeField(
+        null=True, verbose_name='Data de Aceitação pelo Contratante')
+    refused_service_date = models.DateTimeField(
+        null=True, verbose_name='Data de Recusa pelo Contratante')
+    return_date = models.DateTimeField(
+        null=True, verbose_name='Data de Retorno')
+    refused_date = models.DateTimeField(
+        null=True, verbose_name='Data de Recusa')
 
-    blocked_payment_date = models.DateTimeField(null=True, verbose_name='Data da Glosa')
-    finished_date = models.DateTimeField(null=True, verbose_name='Data de Finalização')
+    blocked_payment_date = models.DateTimeField(
+        null=True, verbose_name='Data da Glosa')
+    finished_date = models.DateTimeField(
+        null=True, verbose_name='Data de Finalização')
 
-    description = models.TextField(null=True, blank=True, verbose_name=u'Descrição do serviço')
+    description = models.TextField(
+        null=True, blank=True, verbose_name=u'Descrição do serviço')
 
-    task_status = models.CharField(null=False, verbose_name=u'', max_length=30,
-                                   choices=((x.value, x.name.title()) for x in TaskStatus),
-                                   default=TaskStatus.REQUESTED)
-    survey_result = JSONField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
-    amount = models.DecimalField(null=False, blank=False, verbose_name='Valor',
-                                 max_digits=9, decimal_places=2, default=Decimal('0.00'))
-    chat = models.ForeignKey(Chat, verbose_name='Chat', on_delete=models.SET_NULL, null=True,
-                             blank=True)
+    task_status = models.CharField(
+        null=False,
+        verbose_name=u'',
+        max_length=30,
+        choices=((x.value, x.name.title()) for x in TaskStatus),
+        default=TaskStatus.REQUESTED)
+    survey_result = JSONField(
+        verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    amount = models.DecimalField(
+        null=False,
+        blank=False,
+        verbose_name='Valor',
+        max_digits=9,
+        decimal_places=2,
+        default=Decimal('0.00'))
+    chat = models.ForeignKey(
+        Chat,
+        verbose_name='Chat',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True)
     company_chat = models.ForeignKey(
-        Chat, verbose_name='Chat Company', on_delete=models.SET_NULL, null=True,
-        blank=True, related_name='tasks_company_chat')
+        Chat,
+        verbose_name='Chat Company',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='tasks_company_chat')
     billing_date = models.DateTimeField(null=True, blank=True)
     receipt_date = models.DateTimeField(null=True, blank=True)
 
@@ -308,8 +387,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
         return address
 
     def get_absolute_url(self):
-        return reverse("task_detail",
-                       kwargs={"pk": self.id})
+        return reverse("task_detail", kwargs={"pk": self.id})
 
     @property
     def opposing_party(self):
@@ -322,16 +400,30 @@ class Task(Audit, LegacyCode, OfficeMixin):
     def serialize(self):
         """JSON representation of object"""
         data = {
-            "id": self.id,
-            "url": self.get_absolute_url(),
-            "task_number": self.task_number,
-            "lawsuit_number": self.lawsuit_number,
-            "client": self.client.simple_serialize(),
-            "opposing_party": self.opposing_party,
-            "status": str(self.status),
-            "type_task": {"name": self.type_task.name, "id": self.type_task.id},
-            "final_deadline_date": self.final_deadline_date.strftime(settings.DATETIME_FORMAT) if self.final_deadline_date else "",
-            "delegation_date": self.delegation_date.strftime(settings.DATETIME_FORMAT) if self.delegation_date else ""
+            "id":
+            self.id,
+            "url":
+            self.get_absolute_url(),
+            "task_number":
+            self.task_number,
+            "lawsuit_number":
+            self.lawsuit_number,
+            "client":
+            self.client.simple_serialize(),
+            "opposing_party":
+            self.opposing_party,
+            "status":
+            str(self.status),
+            "type_task": {
+                "name": self.type_task.name,
+                "id": self.type_task.id
+            },
+            "final_deadline_date":
+            self.final_deadline_date.strftime(settings.DATETIME_FORMAT)
+            if self.final_deadline_date else "",
+            "delegation_date":
+            self.delegation_date.strftime(settings.DATETIME_FORMAT)
+            if self.delegation_date else ""
         }
         return data
 
@@ -350,21 +442,23 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     @property
     def get_child(self):
-        if self.child.exists() and self.child.latest('pk').task_status not in [TaskStatus.REFUSED.__str__(),
-                                                                               TaskStatus.REFUSED_SERVICE.__str__()]:
+        if self.child.exists() and self.child.latest('pk').task_status not in [
+                TaskStatus.REFUSED.__str__(),
+                TaskStatus.REFUSED_SERVICE.__str__()
+        ]:
             return self.child.latest('pk')
         return None
 
     @transaction.atomic
     def get_task_number(self):
-        return get_next_value('office_{office_pk}_{name}'.format(office_pk=self.office.pk,
-                                                                 name=self.TASK_NUMBER_SEQUENCE))
+        return get_next_value('office_{office_pk}_{name}'.format(
+            office_pk=self.office.pk, name=self.TASK_NUMBER_SEQUENCE))
 
     @property
     def allow_attachment(self):
-        return not (self.status == TaskStatus.REFUSED or
-                    self.status == TaskStatus.BLOCKEDPAYMENT or
-                    self.status == TaskStatus.FINISHED)
+        return not (self.status == TaskStatus.REFUSED
+                    or self.status == TaskStatus.BLOCKEDPAYMENT
+                    or self.status == TaskStatus.FINISHED)
 
     @property
     def origin_code(self):
@@ -378,16 +472,13 @@ class TaskFeedback(models.Model):
     feedback_date = models.DateTimeField(auto_now_add=True)
     task = models.ForeignKey('Task', verbose_name='OS')
     rating = models.SmallIntegerField(
-        verbose_name='Nota',
-        choices=[(x, x) for x in range(1,6)]
-    )
+        verbose_name='Nota', choices=[(x, x) for x in range(1, 6)])
     comment = models.TextField(null=True, verbose_name='Comentário')
     create_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name='%(class)s_create_user',
-        verbose_name='Criado por'
-    )
+        verbose_name='Criado por')
 
 
 def get_dir_name(instance, filename):
@@ -404,7 +495,6 @@ class EcmQuerySet(models.QuerySet):
 
 
 class EcmManager(models.Manager):
-
     def get_queryset(self):
         return EcmQuerySet(self.model, using=self._db)
 
@@ -423,13 +513,21 @@ class EcmTask(models.Model):
 class Ecm(Audit, LegacyCode):
     path = models.FileField(upload_to=get_dir_name, max_length=255, null=False)
     size = models.PositiveIntegerField(null=True, blank=True)
-    task = models.ForeignKey(Task, blank=False, null=False, on_delete=models.PROTECT)
+    task = models.ForeignKey(
+        Task, blank=False, null=False, on_delete=models.PROTECT)
     tasks = models.ManyToManyField('Task', through='EcmTask', related_name='+')
     updated = models.BooleanField(default=True, null=False)
     exhibition_name = models.CharField(
-        verbose_name="Nome de Exibição", max_length=255, null=False, blank=False
-    )
-    ecm_related = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='child')
+        verbose_name="Nome de Exibição",
+        max_length=255,
+        null=False,
+        blank=False)
+    ecm_related = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='child')
 
     objects = EcmManager()
 
@@ -460,7 +558,9 @@ class Ecm(Audit, LegacyCode):
 
     def delete(self, *args, **kwargs):
         if self.legacy_code:
-            raise ValidationError("Não é possível apagar um arquivo que foi vinculado a outro sistema.")
+            raise ValidationError(
+                "Não é possível apagar um arquivo que foi vinculado a outro sistema."
+            )
 
         # Após apagar um Ecm devemos apagar o arquivo local caso o mesmo ainda esteja no disco.
         # O arquivo continua no disco em alguns casos pois ele pode ser ter sido criado antes de
@@ -479,8 +579,10 @@ class Ecm(Audit, LegacyCode):
 
 
 class TaskHistory(AuditCreate):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, blank=False, null=False)
-    notes = models.TextField(null=True, blank=True, verbose_name=u'Observações')
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, blank=False, null=False)
+    notes = models.TextField(
+        null=True, blank=True, verbose_name=u'Observações')
     status = models.CharField(max_length=30, choices=TaskStatus.choices())
 
     class Meta:
@@ -493,21 +595,39 @@ class TaskHistory(AuditCreate):
 
 
 class TaskGeolocation(Audit):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, blank=False, null=False,
-                             related_name='geolocation')
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False,
+        related_name='geolocation')
     date = models.DateTimeField(null=True, verbose_name='Data de Início')
-    checkpointtype = models.CharField(null=True, verbose_name='Tipo de Marcação', max_length=10,
-                                      choices=((x.value, x.name.title()) for x in CheckPointType),
-                                      default=CheckPointType.CHECKIN)
-    latitude = models.DecimalField(null=True, blank=True, verbose_name='Latitude',
-                                   max_digits=9, decimal_places=6)
-    longitude = models.DecimalField(null=True, blank=True, verbose_name='Longitude',
-                                    max_digits=9, decimal_places=6)
+    checkpointtype = models.CharField(
+        null=True,
+        verbose_name='Tipo de Marcação',
+        max_length=10,
+        choices=((x.value, x.name.title()) for x in CheckPointType),
+        default=CheckPointType.CHECKIN)
+    latitude = models.DecimalField(
+        null=True,
+        blank=True,
+        verbose_name='Latitude',
+        max_digits=9,
+        decimal_places=6)
+    longitude = models.DecimalField(
+        null=True,
+        blank=True,
+        verbose_name='Longitude',
+        max_digits=9,
+        decimal_places=6)
 
     class Meta:
         verbose_name = 'Geolocalização da Providência'
         verbose_name_plural = 'Geolocalização das Providências'
-        ordering = ('task', 'date', )
+        ordering = (
+            'task',
+            'date',
+        )
 
     @property
     def position(self):
@@ -515,49 +635,93 @@ class TaskGeolocation(Audit):
 
 
 class DashboardViewModel(Audit, OfficeMixin):
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='child')    
-    legacy_code = models.CharField(max_length=255, blank=True, null=True,
-                                   verbose_name='Código legado')
-    task_number = models.PositiveIntegerField(default=0, verbose_name='Número da Providência')
+    parent = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name='child')
+    legacy_code = models.CharField(
+        max_length=255, blank=True, null=True, verbose_name='Código legado')
+    task_number = models.PositiveIntegerField(
+        default=0, verbose_name='Número da Providência')
 
-    movement = models.ForeignKey(Movement, on_delete=models.PROTECT, blank=False, null=False,
-                                 verbose_name='Movimentação')
-    person_asked_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False, null=True,
-                                        related_name='%(class)s_asked_by',
-                                        verbose_name='Solicitante')
-    person_executed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False,
-                                           null=True,
-                                           related_name='%(class)s_executed_by',
-                                           verbose_name='Correspondente')
-    person_distributed_by = models.ForeignKey(Person, on_delete=models.PROTECT, blank=False,
-                                              null=True,
-                                              verbose_name='Service')
-    type_task = models.ForeignKey(TypeTask, on_delete=models.PROTECT, blank=False, null=False,
-                                  verbose_name='Tipo de Serviço')
-    requested_date = models.DateTimeField(null=True, verbose_name='Data de Solicitação')
-    acceptance_service_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação pelo Contratante')
-    refused_service_date = models.DateTimeField(null=True, verbose_name='Data de Recusa pelo Contratante')
-    delegation_date = models.DateTimeField(default=timezone.now, verbose_name='Data de Delegação')
-    acceptance_date = models.DateTimeField(null=True, verbose_name='Data de Aceitação')
+    movement = models.ForeignKey(
+        Movement,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
+        verbose_name='Movimentação')
+    person_asked_by = models.ForeignKey(
+        Person,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=True,
+        related_name='%(class)s_asked_by',
+        verbose_name='Solicitante')
+    person_executed_by = models.ForeignKey(
+        Person,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=True,
+        related_name='%(class)s_executed_by',
+        verbose_name='Correspondente')
+    person_distributed_by = models.ForeignKey(
+        Person,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=True,
+        verbose_name='Service')
+    type_task = models.ForeignKey(
+        TypeTask,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
+        verbose_name='Tipo de Serviço')
+    requested_date = models.DateTimeField(
+        null=True, verbose_name='Data de Solicitação')
+    acceptance_service_date = models.DateTimeField(
+        null=True, verbose_name='Data de Aceitação pelo Contratante')
+    refused_service_date = models.DateTimeField(
+        null=True, verbose_name='Data de Recusa pelo Contratante')
+    delegation_date = models.DateTimeField(
+        default=timezone.now, verbose_name='Data de Delegação')
+    acceptance_date = models.DateTimeField(
+        null=True, verbose_name='Data de Aceitação')
     final_deadline_date = models.DateTimeField(null=True, verbose_name='Prazo')
-    execution_date = models.DateTimeField(null=True, verbose_name='Data de Cumprimento')
+    execution_date = models.DateTimeField(
+        null=True, verbose_name='Data de Cumprimento')
 
-    return_date = models.DateTimeField(null=True, verbose_name='Data de Retorno')
-    refused_date = models.DateTimeField(null=True, verbose_name='Data de Recusa')
+    return_date = models.DateTimeField(
+        null=True, verbose_name='Data de Retorno')
+    refused_date = models.DateTimeField(
+        null=True, verbose_name='Data de Recusa')
 
-    blocked_payment_date = models.DateTimeField(null=True, verbose_name='Data da Glosa')
-    finished_date = models.DateTimeField(null=True, verbose_name='Data de Finalização')
+    blocked_payment_date = models.DateTimeField(
+        null=True, verbose_name='Data da Glosa')
+    finished_date = models.DateTimeField(
+        null=True, verbose_name='Data de Finalização')
 
-    description = models.TextField(null=True, blank=True, verbose_name=u'Descrição do serviço')
+    description = models.TextField(
+        null=True, blank=True, verbose_name=u'Descrição do serviço')
 
-    task_status = models.CharField(null=False, verbose_name=u'', max_length=30,
-                                   choices=((x.value, x.name.title()) for x in TaskStatus),
-                                   default=TaskStatus.OPEN)
-    client = models.CharField(null=True, verbose_name='Cliente', max_length=255)
-    type_service = models.CharField(null=True, verbose_name='Serviço', max_length=255)
-    law_suit_number = models.CharField(max_length=255, blank=True, null=True,
-                                      verbose_name='Número do Processo')    
-    parent_task_number = models.PositiveIntegerField(default=0, verbose_name='OS Original')
+    task_status = models.CharField(
+        null=False,
+        verbose_name=u'',
+        max_length=30,
+        choices=((x.value, x.name.title()) for x in TaskStatus),
+        default=TaskStatus.OPEN)
+    client = models.CharField(
+        null=True, verbose_name='Cliente', max_length=255)
+    type_service = models.CharField(
+        null=True, verbose_name='Serviço', max_length=255)
+    law_suit_number = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='Número do Processo')
+    parent_task_number = models.PositiveIntegerField(
+        default=0, verbose_name='OS Original')
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
@@ -583,8 +747,6 @@ class DashboardViewModel(Audit, OfficeMixin):
     def court(self):
         return self.movement.law_suit.organ
 
-
-
     # TODO fazer composição para buscar no endereço completo
     # TODO Modifiquei pois quando não há orgão cadastrado em lawsuit lança erro de
     # variável nula / Martins
@@ -594,7 +756,7 @@ class DashboardViewModel(Audit, OfficeMixin):
         organ = self.movement.law_suit.organ
         if organ:
             address = organ.address_set.first()
-        return address    
+        return address
 
     @property
     def opposing_party(self):
@@ -619,8 +781,10 @@ class DashboardViewModel(Audit, OfficeMixin):
 
 
 class Filter(Audit):
-    name = models.TextField(verbose_name='Nome', blank=False, null=False, max_length=255)
-    description = models.TextField(verbose_name='Descrição', blank=True, null=True)
+    name = models.TextField(
+        verbose_name='Nome', blank=False, null=False, max_length=255)
+    description = models.TextField(
+        verbose_name='Descrição', blank=True, null=True)
     query = models.BinaryField(verbose_name='query', blank=True, null=True)
 
     def __str__(self):
@@ -628,30 +792,42 @@ class Filter(Audit):
 
     @property
     def query_sql(self):
-        return str(DashboardViewModel.objects.filter(pickle.loads(self.query)).query)
+        return str(
+            DashboardViewModel.objects.filter(pickle.loads(self.query)).query)
 
     class Meta:
         verbose_name = 'Filtro'
         verbose_name_plural = 'Filtros'
-        unique_together = (('create_user', 'name'),)
+        unique_together = (('create_user', 'name'), )
 
 
 class TaskWorkflow(Audit):
-    custtom_settings = models.ForeignKey(CustomSettings, related_name='task_workflows')
-    task_from = models.CharField(verbose_name='Do status', null=False, max_length=30,
-                                   choices=((x.value, x.name.title()) for x in TaskStatus),
-                                   default=TaskStatus.REQUESTED)
-    task_to = models.CharField(verbose_name='Para o status', null=False, max_length=30,
-                                   choices=((x.value, x.name.title()) for x in TaskStatus),
-                                   default=TaskStatus.REQUESTED)
+    custtom_settings = models.ForeignKey(
+        CustomSettings, related_name='task_workflows')
+    task_from = models.CharField(
+        verbose_name='Do status',
+        null=False,
+        max_length=30,
+        choices=((x.value, x.name.title()) for x in TaskStatus),
+        default=TaskStatus.REQUESTED)
+    task_to = models.CharField(
+        verbose_name='Para o status',
+        null=False,
+        max_length=30,
+        choices=((x.value, x.name.title()) for x in TaskStatus),
+        default=TaskStatus.REQUESTED)
 
     responsible_user = models.ForeignKey(User)
 
 
 class TaskShowStatus(Audit):
-    custtom_settings = models.ForeignKey(CustomSettings, related_name='task_status_show')
+    custtom_settings = models.ForeignKey(
+        CustomSettings, related_name='task_status_show')
     status_to_show = models.CharField(
-        verbose_name='Mostrar status', null=False, max_length=30,
-        choices=((x.value, x.name.title()) for x in TaskStatus),default=TaskStatus.REQUESTED)
-    send_mail_template = models.ForeignKey(EmailTemplate, verbose_name='Template a enviar', blank=True, null=True)
-
+        verbose_name='Mostrar status',
+        null=False,
+        max_length=30,
+        choices=((x.value, x.name.title()) for x in TaskStatus),
+        default=TaskStatus.REQUESTED)
+    send_mail_template = models.ForeignKey(
+        EmailTemplate, verbose_name='Template a enviar', blank=True, null=True)

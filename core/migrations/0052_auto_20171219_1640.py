@@ -17,13 +17,17 @@ class Migration(migrations.Migration):
             model_name='address',
             name='country',
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT, to='core.Country', verbose_name='País'),
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.Country',
+                verbose_name='País'),
         ),
         migrations.AlterField(
             model_name='address',
             name='state',
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT, to='core.State', verbose_name='Estado'),
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.State',
+                verbose_name='Estado'),
         ),
         migrations.AlterField(
             model_name='address',

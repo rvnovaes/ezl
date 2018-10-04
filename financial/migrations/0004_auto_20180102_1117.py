@@ -14,6 +14,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='servicepricetable',
-            options={'ordering': ['value'], 'verbose_name': 'Tabela de preço de serviços', 'verbose_name_plural': 'Tabelas de preço de serviços'},
+            options={
+                'ordering': ['value'],
+                'verbose_name': 'Tabela de preço de serviços',
+                'verbose_name_plural': 'Tabelas de preço de serviços'
+            },
         ),
     ]

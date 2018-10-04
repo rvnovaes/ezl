@@ -46,7 +46,8 @@ class UserETL(GenericETL):
 
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):
-        correspondent_group, nil = Group.objects.get_or_create(name=Person.CORRESPONDENT_GROUP)
+        correspondent_group, nil = Group.objects.get_or_create(
+            name=Person.CORRESPONDENT_GROUP)
 
         assert len(rows) == rows_count
 
@@ -88,7 +89,8 @@ class UserETL(GenericETL):
                 last_name = (' '.join(name_user.split(' ')[1:]))[:30]
 
                 # tenta encontrar o usuario pelo username (unique)
-                instance = User.objects.filter(username__unaccent=username).first() or None
+                instance = User.objects.filter(
+                    username__unaccent=username).first() or None
 
                 # todo: fazer usuario independente do usuario do django (extend, override or custom user???)
                 # todo: deve herdar de LegacyCode e Audit e já deve criar person ao criar o usuário
@@ -110,7 +112,8 @@ class UserETL(GenericETL):
                     # verifica se a pessoa tem usuario vinculado
                     if person.auth_user:
                         # tenta encontrar o usuario vinculado a essa pessoa
-                        instance = self.model.objects.filter(id=person.auth_user.id).first()
+                        instance = self.model.objects.filter(
+                            id=person.auth_user.id).first()
                     else:
                         if instance:
                             # vincula o usuario encontrado à pessoa encontrada
@@ -129,14 +132,10 @@ class UserETL(GenericETL):
                     instance.date_joined = date_joined
                     instance.first_name = first_name
                     instance.last_name = last_name
-                    instance.save(
-                        update_fields=['is_superuser',
-                                       'email',
-                                       'is_staff',
-                                       'is_active',
-                                       'date_joined',
-                                       'first_name',
-                                       'last_name'])
+                    instance.save(update_fields=[
+                        'is_superuser', 'email', 'is_staff', 'is_active',
+                        'date_joined', 'first_name', 'last_name'
+                    ])
 
                 # elif not person and not instance:
                 else:
@@ -162,20 +161,21 @@ class UserETL(GenericETL):
 
                         # cria a pessoa somente se não existe
                         if not person:
-                            person = Person(id=person_id,
-                                            legal_name=legal_name,
-                                            name=name,
-                                            is_lawyer=is_lawyer,
-                                            legal_type=legal_type,
-                                            cpf_cnpj=cpf_cnpj,
-                                            alter_user=user,
-                                            auth_user=instance,
-                                            create_user=user,
-                                            is_active=is_active,
-                                            is_customer=is_customer,
-                                            is_supplier=is_supplier,
-                                            legacy_code=legacy_code,
-                                            system_prefix=LegacySystem.ADVWIN.value)
+                            person = Person(
+                                id=person_id,
+                                legal_name=legal_name,
+                                name=name,
+                                is_lawyer=is_lawyer,
+                                legal_type=legal_type,
+                                cpf_cnpj=cpf_cnpj,
+                                alter_user=user,
+                                auth_user=instance,
+                                create_user=user,
+                                is_active=is_active,
+                                is_customer=is_customer,
+                                is_supplier=is_supplier,
+                                legacy_code=legacy_code,
+                                system_prefix=LegacySystem.ADVWIN.value)
                         else:
                             # vincula o usuario encontrado à pessoa encontrada
                             person.auth_user = instance
@@ -184,16 +184,18 @@ class UserETL(GenericETL):
 
                 obj = DefaultOffice.objects.filter(auth_user=instance).first()
                 if not obj:
-                    DefaultOffice.objects.create(auth_user=instance, office=default_office,
-                                                 create_user=user)
+                    DefaultOffice.objects.create(
+                        auth_user=instance,
+                        office=default_office,
+                        create_user=user)
 
                 self.debug_logger.debug(
-                    'Usuario,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (
-                        str(person_id), str(legal_name), str(name),
-                        str(is_lawyer), str(legal_type),
-                        str(cpf_cnpj), str(user), str(is_active),
-                        str(is_customer), str(is_customer), str(is_supplier), str(legacy_code),
-                        str(LegacySystem.ADVWIN.value), self.timestr))
+                    'Usuario,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' %
+                    (str(person_id), str(legal_name), str(name),
+                     str(is_lawyer), str(legal_type), str(cpf_cnpj), str(user),
+                     str(is_active), str(is_customer), str(is_customer),
+                     str(is_supplier), str(legacy_code),
+                     str(LegacySystem.ADVWIN.value), self.timestr))
 
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,

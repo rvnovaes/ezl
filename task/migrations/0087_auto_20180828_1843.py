@@ -14,6 +14,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='taskgeolocation',
-            options={'ordering': ('task', 'date'), 'verbose_name': 'Geolocalização da Providência', 'verbose_name_plural': 'Geolocalização das Providências'},
+            options={
+                'ordering': ('task', 'date'),
+                'verbose_name': 'Geolocalização da Providência',
+                'verbose_name_plural': 'Geolocalização das Providências'
+            },
         ),
     ]

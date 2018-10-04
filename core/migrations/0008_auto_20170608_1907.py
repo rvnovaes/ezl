@@ -14,13 +14,18 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='person',
-            options={'ordering': [
-                '-id'], 'verbose_name': 'Pessoa', 'verbose_name_plural': 'Pessoas'},
+            options={
+                'ordering': ['-id'],
+                'verbose_name': 'Pessoa',
+                'verbose_name_plural': 'Pessoas'
+            },
         ),
         migrations.AlterField(
             model_name='person',
             name='legal_type',
             field=models.CharField(
-                choices=[('J', 'Jurídica'), ('F', 'Física')], max_length=1, verbose_name='Tipo'),
+                choices=[('J', 'Jurídica'), ('F', 'Física')],
+                max_length=1,
+                verbose_name='Tipo'),
         ),
     ]

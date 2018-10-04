@@ -17,8 +17,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='servicepricetable',
             name='office_correspondent',
-            field=models.ForeignKey(blank=True, on_delete=django.db.models.deletion.PROTECT,
-                                    null=True, related_name='office_correspondent', to='core.Office',
-                                    verbose_name='Escritório Correspondente'),
+            field=models.ForeignKey(
+                blank=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                null=True,
+                related_name='office_correspondent',
+                to='core.Office',
+                verbose_name='Escritório Correspondente'),
         ),
     ]

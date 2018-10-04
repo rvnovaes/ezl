@@ -15,8 +15,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Company',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, verbose_name='Empresa')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('name',
+                 models.CharField(max_length=255, verbose_name='Empresa')),
             ],
         ),
     ]

@@ -51,9 +51,8 @@ class OrganETL(GenericETL):
                     office=default_office,
                     system_prefix=LegacySystem.ADVWIN.value).first()
                 court_district = CourtDistrict.objects.filter(
-                    name__unaccent__iexact=row[
-                        'court_district']).first() or InvalidObjectFactory.get_invalid_model(
-                    CourtDistrict)
+                    name__unaccent__iexact=row['court_district']).first(
+                    ) or InvalidObjectFactory.get_invalid_model(CourtDistrict)
                 if instance:
                     # use update_fields to specify which fields to save
                     # https://docs.djangoproject.com/en/1.11/ref/models/instances/#specifying-which-fields-to-save
@@ -67,42 +66,37 @@ class OrganETL(GenericETL):
                     instance.is_supplier = is_supplier
                     instance.is_active = is_active
                     instance.office = default_office
-                    instance.save(
-                        update_fields=['alter_date',
-                                       'legal_name',
-                                       'name',
-                                       'is_lawyer',
-                                       'legal_type',
-                                       'cpf_cnpj',
-                                       'alter_user',
-                                       'is_active',
-                                       'is_customer',
-                                       'is_supplier',
-                                       'court_district',
-                                       'office'])
+                    instance.save(update_fields=[
+                        'alter_date', 'legal_name', 'name', 'is_lawyer',
+                        'legal_type', 'cpf_cnpj', 'alter_user', 'is_active',
+                        'is_customer', 'is_supplier', 'court_district',
+                        'office'
+                    ])
                 else:
-                    obj = self.model(legal_name=legal_name,
-                                     name=name,
-                                     is_lawyer=is_lawyer,
-                                     legal_type=legal_type,
-                                     cpf_cnpj=cpf_cnpj,
-                                     alter_user=user,
-                                     create_user=user,
-                                     is_customer=is_customer,
-                                     is_supplier=is_supplier,
-                                     is_active=is_active,
-                                     legacy_code=legacy_code,
-                                     system_prefix=LegacySystem.ADVWIN.value,
-                                     court_district=court_district,
-                                     office=default_office)
+                    obj = self.model(
+                        legal_name=legal_name,
+                        name=name,
+                        is_lawyer=is_lawyer,
+                        legal_type=legal_type,
+                        cpf_cnpj=cpf_cnpj,
+                        alter_user=user,
+                        create_user=user,
+                        is_customer=is_customer,
+                        is_supplier=is_supplier,
+                        is_active=is_active,
+                        legacy_code=legacy_code,
+                        system_prefix=LegacySystem.ADVWIN.value,
+                        court_district=court_district,
+                        office=default_office)
 
                     obj.save()
                 self.debug_logger.debug(
-                    "Pessoa,%s,%s,%s,%s,%s,%s,s,%s,%s,%s,%s,%s,%s,%s,%s" % (
-                        str(legal_name), str(name), str(is_lawyer), str(legal_type), str(cpf_cnpj),
-                        str(user.id), str(user.id), str(is_customer), str(is_supplier),
-                        str(is_active), str(legacy_code), str(court_district),
-                        str(LegacySystem.ADVWIN.value), self.timestr))
+                    "Pessoa,%s,%s,%s,%s,%s,%s,s,%s,%s,%s,%s,%s,%s,%s,%s"
+                    % (str(legal_name), str(name), str(is_lawyer),
+                       str(legal_type), str(cpf_cnpj), str(user.id),
+                       str(user.id), str(is_customer), str(is_supplier),
+                       str(is_active), str(legacy_code), str(court_district),
+                       str(LegacySystem.ADVWIN.value), self.timestr))
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,
                                               rows_count, e, self.timestr)

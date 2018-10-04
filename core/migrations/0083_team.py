@@ -18,13 +18,37 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Team',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('create_date', models.DateTimeField(auto_now_add=True, verbose_name='Criado em')),
-                ('alter_date', models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('name', models.CharField(max_length=255, unique=True, verbose_name='Equipe')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='team_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por')),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='team_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('create_date',
+                 models.DateTimeField(
+                     auto_now_add=True, verbose_name='Criado em')),
+                ('alter_date',
+                 models.DateTimeField(
+                     auto_now=True, null=True, verbose_name='Atualizado em')),
+                ('is_active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('name',
+                 models.CharField(
+                     max_length=255, unique=True, verbose_name='Equipe')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='team_alter_user',
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Alterado por')),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='team_create_user',
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Criado por')),
                 ('users', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
             ],
             options={

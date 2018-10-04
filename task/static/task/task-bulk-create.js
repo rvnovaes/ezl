@@ -54,7 +54,7 @@ TaskForm = (function($){
             self.$lawsuit.selectpicker('refresh')
             return false;
         }
-        $.get("/v1/lawsuit/lawsuit?folder=" + value, function(data){
+        $.get("/v1/lawsuit/lawsuit_common?folder=" + value, function(data){
             var choices;
             if (data.data.length == 0) {
                 choices = ['<option value="">Sem registros</option>'];
@@ -81,7 +81,7 @@ TaskForm = (function($){
             return false;
         }
 
-        $.get("/v1/lawsuit/movement?lawsuit=" + value, function(data){
+        $.get("/v1/lawsuit/movement_common?lawsuit=" + value, function(data){
             var choices = [];
             if (data.data.length > 0) {
                 choices = ['<option value="">Selecione...</option>'];
@@ -261,7 +261,7 @@ TaskForm = (function($){
 
     TaskForm.prototype.loadTasks = function(movement){
         self.task_list.$data.tasks = [];
-        $.get("/v1/lawsuit/task?movement=" + movement, function(data){
+        $.get("/v1/lawsuit/task_common?movement=" + movement, function(data){
             self.task_list.$data.tasks = data.data;
             setTimeout(addLinkOnRows, 1000);
         });
@@ -269,18 +269,19 @@ TaskForm = (function($){
 
     TaskForm.prototype.fillForm = function(params){
         if (params.folder != undefined && params.folderLabel != undefined){
-            $('#id_folder').attr('data-value', decodeURI(params.folder))
-            $('#id_folder').attr('data-value-txt', decodeURI(params.folderLabel))
-            $('#id_folder').attr('value', decodeURI(params.folder))
-            $('#id_folder').val(decodeURI(params.folderLabel))
+            var id_folder_field = $('#id_folder');
+            id_folder_field.attr('data-value', decodeURI(params.folder));
+            id_folder_field.attr('data-value-txt', decodeURI(params.folderLabel));
+            id_folder_field.attr('value', decodeURI(params.folder));
+            id_folder_field.val(decodeURI(params.folderLabel));
             self.enableAdd('lawsuit');
             self.$btn_add_lawsuit.removeClass('disabled-btn');
         }
 
         self.eventChangeFolder(params.folder, function(){
-            self.$lawsuit.val(params.lawsuit);
+            self.$lawsuit.val(params.lawsuit).trigger('change');
             self.eventChangeLawsuit(params.lawsuit, function(){
-                self.$movement.val(params.movement);
+                self.$movement.val(params.movement).trigger('change');
                 self.eventChangeMovement(params.movement);
                 self.$movement.selectpicker('refresh')
             });

@@ -16,6 +16,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='person_asked_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='task_asked_by', to='core.Person', verbose_name='Solicitante'),
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='task_asked_by',
+                to='core.Person',
+                verbose_name='Solicitante'),
         ),
     ]

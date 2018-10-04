@@ -40,15 +40,6 @@ def get_target_path(task):
                         "{}.lock".format(task.task_id))
 
 
-def load_fixtures():
-    # A ordem de inclusão das fixtures é importante, favor não alterar
-    fixtures = ['country.xml', 'state.xml', 'city.xml',
-                'type_movement.xml']
-
-    for fixture in fixtures:
-        call_command(loaddata.Command(), fixture, verbosity=0)
-
-
 class MigrationTask(luigi.Task):
     date_interval = luigi.DateHourParameter()
 
@@ -80,7 +71,6 @@ class ConfigTask(luigi.Task):
         InvalidObjectFactory().restart_table_id()
         InvalidObjectFactory.create()
         DefaultOffice.create()
-        load_fixtures()
         self.output().open("w").close()
 
 

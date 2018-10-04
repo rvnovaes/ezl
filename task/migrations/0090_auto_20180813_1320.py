@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='survey_result',
-            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True, verbose_name='Respotas do Formulário'),
+            field=django.contrib.postgres.fields.jsonb.JSONField(
+                blank=True, null=True, verbose_name='Respotas do Formulário'),
         ),
     ]

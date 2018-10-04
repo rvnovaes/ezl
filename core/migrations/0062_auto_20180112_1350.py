@@ -16,6 +16,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='invite',
             name='office',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='invites', to='core.Office'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='invites',
+                to='core.Office'),
         ),
     ]

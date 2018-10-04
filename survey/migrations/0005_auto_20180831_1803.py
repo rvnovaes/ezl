@@ -19,23 +19,38 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='survey',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AddField(
             model_name='survey',
             name='alter_user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='survey_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='survey_alter_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Alterado por'),
         ),
         migrations.AddField(
             model_name='survey',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True,
+                default=django.utils.timezone.now,
+                verbose_name='Criado em'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='survey',
             name='create_user',
-            field=models.ForeignKey(default=2, on_delete=django.db.models.deletion.PROTECT, related_name='survey_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por'),
+            field=models.ForeignKey(
+                default=2,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='survey_create_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Criado por'),
             preserve_default=False,
         ),
         migrations.AddField(

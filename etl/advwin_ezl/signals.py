@@ -8,16 +8,10 @@ def create_person(person, created, **kwargs):
     if created:
         person.save()
     elif person.id:
-        person.save(update_fields=['alter_date',
-                                   'legal_name',
-                                   'name',
-                                   'is_lawyer',
-                                   'legal_type',
-                                   'cpf_cnpj',
-                                   'alter_user',
-                                   'is_active',
-                                   'is_customer',
-                                   'is_supplier'])
+        person.save(update_fields=[
+            'alter_date', 'legal_name', 'name', 'is_lawyer', 'legal_type',
+            'cpf_cnpj', 'alter_user', 'is_active', 'is_customer', 'is_supplier'
+        ])
 
 
 class temp_disconnect_signal():
@@ -34,13 +28,11 @@ class temp_disconnect_signal():
             receiver=self.receiver,
             sender=self.sender,
             dispatch_uid=self.dispatch_uid,
-            weak=False
-        )
+            weak=False)
 
     def __exit__(self, type, value, traceback):
         self.signal.connect(
             receiver=self.receiver,
             sender=self.sender,
             dispatch_uid=self.dispatch_uid,
-            weak=False
-        )
+            weak=False)

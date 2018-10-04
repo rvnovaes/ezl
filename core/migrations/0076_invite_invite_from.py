@@ -15,6 +15,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invite',
             name='invite_from',
-            field=models.CharField(choices=[('P', 'PERSON'), ('O', 'OFFICE')], default='O', max_length=1, verbose_name='Origem do convite'),
+            field=models.CharField(
+                choices=[('P', 'PERSON'), ('O', 'OFFICE')],
+                default='O',
+                max_length=1,
+                verbose_name='Origem do convite'),
         ),
     ]

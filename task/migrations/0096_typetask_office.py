@@ -16,7 +16,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='typetask',
             name='office',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, related_name='typetask_office', to='core.Office', verbose_name='Escritório'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='typetask_office',
+                to='core.Office',
+                verbose_name='Escritório'),
             preserve_default=False,
         ),
     ]

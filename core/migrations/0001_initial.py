@@ -19,10 +19,16 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Address',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
                 ('street', models.CharField(max_length=255)),
                 ('number', models.CharField(max_length=255)),
                 ('complement', models.CharField(blank=True, max_length=255)),
@@ -39,10 +45,16 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AddressType',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
                 ('name', models.CharField(max_length=255, unique=True)),
             ],
             options={
@@ -52,12 +64,24 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='City',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
                 ('name', models.CharField(max_length=255, unique=True)),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='city_alter_user', to=settings.AUTH_USER_MODEL)),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='city_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'city',
@@ -66,13 +90,25 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ContactMechanism',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
                 ('description', models.CharField(max_length=255, unique=True)),
                 ('notes', models.CharField(max_length=400)),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='contactmechanism_alter_user', to=settings.AUTH_USER_MODEL)),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='contactmechanism_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'contact_mechanism',
@@ -81,13 +117,29 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ContactMechanismType',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
                 ('name', models.CharField(max_length=255, unique=True)),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='contactmechanismtype_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='contactmechanismtype_create_user', to=settings.AUTH_USER_MODEL)),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='contactmechanismtype_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='contactmechanismtype_create_user',
+                     to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'contact_mechanism_type',
@@ -96,16 +148,32 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ContactUs',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
                 ('name', models.CharField(max_length=255)),
                 ('email', models.CharField(max_length=255)),
                 ('phone_number', models.CharField(max_length=255)),
                 ('message', models.TextField()),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='contactus_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='contactus_create_user', to=settings.AUTH_USER_MODEL)),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='contactus_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='contactus_create_user',
+                     to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'contact_us',
@@ -114,13 +182,29 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Country',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
                 ('name', models.CharField(max_length=255, unique=True)),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='country_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='country_create_user', to=settings.AUTH_USER_MODEL)),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='country_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='country_create_user',
+                     to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'country',
@@ -129,20 +213,44 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Person',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
                 ('legal_name', models.CharField(max_length=255, unique=True)),
                 ('name', models.CharField(max_length=255, unique=True)),
                 ('is_lawyer', models.BooleanField(default=False)),
                 ('is_corresponding', models.BooleanField(default=False)),
                 ('is_court', models.BooleanField(default=False)),
-                ('legal_type', models.CharField(choices=[('J', 'Jurídica'), ('F', 'Física')], max_length=1)),
+                ('legal_type',
+                 models.CharField(
+                     choices=[('J', 'Jurídica'), ('F', 'Física')],
+                     max_length=1)),
                 ('cpf_cnpj', models.CharField(blank=True, max_length=255)),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='person_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('auth_user', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='person_create_user', to=settings.AUTH_USER_MODEL)),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='person_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('auth_user',
+                 models.OneToOneField(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to=settings.AUTH_USER_MODEL)),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='person_create_user',
+                     to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'person',
@@ -152,15 +260,34 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='State',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
                 ('name', models.CharField(max_length=255, unique=True)),
                 ('initials', models.CharField(max_length=10, unique=True)),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='state_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('country', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.Country')),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='state_create_user', to=settings.AUTH_USER_MODEL)),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='state_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('country',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='core.Country')),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='state_create_user',
+                     to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'state',
@@ -169,16 +296,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='contactmechanism',
             name='contact_mechanism_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.ContactMechanismType'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.ContactMechanismType'),
         ),
         migrations.AddField(
             model_name='contactmechanism',
             name='create_user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='contactmechanism_create_user', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='contactmechanism_create_user',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='contactmechanism',
             name='person',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.Person'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, to='core.Person'),
         ),
     ]
