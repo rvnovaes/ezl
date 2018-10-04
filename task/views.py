@@ -660,7 +660,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.parent = object_parent
         new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
         new_task.save()
-        for ecm in get_task_ecms(object_parent):
+        for ecm in get_task_ecms(object_parent.id):
             new_ecm = copy_ecm(ecm, new_task)
 
     def dispatch(self, request, *args, **kwargs):
