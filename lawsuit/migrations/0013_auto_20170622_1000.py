@@ -14,62 +14,100 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='courtdivision',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], default='', max_length=255,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                default='',
+                max_length=255,
+                verbose_name='Prefixo do Sistema'),
         ),
         migrations.AddField(
             model_name='folder',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], default='', max_length=255,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                default='',
+                max_length=255,
+                verbose_name='Prefixo do Sistema'),
         ),
         migrations.AddField(
             model_name='lawsuitinstance',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], default='', max_length=255,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                default='',
+                max_length=255,
+                verbose_name='Prefixo do Sistema'),
         ),
         migrations.AddField(
             model_name='movement',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], default='', max_length=255,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                default='',
+                max_length=255,
+                verbose_name='Prefixo do Sistema'),
         ),
         migrations.AddField(
             model_name='typemovement',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], default='', max_length=255,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                default='',
+                max_length=255,
+                verbose_name='Prefixo do Sistema'),
         ),
         migrations.AddField(
             model_name='typetask',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], default='', max_length=255,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                default='',
+                max_length=255,
+                verbose_name='Prefixo do Sistema'),
         ),
         migrations.AlterField(
             model_name='courtdivision',
             name='legacy_code',
-            field=models.CharField(default='', max_length=255, unique=True, verbose_name='Código legado'),
+            field=models.CharField(
+                default='',
+                max_length=255,
+                unique=True,
+                verbose_name='Código legado'),
         ),
         migrations.AlterField(
             model_name='folder',
             name='legacy_code',
-            field=models.CharField(default='', max_length=255, unique=True, verbose_name='Código legado'),
+            field=models.CharField(
+                default='',
+                max_length=255,
+                unique=True,
+                verbose_name='Código legado'),
         ),
         migrations.AlterField(
             model_name='lawsuitinstance',
             name='legacy_code',
-            field=models.CharField(default='', max_length=255, unique=True, verbose_name='Código legado'),
+            field=models.CharField(
+                default='',
+                max_length=255,
+                unique=True,
+                verbose_name='Código legado'),
         ),
         migrations.AlterField(
             model_name='movement',
             name='legacy_code',
-            field=models.CharField(default='', max_length=255, unique=True, verbose_name='Código legado'),
+            field=models.CharField(
+                default='',
+                max_length=255,
+                unique=True,
+                verbose_name='Código legado'),
         ),
         migrations.AlterField(
             model_name='typetask',
             name='legacy_code',
-            field=models.CharField(default='', max_length=255, unique=True, verbose_name='Código legado'),
+            field=models.CharField(
+                default='',
+                max_length=255,
+                unique=True,
+                verbose_name='Código legado'),
         ),
     ]

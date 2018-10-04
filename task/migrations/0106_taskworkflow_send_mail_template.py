@@ -17,6 +17,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='taskworkflow',
             name='send_mail_template',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.EmailTemplate', verbose_name='Template a enviar'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to='core.EmailTemplate',
+                verbose_name='Template a enviar'),
         ),
     ]

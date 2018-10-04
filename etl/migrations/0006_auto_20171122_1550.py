@@ -15,11 +15,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='dashboardetl',
             name='imported_quantity',
-            field=models.IntegerField(default=0, verbose_name='Quantidade importada'),
+            field=models.IntegerField(
+                default=0, verbose_name='Quantidade importada'),
         ),
         migrations.AddField(
             model_name='dashboardetl',
             name='read_quantity',
-            field=models.IntegerField(default=0, verbose_name='Quantidade Lida'),
+            field=models.IntegerField(
+                default=0, verbose_name='Quantidade Lida'),
         ),
     ]

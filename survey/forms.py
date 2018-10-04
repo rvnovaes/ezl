@@ -8,10 +8,7 @@ from core.utils import get_office_field
 
 class SurveyForm(BaseForm):
 
-    data = forms.CharField(
-        label=_('Conteúdo'),
-        widget=forms.HiddenInput()
-    )
+    data = forms.CharField(label=_('Conteúdo'), widget=forms.HiddenInput())
 
     class Meta:
         model = Survey

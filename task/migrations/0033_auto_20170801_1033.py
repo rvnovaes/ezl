@@ -16,30 +16,45 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='blocked_payment_date',
-            field=models.DateTimeField(null=True, verbose_name='Data da Glosa'),
+            field=models.DateTimeField(
+                null=True, verbose_name='Data da Glosa'),
         ),
         migrations.AddField(
             model_name='task',
             name='validated_date',
-            field=models.DateTimeField(null=True, verbose_name='Data de Validação'),
+            field=models.DateTimeField(
+                null=True, verbose_name='Data de Validação'),
         ),
         migrations.AlterField(
             model_name='task',
             name='task_status',
             field=models.CharField(
-                choices=[('A Cumprir', 'Accepted'), ('Em Aberto', 'Open'), ('Retorno', 'Return'), ('Cumprida', 'Done'),
-                         ('Recusada', 'Refused'), ('Glosada', 'Blockedpayment'), ('Válida', 'Validated'),
-                         ('Inválida', 'Invalid')], default=task.models.TaskStatus('Em Aberto'), max_length=30,
+                choices=[('A Cumprir', 'Accepted'), ('Em Aberto', 'Open'),
+                         ('Retorno', 'Return'), ('Cumprida', 'Done'),
+                         ('Recusada', 'Refused'), ('Glosada',
+                                                   'Blockedpayment'),
+                         ('Válida', 'Validated'), ('Inválida', 'Invalid')],
+                default=task.models.TaskStatus('Em Aberto'),
+                max_length=30,
                 verbose_name=''),
         ),
         migrations.AlterField(
             model_name='typetask',
             name='survey_type',
             field=models.CharField(
-                choices=[('Blank', ''), ('Operationlicense', 'Cumprimento de Ordem de Serviço do tipo Alvará'),
-                         ('Courthearing', 'Cumprimento de Ordem de Serviço do tipo Audiência'),
-                         ('Diligence', 'Cumprimento de Ordem de Serviço do tipo Diligência'),
-                         ('Protocol', 'Cumprimento de Ordem de Serviço do tipo Protocolo')],
-                default=task.models.SurveyType(''), max_length=100, verbose_name='Tipo de Formulário'),
+                choices=[
+                    ('Blank', ''),
+                    ('Operationlicense',
+                     'Cumprimento de Ordem de Serviço do tipo Alvará'),
+                    ('Courthearing',
+                     'Cumprimento de Ordem de Serviço do tipo Audiência'),
+                    ('Diligence',
+                     'Cumprimento de Ordem de Serviço do tipo Diligência'),
+                    ('Protocol',
+                     'Cumprimento de Ordem de Serviço do tipo Protocolo')
+                ],
+                default=task.models.SurveyType(''),
+                max_length=100,
+                verbose_name='Tipo de Formulário'),
         ),
     ]

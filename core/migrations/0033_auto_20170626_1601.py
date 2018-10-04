@@ -14,13 +14,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='person',
             name='service_type',
-            field=models.CharField(choices=[('C', 'Cliente'), ('F', 'Fornecedor'), ('N', 'Nao Aplicavel')], default='N',
-                                   max_length=1, verbose_name='Tipo de Serviço'),
+            field=models.CharField(
+                choices=[('C', 'Cliente'), ('F', 'Fornecedor'),
+                         ('N', 'Nao Aplicavel')],
+                default='N',
+                max_length=1,
+                verbose_name='Tipo de Serviço'),
         ),
         migrations.AlterField(
             model_name='person',
             name='legal_type',
             field=models.CharField(
-                choices=[('F', 'Física'), ('J', 'Jurídica')], max_length=1, verbose_name='Tipo'),
+                choices=[('F', 'Física'), ('J', 'Jurídica')],
+                max_length=1,
+                verbose_name='Tipo'),
         ),
     ]

@@ -18,14 +18,40 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Message',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('create_date', models.DateTimeField(auto_now_add=True, verbose_name='Criado em')),
-                ('alter_date', models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Ativo')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('create_date',
+                 models.DateTimeField(
+                     auto_now_add=True, verbose_name='Criado em')),
+                ('alter_date',
+                 models.DateTimeField(
+                     auto_now=True, null=True, verbose_name='Atualizado em')),
+                ('is_active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
                 ('message', models.TextField(verbose_name='Mensagem')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='message_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por')),
-                ('chat', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='messages', to='chat.Chat')),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='message_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='message_alter_user',
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Alterado por')),
+                ('chat',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     related_name='messages',
+                     to='chat.Chat')),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='message_create_user',
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Criado por')),
             ],
             options={
                 'abstract': False,
@@ -43,7 +69,5 @@ class Migration(migrations.Migration):
             model_name='messages',
             name='create_user',
         ),
-        migrations.DeleteModel(
-            name='Messages',
-        ),
+        migrations.DeleteModel(name='Messages', ),
     ]

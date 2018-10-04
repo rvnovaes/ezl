@@ -15,11 +15,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='dashboardetl',
             name='db_host_source',
-            field=models.CharField(blank=True, max_length=16, null=True, verbose_name='Host do db de origem'),
+            field=models.CharField(
+                blank=True,
+                max_length=16,
+                null=True,
+                verbose_name='Host do db de origem'),
         ),
         migrations.AddField(
             model_name='dashboardetl',
             name='db_name_source',
-            field=models.CharField(blank=True, max_length=50, null=True, verbose_name='DB de origem'),
+            field=models.CharField(
+                blank=True,
+                max_length=50,
+                null=True,
+                verbose_name='DB de origem'),
         ),
     ]

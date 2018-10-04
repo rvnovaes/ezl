@@ -18,28 +18,58 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='LawSuitInstance',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('law_suit_number', models.CharField(max_length=255, unique=True, verbose_name='Número do Processo')),
-                ('legacy_code', models.CharField(max_length=255, unique=True, verbose_name='Código Legado')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
-                                                 related_name='lawsuitinstance_alter_user',
-                                                 to=settings.AUTH_USER_MODEL)),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('law_suit_number',
+                 models.CharField(
+                     max_length=255,
+                     unique=True,
+                     verbose_name='Número do Processo')),
+                ('legacy_code',
+                 models.CharField(
+                     max_length=255, unique=True,
+                     verbose_name='Código Legado')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='lawsuitinstance_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
                 ('court_district',
-                 models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.CourtDistrict',
-                                   verbose_name='Comarca')),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
-                                                  related_name='lawsuitinstance_create_user',
-                                                  to=settings.AUTH_USER_MODEL)),
-                ('instance', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.Instance',
-                                               verbose_name='Instância')),
-                ('law_suit', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.LawSuit',
-                                               verbose_name='Processo')),
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='lawsuit.CourtDistrict',
+                     verbose_name='Comarca')),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='lawsuitinstance_create_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('instance',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='lawsuit.Instance',
+                     verbose_name='Instância')),
+                ('law_suit',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='lawsuit.LawSuit',
+                     verbose_name='Processo')),
                 ('person_court',
-                 models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='lawsuitinstance_court',
-                                   to='core.Person', verbose_name='Tribunal')),
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='lawsuitinstance_court',
+                     to='core.Person',
+                     verbose_name='Tribunal')),
             ],
             options={
                 'ordering': ['-id'],
@@ -58,12 +88,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='movement',
             name='deadline',
-            field=models.DateTimeField(null=True, verbose_name='Data da Movimentação'),
+            field=models.DateTimeField(
+                null=True, verbose_name='Data da Movimentação'),
         ),
         migrations.AddField(
             model_name='movement',
             name='law_suit_instance',
-            field=models.ForeignKey(default='', on_delete=django.db.models.deletion.PROTECT,
-                                    to='lawsuit.LawSuitInstance', verbose_name='Instância do Processo'),
+            field=models.ForeignKey(
+                default='',
+                on_delete=django.db.models.deletion.PROTECT,
+                to='lawsuit.LawSuitInstance',
+                verbose_name='Instância do Processo'),
         ),
     ]

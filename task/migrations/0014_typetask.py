@@ -18,15 +18,45 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TypeTask',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('is_active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('legacy_code', models.CharField(default='', max_length=255, unique=True, verbose_name='Código legado')),
-                ('system_prefix', models.CharField(choices=[('ADVWIN', '0')], default='', max_length=255, verbose_name='Prefixo do Sistema')),
-                ('name', models.CharField(max_length=255, unique=True, verbose_name='Tipo de Serviço')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='typetask_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='typetask_create_user', to=settings.AUTH_USER_MODEL)),
+                ('is_active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('legacy_code',
+                 models.CharField(
+                     default='',
+                     max_length=255,
+                     unique=True,
+                     verbose_name='Código legado')),
+                ('system_prefix',
+                 models.CharField(
+                     choices=[('ADVWIN', '0')],
+                     default='',
+                     max_length=255,
+                     verbose_name='Prefixo do Sistema')),
+                ('name',
+                 models.CharField(
+                     max_length=255,
+                     unique=True,
+                     verbose_name='Tipo de Serviço')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='typetask_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='typetask_create_user',
+                     to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'type_task',

@@ -17,18 +17,26 @@ class Migration(migrations.Migration):
             model_name='address',
             name='office',
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='adresses', to='core.Office'),
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='adresses',
+                to='core.Office'),
         ),
         migrations.AlterField(
             model_name='address',
             name='person',
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='core.Person'),
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.Person'),
         ),
         migrations.AlterField(
             model_name='person',
             name='cpf_cnpj',
             field=models.CharField(
-                blank=True, max_length=255, null=True, verbose_name='CPF/CNPJ'),
+                blank=True, max_length=255, null=True,
+                verbose_name='CPF/CNPJ'),
         ),
     ]

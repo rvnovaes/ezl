@@ -14,6 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='blocked_payment_date',
-            field=models.DateTimeField(null=True, verbose_name='Data de Glosa'),
+            field=models.DateTimeField(
+                null=True, verbose_name='Data de Glosa'),
         ),
     ]

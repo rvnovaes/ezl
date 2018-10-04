@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='person',
             name='import_from_legacy',
-            field=models.BooleanField(default=False, verbose_name='Importar registros?'),
+            field=models.BooleanField(
+                default=False, verbose_name='Importar registros?'),
         ),
     ]

@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='attachment',
             name='object_id',
-            field=models.IntegerField(db_index=True, verbose_name='ID do Registro'),
+            field=models.IntegerField(
+                db_index=True, verbose_name='ID do Registro'),
         ),
     ]

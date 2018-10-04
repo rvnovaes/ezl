@@ -15,6 +15,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='servicepricetable',
             name='value',
-            field=models.DecimalField(decimal_places=2, default=0.0, max_digits=9, verbose_name='Valor'),
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0.0,
+                max_digits=9,
+                verbose_name='Valor'),
         ),
     ]

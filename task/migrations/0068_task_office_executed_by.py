@@ -17,6 +17,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='office_executed_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='task_executed_by', to='core.Office', verbose_name='Office correspondente'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='task_executed_by',
+                to='core.Office',
+                verbose_name='Office correspondente'),
         ),
     ]

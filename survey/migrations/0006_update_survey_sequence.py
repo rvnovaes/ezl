@@ -13,6 +13,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunSQL("BEGIN;"),
-        migrations.RunSQL("SELECT setval(pg_get_serial_sequence('\"survey_survey\"','id'), coalesce(max(\"id\"), 1), max(\"id\") IS NOT null) FROM \"survey_survey\";"),
+        migrations.RunSQL(
+            "SELECT setval(pg_get_serial_sequence('\"survey_survey\"','id'), coalesce(max(\"id\"), 1), max(\"id\") IS NOT null) FROM \"survey_survey\";"
+        ),
         migrations.RunSQL("COMMIT;"),
     ]

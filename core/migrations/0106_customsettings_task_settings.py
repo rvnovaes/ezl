@@ -17,7 +17,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='customsettings',
             name='task_settings',
-            field=models.OneToOneField(default=1, on_delete=django.db.models.deletion.CASCADE, to='task.TaskSettings', verbose_name='workflow'),
+            field=models.OneToOneField(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                to='task.TaskSettings',
+                verbose_name='workflow'),
             preserve_default=False,
         ),
     ]

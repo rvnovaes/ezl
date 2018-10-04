@@ -68,4 +68,3 @@ class Migration(migrations.Migration):
     operations.append(migrations.RunSQL(sql))
 
     operations.append(UnaccentExtension())
-

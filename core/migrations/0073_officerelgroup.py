@@ -17,12 +17,21 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='OfficeRelGroup',
             fields=[
-                ('id', models.AutoField(auto_created=True,
-                                        primary_key=True, serialize=False, verbose_name='ID')),
-                ('group', models.OneToOneField(
-                    on_delete=django.db.models.deletion.CASCADE, to='auth.Group')),
-                ('office', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                             related_name='office_groups', to='core.Office')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('group',
+                 models.OneToOneField(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     to='auth.Group')),
+                ('office',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     related_name='office_groups',
+                     to='core.Office')),
             ],
             options={
                 'verbose_name': 'Groupos por escritório',

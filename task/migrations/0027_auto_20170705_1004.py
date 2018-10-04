@@ -16,56 +16,82 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='ecm',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AlterField(
             model_name='ecm',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name='Criado em'),
         ),
         migrations.AlterField(
             model_name='task',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AlterField(
             model_name='task',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name='Criado em'),
         ),
         migrations.AlterField(
             model_name='task',
             name='task_status',
-            field=models.CharField(choices=[('A Cumprir', 'Accepted'), ('Em Aberto', 'Open'), ('Retorno', 'Return'), ('Cumprida', 'Done'), ('Recusada', 'Refused'), ('Inválida', 'Invalid')], default=task.models.TaskStatus('Em Aberto'), max_length=30, verbose_name=''),
+            field=models.CharField(
+                choices=[('A Cumprir', 'Accepted'), ('Em Aberto', 'Open'),
+                         ('Retorno', 'Return'), ('Cumprida', 'Done'),
+                         ('Recusada', 'Refused'), ('Inválida', 'Invalid')],
+                default=task.models.TaskStatus('Em Aberto'),
+                max_length=30,
+                verbose_name=''),
         ),
         migrations.AlterField(
             model_name='taskhistory',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name='Criado em'),
         ),
         migrations.AlterField(
             model_name='taskhistory',
             name='status',
-            field=models.CharField(choices=[('A Cumprir', 'ACCEPTED'), ('Em Aberto', 'OPEN'), ('Retorno', 'RETURN'), ('Cumprida', 'DONE'), ('Recusada', 'REFUSED'), ('Inválida', 'INVALID')], max_length=10),
+            field=models.CharField(
+                choices=[('A Cumprir', 'ACCEPTED'), ('Em Aberto', 'OPEN'),
+                         ('Retorno', 'RETURN'), ('Cumprida', 'DONE'),
+                         ('Recusada', 'REFUSED'), ('Inválida', 'INVALID')],
+                max_length=10),
         ),
         migrations.AlterField(
             model_name='typetask',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AlterField(
             model_name='typetask',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name='Criado em'),
         ),
         migrations.AlterField(
             model_name='typetask',
             name='legacy_code',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Código legado'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Código legado'),
         ),
         migrations.AlterField(
             model_name='typetask',
             name='system_prefix',
-            field=models.CharField(blank=True, choices=[('Advwin', 'Advwin')], max_length=255, null=True, verbose_name='Prefixo do sistema'),
+            field=models.CharField(
+                blank=True,
+                choices=[('Advwin', 'Advwin')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do sistema'),
         ),
     ]

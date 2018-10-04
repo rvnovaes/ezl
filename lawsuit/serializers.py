@@ -10,11 +10,12 @@ class CourtDistrictSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'state')
 
 
-class FolderSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
+class FolderSerializer(serializers.ModelSerializer, CreateUserSerializerMixin,
+                       OfficeSerializerMixin):
     class Meta:
         model = Folder
-        fields = (
-            'id', 'office', 'folder_number', 'person_customer', 'cost_center', 'office', 'create_user', 'legacy_code')
+        fields = ('id', 'office', 'folder_number', 'person_customer',
+                  'cost_center', 'office', 'create_user', 'legacy_code')
 
     def validate_legacy_code(self, value):
         if not value:
@@ -28,14 +29,16 @@ class InstanceSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'office', 'create_user', 'legacy_code')
 
 
-class LawSuitSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):        
+class LawSuitSerializer(serializers.ModelSerializer, CreateUserSerializerMixin,
+                        OfficeSerializerMixin):
     office_name = serializers.SerializerMethodField()
+
     class Meta:
         model = LawSuit
-        fields = (
-            'id', 'folder', 'law_suit_number', 'opposing_party', 'court_district', 'instance', 'organ',
-            'court_division', 'person_lawyer', 'is_current_instance', 'is_active', 'office', 'create_user',
-            'legacy_code', 'office_name')
+        fields = ('id', 'folder', 'law_suit_number', 'opposing_party',
+                  'court_district', 'instance', 'organ', 'court_division',
+                  'person_lawyer', 'is_current_instance', 'is_active',
+                  'office', 'create_user', 'legacy_code', 'office_name')
 
     def get_office_name(self, obj):
         return obj.office.legal_name
@@ -50,17 +53,19 @@ class CourtDivisionSerializer(serializers.ModelSerializer):
 class TypeMovementSerializer(serializers.ModelSerializer):
     class Meta:
         model = TypeMovement
-        fields = ('id', 'office', 'name', 'uses_wo', 'legacy_code', 'create_user')
+        fields = ('id', 'office', 'name', 'uses_wo', 'legacy_code',
+                  'create_user')
 
 
 class MovementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movement
-        fields = ('id', 'type_movement', 'law_suit', 'folder', 'office', 'create_user', 'legacy_code')
+        fields = ('id', 'type_movement', 'law_suit', 'folder', 'office',
+                  'create_user', 'legacy_code')
 
 
 class OrganSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organ
-        fields = ('id', 'legal_name', 'cpf_cnpj', 'court_district', 'is_active', 'legacy_code',
-                  'office', 'create_user')
+        fields = ('id', 'legal_name', 'cpf_cnpj', 'court_district',
+                  'is_active', 'legacy_code', 'office', 'create_user')

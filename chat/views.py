@@ -19,7 +19,10 @@ from django.forms.models import model_to_dict
 
 
 def chat_teste(request):
-    return render(request, 'chat/chat_test.html', {'teste': {'teste': 'tetando'}})
+    return render(request, 'chat/chat_test.html',
+                  {'teste': {
+                      'teste': 'tetando'
+                  }})
 
 
 class ChatListView(ListView):
@@ -34,13 +37,16 @@ class ChatCountMessages(View):
     def get(self, request, *args, **kwargs):
         has_groups = request.GET.get('has_groups', 'false') == 'true'
         data = {
-            'all_messages': UnreadMessage.objects.filter(
+            'all_messages':
+            UnreadMessage.objects.filter(
                 user_by_message__user_by_chat=self.request.user).count(),
         }
         if has_groups:
-            data['grouped_messages'] = list(UnreadMessage.objects.filter(
-                user_by_message__user_by_chat=self.request.user
-            ).values('message__chat__pk').annotate(quantity=Count('id')).order_by())
+            data['grouped_messages'] = list(
+                UnreadMessage.objects.filter(
+                    user_by_message__user_by_chat=self.request.
+                    user).values('message__chat__pk').annotate(
+                        quantity=Count('id')).order_by())
 
         return JsonResponse(data)
 
@@ -50,20 +56,17 @@ class ChatReadMessages(View):
         chat_id = json.loads(request.body).get('chat_id')
         chat = Chat.objects.filter(pk=int(chat_id)).first()
         if chat:
-            UnreadMessage.objects.filter(user_by_message__user_by_chat=self.request.user,
-                                         message__chat=chat).delete()
+            UnreadMessage.objects.filter(
+                user_by_message__user_by_chat=self.request.user,
+                message__chat=chat).delete()
         return JsonResponse({'status': 'ok'})
 
 
 class ChatGetMessages(View):
     def post(self, request, *args, **kwargs):
         chat_id = request.POST.get('chat_id')
-        qry_message = Message.objects.filter(
-            chat_id=chat_id
-        )
-        qry_chat = Chat.objects.get(
-            id=chat_id
-        )
+        qry_message = Message.objects.filter(chat_id=chat_id)
+        qry_chat = Chat.objects.get(id=chat_id)
         messages = map(
             lambda x: {
                 'text': x.message,
@@ -95,17 +98,24 @@ class ChatOfficeContactView(View):
             unread_message_quanty = unread_messages.count()
             latest_unread_message = min_date
             if unread_messages:
-                latest_unread_message = unread_messages.latest('create_date').create_date
+                latest_unread_message = unread_messages.latest(
+                    'create_date').create_date
             office['unread_message_quanty'] = unread_message_quanty
-            office['latest_unread_message'] = int(time.mktime(latest_unread_message.timetuple()))
-        return sorted(contact_offices, key=lambda i: i.get('latest_unread_message'), reverse=True)
+            office['latest_unread_message'] = int(
+                time.mktime(latest_unread_message.timetuple()))
+        return sorted(
+            contact_offices,
+            key=lambda i: i.get('latest_unread_message'),
+            reverse=True)
 
     def get(self, request, *args, **kwargs):
         current_office = get_office_session(request)
-        chats = Chat.objects.filter(users__user_by_chat=self.request.user, users__is_active=True).order_by(
-            'pk').distinct('pk')
-        data = list(Office.objects.filter(chats__in=chats,).values(
-            'pk', 'legal_name').distinct('pk'))
+        chats = Chat.objects.filter(
+            users__user_by_chat=self.request.user,
+            users__is_active=True).order_by('pk').distinct('pk')
+        data = list(
+            Office.objects.filter(chats__in=chats, ).values(
+                'pk', 'legal_name').distinct('pk'))
         data = self.add_count_unread_message(request.user, data)
         return JsonResponse(data, safe=False)
 
@@ -115,25 +125,36 @@ class ChatsByOfficeView(View):
     def add_count_unread_message(user, chats):
         # Pegamos todos os chats do usuário que possuem mensagens não lidas
         unread_chats = UnreadMessage.objects.filter(
-            user_by_message__user_by_chat=user,
-        ).values('message__chat').annotate(count=Count('id'))
+            user_by_message__user_by_chat=user, ).values(
+                'message__chat').annotate(count=Count('id'))
         items = []
-        unread_chats_dict = dict(
-            {(item['message__chat'], item['count']) for item in unread_chats})
+        unread_chats_dict = dict({(item['message__chat'], item['count'])
+                                  for item in unread_chats})
         for chat in chats:
             last_message = chat.messages.last()
             item = {
-                "id": chat.id,
-                "unread_message_quanty": unread_chats_dict[chat.id] if chat.id in unread_chats_dict else 0,
-                "title": chat.title,
-                "alter_date": chat.alter_date if not last_message else last_message.create_date,
-                "label": chat.label,
-                "has_messages": chat.messages.exists()
+                "id":
+                chat.id,
+                "unread_message_quanty":
+                unread_chats_dict[chat.id]
+                if chat.id in unread_chats_dict else 0,
+                "title":
+                chat.title,
+                "alter_date":
+                chat.alter_date
+                if not last_message else last_message.create_date,
+                "label":
+                chat.label,
+                "has_messages":
+                chat.messages.exists()
             }
             items.append(item)
         unread_chats_ids = list(
-            set(unread_chats.values_list('message__chat', flat=True).order_by('-create_date')))
-        return sorted(items, key=lambda i: i.get('id') in unread_chats_ids, reverse=True)
+            set(
+                unread_chats.values_list('message__chat',
+                                         flat=True).order_by('-create_date')))
+        return sorted(
+            items, key=lambda i: i.get('id') in unread_chats_ids, reverse=True)
 
     def get(self, request, *args, **kwargs):
         filters = {
@@ -153,8 +174,8 @@ class ChatsByOfficeView(View):
             filters["messages__alter_date__gt"] = since
 
         office = Office.objects.get(pk=office_id)
-        chats = office.chats.filter(
-            **filters).distinct('id').prefetch_related('messages').order_by('id')
+        chats = office.chats.filter(**filters).distinct('id').prefetch_related(
+            'messages').order_by('id')
         data = self.add_count_unread_message(request.user, chats)
         return JsonResponse(data, safe=False)
 
@@ -162,8 +183,10 @@ class ChatsByOfficeView(View):
 class ChatMenssage(View):
     def get(self, request, *args, **kwargs):
         chat = Chat.objects.get(pk=int(request.GET.get('chat')))
-        messages = list(chat.messages.all().values('message', 'create_user__username', 'create_user_id', 'create_date'))
-        office = get_office_session(request)        
+        messages = list(
+            chat.messages.all().values('message', 'create_user__username',
+                                       'create_user_id', 'create_date'))
+        office = get_office_session(request)
         if chat.tasks_company_chat.exists():
             task = chat.tasks_company_chat.first()
         else:
@@ -178,36 +201,44 @@ class ChatMenssage(View):
         else:
             task_id = ''
         data = {
-            "messages": messages,
-            "request_user_id": request.user.id,
-            "chat": model_to_dict(chat, fields=([field.name for field in chat._meta.fields])),
-            "task": task_id
+            "messages":
+            messages,
+            "request_user_id":
+            request.user.id,
+            "chat":
+            model_to_dict(
+                chat, fields=([field.name for field in chat._meta.fields])),
+            "task":
+            task_id
         }
         return JsonResponse(data, safe=False)
 
 
 class InternalChatOffices(View):
-    def get(self, request, *args, **kwargs):        
+    def get(self, request, *args, **kwargs):
         task = Task.objects.get(pk=int(request.GET.get('task')))
         data = []
         if task.company_chat:
             data.append({
-                'chat': task.company_chat.pk, # "Deve ser o pk da propria task"
-                'office_pk': task.office.pk, #"Deve ser o pk do office do parent"
+                'chat':
+                task.company_chat.pk,  # "Deve ser o pk da propria task"
+                'office_pk':
+                task.office.pk,  #"Deve ser o pk do office do parent"
                 'name': task.company_chat.company.name,
                 'logo': task.company_chat.company.logo.url
-
             })
         if task.parent:
             data.append({
                 'chat': task.chat.pk,  # "Deve ser o pk da propria task"
-                'office_pk': task.parent.office.pk,  # "Deve ser o pk do office do parent"
+                'office_pk':
+                task.parent.office.pk,  # "Deve ser o pk do office do parent"
                 'name': task.parent.office.legal_name
             })
         if task.get_child:
             task_child = task.get_child
             data.append({
-                'chat': task_child.chat.pk,  # "Deve ser o pk do chat da task filha"
+                'chat':
+                task_child.chat.pk,  # "Deve ser o pk do chat da task filha"
                 'office_pk': task_child.office.pk,
                 'name': task_child.office.legal_name
             })
@@ -228,6 +259,8 @@ class UnreadMessageView(CustomLoginRequiredView, View):
         if (chat.messages.exists()):
             user_by_chat = chat.users.filter(user_by_chat=request.user).first()
             unread_message = UnreadMessage.objects.create(
-                create_user=request.user, message=chat.messages.latest('pk'), user_by_message=user_by_chat)
+                create_user=request.user,
+                message=chat.messages.latest('pk'),
+                user_by_message=user_by_chat)
             unread_message.message.save()
         return JsonResponse({'status': 'ok'})

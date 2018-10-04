@@ -8,7 +8,6 @@ import django.utils.timezone
 import task.models
 
 
-
 class Migration(migrations.Migration):
 
     dependencies = [

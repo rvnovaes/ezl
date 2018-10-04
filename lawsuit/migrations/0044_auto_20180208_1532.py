@@ -21,12 +21,14 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='instance',
             name='name',
-            field=models.CharField(default='', max_length=255, verbose_name='Nome'),
+            field=models.CharField(
+                default='', max_length=255, verbose_name='Nome'),
         ),
         migrations.AlterField(
             model_name='typemovement',
             name='name',
-            field=models.CharField(default='', max_length=255, verbose_name='Nome'),
+            field=models.CharField(
+                default='', max_length=255, verbose_name='Nome'),
         ),
         migrations.AlterUniqueTogether(
             name='courtdivision',
@@ -34,7 +36,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='folder',
-            unique_together=set([('folder_number', 'person_customer', 'office')]),
+            unique_together=set([('folder_number', 'person_customer',
+                                  'office')]),
         ),
         migrations.AlterUniqueTogether(
             name='instance',

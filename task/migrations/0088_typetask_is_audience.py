@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='typetask',
             name='is_audience',
-            field=models.BooleanField(default=False, verbose_name='É audiência'),
+            field=models.BooleanField(
+                default=False, verbose_name='É audiência'),
         ),
     ]

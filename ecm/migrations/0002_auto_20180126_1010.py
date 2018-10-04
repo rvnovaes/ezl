@@ -16,6 +16,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='defaultattachmentrule',
             name='person_customer',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='defaultattachmentrule_customer', to='core.Person', verbose_name='Cliente'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='defaultattachmentrule_customer',
+                to='core.Person',
+                verbose_name='Cliente'),
         ),
     ]

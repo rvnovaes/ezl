@@ -16,22 +16,59 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='task',
-            options={'ordering': ['-alter_date'], 'permissions': [('view_delegated_tasks', 'Can view tasks delegated to the user'), ('view_all_tasks', 'Can view all tasks'), ('return_all_tasks', 'Can return tasks'), ('validate_all_tasks', 'Can validade tasks'), ('view_requested_tasks', 'Can view tasks requested by the user'), ('block_payment_tasks', 'Can block tasks payment'), ('can_access_general_data', 'Can access general data screens'), ('view_distributed_tasks', 'Can view tasks distributed by the user')], 'verbose_name': 'Providência', 'verbose_name_plural': 'Providências'},
+            options={
+                'ordering': ['-alter_date'],
+                'permissions': [('view_delegated_tasks',
+                                 'Can view tasks delegated to the user'),
+                                ('view_all_tasks', 'Can view all tasks'),
+                                ('return_all_tasks', 'Can return tasks'),
+                                ('validate_all_tasks', 'Can validade tasks'),
+                                ('view_requested_tasks',
+                                 'Can view tasks requested by the user'),
+                                ('block_payment_tasks',
+                                 'Can block tasks payment'),
+                                ('can_access_general_data',
+                                 'Can access general data screens'),
+                                ('view_distributed_tasks',
+                                 'Can view tasks distributed by the user')],
+                'verbose_name':
+                'Providência',
+                'verbose_name_plural':
+                'Providências'
+            },
         ),
         migrations.AlterField(
             model_name='task',
             name='person_distributed_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='core.Person', verbose_name='Contratante'),
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.Person',
+                verbose_name='Contratante'),
         ),
         migrations.AddField(
             model_name='task',
             name='chat',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='chat.Chat', verbose_name='Chat'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to='chat.Chat',
+                verbose_name='Chat'),
         ),
         migrations.AlterField(
             model_name='taskhistory',
             name='status',
-            field=models.CharField(choices=[('Solicitada', 'REQUESTED'), ('Aceita pelo Service', 'ACCEPTED_SERVICE'), ('Em Aberto', 'OPEN'), ('A Cumprir', 'ACCEPTED'), ('Cumprida', 'DONE'), ('Retorno', 'RETURN'), ('Finalizada', 'FINISHED'), ('Recusada pelo Service', 'REFUSED_SERVICE'), ('Recusada', 'REFUSED'), ('Glosada', 'BLOCKEDPAYMENT'), ('Inválida', 'INVALID')], max_length=30),
-
+            field=models.CharField(
+                choices=[('Solicitada', 'REQUESTED'),
+                         ('Aceita pelo Service', 'ACCEPTED_SERVICE'),
+                         ('Em Aberto', 'OPEN'), ('A Cumprir', 'ACCEPTED'),
+                         ('Cumprida', 'DONE'), ('Retorno', 'RETURN'),
+                         ('Finalizada', 'FINISHED'),
+                         ('Recusada pelo Service', 'REFUSED_SERVICE'),
+                         ('Recusada', 'REFUSED'), ('Glosada',
+                                                   'BLOCKEDPAYMENT'),
+                         ('Inválida', 'INVALID')],
+                max_length=30),
         ),
     ]

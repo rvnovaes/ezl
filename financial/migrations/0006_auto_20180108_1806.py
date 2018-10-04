@@ -7,6 +7,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -19,23 +20,38 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='servicepricetable',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AddField(
             model_name='servicepricetable',
             name='alter_user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='servicepricetable_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='servicepricetable_alter_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Alterado por'),
         ),
         migrations.AddField(
             model_name='servicepricetable',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True,
+                default=django.utils.timezone.now,
+                verbose_name='Criado em'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='servicepricetable',
             name='create_user',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, related_name='servicepricetable_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='servicepricetable_create_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Criado por'),
             preserve_default=False,
         ),
         migrations.AddField(
@@ -46,20 +62,32 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='servicepricetable',
             name='legacy_code',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Código legado'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Código legado'),
         ),
         migrations.AddField(
             model_name='servicepricetable',
             name='system_prefix',
-            field=models.CharField(blank=True, choices=[('Advwin', 'Advwin')], max_length=255, null=True, verbose_name='Prefixo do sistema'),
+            field=models.CharField(
+                blank=True,
+                choices=[('Advwin', 'Advwin')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do sistema'),
         ),
         migrations.AddField(
             model_name='servicepricetable',
             name='office',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
-                                    blank=True, null=True,
-                                    related_name='servicepricetable_office', to='core.Office',
-                                    verbose_name='Escritório'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                blank=True,
+                null=True,
+                related_name='servicepricetable_office',
+                to='core.Office',
+                verbose_name='Escritório'),
             preserve_default=False,
         ),
     ]

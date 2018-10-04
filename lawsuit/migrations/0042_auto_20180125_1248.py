@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='lawsuit',
             name='opposing_party',
-            field=models.TextField(blank=True, null=True, verbose_name='Parte adversa'),
+            field=models.TextField(
+                blank=True, null=True, verbose_name='Parte adversa'),
         ),
     ]
