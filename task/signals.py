@@ -360,8 +360,11 @@ def delete_related_ecm(sender, instance, **kwargs):
 @receiver(pre_delete, sender=Ecm)
 @check_environ
 def delete_ecm_advwin(sender, instance, **kwargs):
-    if not instance.legacy_code and instance.task.legacy_code:
-        delete_ecm(instance.id)
+    if instance.legacy_code:
+        return
+    ecm_task = instance.ecmtask_set.filter(task__legacy_code__isnull=False).first()
+    if ecm_task:
+        delete_ecm(instance.id, ecm_task.task.id)
 
 
 @receiver(post_init, sender=Task)

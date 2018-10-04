@@ -163,14 +163,15 @@ def delete_ecm_related_folder_to_task(self, ecm_id, id_doc, task_id, ecm_create_
 
 
 @retry(stop_max_attempt_number=4, wait_fixed=1000)
-def delete_ecm(ecm_id, execute=True):
+def delete_ecm(ecm_id, task_id, execute=True):
     ecm = Ecm.objects.get(pk=ecm_id)
+    task = Task.objects.get(pk=task_id)
 
     new_path = ecm_path_ezl2advwin(ecm.path.name)
     file_name = get_ecm_file_name(ecm.path.name)
     values = {
         'Tabela_OR': 'Agenda',
-        'Codigo_OR': ecm.task.legacy_code,
+        'Codigo_OR': task.legacy_code,
         'Link': new_path,
         'Nome': file_name,
         'Responsavel': ecm.create_user.username,
@@ -192,7 +193,7 @@ def delete_ecm(ecm_id, execute=True):
                 id_doc = row['ID_doc']
                 stmt = JuridGedMain.__table__.delete().where(JuridGedMain.__table__.c.ID_doc == id_doc)
                 deleted_ecm = get_advwin_engine().execute(stmt)
-                delete_ecm_related_folder_to_task.delay(ecm_id, id_doc, ecm.task.id, ecm.create_user.username)
+                delete_ecm_related_folder_to_task.delay(ecm_id, id_doc, task.id, ecm.create_user.username)
             LOGGER.info('ECM %s: excluído', ecm_id)
             total_afected = result.rowcount
             result.close()
