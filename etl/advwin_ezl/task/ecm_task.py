@@ -102,7 +102,7 @@ class EcmEtl(GenericETL):
                             fazemos um select antes pelo path e pela task, já que um arquivo criado por um usuário, é 
                             exportado para o advwin, e lá ganha um legacy_code. Então, se checarmos pelo legacy_code os 
                             arquivos acabam sendo duplicados
-                            https://mttech.atlassian.net/browse/EZL-828
+                            https://ezlawyer.atlassian.net/browse/EZL-828
                             """
                             if not self.model.objects.filter(
                                     task=task, path__endswith=filename):

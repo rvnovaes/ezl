@@ -11,6 +11,7 @@ from rest_framework.schemas import SchemaGenerator
 from rest_framework.views import APIView
 from rest_framework_swagger import renderers
 from rest_framework.decorators import permission_classes, api_view
+from core.views import remove_invalid_registry
 
 
 class ApplicationView(object):
@@ -30,10 +31,14 @@ def user_session_view(request):
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
+    model = Person
 
-    def get_queryset(self):
-        return Person.objects.filter(
-            offices=self.request.auth.application.office)
+    @remove_invalid_registry
+    def get_queryset(self, *args, **kwargs):
+        invalid_registry = kwargs.get('remove_invalid', None)
+        if invalid_registry:
+            self.queryset = self.queryset.exclude(id=invalid_registry)
+        return self.queryset.filter(offices=self.request.auth.application.office)
 
 
 class CompanyViewSet(viewsets.ReadOnlyModelViewSet):

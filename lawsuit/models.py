@@ -315,7 +315,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
         Este metodo faz a validacao dos campos unicos do modelo. Ele esta sendo sobrescrito pela
         necessidade de checar se existe um registro com os mesmos dados de instance, law_suit_number, office,
         folder__folder_number, folder__person_customer.
-        (https://mttech.atlassian.net/browse/EZL-939).
+        (https://ezlawyer.atlassian.net/browse/EZL-939).
         obs.: unique_together nao funciona para esta classe porque seria necessário verificar campos de dois models
         distintos, e isso não pode ser feito pelo SQL.
         (https://stackoverflow.com/questions/4440010/django-unique-together-with-foreign-keys/4440189#4440189)
