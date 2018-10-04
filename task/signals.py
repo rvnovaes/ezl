@@ -280,6 +280,12 @@ def export_ecm_path(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=Ecm)
+def create_ecm_task(sender, instance, created, **kwargs):
+    if created:
+        EcmTask.objects.get_or_create(ecm=instance, task=instance.task)
+
+
+@receiver(post_save, sender=Ecm)
 def copy_ecm_related(sender, instance, created, **kwargs):
     if created and instance.path:
         if instance.task.parent:
