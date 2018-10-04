@@ -2152,7 +2152,6 @@ class MediaFileView(LoginRequiredMixin, View):
         return HttpResponseRedirect(
             urljoin(settings.AWS_STORAGE_BUCKET_URL, path))
 
-
 class OfficePermissionRequiredMixin(PermissionRequiredMixin):
     def has_permission(self):
         guardian = ObjectPermissionChecker(self.request.user)
