@@ -15,11 +15,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='folder',
             name='is_default',
-            field=models.BooleanField(default=False, verbose_name='Pasta padrão para importação'),
+            field=models.BooleanField(
+                default=False, verbose_name='Pasta padrão para importação'),
         ),
         migrations.AddField(
             model_name='typemovement',
             name='is_default',
-            field=models.BooleanField(default=False, verbose_name='Movimentação padrão para importação'),
+            field=models.BooleanField(
+                default=False,
+                verbose_name='Movimentação padrão para importação'),
         ),
     ]

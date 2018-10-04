@@ -14,6 +14,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddIndex(
             model_name='unreadmessage',
-            index=models.Index(fields=['user_by_message_id'], name='chat_unread_user_by_a473e6_idx'),
+            index=models.Index(
+                fields=['user_by_message_id'],
+                name='chat_unread_user_by_a473e6_idx'),
         ),
     ]

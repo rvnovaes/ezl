@@ -18,14 +18,42 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='UnreadMessage',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('create_date', models.DateTimeField(auto_now_add=True, verbose_name='Criado em')),
-                ('alter_date', models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='unreadmessage_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por')),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='unreadmessage_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por')),
-                ('message', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='chat.Message')),
-                ('user_by_message', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='chat.UserByChat')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('create_date',
+                 models.DateTimeField(
+                     auto_now_add=True, verbose_name='Criado em')),
+                ('alter_date',
+                 models.DateTimeField(
+                     auto_now=True, null=True, verbose_name='Atualizado em')),
+                ('is_active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='unreadmessage_alter_user',
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Alterado por')),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='unreadmessage_create_user',
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Criado por')),
+                ('message',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     to='chat.Message')),
+                ('user_by_message',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     to='chat.UserByChat')),
             ],
             options={
                 'abstract': False,

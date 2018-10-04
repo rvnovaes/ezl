@@ -14,14 +14,23 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='company',
-            options={'verbose_name': 'Empresa', 'verbose_name_plural': 'Empresas'},
+            options={
+                'verbose_name': 'Empresa',
+                'verbose_name_plural': 'Empresas'
+            },
         ),
         migrations.AlterModelOptions(
             name='companyuser',
-            options={'verbose_name': 'Usuario da empresa', 'verbose_name_plural': 'Usuário das empresas'},
+            options={
+                'verbose_name': 'Usuario da empresa',
+                'verbose_name_plural': 'Usuário das empresas'
+            },
         ),
         migrations.AlterModelOptions(
             name='externalapplication',
-            options={'verbose_name': 'Aplicação externa', 'verbose_name_plural': 'Aplicações externas'},
+            options={
+                'verbose_name': 'Aplicação externa',
+                'verbose_name_plural': 'Aplicações externas'
+            },
         ),
     ]

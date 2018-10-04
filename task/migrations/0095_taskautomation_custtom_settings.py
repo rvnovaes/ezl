@@ -17,7 +17,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='taskautomation',
             name='custtom_settings',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='task_automations', to='core.CustomSettings'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='task_automations',
+                to='core.CustomSettings'),
             preserve_default=False,
         ),
     ]

@@ -18,9 +18,23 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DefaultOffice',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('auth_user', models.OneToOneField(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL, verbose_name='Usuário do sistema')),
-                ('office', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='defaultoffice_office', to='core.Office', verbose_name='Escritório')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('auth_user',
+                 models.OneToOneField(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Usuário do sistema')),
+                ('office',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='defaultoffice_office',
+                     to='core.Office',
+                     verbose_name='Escritório')),
             ],
             options={
                 'verbose_name': 'Escritório Padrão',
@@ -30,27 +44,38 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='defaultoffice',
             name='alter_date',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Atualizado em'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Atualizado em'),
         ),
         migrations.AddField(
             model_name='defaultoffice',
             name='alter_user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
-                                    related_name='defaultoffice_alter_user', to=settings.AUTH_USER_MODEL,
-                                    verbose_name='Alterado por'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='defaultoffice_alter_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Alterado por'),
         ),
         migrations.AddField(
             model_name='defaultoffice',
             name='create_date',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now, verbose_name='Criado em'),
+            field=models.DateTimeField(
+                auto_now_add=True,
+                default=django.utils.timezone.now,
+                verbose_name='Criado em'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='defaultoffice',
             name='create_user',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT,
-                                    related_name='defaultoffice_create_user', to=settings.AUTH_USER_MODEL,
-                                    verbose_name='Criado por'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='defaultoffice_create_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Criado por'),
             preserve_default=False,
         ),
         migrations.AddField(

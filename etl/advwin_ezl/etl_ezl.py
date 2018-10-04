@@ -12,6 +12,7 @@ from config.config import get_parser
 config_parser = get_parser()
 source = dict(config_parser.items('etl'))
 
+
 def return_user_from_auth(key, auth_dict):
     print("Tamanho auth dict:", len(auth_dict))
 
@@ -25,8 +26,10 @@ def return_user_from_auth(key, auth_dict):
 
 
 def get_or_create(session, model, kwargs):
-    instance_lname = session.query(model).filter(model.legal_name == kwargs['legal_name']).first()
-    instance_name = session.query(model).filter(model.name == kwargs['name']).first()
+    instance_lname = session.query(model).filter(
+        model.legal_name == kwargs['legal_name']).first()
+    instance_name = session.query(model).filter(
+        model.name == kwargs['name']).first()
 
     print("args", kwargs, instance_name, instance_lname)
 
@@ -103,7 +106,8 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
         if linha['Correspondente'] is True:
 
             authuser_query = session.query(AuthUser).filter(
-                AuthUser.username == return_user_from_auth(linha['Codigo'], auth_dict)).first()
+                AuthUser.username == return_user_from_auth(
+                    linha['Codigo'], auth_dict)).first()
 
             print("auth_user", authuser_query)
 
@@ -162,7 +166,6 @@ def trataPerson(linha, session, person_type='adv', auth_dict=None):
         'create_user_id': 2,
         'is_customer': is_customer,
         'is_supplier': is_supplier
-
     }
 
     return linha
@@ -190,19 +193,26 @@ def insere_person(session, linha):
     person_linha = Person(**linha)
     get_or_create(session, Person, linha)
 
-engine_ezl = connect_db(config_parser, 'django_application')  # conexao com o banco aleteia --usar configparser
-engine_advwin = connect_db(config_parser, source['connection_name'])  # arquivo de conexao do advwin
+
+engine_ezl = connect_db(
+    config_parser,
+    'django_application')  # conexao com o banco aleteia --usar configparser
+engine_advwin = connect_db(
+    config_parser, source['connection_name'])  # arquivo de conexao do advwin
 
 Base.metadata.create_all(engine_ezl)
 session_ezl = sessionmaker(bind=engine_ezl)()
 
 sql_str_cliente = text(
-    'select * from Jurid_Clifor where Status=\'Ativo\' and Codigo not in (select Jurid_CliFor.Codigo from Jurid_CliFor inner join Jurid_advogado on (Jurid_advogado.Codigo = Jurid_Clifor.Codigo));')  # top 1 apenas para testes
+    'select * from Jurid_Clifor where Status=\'Ativo\' and Codigo not in (select Jurid_CliFor.Codigo from Jurid_CliFor inner join Jurid_advogado on (Jurid_advogado.Codigo = Jurid_Clifor.Codigo));'
+)  # top 1 apenas para testes
 sql_str_advogado = text(
-    'select Jurid_Advogado.*,Jurid_CliFor.TipoCF from Jurid_Advogado left join Jurid_clifor on (Jurid_advogado.Codigo = Jurid_Clifor.Codigo) where Jurid_Advogado.Status = \'Ativo\';')
+    'select Jurid_Advogado.*,Jurid_CliFor.TipoCF from Jurid_Advogado left join Jurid_clifor on (Jurid_advogado.Codigo = Jurid_Clifor.Codigo) where Jurid_Advogado.Status = \'Ativo\';'
+)
 sql_str_tribunais = text('select * from Jurid_Tribunais;')
 sql_str_advweb = text(
-    'select advweb_usuario.* from advweb_usuario inner join Jurid_Advogado on (advweb_usuario.codigo_adv = Jurid_advogado.codigo) where Jurid_Advogado.Correspondente = \'1\' and Jurid_Advogado.Status = \'Ativo\';')
+    'select advweb_usuario.* from advweb_usuario inner join Jurid_Advogado on (advweb_usuario.codigo_adv = Jurid_advogado.codigo) where Jurid_Advogado.Correspondente = \'1\' and Jurid_Advogado.Status = \'Ativo\';'
+)
 
 consultas_advwin = [sql_str_advogado, sql_str_cliente, sql_str_tribunais]
 consultas_tipo = ['adv', 'cliente', 'trib']
@@ -225,7 +235,8 @@ for i in range(len(consultas_advwin)):
 
         if consultas_tipo[i] != 'usuario':
 
-            person = trataPerson(j, session_ezl, consultas_tipo[i], result_consulta_usuario)
+            person = trataPerson(j, session_ezl, consultas_tipo[i],
+                                 result_consulta_usuario)
 
             if person is not None:
                 print("Adicionado: ", n, "advogados")

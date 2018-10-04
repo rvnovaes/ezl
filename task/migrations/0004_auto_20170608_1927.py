@@ -24,11 +24,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='notes',
-            field=models.TextField(blank=True, null=True, verbose_name='Observações'),
+            field=models.TextField(
+                blank=True, null=True, verbose_name='Observações'),
         ),
         migrations.AlterField(
             model_name='task',
             name='execution_date',
-            field=models.DateTimeField(null=True, verbose_name='Data de Cumprimento'),
+            field=models.DateTimeField(
+                null=True, verbose_name='Data de Cumprimento'),
         ),
     ]

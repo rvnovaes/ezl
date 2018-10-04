@@ -15,6 +15,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='task_status',
-            field=models.CharField(choices=[('A Cumprir', 'ACCEPTED'), ('Em Aberto', 'OPEN'), ('Retorno', 'RETURN'), ('Cumprida', 'DONE'), ('Recusada', 'REFUSED')], default='-', max_length=30, null=True, verbose_name='Status'),
+            field=models.CharField(
+                choices=[('A Cumprir', 'ACCEPTED'), ('Em Aberto', 'OPEN'),
+                         ('Retorno', 'RETURN'), ('Cumprida', 'DONE'),
+                         ('Recusada', 'REFUSED')],
+                default='-',
+                max_length=30,
+                null=True,
+                verbose_name='Status'),
         ),
     ]

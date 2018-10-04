@@ -14,6 +14,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddIndex(
             model_name='userbychat',
-            index=models.Index(fields=['user_by_chat_id'], name='chat_userby_user_by_403017_idx'),
+            index=models.Index(
+                fields=['user_by_chat_id'],
+                name='chat_userby_user_by_403017_idx'),
         ),
     ]

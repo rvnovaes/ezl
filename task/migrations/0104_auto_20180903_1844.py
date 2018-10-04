@@ -16,7 +16,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='WorkflowTask',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
             ],
         ),
         migrations.RemoveField(
@@ -30,16 +35,25 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowtask',
             name='task_settings',
-            field=models.ForeignKey(blank=True, on_delete=django.db.models.deletion.CASCADE, to='task.TaskSettings'),
+            field=models.ForeignKey(
+                blank=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to='task.TaskSettings'),
         ),
         migrations.AddField(
             model_name='workflowtask',
             name='workflow',
-            field=models.ForeignKey(blank=True, on_delete=django.db.models.deletion.CASCADE, to='task.TaskWorkflow'),
+            field=models.ForeignKey(
+                blank=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to='task.TaskWorkflow'),
         ),
         migrations.AddField(
             model_name='taskworkflow',
             name='settings',
-            field=models.ManyToManyField(related_name='workflows', through='task.WorkflowTask', to='task.TaskSettings'),
+            field=models.ManyToManyField(
+                related_name='workflows',
+                through='task.WorkflowTask',
+                to='task.TaskSettings'),
         ),
     ]

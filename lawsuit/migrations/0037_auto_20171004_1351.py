@@ -14,6 +14,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='courtdistrict',
-            options={'ordering': ('name',), 'verbose_name': 'Comarca', 'verbose_name_plural': 'Comarcas'},
+            options={
+                'ordering': ('name', ),
+                'verbose_name': 'Comarca',
+                'verbose_name_plural': 'Comarcas'
+            },
         ),
     ]

@@ -14,7 +14,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], max_length=255, null=True,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do Sistema'),
         ),
     ]

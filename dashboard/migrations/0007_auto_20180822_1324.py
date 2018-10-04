@@ -15,19 +15,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='card',
             name='name',
-            field=models.CharField(default='EM BRANCO', max_length=255, verbose_name='Nome'),
+            field=models.CharField(
+                default='EM BRANCO', max_length=255, verbose_name='Nome'),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='doughnutchart',
             name='name',
-            field=models.CharField(default='EM BRANCO', max_length=255, verbose_name='Nome'),
+            field=models.CharField(
+                default='EM BRANCO', max_length=255, verbose_name='Nome'),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='linechart',
             name='name',
-            field=models.CharField(default='EM BRANCO', max_length=255, verbose_name='Nome'),
+            field=models.CharField(
+                default='EM BRANCO', max_length=255, verbose_name='Nome'),
             preserve_default=False,
         ),
     ]

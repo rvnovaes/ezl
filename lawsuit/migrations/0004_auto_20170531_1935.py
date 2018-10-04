@@ -14,11 +14,16 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='instance',
-            options={'ordering': ['-id'], 'verbose_name': 'Instância', 'verbose_name_plural': 'Instâncias'},
+            options={
+                'ordering': ['-id'],
+                'verbose_name': 'Instância',
+                'verbose_name_plural': 'Instâncias'
+            },
         ),
         migrations.AlterField(
             model_name='instance',
             name='name',
-            field=models.CharField(default='', max_length=255, unique=True, verbose_name='Nome'),
+            field=models.CharField(
+                default='', max_length=255, unique=True, verbose_name='Nome'),
         ),
     ]

@@ -10,7 +10,10 @@ def chat_add_user_by_office(apps, schema_editor):
     from chat.models import Message
     from task.signals import create_or_update_chat
     from django.db.models import Q
-    last_tasks_to_update = list(set(map(lambda i: Task.objects.filter(chat=i.chat).first().pk, Message.objects.all().order_by('-create_date'))))
+    last_tasks_to_update = list(
+        set(
+            map(lambda i: Task.objects.filter(chat=i.chat).first().pk,
+                Message.objects.all().order_by('-create_date'))))
 
     if last_tasks_to_update:
         for task in Task.objects.filter(~Q(chat__pk__in=last_tasks_to_update)):
@@ -20,6 +23,7 @@ def chat_add_user_by_office(apps, schema_editor):
         for task_id in last_tasks_to_update:
             task = Task.objects.get(pk=task_id)
             create_or_update_chat(Task, task, False)
+
 
 class Migration(migrations.Migration):
     dependencies = [

@@ -17,9 +17,18 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DashboardDoughnutChart',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('sequence', models.IntegerField(verbose_name='Sequencia')),
-                ('dashboard', models.ForeignKey(blank=True, on_delete=django.db.models.deletion.CASCADE, to='dashboard.Dashboard')),
+                ('dashboard',
+                 models.ForeignKey(
+                     blank=True,
+                     on_delete=django.db.models.deletion.CASCADE,
+                     to='dashboard.Dashboard')),
             ],
             options={
                 'ordering': ['sequence'],
@@ -29,11 +38,33 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DoughnutChart',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=255, null=True, verbose_name='Nome')),
-                ('code', models.TextField(blank=True, null=True, verbose_name='Codigo')),
-                ('schema', django.contrib.postgres.fields.jsonb.JSONField(blank=True, default='{"title": "string"}', null=True, verbose_name='Schema')),
-                ('dashboards', models.ManyToManyField(blank=True, related_name='doughnut_charts', through='dashboard.DashboardDoughnutChart', to='dashboard.Dashboard')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('name',
+                 models.CharField(
+                     blank=True,
+                     max_length=255,
+                     null=True,
+                     verbose_name='Nome')),
+                ('code',
+                 models.TextField(
+                     blank=True, null=True, verbose_name='Codigo')),
+                ('schema',
+                 django.contrib.postgres.fields.jsonb.JSONField(
+                     blank=True,
+                     default='{"title": "string"}',
+                     null=True,
+                     verbose_name='Schema')),
+                ('dashboards',
+                 models.ManyToManyField(
+                     blank=True,
+                     related_name='doughnut_charts',
+                     through='dashboard.DashboardDoughnutChart',
+                     to='dashboard.Dashboard')),
             ],
             options={
                 'abstract': False,
@@ -42,6 +73,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='dashboarddoughnutchart',
             name='doughnut_chart',
-            field=models.ForeignKey(blank=True, on_delete=django.db.models.deletion.CASCADE, to='dashboard.DoughnutChart'),
+            field=models.ForeignKey(
+                blank=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to='dashboard.DoughnutChart'),
         ),
     ]

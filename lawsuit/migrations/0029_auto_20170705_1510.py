@@ -53,68 +53,120 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='courtdistrict',
             name='legacy_code',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Código legado'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Código legado'),
         ),
         migrations.AddField(
             model_name='courtdistrict',
             name='system_prefix',
-            field=models.CharField(blank=True, choices=[('Advwin', 'Advwin')], max_length=255, null=True, verbose_name='Prefixo do sistema'),
+            field=models.CharField(
+                blank=True,
+                choices=[('Advwin', 'Advwin')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do sistema'),
         ),
         migrations.AddField(
             model_name='lawsuit',
             name='court_district',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, related_name='court_districts', to='lawsuit.CourtDistrict', verbose_name='Comarca'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='court_districts',
+                to='lawsuit.CourtDistrict',
+                verbose_name='Comarca'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='lawsuit',
             name='court_division',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, related_name='court_divisions', to='lawsuit.CourtDivision', verbose_name='Vara'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='court_divisions',
+                to='lawsuit.CourtDivision',
+                verbose_name='Vara'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='lawsuit',
             name='instance',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, related_name='instances', to='lawsuit.Instance', verbose_name='Instância'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='instances',
+                to='lawsuit.Instance',
+                verbose_name='Instância'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='lawsuit',
             name='law_suit_number',
-            field=models.CharField(default=2, max_length=255, verbose_name='Número do Processo'),
+            field=models.CharField(
+                default=2, max_length=255, verbose_name='Número do Processo'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='lawsuit',
             name='legacy_code',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Código legado'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Código legado'),
         ),
         migrations.AddField(
             model_name='lawsuit',
             name='person_court',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, related_name='lawsuit_court', to='core.Person', verbose_name='Tribunal'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='lawsuit_court',
+                to='core.Person',
+                verbose_name='Tribunal'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='lawsuit',
             name='system_prefix',
-            field=models.CharField(blank=True, choices=[('Advwin', 'Advwin')], max_length=255, null=True, verbose_name='Prefixo do sistema'),
+            field=models.CharField(
+                blank=True,
+                choices=[('Advwin', 'Advwin')],
+                max_length=255,
+                null=True,
+                verbose_name='Prefixo do sistema'),
         ),
         migrations.AddField(
             model_name='movement',
             name='law_suit',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, related_name='law_suits', to='lawsuit.LawSuit', verbose_name='Processo'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='law_suits',
+                to='lawsuit.LawSuit',
+                verbose_name='Processo'),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='lawsuit',
             name='folder',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='folders', to='lawsuit.Folder', verbose_name='Pasta'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='folders',
+                to='lawsuit.Folder',
+                verbose_name='Pasta'),
         ),
         migrations.AlterField(
             model_name='lawsuit',
             name='person_lawyer',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='person_lawyers', to='core.Person', verbose_name='Advogado'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='person_lawyers',
+                to='core.Person',
+                verbose_name='Advogado'),
         ),
         migrations.AlterField(
             model_name='movement',
@@ -125,7 +177,5 @@ class Migration(migrations.Migration):
             name='lawsuit',
             unique_together=set([('instance', 'law_suit_number')]),
         ),
-        migrations.DeleteModel(
-            name='LawSuitInstance',
-        ),
+        migrations.DeleteModel(name='LawSuitInstance', ),
     ]

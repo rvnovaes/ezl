@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='chat',
             name='offices',
-            field=models.ManyToManyField(null=True, related_name='chats', to='core.Office'),
+            field=models.ManyToManyField(
+                null=True, related_name='chats', to='core.Office'),
         ),
     ]

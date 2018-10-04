@@ -18,9 +18,23 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CompanyUsers',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='users', to='core.Company', verbose_name='Empresa')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='Usuário')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('company',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     related_name='users',
+                     to='core.Company',
+                     verbose_name='Empresa')),
+                ('user',
+                 models.OneToOneField(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Usuário')),
             ],
         ),
     ]

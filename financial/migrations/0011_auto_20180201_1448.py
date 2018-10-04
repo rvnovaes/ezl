@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterUniqueTogether(
             name='servicepricetable',
-            unique_together=set([('office', 'type_task', 'client', 'court_district', 'state')]),
+            unique_together=set([('office', 'type_task', 'client',
+                                  'court_district', 'state')]),
         ),
     ]

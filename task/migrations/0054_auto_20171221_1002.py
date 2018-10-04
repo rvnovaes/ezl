@@ -16,11 +16,27 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='task_status',
-            field=models.CharField(choices=[('A Cumprir', 'Accepted'), ('Em Aberto', 'Open'), ('Retorno', 'Return'), ('Cumprida', 'Done'), ('Recusada', 'Refused'), ('Glosada', 'Blockedpayment'), ('Finalizada', 'Finished'), ('Inválida', 'Invalid'), ('Erro no sistema de origem', 'Error')], default=task.models.TaskStatus('Em Aberto'), max_length=30, verbose_name=''),
+            field=models.CharField(
+                choices=[('A Cumprir', 'Accepted'), ('Em Aberto', 'Open'),
+                         ('Retorno', 'Return'), ('Cumprida', 'Done'),
+                         ('Recusada', 'Refused'), ('Glosada',
+                                                   'Blockedpayment'),
+                         ('Finalizada', 'Finished'), ('Inválida', 'Invalid'),
+                         ('Erro no sistema de origem', 'Error')],
+                default=task.models.TaskStatus('Em Aberto'),
+                max_length=30,
+                verbose_name=''),
         ),
         migrations.AlterField(
             model_name='taskhistory',
             name='status',
-            field=models.CharField(choices=[('A Cumprir', 'ACCEPTED'), ('Em Aberto', 'OPEN'), ('Retorno', 'RETURN'), ('Cumprida', 'DONE'), ('Recusada', 'REFUSED'), ('Glosada', 'BLOCKEDPAYMENT'), ('Finalizada', 'FINISHED'), ('Inválida', 'INVALID'), ('Erro no sistema de origem', 'ERROR')], max_length=10),
+            field=models.CharField(
+                choices=[('A Cumprir', 'ACCEPTED'), ('Em Aberto', 'OPEN'),
+                         ('Retorno', 'RETURN'), ('Cumprida', 'DONE'),
+                         ('Recusada', 'REFUSED'), ('Glosada',
+                                                   'BLOCKEDPAYMENT'),
+                         ('Finalizada', 'FINISHED'), ('Inválida', 'INVALID'),
+                         ('Erro no sistema de origem', 'ERROR')],
+                max_length=10),
         ),
     ]

@@ -13,7 +13,8 @@ from .models import Survey, SurveyPermissions
 from .tables import SurveyTable
 
 
-class SurveyListView(CustomLoginRequiredView, OfficePermissionRequiredMixin, SingleTableViewMixin):
+class SurveyListView(CustomLoginRequiredView, OfficePermissionRequiredMixin,
+                     SingleTableViewMixin):
     model = Survey
     table_class = SurveyTable
     ordering = ('id', )
@@ -34,7 +35,8 @@ class SurveyCreateView(AuditFormMixin, CreateView):
         return kw
 
 
-class SurveyUpdateView(OfficePermissionRequiredMixin, AuditFormMixin, UpdateView):
+class SurveyUpdateView(OfficePermissionRequiredMixin, AuditFormMixin,
+                       UpdateView):
     model = Survey
     form_class = SurveyForm
     success_url = reverse_lazy('survey_list')
@@ -48,7 +50,8 @@ class SurveyUpdateView(OfficePermissionRequiredMixin, AuditFormMixin, UpdateView
         return context
 
 
-class SurveyDeleteView(OfficePermissionRequiredMixin, AuditFormMixin, MultiDeleteViewMixin):
+class SurveyDeleteView(OfficePermissionRequiredMixin, AuditFormMixin,
+                       MultiDeleteViewMixin):
     model = Survey
     success_url = reverse_lazy('survey_list')
     success_message = DELETE_SUCCESS_MESSAGE.format(
