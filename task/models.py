@@ -556,6 +556,14 @@ class Ecm(Audit, LegacyCode):
     def local_file_exists(self):
         return os.path.exists(self.local_file_path)
 
+    def get_file_content(self):
+        try:
+            return self.path.read()
+        except OSError:
+            with open(self.local_file_path, 'rb') as pfile:
+                contents = pfile.read()
+            return contents
+
     def delete(self, *args, **kwargs):
         if self.legacy_code:
             raise ValidationError(

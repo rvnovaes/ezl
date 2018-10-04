@@ -1432,7 +1432,7 @@ def ecm_batch_download(request, pk):
         zf = ZipFile(buff, mode='a')
         zip_filename = None
         for ecm in ecms:
-            output = io.BytesIO(ecm.path.read())
+            output = io.BytesIO(ecm.get_file_content())
             output.seek(0)
             zf.writestr(ecm.path.name, output.getvalue())
             if not zip_filename:
