@@ -27,7 +27,9 @@ def import_data():
         # apaga registros da tabela city - tem que ter cascade mesmo que não existam registros
         # associados em outras tabelas
         # restart identity - reinica o id da tabela
-        engine.execute(text('truncate table city restart identity cascade;').execution_options(autocommit=True))
+        engine.execute(
+            text('truncate table city restart identity cascade;').
+            execution_options(autocommit=True))
 
         # pega o diretorio do arquivo __init__.py do diretorio corrente e junta com o 'city.json'
         json_file_path = os.path.join(os.path.dirname(__file__), 'city.json')
@@ -41,7 +43,8 @@ def import_data():
             city_name = str(data['name']).replace("'", "''")
             court_district = str(data['court_district']).replace("'", "''")
 
-            query = "SELECT id FROM state WHERE initials = '" + data['state'] + "';"
+            query = "SELECT id FROM state WHERE initials = '" + data[
+                'state'] + "';"
             connection = engine.connect()
             result = connection.execute(query)
             state_id = ''
@@ -66,13 +69,13 @@ def import_data():
             result = connection.execute(query)
             connection.close()
             debug_logger.debug(
-                "Cidade,%s,%s,%s,%s" % (
-                str(city_name), str(court_district), str(state_id), timestr))
+                "Cidade,%s,%s,%s,%s" % (str(city_name), str(court_district),
+                                        str(state_id), timestr))
 
     except Exception as e:
-        error_logger.error(
-            "Ocorreu o seguinte erro na importacao de Cidade: "+ str(
-                e) + "," + timestr)
+        error_logger.error("Ocorreu o seguinte erro na importacao de Cidade: "
+                           + str(e) + "," + timestr)
+
 
 if __name__ == "__main__":
     engine = connect_db(config_parser, 'django_application')

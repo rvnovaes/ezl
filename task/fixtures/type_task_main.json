@@ -1,0 +1,577 @@
+[
+{
+    "model": "task.typetaskmain",
+    "pk": 1,
+    "fields": {
+        "is_hearing": true,
+        "name": "Audi\u00eancia c\u00edvel - apenas advogado",
+        "characteristics": {
+            "options": [
+                {
+                    "name": "acting_area",
+                    "title": "\u00c1rea de atua\u00e7\u00e3o",
+                    "options": [
+                        "C\u00edvel"
+                    ]
+                },
+                {
+                    "name": "participants",
+                    "title": "Participantes",
+                    "options": [
+                        "Advogado"
+                    ]
+                }
+            ],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 2,
+    "fields": {
+        "is_hearing": true,
+        "name": "Audi\u00eancia c\u00edvel - apenas preposto",
+        "characteristics": {
+            "options": [
+                {
+                    "name": "acting_area",
+                    "title": "\u00c1rea de atua\u00e7\u00e3o",
+                    "options": [
+                        "C\u00edvel"
+                    ]
+                },
+                {
+                    "name": "participants",
+                    "title": "Participantes",
+                    "options": [
+                        "Preposto"
+                    ]
+                }
+            ],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 3,
+    "fields": {
+        "is_hearing": true,
+        "name": "Audi\u00eancia c\u00edvel - advogado e preposto",
+        "characteristics": {
+            "options": [
+                {
+                    "name": "acting_area",
+                    "title": "\u00c1rea de atua\u00e7\u00e3o",
+                    "options": [
+                        "C\u00edvel"
+                    ]
+                },
+                {
+                    "name": "participants",
+                    "title": "Participantes",
+                    "options": [
+                        "Advogado",
+                        "Preposto"
+                    ]
+                }
+            ],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 4,
+    "fields": {
+        "is_hearing": true,
+        "name": "Audi\u00eancia criminal - advogado e preposto",
+        "characteristics": {
+            "options": [
+                {
+                    "name": "acting_area",
+                    "title": "\u00c1rea de atua\u00e7\u00e3o",
+                    "options": [
+                        "Criminal"
+                    ]
+                },
+                {
+                    "name": "participants",
+                    "title": "Participantes",
+                    "options": [
+                        "Advogado",
+                        "Preposto"
+                    ]
+                }
+            ],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 5,
+    "fields": {
+        "is_hearing": true,
+        "name": "Audi\u00eancia criminal - apenas advogado",
+        "characteristics": {
+            "options": [
+                {
+                    "name": "acting_area",
+                    "title": "\u00c1rea de atua\u00e7\u00e3o",
+                    "options": [
+                        "Criminal"
+                    ]
+                },
+                {
+                    "name": "participants",
+                    "title": "Participantes",
+                    "options": [
+                        "Advogado"
+                    ]
+                }
+            ],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 6,
+    "fields": {
+        "is_hearing": true,
+        "name": "Audi\u00eancia criminal - apenas preposto",
+        "characteristics": {
+            "options": [
+                {
+                    "name": "acting_area",
+                    "title": "\u00c1rea de atua\u00e7\u00e3o",
+                    "options": [
+                        "Criminal"
+                    ]
+                },
+                {
+                    "name": "participants",
+                    "title": "Participantes",
+                    "options": [
+                        "Preposto"
+                    ]
+                }
+            ],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 7,
+    "fields": {
+        "is_hearing": true,
+        "name": "Audi\u00eancia trabalhista inicial/concilia\u00e7\u00e3o/encerramento - advogado e preposto",
+        "characteristics": {
+            "options": [
+                {
+                    "name": "acting_area",
+                    "title": "\u00c1rea de atua\u00e7\u00e3o",
+                    "options": [
+                        "Trabalhista"
+                    ]
+                },
+                {
+                    "name": "participants",
+                    "title": "Participantes",
+                    "options": [
+                        "Advogado",
+                        "Preposto"
+                    ]
+                }
+            ],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 8,
+    "fields": {
+        "is_hearing": true,
+        "name": "Audi\u00eancia trabalhista inicial/concilia\u00e7\u00e3o/encerramento - apenas advogado",
+        "characteristics": {
+            "options": [
+                {
+                    "name": "acting_area",
+                    "title": "\u00c1rea de atua\u00e7\u00e3o",
+                    "options": [
+                        "Trabalhista"
+                    ]
+                },
+                {
+                    "name": "participants",
+                    "title": "Participantes",
+                    "options": [
+                        "Advogado"
+                    ]
+                }
+            ],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 9,
+    "fields": {
+        "is_hearing": true,
+        "name": "Audi\u00eancia trabalhista inicial/concilia\u00e7\u00e3o/encerramento - apenas preposto",
+        "characteristics": {
+            "options": [
+                {
+                    "name": "acting_area",
+                    "title": "\u00c1rea de atua\u00e7\u00e3o",
+                    "options": [
+                        "Trabalhista"
+                    ]
+                },
+                {
+                    "name": "participants",
+                    "title": "Participantes",
+                    "options": [
+                        "Preposto"
+                    ]
+                }
+            ],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 10,
+    "fields": {
+        "is_hearing": true,
+        "name": "Audi\u00eancia trabalhista una/instru\u00e7\u00e3o - advogado e preposto",
+        "characteristics": {
+            "options": [
+                {
+                    "name": "acting_area",
+                    "title": "\u00c1rea de atua\u00e7\u00e3o",
+                    "options": [
+                        "Trabalhista"
+                    ]
+                },
+                {
+                    "name": "participants",
+                    "title": "Participantes",
+                    "options": [
+                        "Advogado",
+                        "Preposto"
+                    ]
+                }
+            ],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 11,
+    "fields": {
+        "is_hearing": true,
+        "name": "Audi\u00eancia trabalhista una/instru\u00e7\u00e3o - apenas advogado",
+        "characteristics": {
+            "options": [
+                {
+                    "name": "acting_area",
+                    "title": "\u00c1rea de atua\u00e7\u00e3o",
+                    "options": [
+                        "Trabalhista"
+                    ]
+                },
+                {
+                    "name": "participants",
+                    "title": "Participantes",
+                    "options": [
+                        "Advogado"
+                    ]
+                }
+            ],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 12,
+    "fields": {
+        "is_hearing": true,
+        "name": "Audi\u00eancia trabalhista una/instru\u00e7\u00e3o - apenas preposto",
+        "characteristics": {
+            "options": [
+                {
+                    "name": "acting_area",
+                    "title": "\u00c1rea de atua\u00e7\u00e3o",
+                    "options": [
+                        "Trabalhista"
+                    ]
+                },
+                {
+                    "name": "participants",
+                    "title": "Participantes",
+                    "options": [
+                        "Preposto"
+                    ]
+                }
+            ],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 13,
+    "fields": {
+        "is_hearing": false,
+        "name": "Alvar\u00e1",
+        "characteristics": {
+            "options": [],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 14,
+    "fields": {
+        "is_hearing": false,
+        "name": "C\u00f3pia",
+        "characteristics": {
+            "options": [],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 15,
+    "fields": {
+        "is_hearing": false,
+        "name": "Protocolo",
+        "characteristics": {
+            "options": [],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 16,
+    "fields": {
+        "is_hearing": false,
+        "name": "Certid\u00e3o",
+        "characteristics": {
+            "options": [],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+},
+{
+    "model": "task.typetaskmain",
+    "pk": 17,
+    "fields": {
+        "is_hearing": false,
+        "name": "Outros Servi\u00e7os",
+        "characteristics": {
+            "options": [],
+            "criticality": [
+                {
+                    "name": "minimal_period",
+                    "title": "Prazo M\u00ednimo (h)",
+                    "value": 48
+                },
+                {
+                    "name": "urgent_period",
+                    "title": "Prazo de urg\u00eancia (h)",
+                    "value": 72
+                }
+            ]
+        }
+    }
+}
+]

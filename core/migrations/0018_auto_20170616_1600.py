@@ -14,6 +14,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='person',
             name='legal_type',
-            field=models.CharField(choices=[('J', 'Jurídica'), ('F', 'Física')], max_length=1, verbose_name='Tipo'),
+            field=models.CharField(
+                choices=[('J', 'Jurídica'), ('F', 'Física')],
+                max_length=1,
+                verbose_name='Tipo'),
         ),
     ]

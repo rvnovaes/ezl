@@ -29,23 +29,31 @@ class PersonManagerQuerySet(QuerySet):
         return self.filter(is_active=True)
 
     def correspondents(self):
-        return self.filter(auth_user__groups__name__startswith=self.model.CORRESPONDENT_GROUP + '-').order_by(
-            'name', 'auth_user').distinct('name', 'auth_user')
+        return self.filter(auth_user__groups__name__startswith=self.model.
+                           CORRESPONDENT_GROUP + '-').order_by(
+                               'name', 'auth_user').distinct(
+                                   'name', 'auth_user')
 
-    def requesters(self, office_pk=False):        
-        if office_pk:
-            return self.filter(auth_user__groups__name__startswith=self.model.REQUESTER_GROUP + '-' + str(office_pk)).order_by(
-            'name', 'auth_user').distinct('name', 'auth_user')
+    def requesters(self, office_id=False):
+        if office_id:
+            return self.filter(
+                auth_user__groups__name__startswith=self.model.REQUESTER_GROUP
+                + '-' + str(office_id)).order_by('name', 'auth_user').distinct(
+                    'name', 'auth_user')
 
-        return self.filter(auth_user__groups__name__startswith=self.model.REQUESTER_GROUP + '-').order_by(
-            'name', 'auth_user').distinct('name', 'auth_user')
+        return self.filter(
+            auth_user__groups__name__startswith=self.model.REQUESTER_GROUP +
+            '-').order_by('name', 'auth_user').distinct('name', 'auth_user')
 
     def services(self):
-        return self.filter(auth_user__groups__name__startswith=self.model.SERVICE_GROUP + '-').order_by(
-            'name', 'auth_user').distinct('name', 'auth_user')
+        return self.filter(
+            auth_user__groups__name__startswith=self.model.SERVICE_GROUP +
+            '-').order_by('name', 'auth_user').distinct('name', 'auth_user')
 
     def active_offices(self):
-        return self.filter(officemembership__is_active=True).order_by('legal_name')
+        return self.filter(
+            officemembership__is_active=True).order_by('legal_name')
 
     def inactive_offices(self):
-        return self.filter(officemembership__is_active=False).order_by('legal_name')
+        return self.filter(
+            officemembership__is_active=False).order_by('legal_name')

@@ -5,7 +5,6 @@ from core.models import Person, Office
 import logging
 import traceback
 
-
 ERROR_LOGGER = logging.getLogger('error_logger')
 ECM_PATH_ADVWIN2EZL = 'ERRO ao converter o path do ECM - {e}'
 
@@ -33,7 +32,8 @@ def ecm_path_ezl2advwin(ezl_path):
     """
     storage_server = get_parser()['etl']['host_sftp']
     part = ezl_path.split('ECM/', 1)[1]
-    path = join('//', storage_server, 'ged_advwin$', 'Agenda', part).replace('/', '\\')
+    path = join('//', storage_server, 'ged_advwin$', 'Agenda', part).replace(
+        '/', '\\')
     return path
 
 
@@ -54,9 +54,8 @@ def save_error_log(log, create_user, message_error):
 
 def get_clients_to_import():
     """Retorna os ids dos correspondentes que devemos importar"""
-    return Person.objects.filter(
-        import_from_legacy=True).values_list(
-            'legacy_code', flat=True)
+    return Person.objects.filter(import_from_legacy=True).values_list(
+        'legacy_code', flat=True)
 
 
 def get_message_log_default(model_name, rows_count, error, time):
@@ -67,8 +66,9 @@ def get_message_log_default(model_name, rows_count, error, time):
 
 def get_default_office():
     admin = User.objects.filter(username='admin').first()
-    default_office, created = Office.objects.get_or_create(create_user=admin,
-                                                           cpf_cnpj='03.482.042/0001-02',
-                                                           name='Marcelo Tostes Advogados Associados',
-                                                           legal_name='Marcelo Tostes Advogados Associados')
+    default_office, created = Office.objects.get_or_create(
+        create_user=admin,
+        cpf_cnpj='03.482.042/0001-02',
+        name='Marcelo Tostes Advogados Associados',
+        legal_name='Marcelo Tostes Advogados Associados')
     return default_office

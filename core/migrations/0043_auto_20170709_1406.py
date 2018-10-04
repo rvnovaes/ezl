@@ -15,6 +15,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='person',
             name='cpf_cnpj',
-            field=models.CharField(blank=True, max_length=255, null=True, unique=True, verbose_name='CPF/CNPJ'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                unique=True,
+                verbose_name='CPF/CNPJ'),
         ),
     ]

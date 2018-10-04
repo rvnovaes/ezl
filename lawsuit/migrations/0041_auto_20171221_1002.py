@@ -16,12 +16,23 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='movement',
             name='folder',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, related_name='folders_movement', to='lawsuit.Folder', verbose_name='Pasta'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='folders_movement',
+                to='lawsuit.Folder',
+                verbose_name='Pasta'),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='movement',
             name='law_suit',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='law_suits', to='lawsuit.LawSuit', verbose_name='Processo'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='law_suits',
+                to='lawsuit.LawSuit',
+                verbose_name='Processo'),
         ),
     ]

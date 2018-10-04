@@ -11,10 +11,11 @@ def get_default_office(apps, schema_editor):
     admin = User.objects.filter(username='admin').first()
     if admin:
         Office = apps.get_model('core', 'Office')
-        default_office = Office.objects.get(create_user=admin,
-                                            cpf_cnpj='03.482.042/0001-02',
-                                            name='Marcelo Tostes Advogados Associados',
-                                            legal_name='Marcelo Tostes Advogados Associados')
+        default_office = Office.objects.get(
+            create_user=admin,
+            cpf_cnpj='03.482.042/0001-02',
+            name='Marcelo Tostes Advogados Associados',
+            legal_name='Marcelo Tostes Advogados Associados')
         Task = apps.get_model('task', 'task')
         for record in Task.objects.all():
             record.office_id = default_office.id
@@ -37,34 +38,50 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='office',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
-                                    blank=True, null=True,
-                                    related_name='task_office', to='core.Office', verbose_name='Escritório'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                blank=True,
+                null=True,
+                related_name='task_office',
+                to='core.Office',
+                verbose_name='Escritório'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='typetask',
             name='office',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
-                                    blank=True, null=True,
-                                    related_name='typetask_office', to='core.Office', verbose_name='Escritório'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                blank=True,
+                null=True,
+                related_name='typetask_office',
+                to='core.Office',
+                verbose_name='Escritório'),
             preserve_default=False,
         ),
         migrations.RunPython(get_default_office),
         migrations.AlterField(
             model_name='task',
             name='office',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
-                                    blank=False, null=False,
-                                    related_name='task_office', to='core.Office', verbose_name='Escritório'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                blank=False,
+                null=False,
+                related_name='task_office',
+                to='core.Office',
+                verbose_name='Escritório'),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='typetask',
             name='office',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,
-                                    blank=False, null=False,
-                                    related_name='typetask_office', to='core.Office', verbose_name='Escritório'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                blank=False,
+                null=False,
+                related_name='typetask_office',
+                to='core.Office',
+                verbose_name='Escritório'),
             preserve_default=False,
         ),
     ]

@@ -18,9 +18,21 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ControlFirstAccessUser',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('first_login', models.DateTimeField(auto_now_add=True, verbose_name='Data do primeiro acesso.')),
-                ('auth_user', models.OneToOneField(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL, verbose_name='Usuário do sistema')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('first_login',
+                 models.DateTimeField(
+                     auto_now_add=True,
+                     verbose_name='Data do primeiro acesso.')),
+                ('auth_user',
+                 models.OneToOneField(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to=settings.AUTH_USER_MODEL,
+                     verbose_name='Usuário do sistema')),
             ],
             options={
                 'verbose_name': 'Controle de primeiro acesso',

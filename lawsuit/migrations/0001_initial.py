@@ -21,14 +21,36 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CourtDistrict',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('name', models.CharField(max_length=255, unique=True, verbose_name='Nome')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='courtdistrict_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='courtdistrict_create_user', to=settings.AUTH_USER_MODEL)),
-                ('state', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.State', verbose_name='Estado')),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('name',
+                 models.CharField(
+                     max_length=255, unique=True, verbose_name='Nome')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='courtdistrict_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='courtdistrict_create_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('state',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='core.State',
+                     verbose_name='Estado')),
             ],
             options={
                 'db_table': 'court_district',
@@ -37,14 +59,39 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Folder',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('legacy_code', models.CharField(default='', max_length=255, unique=True, verbose_name='Código Legado')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='folder_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='folder_create_user', to=settings.AUTH_USER_MODEL)),
-                ('person_customer', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.Person', verbose_name='Cliente')),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('legacy_code',
+                 models.CharField(
+                     default='',
+                     max_length=255,
+                     unique=True,
+                     verbose_name='Código Legado')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='folder_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='folder_create_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('person_customer',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='core.Person',
+                     verbose_name='Cliente')),
             ],
             options={
                 'db_table': 'folder',
@@ -54,13 +101,30 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Instance',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('name', models.CharField(default='', max_length=255, unique=True)),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='instance_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='instance_create_user', to=settings.AUTH_USER_MODEL)),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('name',
+                 models.CharField(default='', max_length=255, unique=True)),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='instance_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='instance_create_user',
+                     to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'instance',
@@ -70,14 +134,36 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='LawSuit',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='lawsuit_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='lawsuit_create_user', to=settings.AUTH_USER_MODEL)),
-                ('folder', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.Folder')),
-                ('person_lawyer', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.Person')),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='lawsuit_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='lawsuit_create_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('folder',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='lawsuit.Folder')),
+                ('person_lawyer',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='core.Person')),
             ],
             options={
                 'db_table': 'law_suit',
@@ -87,17 +173,45 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Movement',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('legacy_code', models.CharField(default='', max_length=255, unique=True)),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('legacy_code',
+                 models.CharField(default='', max_length=255, unique=True)),
                 ('deadline', models.DateTimeField(null=True)),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='movement_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='movement_create_user', to=settings.AUTH_USER_MODEL)),
-                ('law_suit', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.LawSuit')),
-                ('person_court', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='movement_court', to='core.Person')),
-                ('person_lawyer', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='movement_laobertowyer', to='core.Person')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='movement_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='movement_create_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('law_suit',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='lawsuit.LawSuit')),
+                ('person_court',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='movement_court',
+                     to='core.Person')),
+                ('person_lawyer',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='movement_laobertowyer',
+                     to='core.Person')),
             ],
             options={
                 'db_table': 'movement',
@@ -107,20 +221,44 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Task',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('legacy_code', models.CharField(default='', max_length=255, unique=True)),
-                ('delegation_date', models.DateTimeField(default=django.utils.timezone.now)),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('legacy_code',
+                 models.CharField(default='', max_length=255, unique=True)),
+                ('delegation_date',
+                 models.DateTimeField(default=django.utils.timezone.now)),
                 ('acceptance_date', models.DateTimeField(null=True)),
                 ('deadline_date', models.DateTimeField(null=True)),
                 ('final_deadline_date', models.DateTimeField(null=True)),
                 ('execution_deadline_date', models.DateTimeField(null=True)),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='task_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='task_create_user', to=settings.AUTH_USER_MODEL)),
-                ('movement', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.Movement')),
-                ('person', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.Person')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='task_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='task_create_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('movement',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='lawsuit.Movement')),
+                ('person',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='core.Person')),
             ],
             options={
                 'db_table': 'task',
@@ -130,15 +268,33 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TypeMovement',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True, verbose_name='Ativo')),
-                ('name', models.CharField(default='', max_length=255, unique=True)),
-                ('legacy_code', models.CharField(default='', max_length=255, unique=True)),
+                ('active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
+                ('name',
+                 models.CharField(default='', max_length=255, unique=True)),
+                ('legacy_code',
+                 models.CharField(default='', max_length=255, unique=True)),
                 ('uses_wo', models.BooleanField(default=False)),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='typemovement_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='typemovement_create_user', to=settings.AUTH_USER_MODEL)),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='typemovement_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='typemovement_create_user',
+                     to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'type_movement',
@@ -148,11 +304,15 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='type_movement',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.TypeMovement'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='lawsuit.TypeMovement'),
         ),
         migrations.AddField(
             model_name='movement',
             name='type_movement',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lawsuit.TypeMovement'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='lawsuit.TypeMovement'),
         ),
     ]

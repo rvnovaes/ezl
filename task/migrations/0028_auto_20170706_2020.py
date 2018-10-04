@@ -19,8 +19,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='type_task',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, to='task.TypeTask',
-                                    verbose_name='Tipo de Serviço'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.PROTECT,
+                to='task.TypeTask',
+                verbose_name='Tipo de Serviço'),
             preserve_default=False,
         ),
     ]

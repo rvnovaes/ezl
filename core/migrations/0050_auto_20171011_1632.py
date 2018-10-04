@@ -15,7 +15,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='address',
-            options={'verbose_name': 'Endereço', 'verbose_name_plural': 'Endereços'},
+            options={
+                'verbose_name': 'Endereço',
+                'verbose_name_plural': 'Endereços'
+            },
         ),
         migrations.RemoveField(
             model_name='person',
@@ -24,12 +27,18 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='address',
             name='address_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.AddressType', verbose_name='Tipo'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.AddressType',
+                verbose_name='Tipo'),
         ),
         migrations.AlterField(
             model_name='address',
             name='city',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.City', verbose_name='Cidade'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='core.City',
+                verbose_name='Cidade'),
         ),
         migrations.AlterField(
             model_name='address',
@@ -39,7 +48,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='address',
             name='complement',
-            field=models.CharField(blank=True, max_length=255, verbose_name='Complemento'),
+            field=models.CharField(
+                blank=True, max_length=255, verbose_name='Complemento'),
         ),
         migrations.AlterField(
             model_name='address',
@@ -64,6 +74,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='person',
             name='name',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Nome Fantasia/Apelido'),
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='Nome Fantasia/Apelido'),
         ),
     ]

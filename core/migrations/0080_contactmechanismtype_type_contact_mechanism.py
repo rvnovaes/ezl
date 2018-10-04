@@ -15,6 +15,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='contactmechanismtype',
             name='type_contact_mechanism',
-            field=models.CharField(choices=[('0', '-'), ('1', 'TELEFONE'), ('2', 'E-MAIL'), ('3', 'SKYPE'), ('4', 'WHATSAPP'), ('5', 'FACEBOOK'), ('6', 'SITE'), ('7', 'LINKEDIN'), ('8', 'INSTAGRAM'), ('9', 'SNAPCHAT')], default='0', max_length=1, verbose_name='Tipo'),
+            field=models.CharField(
+                choices=[('0', '-'), ('1', 'TELEFONE'), ('2', 'E-MAIL'),
+                         ('3', 'SKYPE'), ('4', 'WHATSAPP'), ('5', 'FACEBOOK'),
+                         ('6', 'SITE'), ('7', 'LINKEDIN'), ('8', 'INSTAGRAM'),
+                         ('9', 'SNAPCHAT')],
+                default='0',
+                max_length=1,
+                verbose_name='Tipo'),
         ),
     ]

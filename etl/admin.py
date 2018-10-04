@@ -2,13 +2,15 @@ from etl.models import DashboardETL, ErrorETL
 from django.contrib import admin
 
 
-
 class DashboardErrorInline(admin.TabularInline):
     model = ErrorETL
     fk_name = 'log'
     max_num = 1
     readonly_fields = ('create_date', 'error')
-    fields = ('create_date', 'error',)
+    fields = (
+        'create_date',
+        'error',
+    )
 
 
 class DashboardETLAdmin(admin.ModelAdmin):
@@ -32,24 +34,25 @@ class DashboardETLAdmin(admin.ModelAdmin):
         return obj.execution_date_finish.strftime("%d-%m-%Y às %H:%M:%S")
 
     def code_executed_query(self, instance):
-        return '<pre><code  class="prettyprint lang-sql">{}</code></pre>'.format(instance.executed_query)
+        return '<pre><code  class="prettyprint lang-sql">{}</code></pre>'.format(
+            instance.executed_query)
 
     quantity_errors.short_description = 'Total de erros'
     time_seconds_start.short_description = 'Inicio'
     time_seconds_finish.short_description = 'Fim'
-    code_executed_query.allow_tags  = True
-    list_display = ['name', 'db_name_source', 'db_host_source',
-                    'time_seconds_start', 'time_seconds_finish',
-                    'read_quantity', 'imported_quantity', 'quantity_errors',
-                    'status']
+    code_executed_query.allow_tags = True
+    list_display = [
+        'name', 'db_name_source', 'db_host_source', 'time_seconds_start',
+        'time_seconds_finish', 'read_quantity', 'imported_quantity',
+        'quantity_errors', 'status'
+    ]
     date_hierarchy = 'execution_date_start'
     fields = ('name', 'db_name_source', 'db_host_source',
-              'execution_date_start', 'execution_date_finish',
-              'read_quantity', 'imported_quantity', 'quantity_errors',
-              'status', 'code_executed_query')
+              'execution_date_start', 'execution_date_finish', 'read_quantity',
+              'imported_quantity', 'quantity_errors', 'status',
+              'code_executed_query')
 
-    inlines = [
-        DashboardErrorInline
-    ]
+    inlines = [DashboardErrorInline]
+
 
 admin.site.register(DashboardETL, DashboardETLAdmin)

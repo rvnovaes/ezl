@@ -2,21 +2,19 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 from .models import Survey
 from material import Layout, Row
-from core.forms import BaseModelForm
+from core.forms import BaseModelForm, BaseForm
+from core.utils import get_office_field
 
 
-class SurveyForm(BaseModelForm):
+class SurveyForm(BaseForm):
 
-    layout = Layout(
-        Row('name'),
-        Row('data'),
-    )
-
-    data = forms.CharField(
-        label=_('Conteúdo'),
-        widget=forms.HiddenInput()
-    )
+    data = forms.CharField(label=_('Conteúdo'), widget=forms.HiddenInput())
 
     class Meta:
         model = Survey
-        fields = ['name', 'data']
+        fields = ['office', 'name', 'data', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
+        self.order_fields(['office', 'name', 'data'])

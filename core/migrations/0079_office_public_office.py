@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='office',
             name='public_office',
-            field=models.BooleanField(default=False, verbose_name='Escritório público'),
+            field=models.BooleanField(
+                default=False, verbose_name='Escritório público'),
         ),
     ]

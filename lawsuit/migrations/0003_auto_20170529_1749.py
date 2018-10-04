@@ -31,7 +31,5 @@ class Migration(migrations.Migration):
             model_name='task',
             name='type_movement',
         ),
-        migrations.DeleteModel(
-            name='Task',
-        ),
+        migrations.DeleteModel(name='Task', ),
     ]

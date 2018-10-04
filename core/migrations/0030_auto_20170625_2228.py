@@ -15,6 +15,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='person',
             name='service_type',
-            field=models.CharField(choices=[('C', 'Cliente'), ('N', 'Nao Aplicavel'), ('F', 'Fornecedor')], default='N', max_length=1, verbose_name='Tipo de Serviço'),
+            field=models.CharField(
+                choices=[('C', 'Cliente'), ('N', 'Nao Aplicavel'),
+                         ('F', 'Fornecedor')],
+                default='N',
+                max_length=1,
+                verbose_name='Tipo de Serviço'),
         ),
     ]

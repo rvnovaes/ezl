@@ -7,15 +7,17 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 
+
 def get_default_office(apps, schema_editor):
     User = apps.get_model('auth', 'User')
     admin = User.objects.filter(username='admin').first()
     if admin:
         Office = apps.get_model('core', 'Office')
-        default_office = Office.objects.get(create_user=admin,
-                                            cpf_cnpj='03.482.042/0001-02',
-                                            name='Marcelo Tostes Advogados Associados',
-                                            legal_name='Marcelo Tostes Advogados Associados')
+        default_office = Office.objects.get(
+            create_user=admin,
+            cpf_cnpj='03.482.042/0001-02',
+            name='Marcelo Tostes Advogados Associados',
+            legal_name='Marcelo Tostes Advogados Associados')
         ServicePriceTable = apps.get_model('financial', 'servicepricetable')
         for record in ServicePriceTable.objects.all():
             record.office_id = default_office.id

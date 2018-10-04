@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='ecm',
             name='path',
-            field=models.FileField(max_length=255, unique=True, upload_to='tasks/'),
+            field=models.FileField(
+                max_length=255, unique=True, upload_to='tasks/'),
         ),
     ]

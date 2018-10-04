@@ -22,16 +22,23 @@ default_justify = 'Aceita por Correspondente: %s'
 
 def to_dict(model_instance, query_instance=None):
     if hasattr(model_instance, '__table__'):
-        return {c.name: str(getattr(model_instance, c.name) if getattr(model_instance, c.name) else '') for c in
-                model_instance.__table__.columns if c.name is not 'id'}
+        return {
+            c.name: str(
+                getattr(model_instance, c.
+                        name) if getattr(model_instance, c.name) else '')
+            for c in model_instance.__table__.columns if c.name is not 'id'
+        }
     else:
         cols = query_instance.column_descriptions
         return {cols[i]['name']: model_instance[i] for i in range(len(cols))}
 
 
-survey_tables = {'Courthearing': JuridFMAudienciaCorrespondente, 'Diligence'
-: JuridFMDiligenciaCorrespondente, 'Protocol': JuridFMProtocoloCorrespondente,
-                 'Operationlicense': JuridFMAlvaraCorrespondente}
+survey_tables = {
+    'Courthearing': JuridFMAudienciaCorrespondente,
+    'Diligence': JuridFMDiligenciaCorrespondente,
+    'Protocol': JuridFMProtocoloCorrespondente,
+    'Operationlicense': JuridFMAlvaraCorrespondente
+}
 
 
 def get_status_by_substatus(substatus):
@@ -89,7 +96,8 @@ class TaskETL(GenericETL):
 
     @property
     def import_query(self):
-        return self._import_query.format(cliente="','".join(get_clients_to_import()))
+        return self._import_query.format(
+            cliente="','".join(get_clients_to_import()))
 
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):
@@ -99,21 +107,25 @@ class TaskETL(GenericETL):
             try:
                 legacy_code = row['legacy_code']
                 movement_legacy_code = row['movement_legacy_code']
-                person_asked_by_legacy_code = row['person_asked_by_legacy_code']
-                person_executed_by_legacy_code = row['person_executed_by_legacy_code']
+                person_asked_by_legacy_code = row[
+                    'person_asked_by_legacy_code']
+                person_executed_by_legacy_code = row[
+                    'person_executed_by_legacy_code']
                 type_task_legacy_code = row['type_task_legacy_code']
 
-                status_code_advwin = get_status_by_substatus(row['status_code_advwin'])
+                status_code_advwin = get_status_by_substatus(
+                    row['status_code_advwin'])
 
                 if row['final_deadline_date']:
-                    final_deadline_date = pytz.timezone(settings.TIME_ZONE).localize(
-                        row['final_deadline_date'])
+                    final_deadline_date = pytz.timezone(
+                        settings.TIME_ZONE).localize(
+                            row['final_deadline_date'])
                 else:
                     final_deadline_date = None
 
                 if row['requested_date']:
-                    requested_date = pytz.timezone(settings.TIME_ZONE).localize(
-                        row['requested_date'])
+                    requested_date = pytz.timezone(
+                        settings.TIME_ZONE).localize(row['requested_date'])
                 else:
                     requested_date = None
 
@@ -129,24 +141,26 @@ class TaskETL(GenericETL):
                     legacy_code=movement_legacy_code,
                     legacy_code__isnull=False,
                     office=default_office,
-                    system_prefix=LegacySystem.ADVWIN.value).first() or InvalidObjectFactory.get_invalid_model(
-                    Movement)
+                    system_prefix=LegacySystem.ADVWIN.value).first(
+                    ) or InvalidObjectFactory.get_invalid_model(Movement)
 
                 person_asked_by = Person.objects.filter(
-                    legacy_code=person_asked_by_legacy_code,                     
+                    legacy_code=person_asked_by_legacy_code,
                     legacy_code__isnull=False,
-                    offices=default_office, 
-                    system_prefix=LegacySystem.ADVWIN.value).first() or InvalidObjectFactory.get_invalid_model(Person)
+                    offices=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).first(
+                    ) or InvalidObjectFactory.get_invalid_model(Person)
 
                 person_executed_by = Person.objects.filter(
-                    legacy_code=person_executed_by_legacy_code, 
-                    legacy_code__isnull=False, 
+                    legacy_code=person_executed_by_legacy_code,
+                    legacy_code__isnull=False,
                     offices=default_office,
-                    system_prefix=LegacySystem.ADVWIN.value).first() or InvalidObjectFactory.get_invalid_model(Person)
+                    system_prefix=LegacySystem.ADVWIN.value).first(
+                    ) or InvalidObjectFactory.get_invalid_model(Person)
 
                 type_task = TypeTask.objects.filter(
-                    legacy_code=type_task_legacy_code).first() or InvalidObjectFactory.get_invalid_model(
-                    TypeTask)
+                    legacy_code=type_task_legacy_code).first(
+                    ) or InvalidObjectFactory.get_invalid_model(TypeTask)
 
                 # 30   Open
                 # 80   Refused
@@ -161,8 +175,13 @@ class TaskETL(GenericETL):
                 client = row['Cliente']
                 if movement.id == 1:
                     status_code_advwin = TaskStatus.ERROR
-                    inconsistencies.append({"inconsistency": Inconsistencies.TASKLESSMOVEMENT,
-                                            "solution": Inconsistencies.get_solution(Inconsistencies.TASKLESSMOVEMENT)})
+                    inconsistencies.append({
+                        "inconsistency":
+                        Inconsistencies.TASKLESSMOVEMENT,
+                        "solution":
+                        Inconsistencies.get_solution(
+                            Inconsistencies.TASKLESSMOVEMENT)
+                    })
                 if not Folder.objects.filter(
                         legacy_code=folder_legacy_code,
                         legacy_code__isnull=False,
@@ -171,20 +190,32 @@ class TaskETL(GenericETL):
                         system_prefix=LegacySystem.ADVWIN.value).first():
 
                     status_code_advwin = TaskStatus.ERROR
-                    inconsistencies.append({"inconsistency": Inconsistencies.TASKINATIVEFOLDER,
-                                            "solution": Inconsistencies.get_solution(
-                                                Inconsistencies.TASKINATIVEFOLDER)})
+                    inconsistencies.append({
+                        "inconsistency":
+                        Inconsistencies.TASKINATIVEFOLDER,
+                        "solution":
+                        Inconsistencies.get_solution(
+                            Inconsistencies.TASKINATIVEFOLDER)
+                    })
                 if movement.id != 1 and movement.folder.id == 1:
                     status_code_advwin = TaskStatus.ERROR
-                    inconsistencies.append({"inconsistency": Inconsistencies.TASKINATIVEFOLDER,
-                                            "solution": Inconsistencies.get_solution(
-                                                Inconsistencies.TASKINATIVEFOLDER)})
+                    inconsistencies.append({
+                        "inconsistency":
+                        Inconsistencies.TASKINATIVEFOLDER,
+                        "solution":
+                        Inconsistencies.get_solution(
+                            Inconsistencies.TASKINATIVEFOLDER)
+                    })
 
                 if movement.id != 1 and movement.law_suit.id == 1:
                     status_code_advwin = TaskStatus.ERROR
-                    inconsistencies.append({"inconsistency": Inconsistencies.MOVEMENTLESSPROCESS,
-                                            "solution": Inconsistencies.get_solution(
-                                                Inconsistencies.MOVEMENTLESSPROCESS)})                
+                    inconsistencies.append({
+                        "inconsistency":
+                        Inconsistencies.MOVEMENTLESSPROCESS,
+                        "solution":
+                        Inconsistencies.get_solution(
+                            Inconsistencies.MOVEMENTLESSPROCESS)
+                    })
 
                 if task:
                     task.requested_date = requested_date
@@ -199,14 +230,17 @@ class TaskETL(GenericETL):
                     task.blocked_payment_date = blocked_payment_date
                     task.finished_date = finished_date
                     task.requested_date = requested_date
-                    task.movement = movement                    
+                    task.movement = movement
                     if task.task_status == TaskStatus.ERROR.value and status_code_advwin != TaskStatus.ERROR:
                         task.task_status = status_code_advwin
 
-                    update_fields = ['requested_date', 'final_deadline_date', 'description',
-                                     'task_status', 'alter_user', 'person_asked_by', 'type_task', 'refused_date',
-                                     'execution_date', 'blocked_payment_date', 'finished_date', 'requested_date',
-                                     'movement']
+                    update_fields = [
+                        'requested_date', 'final_deadline_date', 'description',
+                        'task_status', 'alter_user', 'person_asked_by',
+                        'type_task', 'refused_date', 'execution_date',
+                        'blocked_payment_date', 'finished_date',
+                        'requested_date', 'movement'
+                    ]
 
                     task.save(update_fields=update_fields, skip_signal=True)
 
@@ -241,17 +275,19 @@ class TaskETL(GenericETL):
                             alter_user=user,
                             office=default_office)
                 else:
-                    InconsistencyETL.objects.filter(task=task).update(is_active=False)
+                    InconsistencyETL.objects.filter(task=task).update(
+                        is_active=False)
 
                 self.debug_logger.debug(
-                    "Task,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
-                        str(movement.id), str(legacy_code), str(LegacySystem.ADVWIN.value),
-                        str(user.id), str(user.id), str(person_asked_by.id),
-                        str(person_executed_by.id),
-                        str(type_task.id), str(final_deadline_date),
-                        str(description), str(refused_date), str(execution_date),
-                        str(blocked_payment_date), str(finished_date),
-                        str(status_code_advwin), self.timestr))
+                    "Task,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s"
+                    % (str(movement.id), str(legacy_code),
+                       str(LegacySystem.ADVWIN.value), str(user.id),
+                       str(user.id), str(person_asked_by.id),
+                       str(person_executed_by.id), str(type_task.id),
+                       str(final_deadline_date), str(description),
+                       str(refused_date), str(execution_date),
+                       str(blocked_payment_date), str(finished_date),
+                       str(status_code_advwin), self.timestr))
 
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,
@@ -260,41 +296,47 @@ class TaskETL(GenericETL):
                 save_error_log(log, user, msg)
 
     def config_export(self):
-        accepted_tasks = self.model.objects.filter(legacy_code__isnull=False,
-                                                   task_status=TaskStatus.ACCEPTED)
+        accepted_tasks = self.model.objects.filter(
+            legacy_code__isnull=False, task_status=TaskStatus.ACCEPTED)
 
-        done_tasks = self.model.objects.filter(legacy_code__isnull=False,
-                                               task_status=TaskStatus.DONE)
+        done_tasks = self.model.objects.filter(
+            legacy_code__isnull=False, task_status=TaskStatus.DONE)
 
-        refused_tasks = self.model.objects.filter(legacy_code__isnull=False,
-                                                  task_status=TaskStatus.REFUSED)
+        refused_tasks = self.model.objects.filter(
+            legacy_code__isnull=False, task_status=TaskStatus.REFUSED)
 
-        accepted_service_tasks = self.model.objects.filter(legacy_code__isnull=False,
-                                                          task_status=TaskStatus.ACCEPTED_SERVICE)
+        accepted_service_tasks = self.model.objects.filter(
+            legacy_code__isnull=False, task_status=TaskStatus.ACCEPTED_SERVICE)
 
-        refused_service_tasks = self.model.objects.filter(legacy_code__isnull=False,
-                                                          task_status=TaskStatus.REFUSED_SERVICE)
+        refused_service_tasks = self.model.objects.filter(
+            legacy_code__isnull=False, task_status=TaskStatus.REFUSED_SERVICE)
 
-        survey_result = done_tasks.filter(Q(survey_result__isnull=False) & ~Q(survey_result=''))
+        survey_result = done_tasks.filter(
+            Q(survey_result__isnull=False) & ~Q(survey_result=''))
 
         # survey_result = map(lambda x: (
         #     insert(survey_tables.get(x.type_task.survey_type).__table__).values(to_dict(
         #         survey_tables.get(x.type_task.survey_type)(**parse_survey_result(x.survey_result, x.legacy_code))))
         # ), survey_result)
 
-        accepeted_history = TaskHistory.objects.filter(task_id__in=accepted_tasks.values('id'),
-                                                       status=TaskStatus.ACCEPTED.value)
+        accepeted_history = TaskHistory.objects.filter(
+            task_id__in=accepted_tasks.values('id'),
+            status=TaskStatus.ACCEPTED.value)
 
-        done_history = TaskHistory.objects.filter(task_id__in=done_tasks.values('id'), status=TaskStatus.DONE.value)
+        done_history = TaskHistory.objects.filter(
+            task_id__in=done_tasks.values('id'), status=TaskStatus.DONE.value)
 
-        refused_history = TaskHistory.objects.filter(task_id__in=refused_tasks.values('id'),
-                                                     status=TaskStatus.REFUSED.value)
+        refused_history = TaskHistory.objects.filter(
+            task_id__in=refused_tasks.values('id'),
+            status=TaskStatus.REFUSED.value)
 
-        accepted_service_history = TaskHistory.objects.filter(task_id__in=accepted_service_tasks.values('id'),
-                                                              status=TaskStatus.ACCEPTED_SERVICE.value)
+        accepted_service_history = TaskHistory.objects.filter(
+            task_id__in=accepted_service_tasks.values('id'),
+            status=TaskStatus.ACCEPTED_SERVICE.value)
 
-        refused_service_history = TaskHistory.objects.filter(task_id__in=refused_service_tasks.values('id'),
-                                                              status=TaskStatus.REFUSED_SERVICE.value)
+        refused_service_history = TaskHistory.objects.filter(
+            task_id__in=refused_service_tasks.values('id'),
+            status=TaskStatus.REFUSED_SERVICE.value)
 
         accepted_tasks_query = map(
             lambda x: (
@@ -428,10 +470,12 @@ class TaskETL(GenericETL):
                  JuridCorrespondenteHist.descricao: 'Recusada por Back Office: ' +
                                                     x.task.person_executed_by.legal_name})), refused_service_history)
 
-        self.export_query_set = chain(accepted_tasks_query, done_tasks_query, refused_tasks_query,
-                                      accepted_service_tasks_query, refused_service_tasks_query,
-                                      accepeted_history_query, done_history_query, refused_history_query, survey_result,
-                                      accepted_service_history_query, refused_service_history_query)
+        self.export_query_set = chain(
+            accepted_tasks_query, done_tasks_query, refused_tasks_query,
+            accepted_service_tasks_query, refused_service_tasks_query,
+            accepeted_history_query, done_history_query, refused_history_query,
+            survey_result, accepted_service_history_query,
+            refused_service_history_query)
 
 
 if __name__ == '__main__':

@@ -7,12 +7,12 @@ from django.db import migrations
 
 from survey.models import LEGACY_TYPES
 
-
 NAMES = ["Operationlicense", "Diligence", "Protocol", "Courthearing"]
 
 
 def _get_data(name):
-    file_path = os.path.join(os.path.dirname(__file__), 'data/{}.json'.format(name))
+    file_path = os.path.join(
+        os.path.dirname(__file__), 'data/{}.json'.format(name))
     with open(file_path) as f:
         return f.read()
 

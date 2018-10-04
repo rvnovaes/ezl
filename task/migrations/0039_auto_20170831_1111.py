@@ -17,36 +17,70 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='ecm',
             name='alter_user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='ecm_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='ecm_alter_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Alterado por'),
         ),
         migrations.AlterField(
             model_name='ecm',
             name='create_user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='ecm_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='ecm_create_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Criado por'),
         ),
         migrations.AlterField(
             model_name='task',
             name='alter_user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='task_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='task_alter_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Alterado por'),
         ),
         migrations.AlterField(
             model_name='task',
             name='create_user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='task_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='task_create_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Criado por'),
         ),
         migrations.AlterField(
             model_name='taskhistory',
             name='create_user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='taskhistory_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='taskhistory_create_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Criado por'),
         ),
         migrations.AlterField(
             model_name='typetask',
             name='alter_user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='typetask_alter_user', to=settings.AUTH_USER_MODEL, verbose_name='Alterado por'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='typetask_alter_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Alterado por'),
         ),
         migrations.AlterField(
             model_name='typetask',
             name='create_user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='typetask_create_user', to=settings.AUTH_USER_MODEL, verbose_name='Criado por'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='typetask_create_user',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Criado por'),
         ),
     ]

@@ -16,10 +16,12 @@ def trataCidade(linha, session):
 
     nome_estado = linha['state_name']
     nome_cidade = linha['name']
-    state_query = session.query(State).filter(State.name == nome_estado).first()
+    state_query = session.query(State).filter(
+        State.name == nome_estado).first()
     estado_id = state_query.id
 
-    courtdist_query = session.query(CourtDistrict).filter(CourtDistrict.name == nome_cidade).first()
+    courtdist_query = session.query(CourtDistrict).filter(
+        CourtDistrict.name == nome_cidade).first()
     if courtdist_query:
         comarca_id = courtdist_query.id
 
@@ -40,7 +42,10 @@ def insere_cidade(session, linha):
     session.add(cidade_linha)
     session.commit()
 
-engine_ezl = connect_db(config_parser, 'django_application')  # conexao com o banco aleteia --usar configparser
+
+engine_ezl = connect_db(
+    config_parser,
+    'django_application')  # conexao com o banco aleteia --usar configparser
 
 Base.metadata.create_all(engine_ezl)
 session_ezl = sessionmaker(bind=engine_ezl)()

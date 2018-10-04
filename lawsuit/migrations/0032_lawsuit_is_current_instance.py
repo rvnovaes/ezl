@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='lawsuit',
             name='is_current_instance',
-            field=models.BooleanField(default=False, verbose_name='Instância Atual'),
+            field=models.BooleanField(
+                default=False, verbose_name='Instância Atual'),
         ),
     ]
