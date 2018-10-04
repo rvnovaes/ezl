@@ -45,7 +45,7 @@ from task.workflow import CorrespondentsTable
 from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
 from core.utils import get_office_session, get_domain
-from task.utils import get_task_attachment, copy_ecm, get_dashboard_tasks
+from task.utils import get_task_attachment, copy_ecm, get_dashboard_tasks, get_task_ecms
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -660,7 +660,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         new_task.parent = object_parent
         new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
         new_task.save()
-        for ecm in object_parent.ecm_set.all():
+        for ecm in get_task_ecms(object_parent):
             new_ecm = copy_ecm(ecm, new_task)
 
     def dispatch(self, request, *args, **kwargs):
@@ -1258,7 +1258,7 @@ def get_ecm_url(ecm, external=False):
 
 def get_ecms(task_id, external=False):
     data_list = []
-    ecms = Ecm.objects.filter(Q(tasks__id=task_id) | Q(task_id=task_id)).distinct('id')
+    ecms = get_task_ecms(task_id)
     for ecm in ecms:
         data_list.append({
             'task_id': ecm.task_id,

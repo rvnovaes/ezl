@@ -132,3 +132,7 @@ def create_default_type_tasks(office, create_user=None):
         type_task.save()
         type_task.type_task_main.add(main_type_task)
         type_task.save()
+
+
+def get_task_ecms(task_id):
+    return Ecm.objects.filter(Q(tasks__id=task_id) | Q(task_id=task_id)).distinct('id')
