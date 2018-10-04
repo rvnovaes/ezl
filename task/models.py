@@ -409,10 +409,22 @@ class EcmManager(models.Manager):
         return EcmQuerySet(self.model, using=self._db)
 
 
+class EcmTask(models.Model):
+    """
+    Model utilizado para relacionar um Ecm com mais de uma task.
+    NOTE: Ainda mantemos a FK de Ecm para task para não termos
+    que fazer uma migração gigante que demande a exclusão de
+    ECMs duplicados.
+    """
+    task = models.ForeignKey('Task')
+    ecm = models.ForeignKey('Ecm')
+
+
 class Ecm(Audit, LegacyCode):
     path = models.FileField(upload_to=get_dir_name, max_length=255, null=False)
     size = models.PositiveIntegerField(null=True, blank=True)
     task = models.ForeignKey(Task, blank=False, null=False, on_delete=models.PROTECT)
+    tasks = models.ManyToManyField('Task', through='EcmTask', related_name='+')
     updated = models.BooleanField(default=True, null=False)
     exhibition_name = models.CharField(
         verbose_name="Nome de Exibição", max_length=255, null=False, blank=False

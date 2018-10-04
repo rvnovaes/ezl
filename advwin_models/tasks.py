@@ -45,9 +45,9 @@ def get_result_advwin(stmt):
 
 
 @shared_task(bind=True, max_retries=MAX_RETRIES)
-def export_ecm(self, ecm_id, ecm=None, execute=True):
-    if ecm is None:
-        ecm = Ecm.objects.get(pk=ecm_id)
+def export_ecm(self, ecm_id, task_id):
+    ecm = Ecm.objects.get(pk=ecm_id)
+    task = Task.objects.get(pk=task_id)
 
     new_path = ecm_path_ezl2advwin(ecm.path.name)
     file_name = get_ecm_file_name(ecm.path.name)
@@ -57,7 +57,7 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
 
     values = {
         'Tabela_OR': 'Agenda',
-        'Codigo_OR': ecm.task.legacy_code,
+        'Codigo_OR': task.legacy_code,
         'Link': new_path,
         'Data': timezone.localtime(ecm.create_date),
         'Nome': file_name,
@@ -67,32 +67,29 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
         'Descricao': file_name
     }
     stmt = JuridGedMain.__table__.insert().values(**values)
-    if execute:
-        LOGGER.debug('Exportando ECM %d-%s ', ecm.id, ecm)
-        try:
-            result = get_advwin_engine().execute(stmt)
-            result.close()
-        except Exception as exc:
-            self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
-            LOGGER.warning('Não foi possível exportar ECM: %d-%s\n%s',
-                           ecm.id,
-                           ecm,
-                           exc,
-                           exc_info=(type(exc), exc, exc.__traceback__))
-            raise exc
-        stmt = JuridGedMain.__table__.select().where(and_(
-            JuridGedMain.__table__.c.Codigo_OR == ecm.task.legacy_code,
-            JuridGedMain.__table__.c.Nome == file_name)
-        )
-        result = get_result_advwin(stmt)
-        id_doc = []
-        for row in result:
-            id_doc.append(row['ID_doc'])
+    LOGGER.debug('Exportando ECM %d-%s ', ecm.id, ecm)
+    try:
+        result = get_advwin_engine().execute(stmt)
         result.close()
-        LOGGER.info('ECM %s: exportado', ecm)
-        return id_doc
-    else:
-        return stmt
+    except Exception as exc:
+        self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
+        LOGGER.warning('Não foi possível exportar ECM: %d-%s\n%s',
+                       ecm.id,
+                       ecm,
+                       exc,
+                       exc_info=(type(exc), exc, exc.__traceback__))
+        raise exc
+    stmt = JuridGedMain.__table__.select().where(and_(
+        JuridGedMain.__table__.c.Codigo_OR == task.legacy_code,
+        JuridGedMain.__table__.c.Nome == file_name)
+    )
+    result = get_result_advwin(stmt)
+    id_doc = []
+    for row in result:
+        id_doc.append(row['ID_doc'])
+    result.close()
+    LOGGER.info('ECM %s: exportado', ecm)
+    return id_doc
 
 
 @shared_task(bind=True, max_retries=MAX_RETRIES)

@@ -1154,7 +1154,7 @@ def ajax_get_correspondents_table(request):
 
 def get_ecms(task_id):
     data_list = []
-    ecms = Ecm.objects.filter(task_id=task_id)
+    ecms = Ecm.objects.filter(Q(tasks__id=task_id) | Q(task_id=task_id)).distinct('id')
     for ecm in ecms:
         data_list.append({
             'task_id': ecm.task_id,

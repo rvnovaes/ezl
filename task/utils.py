@@ -48,36 +48,7 @@ def get_task_attachment(self, form):
 
 @retry(stop_max_attempt_number=4, wait_fixed=1000)
 def copy_ecm(ecm, task):
-    new_file = get_file_content_copy(ecm.path)
-    if new_file:
-        file_name = os.path.basename(ecm.path.name)
-        ecm_related = ecm.ecm_related
-        if not ecm_related:
-            ecm_related = ecm
-        if not Ecm.objects.filter(Q(task=task), Q(ecm_related=ecm_related)) \
-                and not task == ecm_related.task:
-
-            new_ecm = copy.copy(ecm)
-            new_ecm.pk = None
-            new_ecm.task = task
-            new_ecm.path = new_file
-            new_file.name = os.path.basename(ecm.path.name)
-            new_ecm.exhibition_name = new_file.name
-            new_ecm.ecm_related = ecm_related
-            new_ecm.save()
-            return new_ecm
-    else:
-        try:
-            subject = 'Erro ao copiar ECM {}'.format(ecm.id)
-            body = """Erro ao copiar ECM {} para a OS {}:
-            {} does not exists""".format(ecm.id, task.id, str(ecm.path))
-            recipients = [admin[1] for admin in settings.ADMINS]
-            # Nessario converter para unicode pois o celery usa python 2.7
-            body = u'{}'.format(body)
-            send_mail.delay(recipients, subject, body)
-        except Exception as e:
-            logger.error('OCORREU UM ERRO AO COPIAR O ECM E NAO FOI POSSIVEL NOTIFICAR POR E-MAIL')
-            logger.error(e)
+    EcmTask.objects.get_or_create(ecm=ecm, task=task)
 
 
 def get_file_content_copy(filefield):    

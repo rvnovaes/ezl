@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.core.exceptions import MultipleObjectsReturned
 from advwin_models.tasks import export_ecm, export_task, export_task_history, delete_ecm
 from django.conf import settings
-from task.models import Task, TaskStatus, TaskHistory, Ecm
+from task.models import Task, Ecm, EcmTask, TaskStatus, TaskHistory
 from task.utils import task_send_mail, copy_ecm
 from task.workflow import get_parent_status, get_child_status, get_parent_fields, get_child_recipients, \
     get_parent_recipients
@@ -273,10 +273,10 @@ def post_save_task(sender, instance, created, **kwargs):
         post_save.connect(post_save_task, sender=sender)
 
 
-@receiver(post_save, sender=Ecm)
+@receiver(post_save, sender=EcmTask)
 def export_ecm_path(sender, instance, created, **kwargs):
-    if created and instance.legacy_code is None and instance.task.legacy_code:
-        export_ecm.delay(instance.id, )
+    if created and instance.ecm.legacy_code is None and instance.task.legacy_code:
+        export_ecm.delay(instance.ecm.id, instance.task.id)
 
 
 @receiver(post_save, sender=Ecm)
