@@ -170,7 +170,7 @@ class TaskETL(GenericETL):
                 inconsistencies = []
                 folder_legacy_code = row['folder_legacy_code']
                 client = row['Cliente']
-                performance_place = 'Local de cumprimento Indefinido'
+                performance_place = 'Local de cumprimento indefinido'
                 if movement.id == 1:
                     status_code_advwin = TaskStatus.ERROR
                     inconsistencies.append({
