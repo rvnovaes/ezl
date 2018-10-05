@@ -115,6 +115,16 @@ class TypeMovementViewSet(viewsets.ModelViewSet):
 class OrganViewSet(viewsets.ModelViewSet):
     queryset = Organ.objects.all()
     serializer_class = OrganSerializer
+    model = Organ
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    search_fields = ('legal_name', 'legacy_code', 'court_district__state__initials', 'court_district__name')
+
+    @remove_invalid_registry
+    def get_queryset(self, *args, **kwargs):
+        invalid_registry = kwargs.get('remove_invalid', None)
+        if invalid_registry:
+            self.queryset = self.queryset.exclude(id=invalid_registry)
+        return self.queryset.filter(office=self.request.auth.application.office)
 
 
 # Não alterar view utilizada pela criacao de OS

@@ -65,8 +65,9 @@ class MovementSerializer(serializers.ModelSerializer):
                   'create_user', 'legacy_code')
 
 
-class OrganSerializer(serializers.ModelSerializer):
+class OrganSerializer(serializers.ModelSerializer, CreateUserSerializerMixin,
+                      OfficeSerializerMixin):
     class Meta:
         model = Organ
-        fields = ('id', 'legal_name', 'cpf_cnpj', 'court_district',
-                  'is_active', 'legacy_code', 'office', 'create_user')
+        fields = ('id', 'legal_name', 'name', 'cpf_cnpj', 'court_district', 'is_active', 'legacy_code', 'office',
+                  'create_user')

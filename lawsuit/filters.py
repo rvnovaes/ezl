@@ -37,4 +37,4 @@ class LawsuitFilter(filters.FilterSet):
     company_id = filters.CharFilter(name='folder__person_customer__company_id')
     class Meta:
         model = LawSuit
-        fields = ['company_id']    
+        fields = ['company_id']
