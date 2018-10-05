@@ -1630,6 +1630,7 @@ class TypeaHeadGenericSearch(View):
             if model._meta.get_field(
                     forward).get_internal_type() == 'ForeignKey':
                 forward = '{}__id'.format(forward)
+                extra_params['forward_field'] = forward
         if forward and int(forward_value):
             forward_params = {
                 '{}'.format(forward): forward_value,

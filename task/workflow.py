@@ -124,8 +124,9 @@ class CorrespondentsTable(object):
         type_task_main = self.type_task_main
 
         if type_task:
+            complement = task.movement.law_suit.court_district_complement
             court_district = task.movement.law_suit.court_district
-            state = task.movement.law_suit.court_district.state
+            state = court_district.state if court_district else None
             client = task.movement.law_suit.folder.person_customer
             offices_related = task.office.offices.all()
             qs = ServicePriceTable.objects.filter(
@@ -152,6 +153,7 @@ class CorrespondentsTable(object):
                 Q(office_correspondent__is_active=True),
                 Q(Q(court_district=court_district) | Q(court_district=None)),
                 Q(Q(state=state) | Q(state=None)),
+                Q(Q(court_district_complement=complement) | Q(court_district_complement=None)),
                 Q(Q(client=client) | Q(client=None)),
                 Q(is_active=True))
             qs_values = qs.values('pk', 'office_id', 'type_task__office_id',

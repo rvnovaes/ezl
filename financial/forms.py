@@ -2,7 +2,7 @@ from django import forms
 from material import Layout, Row
 from core.models import Person, State
 from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field
-from lawsuit.models import CourtDistrict
+from lawsuit.models import CourtDistrict, CourtDistrictComplement
 from task.models import TypeTask
 from .models import CostCenter, ServicePriceTable, ImportServicePriceTable
 from decimal import Decimal
@@ -52,6 +52,16 @@ class ServicePriceTableForm(BaseModelForm):
                                                                       name='court_district',
                                                                       url='/processos/typeahead/search/comarca'))
 
+    court_district_complement = forms.CharField(label="Complemento de Comarca",
+                                                required=False,
+                                                widget=TypeaHeadForeignKeyWidget(
+                                                    model=CourtDistrictComplement,
+                                                    field_related='name',
+                                                    forward='court_district',
+                                                    name='court_district_complement',
+                                                    url='/processos/typeahead/search/complemento',
+                                                ))
+
     type_task = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(TypeTask.objects.all().order_by('name')),
         empty_label='',
@@ -67,8 +77,8 @@ class ServicePriceTableForm(BaseModelForm):
 
     class Meta:
         model = ServicePriceTable
-        fields = ('office', 'office_correspondent', 'client', 'type_task', 'state', 'court_district', 'value',
-                  'is_active')
+        fields = ('office', 'office_correspondent', 'client', 'type_task', 'state', 'court_district',
+                  'court_district_complement', 'value', 'is_active')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'

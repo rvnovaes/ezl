@@ -3,6 +3,8 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+from django.db.models.signals import post_save
+from task.signals import post_save_task
 import django.utils.timezone
 
 import logging
@@ -10,12 +12,14 @@ logger = logging.getLogger('0112')
 
 
 def update_requested_date(apps, schema_editor):
-    from task.models import Task
+    Task = apps.get_model('task', 'Task')
+    post_save.disconnect(post_save_task, sender=Task)
     for task in Task.objects.filter(requested_date__isnull=True):
         task.requested_date = task.create_date
-        task.save(**{'skip_signal': True, 'skip_mail': True})
+        task.save()
         logger.info('TASK {} ALTEROU O REQUESTED_DATE PARA {}'.format(
             str(task.task_number), str(task.create_date)))
+    post_save.connect(post_save_task, sender=Task)
 
 
 class Migration(migrations.Migration):

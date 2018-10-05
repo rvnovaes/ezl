@@ -1,4 +1,4 @@
-from .models import CourtDistrict, State, Movement, LawSuit
+from .models import CourtDistrict, State, Movement, LawSuit, Instance
 import django_filters
 from django_filters import rest_framework as filters
 
@@ -10,6 +10,15 @@ class CourtDistrictFilter(filters.FilterSet):
     class Meta:
         model = CourtDistrict
         fields = ['state', 'name']
+
+
+class InstanceFilter(filters.FilterSet):
+    name = filters.CharFilter(name='name', lookup_expr='icontains')
+    legacy_code = filters.CharFilter(name='legacy_code', lookup_expr='exact')
+
+    class Meta:
+        model = Instance
+        fields = ['legacy_code', 'name']
 
 
 class MovementFilter(filters.FilterSet):

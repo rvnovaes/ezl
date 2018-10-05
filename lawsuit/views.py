@@ -3,31 +3,28 @@ from urllib.parse import urlparse
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.validators import ValidationError
 # project imports
 from django.db.models import ProtectedError
 from django.http import HttpResponseRedirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
-    delete_error_protected, record_from_wrong_office
+    delete_error_protected
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin, \
     GenericFormOneToMany, AddressCreateView, AddressUpdateView, AddressDeleteView
 from task.models import Task
 from task.tables import TaskTable
-from .forms import (TypeMovementForm, InstanceForm, MovementForm, FolderForm,
-                    LawSuitForm, CourtDistrictForm, OrganForm,
-                    CourtDivisionForm)
-from .models import (Instance, Movement, LawSuit, Folder, CourtDistrict,
-                     CourtDivision, TypeMovement, Organ)
-from .tables import (MovementTable, FolderTable, LawSuitTable,
-                     CourtDistrictTable, InstanceTable, CourtDivisionTable,
-                     TypeMovementTable, OrganTable, AddressOrganTable)
+from .forms import (TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm, OrganForm,
+                    CourtDivisionForm, CourtDistrictComplementForm)
+from .models import (Instance, Movement, LawSuit, Folder, CourtDistrict, CourtDivision, TypeMovement, Organ,
+                     CourtDistrictComplement)
+from .tables import (MovementTable, FolderTable, LawSuitTable, CourtDistrictTable, InstanceTable, CourtDivisionTable,
+                     TypeMovementTable, OrganTable, AddressOrganTable, CourtDistrictComplementTable)
 from core.views import remove_invalid_registry, PopupMixin
 from django.core.cache import cache
 from dal import autocomplete
 from django.db.models import Q
-from core.utils import get_office_session
-from ecm.utils import attachment_form_valid
 
 from core.views import CustomLoginRequiredView, TypeaHeadGenericSearch
 
@@ -503,6 +500,14 @@ class LawsuitMovementCreateView(PopupMixin, AuditFormMixin,
         kw['request'] = self.request
         return kw
 
+    def form_valid(self, form):
+        try:
+            res = super().form_valid(form)
+        except ValidationError as e:
+            form.add_error(field=None, error=e)
+            return super().form_invalid(form)
+        return res
+
 
 class LawsuitMovementUpdateView(SuccessMessageMixin, CustomLoginRequiredView,
                                 GenericFormOneToMany, UpdateView):
@@ -544,6 +549,18 @@ class LawsuitMovementUpdateView(SuccessMessageMixin, CustomLoginRequiredView,
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
+
+    def form_invalid(self, form):
+        messages.error(self.request, form.errors)
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        try:
+            res = super().form_valid(form)
+        except ValidationError as e:
+            form.add_error(field=None, error=e)
+            return super().form_invalid(form)
+        return res
 
 
 class MovementListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -855,12 +872,80 @@ class TypeaHeadCourtDistrictSearch(TypeaHeadGenericSearch):
         court_districts = CourtDistrict.objects.filter(
             **
             forward_params) if forward_params else CourtDistrict.objects.all()
-        court_districts = court_districts.filter(
-            Q(name__unaccent__icontains=q)
-            | Q(state__initials__unaccent__icontains=q))
+        court_districts = court_districts.filter(Q(name__unaccent__icontains=q) |
+                                                 Q(state__initials__unaccent__icontains=q))
+        forward_field = extra_params.get('forward_field', None)
+        if forward_field:
+            forward_field = forward_field.replace('__', '.')
         for court_district in court_districts:
             data.append({
                 'id': court_district.id,
-                'data-value-txt': court_district.__str__()
+                'data-value-txt': court_district.__str__(),
+                'data-forward-id': eval('court_district.{}'.format(forward_field)) if forward_field else 0
+            })
+        return list(data)
+
+
+class CourtDistrictComplementListView(CustomLoginRequiredView, SingleTableViewMixin):
+    model = CourtDistrictComplement
+    table_class = CourtDistrictComplementTable
+
+
+class CourtDistrictComplementCreateView(AuditFormMixin, CreateView):
+    model = CourtDistrictComplement
+    form_class = CourtDistrictComplementForm
+    success_url = reverse_lazy('complement_list')
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+
+class CourtDistrictComplementUpdateView(AuditFormMixin, UpdateView):
+    model = CourtDistrictComplement
+    form_class = CourtDistrictComplementForm
+    success_url = reverse_lazy('complement_list')
+    success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+
+class CourtDistrictComplementDeleteView(AuditFormMixin, MultiDeleteViewMixin):
+    model = CourtDistrictComplement
+    success_url = reverse_lazy('complement_list')
+    success_message = DELETE_SUCCESS_MESSAGE.format(
+        model._meta.verbose_name_plural)
+
+
+class TypeaHeadCourtDistrictComplementSearch(TypeaHeadGenericSearch):
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params, extra_params,
+                 *args, **kwargs):
+        data = []
+        complements = CourtDistrictComplement.objects.get_queryset(office=[office.id]).filter(
+            **forward_params) if forward_params else CourtDistrictComplement.objects.get_queryset(office=[office.id])
+        complement_name = court_district = q
+        if len(q.split(' - ')) == 2:
+            complement_name, court_district = q.split(' - ')
+            court_district = court_district.split(' (')[0]
+        complements = complements.filter(Q(name__unaccent__icontains=complement_name)|
+                                         Q(court_district__name__unaccent__icontains=court_district))
+        state = extra_params.get('state', None)
+        if state:
+            complements = complements.filter(Q(court_district__state__id=state))
+        forward_field = extra_params.get('forward_field', None)
+        if forward_field:
+            forward_field = forward_field.replace('__', '.')
+        for complement in complements:
+            data.append({
+                'id': complement.id,
+                'data-value-txt': '{} - {}'.format(complement.name, complement.court_district.__str__()),
+                'data-forward-id': eval('complement.{}'.format(forward_field)) if forward_field else 0,
+                'data-extra-params': complement.court_district.state.id
             })
         return list(data)

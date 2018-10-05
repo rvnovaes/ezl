@@ -10,7 +10,7 @@ from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from etl.advwin_ezl.factory import InvalidObjectFactory
 from etl.utils import get_message_log_default, save_error_log, get_clients_to_import
 from ezl import settings
-from lawsuit.models import Movement, Folder
+from lawsuit.models import Movement, Folder, CourtDistrict
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
 from etl.utils import get_message_log_default, save_error_log
 from etl.models import InconsistencyETL, Inconsistencies
@@ -102,6 +102,7 @@ class TaskETL(GenericETL):
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):
         from core.models import Person
+        invalid_court_district = InvalidObjectFactory.get_invalid_model(CourtDistrict)
         for row in rows:
             rows_count -= 1
             try:
@@ -162,10 +163,6 @@ class TaskETL(GenericETL):
                     legacy_code=type_task_legacy_code).first(
                     ) or InvalidObjectFactory.get_invalid_model(TypeTask)
 
-                # 30   Open
-                # 80   Refused
-                # atualizar o status_task somente se for diferente de OPEN
-
                 # É necessário fazer com que as datas abaixo sejam nula, senão na execução da ETL
                 # será originado erro de variável sem valor
                 refused_date = execution_date = blocked_payment_date = finished_date = acceptance_service_date = refused_service_date = None
@@ -173,6 +170,7 @@ class TaskETL(GenericETL):
                 inconsistencies = []
                 folder_legacy_code = row['folder_legacy_code']
                 client = row['Cliente']
+                performance_place = 'Local de cumprimento indefinido'
                 if movement.id == 1:
                     status_code_advwin = TaskStatus.ERROR
                     inconsistencies.append({
@@ -217,6 +215,34 @@ class TaskETL(GenericETL):
                             Inconsistencies.MOVEMENTLESSPROCESS)
                     })
 
+                if movement.id != 1 and movement.law_suit.id != 1:
+                    if not (movement.law_suit.court_district or
+                            movement.law_suit.city or movement.law_suit.court_district_complement):
+                        status_code_advwin = TaskStatus.ERROR
+                        inconsistencies.append({
+                            "inconsistency":
+                                Inconsistencies.BLANKCOURTDISTRICT,
+                            "solution":
+                                Inconsistencies.get_solution(
+                                    Inconsistencies.BLANKCOURTDISTRICT)
+                        })
+                    if movement.law_suit.court_district == invalid_court_district:
+                        status_code_advwin = TaskStatus.ERROR
+                        inconsistencies.append({
+                            "inconsistency":
+                                Inconsistencies.INVALIDCOURTDISTRICT,
+                            "solution":
+                                Inconsistencies.get_solution(
+                                    Inconsistencies.INVALIDCOURTDISTRICT)
+                        })
+                    else:
+                        if movement.law_suit.court_district_complement:
+                            performance_place = movement.law_suit.court_district_complement.name
+                        elif movement.law_suit.city:
+                            performance_place = movement.law_suit.city.name
+                        else:
+                            performance_place = movement.law_suit.court_district.name
+
                 if task:
                     task.requested_date = requested_date
                     task.final_deadline_date = final_deadline_date
@@ -231,15 +257,16 @@ class TaskETL(GenericETL):
                     task.finished_date = finished_date
                     task.requested_date = requested_date
                     task.movement = movement
+                    task.performance_place = performance_place
                     if task.task_status == TaskStatus.ERROR.value and status_code_advwin != TaskStatus.ERROR:
+                        task.task_status = status_code_advwin
+                    elif status_code_advwin == TaskStatus.ERROR:
                         task.task_status = status_code_advwin
 
                     update_fields = [
-                        'requested_date', 'final_deadline_date', 'description',
-                        'task_status', 'alter_user', 'person_asked_by',
-                        'type_task', 'refused_date', 'execution_date',
-                        'blocked_payment_date', 'finished_date',
-                        'requested_date', 'movement'
+                        'requested_date', 'final_deadline_date', 'description', 'task_status', 'alter_user',
+                        'person_asked_by', 'type_task', 'refused_date', 'execution_date', 'blocked_payment_date',
+                        'finished_date', 'requested_date', 'movement', 'performance_place'
                     ]
 
                     task.save(update_fields=update_fields, skip_signal=True)
@@ -263,6 +290,7 @@ class TaskETL(GenericETL):
                     task.task_status = status_code_advwin
                     task.requested_date = requested_date
                     task.office = default_office
+                    task.performance_place = performance_place
                     task.save(skip_signal=True)
 
                 if status_code_advwin == TaskStatus.ERROR:

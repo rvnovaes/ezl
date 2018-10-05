@@ -1,10 +1,23 @@
 from django.db import models
-from core.models import Audit, Person, State, LegacyCode, OfficeMixin, OfficeManager
+from enum import Enum
+from core.models import Audit, Person, State, LegacyCode, OfficeMixin, OfficeManager, City
 from sequences import get_next_value
 from django.db import transaction
 from django.core.validators import ValidationError
 from django.core.exceptions import NON_FIELD_ERRORS, ObjectDoesNotExist
 from django.db.models import Q
+
+
+class TypeLawsuit(Enum):
+    ADMINISTRATIVE = "Administrativo"
+    JUDICIAL = "Judicial"
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        return [(x.name, x.value) for x in cls]
 
 
 @transaction.atomic
@@ -143,6 +156,22 @@ class CourtDistrict(Audit, LegacyCode):
         return {"id": self.id, "name": self.name}
 
 
+class CourtDistrictComplement(Audit, LegacyCode, OfficeMixin):
+    name = models.CharField(max_length=255, null=False, verbose_name="Nome")
+    court_district = models.ForeignKey(CourtDistrict, on_delete=models.PROTECT, verbose_name='Comarca')
+
+    objects = OfficeManager()
+
+    class Meta:
+        ordering = ('office', 'name',)
+        verbose_name = "Complemento de comarca"
+        verbose_name_plural = "Complementos de comarca"
+        unique_together = (('name', 'court_district', 'office'),)
+
+    def __str__(self):
+        return '{} - {}'.format(self.name, self.court_district.__str__())
+
+
 class Organ(Person, OfficeMixin):
     """
     Classe responsavel por manter o cadastro dos tribunais.
@@ -204,15 +233,15 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
     instance = models.ForeignKey(
         Instance,
         on_delete=models.PROTECT,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         verbose_name='Instância',
         related_name='instances')
     court_district = models.ForeignKey(
         CourtDistrict,
         on_delete=models.PROTECT,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         verbose_name='Comarca',
         related_name='court_districts')
     organ = models.ForeignKey(
@@ -238,6 +267,25 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
         verbose_name='Instância Atual', default=False)
     opposing_party = models.TextField(
         blank=True, null=True, verbose_name='Parte adversa')
+    type_lawsuit = models.CharField(
+        null=False,
+        verbose_name='Tipo de processo',
+        max_length=30,
+        choices=((x.name, x.value.title()) for x in TypeLawsuit),
+        default=TypeLawsuit.JUDICIAL.name)
+    city = models.ForeignKey(
+        City,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        verbose_name='Cidade')
+    court_district_complement = models.ForeignKey(
+        CourtDistrictComplement,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name='%(class)s_court_district_complement',
+        verbose_name='Complemento de comarca')
 
     objects = OfficeManager()
 
@@ -276,23 +324,22 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
         """
         res = super(LawSuit, self).validate_unique(exclude)
         try:
-            if LawSuit.objects.filter(
-                    ~Q(pk=self.pk),
-                    instance=self.instance,
-                    law_suit_number=self.law_suit_number,
-                    office=self.office,
-                    folder__folder_number=self.folder.folder_number,
-                    folder__person_customer=self.folder.person_customer):
+            if LawSuit.objects.filter(~Q(pk=self.pk),
+                                      instance=self.instance,
+                                      law_suit_number=self.law_suit_number,
+                                      type_lawsuit=self.type_lawsuit,
+                                      office=self.office,
+                                      folder__folder_number=self.folder.folder_number,
+                                      folder__person_customer=self.folder.person_customer):
                 raise ValidationError({
                     NON_FIELD_ERRORS: [
-                        'Processo com valores duplicados para os campos office, instance, '
-                        'law_suit_number, folder__folder_number e folder__person_customer'
-                        'DETAIL: Key(office, instance, law_suit_number, folder__folder_number, '
-                        'folder__person_customer)=({}, {}, {}, {}, {})'.format(
-                            self.office, self.instance, self.law_suit_number,
-                            self.folder.folder_number,
-                            self.folder.person_customer)
-                    ]
+                        'Já existe outro processo com o mesmo número, do mesmo tipo para a mesma instância cadastrado '
+                        'nessa pasta. '
+                    ],
+                    'type_lawsuit': ['Favor verificar o tipo do processo'],
+                    'law_suit_number': ['Favor verificar o número do processo'],
+                    'instance': ['Favor verificar a instância do processo']
+
                 })
         except ObjectDoesNotExist:
             pass

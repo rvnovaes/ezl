@@ -60,9 +60,9 @@
         {% elif message.tags == 'success' %}
             message_toast('{{ message.tags }}', 'Sucesso', '{{ message }}', 5000);
         {% elif message.tags == 'error' %}
-            message_toast('{{ message.tags }}', 'Erro', '{{ message }}');
+            message_toast('{{ message.tags }}', 'Erro', '{{ message }}'.replace('__all__', 'Erro de validação'));
         {% elif message.tags == 'warning' %}
-            message_toast('{{ message.tags }}', 'AvisoErro', '{{ message }}');
+            message_toast('{{ message.tags }}', 'Atenção', '{{ message }}');
         {% endif %}
     {% endfor %}
 

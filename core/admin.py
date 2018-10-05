@@ -1,7 +1,8 @@
 from django.contrib import admin
 from core.models import AddressType, ContactMechanismType, ContactMechanism, Team, ControlFirstAccessUser, EmailTemplate
 #Todo: Remover office
-from core.models import Office, Invite, InviteOffice, OfficeRelGroup, CustomSettings, Company, CompanyUser
+from core.models import Office, Invite, InviteOffice, OfficeRelGroup, CustomSettings, Company, CompanyUser, City, \
+    State, Country
 from task.models import TaskWorkflow, TaskShowStatus
 
 
@@ -89,5 +90,19 @@ class TeamAdmin(admin.ModelAdmin):
     list_display = ['pk', 'name']
 
 
+@admin.register(City)
+class CityAdmin(admin.ModelAdmin):
+    ordering = ('state', 'name')
+    list_filter = ['state']
+    list_display = ['name', 'state', 'court_district']
+    search_fields = ['name']
+
+
+@admin.register(State)
+class StateAdmin(admin.ModelAdmin):
+    search_fields = ['name']
+
+
 admin.site.register(AddressType)
 admin.site.register(ControlFirstAccessUser)
+admin.site.register(Country)

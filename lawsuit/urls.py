@@ -31,6 +31,20 @@ urlpatterns = [
         login_required(views.MovementAutocomplete.as_view()),
         name='movement_autocomplete'),
 
+    # Complemento de comarca
+    url(r'^complemento/$',
+        login_required(login_required(views.CourtDistrictComplementListView.as_view())),
+        name='complement_list'),
+    url(r'^complemento/criar/$', login_required(login_required(views.CourtDistrictComplementCreateView.as_view())),
+        name='complement_add'),
+    url(r'^complemento/(?P<pk>[0-9]+)/$', login_required(
+        login_required(views.CourtDistrictComplementUpdateView.as_view())), name='complement_update'),
+    url(r'^complemento/excluir$', login_required(login_required(views.CourtDistrictComplementDeleteView.as_view())),
+        name='complement_delete'),
+    url(r'^typeahead/search/complemento$',
+        login_required(views.TypeaHeadCourtDistrictComplementSearch.as_view()),
+        name='typeahead_complemento'),
+
     # Varas
     url(r'^varas/$',
         login_required(views.CourtDivisionListView.as_view()),

@@ -1,10 +1,10 @@
 from django import forms
 from django.forms import ModelForm
 from core.fields import CustomBooleanField
-from core.models import Person, State, Address, Office
+from core.models import Person, State, City
 from financial.models import CostCenter
-from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict,
-                     LawSuit, CourtDivision, Organ)
+from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict, LawSuit, CourtDivision, Organ,
+                     CourtDistrictComplement)
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
 from dal import autocomplete
 from localflavor.br.forms import BRCNPJField
@@ -114,9 +114,8 @@ class LawSuitForm(BaseForm):
     class Meta:
         model = LawSuit
         fields = [
-            'office', 'law_suit_number', 'court_district', 'organ', 'instance',
-            'court_division', 'person_lawyer', 'opposing_party',
-            'is_current_instance', 'is_active'
+            'office', 'type_lawsuit', 'law_suit_number', 'court_district', 'city', 'court_district_complement', 'organ',
+            'instance', 'court_division', 'person_lawyer', 'opposing_party', 'is_current_instance', 'is_active'
         ]
 
     person_lawyer = forms.ModelChoiceField(
@@ -128,12 +127,31 @@ class LawSuitForm(BaseForm):
         required=False)
     court_district = forms.CharField(
         label='Comarca',
-        required=True,
+        required=False,
         widget=TypeaHeadForeignKeyWidget(
             model=CourtDistrict,
             field_related='name',
             name='court_district',
             url='/processos/courtdistrict_autocomplete'))
+    city = forms.CharField(
+        label='Cidade',
+        required=False,
+        widget=TypeaHeadForeignKeyWidget(
+            model=City,
+            field_related='name',
+            name='city',
+            url='/city/autocomplete/'
+        )
+    )
+    court_district_complement = forms.CharField(label="Complemento de Comarca",
+                                                required=False,
+                                                widget=TypeaHeadForeignKeyWidget(
+                                                    model=CourtDistrictComplement,
+                                                    field_related='name',
+                                                    forward='court_district',
+                                                    name='court_district_complement',
+                                                    url='/processos/typeahead/search/complemento',
+                                                ))
 
     organ = forms.CharField(
         label='Órgão',
@@ -148,7 +166,7 @@ class LawSuitForm(BaseForm):
         queryset=filter_valid_choice_form(
             Instance.objects.filter(is_active=True)).order_by('name'),
         empty_label=u"Selecione",
-        required=True)
+        required=False)
     court_division = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(
             CourtDivision.objects.filter(is_active=True)).order_by('name'),
@@ -207,3 +225,20 @@ class OrganForm(BaseForm):
         fields = [
             'office', 'legal_name', 'cpf_cnpj', 'court_district', 'is_active'
         ]
+
+
+class CourtDistrictComplementForm(BaseForm):
+    court_district = forms.CharField(label="Comarca",
+                                     required=True,
+                                     widget=TypeaHeadForeignKeyWidget(model=CourtDistrict,
+                                                                      field_related='name',
+                                                                      name='court_district',
+                                                                      url='/processos/typeahead/search/comarca'))
+
+    class Meta:
+        model = CourtDistrictComplement
+        fields = ['office', 'name', 'court_district', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)
