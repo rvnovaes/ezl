@@ -51,7 +51,7 @@ class ServicePriceTableTaskTable(tables.Table):
     office_return_rating = tables.Column(orderable=False, verbose_name='OS Retornadas')
 
     class Meta:
-        sequence = ('office_correspondent', 'state', 'court_district', 'court_district_complement', 'client', 'value')
+        sequence = ('office_correspondent', 'state', 'court_district', 'court_district_complement', 'client', 'value', 'office_rating', 'office_return_rating')
         model = ServicePriceTable
         fields = ('office_correspondent', 'court_district', 'state', 'client', 'value', 'court_district_complement',
                   'office_rating', 'office_return_rating')
