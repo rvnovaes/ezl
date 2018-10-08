@@ -91,6 +91,17 @@ def office_filter(queryset, request):
 class CourtDivisionViewSet(viewsets.ModelViewSet):
     queryset = CourtDivision.objects.all()
     serializer_class = CourtDivisionSerializer
+    model = CourtDivision
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    search_fields = ('name', 'legacy_code')
+
+
+    @remove_invalid_registry
+    def get_queryset(self, *args, **kwargs):
+        invalid_registry = kwargs.get('remove_invalid', None)
+        if invalid_registry:
+            self.queryset = self.queryset.exclude(id=invalid_registry)
+        return self.queryset.filter(office=self.request.auth.application.office)
 
 
 @permission_classes((TokenHasReadWriteScope, ))

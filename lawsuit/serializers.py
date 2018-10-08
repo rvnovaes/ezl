@@ -45,7 +45,8 @@ class LawSuitSerializer(serializers.ModelSerializer, CreateUserSerializerMixin,
         return obj.office.legal_name
 
 
-class CourtDivisionSerializer(serializers.ModelSerializer):
+class CourtDivisionSerializer(serializers.ModelSerializer, CreateUserSerializerMixin,
+                              OfficeSerializerMixin):
     class Meta:
         model = CourtDivision
         fields = ('id', 'name', 'office', 'create_user', 'legacy_code')
