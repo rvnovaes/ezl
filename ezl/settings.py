@@ -351,12 +351,12 @@ LOGGING = {
         },
     },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-            'include_html': True,
-            'filters': ['require_debug_false'],
-        },
+        # 'mail_admins': {
+        #     'level': 'ERROR',
+        #     'class': 'django.utils.log.AdminEmailHandler',
+        #     'include_html': True,
+        #     'filters': ['require_debug_false'],
+        # },
         'console': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
@@ -444,7 +444,7 @@ LOGGING = {
 }
 
 UPLOAD_DIRECTORY = 'uploads'
-ADMINS = [('EZL Erros', 'erros.ezlawyer@gmail.com')]
+# ADMINS = [('EZL Erros', 'erros.ezlawyer@gmail.com')]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES':
