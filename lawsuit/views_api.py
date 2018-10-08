@@ -29,6 +29,7 @@ class CourtDistrictViewSet(viewsets.ReadOnlyModelViewSet):
 
 @permission_classes((TokenHasReadWriteScope, ))
 class FolderViewSet(viewsets.ModelViewSet):
+    queryset = Folder.objects.all()
     serializer_class = FolderSerializer
     model = Folder
 
@@ -59,6 +60,7 @@ class InstanceViewSet(viewsets.ModelViewSet):
 
 @permission_classes((TokenHasReadWriteScope, ))
 class LawSuitViewSet(viewsets.ModelViewSet):
+    queryset = LawSuit.objects.all()
     serializer_class = LawSuitSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filter_class = LawsuitFilter
@@ -67,6 +69,7 @@ class LawSuitViewSet(viewsets.ModelViewSet):
 
     @remove_invalid_registry
     def get_queryset(self, *args, **kwargs):
+        import pdb;pdb.set_trace()
         invalid_registry = kwargs.get('remove_invalid', None)
         if invalid_registry:
             self.queryset = self.queryset.exclude(id=invalid_registry)
