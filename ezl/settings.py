@@ -435,11 +435,11 @@ LOGGING = {
         'py.warnings': {
             'handlers': ['development_logfile'],
         },
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': False,
-        },
+        # 'django.request': {
+        #     'handlers': ['mail_admins'],
+        #     'level': 'ERROR',
+        #     'propagate': False,
+        # },
     }
 }
 
