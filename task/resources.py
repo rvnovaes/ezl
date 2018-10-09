@@ -1,11 +1,12 @@
 from core.models import Person
 from decimal import Decimal
-from django.db.models import Q
 from django.db.models.fields import NOT_PROVIDED
+from django.utils import timezone
 from import_export import resources
 from import_export.fields import Field
 from import_export.widgets import DecimalWidget
-from lawsuit.models import Folder, LawSuit, Movement, TypeMovement, CourtDistrict, CourtDivision, Organ, Instance
+from lawsuit.models import Folder, LawSuit, Movement, TypeMovement, CourtDistrict, CourtDivision, Organ, Instance, \
+    TypeLawsuit, CourtDistrictComplement, City
 from task.instance_loaders import TaskModelInstanceLoader
 from task.models import Task, TypeTask
 from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin
@@ -33,11 +34,6 @@ COLUMN_NAME_DICT = {
         'attribute': 'movement__folder__person_customer',
         'required': True
     },
-    'folder_is_active': {
-        'column_name': 'pasta.ativa',
-        'attribute': 'movement__folder__is_active',
-        'required': False
-    },
     'folder_cost_center': {
         'column_name': 'pasta.centro_custo',
         'attribute': 'movement__folder__legacy_code',
@@ -48,20 +44,20 @@ COLUMN_NAME_DICT = {
         'attribute': 'movement__law_suit__law_suit_number',
         'required': True
     },
+    'type_lawsuit': {
+        'column_name': 'processo.tipo',
+        'attribute': 'movement__law_suit__type_lawsuit',
+        'required': True
+    },
     'instance': {
         'column_name': 'processo.instancia',
         'attribute': 'movement__law_suit__instance__name',
-        'required': True
+        'required': False
     },
     'lawsuit_is_current_instance': {
         'column_name': 'processo.instancia_atual',
         'attribute': 'movement__law_suit__is_current_instance',
         'required': True
-    },
-    'lawsuit_is_active': {
-        'column_name': 'processo.ativo',
-        'attribute': 'movement__law_suit__is_active',
-        'required': False
     },
     'lawsuit_person_lawyer': {
         'column_name': 'processo.advogado',
@@ -71,7 +67,17 @@ COLUMN_NAME_DICT = {
     'lawsuit_court_district': {
         'column_name': 'processo.comarca',
         'attribute': 'movement__law_suit__court_district',
-        'required': True
+        'required': False
+    },
+    'lawsuit_court_district_complement': {
+        'column_name': 'processo.complemento_comarca',
+        'attribute': 'movement__law_suit__court_district_complement',
+        'required': False
+    },
+    'lawsuit_city': {
+        'column_name': 'processo.cidade',
+        'attribute': 'movement__law_suit__city',
+        'required': False
     },
     'lawsuit_court_division': {
         'column_name': 'processo.vara',
@@ -103,11 +109,6 @@ COLUMN_NAME_DICT = {
         'attribute': 'movement__legacy_code',
         'required': False
     },
-    'movement_is_active': {
-        'column_name': 'movimentacao.ativa',
-        'attribute': 'movement__is_active',
-        'required': False
-    },
     'person_asked_by': {
         'column_name': 'os.solicitante',
         'attribute': 'person_asked_by',
@@ -121,6 +122,11 @@ COLUMN_NAME_DICT = {
     'final_deadline_date': {
         'column_name': 'os.prazo_fatal',
         'attribute': 'final_deadline_date',
+        'required': True
+    },
+    'performance_place': {
+        'column_name': 'os.local_cumprimento',
+        'attribute': 'billing_date',
         'required': True
     },
     'description': {
@@ -255,86 +261,46 @@ class CustomFieldImportExport(Field):
 
 
 class TaskResource(resources.ModelResource):
-    type_task = CustomFieldImportExport(
-        column_name='type_task',
-        attribute='type_task',
-        widget=UnaccentForeignKeyWidget(TypeTask, 'name'),
-        saves_null_values=False)
-    person_asked_by = CustomFieldImportExport(
-        column_name='person_asked_by',
-        attribute='person_asked_by',
-        widget=PersonAskedByWidget(Person, 'legal_name'),
-        saves_null_values=False)
-    person_executed_by = CustomFieldImportExport(
-        column_name='person_executed_by',
-        attribute='person_executed_by',
-        widget=UnaccentForeignKeyWidget(Person, 'legal_name'))
-    person_distributed_by = CustomFieldImportExport(
-        column_name='person_distributed_by',
-        attribute='person_distributed_by',
-        widget=UnaccentForeignKeyWidget(Person, 'legal_name'))
-    final_deadline_date = CustomFieldImportExport(
-        column_name='final_deadline_date',
-        attribute='final_deadline_date',
-        widget=DateTimeWidgetMixin(),
-        saves_null_values=False)
-    delegation_date = CustomFieldImportExport(
-        column_name='delegation_date',
-        attribute='delegation_date',
-        widget=DateTimeWidgetMixin())
-    acceptance_date = CustomFieldImportExport(
-        column_name='acceptance_date',
-        attribute='acceptance_date',
-        widget=DateTimeWidgetMixin())
-    execution_date = CustomFieldImportExport(
-        column_name='execution_date',
-        attribute='execution_date',
-        widget=DateTimeWidgetMixin())
-    requested_date = CustomFieldImportExport(
-        column_name='requested_date',
-        attribute='requested_date',
-        widget=DateTimeWidgetMixin())
-    acceptance_service_date = CustomFieldImportExport(
-        column_name='acceptance_service_date',
-        attribute='acceptance_service_date',
-        widget=DateTimeWidgetMixin())
-    refused_service_date = CustomFieldImportExport(
-        column_name='refused_service_date',
-        attribute='refused_service_date',
-        widget=DateTimeWidgetMixin())
-    refused_date = CustomFieldImportExport(
-        column_name='refused_date',
-        attribute='refused_date',
-        widget=DateTimeWidgetMixin())
-    return_date = CustomFieldImportExport(
-        column_name='return_date',
-        attribute='return_date',
-        widget=DateTimeWidgetMixin())
-    blocked_payment_date = CustomFieldImportExport(
-        column_name='blocked_payment_date',
-        attribute='blocked_payment_date',
-        widget=DateTimeWidgetMixin())
-    finished_date = CustomFieldImportExport(
-        column_name='finished_date',
-        attribute='finished_date',
-        widget=DateTimeWidgetMixin())
-    receipt_date = CustomFieldImportExport(
-        column_name='receipt_date',
-        attribute='receipt_date',
-        widget=DateTimeWidgetMixin())
-    billing_date = CustomFieldImportExport(
-        column_name='billing_date',
-        attribute='billing_date',
-        widget=DateTimeWidgetMixin())
-    task_status = CustomFieldImportExport(
-        column_name='task_status',
-        attribute='task_status',
-        widget=TaskStatusWidget())
-    amount = CustomFieldImportExport(
-        column_name='amount',
-        attribute='amount',
-        widget=DecimalWidget(),
-        default=Decimal('0.00'))
+    type_task = CustomFieldImportExport(column_name='type_task', attribute='type_task',
+                                        widget=UnaccentForeignKeyWidget(TypeTask, 'name'), saves_null_values=False)
+    person_asked_by = CustomFieldImportExport(column_name='person_asked_by', attribute='person_asked_by',
+                                              widget=PersonAskedByWidget(Person, 'legal_name'), saves_null_values=False)
+    person_executed_by = CustomFieldImportExport(column_name='person_executed_by', attribute='person_executed_by',
+                                                 widget=UnaccentForeignKeyWidget(Person, 'legal_name'))
+    person_distributed_by = CustomFieldImportExport(column_name='person_distributed_by',
+                                                    attribute='person_distributed_by',
+                                                    widget=UnaccentForeignKeyWidget(Person, 'legal_name'))
+    final_deadline_date = CustomFieldImportExport(column_name='final_deadline_date', attribute='final_deadline_date',
+                                                  widget=DateTimeWidgetMixin(), saves_null_values=False)
+    delegation_date = CustomFieldImportExport(column_name='delegation_date', attribute='delegation_date',
+                                              widget=DateTimeWidgetMixin())
+    acceptance_date = CustomFieldImportExport(column_name='acceptance_date', attribute='acceptance_date',
+                                              widget=DateTimeWidgetMixin())
+    execution_date = CustomFieldImportExport(column_name='execution_date', attribute='execution_date',
+                                             widget=DateTimeWidgetMixin())
+    requested_date = CustomFieldImportExport(column_name='requested_date', attribute='requested_date',
+                                             widget=DateTimeWidgetMixin(), default=timezone.now())
+    acceptance_service_date = CustomFieldImportExport(column_name='acceptance_service_date',
+                                                      attribute='acceptance_service_date', widget=DateTimeWidgetMixin())
+    refused_service_date = CustomFieldImportExport(column_name='refused_service_date', attribute='refused_service_date',
+                                                   widget=DateTimeWidgetMixin())
+    refused_date = CustomFieldImportExport(column_name='refused_date', attribute='refused_date',
+                                           widget=DateTimeWidgetMixin())
+    return_date = CustomFieldImportExport(column_name='return_date', attribute='return_date',
+                                          widget=DateTimeWidgetMixin())
+    blocked_payment_date = CustomFieldImportExport(column_name='blocked_payment_date', attribute='blocked_payment_date',
+                                                   widget=DateTimeWidgetMixin())
+    finished_date = CustomFieldImportExport(column_name='finished_date', attribute='finished_date',
+                                            widget=DateTimeWidgetMixin())
+    receipt_date = CustomFieldImportExport(column_name='receipt_date', attribute='receipt_date',
+                                           widget=DateTimeWidgetMixin())
+    billing_date = CustomFieldImportExport(column_name='billing_date', attribute='billing_date',
+                                           widget=DateTimeWidgetMixin())
+    task_status = CustomFieldImportExport(column_name='task_status', attribute='task_status', widget=TaskStatusWidget())
+    amount = CustomFieldImportExport(column_name='amount', attribute='amount', widget=DecimalWidget(),
+                                     default=Decimal('0.00'))
+    performance_place = CustomFieldImportExport(column_name='performance_place', attribute='performance_place',
+                                                saves_null_values=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -372,13 +338,19 @@ class TaskResource(resources.ModelResource):
                     defaults={'create_user': self.create_user})
             else:
                 if folder_legacy_code:
-                    folder = Folder.objects.filter(
+                    folder, created = Folder.objects.get_or_create(
                         legacy_code=folder_legacy_code,
-                        office_id=self.office_id).first()
+                        person_customer=person_customer,
+                        office=self.office,
+                        defaults={'create_user': self.create_user,
+                                  'folder_number': folder_number})
                 if not folder and folder_number:
-                    folder = Folder.objects.filter(
+                    folder, created = Folder.objects.get_or_create(
                         folder_number=folder_number,
-                        office_id=self.office_id).first()
+                        person_customer=person_customer,
+                        office=self.office,
+                        defaults={'create_user': self.create_user,
+                                  'legacy_code': folder_legacy_code})
                 if not folder:
                     row_errors.append(
                         'Não foi encontrado registro de pasta correspondente aos valores informados;'
@@ -388,70 +360,71 @@ class TaskResource(resources.ModelResource):
     def validate_lawsuit(self, row, row_errors):
         lawsuit_number = row['law_suit_number']
         lawsuit_legacy_code = row['lawsuit_legacy_code']
-        instance = row['instance']
         lawsuit = None
-        if not lawsuit_number or not instance:
+        type_lawsuit = row['type_lawsuit']
+        instance = row['instance']
+        if instance:
+            instance = Instance.objects.filter(name=instance, office=self.office).first()
+        if not lawsuit_number or not type_lawsuit:
             row_errors.append(
                 "É obrigatório o preenchimento dos campos de identificação do processo "
                 "({} e {});".format(
                     COLUMN_NAME_DICT['law_suit_number']['column_name'],
-                    COLUMN_NAME_DICT['instance']['column_name']))
+                    COLUMN_NAME_DICT['type_lawsuit']['column_name']))
         else:
             if lawsuit_legacy_code:
                 lawsuit = LawSuit.objects.filter(
                     legacy_code=lawsuit_legacy_code,
+                    folder=self.folder,
+                    instance=self_or_none(instance),
                     office_id=self.office_id).first()
             if not lawsuit and lawsuit_number:
                 lawsuit = LawSuit.objects.filter(
                     law_suit_number=lawsuit_number,
+                    folder=self.folder,
+                    instance=self_or_none(instance),
                     office_id=self.office_id).first()
             if not lawsuit:
-                instance = Instance.objects.filter(
-                    name=instance, office=self.office).first()
-                if instance:
-                    is_current_instance = TRUE_FALSE_DICT.get(
-                        row['lawsuit_is_current_instance'], False)
-                    is_active = TRUE_FALSE_DICT.get(
-                        row.get('lawsuit_is_active', 'F'), True)
-                    person_lawyer = row.get('lawsuit_court_district', '')
-                    if person_lawyer:
-                        person_lawyer = Person.objects.filter(
-                            legal_name__unaccent__icontains=row.get(
-                                'lawsuit_person_lawyer'),
-                            is_lawyer=True,
-                            offices=self.office).first()
-                    court_district = row.get('lawsuit_court_district', '')
-                    if court_district:
-                        court_district = CourtDistrict.objects.filter(
-                            name=row.get('lawsuit_court_district')).first()
-                    court_division = row.get('lawsuit_court_division', '')
-                    if court_division:
-                        court_division = CourtDivision.objects.filter(
-                            name=row.get('lawsuit_court_division'),
-                            office=self.office).first()
-                    organ = row.get('lawsuit_organ', '')
-                    if organ:
-                        organ = Organ.objects.filter(
-                            legal_name=row.get(
-                                'lawsuit_organ', offices=self.office)).first()
-                    opposing_party = row.get('opposing_party', '')
-                    lawsuit = LawSuit.objects.create(
-                        person_lawyer=self_or_none(person_lawyer),
-                        folder=self.folder,
-                        instance=instance,
-                        court_district=self_or_none(court_district),
-                        organ=self_or_none(organ),
-                        court_division=self_or_none(court_division),
-                        law_suit_number=lawsuit_number,
-                        is_current_instance=is_current_instance,
-                        opposing_party=self_or_none(opposing_party),
-                        create_user=self.create_user,
-                        is_active=is_active,
-                        office=self.office)
-                else:
-                    row_errors.append(
-                        'Não foi encontrada instância para este escritório com o valor informado;'
-                    )
+                is_current_instance = TRUE_FALSE_DICT.get(
+                    row['lawsuit_is_current_instance'], False)
+                person_lawyer = row.get('lawsuit_person_lawyer', '')
+                if person_lawyer:
+                    person_lawyer = Person.objects.filter(legal_name__unaccent__icontains=person_lawyer,
+                                                          is_lawyer=True,
+                                                          offices=self.office).first()
+                court_district = row.get('lawsuit_court_district', '')
+                if court_district:
+                    court_district = CourtDistrict.objects.filter(name=court_district).first()
+                court_district_complement = row.get('lawsuit_court_district_complement', '')
+                if court_district_complement:
+                    court_district_complement = CourtDistrictComplement.objects.filter(
+                        name=court_district_complement).first()
+                city = row.get('lawsuit_city', '')
+                if city:
+                    city = City.objects.filter(name=city).first()
+                court_division = row.get('lawsuit_court_division', '')
+                if court_division:
+                    court_division = CourtDivision.objects.filter(name=court_division,
+                                                                  office=self.office).first()
+                organ = row.get('lawsuit_organ', '')
+                if organ:
+                    organ = Organ.objects.filter(legal_name=organ,
+                                                 offices=self.office).first()
+                opposing_party = row.get('opposing_party', '')
+                lawsuit = LawSuit.objects.create(type_lawsuit=TypeLawsuit(type_lawsuit).name,
+                                                 person_lawyer=self_or_none(person_lawyer),
+                                                 folder=self.folder,
+                                                 instance=self_or_none(instance),
+                                                 court_district=self_or_none(court_district),
+                                                 court_district_complement=self_or_none(court_district_complement),
+                                                 city=self_or_none(city),
+                                                 organ=self_or_none(organ),
+                                                 court_division=self_or_none(court_division),
+                                                 law_suit_number=lawsuit_number,
+                                                 is_current_instance=is_current_instance,
+                                                 opposing_party=self_or_none(opposing_party),
+                                                 create_user=self.create_user,
+                                                 office=self.office)
         return lawsuit
 
     def validate_movement(self, row, row_errors):
@@ -466,16 +439,24 @@ class TaskResource(resources.ModelResource):
                 office=self.office,
                 defaults={'create_user': self.create_user})
         else:
+            type_movement = TypeMovement.objects.filter(name=type_movement_name).first()
             if movement_legacy_code:
-                movement = Movement.objects.filter(
+                movement, created = Movement.objects.get_or_create(
                     legacy_code=movement_legacy_code,
-                    office_id=self.office_id).first()
-            if not movement and (type_movement_name and self.folder
+                    office_id=self.office_id,
+                    defaults={'folder': self.folder,
+                              'law_suit': self.lawsuit,
+                              'type_movement': type_movement})
+            if not movement and (type_movement and self.folder
                                  and self.lawsuit):
-                movement = Movement.objects.filter(
-                    Q(folder=self.folder), Q(law_suit=self.lawsuit),
-                    Q(type_movement__name=type_movement_name),
-                    Q(office_id=self.office_id)).first()
+                movement, created = Movement.objects.get_or_create(
+                    folder=self.folder,
+                    law_suit=self.lawsuit,
+                    office_id=self.office_id,
+                    defaults={'folder': self.folder,
+                              'law_suit': self.lawsuit,
+                              'type_movement': type_movement,
+                              'legacy_code': movement_legacy_code})
             if not movement:
                 row_errors.append(
                     'Não foi encontrado registro de movimentação com os valores informados;'
@@ -506,33 +487,20 @@ class TaskResource(resources.ModelResource):
                 'name': 'OS Avulsa',
                 'create_user': self.create_user
             })
-        dataset.insert_col(
-            1,
-            col=[
-                int("{}".format(self.office.id)),
-            ] * dataset.height,
-            header="office")
-        dataset.insert_col(
-            1,
-            col=[
-                int("{}".format(self.create_user.id)),
-            ] * dataset.height,
-            header="create_user")
-        dataset.insert_col(
-            3, col=[
-                "",
-            ] * dataset.height, header="movement")
+        dataset.insert_col(1, col=[int("{}".format(self.office.id)), ] * dataset.height, header="office")
+        dataset.insert_col(1, col=[int("{}".format(self.create_user.id)), ] * dataset.height, header="create_user")
+        dataset.insert_col(3, col=["", ] * dataset.height, header="movement")
 
     def before_import_row(self, row, **kwargs):
         row_errors = []
         self.folder = self.validate_folder(row, row_errors)
-        self.lawsuit = self.validate_lawsuit(
-            row, row_errors) if self.folder else None
-        self.movement = self.validate_movement(
-            row, row_errors) if self.lawsuit else None
+        import pdb;pdb.set_trace()
+        self.lawsuit = self.validate_lawsuit(row, row_errors) if self.folder else None
+        self.movement = self.validate_movement(row, row_errors) if self.lawsuit else None
 
         if self.movement:
             row['movement'] = self.movement.id
         if row_errors:
             raise Exception(row_errors)
+        import pdb;pdb.set_trace()
         row['is_active'] = TRUE_FALSE_DICT.get('is_active', True)
