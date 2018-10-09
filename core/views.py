@@ -1748,6 +1748,18 @@ class RequesterAutocomplete(TypeaHeadGenericSearch):
             })
         return list(data)
 
+class OriginRequesterAutocomplete(TypeaHeadGenericSearch):
+    @staticmethod
+    def get_data(module, model, field, q, office, forward_params, extra_params,
+                 *args, **kwargs):
+        data = []
+        for requester in Person.objects.active().requesters().filter(
+                Q(legal_name__unaccent__icontains=q), Q(offices__in=office.offices.all())):
+            data.append({
+                'id': requester.id,
+                'data-value-txt': requester.__str__()
+            })
+        return list(data)
 
 class ServiceAutocomplete(TypeaHeadGenericSearch):
     @staticmethod

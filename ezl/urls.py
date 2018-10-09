@@ -11,7 +11,7 @@ from core.views import (
     ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView,
     PasswordResetViewMixin, CorrespondentAutocomplete, RequesterAutocomplete,
     ServiceAutocomplete, EditableListSave, PopupSuccessView,
-    OfficeAutocomplete, OfficeCorrespondentAutocomplete)
+    OfficeAutocomplete, OfficeCorrespondentAutocomplete, OriginRequesterAutocomplete)
 from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView
 from rest_framework_swagger.views import get_swagger_view
@@ -70,6 +70,9 @@ urlpatterns = [
     url(r'^requester_form',
         login_required(RequesterAutocomplete.as_view()),
         name='requester_autocomplete'),
+    url(r'^origin_requester_form',
+        login_required(OriginRequesterAutocomplete.as_view()),
+        name='origin_requester_autocomplete'),    
     url(r'^service_form',
         login_required(ServiceAutocomplete.as_view()),
         name='service_autocomplete'),
