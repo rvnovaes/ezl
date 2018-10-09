@@ -21,7 +21,7 @@ class ChatSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Chat
-        fields = ('id', 'create_date', 'title', 'label', 'messages' 'task_status')
+        fields = ('id', 'create_date', 'title', 'label', 'messages', 'task_status')
 
     def get_task_status(self, obj):
         return obj.tasks_company_chat.latest('pk').status.name
