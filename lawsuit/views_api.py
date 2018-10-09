@@ -69,7 +69,6 @@ class LawSuitViewSet(viewsets.ModelViewSet):
 
     @remove_invalid_registry
     def get_queryset(self, *args, **kwargs):
-        import pdb;pdb.set_trace()
         invalid_registry = kwargs.get('remove_invalid', None)
         if invalid_registry:
             self.queryset = self.queryset.exclude(id=invalid_registry)

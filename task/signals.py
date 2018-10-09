@@ -342,7 +342,6 @@ def update_status_parent_task(sender, instance, **kwargs):
     :param kwargs:
     :return:
     """
-    import pdb;pdb.set_trace()
     if instance.parent and not instance.task_status == TaskStatus.REQUESTED:
         if not get_parent_status(instance.status) == TaskStatus(instance.parent.__previous_status) \
                 and not getattr(instance, '_from_parent'):
@@ -376,7 +375,6 @@ def update_status_child_task(sender, instance, **kwargs):
     :param kwargs:
     :return:
     """
-    import pdb; pdb.set_trace()
     status = get_child_status(instance.status)
     if TaskStatus(instance.task_status) == TaskStatus(
             instance.__previous_status):
@@ -404,7 +402,6 @@ def update_status_child_task(sender, instance, **kwargs):
 
 @receiver(pre_save, sender=Task)
 def send_task_emails(sender, instance, **kwargs):
-    import pdb;pdb.set_trace()
     try:
         # Todo trocar posteriormente para workflow_send_mail
         mail_list = []
