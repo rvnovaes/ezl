@@ -20,24 +20,32 @@ def person_office(apps, schema_editor):
     if not office_mt:
         return True
 
-    for record in ServicePriceTable.objects.order_by('correspondent__id').all():
+    for record in ServicePriceTable.objects.order_by(
+            'correspondent__id').all():
         person = record.correspondent
-        create_user = User.objects.get(pk=person.auth_user.pk) if person.auth_user else admin
-        person_office, created = Office.objects.get_or_create(create_user=create_user,
-                                                              cpf_cnpj=person.cpf_cnpj,
-                                                              name=person.name,
-                                                              legal_name=person.legal_name)
+        create_user = User.objects.get(
+            pk=person.auth_user.pk) if person.auth_user else admin
+        person_office, created = Office.objects.get_or_create(
+            create_user=create_user,
+            cpf_cnpj=person.cpf_cnpj,
+            name=person.name,
+            legal_name=person.legal_name)
         if created:
             office_mt.offices.add(person_office)
             create_permission(person_office)
-            for group in {group for group, perms in
-                          get_groups_with_perms(person_office, attach_perms=True).items() if 'group_admin' in perms}:
+            for group in {
+                    group
+                    for group, perms in get_groups_with_perms(
+                        person_office, attach_perms=True).items()
+                    if 'group_admin' in perms
+            }:
                 create_user.groups.add(group)
-            OfficeMembership(office=person_office,
-                             person=person,
-                             create_user=create_user,
-                             is_active=True,
-                             create_date=timezone.now()).save()
+            OfficeMembership(
+                office=person_office,
+                person=person,
+                create_user=create_user,
+                is_active=True,
+                create_date=timezone.now()).save()
         record.office_correspondent = person_office
         record.save()
 

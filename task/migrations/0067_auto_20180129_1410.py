@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='task_number',
-            field=models.PositiveIntegerField(verbose_name='Número da Providência'),
+            field=models.PositiveIntegerField(
+                verbose_name='Número da Providência'),
         ),
     ]

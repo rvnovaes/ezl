@@ -37,12 +37,10 @@ class CostCenterETL(GenericETL):
                     instance.is_active = True
                     instance.alter_user = user
                     instance.office = default_office
-                    instance.save(
-                        update_fields=['name',
-                                       'is_active',
-                                       'alter_date',
-                                       'alter_user',
-                                       'office'])
+                    instance.save(update_fields=[
+                        'name', 'is_active', 'alter_date', 'alter_user',
+                        'office'
+                    ])
                 else:
                     instance = self.model.objects.create(
                         name=name,
@@ -56,7 +54,8 @@ class CostCenterETL(GenericETL):
                 self.debug_logger.debug("Centro de Custo, {}, {}".format(
                     instance.id, self.timestr))
             except Exception as e:
-                msg = get_message_log_default(self.model._meta.verbose_name, rows_count, e, self.timestr)
+                msg = get_message_log_default(self.model._meta.verbose_name,
+                                              rows_count, e, self.timestr)
                 self.error_logger.error(msg)
                 save_error_log(log, user, msg)
 

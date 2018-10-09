@@ -18,6 +18,7 @@ class TaskModelInstanceLoader(BaseInstanceLoader):
                 field = self.resource.fields[key]
                 params[field.attribute] = field.clean(row)
                 params['{}__isnull'.format(field.attribute)] = False
-            return self.get_queryset().filter(office=row['office']).exclude(legacy_code='').get(**params)
+            return self.get_queryset().filter(office=row['office']).exclude(
+                legacy_code='').get(**params)
         except self.resource._meta.model.DoesNotExist:
             return None

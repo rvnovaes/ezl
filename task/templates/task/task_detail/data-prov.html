@@ -4,7 +4,7 @@
         <tbody>
         <tr>
             <th>Serviço solicitado</th>
-            <td>
+            <td id="type_task">
                 {{ form.instance.type_task|default_if_none:"---" }}
             </td>
         </tr>
@@ -29,7 +29,7 @@
         <tr>
             <th>Recebida em</th>
             <td>
-                {{ form.instance.delegation_date|localtime|default_if_none:"---" }}
+                {{ form.instance.requested_date|localtime|default_if_none:"---" }}
             </td>
         </tr>
         <tr>
@@ -54,6 +54,24 @@
             <th>UF</th>
             <td>
                 {{ form.instance.court_district.state|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Cidade</th>
+            <td>
+                {{ form.instance.city|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Complemento da comarca</th>
+            <td>
+                {{ form.instance.court_district_complement|default_if_none:"---" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Local de cumprimento</th>
+            <td>
+                {{ form.instance.performance_place|default_if_none:"---" }}
             </td>
         </tr>
         <tr>

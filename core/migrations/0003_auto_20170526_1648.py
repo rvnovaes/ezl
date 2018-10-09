@@ -16,42 +16,59 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='person',
             name='auth_user',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
-                                       to=settings.AUTH_USER_MODEL, verbose_name='Usuário do sistema'),
+            field=models.OneToOneField(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Usuário do sistema'),
         ),
         migrations.AlterField(
             model_name='person',
             name='cpf_cnpj',
-            field=models.CharField(blank=True, max_length=255, verbose_name='CPF/CNPJ'),
+            field=models.CharField(
+                blank=True, max_length=255, verbose_name='CPF/CNPJ'),
         ),
         migrations.AlterField(
             model_name='person',
             name='is_corresponding',
-            field=models.BooleanField(default=False, verbose_name='É Correspondente?'),
+            field=models.BooleanField(
+                default=False, verbose_name='É Correspondente?'),
         ),
         migrations.AlterField(
             model_name='person',
             name='is_court',
-            field=models.BooleanField(default=False, verbose_name='É Tribunal?'),
+            field=models.BooleanField(
+                default=False, verbose_name='É Tribunal?'),
         ),
         migrations.AlterField(
             model_name='person',
             name='is_lawyer',
-            field=models.BooleanField(default=False, verbose_name='É Advogado?'),
+            field=models.BooleanField(
+                default=False, verbose_name='É Advogado?'),
         ),
         migrations.AlterField(
             model_name='person',
             name='legal_name',
-            field=models.CharField(max_length=255, unique=True, verbose_name='Razão social/nome completo'),
+            field=models.CharField(
+                max_length=255,
+                unique=True,
+                verbose_name='Razão social/nome completo'),
         ),
         migrations.AlterField(
             model_name='person',
             name='legal_type',
-            field=models.CharField(choices=[('F', 'Física'), ('J', 'Jurídica')], max_length=1, verbose_name='Tipo'),
+            field=models.CharField(
+                choices=[('F', 'Física'), ('J', 'Jurídica')],
+                max_length=1,
+                verbose_name='Tipo'),
         ),
         migrations.AlterField(
             model_name='person',
             name='name',
-            field=models.CharField(max_length=255, unique=True, verbose_name='Nome Fantasia/Apelido'),
+            field=models.CharField(
+                max_length=255,
+                unique=True,
+                verbose_name='Nome Fantasia/Apelido'),
         ),
     ]

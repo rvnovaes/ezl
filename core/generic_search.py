@@ -3,6 +3,8 @@ from itertools import groupby
 from datetime import datetime
 from django.contrib.auth.models import User
 from financial.utils import remove_caracter_especial
+from core.utils import get_office_session
+
 
 def field_to_html_input(field):
     html_map = {
@@ -52,7 +54,12 @@ def set_search_model_attrs(f):
 
 class GenericSearchFormat(object):
     # Classe responsavel por formatar o filtro global
-    def __init__(self, request, model, fields, related_id=False, field_name_related=False):
+    def __init__(self,
+                 request,
+                 model,
+                 fields,
+                 related_id=False,
+                 field_name_related=False):
         self.model = model
         self.related_id = related_id
         self.field_name_related = field_name_related
@@ -72,7 +79,8 @@ class GenericSearchFormat(object):
             'DateTimeField': GenericSearchDate(),
             'ForeignKey': GenericSearchForeignKey(self.model),
             'OneToOneField': GenericSearchForeignKey(self.model),
-            'BooleanField': GenericSearchBooleanField()}
+            'BooleanField': GenericSearchBooleanField()
+        }
 
     def despatch(self, office=False):
         params = []
@@ -82,32 +90,42 @@ class GenericSearchFormat(object):
 
         if self.params.get('is_active') == 'T':
             self.params.pop('is_active')
-            self.model_type_fields.remove({'type': 'BooleanField', 'name': 'is_active'})
+            self.model_type_fields.remove({
+                'type': 'BooleanField',
+                'name': 'is_active'
+            })
 
         try:
             office_field = self.model._meta.get_field('office')
             if self.model == User:
                 search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
             else:
-                search = "self.table_class(self.model.objects.get_queryset(office=office).filter({params}))"
+                if not office:
+                    office = [get_office_session(self.request).id]
+                search = "self.table_class(self.model.objects.get_queryset(office=[{office}]).filter({params}))".format(
+                    office=office, params='{params}')
         except:
             search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
 
         for field in self.model_type_fields:
             if field.get('type') in ['DateField', 'DateTimeField']:
-                value = self.params.get(field.get('name') + '_ini'), self.params.get(field.get('name') + '_fim')
+                value = self.params.get(field.get('name') +
+                                        '_ini'), self.params.get(
+                                            field.get('name') + '_fim')
                 params.append(
                     self.search.get(field.get('type'),
-                                    GenericSearch()).dict_to_filter(field.get('name'), value))
+                                    GenericSearch()).dict_to_filter(
+                                        field.get('name'), value))
             else:
                 params.append(
-                    self.search.get(
-                        field.get('type'),
-                        GenericSearch()).dict_to_filter(field.get('name'),
-                                                        self.params.get(field.get('name'))))
+                    self.search.get(field.get('type'),
+                                    GenericSearch()).dict_to_filter(
+                                        field.get('name'),
+                                        self.params.get(field.get('name'))))
 
         if self.related_id:
-            params.append('{0}__id={1}'.format(self.field_name_related, self.related_id))
+            params.append('{0}__id={1}'.format(self.field_name_related,
+                                               self.related_id))
 
         if not params:
             return False
@@ -115,7 +133,10 @@ class GenericSearchFormat(object):
         return search.format(params=','.join(list(set(params))))
 
     def format_params(self):
-        return dict(list(filter(lambda x: x[1], list(map(lambda i: i, self.request.GET.items())))))
+        return dict(
+            list(
+                filter(lambda x: x[1],
+                       list(map(lambda i: i, self.request.GET.items())))))
 
 
 class GenericSearch(object):
@@ -132,7 +153,8 @@ class GenericSearch(object):
 
 class GenericSearchString(GenericSearch):
     def dict_to_filter(self, param, value):
-        return "{}__unaccent__icontains=\"{}\"".format(param, value.replace('"', "'"))
+        return "{}__unaccent__icontains=\"{}\"".format(param,
+                                                       value.replace('"', "'"))
 
 
 class GenericSearchInteger(GenericSearch):
@@ -156,12 +178,14 @@ class GenericSearchDate(GenericSearch):
     def dict_to_filter(self, param, value):
         filter_date = []
         if value[0]:
-            data = datetime.strptime(value[0] + ' 00:00:00',
-                                     "%d/%m/%Y %H:%M:%S").strftime('%Y-%m-%d %H:%M:%S')
+            data = datetime.strptime(
+                value[0] + ' 00:00:00',
+                "%d/%m/%Y %H:%M:%S").strftime('%Y-%m-%d %H:%M:%S')
             filter_date.append("{0}__gte='{1}'".format(param, data))
         if value[1]:
-            data = datetime.strptime(value[1] + ' 23:59:59',
-                                     "%d/%m/%Y %H:%M:%S").strftime('%Y-%m-%d %H:%M:%S')
+            data = datetime.strptime(
+                value[1] + ' 23:59:59',
+                "%d/%m/%Y %H:%M:%S").strftime('%Y-%m-%d %H:%M:%S')
             filter_date.append("{0}__lte='{1}'".format(param, data))
         return ",".join(filter_date)
 
@@ -175,7 +199,7 @@ class GenericSearchForeignKey(GenericSearch):
         ids = self.get_related_values(value, param)
         return "{}__in={}".format(param, ids)
 
-    def get_related_values(self, value, param):        
+    def get_related_values(self, value, param):
         if value:
             model_query_set = 'self.model.{0}.get_queryset()'.format(param)
             return list(map(lambda x: x.id,

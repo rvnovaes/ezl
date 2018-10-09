@@ -30,8 +30,8 @@ from etl.models import DashboardETL
 from django.utils import timezone
 from etl.utils import get_default_office
 
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE_DIR = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 parser = get_parser()
 
 try:
@@ -76,10 +76,10 @@ def validate_import(f):
         debug_logger = etl.debug_logger
         error_logger = etl.error_logger
         name_class = etl.model._meta.verbose_name
-        try:            
+        try:
             field_check = etl.EZL_LEGACY_CODE_FIELD if not etl.field_check else etl.field_check
             advwin_values = [str(i[field_check]) for i in rows]
-            params = {'{}__in'.format(field_check): advwin_values}            
+            params = {'{}__in'.format(field_check): advwin_values}
             qset = etl.model.objects.filter(**params)
             parts = field_check.split('__')
             chain = parts[:-1]
@@ -88,7 +88,8 @@ def validate_import(f):
                 qset = qset.select_related(related)
 
             for entry in qset:
-                debug_logger.debug('{}: REGISTRO SALVO - {}'.format(name_class, entry))
+                debug_logger.debug('{}: REGISTRO SALVO - {}'.format(
+                    name_class, entry))
 
             ezl_values = [reduce(getattr, parts, entry) for entry in qset]
 
@@ -97,20 +98,25 @@ def validate_import(f):
 
             not_imported = set(advwin_values) - set(ezl_values)
 
-            debug_logger.debug(name_class + ' - Quantidade lida:  {0}'.format(read_quantity))
-            debug_logger.debug(name_class + ' - Quantidade salva: {0}'.format(written_amount))
             debug_logger.debug(
-                name_class + ' - Quantidade nao importada {0}'.format(len(not_imported)))
+                name_class + ' - Quantidade lida:  {0}'.format(read_quantity))
+            debug_logger.debug(
+                name_class + ' - Quantidade salva: {0}'.format(written_amount))
+            debug_logger.debug(name_class + ' - Quantidade nao importada {0}'.
+                               format(len(not_imported)))
             if not_imported:
-                error_logger.error(
-                    name_class + ' - Quantidade nao importada {0}'.format(len(not_imported)))
-                error_logger.error(
-                    name_class + ' -  Registros nao importadados {0}'.format(str(not_imported)))
+                error_logger.error(name_class +
+                                   ' - Quantidade nao importada {0}'.format(
+                                       len(not_imported)))
+                error_logger.error(name_class +
+                                   ' -  Registros nao importadados {0}'.format(
+                                       str(not_imported)))
             log.imported_quantity = written_amount
             log.save()
             return res
         except Exception as exc:
-            error_logger.error(etl.model._meta.verbose_name + ': Nao foi possivel validar ')
+            error_logger.error(etl.model._meta.verbose_name +
+                               ': Nao foi possivel validar ')
             error_logger.error(exc)
 
     return wrapper
@@ -137,13 +143,29 @@ class GenericETL(object):
     # legado
     def deactivate_records(self):
         if not truncate_all_tables:
-            records = self.model.objects.filter(system_prefix=LegacySystem.ADVWIN.value)
+            records = self.model.objects.filter(
+                system_prefix=LegacySystem.ADVWIN.value)
             for record in records:
                 record.deactivate()
 
-    def deactivate_all(self):
+    def deactivate_all(self, default_office):
         if not truncate_all_tables:
-            self.model.objects.filter(system_prefix=LegacySystem.ADVWIN.value).update(is_active=False)
+            if self.model._meta.object_name == 'Person':
+                self.model.objects.filter(
+                    offices=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value).update(
+                        is_active=False)
+            else:
+                try:
+                    office_field = self.model._meta.get_field('office')
+                    self.model.objects.filter(
+                        office=default_office,
+                        system_prefix=LegacySystem.ADVWIN.value).update(
+                            is_active=False)
+                except:
+                    self.model.objects.filter(
+                        system_prefix=LegacySystem.ADVWIN.value).update(
+                            is_active=False)
 
     def config_import(self, rows, user, rows_count, default_office, log=False):
         raise NotImplementedError()
@@ -154,11 +176,15 @@ class GenericETL(object):
         user = User.objects.get(pk=create_alter_user)
         default_office = get_default_office()
         dashboard_log = DashboardETL.objects.create(
-            name=self.model._meta.verbose_name.upper(), status=False,
-            executed_query=self.import_query, create_user=user,
-            db_name_source=db_name_source, db_host_source=db_host_source, office=default_office)
+            name=self.model._meta.verbose_name.upper(),
+            status=False,
+            executed_query=self.import_query,
+            create_user=user,
+            db_name_source=db_name_source,
+            db_host_source=db_host_source,
+            office=default_office)
         if self.has_status:
-            self.deactivate_all()
+            self.deactivate_all(default_office)
 
         for attempt in range(5):
             try:
@@ -167,7 +193,12 @@ class GenericETL(object):
                 rows = cursor.fetchall()
                 rows_count = len(rows)
                 user = User.objects.get(pk=create_alter_user)
-                self.config_import(rows, user, rows_count, default_office=default_office, log=dashboard_log)
+                self.config_import(
+                    rows,
+                    user,
+                    rows_count,
+                    default_office=default_office,
+                    log=dashboard_log)
                 dashboard_log.execution_date_finish = timezone.now()
                 dashboard_log.read_quantity = rows_count
                 dashboard_log.status = True
@@ -175,7 +206,9 @@ class GenericETL(object):
                 connection.close()
             except Exception as e:
                 print(e)
-                self.error_logger.error("Erro de conexão. Nova tentativa de conexão em 5s. Tentativa: " + str(attempt + 1))
+                self.error_logger.error(
+                    "Erro de conexão. Nova tentativa de conexão em 5s. Tentativa: "
+                    + str(attempt + 1))
                 time.sleep(5)
             else:
                 break

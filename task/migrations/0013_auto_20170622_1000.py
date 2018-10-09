@@ -14,12 +14,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='system_prefix',
-            field=models.CharField(choices=[('ADVWIN', '0')], default='', max_length=255,
-                                   verbose_name='Prefixo do Sistema'),
+            field=models.CharField(
+                choices=[('ADVWIN', '0')],
+                default='',
+                max_length=255,
+                verbose_name='Prefixo do Sistema'),
         ),
         migrations.AlterField(
             model_name='task',
             name='legacy_code',
-            field=models.CharField(default='', max_length=255, unique=True, verbose_name='Código legado'),
+            field=models.CharField(
+                default='',
+                max_length=255,
+                unique=True,
+                verbose_name='Código legado'),
         ),
     ]

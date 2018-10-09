@@ -12,5 +12,4 @@ class Migration(migrations.Migration):
         ('task', '0014_typetask'),
     ]
 
-    operations = [
-    ]
+    operations = []

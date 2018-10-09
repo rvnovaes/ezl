@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='typetask',
             name='simple_service',
-            field=models.BooleanField(default=False, verbose_name='Serviço simples'),
+            field=models.BooleanField(
+                default=False, verbose_name='Serviço simples'),
         ),
     ]

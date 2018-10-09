@@ -42,7 +42,7 @@
         <div id="confirmAction" class="modal fade "
             tabindex="-1" role="alert" aria-labelledby="modalTitle"
             aria-hidden="true">
-            <div class="modal-dialog modal-lg ">
+            <div class="modal-dialog" style="min-width: 90%">
                 <div class="modal-content">
                     <div id="modalHeader" class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -54,8 +54,16 @@
                         {% if form.instance.status.name == 'ACCEPTED_SERVICE' or  form.instance.status.name == 'REQUESTED' and not form.instance.office.use_service%}
                             {{ form.servicepricetable_id }}
                             <div class="form-group" style="margin: auto">
-                                <label>Tipo de Serviço: </label>
-                                {{ form.instance.type_task }}
+                                <span id="type_task_name">
+                                {% if form.type_task_field %}
+                                    <label>{{ form.type_task_field.label }}</label>
+                                    {{ form.type_task_field }}
+                                    <div class="divider">&nbsp</div>
+                                {% else %}
+                                    <label>Tipo de Serviço: </label>
+                                    {{ form.instance.type_task }}
+                                {% endif %}
+                                </span>
                             </div>
                             <div id="servicepricetable" class="table-responsive" style="margin: auto">
                                 {% render_table correspondents_table %}
@@ -260,7 +268,6 @@
             var task_status = actionButton.value;
             var have_survey = actionButton.getAttribute('survey');
             actionButton.disabled = true;
-            {#toogleModals('#confirmAction', '#processing')#}
             if ((task_status === 'DONE' || task_status === 'FINISHED' && use_service === 'False') && have_survey){
                 beforeSubmit(task_status);
             }else if(task_status === 'OPEN'){
@@ -305,8 +312,13 @@
 
         function getId(value) {
             var task_status = value.id;
+            {% if custom_settings %}
+            var office_work_alone = {{ custom_settings.i_work_alone|lower }};
+            {% else %}
+            var office_work_alone = false;
+            {% endif %}
 
-            if (value.id == "BLOCKEDPAYMENT" || value.id == "FINISHED"){
+            if ((value.id == "BLOCKEDPAYMENT" || value.id == "FINISHED") && !(office_work_alone) ){
                 $('.rating-container').show();
             } else {
                 $('.rating-container').hide();
@@ -334,7 +346,6 @@
 
             $("#servicepricetable-alert").addClass("hidden");
 
-            // $("#confirmAction").on('shown.bs.modal', function () {
             var actionButton = document.getElementById("actionButton");
             var nextText = document.getElementById("actionText");
             var modalHeader = document.getElementById("modalHeader");
@@ -362,6 +373,11 @@
 
             return true;
         }
+    </script>
+    <script>
+        $('#id_type_task_field').on('change', function () {
+            ajax_get_correspondents($(this).val())
+        })
     </script>
     <script>
         function getLocation() {
@@ -423,16 +439,75 @@
         }
         </script>
     <script type="text/javascript">
-        $("#correspondents-table tbody tr").click(function(){
-            $("#servicepricetable-alert").addClass("hidden");
-            id = $(this).data('id');
-            amount = $(this).data('value').toString();
-            $('input[name=servicepricetable_id]').val(id);
-            $('input[name=amount]').val(amount.replace(".", ","));
-            $(this).addClass("ezl-bg-open");
-            $(this).siblings().removeClass("ezl-bg-open");
-            $('input[name=amount]').focus();
-        });
+        var row_click_function = function (){
+            $("#correspondents-table tbody tr").click(function(){
+                $("#servicepricetable-alert").addClass("hidden");
+                id = $(this).data('id');
+                amount = $(this).data('value').toString();
+                $('input[name=servicepricetable_id]').val(id);
+                $('input[name=amount]').val(amount.replace(".", ","));
+                $(this).addClass("ezl-bg-open");
+                $(this).siblings().removeClass("ezl-bg-open");
+                $('input[name=amount]').focus();
+            });
+
+            return;
+        };
+
+        var ajax_get_correspondents = function (type_task) {
+            var tmplRowCorrespondent = '<tr id="office-${pk}" data-id="${pk}" ' +
+                                'data-value="${value}" data-formated-value="${formated_value}" ' +
+                                'data-office-public="${office_public}" class="tr_select" role="row">\n' +
+                    '<td class="office_correspondent">${office_correspondent}</td>\n' +
+                    '<td class="court_district">${court_district}</td>\n' +
+                    '<td class="court_district_complement">${court_district_complement}</td>\n' +
+                    '<td class="state">${state}</td>\n' +
+                    '<td class="client">${client}</td>\n' +
+                    '<td class="value">${value}</td>\n' +
+                    '<td class="office_rating">${office_rating}</td>\n' +
+                    '<td class="office_return_rating">${office_return_rating}</td>\n' +
+                '</tr>';
+            $.ajax({
+                type: 'GET',
+                url: '/providencias/ajax_get_correspondent_table/?task={{ form.instance.pk }}&type_task='+type_task,
+                success: function (data) {
+                    window.total = data.total;
+                    window.table_rows = data.total;
+                    window.type_task_id = data.type_task_id;
+                    $("#type_task").html(data.type_task);
+                    var tbody = $('#correspondents-table tbody');
+                    if(window.table) {
+                        window.table.destroy();
+                    }
+                    tbody.html('')
+                    if (data.total > 0) {
+                        $.each(data.correspondents_table, function (index, value) {
+                            $.tmpl(tmplRowCorrespondent, value).appendTo(tbody)
+                        });
+                    }
+                    correspondents_data_table();
+                },
+                dataType: 'json'
+            });
+            return;
+        };
+
+        var correspondents_data_table = function() {
+            window.table = $('#correspondents-table').DataTable({
+                paging: false,
+                order: [[5, 'asc'], [6, 'desc'], [7, 'asc'], [0, 'asc']],
+                dom: 'frti',
+                buttons: [],
+                destroy: true,
+                language: {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                },
+            });
+            $('#actionButton').removeAttr('disabled');
+            row_click_function();
+            $("#correspondents-table_filter input").focus();
+            return;
+        };
 
         $('input[id=id_amount]').keypress(function(e) {
             if(e.which == 13) {
@@ -443,7 +518,7 @@
 {% endblock %}
 {% block script_window_load %}
     {{ block.super }}
-    get_ecms({{form.instance.pk}});
+    get_internal_ecms({{form.instance.pk}});
 {% endblock %}
 
 {% block extra_modal %}
@@ -496,39 +571,36 @@
 {% endblock %}
 {% block script_document_ready %}
     {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
+        row_click_function();
         $('#confirmAction').on('show.bs.modal', function (event) {
-            var table_rows = {{ correspondents_table.rows|length }};
+            if (! window.type_task_id){
+                window.type_task_id = {{ form.instance.type_task.id }}
+            }
+            var $id_type_task_field = $("#id_type_task_field");
+            if ($id_type_task_field.length > 0 && $id_type_task_field.val()) {
+                if ($id_type_task_field[0].options.length == 1){
+                    $("#type_task").html($id_type_task_field.find(":selected").text())
+                    $("#type_task_name").html("<label>Tipo de Serviço: </label> " + $id_type_task_field.find(":selected").text())
+                }
+                window.type_task_id = $id_type_task_field.val();
+                ajax_get_correspondents(window.type_task_id);
+            }
+            (window.total) ? window.table_rows = window.total : window.table_rows = {{ correspondents_table.rows|length }};
             if (table_rows > 0) {
-                window.table = $('#correspondents-table').DataTable({
-                    paging: false,
-                    order: [[4, 'asc']],
-                    dom: 'frti',
-                    buttons: [],
-                    language: {
-                        "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-                    },
-                });
-                $('#actionButton').removeAttr('disabled');
-            } else {
-                event.preventDefault();
-                event.stopPropagation();
-                swal({
-                    title: "Atenção",
-                    text: "Não existem tabelas de preço que atendam aos critérios desta OS",
-                    type: "warning",
-                    showCancelButton: false,
-                    confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "OK",
-                    closeOnConfirm: true
-                });
+                correspondents_data_table();
+            }
+        });
+        $('#confirmAction').on('shown.bs.modal', function (event) {
+            if($('#correspondents-table_filter input').length > 0){
+                $('#correspondents-table_filter input').focus()
             }
         });
         /* Ao fechar o modal, limpar a tabela */
-        {% if correspondents_table.rows %}
         $('#confirmAction').on('hide.bs.modal', function (event) {
-            window.table.destroy();
+            if (window.table_rows) {
+                window.table.destroy();
+            }
         });
-        {% endif %}
 
     {% endif %}
 {% endblock %}

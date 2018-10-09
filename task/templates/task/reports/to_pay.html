@@ -61,6 +61,10 @@
                                 {% bootstrap_label "Agrupar por: " %}
                                 {% bootstrap_field filter.form.group_by_tasks form_group_class="" bound_css_class='' show_label=False %}
                             </div>
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Cliente reembolsa valor gasto com serviço de correspondência: " %}
+                                {% bootstrap_field filter.form.refunds_correspondent_service form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
                         </div>
                     </fieldset>
                      <div class="panel-footer text-center">
@@ -93,6 +97,7 @@
                             <th>Processo</th>
                             <th>Comarca</th>
                             <th>Cliente</th>
+                            <th>Reembolsa valor</th>
                             <th>Parte Adversa</th>
                             <th>OS Original</th>
                             <th>Faturada</th>
@@ -100,7 +105,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for office in offices %}
+                        {% for office in offices_report %}
                             {% for task in office.tasks %}
                                 <tr>
                                     <td>{{ task.parent.task_number }}</td>
@@ -110,6 +115,7 @@
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.court_district }}</td>
                                     <td>{{ task.client }}</td>
+                                    <td>{{ office.client_refunds }}</td>
                                     <td>{{ task.opposing_party }}</td>
                                     {% if task.parent %}
                                         {% if task.parent.parent %}
@@ -141,24 +147,33 @@
                             <th>Parte Adversa</th>
                             <th>OS Original</th>
                             <th>Faturada</th>
-                            <th>Valor</th>
+                            <th>Valor (R$)</th>
                         </tr>
                     </thead>
                     <tbody id="os-table-body">
-                        {% for office in offices %}
+                        {% for office in offices_report %}
                             {% ifchanged office.office_name %}
                                 <tr>
                                     <th colspan="10">{{ office.office_name }}</th>
                                     <th></th>
-                                    <th><center>R$ {{office.office_total}}</center></th>
+                                    <th><center>{{office.office_total}}</center></th>
                                 </tr>
                             {% endifchanged %}
 
                             {% ifchanged office.client_name or office.office_name %}
                                 <tr>
                                     <th></th>
-                                    <th colspan="10">{{ office.client_name }}</th>
-                                    <th><center>R$ {{office.client_total}}</center></th>
+                                    <th colspan="10">
+                                        <div class="col-xs-10">
+                                            {{ office.client_name }}
+                                        </div>
+                                        <div class="col-xs-2">
+                                            {% if office.client_refunds %}
+                                            <span class="badge badge-danger pull-right"><i class="fa fa-check"></i> Reembolsa valor</span>
+                                            {% endif %}
+                                        </div>
+                                    </th>
+                                    <th><center>{{office.client_total}}</center></th>
                                 </tr>
                             {% endifchanged %}
                             {% for task in office.tasks %}
@@ -186,7 +201,7 @@
                                         <td>{{ task.legacy_code }}</td>
                                     {% endif %}
                                     <td>{{ task.billing_date|date:"d/m/Y" }}</td>
-                                    <td class="text-center"><center>R$ {{ task.amount }}</center></td>
+                                    <td class="text-center"><center>{{ task.amount }}</center></td>
                                 </tr>
                             {% endfor %}
                         {% empty %}
@@ -196,19 +211,20 @@
                         {% endfor %}
                         {% if total %}
                             <tr class="total-container">
-                                <th colspan="10" class="text-center" >Total Geral</th>
-                                <th></th>
-                                <th class="text-center">R$ {{total}}</th>
+                                <th colspan="10" class="text-right" >Total Geral (R$)</th>
+                                <th colspan="2" class="text-right">{{total}}</th>
                             </tr>
                         {% endif %}
                     </tbody>
                 </table>
             </div>
-            <div class="text-center">
+            <div class="row">
+                <div class="text-center" style="padding-top: 10px">
                 {% if offices_report %}
-                <button class="btn btn-success" id="btn-faturar">Faturar</button>
+                    <button class="btn btn-success" id="btn-faturar">Faturar</button>
                 {% endif %}
-            </div>            
+                </div>
+            </div>
         </div>
     </div>
     <div id="modal-faturar" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
@@ -235,6 +251,9 @@
     <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.flash.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
     <script>
@@ -260,7 +279,13 @@
     });
     $('#btn-faturar').click(function(){
         if (getSelectedOs().length == 0){
-            alert("Você deve selecionar pelo menos uma OS para ser faturada.");
+            swal({
+                title: "Importante",
+                text: "Você deve selecionar pelo menos uma OS para ser faturada.",
+                type: "warning",
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Ok"
+            });
             return false;
         }
         $('#modal-faturar').modal();

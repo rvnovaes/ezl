@@ -45,15 +45,19 @@ def get_result_advwin(stmt):
 
 
 @shared_task(bind=True, max_retries=MAX_RETRIES)
-def export_ecm(self, ecm_id, ecm=None, execute=True):
-    if ecm is None:
-        ecm = Ecm.objects.get(pk=ecm_id)
+def export_ecm(self, ecm_id, task_id):
+    ecm = Ecm.objects.get(pk=ecm_id)
+    task = Task.objects.get(pk=task_id)
 
     new_path = ecm_path_ezl2advwin(ecm.path.name)
     file_name = get_ecm_file_name(ecm.path.name)
+
+    # Caso o arquivo não exista localmente devemos baixa-lo do s3
+    ecm.download()
+
     values = {
         'Tabela_OR': 'Agenda',
-        'Codigo_OR': ecm.task.legacy_code,
+        'Codigo_OR': task.legacy_code,
         'Link': new_path,
         'Data': timezone.localtime(ecm.create_date),
         'Nome': file_name,
@@ -63,32 +67,29 @@ def export_ecm(self, ecm_id, ecm=None, execute=True):
         'Descricao': file_name
     }
     stmt = JuridGedMain.__table__.insert().values(**values)
-    if execute:
-        LOGGER.debug('Exportando ECM %d-%s ', ecm.id, ecm)
-        try:
-            result = get_advwin_engine().execute(stmt)
-            result.close()
-        except Exception as exc:
-            self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
-            LOGGER.warning('Não foi possível exportar ECM: %d-%s\n%s',
-                           ecm.id,
-                           ecm,
-                           exc,
-                           exc_info=(type(exc), exc, exc.__traceback__))
-            raise exc
-        stmt = JuridGedMain.__table__.select().where(and_(
-            JuridGedMain.__table__.c.Codigo_OR == ecm.task.legacy_code,
-            JuridGedMain.__table__.c.Nome == file_name)
-        )
-        result = get_result_advwin(stmt)
-        id_doc = []
-        for row in result:
-            id_doc.append(row['ID_doc'])
+    LOGGER.debug('Exportando ECM %d-%s ', ecm.id, ecm)
+    try:
+        result = get_advwin_engine().execute(stmt)
         result.close()
-        LOGGER.info('ECM %s: exportado', ecm)
-        return id_doc
-    else:
-        return stmt
+    except Exception as exc:
+        self.retry(countdown=(BASE_COUNTDOWN ** self.request.retries), exc=exc)
+        LOGGER.warning('Não foi possível exportar ECM: %d-%s\n%s',
+                       ecm.id,
+                       ecm,
+                       exc,
+                       exc_info=(type(exc), exc, exc.__traceback__))
+        raise exc
+    stmt = JuridGedMain.__table__.select().where(and_(
+        JuridGedMain.__table__.c.Codigo_OR == task.legacy_code,
+        JuridGedMain.__table__.c.Nome == file_name)
+    )
+    result = get_result_advwin(stmt)
+    id_doc = []
+    for row in result:
+        id_doc.append(row['ID_doc'])
+    result.close()
+    LOGGER.info('ECM %s: exportado', ecm)
+    return id_doc
 
 
 @shared_task(bind=True, max_retries=MAX_RETRIES)
@@ -162,14 +163,15 @@ def delete_ecm_related_folder_to_task(self, ecm_id, id_doc, task_id, ecm_create_
 
 
 @retry(stop_max_attempt_number=4, wait_fixed=1000)
-def delete_ecm(ecm_id, execute=True):
+def delete_ecm(ecm_id, task_id, execute=True):
     ecm = Ecm.objects.get(pk=ecm_id)
+    task = Task.objects.get(pk=task_id)
 
     new_path = ecm_path_ezl2advwin(ecm.path.name)
     file_name = get_ecm_file_name(ecm.path.name)
     values = {
         'Tabela_OR': 'Agenda',
-        'Codigo_OR': ecm.task.legacy_code,
+        'Codigo_OR': task.legacy_code,
         'Link': new_path,
         'Nome': file_name,
         'Responsavel': ecm.create_user.username,
@@ -191,7 +193,7 @@ def delete_ecm(ecm_id, execute=True):
                 id_doc = row['ID_doc']
                 stmt = JuridGedMain.__table__.delete().where(JuridGedMain.__table__.c.ID_doc == id_doc)
                 deleted_ecm = get_advwin_engine().execute(stmt)
-                delete_ecm_related_folder_to_task.delay(ecm_id, id_doc, ecm.task.id, ecm.create_user.username)
+                delete_ecm_related_folder_to_task.delay(ecm_id, id_doc, task.id, ecm.create_user.username)
             LOGGER.info('ECM %s: excluído', ecm_id)
             total_afected = result.rowcount
             result.close()
@@ -291,6 +293,7 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
     task = task_history.task
     person_executed_by_legacy_code = None
     person_executed_by_legal_name = None
+    justification = task_history.notes[:1000]
     values = {}
     if task.get_child:
         person_executed_by_legacy_code = None
@@ -305,7 +308,7 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
             'status': 0,
             'SubStatus': 50,
             'data_operacao': timezone.localtime(task_history.create_date),
-            'justificativa': task_history.notes,
+            'justificativa': justification,
             'usuario': username,
             'descricao': 'Aceita por correspondente: {}'.format(
                 person_executed_by_legal_name),
@@ -317,7 +320,7 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
             'status': 0,
             'SubStatus': 70,
             'data_operacao': timezone.localtime(task_history.create_date),
-            'justificativa': task_history.notes,
+            'justificativa': justification,
             'usuario': username,
             'descricao': 'Cumprida por correspondente: {}'.format(
                 person_executed_by_legal_name),
@@ -329,7 +332,7 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
             'status': 0,
             'SubStatus': 20,
             'data_operacao': timezone.localtime(task_history.create_date),
-            'justificativa': task_history.notes,
+            'justificativa': justification,
             'usuario': username,
             'descricao': 'Recusada por correspondente: {}'.format(
                 person_executed_by_legal_name),
@@ -341,7 +344,7 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
             'status': 0,
             'SubStatus': 100,
             'data_operacao': timezone.localtime(task_history.create_date),
-            'justificativa': task_history.notes,
+            'justificativa': justification,
             'usuario': username,
             'descricao': 'Diligência devidamente cumprida por: {}'.format(
                 person_executed_by_legal_name),
@@ -353,7 +356,7 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
             'status': 0,
             'SubStatus': 80,
             'data_operacao': timezone.localtime(task_history.create_date),
-            'justificativa': task_history.notes,
+            'justificativa': justification,
             'usuario': username,
             'descricao': 'Diligência delegada ao correspondente para complementação:'
         }
@@ -364,7 +367,7 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
             'status': 0,
             'SubStatus': 90,
             'data_operacao': timezone.localtime(task_history.create_date),
-            'justificativa': task_history.notes,
+            'justificativa': justification,
             'usuario': username,
             'descricao': 'Diligência não cumprida - pagamento glosado'
         }
@@ -376,7 +379,7 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
             'SubStatus': 11,
             'status': 0,
             'data_operacao': timezone.localtime(task_history.create_date),
-            'justificativa': task_history.notes,
+            'justificativa': justification,
             'usuario': username,
             'descricao': 'Aceita por Back Office: {}'.format(
                 task.person_distributed_by.legal_name),
@@ -389,7 +392,7 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
             'SubStatus': 20,
             'status': 1,
             'data_operacao': timezone.localtime(task_history.create_date),
-            'justificativa': task_history.notes,
+            'justificativa': justification,
             'usuario': username,
             'descricao': 'Recusada por Back Office: {}'.format(
                 task.person_distributed_by.legal_name),
@@ -403,7 +406,7 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
             'SubStatus': 30,
             'status': 0,
             'data_operacao': timezone.localtime(task_history.create_date),
-            'justificativa': task_history.notes,
+            'justificativa': justification,
             'usuario': username,
             'descricao': 'Solicitada ao correspondente ('+person_executed_by_legal_name +
                          ') por BackOffice: {}'.format(

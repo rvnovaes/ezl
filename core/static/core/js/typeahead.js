@@ -21,7 +21,10 @@ $(document).ready(function () {
                 },
                 replace: function (url, query) {
                     if (forward && forward !== 'None'){
-                        forwardValue = $("[name=" + forward + "]").val();
+                        var forwardValue = $("[name=" + forward + "]").attr('data-value');
+                        if (!forwardValue){
+                            forwardValue = $("[name=" + forward + "]").val();
+                        }
                         if (forwardValue == ''){
                             forwardValue = 0;
                         }
@@ -43,19 +46,29 @@ $(document).ready(function () {
             display: 'data-value-txt',
             limit: 15,
             source: getTypeaheadData
+        }).on('typeahead:asyncrequest', function() {
+            $(this).addClass('loading');
+        }).on('typeahead:asynccancel typeahead:asyncreceive', function() {
+            $(this).removeClass('loading');
         }).on('typeahead:selected', function (el, data) {
             $(this).attr('value', data.id);
             $(this).attr('data-value', data.id);
             $(this).attr('data-value-txt', data['data-value-txt']);
+            $(this).attr('data-forward-id', data['data-forward-id']);
+            $(this).attr('data-extra-params', data['data-extra-params']);
         }).on('typeahead:autocomplete', function (el, data) {
             $(this).attr('value', data.id);
             $(this).attr('data-value', data.id);
             $(this).attr('data-value-txt', data['data-value-txt']);
+            $(this).attr('data-forward-id', data['data-forward-id']);
+            $(this).attr('data-extra-params', data['data-extra-params']);
         }).on('typeahead:close', function (el) {
             if (!$(this).val()){
                 $(this).attr('value', '');
                 $(this).attr('data-value', '');
                 $(this).attr('data-value-txt', '');
+                $(this).attr('data-forward-id', '');
+                $(this).attr('data-extra-params', '');
             }
         });
     });
@@ -74,4 +87,51 @@ $(document).ready(function () {
             $(this).val($(this).attr('data-value-txt'))
         }
     });
+
+    // funcao responsavel por limpar um campo typeahead
+    var clearTypeaheadField = function(field){
+        field.attr('value', '');
+        field.attr('data-value', '');
+        field.attr('data-value-txt', '');
+        field.attr('data-forward-id', '');
+        field.attr('data-extra-params', '');
+        field.typeahead('val', '');
+    };
+
+    // tenta localizar o campo de complemento
+    var complement = $('[name=court_district_complement]');
+
+    // limpa o campo de complemento de acordo com a comarca selecionada, caso exista o campo de comarca e complemento
+    var courtDistrict = $('[name=court_district]');
+    if (courtDistrict.length > 0 && complement.length > 0) {
+        var courtDistrictSelect = courtDistrict.attr('data-value');
+        courtDistrict.on('change', function () {
+            if (courtDistrict.attr('data-value') !== courtDistrictSelect && courtDistrict.attr('data-value') !== complement.attr('data-forward-id')) {
+                clearTypeaheadField(complement);
+                courtDistrictSelect = courtDistrict.attr('data-value');
+            }
+        });
+    }
+
+    // limpa o campo de complemento de acordo com a uf selecionada, caso exista o campo de uf e complemento
+    var stateField = $('#id_state');
+    if (stateField.length > 0 && complement.length > 0) {
+        typeaheadAditionalParams.state = stateField.val();
+        stateField.on('change', function(){
+            typeaheadAditionalParams.state = $(this).val();
+            if(complement.attr('data-extra-params') !== $(this).val()){
+                clearTypeaheadField(complement);
+            }
+        });
+    }
+
+    if (stateField.length > 0 && courtDistrict.length > 0) {
+        var stateSelect = stateField.prop('selectedIndex');
+        stateField.on('change', function () {
+            if (stateSelect !== stateField.prop('selectedIndex') && stateField.val() !== courtDistrict.attr('data-forward-id')) {
+                clearTypeaheadField(courtDistrict);
+                stateSelect = $('#id_state').prop('selectedIndex');
+            }
+        });
+    }
 });

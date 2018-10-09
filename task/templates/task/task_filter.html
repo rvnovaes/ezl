@@ -21,8 +21,9 @@
                 <div class="panel-body">
                     <fieldset>
                         <div class="row">
-                            {% bootstrap_field filter.form.state form_group_class="form-group col-sm-6" bound_css_class='' %}
-                            {% bootstrap_field filter.form.court_district form_group_class="form-group col-sm-6" bound_css_class='' %}
+                            {% bootstrap_field filter.form.state form_group_class="form-group col-sm-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.court_district form_group_class="form-group col-sm-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.court_district_complement form_group_class="form-group col-sm-4" bound_css_class='' %}
                         </div>
                         <div class="row">                            
                             {% bootstrap_field filter.form.type_task form_group_class="form-group col-md-3" bound_css_class='' %}
@@ -216,7 +217,6 @@
 
 {% block extra_scripts %}
     {{ filter.form.media }}
-    {% include 'core/uf_court_district_link.html' %}
     <script src="{% static 'skeleton/plugins/bower_components/multiselect/js/jquery.multi-select.js' %}"></script>
     <script>
         $(document).ready(function(){

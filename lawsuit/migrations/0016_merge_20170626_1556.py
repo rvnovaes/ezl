@@ -11,5 +11,4 @@ class Migration(migrations.Migration):
         ('lawsuit', '0015_merge_20170626_1525'),
     ]
 
-    operations = [
-    ]
+    operations = []

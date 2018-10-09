@@ -15,11 +15,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='dashboardetl',
             name='execution_date_finish',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Fim'),
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name='Fim'),
         ),
         migrations.AlterField(
             model_name='dashboardetl',
             name='execution_date_start',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Inicio'),
+            field=models.DateTimeField(
+                auto_now=True, null=True, verbose_name='Inicio'),
         ),
     ]

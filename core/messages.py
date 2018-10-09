@@ -20,8 +20,7 @@ NO_PERMISSIONS_DEFINED = 'Não existem permissões de acesso definidas para este
 
 
 def delete_error_protected(model_name, related_model):
-    return ('Não é possível excluir o(s) registros de ' +
-            model_name +
+    return ('Não é possível excluir o(s) registros de ' + model_name +
             ' porque existem registros '
             'associados em outra parte do sistema!'
             ' A exclusão será cancelada.')
@@ -53,3 +52,11 @@ def integrity_error_delete():
 
 def record_from_wrong_office():
     return 'Erro: este registro pertence a outro escritório.'
+
+
+def person_cpf_cnpj_already_exists():
+    return 'Já existe uma pessoa cadastrada com este CPF/CNPJ para este escritório'
+
+
+def invalid_field(name_field):
+    return '%s inválido' % name_field

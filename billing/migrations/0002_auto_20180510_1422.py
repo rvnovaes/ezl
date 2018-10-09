@@ -15,11 +15,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='plan',
             name='custom_pricing',
-            field=models.BooleanField(default=False, verbose_name='Preço customizado'),
+            field=models.BooleanField(
+                default=False, verbose_name='Preço customizado'),
         ),
         migrations.AddField(
             model_name='plan',
             name='custom_pricing_text',
-            field=models.CharField(blank=True, max_length=50, null=True, verbose_name='Descrição para preço customizado'),
+            field=models.CharField(
+                blank=True,
+                max_length=50,
+                null=True,
+                verbose_name='Descrição para preço customizado'),
         ),
     ]

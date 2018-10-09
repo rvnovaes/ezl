@@ -41,25 +41,27 @@
             </div>
             {% for status_name, status_items in ret_status_dict.items %}
                 {% if status_items.name and status_items.title != 'Inválida'%}
-                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12" id="id_{{ status_items.name|lower }}">
-                    <a {% if status_items.total %}href="#modal-view-task-table" data-toggle="modal"{% else %}href="javascript:swal('Não há dados para exibir.')"{% endif %} data-status="{{ status_items.status }}">
-                    <div class="white-box">
-                        <h5 class="font-bold ezl-text-{{ status_items.name|lower }}">{{ status_items.title }}</h5>
-                        <div class="text-left">
-                            <h1>
-                                <sup>
-                                    <i class="{{ status_items.task_icon }} ezl-text-{{ status_items.name|lower }} font-30"></i>
-                                </sup>
-                                <span id="{{ status_items.status|remove_spaces_lower }}" class="pull-right status-total">{{status_items.total}}</span>
-                            </h1>
-                        </div>{% get_percent status_items.total ret_status_dict.total as percent %}
-                        <span class="text-success" id="{{ status_items.status|remove_spaces_lower }}_percent">{{ percent|stringformat:".02f" }}%</span> <div class="progress m-b-0">
-                        <div id="{{ status_items.status|remove_spaces_lower }}_percent_bar" class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{ percent|stringformat:"d" }}" aria-valuemin="0" aria-valuemax="100" style="width:{{ percent|stringformat:"d" }}%;">
-                            <span class="sr-only">{{ percent|stringformat:".02d" }}% Complete</span> </div>
+                    {% if not cards_to_show or status_items.status in cards_to_show %}
+                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12" id="id_{{ status_items.name|lower }}">
+                        <a {% if status_items.total %}href="#modal-view-task-table" data-toggle="modal"{% else %}href="javascript:swal('Não há dados para exibir.')"{% endif %} data-status="{{ status_items.status }}">
+                        <div class="white-box">
+                            <h5 class="font-bold ezl-text-{{ status_items.name|lower }}" style="min-height: 32px">{{ status_items.title }}</h5>
+                            <div class="text-left">
+                                <h1>
+                                    <sup>
+                                        <i class="{{ status_items.task_icon }} ezl-text-{{ status_items.name|lower }} font-30"></i>
+                                    </sup>
+                                    <span id="{{ status_items.status|remove_spaces_lower }}" class="pull-right status-total">{{status_items.total}}</span>
+                                </h1>
+                            </div>{% get_percent status_items.total ret_status_dict.total as percent %}
+                            <span class="text-success" id="{{ status_items.status|remove_spaces_lower }}_percent">{{ percent|stringformat:".02f" }}%</span> <div class="progress m-b-0">
+                            <div id="{{ status_items.status|remove_spaces_lower }}_percent_bar" class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{ percent|stringformat:"d" }}" aria-valuemin="0" aria-valuemax="100" style="width:{{ percent|stringformat:"d" }}%;">
+                                <span class="sr-only">{{ percent|stringformat:".02d" }}% Complete</span> </div>
+                            </div>
                         </div>
+                        </a>
                     </div>
-                    </a>
-                </div>
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         </div>
@@ -129,6 +131,7 @@
                     type: "GET",
                     url: "/dashboard/verificar_status/",
                     success: function(response){
+                        $("#current_office").html(response.office);
                         $.each($('.status-total'), function (index, value){
                             if (!(value.id in response)) {
                                 $("#"+value.id).html('0');

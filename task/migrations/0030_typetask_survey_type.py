@@ -16,11 +16,20 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='typetask',
             name='survey_type',
-            field=models.CharField(choices=[('Operationlicense', 'Cumprimento de Ordem de Serviço do tipo Alvará'),
-                                            ('Courthearing', 'Cumprimento de Ordem de Serviço do tipo Audiência'),
-                                            ('Diligence', 'Cumprimento de Ordem de Serviço do tipo Diligência'),
-                                            ('Protocol', 'Cumprimento de Ordem de Serviço do tipo Protocolo'),
-                                            ('Blank', '')], default=task.models.SurveyType(''), max_length=100,
-                                   verbose_name='Tipo de Formulário'),
+            field=models.CharField(
+                choices=[
+                    ('Operationlicense',
+                     'Cumprimento de Ordem de Serviço do tipo Alvará'),
+                    ('Courthearing',
+                     'Cumprimento de Ordem de Serviço do tipo Audiência'),
+                    ('Diligence',
+                     'Cumprimento de Ordem de Serviço do tipo Diligência'),
+                    ('Protocol',
+                     'Cumprimento de Ordem de Serviço do tipo Protocolo'),
+                    ('Blank', '')
+                ],
+                default=task.models.SurveyType(''),
+                max_length=100,
+                verbose_name='Tipo de Formulário'),
         ),
     ]

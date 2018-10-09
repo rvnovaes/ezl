@@ -151,37 +151,14 @@
                                                               </div>
                                                           </div>
                                                       {% elif field_type != 'clearablefile' and field.name != 'documents' %}
-                                                        {% if field.name == 'type_task' %}
-                                                          <script>
-                                                            var selectedItem = '{{form.type_task.value}}';
-                                                            var typeTaskList = []
-                                                            {% for data in field.field.queryset %}
-                                                                var setTypeTaskList = function (pk, name, simple_service) {
-                                                                  typeTaskList.push({
-                                                                    pk: pk,
-                                                                    name: name,
-                                                                    simple_service: simple_service
-                                                                  })
-                                                                }
-                                                                setTypeTaskList('{{data.pk}}', '{{data.name}}', '{{data.simple_service}}')
-                                                            {% endfor %}
-                                                          </script>
-                                                          <div class="form-group col-sm-6 ezl-required">
-                                                            <label class="control-label" for="id_type_task">Tipo de Serviço</label>
-                                                            <select name="type_task" class="form-control" title="" required="" id="id_type_task">
-                                                              <option value="" selected="">Selecione...</option>
-                                                            </select>
-                                                          </div>
-                                                        {% else %}
-                                                          {% bootstrap_field field form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
-                                                        {% endif %}
+                                                        {% bootstrap_field field form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
                                                       {% endif %}
                                                   {% endfor %}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {% include 'ecm/attachments_create.html' %}
+                                        {% include 'ecm/attachments.html' %}
 
                                         <div class="form-row  text-center">
                                             <button class="btn btn-danger waves-effect waves-light" type="button" data-dismiss="modal">
@@ -199,85 +176,49 @@
                 </div>
             </div>
     </form>
-    {%block extra_form %}
-    <!-- Modal -->
-    <div class="modal fade" id="modal-type-task" tabindex="-1" role="dialog" aria-labelledby="modal-type-task-label">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="modal-type-task-label">Selecione o tipo de serviço</h4>
-          </div>
-          <div class="modal-body">
-            <div class="table-responsive">
-              <table id='table-type-task' class="table-hover">
-                <thead>
-                  <tr>
-                    <th>Tipo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for type_task in form.type_task.field.queryset %}
-                    {% if not type_task.simple_service %}
-                        <tr id="{{type_task.pk}}" data-label="{{type_task.name}}">
-                          <td>
-                            {{type_task.name}}
-                          </td>
-                        </tr>
-                    {% endif %}
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
-            <button type="button" class="btn btn-primary">Salvar</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    {%endblock%}
 {% endblock content %}
 
 
 {% block extra_scripts %}
     {{ block.super }}
-    <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
-    <script src="{% static "file_form/file_form.js" %}"></script>
-    <script>
-       $(function() {
-           initUploadFields($('#task_form'));
-       });
-    </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
-    <script src="{% static 'task/task-builk-create.js' %}"></script>
-    <script src="{% static 'task/task-typetask.js' %}"></script>
+    <script src="{% static 'task/task-bulk-create.js' %}"></script>
     <script src="{% static 'skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js' %}"></script>
     <script src="{% static 'core/js/typeahead.js' %}"></script>
-    <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
-    <script src="{% static "file_form/file_form.js" %}"></script>
     <script src="{% static "skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js" %}"></script>
-    <script>
-       $(function() {
-           initUploadFields($('#object_form'));
-       });
-    {% endblock %}
+    <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+    {% include 'ecm/javascripts.html' %}
+{% endblock extra_scripts %}
 
 {% block extra_stylesheets %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static "fileuploader.css" %}">
     <link href="{% static "skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css" %}" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="{% static "fileuploader.css" %}">
     <style type="text/css">
         .select2{
-            margin-top: 20px !important;
+            margin-top: -4px !important;
         }
+
+        .select2-container {
+            min-width: 100% !important;
+        }
+
         .nav-form label{
             width: 100%;
         }
+
         .modal-dialog {
             width: 95%!important;
+        }
+        .loading {
+            background-color: #ffffff;
+            background-image: url("{% static "img/loading.gif" %}") !important;
+            background-size: 16px 16px;
+            background-position: right center;
+            background-repeat: no-repeat;
+
         }
     </style>
 

@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='ecm',
             name='task',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='task.Task'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, to='task.Task'),
         ),
     ]

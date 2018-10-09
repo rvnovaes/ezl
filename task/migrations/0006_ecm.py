@@ -18,15 +18,40 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Ecm',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
                 ('create_date', models.DateTimeField()),
                 ('alter_date', models.DateTimeField(blank=True, null=True)),
-                ('is_active', models.BooleanField(default=True, verbose_name='Ativo')),
+                ('is_active',
+                 models.BooleanField(default=True, verbose_name='Ativo')),
                 ('path', models.CharField(max_length=255, unique=True)),
-                ('legacy_code', models.CharField(default='', max_length=255, unique=True, verbose_name='Código Legado')),
-                ('alter_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='ecm_alter_user', to=settings.AUTH_USER_MODEL)),
-                ('create_user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='ecm_create_user', to=settings.AUTH_USER_MODEL)),
-                ('task', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='task.Task', verbose_name='Movimentação')),
+                ('legacy_code',
+                 models.CharField(
+                     default='',
+                     max_length=255,
+                     unique=True,
+                     verbose_name='Código Legado')),
+                ('alter_user',
+                 models.ForeignKey(
+                     blank=True,
+                     null=True,
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='ecm_alter_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('create_user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     related_name='ecm_create_user',
+                     to=settings.AUTH_USER_MODEL)),
+                ('task',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.PROTECT,
+                     to='task.Task',
+                     verbose_name='Movimentação')),
             ],
             options={
                 'abstract': False,

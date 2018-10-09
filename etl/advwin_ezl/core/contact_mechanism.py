@@ -4,18 +4,19 @@ from etl.utils import get_message_log_default, save_error_log
 from core.utils import LegacySystem
 
 UNIT_TO_CONTACT = {
-  '21': '31 2538-7830', 
-  '11': '31 2538-7760', 
-  '14': '48 3771-6812', 
-  '09': '11 4837-3400', 
-  '06': '21 2221-5797', 
-  '13': '11 3738-1763', 
-  '01': '31 4501-4100'
+    '21': '31 2538-7830',
+    '11': '31 2538-7760',
+    '14': '48 3771-6812',
+    '09': '11 4837-3400',
+    '06': '21 2221-5797',
+    '13': '11 3738-1763',
+    '01': '31 4501-4100'
 }
 
+
 # noinspection SpellCheckingInspection
-class ContactMechanismETL(GenericETL):  
-    model = ContactMechanism    
+class ContactMechanismETL(GenericETL):
+    model = ContactMechanism
     import_query = """
         SELECT *
                     FROM (
@@ -123,14 +124,13 @@ class ContactMechanismETL(GenericETL):
                          ) AS TMP
                     WHERE description IS NOT NULL AND description <> ''
                     """
-    has_status = False    
+    has_status = False
     field_check = 'description'
 
     @staticmethod
     def get_unit_contact(row):
-      if row['contact_mechanism_type'] == 'telefone':               
-        return UNIT_TO_CONTACT.get(row['unit'], '')
-
+        if row['contact_mechanism_type'] == 'telefone':
+            return UNIT_TO_CONTACT.get(row['unit'], '')
 
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):
@@ -139,40 +139,55 @@ class ContactMechanismETL(GenericETL):
             try:
                 legacy_code = row['legacy_code']
                 persons = Person.objects.filter(
-                  legacy_code=legacy_code, 
-                  legacy_code__isnull=False,
-                  offices=default_office, 
-                  system_prefix=LegacySystem.ADVWIN.value)
+                    legacy_code=legacy_code,
+                    legacy_code__isnull=False,
+                    offices=default_office,
+                    system_prefix=LegacySystem.ADVWIN.value)
                 for person in persons:
-                        description = ''
-                        if row['contact_mechanism_type'] != 'multemail':
-                            contact_mechanism_type, created = ContactMechanismType.objects.get_or_create(
-                                defaults={'name': row['contact_mechanism_type'],
-                                          'create_user': user},
-                                name__unaccent__iexact=row['contact_mechanism_type'])
-                            if contact_mechanism_type:                                
-                                description = self.get_unit_contact(row) if row['contact_mechanism_type'] == 'telefone' else row['description']
-                                obj = self.model(contact_mechanism_type=contact_mechanism_type,
-                                                 description=description, notes='', person=person,
-                                                 create_user=user)
-                                obj.save()
-                        else:
-                            contact_mechanism_type, created = ContactMechanismType.objects.get_or_create(
-                                defaults={'name': 'email',
-                                            'create_user': user},
-                                name__unaccent__iexact = 'email')
-                            if contact_mechanism_type:
-                                for description in row['description'].split(';'):
-                                    if '@mtostes.com.br' in description.lower():
-                                        obj = self.model(contact_mechanism_type=contact_mechanism_type,
-                                                         description=description, notes='', person=person,
-                                                         create_user=user)
-                                        obj.save()
+                    description = ''
+                    if row['contact_mechanism_type'] != 'multemail':
+                        contact_mechanism_type, created = ContactMechanismType.objects.get_or_create(
+                            defaults={
+                                'name': row['contact_mechanism_type'],
+                                'create_user': user
+                            },
+                            name__unaccent__iexact=row[
+                                'contact_mechanism_type'])
+                        if contact_mechanism_type:
+                            description = self.get_unit_contact(row) if row[
+                                'contact_mechanism_type'] == 'telefone' else row[
+                                    'description']
+                            obj = self.model(
+                                contact_mechanism_type=contact_mechanism_type,
+                                description=description,
+                                notes='',
+                                person=person,
+                                create_user=user)
+                            obj.save()
+                    else:
+                        contact_mechanism_type, created = ContactMechanismType.objects.get_or_create(
+                            defaults={
+                                'name': 'email',
+                                'create_user': user
+                            },
+                            name__unaccent__iexact='email')
+                        if contact_mechanism_type:
+                            for description in row['description'].split(';'):
+                                if '@mtostes.com.br' in description.lower():
+                                    obj = self.model(
+                                        contact_mechanism_type=
+                                        contact_mechanism_type,
+                                        description=description,
+                                        notes='',
+                                        person=person,
+                                        create_user=user)
+                                    obj.save()
 
-                        self.debug_logger.debug(
-                            "Contact Mechanism,%s,%s,%s,%s,%s,%s" % (
-                            str(legacy_code), str(contact_mechanism_type), str(description), str(person.id),
-                            str(user.id), self.timestr))
+                    self.debug_logger.debug(
+                        "Contact Mechanism,%s,%s,%s,%s,%s,%s" %
+                        (str(legacy_code), str(contact_mechanism_type),
+                         str(description), str(person.id), str(user.id),
+                         self.timestr))
             except Exception as e:
                 msg = get_message_log_default(self.model._meta.verbose_name,
                                               rows_count, e, self.timestr)

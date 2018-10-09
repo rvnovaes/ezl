@@ -71,9 +71,11 @@
                                         $("#totals").css('display', 'none');
                                     }
                                     $("#id_file_xls").val('');
-                                    if(result.errors){
+                                    if(result.errors.length){
                                         var log_table = $('#log_table');
+                                        log_table.DataTable().destroy()
                                         var log_table_tbody = $('#log_table tbody');
+                                        log_table_tbody.html('')
                                         for (var j = 0; j < result.errors.length; j++) {
                                             var result_error_obj = result.errors[j]
                                             var errors_desc = '';

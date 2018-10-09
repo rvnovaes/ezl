@@ -15,7 +15,8 @@ def populate_task_task_number(apps, schema_editor):
         print(tasks.update(task_number=F('id')))
         last_id = tasks.last().pk
         from task.models import Task
-        assert last_id == get_next_value(Task.TASK_NUMBER_SEQUENCE, initial_value=last_id)
+        assert last_id == get_next_value(
+            Task.TASK_NUMBER_SEQUENCE, initial_value=last_id)
 
 
 class Migration(migrations.Migration):
