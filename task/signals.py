@@ -309,14 +309,19 @@ def send_task_emails(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Task)
 def post_save_task(sender, instance, created, **kwargs):
     post_save.disconnect(post_save_task, sender=sender)
+    """
+    A ordem das chamadas a seguir e importante uma vez que ao dar o save na instancia em alguns métodos, alteramos as
+    propriedades skip_mail ou skip_signal da instancia. Esta alteracao acaba por influenciar o comportamento dos metodos 
+    seguintes.
+    """
     try:
         new_task(sender, instance, created, **kwargs)
         ezl_export_task_to_advwin(sender, instance, **kwargs)
+        send_task_emails(sender, instance, created, **kwargs)
         create_or_update_chat(sender, instance, created, **kwargs)
         create_company_chat(sender, instance, created, **kwargs)
         workflow_task(sender, instance, created, **kwargs)
         workflow_send_mail(sender, instance, created, **kwargs)
-        send_task_emails(sender, instance, created, **kwargs)
     except Exception as e:
         raise e
     finally:
