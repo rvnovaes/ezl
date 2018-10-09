@@ -16,10 +16,15 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class ChatSerializer(serializers.ModelSerializer):
     messages = MessageSerializer(many=True)
+    task_status = serializers.SerializerMethodField()
+    
 
     class Meta:
         model = Chat
-        fields = ('id', 'create_date', 'title', 'label', 'messages')
+        fields = ('id', 'create_date', 'title', 'label', 'messages' 'task_status')
+
+    def get_task_status(self, obj):
+        return obj.tasks_company_chat.latest('pk').status.name
 
 
 class UnreadMessageSerializer(serializers.ModelSerializer):
