@@ -53,4 +53,4 @@ class UnreadMessageSerializer(serializers.ModelSerializer):
         return obj.message.chat.tasks_company_chat.latest('pk').pk
 
     def get_task_status(self, obj):
-        return obj.message.chat.task_status_chat.latest('pk').status.name
+        return obj.message.chat.tasks_company_chat.latest('pk').status.name
