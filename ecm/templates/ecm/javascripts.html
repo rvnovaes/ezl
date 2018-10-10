@@ -64,25 +64,26 @@
             confirmButtonColor: "#DD6B55",
             confirmButtonText: "Sim, excluir o arquivo.",
             cancelButtonText: "Cancelar",
-            closeOnConfirm: false
-        }, function(){
-            $('#deleting').modal('show');
-            $.ajax({
-                url: '/ecm/ajax-drop-attachment/' + pk,
-                dataType: 'json',
+        }.then(function(result){
+            if (result.value) {
+                $('#deleting').modal('show');
+                $.ajax({
+                    url: '/ecm/ajax-drop-attachment/' + pk,
+                    dataType: 'json',
 
-                success: function (data) {
-                    if (data.is_deleted) {
-                        $('#deleting').modal('hide');
-                        get_attachments(model_name, object_id);
-                        swal("Sucesso!!!", data.message, "success")
+                    success: function (data) {
+                        if (data.is_deleted) {
+                            $('#deleting').modal('hide');
+                            get_attachments(model_name, object_id);
+                            swal("Sucesso!!!", data.message, "success")
+                        }
+                        else {
+                            $('#deleting').modal('hide');
+                            swal("Erro", data.message, "error")
+                        }
                     }
-                    else {
-                        $('#deleting').modal('hide');
-                        swal("Erro", data.message, "error")
-                    }
-                }
-            })
+                })                
+            }
         });
     }
 

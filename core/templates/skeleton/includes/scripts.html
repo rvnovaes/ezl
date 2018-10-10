@@ -11,8 +11,7 @@
 <script src="{% static 'skeleton/js/waves.js' %}"></script>
 <script src="{% static 'skeleton/plugins/bower_components/bootstrap-select/bootstrap-select.min.js' %}"></script>
 <!-- Sweet-Alert  -->
-<script src="{% static 'skeleton/plugins/bower_components/sweetalert/sweetalert.min.js' %}"></script>
-<script src="{% static 'skeleton/plugins/bower_components/sweetalert/jquery.sweet-alert.custom.js' %}"></script>
+<script src="{% static 'skeleton/plugins/bower_components/sweetalert2/dist/sweetalert2.all.min.js' %}"></script>
 <script src="{% static 'skeleton/plugins/bower_components/toast-master/js/jquery.toast.js' %}"></script>
 <!-- X-Editable -->
 <script src="{% static 'skeleton/plugins/bower_components/x-editable/dist/bootstrap3-editable/js/bootstrap-editable.min.js' %}"></script>
@@ -48,9 +47,10 @@
             cancelButtonText: "Continuar no sistema",
             confirmButtonColor: "#DD6B55",
             confirmButtonText: "Sim, eu tenho.",
-            closeOnConfirm: false
-        }, function(){
-            window.location.href = "{% url 'logout' %}";
+        }).then(function(result){
+            if(result.value) {
+                window.location.href = "{% url 'logout' %}";                
+            }
         });
     }
 
