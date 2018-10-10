@@ -1,13 +1,12 @@
 from core.models import Person
 from decimal import Decimal
-from django.db.models.fields import NOT_PROVIDED
 from django.utils import timezone
 from financial.models import CostCenter
 from import_export import resources
-from import_export.fields import Field
 from import_export.widgets import DecimalWidget
 from lawsuit.models import Folder, LawSuit, Movement, TypeMovement, CourtDistrict, CourtDivision, Organ, Instance, \
     TypeLawsuit, CourtDistrictComplement, City
+from task.fields import CustomFieldImportExport
 from task.instance_loaders import TaskModelInstanceLoader
 from task.messages import *
 from task.models import Task, TypeTask
@@ -281,76 +280,57 @@ def insert_incorrect_natural_key_message(row, key):
                                         row[key])
 
 
-class CustomFieldImportExport(Field):
-    def clean(self, data):
-        """
-        Translates the value stored in the imported datasource to an
-        appropriate Python object and returns it.
-        """
-        try:
-            value = data[self.column_name]
-        except KeyError:
-            raise KeyError(COLUMNS_NOT_AVAILABLE.format(self.column_name, list(data)))
-
-        try:
-            value = self.widget.clean(value, row=data)
-        except ValueError as e:
-            column_name = COLUMN_NAME_DICT.get(self.column_name,
-                                               self.column_name)
-            if not column_name == self.column_name:
-                column_name = column_name.get('column_name')
-            raise ValueError(COLUMN_ERROR.format(column_name, e))
-
-        if value in self.empty_values and self.default != NOT_PROVIDED:
-            if callable(self.default):
-                return self.default()
-            return self.default
-
-        return value
-
-
 class TaskResource(resources.ModelResource):
     type_task = CustomFieldImportExport(column_name='type_task', attribute='type_task',
-                                        widget=UnaccentForeignKeyWidget(TypeTask, 'name'), saves_null_values=False)
-    movement = CustomFieldImportExport(column_name='movement', attribute='movement_id', saves_null_values=False)
+                                        widget=UnaccentForeignKeyWidget(TypeTask, 'name'), saves_null_values=False,
+                                        column_name_dict=COLUMN_NAME_DICT)
+    movement = CustomFieldImportExport(column_name='movement', attribute='movement_id', saves_null_values=False,
+                                       column_name_dict=COLUMN_NAME_DICT)
     person_asked_by = CustomFieldImportExport(column_name='person_asked_by', attribute='person_asked_by',
-                                              widget=PersonAskedByWidget(Person, 'legal_name'), saves_null_values=False)
+                                              widget=PersonAskedByWidget(Person, 'legal_name'), saves_null_values=False,
+                                              column_name_dict=COLUMN_NAME_DICT)
     person_executed_by = CustomFieldImportExport(column_name='person_executed_by', attribute='person_executed_by',
-                                                 widget=UnaccentForeignKeyWidget(Person, 'legal_name'))
+                                                 widget=UnaccentForeignKeyWidget(Person, 'legal_name'),
+                                                 column_name_dict=COLUMN_NAME_DICT)
     person_distributed_by = CustomFieldImportExport(column_name='person_distributed_by',
                                                     attribute='person_distributed_by',
-                                                    widget=UnaccentForeignKeyWidget(Person, 'legal_name'))
+                                                    widget=UnaccentForeignKeyWidget(Person, 'legal_name'),
+                                                    column_name_dict=COLUMN_NAME_DICT)
     final_deadline_date = CustomFieldImportExport(column_name='final_deadline_date', attribute='final_deadline_date',
-                                                  widget=DateTimeWidgetMixin(), saves_null_values=False)
+                                                  widget=DateTimeWidgetMixin(), saves_null_values=False,
+                                                  column_name_dict=COLUMN_NAME_DICT)
     delegation_date = CustomFieldImportExport(column_name='delegation_date', attribute='delegation_date',
-                                              widget=DateTimeWidgetMixin())
+                                              widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
     acceptance_date = CustomFieldImportExport(column_name='acceptance_date', attribute='acceptance_date',
-                                              widget=DateTimeWidgetMixin())
+                                              widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
     execution_date = CustomFieldImportExport(column_name='execution_date', attribute='execution_date',
-                                             widget=DateTimeWidgetMixin())
+                                             widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
     requested_date = CustomFieldImportExport(column_name='requested_date', attribute='requested_date',
-                                             widget=DateTimeWidgetMixin(), default=timezone.now())
+                                             widget=DateTimeWidgetMixin(), default=timezone.now(),
+                                             column_name_dict=COLUMN_NAME_DICT)
     acceptance_service_date = CustomFieldImportExport(column_name='acceptance_service_date',
-                                                      attribute='acceptance_service_date', widget=DateTimeWidgetMixin())
+                                                      attribute='acceptance_service_date', widget=DateTimeWidgetMixin(),
+                                                      column_name_dict=COLUMN_NAME_DICT)
     refused_service_date = CustomFieldImportExport(column_name='refused_service_date', attribute='refused_service_date',
-                                                   widget=DateTimeWidgetMixin())
+                                                   widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
     refused_date = CustomFieldImportExport(column_name='refused_date', attribute='refused_date',
-                                           widget=DateTimeWidgetMixin())
+                                           widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
     return_date = CustomFieldImportExport(column_name='return_date', attribute='return_date',
-                                          widget=DateTimeWidgetMixin())
+                                          widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
     blocked_payment_date = CustomFieldImportExport(column_name='blocked_payment_date', attribute='blocked_payment_date',
-                                                   widget=DateTimeWidgetMixin())
+                                                   widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
     finished_date = CustomFieldImportExport(column_name='finished_date', attribute='finished_date',
-                                            widget=DateTimeWidgetMixin())
+                                            widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
     receipt_date = CustomFieldImportExport(column_name='receipt_date', attribute='receipt_date',
-                                           widget=DateTimeWidgetMixin())
+                                           widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
     billing_date = CustomFieldImportExport(column_name='billing_date', attribute='billing_date',
-                                           widget=DateTimeWidgetMixin())
-    task_status = CustomFieldImportExport(column_name='task_status', attribute='task_status', widget=TaskStatusWidget())
+                                           widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
+    task_status = CustomFieldImportExport(column_name='task_status', attribute='task_status', widget=TaskStatusWidget(),
+                                          column_name_dict=COLUMN_NAME_DICT)
     amount = CustomFieldImportExport(column_name='amount', attribute='amount', widget=DecimalWidget(),
-                                     default=Decimal('0.00'))
+                                     default=Decimal('0.00'), column_name_dict=COLUMN_NAME_DICT)
     performance_place = CustomFieldImportExport(column_name='performance_place', attribute='performance_place',
-                                                saves_null_values=False)
+                                                saves_null_values=False, column_name_dict=COLUMN_NAME_DICT)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -371,8 +351,8 @@ class TaskResource(resources.ModelResource):
         folder_number = int(
             row['folder_number']) if row['folder_number'] else ''
         folder_legacy_code = row['folder_legacy_code']
-        cost_center = None
-        if row['folder_cost_center']:
+        cost_center = row['folder_cost_center']
+        if cost_center:
             cost_center = CostCenter.objects.get_queryset(office=[self.office_id]).filter(
                 name__unaccent__icontains=cost_center).first()
             if not cost_center:
@@ -414,14 +394,15 @@ class TaskResource(resources.ModelResource):
         return folder
 
     def validate_lawsuit(self, row, row_errors):
-        lawsuit_number = row['law_suit_number']
+        lawsuit_number = str(row['law_suit_number'])
         lawsuit_legacy_code = row['lawsuit_legacy_code']
         lawsuit = None
         type_lawsuit = row['type_lawsuit']
-        if not lawsuit_number or not type_lawsuit:
+        if not lawsuit_legacy_code and not (lawsuit_number and type_lawsuit):
             row_errors.append(REQUIRED_ONE_IN_GROUP.format('identificação do processo',
                                                            [COLUMN_NAME_DICT['law_suit_number']['column_name'],
-                                                            COLUMN_NAME_DICT['type_lawsuit']['column_name']]))
+                                                            COLUMN_NAME_DICT['type_lawsuit']['column_name'],
+                                                            COLUMN_NAME_DICT['lawsuit_legacy_code']['column_name']]))
         else:
             if lawsuit_legacy_code:
                 lawsuit = LawSuit.objects.filter(
@@ -436,7 +417,7 @@ class TaskResource(resources.ModelResource):
             if not lawsuit:
                 instance = None
                 if row['instance']:
-                    instance = Instance.objects.filter(name=instance, office=self.office).first()
+                    instance = Instance.objects.filter(name=row['instance'], office=self.office).first()
                     if not instance:
                         row_errors.append(insert_incorrect_natural_key_message(row, 'instance'))
                 is_current_instance = TRUE_FALSE_DICT.get(row['lawsuit_is_current_instance'], False)
@@ -472,11 +453,10 @@ class TaskResource(resources.ModelResource):
                         row_errors.append(insert_incorrect_natural_key_message(row, 'lawsuit_court_division'))
                 organ = row.get('lawsuit_organ', '')
                 if organ:
-                    organ = Organ.objects.filter(legal_name=organ,
-                                                 offices=self.office).first()
+                    organ = Organ.objects.get_queryset(office=[self.office_id]).filter(legal_name=organ).first()
                     if not organ:
                         row_errors.append(insert_incorrect_natural_key_message(row, 'lawsuit_organ'))
-                opposing_party = row.get('opposing_party', '')
+                opposing_party = row.get('lawsuit_opposing_party', '')
                 if not row_errors:
                     lawsuit = LawSuit.objects.create(type_lawsuit=TypeLawsuit(type_lawsuit).name,
                                                      person_lawyer=self_or_none(person_lawyer),
@@ -491,7 +471,8 @@ class TaskResource(resources.ModelResource):
                                                      is_current_instance=is_current_instance,
                                                      opposing_party=self_or_none(opposing_party),
                                                      create_user=self.create_user,
-                                                     office=self.office)
+                                                     office=self.office,
+                                                     legacy_code=lawsuit_legacy_code)
         if not lawsuit:
             row_errors.append(RECORD_NOT_FOUND.format(LawSuit._meta.verbose_name))
         return lawsuit
