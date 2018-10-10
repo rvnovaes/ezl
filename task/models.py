@@ -308,7 +308,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     task_status = models.CharField(
         null=False,
-        verbose_name=u'',
+        verbose_name='Status da OS',
         max_length=30,
         choices=((x.value, x.name.title()) for x in TaskStatus),
         default=TaskStatus.REQUESTED)

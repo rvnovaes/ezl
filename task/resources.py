@@ -491,22 +491,18 @@ class TaskResource(resources.ModelResource):
         else:
             type_movement = TypeMovement.objects.filter(name=type_movement_name).first()
             if movement_legacy_code:
-                movement, created = Movement.objects.get_or_create(
-                    legacy_code=movement_legacy_code,
-                    office_id=self.office_id,
-                    defaults={'folder': self.folder,
-                              'law_suit': self.lawsuit,
-                              'type_movement': type_movement})
-            if not movement and (type_movement and self.folder
-                                 and self.lawsuit):
+                movement = Movement.objects.filter(legacy_code=movement_legacy_code,
+                                                   office_id=self.office_id).first()
+            if not movement and type_movement:
                 movement, created = Movement.objects.get_or_create(
                     folder=self.folder,
                     law_suit=self.lawsuit,
-                    office_id=self.office_id,
-                    defaults={'folder': self.folder,
-                              'law_suit': self.lawsuit,
-                              'type_movement': type_movement,
-                              'legacy_code': movement_legacy_code})
+                    office=self.office,
+                    type_movement=type_movement,
+                    defaults={'legacy_code': movement_legacy_code,
+                              'create_user': self.create_user})
+            elif not movement and not type_movement:
+                row_errors.append(insert_incorrect_natural_key_message(row, 'type_movement'))
         if not movement:
             row_errors.append(RECORD_NOT_FOUND.format(Movement._meta.verbose_name))
         return movement

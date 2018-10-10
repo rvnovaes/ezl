@@ -3,6 +3,7 @@ from core.models import Person
 from django.utils.timezone import make_aware
 from import_export.widgets import ForeignKeyWidget, Widget, DateTimeWidget
 from task.models import TaskStatus
+from task.messages import *
 from codemirror import CodeMirrorTextarea
 
 code_mirror_schema = CodeMirrorTextarea(
@@ -61,7 +62,15 @@ class TaskStatusWidget(Widget):
     """
 
     def clean(self, value, row=None, *args, **kwargs):
-        return TaskStatus._value2member_map_.get(value, TaskStatus.REQUESTED)
+        if value:
+            values = [item.value for item in TaskStatus]
+            if value in values:
+                ret = TaskStatus._value2member_map_.get(value)
+            else:
+                raise ValueError(WRONG_TASK_STATUS.format(values))
+        else:
+            ret = TaskStatus.REQUESTED
+        return ret
 
 
 class DateTimeWidgetMixin(DateTimeWidget):
