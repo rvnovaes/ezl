@@ -1062,7 +1062,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         context['table'] = table
         return context
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         checker = ObjectPermissionChecker(self.request.user)
         if (self.request.GET.get('export_answers') and checker.has_perm(
                 'can_view_survey_results', get_office_session(request))):

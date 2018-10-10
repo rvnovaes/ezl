@@ -39,7 +39,13 @@
                 })
 
                 if (changeOption) {
-                  swal('You selected: ' + changeOption)
+                  if (changeOption==='A') {
+                    window.location.href = "{% url 'batch_change_tasks' 'A' %}"
+                  } else if (changeOption==='D') {
+                    window.location.href = "{% url 'batch_change_tasks' 'D' %}"
+                  } else {
+                    window.location.href = "{% url 'batch_change_tasks' 'R' %}"
+                  }
                 }
             };
 

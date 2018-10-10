@@ -87,8 +87,8 @@ urlpatterns = [
         login_required(views.GetTypeTaskMainCharacteristics.as_view()),
         name='typetaskmain_get'),
 
-    url(r'^batch_change_tasks', login_required(views.BatchChangeTasksView.as_view()), 
-        name='batch-change-tasks'),
+    url(r'^batch_change_tasks/(?P<option>[A-Z]+)/', login_required(views.BatchChangeTasksView.as_view()), 
+        name='batch_change_tasks'),
 
     # Filtros
     url(r'^import_task_list/$',
