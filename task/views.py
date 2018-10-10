@@ -1061,7 +1061,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
     def get_context_data(self, **kwargs):
         context = super(DashboardSearchView, self).get_context_data()
         context[self.context_filter_name] = self.filter
-        table = DashboardStatusTable(self.object_list)
+        table = self.table_class(self.object_list)
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         return context
@@ -1662,6 +1662,7 @@ class BatchChangeTasksView(DashboardSearchView):
     filter_class = BatchChangTaskFilter
     template_name = 'task/batch-change-tasks.html'
     option = ''
+    table_class = DashboardStatusTable
 
     def get(self, request, option, *args, **kwargs):
         self.option = option

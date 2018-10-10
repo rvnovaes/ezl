@@ -56,7 +56,6 @@ class DashboardStatusTable(tables.Table):
                  status="",
                  **kwargs):
         super().__init__(*args, **kwargs)
-        self.base_columns['delegation_date'].verbose_name = delegation_date
         self.base_columns['client'].verbose_name = client
         self.base_columns['law_suit_number'].verbose_name = law_suit_number
         self.base_columns['type_service'].verbose_name = type_service
@@ -79,8 +78,7 @@ class DashboardStatusTable(tables.Table):
         model = DashboardViewModel
         fields = [
             'status', 'task_number', 'final_deadline_date', 'type_service',
-            'law_suit_number', 'client', 'opposing_party', 'delegation_date',
-            'origin_code'
+            'law_suit_number', 'client', 'opposing_party', 'origin_code'
         ]
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {

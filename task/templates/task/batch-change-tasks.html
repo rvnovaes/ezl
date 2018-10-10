@@ -8,15 +8,19 @@
     {% block extra_content %}
     <div class="panel panel-default">
         <div class="panel-heading">
-            <div class="panel-title form-row">Alterações em lote ({{ table.length }})</div>
+            <div class="panel-title form-row">
+            	<span>Alterações em lote ({{ table.length }})</span>
+            </div>
         </div>
         <div class="panel-body">
             <div class="table-responsive">
-                <table class="table table-striped table-hover" paginate-fixed>
+                <table class="table table-striped table-hover" paginate-fixed id="table-betch-change-tasks">
                     {% block table.thead %}
                         <thead>
                         <tr>
+                        	<th></th>
                             {% for column in table.columns %}
+
                                 {% if column.orderable %}
                                     <th {{ column.attrs.th.as_html }}><a
                                             href="{% querystring table.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header|title }}</a>
@@ -25,17 +29,24 @@
                                     <th {{ column.attrs.th.as_html }}>{{ column.header|title }}</th>
                                 {% endif %}
                             {% endfor %}
+                            <th>Correspondente</th>
+                            <th>Preço</th>
+                            <th>Trocar o correspondente</th>
                         </tr>
                         </thead>
                     {% endblock table.thead %}
                     {% block table.tbody %}
-                        <tbody>
+                        <tbody>                        
                         {% for row in table.page.object_list|default:table.rows %} {# support pagination #}
                             {% block table.tbody.row %}
-                                <tr class="{% cycle "odd" "even" %}" data-new-href="{{ row.attrs.data_new_href }}">
+                                <tr class="{% cycle "odd" "even" %}">
+                                	<td><input type="checkbox" name=""/></td>
                                     {% for column, cell in row.items %}
                                         <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                                     {% endfor %}
+                                    <td><span>Correspondente</span></td>
+                                    <td><span>520,00</span></td>
+                                    <td><button class="btn btn-info btn-outline"><i class="fa fa-edit"> Trocar</i></button></td>
                                 </tr>
                             {% endblock table.tbody.row %}
                         {% empty %}
@@ -68,4 +79,9 @@
 
 {% block extra_scripts %} 
     {% include 'task/includes/task-filter-extras.html'%}  
+    <script type="text/javascript">
+    	$(document).ready(function(){
+			$('#table-betch-change-tasks').css('font-size', '13px');
+    	})    	
+    </script>
 {%endblock%}
