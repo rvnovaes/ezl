@@ -103,16 +103,7 @@
             <span class="hide-menu">Administração<span class="fa arrow"></span></span>
         </a>
         <ul class="nav nav-second-level">
-            {% if 'can_access_settings' in office_session_perms or 'group_admin' in office_session_perms or request.user.is_superuser %}            
-            <li>
-                <a href="javascript:void(0)" class="waves-effect">
-                    <i class="fa fa-exchange" data-icon="v"></i>
-                    <span class="hide-menu">
-                        Alteração em lote
-                    </span>
-                </a>
-            </li>
-            {% endif %}
+            {% include 'task/includes/menu-batch-change-tasks.html' %}
             {% if 'can_access_settings' in office_session_perms or request.user.is_superuser %}
                 <li>
                     <a href="{% url 'custom_settings_create' %}" target="_self">
