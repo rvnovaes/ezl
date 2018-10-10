@@ -3,14 +3,12 @@
 {% load static %}
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
-
-{% block content %}    
-    {% include 'task/includes/task-form-filters.html'%}
-
+{% block content %} 
+	{% include 'task/includes/task-form-filters.html'%}
     {% block extra_content %}
     <div class="panel panel-default">
         <div class="panel-heading">
-            <div class="panel-title form-row">Listagem de providências ({{ table.length }})</div>
+            <div class="panel-title form-row">Alterações em lote ({{ table.length }})</div>
         </div>
         <div class="panel-body">
             <div class="table-responsive">
@@ -65,10 +63,9 @@
             </div>
         </div>
     </div>
-    {% endblock extra_content %}
-{% endblock content %}
+    {% endblock extra_content %}	
+{% endblock %}
+
 {% block extra_scripts %} 
     {% include 'task/includes/task-filter-extras.html'%}
 {%endblock%}
-
-

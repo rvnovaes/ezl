@@ -103,7 +103,7 @@
             <span class="hide-menu">Administração<span class="fa arrow"></span></span>
         </a>
         <ul class="nav nav-second-level">
-            {% include 'task/includes/menu-batch-change-tasks.html' %}
+            {% include 'task/includes/menus/menu-batch-change-tasks.html' %}
             {% if 'can_access_settings' in office_session_perms or request.user.is_superuser %}
                 <li>
                     <a href="{% url 'custom_settings_create' %}" target="_self">

@@ -1653,3 +1653,6 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView,
             messages.error(request, form.errors)
             return JsonResponse(ret, status=status)
         return JsonResponse(json.loads(json.dumps(ret)), status=status)
+
+class BatchChangeTasksView(DashboardSearchView):
+    template_name = 'task/batch-change-tasks.html'
