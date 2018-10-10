@@ -103,6 +103,37 @@
             <span class="hide-menu">Administração<span class="fa arrow"></span></span>
         </a>
         <ul class="nav nav-second-level">
+            {% if 'can_access_settings' in office_session_perms or 'group_admin' in office_session_perms or request.user.is_superuser %}            
+            <li>
+                <a href="javascript:void(0)" class="waves-effect">
+                    <i class="fa fa-exchange" data-icon="v"></i>
+                    <span class="hide-menu">
+                        Alteração em lote
+                        <span class="fa arrow"></span>
+                    </span>
+                </a>
+                <ul class="nav nav-third-level">
+                    <li>
+                        <a href="{% url 'custom_settings_create' %}" target="_self">
+                            <i class="fa fa-long-arrow-right"></i>
+                            <span class="hide-menu">Atribuir OS</span>
+                        </a>
+                    </li>                    
+                    <li>
+                        <a href="{% url 'custom_settings_create' %}" target="_self">
+                            <i class="fa fa-external-link"></i>
+                            <span class="hide-menu">Delegar OS</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'custom_settings_create' %}" target="_self">
+                            <i class="fa fa-long-arrow-left"></i>
+                            <span class="hide-menu">Recusar OS</span>
+                        </a>
+                    </li>                                        
+                </ul>
+            </li>
+            {% endif %}
             {% if 'can_access_settings' in office_session_perms or request.user.is_superuser %}
                 <li>
                     <a href="{% url 'custom_settings_create' %}" target="_self">
@@ -181,7 +212,7 @@
                 </a>
             </li>
             <li> <!-- SUPORTE -->
-                <a href="http://suporte.ezlawyer.com.br/otrs/customer.pl" class="waves-effect" target="_blank">
+                <a href="http://suporte.ezlawyer.com.br" class="waves-effect" target="_blank">
                     <i class="fa fa-life-ring fa-fw"></i>
                     <span class="hide-menu">Suporte</span>
                 </a>
