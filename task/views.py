@@ -33,7 +33,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
 from core.models import Person, CorePermissions, CustomSettings
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
-from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE
+from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, ImportTaskListForm
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation, TypeTaskMain
@@ -795,11 +795,15 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         checker = ObjectPermissionChecker(person.auth_user)
 
         filters = self.request.GET
-        task_filter = TaskFilter(data=filters, request=self.request)
+        task_filter = self.filter_class(data=filters, request=self.request)
         task_form = task_filter.form
 
         if task_form.is_valid():
             data = task_form.cleaned_data
+            import logging
+            logger = logging.getLogger('teste')
+            logger.info(data)
+
 
             if data['custom_filter']:
                 q = pickle.loads(data['custom_filter'].query)
@@ -845,7 +849,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     task_dynamic_query.add(
                         Q(movement__law_suit__court_district_complement=data[
                             'court_district_complement']), Q.AND)
-                if data['task_status']:
+                if data.get('task_status'):
                     status = [
                         getattr(TaskStatus, s) for s in data['task_status']
                     ]
@@ -1655,4 +1659,22 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView,
         return JsonResponse(json.loads(json.dumps(ret)), status=status)
 
 class BatchChangeTasksView(DashboardSearchView):
+    filter_class = BatchChangTaskFilter
     template_name = 'task/batch-change-tasks.html'
+    option = ''
+
+    def get(self, request, option, *args, **kwargs):
+        self.option = option
+        return super().get(self, request, *args, **kwargs)
+
+    def get_queryset(self):
+        task_list, task_filter = self.query_builder()
+        self.filter = task_filter
+        if self.option in ['A', 'D']:
+            status_to_filter = [TaskStatus.ERROR, TaskStatus.REQUESTED]
+            return task_list.filter(task_status__in=status_to_filter)
+        status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN, 
+            TaskStatus.DONE]            
+        return task_list.filter(task_status__in=status_to_filter)
+
+

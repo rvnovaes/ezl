@@ -183,6 +183,12 @@ class TaskFilter(FilterSet):
         fields = []
         order_by = ['final_deadline_date']
 
+class BatchChangTaskFilter(TaskFilter):
+    task_status = CharFilter(
+        label="Status",        
+        required=False,
+        widget=forms.HiddenInput())        
+
 
 class TaskReportFilterBase(FilterSet):
     finished_in = MDDateTimeRangeFilter(name='finished_in')
