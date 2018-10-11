@@ -196,7 +196,11 @@ class BatchTaskToAssignView(AuditFormMixin, UpdateView):
                 form.instance.person_distributed_by = self.request.user.person
                 form.instance.task_status = TaskStatus.OPEN        
                 get_task_attachment(self, form)
-                task.save()        
+                task.save()
+                task_history = TaskHistory(
+                    create_user=request.user, task=task, status=task.task_status, 
+                    notes="")
+                task_history.save()                        
             return JsonResponse({'status': 'ok'})            
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
