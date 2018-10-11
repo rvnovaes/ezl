@@ -37,7 +37,7 @@
         <script>
             function showMessages()
             {                                                                              
-                var text_msg = "Ao iniciar o processo de importação de tabela de preços não será possível cancelá-lo. Deseja continuar?"
+                var text_msg = "Ao iniciar o processo de importação de tabela de preços não será possível cancelá-lo. Deseja continuar?";
                 swal({
                         title: "Importante",
                         text: text_msg,
@@ -73,11 +73,11 @@
                                     $("#id_file_xls").val('');
                                     if(result.errors.length){
                                         var log_table = $('#log_table');
-                                        log_table.DataTable().destroy()
+                                        log_table.DataTable().destroy();
                                         var log_table_tbody = $('#log_table tbody');
-                                        log_table_tbody.html('')
+                                        log_table_tbody.html('');
                                         for (var j = 0; j < result.errors.length; j++) {
-                                            var result_error_obj = result.errors[j]
+                                            var result_error_obj = result.errors[j];
                                             var errors_desc = '';
                                             for (var i = 0; i < result_error_obj.errors[0].length; i++) {
                                                 errors_desc += $.trim(result_error_obj.errors[0][i]).split("'").join('') + '<br />';
@@ -85,6 +85,16 @@
                                             log_table_tbody.append('<tr> ' +
                                                 '<td>' + result_error_obj.line + '</td>' +
                                                 '<td>' + errors_desc + '</td></tr>');
+                                        }
+                                        for (var j = 0; j < result.warnings.length; j++) {
+                                            var result_warning_obj = result.warnings[j];
+                                            var wanings_desc = '';
+                                            for (var i = 0; i < result_warning_obj.warnings[0].length; i++) {
+                                                wanings_desc += $.trim(result_warning_obj.warnings[0][i]).split("'").join('') + '<br />';
+                                            }
+                                            log_table_tbody.append('<tr> ' +
+                                                '<td>' + result_warning_obj.line + '</td>' +
+                                                '<td>' + wanings_desc + '</td></tr>');
                                         }
                                         $("#div-log-table").css('display', 'block');
                                         log_table.DataTable({

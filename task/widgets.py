@@ -63,11 +63,11 @@ class TaskStatusWidget(Widget):
 
     def clean(self, value, row=None, *args, **kwargs):
         if value:
-            values = [item.value for item in TaskStatus]
-            if value in values:
+            values = [item.value.title() for item in TaskStatus]
+            if value.title() in values:
                 ret = TaskStatus._value2member_map_.get(value)
             else:
-                raise ValueError(WRONG_TASK_STATUS.format(values))
+                raise ValueError(WRONG_TASK_STATUS.format(value.title(), values))
         else:
             ret = TaskStatus.REQUESTED
         return ret

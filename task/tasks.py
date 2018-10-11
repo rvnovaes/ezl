@@ -33,13 +33,15 @@ def import_xls_task_list(self, file_id):
         imported_data = dataset.load(xls_file.file_xls.read())
         params = {
             'create_user': xls_file.create_user,
-            'office': xls_file.office
+            'office': xls_file.office,
+            'warnings': []
         }
         result = task_resource.import_data(
-            imported_data, use_transactions=True, **params)
+            imported_data, use_transactions=False, **params)
         ret['total_rows'] = result.total_rows
         ret['totals'] = result.totals
         ret['errors'] = []
+        ret['warnings'] = []
         if result.has_errors():
             for line_error in result.row_errors():
                 line = line_error[0]
@@ -49,6 +51,9 @@ def import_xls_task_list(self, file_id):
                         '[', '').replace(']', '')
                     errors.append(error_description.split("',"))
                 ret['errors'].append({'line': line, 'errors': errors})
+        if result.has_warnings():
+            for line_warning in result.row_warnings():
+                ret['warnings'].append({'line': line_warning[0], 'warnings': line_warning[1]})
 
     except Exception as e:
         ret['errors'] = '{} - {}'.format(e, traceback.format_exc())

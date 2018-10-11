@@ -1,9 +1,11 @@
 from core.models import Person
+from collections import OrderedDict
 from decimal import Decimal
 from django.utils import timezone
 from financial.models import CostCenter
 from import_export import resources
 from import_export.widgets import DecimalWidget
+from import_export.results import RowResult, Result
 from lawsuit.models import Folder, LawSuit, Movement, TypeMovement, CourtDistrict, CourtDivision, Organ, Instance, \
     TypeLawsuit, CourtDistrictComplement, City
 from task.fields import CustomFieldImportExport
@@ -280,6 +282,33 @@ def insert_incorrect_natural_key_message(row, key):
                                         row[key])
 
 
+class TaskRowResult(RowResult):
+    IMPORT_TYPE_WARNING = 'warning'
+
+    def __init__(self):
+        super().__init__()
+        self.warnings = []
+
+
+class TaskResult(Result):
+
+    def __init__(self):
+        super().__init__()
+        self.totals = OrderedDict([(TaskRowResult.IMPORT_TYPE_NEW, 0),
+                                   (TaskRowResult.IMPORT_TYPE_UPDATE, 0),
+                                   (TaskRowResult.IMPORT_TYPE_DELETE, 0),
+                                   (TaskRowResult.IMPORT_TYPE_SKIP, 0),
+                                   (TaskRowResult.IMPORT_TYPE_WARNING, 0),
+                                   (TaskRowResult.IMPORT_TYPE_ERROR, 0)])
+
+    def row_warnings(self):
+        return [(i + 1, row.warnings)
+                for i, row in enumerate(self.rows) if row.warnings]
+
+    def has_warnings(self):
+        return bool(self.row_warnings())
+
+
 class TaskResource(resources.ModelResource):
     type_task = CustomFieldImportExport(column_name='type_task', attribute='type_task',
                                         widget=UnaccentForeignKeyWidget(TypeTask, 'name'), saves_null_values=False,
@@ -347,7 +376,21 @@ class TaskResource(resources.ModelResource):
         model = Task
         import_id_fields = ('legacy_code', )
 
-    def validate_folder(self, row, row_errors):
+    @classmethod
+    def get_row_result_class(self):
+        """
+        Returns the class used to store the result of a row import.
+        """
+        return TaskRowResult
+
+    @classmethod
+    def get_result_class(self):
+        """
+        Returns the class used to store the result of an import.
+        """
+        return TaskResult
+
+    def validate_folder(self, row, row_errors, row_warnings):
         folder_number = int(
             row['folder_number']) if row['folder_number'] else ''
         folder_legacy_code = row['folder_legacy_code']
@@ -380,7 +423,7 @@ class TaskResource(resources.ModelResource):
                             office=self.office,
                             defaults={'create_user': self.create_user,
                                       'folder_number': folder_number,
-                                      'cost_center': cost_center})
+                                      'cost_center': self_or_none(cost_center)})
                     if not folder and folder_number:
                         folder, created = Folder.objects.get_or_create(
                             folder_number=folder_number,
@@ -388,12 +431,12 @@ class TaskResource(resources.ModelResource):
                             office=self.office,
                             defaults={'create_user': self.create_user,
                                       'legacy_code': folder_legacy_code,
-                                      'cost_center': cost_center})
+                                      'cost_center': self_or_none(cost_center)})
         if not folder:
             row_errors.append(RECORD_NOT_FOUND.format(Folder._meta.verbose_name))
         return folder
 
-    def validate_lawsuit(self, row, row_errors):
+    def validate_lawsuit(self, row, row_errors, row_warnings):
         lawsuit_number = str(row['law_suit_number'])
         lawsuit_legacy_code = row['lawsuit_legacy_code']
         lawsuit = None
@@ -419,7 +462,7 @@ class TaskResource(resources.ModelResource):
                 if row['instance']:
                     instance = Instance.objects.filter(name=row['instance'], office=self.office).first()
                     if not instance:
-                        row_errors.append(insert_incorrect_natural_key_message(row, 'instance'))
+                        row_warnings.append(insert_incorrect_natural_key_message(row, 'instance'))
                 is_current_instance = TRUE_FALSE_DICT.get(row['lawsuit_is_current_instance'], False)
                 person_lawyer = row.get('lawsuit_person_lawyer', '')
                 if person_lawyer:
@@ -427,35 +470,35 @@ class TaskResource(resources.ModelResource):
                                                           is_lawyer=True,
                                                           offices=self.office).first()
                     if not person_lawyer:
-                        row_errors.append(insert_incorrect_natural_key_message(row, 'lawsuit_person_lawyer'))
+                        row_warnings.append(insert_incorrect_natural_key_message(row, 'lawsuit_person_lawyer'))
                 court_district = row.get('lawsuit_court_district', '')
                 if court_district:
                     court_district = CourtDistrict.objects.filter(name=court_district).first()
                     if not court_district:
-                        row_errors.append(insert_incorrect_natural_key_message(row, 'lawsuit_court_district'))
+                        row_warnings.append(insert_incorrect_natural_key_message(row, 'lawsuit_court_district'))
                 court_district_complement = row.get('lawsuit_court_district_complement', '')
                 if court_district_complement:
                     court_district_complement = CourtDistrictComplement.objects.filter(
                         name=court_district_complement).first()
                     if not court_district_complement:
-                        row_errors.append(insert_incorrect_natural_key_message(row,
+                        row_warnings.append(insert_incorrect_natural_key_message(row,
                                                                                'lawsuit_court_district_complement'))
                 city = row.get('lawsuit_city', '')
                 if city:
                     city = City.objects.filter(name=city).first()
                     if not city:
-                        row_errors.append(insert_incorrect_natural_key_message(row, 'lawsuit_city'))
+                        row_warnings.append(insert_incorrect_natural_key_message(row, 'lawsuit_city'))
                 court_division = row.get('lawsuit_court_division', '')
                 if court_division:
                     court_division = CourtDivision.objects.filter(name=court_division,
                                                                   office=self.office).first()
                     if not court_division:
-                        row_errors.append(insert_incorrect_natural_key_message(row, 'lawsuit_court_division'))
+                        row_warnings.append(insert_incorrect_natural_key_message(row, 'lawsuit_court_division'))
                 organ = row.get('lawsuit_organ', '')
                 if organ:
                     organ = Organ.objects.get_queryset(office=[self.office_id]).filter(legal_name=organ).first()
                     if not organ:
-                        row_errors.append(insert_incorrect_natural_key_message(row, 'lawsuit_organ'))
+                        row_warnings.append(insert_incorrect_natural_key_message(row, 'lawsuit_organ'))
                 opposing_party = row.get('lawsuit_opposing_party', '')
                 if not row_errors:
                     lawsuit = LawSuit.objects.create(type_lawsuit=TypeLawsuit(type_lawsuit).name,
@@ -477,7 +520,7 @@ class TaskResource(resources.ModelResource):
             row_errors.append(RECORD_NOT_FOUND.format(LawSuit._meta.verbose_name))
         return lawsuit
 
-    def validate_movement(self, row, row_errors):
+    def validate_movement(self, row, row_errors, row_warnings):
         type_movement_name = row['type_movement']
         movement_legacy_code = row['movement_legacy_code']
         movement = None
@@ -537,12 +580,23 @@ class TaskResource(resources.ModelResource):
 
     def before_import_row(self, row, **kwargs):
         row_errors = []
-        self.folder = self.validate_folder(row, row_errors)
-        self.lawsuit = self.validate_lawsuit(row, row_errors) if self.folder else None
-        self.movement = self.validate_movement(row, row_errors) if self.lawsuit else None
+        row_warnings = []
+        self.folder = self.validate_folder(row, row_errors, row_warnings)
+        self.lawsuit = self.validate_lawsuit(row, row_errors, row_warnings) if self.folder else None
+        self.movement = self.validate_movement(row, row_errors, row_warnings) if self.lawsuit else None
 
         if self.movement:
             row['movement'] = self.movement.id
+        if row_warnings:
+            kwargs['warnings'].append(row_warnings)
         if row_errors:
             raise Exception(row_errors)
         row['is_active'] = TRUE_FALSE_DICT.get('is_active', True)
+
+    def after_import_row(self, row, row_result, **kwargs):
+        warnings = kwargs.get('warnings', [])
+        if warnings:
+            for warning in warnings:
+                row_result.warnings.append(warning)
+            row_result.import_type = TaskRowResult.IMPORT_TYPE_WARNING
+            warnings.clear()
