@@ -6,6 +6,7 @@
 {% load core_filters %}
 {% block content %} 
 	{% include 'task/includes/task-form-filters.html'%}
+    {% include 'task/includes/batch-service-price-table.html'%}
     {% block extra_content %}
         {% if option == 'D' %}
             {% include 'task/includes/batch-delegate-task-table.html'%}
@@ -21,7 +22,7 @@
     {% include 'task/includes/task-filter-extras.html'%}  
     <script type="text/javascript">
     	$(document).ready(function(){
-			$('#table-betch-change-tasks').css('font-size', '13px');
+			$('#table-batch-change-tasks').css('font-size', '12px');
     	})    	
     </script>
 {%endblock%}

@@ -11,7 +11,7 @@
     </div>
     <div class="panel-body">
         <div class="table-responsive">
-            <table class="table table-striped table-hover" paginate-fixed id="table-betch-change-tasks">
+            <table class="table table-striped table-hover" paginate-fixed id="table-batch-change-tasks">
                 {% block table.thead %}
                     <thead>
                     <tr>
@@ -43,7 +43,11 @@
                                 {% endfor %}
                                 <td><span>Correspondente</span></td>
                                 <td><span>520,00</span></td>
-                                <td><button class="btn btn-info btn-outline"><i class="fa fa-edit"> Trocar</i></button></td>
+                                <td>
+                                    <button class="btn btn-xs btn-info btn-outline btn-change-office-correspondent">
+                                        <i class="fa fa-edit"> Trocar</i>
+                                    </button>
+                                </td>
                             </tr>
                         {% endblock table.tbody.row %}
                     {% empty %}
@@ -71,3 +75,15 @@
         </div>
     </div>
 </div>
+
+{% block extra_scripts %} 
+    <script type="text/javascript">
+        var tasksToDelegate = [];
+        var allTasks = [];    
+        $(document).ready(function(){
+            $('.btn-change-office-correspondent').on('click', function() {
+                $('#modal-service-price-table').modal('show')
+            })
+        })
+    </script>
+{% endblock %}
