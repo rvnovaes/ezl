@@ -82,6 +82,7 @@ class DashboardStatusTable(tables.Table):
         ]
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {
+            'pk': lambda record: str(record.pk),
             'data_new_href':
             lambda record: '/dashboard/' + str(record.pk) + '/'
         }

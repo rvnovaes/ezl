@@ -167,19 +167,39 @@ class TaskToAssignView(AuditFormMixin, UpdateView):
     success_url = reverse_lazy('dashboard')
     template_name_suffix = '_to_assign'
 
-    def form_valid(self, form):
-        super().form_valid(form)
+    def save_form(self, form):
         if form.is_valid():
             form.instance.person_distributed_by = self.request.user.person
             form.instance.task_status = TaskStatus.OPEN
             # TODO: rever processo de anexo, quando for trocar para o ECM Generico
             get_task_attachment(self, form)
             form.save()
+
+    def form_valid(self, form):
+        super().form_valid(form)
+        self.save_form(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
     def form_invalid(self, form):
         super().form_invalid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
+
+
+class BatchTaskToAssignView(AuditFormMixin, UpdateView):
+    def post(self, request, *args, **kwargs):
+        try:
+            task_id = kwargs.get('pk')
+            task = Task.objects.get(pk=task_id)
+            form = TaskToAssignForm(instance=task)
+            if form.is_valid:
+                form.instance.person_executed_by_id = request.POST.get('person_executed_by')
+                form.instance.person_distributed_by = self.request.user.person
+                form.instance.task_status = TaskStatus.OPEN        
+                get_task_attachment(self, form)
+                task.save()        
+            return JsonResponse({'status': 'ok'})            
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})            
 
 
 class TaskUpdateView(AuditFormMixin, UpdateView):
@@ -1679,3 +1699,12 @@ class BatchChangeTasksView(DashboardSearchView):
         return task_list.filter(task_status__in=status_to_filter)
 
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context[self.context_filter_name] = self.filter
+        table = self.table_class(self.object_list)
+        RequestConfig(self.request, paginate={'per_page': 100}).configure(table)
+        context['table'] = table
+        context['option'] = self.option
+        context['office'] = get_office_session(self.request)        
+        return context
