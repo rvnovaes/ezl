@@ -199,7 +199,18 @@ class BatchTaskToAssignView(AuditFormMixin, UpdateView):
                 task.save()        
             return JsonResponse({'status': 'ok'})            
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})            
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+class BatchTaskToRefuseView(AuditFormMixin, UpdateView):
+    def post(self, request, *args, **kwargs):
+        task = Task.objects.get(pk=kwargs.get('pk'))
+        task.task_status = TaskStatus.REFUSED
+        task.save()
+        task_history = TaskHistory(
+            create_user=request.user, task=task, status=task.task_status, 
+            notes=request.POST.get('notes'))
+        task_history.save()
+        return JsonResponse({'status': 'ok'})
 
 
 class TaskUpdateView(AuditFormMixin, UpdateView):
