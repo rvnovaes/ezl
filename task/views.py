@@ -1653,6 +1653,8 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView,
 
             ret = import_xls_task_list(file_xls.pk)
             file_xls.end = timezone.now()
+            file_xls.save()
+            file_xls.delete()
         else:
             status = 500
             ret = {'status': 'false', 'message': form.errors}

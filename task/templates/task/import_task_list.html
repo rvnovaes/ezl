@@ -93,8 +93,8 @@
                                                 for (var j = 0; j < result.warnings.length; j++) {
                                                     var result_warning_obj = result.warnings[j];
                                                     var wanings_desc = '';
-                                                    for (var i = 0; i < result_warning_obj.warnings[0].length; i++) {
-                                                        wanings_desc += $.trim(result_warning_obj.warnings[0][i]).split("'").join('') + '<br />';
+                                                    for (var i = 0; i < result_warning_obj.warnings.length; i++) {
+                                                        wanings_desc += $.trim(result_warning_obj.warnings[i].join('<br />')) + '<br />';
                                                     }
                                                     log_table_tbody.append('<tr> ' +
                                                         '<td>' + result_warning_obj.line + '</td>' +

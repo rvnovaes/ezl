@@ -4,6 +4,8 @@ from django.db.models.fields import NOT_PROVIDED
 from import_export.fields import Field
 from import_export.widgets import Widget
 from task.messages import *
+from task.utils import self_or_none
+import warnings
 
 
 class JSONFieldMixin(JSONField):
@@ -30,7 +32,16 @@ class CustomFieldImportExport(Field):
             raise KeyError(COLUMNS_NOT_AVAILABLE.format(self.column_name, list(data)))
 
         try:
+            old_value = value
             value = self.widget.clean(value, row=data)
+            if value in self.empty_values:
+                column_property = self.column_name_dict.get(self.column_name)
+                if column_property and column_property.get('required'):
+                    raise ValueError(REQUIRED_COLUMN.format(self.column_name))
+                if old_value not in self.empty_values and column_property:
+                    data['warnings'].append([INCORRECT_NATURAL_KEY.format(column_property.get('verbose_name'),
+                                                                          self.column_name,
+                                                                          old_value)])
         except ValueError as e:
             column_name = self.column_name_dict.get(self.column_name, self.column_name)
             if not column_name == self.column_name:
@@ -42,4 +53,4 @@ class CustomFieldImportExport(Field):
                 return self.default()
             return self.default
 
-        return value
+        return self_or_none(value)

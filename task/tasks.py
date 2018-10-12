@@ -1,25 +1,8 @@
-from decimal import Decimal
-from django.core.cache import cache
-from django.utils import timezone
-from celery import shared_task, current_task, chain
-from celery.utils.log import get_task_logger
-from openpyxl import load_workbook
-from djmoney.money import Money
-from core.utils import get_office_session
-from core.models import ImportXlsFile, Office, State
-from core.tasks import delete_imported_xls
-from task.models import TypeTask
+from celery import shared_task
+from core.models import ImportXlsFile
 from task.resources import TaskResource
-from lawsuit.models import CourtDistrict
 from tablib import Dataset
 import traceback
-
-
-def int_formatter(cell_value):
-    try:
-        return int(cell_value)
-    except:
-        return cell_value
 
 
 @shared_task(bind=True)
