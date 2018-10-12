@@ -4,7 +4,7 @@ from decimal import Decimal
 from django.utils import timezone
 from financial.models import CostCenter
 from import_export import resources
-from import_export.widgets import DecimalWidget, CharWidget
+from import_export.widgets import DecimalWidget, CharWidget, IntegerWidget
 from import_export.results import RowResult, Result
 from lawsuit.models import Folder, LawSuit, Movement, TypeMovement, CourtDistrict, CourtDivision, Organ, Instance, \
     TypeLawsuit, CourtDistrictComplement, City
@@ -308,6 +308,8 @@ class TaskResult(Result):
 
 
 class TaskResource(resources.ModelResource):
+    id = CustomFieldImportExport(column_name='id', attribute='id', widget=IntegerWidget(), saves_null_values=True,
+                                 column_name_dict=COLUMN_NAME_DICT)
     performance_place = CustomFieldImportExport(column_name='performance_place', attribute='performance_place',
                                                 widget=CharWidget(), saves_null_values=True,
                                                 column_name_dict=COLUMN_NAME_DICT)
