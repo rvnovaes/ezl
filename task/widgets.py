@@ -65,7 +65,7 @@ class TaskStatusWidget(Widget):
         if value:
             values = [item.value.title() for item in TaskStatus]
             if value.title() in values:
-                ret = TaskStatus._value2member_map_.get(value)
+                ret = TaskStatus._value2member_map_.get(value.title())
             else:
                 raise ValueError(WRONG_TASK_STATUS.format(value.title(), values))
         else:

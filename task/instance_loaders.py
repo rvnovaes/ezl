@@ -20,7 +20,8 @@ class TaskModelInstanceLoader(BaseInstanceLoader):
                 params['{}__isnull'.format(field.attribute)] = False
             instance = self.get_queryset().filter(office=row['office']).exclude(legacy_code='').get(**params)
             row['id'] = instance.id
-            row['legacy_code'] = instance.legacy_code
+            if instance.legacy_code:
+                row['legacy_code'] = instance.legacy_code
             return instance
         except self.resource._meta.model.DoesNotExist:
             return None

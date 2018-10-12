@@ -14,7 +14,6 @@ from task.messages import *
 from task.models import Task, TypeTask
 from task.utils import self_or_none
 from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin
-import warnings
 
 TRUE_FALSE_DICT = {'V': True, 'F': False}
 
@@ -310,13 +309,12 @@ class TaskResult(Result):
 class TaskResource(resources.ModelResource):
     id = CustomFieldImportExport(column_name='id', attribute='id', widget=IntegerWidget(), saves_null_values=True,
                                  column_name_dict=COLUMN_NAME_DICT)
-    performance_place = CustomFieldImportExport(column_name='performance_place', attribute='performance_place',
-                                                widget=CharWidget(), saves_null_values=True,
-                                                column_name_dict=COLUMN_NAME_DICT)
+    legacy_code = CustomFieldImportExport(column_name='legacy_code', attribute='legacy_code', widget=CharWidget(),
+                                          saves_null_values=True, column_name_dict=COLUMN_NAME_DICT)
     type_task = CustomFieldImportExport(column_name='type_task', attribute='type_task',
                                         widget=UnaccentForeignKeyWidget(TypeTask, 'name'), saves_null_values=False,
                                         column_name_dict=COLUMN_NAME_DICT)
-    movement = CustomFieldImportExport(column_name='movement', attribute='movement_id', saves_null_values=False,
+    movement = CustomFieldImportExport(column_name='movement', attribute='movement_id', saves_null_values=True,
                                        column_name_dict=COLUMN_NAME_DICT)
     person_asked_by = CustomFieldImportExport(column_name='person_asked_by', attribute='person_asked_by',
                                               widget=PersonAskedByWidget(Person, 'legal_name'), saves_null_values=False,
@@ -361,6 +359,9 @@ class TaskResource(resources.ModelResource):
                                           column_name_dict=COLUMN_NAME_DICT)
     amount = CustomFieldImportExport(column_name='amount', attribute='amount', widget=DecimalWidget(),
                                      default=Decimal('0.00'), column_name_dict=COLUMN_NAME_DICT)
+    performance_place = CustomFieldImportExport(column_name='performance_place', attribute='performance_place',
+                                                widget=CharWidget(), saves_null_values=False,
+                                                column_name_dict=COLUMN_NAME_DICT)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -459,50 +460,50 @@ class TaskResource(resources.ModelResource):
                     law_suit_number=lawsuit_number,
                     folder=self.folder,
                     office_id=self.office_id).first()
-            if not lawsuit:
-                instance = None
-                if row['instance']:
-                    instance = Instance.objects.filter(name=row['instance'], office=self.office).first()
-                    if not instance:
-                        row['warnings'].append([insert_incorrect_natural_key_message(row, 'instance')])
-                is_current_instance = TRUE_FALSE_DICT.get(row['lawsuit_is_current_instance'], False)
-                person_lawyer = row.get('lawsuit_person_lawyer', '')
-                if person_lawyer:
-                    person_lawyer = Person.objects.filter(legal_name__unaccent__icontains=person_lawyer,
-                                                          is_lawyer=True,
-                                                          offices=self.office).first()
-                    if not person_lawyer:
-                        row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_person_lawyer')])
-                court_district = row.get('lawsuit_court_district', '')
-                if court_district:
-                    court_district = CourtDistrict.objects.filter(name=court_district).first()
-                    if not court_district:
-                        row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_court_district')])
-                court_district_complement = row.get('lawsuit_court_district_complement', '')
-                if court_district_complement:
-                    court_district_complement = CourtDistrictComplement.objects.filter(
-                        name=court_district_complement).first()
-                    if not court_district_complement:
-                        row['warnings'].append([insert_incorrect_natural_key_message(row,
-                                                                                    'lawsuit_court_district_complement')])
-                city = row.get('lawsuit_city', '')
-                if city:
-                    city = City.objects.filter(name=city).first()
-                    if not city:
-                        row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_city')])
-                court_division = row.get('lawsuit_court_division', '')
-                if court_division:
-                    court_division = CourtDivision.objects.filter(name=court_division,
-                                                                  office=self.office).first()
-                    if not court_division:
-                        row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_court_division')])
-                organ = row.get('lawsuit_organ', '')
-                if organ:
-                    organ = Organ.objects.get_queryset(office=[self.office_id]).filter(legal_name=organ).first()
-                    if not organ:
-                        row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_organ')])
-                opposing_party = row.get('lawsuit_opposing_party', '')
-                if not row_errors:
+            instance = None
+            if row['instance']:
+                instance = Instance.objects.filter(name=row['instance'], office=self.office).first()
+                if not instance:
+                    row['warnings'].append([insert_incorrect_natural_key_message(row, 'instance')])
+            is_current_instance = TRUE_FALSE_DICT.get(row['lawsuit_is_current_instance'], False)
+            person_lawyer = row.get('lawsuit_person_lawyer', '')
+            if person_lawyer:
+                person_lawyer = Person.objects.filter(legal_name__unaccent__icontains=person_lawyer,
+                                                      is_lawyer=True,
+                                                      offices=self.office).first()
+                if not person_lawyer:
+                    row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_person_lawyer')])
+            court_district = row.get('lawsuit_court_district', '')
+            if court_district:
+                court_district = CourtDistrict.objects.filter(name=court_district).first()
+                if not court_district:
+                    row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_court_district')])
+            court_district_complement = row.get('lawsuit_court_district_complement', '')
+            if court_district_complement:
+                court_district_complement = CourtDistrictComplement.objects.filter(
+                    name=court_district_complement).first()
+                if not court_district_complement:
+                    row['warnings'].append([insert_incorrect_natural_key_message(row,
+                                                                                'lawsuit_court_district_complement')])
+            city = row.get('lawsuit_city', '')
+            if city:
+                city = City.objects.filter(name=city).first()
+                if not city:
+                    row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_city')])
+            court_division = row.get('lawsuit_court_division', '')
+            if court_division:
+                court_division = CourtDivision.objects.filter(name=court_division,
+                                                              office=self.office).first()
+                if not court_division:
+                    row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_court_division')])
+            organ = row.get('lawsuit_organ', '')
+            if organ:
+                organ = Organ.objects.get_queryset(office=[self.office_id]).filter(legal_name=organ).first()
+                if not organ:
+                    row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_organ')])
+            opposing_party = row.get('lawsuit_opposing_party', '')
+            if not row_errors:
+                if not lawsuit:
                     lawsuit = LawSuit.objects.create(type_lawsuit=TypeLawsuit(type_lawsuit).name,
                                                      person_lawyer=self_or_none(person_lawyer),
                                                      folder=self.folder,
@@ -518,6 +519,24 @@ class TaskResource(resources.ModelResource):
                                                      create_user=self.create_user,
                                                      office=self.office,
                                                      legacy_code=lawsuit_legacy_code)
+                else:
+                    if instance:
+                        lawsuit.instance = instance
+                    if person_lawyer:
+                        lawsuit.person_lawyer = person_lawyer
+                    if court_district:
+                        lawsuit.court_district = court_district
+                    if court_district_complement:
+                        lawsuit.court_district_complement = court_district_complement
+                    if city:
+                        lawsuit.city = city
+                    if court_division:
+                        lawsuit.court_division = court_division
+                    if organ:
+                        lawsuit.organ = organ
+                    if opposing_party:
+                        lawsuit.opposing_party = opposing_party
+                    lawsuit.save()
         if not lawsuit:
             row_errors.append(RECORD_NOT_FOUND.format(LawSuit._meta.verbose_name))
         return lawsuit
@@ -564,14 +583,14 @@ class TaskResource(resources.ModelResource):
             if v['column_name'] in dataset.headers:
                 headers_index = dataset.headers.index(v['column_name'])
                 dataset.headers[headers_index] = k
-
-        if 'id' not in dataset._Dataset__headers:
+        if 'id' not in dataset.headers:
             dataset.insert_col(
                 0, col=[
                     "",
                 ] * dataset.height, header="id")
         else:
-            self.__setattr__('import_id_fields', ('id', ))
+            del self._meta.import_id_fields
+            self._meta.import_id_fields = ('id', )
 
         self.default_type_movement, created = TypeMovement.objects.get_or_create(
             is_default=True,
