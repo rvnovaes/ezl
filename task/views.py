@@ -1740,6 +1740,7 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
                 'name': price.court_district_complement.name if price.court_district_complement else '-',            
                 }, 
             'create_user': price.create_user.pk, 
+            'client': price.client if price.client else '-',
             'office': {
                 'id': price.office.pk, 
                 'legal_name': price.office.legal_name
@@ -1753,6 +1754,8 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
                 'id': price.type_task.pk if price.type_task else '-', 
                 'name': price.type_task.name if price.type_task else '-'
             }, 
+            'office_rating': price.office_rating, 
+            'office_return_rating': price.office_return_rating,
             'value': price.value
 
         } for price in price_table.get_correspondents_qs()]

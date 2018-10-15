@@ -111,10 +111,10 @@
                         state = price.state;
                         court_district_name = price.court_district.name;
                         court_district_complement_name = price.court_district_complement.name;
-                        client_name = 'CLIENT NAME';
+                        client_name = price.client;
                         value = price.value;
-                        rating = 'RATING';                        
-                        tasks_return = 'TASKS RETURN';
+                        office_rating = price.office_rating;                        
+                        office_return_rating = price.office_return_rating;
                         correspondentTable.row.add(
                           [
                             office_correspondent_name, 
@@ -123,8 +123,8 @@
                             court_district_complement_name, 
                             client_name, 
                             value, 
-                            rating, 
-                            tasks_return
+                            office_rating, 
+                            office_return_rating
                           ]).draw(false);
                       });
                   }, 
