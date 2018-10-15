@@ -1719,11 +1719,12 @@ class BatchChangeTasksView(DashboardSearchView):
         context = super().get_context_data()
         context[self.context_filter_name] = self.filter
         table = self.table_class(self.object_list)
-        RequestConfig(self.request, paginate={'per_page': 100}).configure(table)
+        RequestConfig(self.request, paginate={'per_page': 50}).configure(table)
         context['table'] = table
         context['option'] = self.option
         context['office'] = get_office_session(self.request)        
         return context
+
 
 class BatchServicePriceTable(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
@@ -1770,3 +1771,18 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
             'prices': prices
         }
         return JsonResponse(data)
+
+
+class BatchCheapestCorrespondent(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        task = Task.objects.get(pk=request.GET.get('task_id'))
+        price_table = CorrespondentsTable(task, task.office)
+        cheapest_correspondent = price_table.get_cheapest_correspondent()
+        if cheapest_correspondent:
+            return JsonResponse({
+                    'count': len(cheapest_correspondent),
+                    'id': cheapest_correspondent[0].pk, 
+                    'office_correspondent': cheapest_correspondent[0].office_correspondent.legal_name, 
+                    'value': cheapest_correspondent[0].value
+                })
+        return JsonResponse({})

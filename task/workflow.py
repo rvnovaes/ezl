@@ -3,6 +3,7 @@ from django.db.models import Q
 from financial.models import ServicePriceTable
 from financial.tables import ServicePriceTableTaskTable
 from task.models import TaskStatus, TypeTask
+from decimal import Decimal
 
 PARENT_STATUS = {
     TaskStatus.REQUESTED: TaskStatus.OPEN,
@@ -117,6 +118,14 @@ class CorrespondentsTable(object):
         else:
             self.type_task = type_task
             self.type_task_main = type_task.main_tasks
+
+    def get_cheapest_correspondent(self):
+        correspondents = self.get_correspondents_qs()
+        return sorted(
+                sorted(
+                    list(correspondents), key=lambda i: str(i.office_rating) or '0.00', reverse=True), 
+                        key=lambda x: str(x.value) or '0.00')
+
 
     def get_correspondents_qs(self):
         task = self.task

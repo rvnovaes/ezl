@@ -36,19 +36,23 @@
                     <tbody>                        
                     {% for row in table.page.object_list|default:table.rows %} {# support pagination #}
                         {% block table.tbody.row %}
-                            <tr class="{% cycle "odd" "even" %}">
+                            <tr class="{% cycle "odd" "even" %}" data-id="{{row.attrs.pk}}">
                             	<td><input type="checkbox" name=""/></td>
                                 {% for column, cell in row.items %}
                                     <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                                 {% endfor %}
-                                <td><span>Correspondente</span></td>
-                                <td><span>520,00</span></td>
                                 <td>
-                                    <button class="btn btn-xs btn-info btn-outline btn-change-office-correspondent" data-id="{{row.attrs.pk}}">
+                                    <span td-correspondent>Carregando...</span>
+                                </td>
+                                <td>
+                                    <span td-correspondent-value></span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-xs btn-info btn-outline btn-change-office-correspondent" btn-data-id="{{row.attrs.pk}}">
                                         <i class="fa fa-edit"> Trocar</i>
                                     </button>
                                 </td>
-                            </tr>
+                            </tr>                            
                         {% endblock table.tbody.row %}
                     {% empty %}
                         {% if table.empty_text %}
@@ -77,9 +81,40 @@
 </div>
 
 {% block extra_scripts %} 
-<script type="text/javascript">
+<script type="text/javascript">    
+    $(window).load(function() {
+        $(`#table-batch-change-tasks tbody tr`).each(function() {
+            setCorrespondent($(this).attr('data-id'));
+        })
+    })
+
+    var setCorrespondent = function(taskId) {         
+        $.ajax({
+            method: 'GET', 
+            url: `/providencias/${taskId}/batch/batch_cheapest_correspondent`, 
+            data: {
+                task_id: taskId
+            }, 
+            success: function(response){                
+                let elTable = $(`#table-batch-change-tasks [data-id=${taskId}]`)
+                $(elTable).find('td [td-correspondent]').text(response.office_correspondent)
+                $(elTable).find('td [td-correspondent-value]').text(response.value)
+                if (response.count === 1) {
+                    $(elTable).find('td [btn-data-id]').css('display', 'none');
+                }
+            },
+            error: function(error) {
+              console.log('DEU ERRADO');
+              console.log(error)
+            }, 
+            beforeSend: function (xhr, settings) {
+              xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+            },
+            dataType: 'json'                 
+        })
+    };
     $('.btn-change-office-correspondent').on('click', function() {
-        $('#modal-service-price-table').attr('task-id', $(this).attr('data-id'));
+        $('#modal-service-price-table').attr('task-id', $(this).attr('btn-data-id'));
         $('#modal-service-price-table').modal('show');          
     })    
 </script>
