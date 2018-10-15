@@ -398,6 +398,8 @@ def update_status_child_task(sender, instance, **kwargs):
                 'skip_mail': False,
                 'from_parent': True
             })
+        if instance.task_status == TaskStatus.RETURN:
+            setattr(instance, '_skip_mail', True)
 
 
 @receiver(pre_save, sender=Task)

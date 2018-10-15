@@ -40,6 +40,12 @@ services:
     volumes:
       - .:/app
       - ezl-logs:/var/log/ezl
+    environment:
+      ENV: development
+      EMAIL_HOST: mail
+      EMAIL_PORT: 1025
+      EMAIL_USE_SSL: "false"
+      WORKFLOW_EMAIL: "http://localhost:8000"
     command: python manage.py runworker
   luigi:
     command: luigid
