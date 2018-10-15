@@ -24,6 +24,7 @@ from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django.core.exceptions import ValidationError
 from django.shortcuts import render
+from django.forms.models import model_to_dict
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from djmoney.money import Money
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
@@ -1723,3 +1724,46 @@ class BatchChangeTasksView(DashboardSearchView):
         context['option'] = self.option
         context['office'] = get_office_session(self.request)        
         return context
+
+class BatchServicePriceTable(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        task = Task.objects.get(pk=request.GET.get('task_id'))
+        price_table = CorrespondentsTable(task, task.office)
+        prices = [ {
+            'id': price.id, 
+            'court_district': {
+                'id': price.court_district.pk if price.court_district else '-', 
+                'name': price.court_district.name if price.court_district else '-',                 
+            }, 
+            'court_district_complement': {
+                'id': price.court_district_complement.pk if price.court_district_complement else '-', 
+                'name': price.court_district_complement.name if price.court_district_complement else '-',            
+                }, 
+            'create_user': price.create_user.pk, 
+            'office': {
+                'id': price.office.pk, 
+                'legal_name': price.office.legal_name
+            }, 
+            'office_correspondent': {
+                'id': price.office_correspondent.pk, 
+                'legal_name': price.office_correspondent.legal_name                    
+            }, 
+            'state': price.state.initials if price.state else '-', 
+            'type_task': {
+                'id': price.type_task.pk if price.type_task else '-', 
+                'name': price.type_task.name if price.type_task else '-'
+            }, 
+            'value': price.value
+
+        } for price in price_table.get_correspondents_qs()]
+        data = {
+            'task': {
+                'id': task.pk, 
+                'type_task': {
+                    'id': task.type_task.pk, 
+                    'name': task.type_task.name
+                }
+            }, 
+            'prices': prices
+        }
+        return JsonResponse(data)

@@ -1,8 +1,34 @@
+{% load staticfiles %}
+
+{% block extra_stylesheets %}
+    <!-- DataTables -->
+    <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+      .modal {
+        width: 100%;
+      }
+      .modal-content {
+        position: absolute;
+      }
+      table.dataTable.row-border tbody tr:first-child th, table.dataTable.row-border tbody tr:first-child td, table.dataTable.display tbody tr:first-child th, table.dataTable.display tbody tr:first-child td {
+          font-size: small !important;
+          cursor: pointer;
+      }
+      tr {
+          cursor: pointer;
+      }
+      #table-service-price {
+          overflow: auto;
+      }      
+    </style>
+{% endblock %}
+
 <!-- CONFIRMAR AÇÃO -->
 <div id="modal-service-price-table" class="modal fade "
   tabindex="-1" role="alert" aria-labelledby="modalTitle"
-  aria-hidden="true">
-  <div class="modal-dialog" style="min-width: 90%">
+  aria-hidden="true" task-id="">
+  <div class="modal-dialog modal-lg">
     <!-- MODAL -->  
     <div class="modal-content">
       <!-- HEADER MODAL -->
@@ -18,13 +44,35 @@
       <!-- BODY MODAL -->
       <div class="modal-body p-30">
         <div class="form-group" style="margin: auto">
+          <div class="row">
+            <div class="col" id="modal-content">
+              <strong>Tipo de serviço:</strong> <span id="type-task"></span>
+              <hr/>
+              <table id='table-service-price' class="display" style="width:100%">
+                <thead>
+                  <tr>
+                    <th>Escritório correspondente</th>
+                    <th>UF</th>
+                    <th>Comarca</th>
+                    <th>Complemento da comarca</th>
+                    <th>Cliente</th>
+                    <th>Valor</th>
+                    <th>Avaliação</th>
+                    <th>Os retornadas</th>
+                  </tr>                  
+                </thead>
+                <tbody>                  
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
       <!-- END BODY MODAL -->
 
       <!-- FOOTER MODAL -->
       <div class="modal-footer">
-        <button style="width: 100px!important;" class="btn btn-default" data-dismiss="modal">
+        <button style="widtd: 100px!important;" class="btn btn-default" data-dismiss="modal">
           <i class="mdi mdi-close"></i> Cancelar
         </button>
         <button id="actionButton">Confirmar</button>
@@ -33,3 +81,70 @@
     </div>
   </div>
 </div>
+
+{% block extra_scripts %} 
+    <!-- datatables -->
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+    <script type="text/javascript">  
+        var correspondentTable;  
+        $(document).ready(function(){          
+          $('#modal-service-price-table').on('show.bs.modal', function(e) {
+              var taskId = $(this).attr('task-id');                
+              $.ajax({
+                  metdod: 'GET', 
+                  url: `/providencias/${taskId}/batch/service_price_table`, 
+                  data: {
+                      task_id: taskId
+                  }, 
+                  success: function(response) {                      
+                      $('#type-task').append(response.task.type_task.name)
+                      if (!correspondentTable) {
+                        correspondentTable = $('#table-service-price')
+                          .DataTable({
+                            language: {
+                                "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                            }                          
+                          })
+                      }
+                      response.prices.forEach(function(price) {                        
+                        office_correspondent_name = price.office_correspondent.legal_name;
+                        state = price.state;
+                        court_district_name = price.court_district.name;
+                        court_district_complement_name = price.court_district_complement.name;
+                        client_name = 'CLIENT NAME';
+                        value = price.value;
+                        rating = 'RATING';                        
+                        tasks_return = 'TASKS RETURN';
+                        correspondentTable.row.add(
+                          [
+                            office_correspondent_name, 
+                            state, 
+                            court_district_name, 
+                            court_district_complement_name, 
+                            client_name, 
+                            value, 
+                            rating, 
+                            tasks_return
+                          ]).draw(false);
+                      });
+                  }, 
+                  error: function(error) {
+                      console.log('DEU ERRADO');
+                      console.log(error)
+                  }, 
+                  beforeSend: function (xhr, settings) {
+                      xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                  },
+                  dataType: 'json' 
+              })
+          })
+          $('#modal-service-price-table').on('hide.bs.modal', function(e) {
+            correspondentTable.clear().draw(false);
+            correspondentTable.search('').draw(false);
+            $('#type-task').empty();
+          })
+
+        })
+    </script>
+
+{% endblock %}

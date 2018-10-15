@@ -2,7 +2,7 @@
 {% load static %}
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
-
+{% include 'task/includes/batch-service-price-table.html'%}
 <div class="panel panel-default">
     <div class="panel-heading">
         <div class="panel-title form-row">
@@ -44,7 +44,7 @@
                                 <td><span>Correspondente</span></td>
                                 <td><span>520,00</span></td>
                                 <td>
-                                    <button class="btn btn-xs btn-info btn-outline btn-change-office-correspondent">
+                                    <button class="btn btn-xs btn-info btn-outline btn-change-office-correspondent" data-id="{{row.attrs.pk}}">
                                         <i class="fa fa-edit"> Trocar</i>
                                     </button>
                                 </td>
@@ -77,13 +77,10 @@
 </div>
 
 {% block extra_scripts %} 
-    <script type="text/javascript">
-        var tasksToDelegate = [];
-        var allTasks = [];    
-        $(document).ready(function(){
-            $('.btn-change-office-correspondent').on('click', function() {
-                $('#modal-service-price-table').modal('show')
-            })
-        })
-    </script>
+<script type="text/javascript">
+    $('.btn-change-office-correspondent').on('click', function() {
+        $('#modal-service-price-table').attr('task-id', $(this).attr('data-id'));
+        $('#modal-service-price-table').modal('show');          
+    })    
+</script>
 {% endblock %}

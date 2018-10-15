@@ -5,8 +5,7 @@
 {% load bootstrap3 %}
 {% load core_filters %}
 {% block content %} 
-	{% include 'task/includes/task-form-filters.html'%}
-    {% include 'task/includes/batch-service-price-table.html'%}
+	{% include 'task/includes/task-form-filters.html'%}    
     {% block extra_content %}
         {% if option == 'D' %}
             {% include 'task/includes/batch-delegate-task-table.html'%}

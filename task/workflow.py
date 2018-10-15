@@ -118,11 +118,10 @@ class CorrespondentsTable(object):
             self.type_task = type_task
             self.type_task_main = type_task.main_tasks
 
-    def get_correspondents_table(self):
+    def get_correspondents_qs(self):
         task = self.task
         type_task = self.type_task
         type_task_main = self.type_task_main
-
         if type_task:
             complement = task.movement.law_suit.court_district_complement
             court_district = task.movement.law_suit.court_district
@@ -165,12 +164,12 @@ class CorrespondentsTable(object):
             ]
             if ignore_list:
                 qs = qs.filter(~Q(id__in=ignore_list))
-            correspondents_table = ServicePriceTableTaskTable(set(qs))
+            return set(qs)
         else:
-            correspondents_table = ServicePriceTableTaskTable(
-                ServicePriceTable.objects.none())
+            return ServicePriceTable.objects.none()
 
-        return correspondents_table
+    def get_correspondents_table(self):
+        return ServicePriceTableTaskTable(self.get_correspondents_qs())
 
     def get_type_task(self, task):
         type_task = task.type_task
