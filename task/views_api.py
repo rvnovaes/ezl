@@ -29,7 +29,7 @@ class TypeTaskViewSet(viewsets.ModelViewSet):
     queryset = TypeTask.objects.filter(is_active=True)
     serializer_class = TypeTaskSerializer
     filter_backends = (SearchFilter, )
-    search_fields = ('name', )
+    search_fields = ('name', 'legacy_code')
 
     @remove_invalid_registry
     def get_queryset(self, *args, **kwargs):

@@ -12,7 +12,7 @@ class TypeTaskMainSerializer(serializers.ModelSerializer):
 class TypeTaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
     class Meta:
         model = TypeTask
-        fields = ('id', 'name', 'type_task_main')
+        fields = ('id', 'name', 'type_task_main', 'legacy_code', 'create_user', 'office')
 
 
 class TaskSerializer(serializers.ModelSerializer):
