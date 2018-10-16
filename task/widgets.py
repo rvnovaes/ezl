@@ -3,6 +3,7 @@ from core.models import Person
 from django.utils.timezone import make_aware
 from import_export.widgets import ForeignKeyWidget, Widget, DateTimeWidget
 from task.models import TaskStatus
+from task.messages import *
 from codemirror import CodeMirrorTextarea
 
 code_mirror_schema = CodeMirrorTextarea(
@@ -22,11 +23,7 @@ class UnaccentForeignKeyWidget(ForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         val = super(ForeignKeyWidget, self).clean(value)
         if val:
-            ret = self.get_queryset(
-                value, row, *args,
-                **kwargs).filter(**{
-                    '{}'.format(self.field): val
-                }).first()
+            ret = self.get_queryset(value, row, *args, **kwargs).filter(**{'{}'.format(self.field): val}).first()
             return ret if ret else self.get_queryset(
                 value, row, *args, **kwargs).filter(
                     **{
@@ -34,6 +31,13 @@ class UnaccentForeignKeyWidget(ForeignKeyWidget):
                     }).first()
         else:
             return None
+
+    def get_queryset(self, value, row, *args, **kwargs):
+        try:
+            office_field = self.model._meta.get_field('office')
+            return self.model.objects.get_queryset(office=row['office'])
+        except:
+            return super().get_queryset(value, row, *args, **kwargs)
 
 
 class PersonAskedByWidget(UnaccentForeignKeyWidget):
@@ -58,7 +62,15 @@ class TaskStatusWidget(Widget):
     """
 
     def clean(self, value, row=None, *args, **kwargs):
-        return TaskStatus._value2member_map_.get(value, TaskStatus.REQUESTED)
+        if value:
+            values = [item.value.title() for item in TaskStatus]
+            if value.title() in values:
+                ret = TaskStatus._value2member_map_.get(value.title())
+            else:
+                raise ValueError(WRONG_TASK_STATUS.format(value.title(), values))
+        else:
+            ret = TaskStatus.REQUESTED
+        return ret
 
 
 class DateTimeWidgetMixin(DateTimeWidget):

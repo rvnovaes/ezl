@@ -140,3 +140,7 @@ def create_ecm_task(ecm, task):
 def clone_task_ecms(task_from, task_to):
     for ecm in get_task_ecms(task_from.id):
         create_ecm_task(ecm, task_to)
+
+
+def self_or_none(obj):
+    return obj if obj else None

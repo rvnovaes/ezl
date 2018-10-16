@@ -97,7 +97,8 @@ class Folder(Audit, LegacyCode, OfficeMixin):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.folder_number = get_folder_number(self.office)
+            if not self.folder_number:
+                self.folder_number = get_folder_number(self.office)
         super(Folder, self).save(*args, **kwargs)
 
     def simple_serialize(self):
