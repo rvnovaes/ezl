@@ -56,6 +56,13 @@ class TaskViewSet(viewsets.ModelViewSet, ApplicationView):
             return TaskCreateSerializer
         return TaskSerializer
 
+    @remove_invalid_registry
+    def get_queryset(self, *args, **kwargs):
+        invalid_registry = kwargs.get('remove_invalid', None)
+        if invalid_registry:
+            self.queryset = self.queryset.exclude(id=invalid_registry)
+        return self.queryset.filter(office=self.request.auth.application.office)
+
 
 @api_view(['GET'])
 @permission_classes((TokenHasReadWriteScope, ))
