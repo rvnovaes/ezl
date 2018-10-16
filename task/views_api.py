@@ -1,6 +1,7 @@
-from .models import TypeTask, Task, Ecm
-from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerializer, EcmTaskSerializer
-from .filters import TaskApiFilter
+from .models import TypeTask, Task, Ecm, TypeTaskMain
+from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerializer, EcmTaskSerializer, \
+    TypeTaskMainSerializer
+from .filters import TaskApiFilter, TypeTaskMainFilter
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
@@ -11,14 +12,31 @@ from rest_framework.decorators import permission_classes
 from core.views_api import ApplicationView
 from lawsuit.models import Folder, Movement
 from django.utils import timezone
+from core.views import remove_invalid_registry
+
+
+@permission_classes((TokenHasReadWriteScope,))
+class TypeTaskMainViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = TypeTaskMain.objects.all()
+    serializer_class = TypeTaskMainSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filter_class = TypeTaskMainFilter
+    search_fields = ('name', )
 
 
 @permission_classes((TokenHasReadWriteScope, ))
-class TypeTaskViewSet(viewsets.ReadOnlyModelViewSet):
+class TypeTaskViewSet(viewsets.ModelViewSet):
     queryset = TypeTask.objects.filter(is_active=True)
     serializer_class = TypeTaskSerializer
     filter_backends = (SearchFilter, )
     search_fields = ('name', )
+
+    @remove_invalid_registry
+    def get_queryset(self, *args, **kwargs):
+        invalid_registry = kwargs.get('remove_invalid', None)
+        if invalid_registry:
+            self.queryset = self.queryset.exclude(id=invalid_registry)
+        return self.queryset.filter(office=self.request.auth.application.office)
 
 
 @permission_classes((TokenHasReadWriteScope, ))

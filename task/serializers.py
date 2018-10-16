@@ -1,12 +1,18 @@
-from .models import TypeTask, Task, Ecm
+from .models import TypeTask, Task, Ecm, TypeTaskMain
 from rest_framework import serializers
 from core.serializers import OfficeDefault, CreateUserDefault, CreateUserSerializerMixin, OfficeSerializerMixin
 
 
-class TypeTaskSerializer(serializers.ModelSerializer):
+class TypeTaskMainSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TypeTaskMain
+        fields = ('id', 'name', 'is_hearing')
+
+
+class TypeTaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
     class Meta:
         model = TypeTask
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'type_task_main')
 
 
 class TaskSerializer(serializers.ModelSerializer):
