@@ -35,7 +35,6 @@ class TypeMovement(Audit, LegacyCode, OfficeMixin):
         max_length=255,
         blank=False,
         null=False,
-        default="",
         verbose_name='Nome')
     uses_wo = models.BooleanField(
         default=False, verbose_name='Utiliza ordem de serviço?')

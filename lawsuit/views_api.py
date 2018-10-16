@@ -97,7 +97,6 @@ class CourtDivisionViewSet(viewsets.ModelViewSet):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('name', 'legacy_code')
 
-
     @remove_invalid_registry
     def get_queryset(self, *args, **kwargs):
         invalid_registry = kwargs.get('remove_invalid', None)
@@ -115,6 +114,13 @@ class MovementViewSet(viewsets.ModelViewSet):
     search_fields = ('law_suit__legacycode', 'law_suit__law_suit_number',
                      'type_movement__legacycode')
 
+    @remove_invalid_registry
+    def get_queryset(self, *args, **kwargs):
+        invalid_registry = kwargs.get('remove_invalid', None)
+        if invalid_registry:
+            self.queryset = self.queryset.exclude(id=invalid_registry)
+        return self.queryset.filter(office=self.request.auth.application.office)
+
 
 @permission_classes((TokenHasReadWriteScope, ))
 class TypeMovementViewSet(viewsets.ModelViewSet):
@@ -122,6 +128,13 @@ class TypeMovementViewSet(viewsets.ModelViewSet):
     serializer_class = TypeMovementSerializer
     filter_backends = (SearchFilter, )
     search_fields = ('name', )
+
+    @remove_invalid_registry
+    def get_queryset(self, *args, **kwargs):
+        invalid_registry = kwargs.get('remove_invalid', None)
+        if invalid_registry:
+            self.queryset = self.queryset.exclude(id=invalid_registry)
+        return self.queryset.filter(office=self.request.auth.application.office)
 
 
 @permission_classes((TokenHasReadWriteScope, ))
