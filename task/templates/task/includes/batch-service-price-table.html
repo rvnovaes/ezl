@@ -48,7 +48,7 @@
             <div class="col" id="modal-content">
               <strong>Tipo de serviço:</strong> <span id="type-task"></span>
               <hr/>
-              <table id='table-service-price' class="display" style="width:100%">
+              <table id='table-service-price' style="width:100%">
                 <thead>
                   <tr>
                     <th>Escritório correspondente</th>
@@ -75,7 +75,7 @@
         <button style="widtd: 100px!important;" class="btn btn-default" data-dismiss="modal">
           <i class="mdi mdi-close"></i> Cancelar
         </button>
-        <button class="btn btn-raised btn-success">
+        <button class="btn btn-raised btn-success" id="btn-ok">
           <i class="mdi mdi-account-location"></i> Confirmar
         </button>
       </div>
@@ -89,61 +89,66 @@
     <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
     <script type="text/javascript">  
         var correspondentTable;  
+        var chosenPrice = {};
         $(document).ready(function(){          
           $('#modal-service-price-table').on('show.bs.modal', function(e) {
-              var taskId = $(this).attr('task-id');                
-              $.ajax({
-                  metdod: 'GET', 
-                  url: `/providencias/${taskId}/batch/service_price_table`, 
-                  data: {
-                      task_id: taskId
-                  }, 
-                  success: function(response) {                      
-                      $('#type-task').append(response.task.type_task.name)
-                      if (!correspondentTable) {
-                        correspondentTable = $('#table-service-price')
-                          .DataTable({
-                            language: {
-                                "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-                            }                          
-                          })
-                      }
-                      response.prices.forEach(function(price) {                        
-                        office_correspondent_name = price.office_correspondent.legal_name;
-                        state = price.state;
-                        court_district_name = price.court_district.name;
-                        court_district_complement_name = price.court_district_complement.name;
-                        client_name = price.client;
-                        value = price.value;
-                        office_rating = price.office_rating;                        
-                        office_return_rating = price.office_return_rating;
-                        correspondentTable.row.add(
-                          [
-                            office_correspondent_name, 
-                            state, 
-                            court_district_name, 
-                            court_district_complement_name, 
-                            client_name, 
-                            value, 
-                            office_rating, 
-                            office_return_rating
-                          ]).draw(false);
-                      });
-                  }, 
-                  error: function(error) {
-                      console.log('DEU ERRADO');
-                      console.log(error)
-                  }, 
-                  beforeSend: function (xhr, settings) {
-                      xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
-                  },
-                  dataType: 'json' 
+              var taskId = $(this).attr('task-id');
+              servicePriceTable = servicePrices[taskId];                            
+              $('#type-task').append(servicePriceTable.task.type_task.name)
+              if (!correspondentTable) {
+                correspondentTable = $('#table-service-price')
+                  .DataTable({
+                    language: {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                    }                          
+                  })
+              }
+              servicePriceTable.prices.forEach(function(price) {                        
+                office_correspondent_name = price.office_correspondent.legal_name;
+                state = price.state;
+                court_district_name = price.court_district.name;
+                court_district_complement_name = price.court_district_complement.name;
+                client_name = price.client;
+                value = price.value;
+                office_rating = price.office_rating;                        
+                office_return_rating = price.office_return_rating;
+                servicePriceTableId = price.id;
+                correspondentTable.row.add(
+                  [
+                    office_correspondent_name, 
+                    state, 
+                    court_district_name, 
+                    court_district_complement_name, 
+                    client_name, 
+                    value, 
+                    office_rating, 
+                    office_return_rating
+                  ]).node().id = servicePriceTableId;
+                correspondentTable.draw(false);
+              });
+              $('#table-service-price tbody tr').on('click', function() {            
+                $(this).addClass("ezl-bg-open");
+                $(this).siblings().removeClass("ezl-bg-open");
+                chosenPrice = {
+                  taskId: taskId, 
+                  servicePriceTableId: $(this).attr('id'), 
+                  correspondenteName: correspondentTable.row(this).data()[0], // Nome
+                  correspondenteValue: correspondentTable.row(this).data()[5] // Valor
+                };
               })
-          })
+          });
           $('#modal-service-price-table').on('hide.bs.modal', function(e) {
+            var taskId = $(this).attr('task-id');
+            servicePrices[taskId]['chosenPrice'] = chosenPrice;
+            console.log(servicePrices[taskId]);
             correspondentTable.clear().draw(false);
             correspondentTable.search('').draw(false);
             $('#type-task').empty();
+            setChosenPrice(chosenPrice);
+          });
+
+          $('#modal-service-price-table #btn-ok').on('click', function(e) {            
+            $('#modal-service-price-table').modal('hide');
           })
 
         })

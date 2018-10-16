@@ -112,15 +112,16 @@ class CorrespondentsTable(object):
                  type_task=None):
         self.task = task
         self.office_session = office_session
-        self.type_task_qs = type_task_qs
+        self.type_task_qs = type_task_qs        
         if not type_task:
             self.type_task, self.type_task_main = self.get_type_task(task)
         else:
             self.type_task = type_task
             self.type_task_main = type_task.main_tasks
+        self.correspondents_qs = self.get_correspondents_qs()            
 
     def get_cheapest_correspondent(self):
-        correspondents = self.get_correspondents_qs()
+        correspondents = self.correspondents_qs
         return sorted(
                 sorted(
                     list(correspondents), key=lambda i: str(i.office_rating) or '0.00', reverse=True), 
