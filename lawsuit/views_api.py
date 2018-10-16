@@ -111,8 +111,8 @@ class MovementViewSet(viewsets.ModelViewSet):
     serializer_class = MovementSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filter_class = MovementFilter
-    search_fields = ('law_suit__legacycode', 'law_suit__law_suit_number',
-                     'type_movement__legacycode')
+    search_fields = ('type_movement__name', 'type_movement__legacy_code', 'law_suit__legacy_code',
+                     'law_suit__law_suit_number')
 
     @remove_invalid_registry
     def get_queryset(self, *args, **kwargs):
@@ -127,7 +127,7 @@ class TypeMovementViewSet(viewsets.ModelViewSet):
     queryset = TypeMovement.objects.all()
     serializer_class = TypeMovementSerializer
     filter_backends = (SearchFilter, )
-    search_fields = ('name', )
+    search_fields = ('name', 'legacy_code', )
 
     @remove_invalid_registry
     def get_queryset(self, *args, **kwargs):

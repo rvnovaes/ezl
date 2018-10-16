@@ -59,10 +59,13 @@ class TypeMovementSerializer(serializers.ModelSerializer, CreateUserSerializerMi
 
 
 class MovementSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
+
+    law_suit = serializers.PrimaryKeyRelatedField(allow_null=False, label='Processo', queryset=LawSuit.objects.all(),
+                                                  required=True)
+
     class Meta:
         model = Movement
-        fields = ('id', 'type_movement', 'law_suit', 'folder', 'office',
-                  'create_user', 'legacy_code')
+        fields = ('id', 'type_movement', 'law_suit', 'folder', 'legacy_code', 'office', 'create_user')
 
 
 class OrganSerializer(serializers.ModelSerializer, CreateUserSerializerMixin,
