@@ -1,0 +1,180 @@
+{% load render_table from django_tables2 %}
+{% load static %}
+{% load querystring from django_tables2 %}
+{% load bootstrap3 %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title form-row">
+            <span>Recusar providências em lote ({{ table.length }})</span>
+            <button class="pull-right btn btn-danger" id="btn-refuse">Recusar</button>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover" paginate-fixed id="table-batch-change-tasks">
+                {% block table.thead %}
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox" name="checkbox-refuse" id="check-all-tasks"/></th>
+                        {% for column in table.columns %}
+                            {% if column.orderable %}
+                                <th {{ column.attrs.th.as_html }}><a
+                                        href="{% querystring table.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header|title }}</a>
+                                </th>
+                            {% else %}
+                                <th {{ column.attrs.th.as_html }}>{{ column.header|title }}</th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                {% endblock table.thead %}
+                {% block table.tbody %}
+                    <tbody>
+                    {% for row in table.page.object_list|default:table.rows %} {# support pagination #}
+                        {% block table.tbody.row %}
+                            <tr class="{% cycle "odd" "even" %}" data-id="{{row.attrs.pk}}">
+                                <td><input type="checkbox" class="checkbox-refuse" name="checkbox-refuse" id="{{row.attrs.pk}}"/></td>
+                                {% for column, cell in row.items %}
+                                    <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endblock table.tbody.row %}
+                    {% empty %}
+                        {% if table.empty_text %}
+                            {% block table.tbody.empty_text %}
+                                <tr>
+                                    <td colspan="{{ table.columns|length }}">{{ table.empty_text }}</td>
+                                </tr>
+                            {% endblock table.tbody.empty_text %}
+                        {% endif %}
+                    {% endfor %}
+                    </tbody>
+                {% endblock table.tbody %}
+                {% block table.tfoot %}
+                    <tfoot></tfoot>
+                {% endblock table.tfoot %}
+            </table>
+        </div>
+        <div class="pagination-fixed">
+            {% if table.page %}
+                {% block pagination %}
+                    {% bootstrap_pagination table.page url=request.get_full_path %}
+                {% endblock pagination %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{%block extra_scripts%} 
+<script type="text/javascript">
+    var tasksToRefuse = [];
+    $(document).ready(function(){
+        $('#check-all-tasks').on('change', function() {
+            if ($(this).is(':checked')){
+                $('.checkbox-refuse').prop('checked', true);
+                $('.checkbox-refuse').each(function(){
+                    tasksToRefuse.push($(this).attr('id'))
+                })
+            } else {
+                $('.checkbox-refuse').prop('checked', false); 
+                tasksToRefuse = [];
+            }
+        }),
+        $('.checkbox-refuse').on('change', function() {
+            if ($(this).is(':checked')){
+                tasksToRefuse.push($(this).attr('id'))
+            } else {
+                tasksToRefuse.splice(tasksToRefuse.indexOf($(this).attr('id')), 1)
+            }             
+        })
+        async function showSwalInput (){
+            const {value: notes} = await swal({
+              title: 'Informe o motivo para recusar:',
+              input: 'textarea',
+              width: '30%', 
+              inputClass: 'form-control',
+              inputPlaceholder: 'Informe o motivo',
+              showCancelButton: true,
+              inputValidator: (value) => {
+                return new Promise((resolve) => {
+                  if (!value) {
+                    resolve('Você precisa informar o motivo!');
+                  } else {
+                    resolve();
+                  }
+
+                })
+              }
+            })
+            if (notes) {
+                var current = 0;
+                var total = tasksToRefuse.length;
+                var refuseTasks = function() {
+                    tasksToRefuse.forEach(function(taskId){
+                        $.ajax({
+                            method: 'post', 
+                            url: `/providencias/${taskId}/batch/recusar`, 
+                            data: {
+                                notes: notes,                                 
+                            },
+                            success: function(response) {
+                                current += 1
+                                console.log(response)
+                            },
+                            error: function (request, status, error) {
+                            },
+                            beforeSend: function (xhr, settings) {
+                                xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                            },
+                            dataType: 'json'                        
+                        })
+                    });                    
+                    return;
+                }
+                swal({
+                    tible: 'Recusando ordens de serviço', 
+                    html: '<h3>Recusando <strong></strong></h3>',
+                    onOpen: () => {
+                        swal.showLoading(), 
+                        refuseInterval = setInterval(()=>{
+                            swal.getContent().querySelector('strong')
+                            .textContent = `${current} de ${total}`
+                            if (current == total) {
+                                swal({
+                                    type: 'success',
+                                    title: `${total} ordens de serviço foram recusadas!`, 
+                                    onClose: () => {
+                                        tasksToRefuse = [];
+                                        location.reload();
+                                    }
+                                })
+                            }
+                        }, 0), 
+                        refuseTasks();
+                    }, 
+                    onClose: () => {
+                        clearInterval(refuseInterval);
+                    }
+
+                }).then((result)=>{
+                    if (result.dismiss === swal.DismissReason.timer) {
+                        console.log('I was closed by the timer')
+                    }                    
+                });
+
+            }
+        };
+        $('#btn-refuse').on('click', function(){
+            if (tasksToRefuse.length === 0) {
+                swal({
+                    type: 'error', 
+                    title: 'Você precisa selecionar no mínimo uma Ordem de serviço!'
+                })
+            } else {
+                showSwalInput();    
+            }                                    
+        })                    
+
+    })
+</script>
+{% endblock %}

@@ -24,6 +24,7 @@ from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django.core.exceptions import ValidationError
 from django.shortcuts import render
+from django.forms.models import model_to_dict
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from djmoney.money import Money
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
@@ -33,7 +34,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
 from core.models import Person, CorePermissions, CustomSettings
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
-from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE
+from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, ImportTaskListForm
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation, TypeTaskMain
@@ -45,7 +46,7 @@ from task.workflow import CorrespondentsTable
 from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
 from core.utils import get_office_session, get_domain
-from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms
+from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms, delegate_child_task
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -167,19 +168,88 @@ class TaskToAssignView(AuditFormMixin, UpdateView):
     success_url = reverse_lazy('dashboard')
     template_name_suffix = '_to_assign'
 
-    def form_valid(self, form):
-        super().form_valid(form)
+    def save_form(self, form):
         if form.is_valid():
             form.instance.person_distributed_by = self.request.user.person
             form.instance.task_status = TaskStatus.OPEN
             # TODO: rever processo de anexo, quando for trocar para o ECM Generico
             get_task_attachment(self, form)
             form.save()
+
+    def form_valid(self, form):
+        super().form_valid(form)
+        self.save_form(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
     def form_invalid(self, form):
         super().form_invalid(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
+
+
+class BatchTaskToAssignView(AuditFormMixin, UpdateView):
+    def post(self, request, *args, **kwargs):
+        try:
+            task_id = kwargs.get('pk')
+            task = Task.objects.get(pk=task_id)
+            form = TaskToAssignForm(request.POST, instance=task)            
+            if form.is_valid():
+                form.instance.person_executed_by_id = request.POST.get('person_executed_by')
+                form.instance.person_distributed_by = self.request.user.person
+                form.instance.task_status = TaskStatus.OPEN        
+                get_task_attachment(self, form)
+                form.save()
+                task_history = TaskHistory(
+                    create_user=request.user, task=task, status=task.task_status, 
+                    notes="")
+                task_history.save()                        
+                return JsonResponse({'status': 'ok'})            
+            return JsonResponse({'status': 'error', 'errors': form})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
+    def post(self, request, *args, **kwargs):
+        try:
+            import logging 
+            logger = logging.getLogger('teste')
+            logger.info(request.POST)
+            task = Task.objects.get(pk=kwargs.get('pk'))
+            amount = request.POST.get('amount').replace('R$', '') if request.POST.get('amount') else '0.00'
+            note = request.POST.get('note', '')
+            form = TaskDetailForm(request.POST, instance=task)  
+            if form.is_valid():
+                form.instance.task_status = TaskStatus.OPEN
+                form.instance.amount = Decimal(amount)
+                get_task_attachment(self, form)
+                form.instance.delegation_date = timezone.now()
+                if not form.instance.person_distributed_by:
+                    form.instance.person_distributed_by = request.user.person
+                servicepricetable = ServicePriceTable.objects.get(
+                    pk=request.POST.get('servicepricetable_id'))
+                if servicepricetable:
+                    delegate_child_task(form.instance, servicepricetable.office_correspondent)
+                    form.instance.person_executed_by = None
+                form.save()
+                task_history = TaskHistory(
+                    create_user=request.user, task=task, status=task.task_status, 
+                    notes=note)
+                task_history.save()
+                return JsonResponse({'status': 'ok'})            
+            return JsonResponse({'status': 'error', 'errors': form})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+class BatchTaskToRefuseView(AuditFormMixin, UpdateView):
+    def post(self, request, *args, **kwargs):
+        task = Task.objects.get(pk=kwargs.get('pk'))
+        task.task_status = TaskStatus.REFUSED
+        task.save()
+        task_history = TaskHistory(
+            create_user=request.user, task=task, status=task.task_status, 
+            notes=request.POST.get('notes'))
+        task_history.save()
+        return JsonResponse({'status': 'ok'})
 
 
 class TaskUpdateView(AuditFormMixin, UpdateView):
@@ -593,7 +663,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 id=servicepricetable_id).first()
             get_task_attachment(self, form)
             if servicepricetable:
-                self.delegate_child_task(
+                delegate_child_task(
                     form.instance, servicepricetable.office_correspondent)
                 form.instance.person_executed_by = None
 
@@ -637,37 +707,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
 
         return context
 
-    @staticmethod
-    def delegate_child_task(object_parent, office_correspondent):
-        """
-        Este metodo e chamado quando um escritorio delega uma OS para outro escritorio
-        Ao realizar este processo a nova OS criada devera ficar com o status de Solicitada
-        enquanto a OS pai devera ficar com o status de Delegada/Em Aberti
-        :param object_parent: Task que sera copiada para gerar a nova task
-        :param office_correspondent: Escritorio responsavel pela nova task
-        :return:
-        """
-        if object_parent.get_child:
-            if TaskStatus(object_parent.get_child.task_status) not in [
-                    TaskStatus.REFUSED, TaskStatus.REFUSED_SERVICE,
-                    TaskStatus.FINISHED
-            ]:
-                return False
-        new_task = copy.copy(object_parent)
-        new_task.task_hash = uuid.uuid4()
-        new_task.legacy_code = None
-        new_task.system_prefix = None
-        new_task.pk = new_task.task_number = None
-        new_task.person_asked_by = None
-        new_task.person_executed_by = None
-        new_task.person_distributed_by = None
-        new_task.delegation_date = None
-        new_task.office = office_correspondent
-        new_task.task_status = TaskStatus.REQUESTED
-        new_task.parent = object_parent
-        new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
-        new_task.save()
-        clone_task_ecms(object_parent, new_task)
+
 
     def dispatch(self, request, *args, **kwargs):
         res = super().dispatch(request, *args, **kwargs)
@@ -795,11 +835,15 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         checker = ObjectPermissionChecker(person.auth_user)
 
         filters = self.request.GET
-        task_filter = TaskFilter(data=filters, request=self.request)
+        task_filter = self.filter_class(data=filters, request=self.request)
         task_form = task_filter.form
 
         if task_form.is_valid():
             data = task_form.cleaned_data
+            import logging
+            logger = logging.getLogger('teste')
+            logger.info(data)
+
 
             if data['custom_filter']:
                 q = pickle.loads(data['custom_filter'].query)
@@ -845,7 +889,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     task_dynamic_query.add(
                         Q(movement__law_suit__court_district_complement=data[
                             'court_district_complement']), Q.AND)
-                if data['task_status']:
+                if data.get('task_status'):
                     status = [
                         getattr(TaskStatus, s) for s in data['task_status']
                     ]
@@ -1057,12 +1101,12 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
     def get_context_data(self, **kwargs):
         context = super(DashboardSearchView, self).get_context_data()
         context[self.context_filter_name] = self.filter
-        table = DashboardStatusTable(self.object_list)
+        table = self.table_class(self.object_list)
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         return context
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         checker = ObjectPermissionChecker(self.request.user)
         if (self.request.GET.get('export_answers') and checker.has_perm(
                 'can_view_survey_results', get_office_session(request))):
@@ -1661,3 +1705,107 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView,
             messages.error(request, form.errors)
             return JsonResponse(ret, status=status)
         return JsonResponse(json.loads(json.dumps(ret)), status=status)
+
+class BatchChangeTasksView(DashboardSearchView):
+    filter_class = BatchChangTaskFilter
+    template_name = 'task/batch-change-tasks.html'
+    option = ''
+    table_class = DashboardStatusTable
+
+    def get(self, request, option, *args, **kwargs):
+        self.option = option
+        return super().get(self, request, *args, **kwargs)
+
+    def get_queryset(self):
+        task_list, task_filter = self.query_builder()
+        self.filter = task_filter
+        if self.option in ['A', 'D']:
+            status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED]
+            return task_list.filter(task_status__in=status_to_filter)
+        status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN, 
+            TaskStatus.DONE]            
+        return task_list.filter(task_status__in=status_to_filter)
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context[self.context_filter_name] = self.filter
+        table = self.table_class(self.object_list)
+        RequestConfig(self.request, paginate={'per_page': 30}).configure(table)
+        context['table'] = table
+        context['option'] = self.option
+        context['office'] = get_office_session(self.request)        
+        return context
+
+
+class BatchServicePriceTable(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        datas = []
+        tasks = Task.objects.filter(pk__in=request.GET.getlist('task_ids[]'))
+        for task in tasks:
+            price_table = CorrespondentsTable(task, task.office)
+            cheapest_correspondent = price_table.get_cheapest_correspondent()
+            prices = [ {
+                'id': price.id, 
+                'court_district': {
+                    'id': price.court_district.pk if price.court_district else '-', 
+                    'name': price.court_district.name if price.court_district else '-',                 
+                }, 
+                'court_district_complement': {
+                    'id': price.court_district_complement.pk if price.court_district_complement else '-', 
+                    'name': price.court_district_complement.name if price.court_district_complement else '-',            
+                    }, 
+                'create_user': price.create_user.pk, 
+                'client': price.client if price.client else '-',
+                'office': {
+                    'id': price.office.pk, 
+                    'legal_name': price.office.legal_name
+                }, 
+                'office_correspondent': {
+                    'id': price.office_correspondent.pk, 
+                    'legal_name': price.office_correspondent.legal_name                    
+                }, 
+                'state': price.state.initials if price.state else '-', 
+                'type_task': {
+                    'id': price.type_task.pk if price.type_task else '-', 
+                    'name': price.type_task.name if price.type_task else '-'
+                }, 
+                'office_rating': price.office_rating, 
+                'office_return_rating': price.office_return_rating,
+                'value': price.value
+
+            } for price in price_table.correspondents_qs]
+
+            data = {
+                'task': {
+                    'id': task.pk, 
+                    'type_task': {
+                        'id': task.type_task.pk, 
+                        'name': task.type_task.name
+                    }
+                }, 
+                'prices': prices, 
+                'cheapest_correspondent': {
+                    'count': len(price_table.correspondents_qs),
+                    'id': cheapest_correspondent.pk if cheapest_correspondent else '', 
+                    'office_correspondent': cheapest_correspondent.office_correspondent.legal_name if cheapest_correspondent else '', 
+                    'value': cheapest_correspondent.value if cheapest_correspondent else ''
+                }
+            }
+            datas.append(data)
+        return JsonResponse(datas, safe=False)
+
+
+class BatchCheapestCorrespondent(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        task = Task.objects.get(pk=request.GET.get('task_id'))
+        price_table = CorrespondentsTable(task, task.office)
+        cheapest_correspondent = price_table.get_cheapest_correspondent()
+        if cheapest_correspondent:
+            return JsonResponse({
+                    'count': len(cheapest_correspondent),
+                    'id': cheapest_correspondent[0].pk, 
+                    'office_correspondent': cheapest_correspondent[0].office_correspondent.legal_name, 
+                    'value': cheapest_correspondent[0].value
+                })
+        return JsonResponse({})
