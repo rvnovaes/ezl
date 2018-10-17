@@ -215,6 +215,7 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
             logger.info(request.POST)
             task = Task.objects.get(pk=kwargs.get('pk'))
             amount = request.POST.get('amount').replace('R$', '') if request.POST.get('amount') else '0.00'
+            note = request.POST.get('note', '')
             form = TaskDetailForm(request.POST, instance=task)  
             if form.is_valid():
                 form.instance.task_status = TaskStatus.OPEN
@@ -231,7 +232,7 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
                 form.save()
                 task_history = TaskHistory(
                     create_user=request.user, task=task, status=task.task_status, 
-                    notes='')
+                    notes=note)
                 task_history.save()
                 return JsonResponse({'status': 'ok'})            
             return JsonResponse({'status': 'error', 'errors': form})

@@ -153,7 +153,8 @@
                   taskId: taskId, 
                   servicePriceTableId: $(this).attr('id'), 
                   correspondenteName: correspondentTable.row(this).data()[0], // Nome
-                  correspondenteValue: amount
+                  correspondenteValue: amount, 
+                  note: $('#note').val()
                 };
               })
           });
@@ -165,6 +166,7 @@
           $('#modal-service-price-table').on('hide.bs.modal', function(e) {
             if ($('#value').val()) {
               var taskId = $(this).attr('task-id');
+              chosenPrice.note =  $('#note').val();
               servicePrices[taskId]['chosenPrice'] = chosenPrice;
               console.log(servicePrices[taskId]);
               correspondentTable.clear().draw(false);

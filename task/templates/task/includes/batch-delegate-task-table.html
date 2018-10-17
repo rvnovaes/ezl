@@ -148,7 +148,8 @@
                       taskId: data.task.id, 
                       servicePriceTableId: data.cheapest_correspondent.id, 
                       correspondenteName: data.cheapest_correspondent.office_correspondent, // Nome
-                      correspondenteValue: data.cheapest_correspondent.value                    
+                      correspondenteValue: data.cheapest_correspondent.value, 
+                      note: ''                    
                     }
                     servicePrices[data.task.id]=data;
                     setChosenPrice(data.chosenPrice);
@@ -188,7 +189,8 @@
                     data: {
                         task_id: taskId,
                         servicepricetable_id: chosenPrice.servicePriceTableId,   
-                        amount: chosenPrice.correspondenteValue                               
+                        amount: chosenPrice.correspondenteValue, 
+                        note: chosenPrice.note,                               
                     },
                     success: function(response) {
                         current += 1
@@ -242,7 +244,20 @@
                 title: 'Você precisa selecionar no mínimo uma Ordem de serviço!'
             })
         } else {
-            sendTasksToDelegate();
+            swal({
+              title: 'Tem certeza que deseja delegar?',
+              html: "Se você já fez todos os ajustes necessários clique em <br/><strong>Sim, quero delegar!</strong>",
+              type: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#3085d6',
+              cancelButtonColor: '#d33',
+              cancelButtonText: 'Cancelar',
+              confirmButtonText: 'Sim, quero delegar'
+            }).then((result) => {
+              if (result.value) {
+                sendTasksToDelegate();
+              }
+            })                        
         }        
     })  
 
