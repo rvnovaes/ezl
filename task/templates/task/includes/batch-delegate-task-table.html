@@ -236,7 +236,14 @@
         });
     };
     $('#btn-delegate').on('click', function(){
-        sendTasksToDelegate();
+        if (tasksToDelegate.length === 0) {
+            swal({
+                type: 'error', 
+                title: 'Você precisa selecionar no mínimo uma Ordem de serviço!'
+            })
+        } else {
+            sendTasksToDelegate();
+        }        
     })  
 
 </script>
