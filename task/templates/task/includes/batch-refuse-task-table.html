@@ -165,7 +165,14 @@
             }
         };
         $('#btn-refuse').on('click', function(){
-            showSwalInput();
+            if (tasksToRefuse.length === 0) {
+                swal({
+                    type: 'error', 
+                    title: 'Você precisa selecionar no mínimo uma Ordem de serviço!'
+                })
+            } else {
+                showSwalInput();    
+            }                                    
         })                    
 
     })

@@ -173,7 +173,14 @@
         };
 
         $('#btn-assign').on('click', function(){
-            showOptions();
+            if (tasksToAssign.length === 0) {
+                swal({
+                    type: 'error', 
+                    title: 'Você precisa selecionar no mínimo uma Ordem de serviço!'
+                })  
+            } else {
+                showOptions();
+            }                    
         })                    
     })
 </script>
