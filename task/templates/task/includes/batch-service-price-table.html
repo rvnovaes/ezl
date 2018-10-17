@@ -163,16 +163,18 @@
           });
 
           $('#modal-service-price-table').on('hide.bs.modal', function(e) {
-            var taskId = $(this).attr('task-id');
-            servicePrices[taskId]['chosenPrice'] = chosenPrice;
-            console.log(servicePrices[taskId]);
-            correspondentTable.clear().draw(false);
-            correspondentTable.search('').draw(false);
-            $('#type-task').empty();
-            setChosenPrice(chosenPrice);
+            if ($('#value').val()) {
+              var taskId = $(this).attr('task-id');
+              servicePrices[taskId]['chosenPrice'] = chosenPrice;
+              console.log(servicePrices[taskId]);
+              correspondentTable.clear().draw(false);
+              correspondentTable.search('').draw(false);
+              $('#type-task').empty();
+              setChosenPrice(chosenPrice);              
+            }
           });
 
-          $('#modal-service-price-table #btn-ok').on('click', function(e) {            
+          $('#modal-service-price-table #btn-ok').on('click', function(e) {                        
             $('#modal-service-price-table').modal('hide');
           })
 
