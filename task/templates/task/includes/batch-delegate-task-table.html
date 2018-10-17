@@ -115,7 +115,8 @@
         }).promise().done(function() { 
             var tasksToGetPrice = true;
             while(tasksToGetPrice) {                
-                setCorrespondents(taskIds.splice(0, 10))
+                setCorrespondents(taskIds.splice(0, 2))
+                // tasksToGetPrice = false;
                 if (taskIds.length === 0) {
                     tasksToGetPrice = false;
                 }
@@ -123,11 +124,15 @@
         })
     })
 
+    var formatPrice = function(price) {        
+        return `R$${price.replace(".", ",")}`
+    }
+
     var setChosenPrice = function(chosenPrice) {
         let elTable = $(`#table-batch-change-tasks [data-id=${chosenPrice.taskId}]`)
         $(elTable).find('tr').attr('service-price-id', chosenPrice.servicePriceTableId )
         $(elTable).find('td [td-correspondent]').text(chosenPrice.correspondenteName)
-        $(elTable).find('td [td-correspondent-value]').text(chosenPrice.correspondenteValue)   
+        $(elTable).find('td [td-correspondent-value]').text(formatPrice(chosenPrice.correspondenteValue))   
     }
 
     var setCorrespondents = function(taskIds) {         
@@ -206,7 +211,7 @@
                     if (current == total) {
                         swal({
                             type: 'success',
-                            title: `${total} ordens de serviço foram recusadas!`, 
+                            title: `${total} ordens de serviço foram delegadas!`, 
                             onClose: () => {
                                 tasksToDelegate = [];
                                 location.reload();

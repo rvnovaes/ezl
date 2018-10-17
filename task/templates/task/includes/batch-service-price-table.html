@@ -64,6 +64,21 @@
                 <tbody>                  
                 </tbody>
               </table>
+              <hr/>
+              <div class="row">
+                <div class="col col-md-4">
+                  <div class="form-inline">
+                      <label for="valor">Valor: </label>
+                      <input type="text" class="form-control" mask='money' id="value">
+                  </div>
+                </div>
+                <div class="col col-md-12">
+                  <div class="form-group">
+                      <label for="notes">Insira um comentário</label>
+                      <textarea class="form-control" rows="3" id="note"></textarea>
+                  </div>                  
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -85,6 +100,7 @@
 </div>
 
 {% block extra_scripts %} 
+    {% include 'core/mask_selector.html' %}
     <!-- datatables -->
     <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
     <script type="text/javascript">  
@@ -129,14 +145,23 @@
               $('#table-service-price tbody tr').on('click', function() {            
                 $(this).addClass("ezl-bg-open");
                 $(this).siblings().removeClass("ezl-bg-open");
+                amount = correspondentTable.row(this).data()[5];                
+                $('#value').val(amount.replace(".", ","));
+                $('#value').focus();                
+                
                 chosenPrice = {
                   taskId: taskId, 
                   servicePriceTableId: $(this).attr('id'), 
                   correspondenteName: correspondentTable.row(this).data()[0], // Nome
-                  correspondenteValue: correspondentTable.row(this).data()[5] // Valor
+                  correspondenteValue: amount
                 };
               })
           });
+
+          $('#value').on('change', function() {            
+            chosenPrice.correspondenteValue = $(this).val()
+          });
+
           $('#modal-service-price-table').on('hide.bs.modal', function(e) {
             var taskId = $(this).attr('task-id');
             servicePrices[taskId]['chosenPrice'] = chosenPrice;

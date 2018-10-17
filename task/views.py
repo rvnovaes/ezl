@@ -1717,7 +1717,7 @@ class BatchChangeTasksView(DashboardSearchView):
         context = super().get_context_data()
         context[self.context_filter_name] = self.filter
         table = self.table_class(self.object_list)
-        RequestConfig(self.request, paginate={'per_page': 50}).configure(table)
+        RequestConfig(self.request, paginate={'per_page': 30}).configure(table)
         context['table'] = table
         context['option'] = self.option
         context['office'] = get_office_session(self.request)        
@@ -1772,10 +1772,10 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
                 }, 
                 'prices': prices, 
                 'cheapest_correspondent': {
-                    'count': len(cheapest_correspondent),
-                    'id': cheapest_correspondent[0].pk if cheapest_correspondent else '', 
-                    'office_correspondent': cheapest_correspondent[0].office_correspondent.legal_name if cheapest_correspondent else '', 
-                    'value': cheapest_correspondent[0].value if cheapest_correspondent else ''
+                    'count': len(price_table.correspondents_qs),
+                    'id': cheapest_correspondent.pk if cheapest_correspondent else '', 
+                    'office_correspondent': cheapest_correspondent.office_correspondent.legal_name if cheapest_correspondent else '', 
+                    'value': cheapest_correspondent.value if cheapest_correspondent else ''
                 }
             }
             datas.append(data)

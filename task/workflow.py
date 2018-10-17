@@ -118,14 +118,15 @@ class CorrespondentsTable(object):
         else:
             self.type_task = type_task
             self.type_task_main = type_task.main_tasks
+        self.qs = None
         self.correspondents_qs = self.get_correspondents_qs()            
 
-    def get_cheapest_correspondent(self):
-        correspondents = self.correspondents_qs
-        return sorted(
-                sorted(
-                    list(correspondents), key=lambda i: str(i.office_rating) or '0.00', reverse=True), 
-                        key=lambda x: str(x.value) or '0.00')
+    def get_cheapest_correspondent(self):        
+        correspondents = self.correspondents_qs        
+        if self.qs:
+            # Foi feito desta forma por conta de performance --Nao utilizar o sorted pois aumenta muito o tempo de execucao--
+            return max(self.qs.filter(value=self.qs.earliest('value').value), key=lambda k: k.office_rating)        
+        return None
 
 
     def get_correspondents_qs(self):
@@ -174,12 +175,13 @@ class CorrespondentsTable(object):
             ]
             if ignore_list:
                 qs = qs.filter(~Q(id__in=ignore_list))
+            self.qs = qs
             return set(qs)
         else:
             return ServicePriceTable.objects.none()
 
     def get_correspondents_table(self):
-        return ServicePriceTableTaskTable(self.get_correspondents_qs())
+        return ServicePriceTableTaskTable(self.correspondents_qs)
 
     def get_type_task(self, task):
         type_task = task.type_task
