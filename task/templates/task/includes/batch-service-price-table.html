@@ -159,7 +159,7 @@
           });
 
           $('#value').on('change', function() {            
-            chosenPrice.correspondenteValue = $(this).val()
+            chosenPrice.correspondenteValue = $(this).val().replace(".", "").replace(',', '.')
           });
 
           $('#modal-service-price-table').on('hide.bs.modal', function(e) {

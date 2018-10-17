@@ -184,7 +184,8 @@
                     url: `/providencias/${taskId}/batch/delegar`, 
                     data: {
                         task_id: taskId,
-                        servicepricetable_id: chosenPrice.servicePriceTableId,                                 
+                        servicepricetable_id: chosenPrice.servicePriceTableId,   
+                        amount: chosenPrice.correspondenteValue                               
                     },
                     success: function(response) {
                         current += 1

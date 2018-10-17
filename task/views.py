@@ -210,10 +210,15 @@ class BatchTaskToAssignView(AuditFormMixin, UpdateView):
 class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         try:
+            import logging 
+            logger = logging.getLogger('teste')
+            logger.info(request.POST)
             task = Task.objects.get(pk=kwargs.get('pk'))
+            amount = request.POST.get('amount').replace('R$', '') if request.POST.get('amount') else '0.00'
             form = TaskDetailForm(request.POST, instance=task)  
             if form.is_valid():
                 form.instance.task_status = TaskStatus.OPEN
+                form.instance.amount = Decimal(amount)
                 get_task_attachment(self, form)
                 form.instance.delegation_date = timezone.now()
                 if not form.instance.person_distributed_by:
