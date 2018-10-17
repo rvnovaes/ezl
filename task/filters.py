@@ -79,7 +79,7 @@ class TaskFilter(FilterSet):
     law_suit_number = CharFilter(label=u"Nº do processo")
     task_number = NumberFilter(label=u"Nº da OS")
     task_legacy_code = CharFilter(label=u"Nº da OS de origem")
-    task_origin_code = NumberFilter(label=u"Nº da OS de origem")
+    task_origin_code = NumberFilter(label=u"Nº da OS de origem")   
     client = CharFilter(
         label="Cliente",
         required=False,
@@ -112,6 +112,14 @@ class TaskFilter(FilterSet):
             field_related='legal_name',
             name='person_asked_by',
             url='/requester_form'))
+    origin_office_asked_by = CharFilter(
+        label="Solicitante de origem",
+        required=False,
+        widget=TypeaHeadForeignKeyWidget(
+            model=Office,
+            field_related='legal_name',
+            name='origin_office_asked_by',
+            url='/origin_requester_form'))    
     person_distributed_by = CharFilter(
         label="Contratante",
         required=False,
