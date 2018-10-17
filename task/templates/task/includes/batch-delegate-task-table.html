@@ -49,7 +49,7 @@
                                     <span td-correspondent-value></span>
                                 </td>
                                 <td>
-                                    <button class="btn btn-xs btn-info btn-outline btn-change-office-correspondent" btn-data-id="{{row.attrs.pk}}">
+                                    <button class="btn btn-xs btn-info btn-outline btn-change-office-correspondent" btn-data-id="{{row.attrs.pk}}" disabled>
                                         <i class="fa fa-edit"> Trocar</i>
                                     </button>
                                 </td>
@@ -152,6 +152,9 @@
                     }
                     servicePrices[data.task.id]=data;
                     setChosenPrice(data.chosenPrice);
+                    if (data.prices.length > 1) {
+                        $(`td [btn-data-id=${data.task.id}]`).attr('disabled', false);                        
+                    }
                     if (data.cheapest_correspondent.count === 1) {
                         $(elTable).find('td [btn-data-id]').css('display', 'none');
                     }                    
