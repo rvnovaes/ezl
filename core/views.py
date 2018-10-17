@@ -1753,11 +1753,11 @@ class OriginRequesterAutocomplete(TypeaHeadGenericSearch):
     def get_data(module, model, field, q, office, forward_params, extra_params,
                  *args, **kwargs):
         data = []
-        for requester in Person.objects.active().requesters().filter(
-                Q(legal_name__unaccent__icontains=q), Q(offices__in=office.offices.all())):
+        for office_correspondent in office.offices.filter(
+                Q(legal_name__unaccent__icontains=q)):
             data.append({
-                'id': requester.id,
-                'data-value-txt': requester.__str__()
+                'id': office_correspondent.id,
+                'data-value-txt': office_correspondent.__str__()
             })
         return list(data)
 

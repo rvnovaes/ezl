@@ -44,11 +44,14 @@
                             {% bootstrap_field filter.form.task_origin_code form_group_class="form-group col-sm-6" bound_css_class='' %}
                         </div>
                         <div class="row">
-                            {% bootstrap_field filter.form.office_executed_by form_group_class="form-group col-sm-12 col-md-3" bound_css_class='' %}                            
-                            {% bootstrap_field filter.form.person_executed_by form_group_class="form-group col-sm-12 col-md-3" bound_css_class='' %}
-                            {% bootstrap_field filter.form.person_asked_by form_group_class="form-group col-sm-12 col-md-3" bound_css_class='' %}
-                            {% bootstrap_field filter.form.origin_person_asked_by form_group_class="form-group col-sm-12 col-md-3" bound_css_class='' %}                            
-                            {% bootstrap_field filter.form.person_distributed_by form_group_class="form-group col-sm-12 col-md-3" bound_css_class='' %}
+                            {% bootstrap_field filter.form.person_asked_by form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}
+                            {% bootstrap_field filter.form.origin_office_asked_by form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}                              
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field filter.form.office_executed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}                            
+                            {% bootstrap_field filter.form.person_executed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}
+                          
+                            {% bootstrap_field filter.form.person_distributed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}
                         </div>
                         <div class="row">
                             <div class="form-group col-sm-12 col-md-6">

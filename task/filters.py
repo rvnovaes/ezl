@@ -111,13 +111,13 @@ class TaskFilter(FilterSet):
             field_related='legal_name',
             name='person_asked_by',
             url='/requester_form'))
-    origin_person_asked_by = CharFilter(
+    origin_office_asked_by = CharFilter(
         label="Solicitante de origem",
         required=False,
         widget=TypeaHeadForeignKeyWidget(
-            model=Person,
+            model=Office,
             field_related='legal_name',
-            name='origin_person_asked_by',
+            name='origin_office_asked_by',
             url='/origin_requester_form'))    
     person_distributed_by = CharFilter(
         label="Contratante",
