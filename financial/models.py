@@ -1,5 +1,8 @@
 import os
+from django.core.validators import ValidationError
+from django.core.exceptions import NON_FIELD_ERRORS, ObjectDoesNotExist
 from django.db import models
+from django.db.models import Q
 from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager, Office
 from decimal import Decimal
 from task.metrics import get_office_correspondent_metrics
@@ -97,7 +100,44 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         ordering = ['value']
         verbose_name = 'Tabela de preço de serviços'
         verbose_name_plural = 'Tabelas de preço de serviços'
-        unique_together = (("office", "office_correspondent", "type_task", "client", "court_district", "state"),)
+
+    def validate_unique(self, exclude=None):
+        res = super().validate_unique(exclude)
+        office_q = Q(office=self.office)
+        office_correspondent_q = Q(office_correspondent=self.office_correspondent) if self.office_correspondent \
+            else Q(office_correspondent__isnull=True)
+        state_q = Q(state=self.state) if self.state else Q(state__isnull=True)
+        court_district_q = Q(court_district=self.court_district) if self.court_district \
+            else Q(court_district__isnull=True)
+        court_district_complement_q = Q(court_district_complement=self.court_district_complement) if \
+            self.court_district_complement else Q(court_district_complement__isnull=True)
+        type_task_q = Q(type_task=self.type_task) if self.type_task else Q(type_task__isnull=True)
+        client_q = Q(client=self.client) if self.client else Q(client__isnull=True)
+        try:
+            if ServicePriceTable.objects.filter(~Q(pk=self.pk),
+                                                office_q,
+                                                office_correspondent_q,
+                                                state_q,
+                                                court_district_q,
+                                                court_district_complement_q,
+                                                type_task_q,
+                                                client_q):
+                raise ValidationError({
+                    NON_FIELD_ERRORS: [
+                        "Os campos office, office_correspondent, type_task, client, court_district, state e "
+                        "court_district_complement devem criar um set único."
+                    ],
+                    'office_correspondent': ['Favor verificar o escritório correspondente'],
+                    'type_task': ['Favor verificar o tipo de serviço'],
+                    'state': ['Favor verificar o estado'],
+                    'court_district': ['Favor verificar a comarca'],
+                    'court_district_complement': ['Favor verificar o complemento de comarcar'],
+                    'client': ['Favor verificar o cliente']
+
+                })
+        except ObjectDoesNotExist:
+            pass
+        return res
 
 
 def get_dir_name(instance, filename):
