@@ -8,7 +8,6 @@ from djmoney.money import Money
 
 class CostCenterTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
-    court_district_complement = tables.Column(orderable=False, verbose_name='Complemento')
 
     class Meta:
         sequence = ('selection', 'name', 'is_active', 'legacy_code')
