@@ -182,9 +182,9 @@ class CourtDistrictComplementTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = ('selection', 'name', 'court_district', 'is_active')
+        sequence = ('selection', 'name', 'court_district', 'is_active', 'legacy_code')
         model = CourtDistrictComplement
-        fields = ['selection', 'name', 'court_district', 'is_active', 'office']
+        fields = ['selection', 'name', 'court_district', 'is_active', 'legacy_code']
         empty_text = "Não existem complementos de comarca cadastrados"
         row_attrs = {
             'data_href':

@@ -237,7 +237,7 @@ class CourtDistrictComplementForm(BaseForm):
 
     class Meta:
         model = CourtDistrictComplement
-        fields = ['office', 'name', 'court_district', 'is_active']
+        fields = ['office', 'name', 'court_district', 'is_active', 'legacy_code']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
