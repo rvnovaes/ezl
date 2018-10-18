@@ -1717,6 +1717,7 @@ class BatchChangeTasksView(DashboardSearchView):
 
     def get(self, request, option, *args, **kwargs):
         self.option = option
+        request.option = option
         return super().get(self, request, *args, **kwargs)
 
     def get_queryset(self):
@@ -1726,7 +1727,7 @@ class BatchChangeTasksView(DashboardSearchView):
             status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED]
             return task_list.filter(task_status__in=status_to_filter)
         status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN, 
-            TaskStatus.DONE]            
+            TaskStatus.DONE, TaskStatus.ERROR]            
         return task_list.filter(task_status__in=status_to_filter)
 
 

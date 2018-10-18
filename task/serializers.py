@@ -38,7 +38,7 @@ class TaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, Off
 
     class Meta:
         model = Task
-        exclude = ('create_date', 'alter_date', 'system_prefix', 'survey_result', 'chat', 'company_chat')
+        exclude = ('create_date', 'alter_date', 'system_prefix', 'survey_result', 'chat', 'company_chat', 'task_hash')
 
     def validate_person_asked_by(self, value):
         if not value:
@@ -59,7 +59,7 @@ class TaskCreateSerializer(TaskSerializer):
     class Meta:
         model = Task
         fields = ('final_deadline_date', 'performance_place', 'movement', 'type_task', 'description', 'task_status',
-                  'legacy_code', 'requested_date', 'create_user', 'office')
+                  'legacy_code', 'requested_date', 'create_user', 'office', 'task_hash')
 
 
 class EcmTaskSerializer(serializers.ModelSerializer,

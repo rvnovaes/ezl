@@ -194,10 +194,17 @@ class TaskFilter(FilterSet):
         order_by = ['final_deadline_date']
 
 class BatchChangTaskFilter(TaskFilter):
-    task_status = CharFilter(
-        label="Status",        
-        required=False,
-        widget=forms.HiddenInput())        
+    def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
+        super().__init__(data, queryset, prefix, strict, request)
+        if request.option in ['A', 'D']:
+            status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED]
+        else: 
+            status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN, 
+            TaskStatus.DONE, TaskStatus.ERROR]
+        self.filters['task_status'].extra['choices'] = list(
+            map(lambda x: (TaskStatus(x).name, x), status_to_filter))
+
+
 
 
 class TaskReportFilterBase(FilterSet):
