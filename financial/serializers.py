@@ -34,8 +34,8 @@ class ServicePriceTableSerializer(serializers.ModelSerializer, CreateUserSeriali
         return data
 
 
-class CostCenterSerializer(serializers.ModelSerializer):
+class CostCenterSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
 
     class Meta:
         model = CostCenter
-        exclude = ('system_prefix', 'create_date', 'alter_date')
+        exclude = ('system_prefix', 'create_date', 'alter_date', 'alter_user')
