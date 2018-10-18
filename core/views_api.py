@@ -1,17 +1,20 @@
-from rest_framework import mixins, viewsets, pagination
+from rest_framework import viewsets
 from core.models import Person, Company
 from core.serializers import PersonSerializer, CompanySerializer
-from rest_framework_swagger.renderers import OpenAPIRenderer, SwaggerUIRenderer
-from rest_framework.decorators import api_view, renderer_classes
-from rest_framework import response, schemas
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope, TokenHasReadWriteScope
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.schemas import SchemaGenerator
-from rest_framework.views import APIView
-from rest_framework_swagger import renderers
 from rest_framework.decorators import permission_classes, api_view
 from core.views import remove_invalid_registry
+
+
+class OfficeMixinViewSet(viewsets.ModelViewSet):
+
+    @remove_invalid_registry
+    def get_queryset(self, *args, **kwargs):
+        invalid_registry = kwargs.get('remove_invalid', None)
+        if invalid_registry:
+            self.queryset = self.queryset.exclude(id=invalid_registry)
+        return self.queryset.filter(office=self.request.auth.application.office, is_active=True)
 
 
 class ApplicationView(object):
@@ -46,13 +49,3 @@ class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return Company.objects.filter(users__user=self.request.user)
-
-
-class OfficeMixinViewSet(viewsets.ModelViewSet):
-
-    @remove_invalid_registry
-    def get_queryset(self, *args, **kwargs):
-        invalid_registry = kwargs.get('remove_invalid', None)
-        if invalid_registry:
-            self.queryset = self.queryset.exclude(id=invalid_registry)
-        return self.queryset.filter(office=self.request.auth.application.office)
