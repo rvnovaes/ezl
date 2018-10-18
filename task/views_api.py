@@ -2,7 +2,7 @@ from .models import TypeTask, Task, Ecm, TypeTaskMain
 from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerializer, EcmTaskSerializer, \
     TypeTaskMainSerializer
 from .filters import TaskApiFilter, TypeTaskMainFilter
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -12,6 +12,7 @@ from rest_framework.decorators import permission_classes
 from core.views_api import ApplicationView
 from lawsuit.models import Folder, Movement
 from django.utils import timezone
+from django.db.models import Q
 from core.views import remove_invalid_registry
 
 
@@ -40,9 +41,17 @@ class TypeTaskViewSet(viewsets.ModelViewSet):
 
 
 @permission_classes((TokenHasReadWriteScope, ))
-class EcmTaskViewSet(viewsets.ModelViewSet):
+class EcmTaskViewSet(mixins.CreateModelMixin,
+                     mixins.RetrieveModelMixin,
+                     mixins.DestroyModelMixin,
+                     mixins.ListModelMixin,
+                     viewsets.GenericViewSet):
     queryset = Ecm.objects.all()
     serializer_class = EcmTaskSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        office = self.request.auth.application.office
+        return self.queryset.filter(Q(tasks__office=office.id) | Q(task__office_id=office.id))
 
 
 @permission_classes((TokenHasReadWriteScope, ))

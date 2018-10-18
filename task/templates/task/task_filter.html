@@ -6,6 +6,14 @@
 
 {% block content %}    
     {% include 'task/includes/task-form-filters.html'%}
+                            {% bootstrap_field filter.form.person_asked_by form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}
+                            {% bootstrap_field filter.form.origin_office_asked_by form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}                              
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field filter.form.office_executed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}                            
+                            {% bootstrap_field filter.form.person_executed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}
+                          
+                            {% bootstrap_field filter.form.person_distributed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}
 
     {% block extra_content %}
     <div class="panel panel-default">

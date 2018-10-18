@@ -28,27 +28,34 @@ class PersonManagerQuerySet(QuerySet):
     def active(self):
         return self.filter(is_active=True)
 
-    def correspondents(self):
-        return self.filter(auth_user__groups__name__startswith=self.model.
-                           CORRESPONDENT_GROUP + '-').order_by(
-                               'name', 'auth_user').distinct(
-                                   'name', 'auth_user')
+    def correspondents(self, office_id=False):
+        if office_id:
+            return self.filter(
+                auth_user__groups__name__startswith='{}-{}'.format(self.model.CORRESPONDENT_GROUP, str(office_id))
+            ).order_by('name', 'auth_user').distinct('name', 'auth_user')
+
+        return self.filter(auth_user__groups__name__startswith='{}-'.format(self.model.CORRESPONDENT_GROUP)).order_by(
+                               'name', 'auth_user').distinct('name', 'auth_user')
 
     def requesters(self, office_id=False):
         if office_id:
             return self.filter(
-                auth_user__groups__name__startswith=self.model.REQUESTER_GROUP
-                + '-' + str(office_id)).order_by('name', 'auth_user').distinct(
-                    'name', 'auth_user')
+                auth_user__groups__name__startswith='{}-{}'.format(self.model.REQUESTER_GROUP, str(office_id))
+            ).order_by('name', 'auth_user').distinct('name', 'auth_user')
 
         return self.filter(
-            auth_user__groups__name__startswith=self.model.REQUESTER_GROUP +
-            '-').order_by('name', 'auth_user').distinct('name', 'auth_user')
+            auth_user__groups__name__startswith='{}-'.format(self.model.REQUESTER_GROUP)).order_by(
+            'name', 'auth_user').distinct('name', 'auth_user')
 
-    def services(self):
+    def services(self, office_id=False):
+        if office_id:
+            return self.filter(
+                auth_user__groups__name__startswith='{}-{}'.format(self.model.SERVICE_GROUP, str(office_id))
+            ).order_by('name', 'auth_user').distinct('name', 'auth_user')
+
         return self.filter(
-            auth_user__groups__name__startswith=self.model.SERVICE_GROUP +
-            '-').order_by('name', 'auth_user').distinct('name', 'auth_user')
+            auth_user__groups__name__startswith='{}-'.format(self.model.SERVICE_GROUP)).order_by(
+            'name', 'auth_user').distinct('name', 'auth_user')
 
     def active_offices(self):
         return self.filter(
