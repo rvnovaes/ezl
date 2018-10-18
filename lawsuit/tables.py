@@ -27,10 +27,10 @@ class TypeMovementTable(tables.Table):
 
     class Meta:
         sequence = ('selection', 'name', 'is_active', 'legacy_code',
-                    'is_default')
+                    'is_default', 'legacy_code')
         model = TypeMovement
         fields = [
-            'selection', 'name', 'legacy_code', 'is_default', 'is_active'
+            'selection', 'name', 'legacy_code', 'is_default', 'is_active', 'legacy_code'
         ]
         attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem tipos de movimentações cadastradas"
@@ -49,8 +49,7 @@ class MovementTable(tables.Table):
         model = Movement
         attrs = {"class": "table-striped table-bordered"}
         fields = [
-            'selection', 'legacy_code', 'type_movement', 'is_active',
-            'create_date'
+            'selection', 'legacy_code', 'type_movement', 'is_active'
         ]
         empty_text = "Não existem movimentações cadastradas"
         row_attrs = {

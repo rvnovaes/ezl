@@ -1,23 +1,19 @@
 from django import forms
-from django.forms import ModelForm
 from core.fields import CustomBooleanField
 from core.models import Person, State, City
 from financial.models import CostCenter
 from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict, LawSuit, CourtDivision, Organ,
                      CourtDistrictComplement)
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
-from dal import autocomplete
 from localflavor.br.forms import BRCNPJField
-from material import Layout, Row
-from django.forms.models import inlineformset_factory
 from core.widgets import TypeaHeadForeignKeyWidget
-from core.forms import BaseForm, BaseModelForm
+from core.forms import BaseForm
 
 
 class TypeMovementForm(BaseForm):
     class Meta:
         model = TypeMovement
-        fields = ['office', 'name', 'is_default', 'is_active']
+        fields = ['office', 'name', 'is_default', 'is_active', 'legacy_code']
 
     name = forms.CharField(
         max_length=255,
@@ -32,7 +28,7 @@ class TypeMovementForm(BaseForm):
 class InstanceForm(BaseForm):
     class Meta:
         model = Instance
-        fields = ['office', 'name', 'is_active']
+        fields = ['office', 'name', 'is_active', 'legacy_code']
 
     name = forms.CharField(
         label=u"Nome da Instância",
@@ -47,7 +43,7 @@ class InstanceForm(BaseForm):
 class MovementForm(BaseForm):
     class Meta:
         model = Movement
-        fields = ['office', 'type_movement', 'is_active']
+        fields = ['office', 'type_movement', 'is_active', 'legacy_code']
 
     type_movement = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(
@@ -64,8 +60,7 @@ class FolderForm(BaseForm):
     class Meta:
         model = Folder
         fields = [
-            'office', 'folder_number', 'person_customer', 'cost_center',
-            'is_default', 'is_active'
+            'office', 'folder_number', 'person_customer', 'cost_center', 'is_default', 'is_active', 'legacy_code'
         ]
 
     folder_number = forms.CharField(
@@ -91,7 +86,7 @@ class FolderForm(BaseForm):
         super(FolderForm, self).__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
         self.order_fields(
-            ['office', 'folder_number', 'person_customer', 'is_active'])
+            ['office', 'folder_number', 'person_customer', 'cost_center', 'is_default', 'is_active', 'legacy_code'])
 
         if not self.instance.pk:
             # Since the pk is set this is not a new instance
@@ -115,7 +110,8 @@ class LawSuitForm(BaseForm):
         model = LawSuit
         fields = [
             'office', 'type_lawsuit', 'law_suit_number', 'court_district', 'city', 'court_district_complement', 'organ',
-            'instance', 'court_division', 'person_lawyer', 'opposing_party', 'is_current_instance', 'is_active'
+            'instance', 'court_division', 'person_lawyer', 'opposing_party', 'is_current_instance', 'is_active',
+            'legacy_code'
         ]
 
     person_lawyer = forms.ModelChoiceField(
@@ -180,7 +176,7 @@ class LawSuitForm(BaseForm):
 class CourtDivisionForm(BaseForm):
     class Meta:
         model = CourtDivision
-        fields = ['office', 'name', 'is_active']
+        fields = ['office', 'name', 'is_active', 'legacy_code']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -222,9 +218,7 @@ class OrganForm(BaseForm):
 
     class Meta:
         model = Organ
-        fields = [
-            'office', 'legal_name', 'cpf_cnpj', 'court_district', 'is_active'
-        ]
+        fields = ['office', 'legal_name', 'cpf_cnpj', 'court_district', 'is_active', 'legacy_code']
 
 
 class CourtDistrictComplementForm(BaseForm):

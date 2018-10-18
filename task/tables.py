@@ -112,14 +112,9 @@ class TypeTaskTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequence = (
-            'selection',
-            'name',
-            'type_task_main',
-            'survey',
-        )
+        sequence = ('selection', 'name', 'type_task_main', 'survey', 'legacy_code')
         model = TypeTask
-        fields = ['name', 'type_task_main', 'survey']
+        fields = ['name', 'type_task_main', 'survey', 'legacy_code']
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existem questionários cadastrados"
         row_attrs = {
