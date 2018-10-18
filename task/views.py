@@ -894,7 +894,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         Q(person_asked_by=data['person_asked_by']), Q.AND)
                 if data['origin_office_asked_by']:                    
                     task_dynamic_query.add(
-                        Q(parent__office_id=data['origin_office_asked_by']), Q.AND)                    
+                        Q(office=office_session, parent__office_id=data['origin_office_asked_by']), Q.AND)                    
                 if data['person_distributed_by']:
                     task_dynamic_query.add(
                         Q(person_distributed_by=data['person_distributed_by']),
