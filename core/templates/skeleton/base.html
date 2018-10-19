@@ -194,6 +194,12 @@
     {% endblock extra_scripts %}    
     <!-- End Javascript Block  -->
     <!-- ============================================================== -->
+    <script>
+        window.onload = function() {
+            var browser=get_browser();
+            console.log(browser)
+        }
+    </script>
 </body>
 
 </html>
