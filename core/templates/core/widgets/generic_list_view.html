@@ -179,10 +179,11 @@
                 showCancelButton: true,
                 confirmButtonColor: "#DD6B55",
                 confirmButtonText: "Sim, desejo excluir.",
-                closeOnConfirm: false,
                 cancelButtonText: "Cancelar."
-            }, function(){
-                $('#formTable').submit()
+            }).then(function(result){
+                if (result.value) {
+                    $('#formTable').submit()                    
+                }
             });
         });
     </script>

@@ -279,7 +279,6 @@ class Task(Audit, LegacyCode, OfficeMixin):
     final_deadline_date = models.DateTimeField(
         null=False,
         blank=False,
-        default=timezone.now,
         verbose_name='Prazo Fatal')
     execution_date = models.DateTimeField(
         null=True, verbose_name='Data de Cumprimento')
@@ -308,7 +307,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     task_status = models.CharField(
         null=False,
-        verbose_name=u'',
+        verbose_name='Status da OS',
         max_length=30,
         choices=((x.value, x.name.title()) for x in TaskStatus),
         default=TaskStatus.REQUESTED)

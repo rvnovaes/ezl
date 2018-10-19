@@ -133,6 +133,7 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'import_export',
     'django_dbconn_retry',
+    'rest_auth',
 ]
 
 MIDDLEWARE = [

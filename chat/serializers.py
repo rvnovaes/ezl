@@ -16,14 +16,19 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class ChatSerializer(serializers.ModelSerializer):
     messages = MessageSerializer(many=True)
+    task_status = serializers.SerializerMethodField()
     task_number = serializers.SerializerMethodField()
     opposing_party = serializers.SerializerMethodField()
     final_deadline_date = serializers.SerializerMethodField()
     
+
     class Meta:
         model = Chat
-        fields = ('id', 'create_date', 'title', 'label', 'messages', 'opposing_party', 
+        fields = ('id', 'create_date', 'title', 'label', 'messages', 'task_status', 'opposing_party', 
             'task_number', 'final_deadline_date')
+
+    def get_task_status(self, obj):
+        return obj.tasks_company_chat.latest('pk').status.name
 
     def get_task_number(self, obj):
         return obj.tasks_company_chat.latest('pk').task_number                
@@ -34,7 +39,6 @@ class ChatSerializer(serializers.ModelSerializer):
     def get_final_deadline_date(self, obj): 
         final_deadline_date = obj.tasks_company_chat.latest('pk').final_deadline_date
         return final_deadline_date.strftime('%d/%m/%Y %H:%M')        
-
 
 class UnreadMessageSerializer(serializers.ModelSerializer):
     message = serializers.SerializerMethodField()

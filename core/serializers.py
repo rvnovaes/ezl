@@ -7,6 +7,7 @@ from .messages import person_cpf_cnpj_already_exists, invalid_field
 from .utils import get_office_session, get_office_api
 from .validators import CpfCnpjOfficeUniqueValidator
 from rest_framework.fields import SlugField
+from rest_framework.compat import unicode_to_repr
 
 
 class CreateUserDefault(object):

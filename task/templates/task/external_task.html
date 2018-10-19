@@ -242,9 +242,8 @@
                     cancelButtonText: "Cancelar",
                     confirmButtonColor: "#DD6B55",
                     confirmButtonText: "Delegar",
-                    closeOnConfirm: false
-                }, function(isConfirm){
-                    if (isConfirm) {
+                }).then(function(result){
+                    if (result.value) {
                         $('<input />').attr('type', 'hidden')
                             .attr('name', 'action')
                             .attr('value', 'OPEN')

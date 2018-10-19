@@ -1,0 +1,187 @@
+{% load render_table from django_tables2 %}
+{% load static %}
+{% load querystring from django_tables2 %}
+{% load bootstrap3 %}
+{% load core_filters %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title form-row">
+            <span>Atribuir providências em lote ({{ table.length }})</span>
+            <button class="pull-right btn btn-info" id="btn-assign">Atribuir</button>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover" paginate-fixed id="table-batch-change-tasks">
+                {% block table.thead %}
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox" name="checkbox-assign" id="check-all-tasks"/></th>
+                        {% for column in table.columns %}
+                            {% if column.orderable %}
+                                <th {{ column.attrs.th.as_html }}><a
+                                        href="{% querystring table.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header|title }}</a>
+                                </th>
+                            {% else %}
+                                <th {{ column.attrs.th.as_html }}>{{ column.header|title }}</th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                {% endblock table.thead %}
+                {% block table.tbody %}
+                    <tbody>
+                    {% for row in table.page.object_list|default:table.rows %} {# support pagination #}
+                        {% block table.tbody.row %}
+                            <tr class="{% cycle "odd" "even" %}" data-id="{{row.attrs.pk}}">
+                                <td><input type="checkbox" class="checkbox-assign" name="checkbox-assign" id="{{row.attrs.pk}}"/></td>
+                                {% for column, cell in row.items %}
+                                    <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endblock table.tbody.row %}
+                    {% empty %}
+                        {% if table.empty_text %}
+                            {% block table.tbody.empty_text %}
+                                <tr>
+                                    <td colspan="{{ table.columns|length }}">{{ table.empty_text }}</td>
+                                </tr>
+                            {% endblock table.tbody.empty_text %}
+                        {% endif %}
+                    {% endfor %}
+                    </tbody>
+                {% endblock table.tbody %}
+                {% block table.tfoot %}
+                    <tfoot></tfoot>
+                {% endblock table.tfoot %}
+            </table>
+        </div>
+        <div class="pagination-fixed">
+            {% if table.page %}
+                {% block pagination %}
+                    {% bootstrap_pagination table.page url=request.get_full_path %}
+                {% endblock pagination %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{%block extra_scripts%} 
+<script type="text/javascript">
+    var tasksToAssign = [];
+    $(document).ready(function(){
+        $('#check-all-tasks').on('change', function() {
+            if ($(this).is(':checked')){
+                $('.checkbox-assign').prop('checked', true);
+                $('.checkbox-assign').each(function(){
+                    tasksToAssign.push($(this).attr('id'))
+                })
+            } else {
+                $('.checkbox-assign').prop('checked', false); 
+                tasksToAssign = [];
+            }
+        }),
+        $('.checkbox-assign').on('change', function() {
+            if ($(this).is(':checked')){
+                tasksToAssign.push($(this).attr('id'))
+            } else {
+                tasksToAssign.splice(tasksToAssign.indexOf($(this).attr('id')), 1)
+            }             
+        })
+        async function showOptions (){
+            const {value: changeOption} = await swal({
+              title: 'Selecione o correspondente para atribuir',
+              input: 'select',
+              width: '30%', 
+              inputClass: 'form-control',
+              inputOptions: {
+                {% for person in office.persons.active_offices|get_correspondent:office %}
+                    "{{person.pk}}": "{{person.legal_name}}",
+                {% endfor %}
+              },
+              inputPlaceholder: 'Selecione a ação desejada',
+              showCancelButton: true,
+              inputValidator: (value) => {
+                return new Promise((resolve) => {
+                  if (!value) {
+                    resolve('Você precisa selecionar uma opção!');
+                  } else {
+                    resolve();
+                  }
+
+                })
+              }
+            })
+
+            if (changeOption) {
+                var current = 0;
+                var total = tasksToAssign.length;
+                var assignTasks = function() {
+                    tasksToAssign.forEach(function(taskId){
+                        $.ajax({
+                            method: 'post', 
+                            url: `/providencias/${taskId}/batch/atribuir`, 
+                            data: {
+                                person_executed_by: changeOption
+                            },
+                            success: function(response) {
+                                current += 1
+                                console.log(response)
+                            },
+                            error: function (request, status, error) {
+                            },
+                            beforeSend: function (xhr, settings) {
+                                xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                            },
+                            dataType: 'json'                        
+                        })
+                    });                    
+                    return;
+                }
+                swal({
+                    tible: 'Atribuindo ordens de serviço', 
+                    html: '<h3>Atribuindo <strong></strong></h3>',
+                    onOpen: () => {
+                        swal.showLoading(), 
+                        assignInterval = setInterval(()=>{
+                            swal.getContent().querySelector('strong')
+                            .textContent = `${current} de ${total}`
+                            if (current == total) {
+                                swal({
+                                    type: 'success',
+                                    title: `${total} ordens de serviço foram atribuidas!`, 
+                                    onClose: () => {
+                                        tasksToAssign = [];
+                                        location.reload();
+                                    }
+                                })
+                            }
+                        }, 0), 
+                        assignTasks();
+                    }, 
+                    onClose: () => {
+                        clearInterval(assignInterval);
+                    }
+
+                }).then((result)=>{
+                    if (result.dismiss === swal.DismissReason.timer) {
+                        console.log('I was closed by the timer')
+                    }                    
+                });
+
+            }
+        };
+
+        $('#btn-assign').on('click', function(){
+            if (tasksToAssign.length === 0) {
+                swal({
+                    type: 'error', 
+                    title: 'Você precisa selecionar no mínimo uma Ordem de serviço!'
+                })  
+            } else {
+                showOptions();
+            }                    
+        })                    
+    })
+</script>
+{% endblock %}

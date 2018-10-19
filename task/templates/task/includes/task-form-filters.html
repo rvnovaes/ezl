@@ -1,0 +1,160 @@
+{% load static %}
+{% load bootstrap3 %}
+   
+    {% load core_filters %}    
+    <div class="panel panel-default">
+        <form method="get">
+            <div class="panel-heading ">
+                <a href="#" data-perform="panel-collapse"><i class="ti-filter"></i> Filtrar providências</a>
+                <div class="panel-action">
+                    <label for="{{ filter.form.custom_filter.id_for_label }}">{{ filter.form.custom_filter.label }}</label>
+                    {{ filter.form.custom_filter }}
+                    <a href="#" data-perform="panel-collapse"><i class="ti-plus"></i></a>
+                </div>
+            </div>
+            <div id="filter_content" class="panel-wrapper collapse" aria-expanded="false">
+                {% csrf_token %}
+                <div class="panel-body">
+                    <fieldset>
+                        <div class="row">
+                            {% bootstrap_field filter.form.state form_group_class="form-group col-sm-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.court_district form_group_class="form-group col-sm-4" bound_css_class='' %}
+                            {% bootstrap_field filter.form.court_district_complement form_group_class="form-group col-sm-4" bound_css_class='' %}
+                        </div>
+                        <div class="row">                            
+                            {% bootstrap_field filter.form.type_task form_group_class="form-group col-md-3" bound_css_class='' %}
+                            {% bootstrap_field filter.form.cost_center form_group_class="form-group col-md-3" bound_css_class='' %}
+                            {% bootstrap_field filter.form.court form_group_class="form-group col-md-3" bound_css_class='' %}
+                            {% bootstrap_field filter.form.team form_group_class="form-group col-md-3" bound_css_class='' %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field filter.form.law_suit_number form_group_class="form-group col-sm-6" bound_css_class='' %}
+                            {% bootstrap_field filter.form.client form_group_class="form-group col-sm-6" bound_css_class='' %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field filter.form.folder_number form_group_class="form-group col-sm-6" bound_css_class='' %}
+                            {% bootstrap_field filter.form.folder_legacy_code form_group_class="form-group col-sm-6" bound_css_class='' %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field filter.form.task_number form_group_class="form-group col-sm-6" bound_css_class='' %}
+                            {% bootstrap_field filter.form.task_origin_code form_group_class="form-group col-sm-6" bound_css_class='' %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field filter.form.person_asked_by form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}
+                            {% bootstrap_field filter.form.origin_office_asked_by form_group_class="form-group col-sm-12 col-md-6" bound_css_class='' %}                              
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field filter.form.office_executed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}                            
+                            {% bootstrap_field filter.form.person_executed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}
+                          
+                            {% bootstrap_field filter.form.person_distributed_by form_group_class="form-group col-sm-12 col-md-4" bound_css_class='' %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field filter.form.office_executed_by form_group_class="form-group col-sm-12 col-md-3" bound_css_class='' %}                            
+                            {% bootstrap_field filter.form.person_executed_by form_group_class="form-group col-sm-12 col-md-3" bound_css_class='' %}
+                            {% bootstrap_field filter.form.person_asked_by form_group_class="form-group col-sm-12 col-md-3" bound_css_class='' %}
+                            {% bootstrap_field filter.form.person_distributed_by form_group_class="form-group col-sm-12 col-md-3" bound_css_class='' %}
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Solicitadas entre: " %}
+                                {% bootstrap_field filter.form.requested_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Aceitas pelo service entre: " %}
+                                {% bootstrap_field filter.form.accepted_service_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Recusadas pelo service entre: " %}
+                                {% bootstrap_field filter.form.refused_service_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Abertas entre: " %}
+                                {% bootstrap_field filter.form.open_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Aceitas entre: " %}
+                                {% bootstrap_field filter.form.accepted_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Recusadas entre: " %}
+                                {% bootstrap_field filter.form.refused_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Retornadas entre: " %}
+                                {% bootstrap_field filter.form.return_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Cumpridas entre: " %}
+                                {% bootstrap_field filter.form.done_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Glosadas entre: " %}
+                                {% bootstrap_field filter.form.blocked_payment_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Finalizadas entre: " %}
+                                {% bootstrap_field filter.form.finished_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Prazo entre: " %}
+                                {% bootstrap_field filter.form.final_deadline_date_in form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                            <div class="form-group col-sm-12 com-md-6">
+                                {% bootstrap_field filter.form.task_status form_group_class="form-group col-md-3" bound_css_class='' %}
+                            </div>
+                        </div>                        
+                    </fieldset>
+                     <div class="panel-footer text-center">
+                         <button class="btn btn-default waves-effect waves-light" type="button"
+                                onclick="javascript:window.open('{{ request.META.PATH_INFO }}', '_self')">
+                            <span class="btn-label"><i class="fa fa-trash-o"></i></span>Limpar
+                         </button>
+                         <button class="btn btn-success waves-effect waves-light" type="submit">
+                             <span class="btn-label"><i class="fa fa-filter"></i></span>Filtrar
+                         </button>
+                         <button type="button" data-toggle="modal" data-target="#saveFilter" class="btn btn-primary waves-effect waves-light">
+                             <span class="btn-label"><i class="fa fa-save"></i></span>Salvar
+                         </button>
+                    </div>
+                </div>
+                <!-- Modal Save Filter-->
+                <div id="saveFilter" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                    <div class="modal-dialog">
+                        <div class="modal-content ">
+                            <div id="modalHeader">
+                                <h4 class="panel-header panel-heading" style="padding-top: 15px;padding-bottom: 15px;">
+                                    <i class="fa fa-save"></i>
+                                    <b> Novo Filtro </b></h4>
+                            </div>
+                            <div class="modal-body">
+                                    {% bootstrap_field filter.form.custom_filter_name form_group_class="form-group" bound_css_class='' %}
+                                    {% bootstrap_field filter.form.custom_filter_description form_group_class="form-group" bound_css_class='' %}
+                            </div>
+                            <div class="modal-footer">
+                                <div class="form-group text-center">
+                                    <button type="button" class="btn btn-default waves-effect"
+                                            data-dismiss="modal">
+                                        <span class="btn-label"><i class="fa fa-close"></i></span> Cancelar</button>
+                                    <button name="save_filter"
+                                           type="submit"
+                                           class="btn btn-raised btn-success waves-effect">
+                                        <span class="btn-label"><i class="fa fa-save"></i></span> Salvar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
