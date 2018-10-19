@@ -51,10 +51,9 @@
                                 showCancelButton: true,
                                 confirmButtonText: "Sim",
                                 cancelButtonText: "Não",
-                                confirmButtonColor: "#DD6B55",
-                                closeOnConfirm: false
-                            }, function(isConfirm){
-                                if (isConfirm) {
+                                confirmButtonColor: "#DD6B55"
+                            }).then(function(isConfirm){
+                                if (isConfirm.value) {
                                     swal.close();
                                     $('#processing').modal({backdrop: 'static', keyboard: false});
                                     var formData = new FormData($('#import_task_list_form')[0]);

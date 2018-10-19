@@ -187,12 +187,6 @@ COLUMN_NAME_DICT = {
         'required': False,
         'verbose_name': Task._meta.get_field('acceptance_service_date').verbose_name,
     },
-    'amount': {
-        'column_name': 'os.valor',
-        'attribute': 'amount',
-        'required': False,
-        'verbose_name': Task._meta.get_field('amount').verbose_name,
-    },
     'legacy_code': {
         'column_name': 'os.codigo_legado',
         'attribute': 'legacy_code',
@@ -259,8 +253,6 @@ class TaskResource(resources.ModelResource):
                                                       attribute='acceptance_service_date',
                                                       widget=AcceptanceServiceDateWidget(),
                                                       column_name_dict=COLUMN_NAME_DICT)
-    amount = CustomFieldImportExport(column_name='amount', attribute='amount', widget=DecimalWidget(),
-                                     default=Decimal('0.00'), column_name_dict=COLUMN_NAME_DICT)
     legacy_code = CustomFieldImportExport(column_name='legacy_code', attribute='legacy_code', widget=CharWidget(),
                                           saves_null_values=True, column_name_dict=COLUMN_NAME_DICT)
     movement = CustomFieldImportExport(column_name='movement', attribute='movement_id', saves_null_values=True,
