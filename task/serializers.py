@@ -47,7 +47,6 @@ class TaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, Off
         return value
 
     def validate_legacy_code(self, value):
-        import pdb;pdb.set_trace()
         office = self.fields['office'].get_default()
         if Task.objects.filter(office=office, legacy_code=value):
             raise serializers.ValidationError("O legacy_code informado já está sendo utilizado neste escritório")

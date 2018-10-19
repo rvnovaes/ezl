@@ -357,7 +357,8 @@ class TaskResource(resources.ModelResource):
                     office_id=self.office_id).first()
             instance = None
             if row['instance']:
-                instance = Instance.objects.filter(name=row['instance'], office=self.office).first()
+                instance = Instance.objects.filter(name__unaccent__icontains=row['instance'],
+                                                   office=self.office).first()
                 if not instance:
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'instance')])
             is_current_instance = TRUE_FALSE_DICT.get(row['lawsuit_is_current_instance'], False)

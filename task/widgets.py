@@ -92,7 +92,6 @@ class AcceptanceServiceDateWidget(DateTimeWidgetMixin):
     """
 
     def clean(self, value, row=None, *args, **kwargs):
-        import pdb;pdb.set_trace()
         if not value and row['task_status'].title() == TaskStatus.ACCEPTED_SERVICE.value.title():
             raise ValueError(MISSING_ACCEPTANCE_SERVICE_DATE)
         return super().clean(value, row, *args, **kwargs)
