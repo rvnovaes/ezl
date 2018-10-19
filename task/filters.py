@@ -1,6 +1,5 @@
 from django.forms import Select, Textarea, RadioSelect
 from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, BooleanFilter
-from django import forms
 
 from core.models import Person, State, Office, Team
 from core.utils import filter_valid_choice_form
@@ -8,8 +7,10 @@ from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
 from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ, CourtDistrictComplement
 from task.models import TypeTask, Task, Filter, TaskStatus
-from .models import DashboardViewModel
+from .models import DashboardViewModel, TypeTaskMain
 from core.utils import get_office_session
+
+from django_filters import rest_framework as filters
 
 OFFICE = 'E'
 CLIENT = 'C'
@@ -78,7 +79,7 @@ class TaskFilter(FilterSet):
     law_suit_number = CharFilter(label=u"Nº do processo")
     task_number = NumberFilter(label=u"Nº da OS")
     task_legacy_code = CharFilter(label=u"Nº da OS de origem")
-    task_origin_code = NumberFilter(label=u"Nº da OS de origem")
+    task_origin_code = NumberFilter(label=u"Nº da OS de origem")   
     client = CharFilter(
         label="Cliente",
         required=False,
@@ -111,6 +112,14 @@ class TaskFilter(FilterSet):
             field_related='legal_name',
             name='person_asked_by',
             url='/requester_form'))
+    origin_office_asked_by = CharFilter(
+        label="Solicitante de origem",
+        required=False,
+        widget=TypeaHeadForeignKeyWidget(
+            model=Office,
+            field_related='legal_name',
+            name='origin_office_asked_by',
+            url='/origin_requester_form'))    
     person_distributed_by = CharFilter(
         label="Contratante",
         required=False,
@@ -225,3 +234,12 @@ class TaskToReceiveFilter(TaskReportFilterBase):
         ))
     group_by_tasks = ChoiceFilter(
         empty_label=None, choices=GROUP_BY_TASK_TO_RECEIVE_TYPE)
+
+
+class TypeTaskMainFilter(filters.FilterSet):
+    is_hearing = filters.BooleanFilter(name='is_hearing')
+    name = filters.CharFilter(name='name', lookup_expr='unaccent__icontains')
+
+    class Meta:
+        model = TypeTaskMain
+        fields = ['is_hearing', 'name']

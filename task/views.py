@@ -892,6 +892,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 if data['person_asked_by']:
                     task_dynamic_query.add(
                         Q(person_asked_by=data['person_asked_by']), Q.AND)
+                if data['origin_office_asked_by']:                    
+                    task_dynamic_query.add(
+                        Q(office=office_session, parent__office_id=data['origin_office_asked_by']), Q.AND)                    
                 if data['person_distributed_by']:
                     task_dynamic_query.add(
                         Q(person_distributed_by=data['person_distributed_by']),
@@ -1634,6 +1637,12 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView,
     template_name = 'task/import_task_list.html'
     form_class = ImportTaskListForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_name_plural'] = 'Importação de OS'
+        context['page_title'] = 'Importação de OS'
+        return context
+
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(*args, **kwargs)
         form = self.form_class(request.POST, request.FILES)
@@ -1647,6 +1656,8 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView,
 
             ret = import_xls_task_list(file_xls.pk)
             file_xls.end = timezone.now()
+            file_xls.save()
+            file_xls.delete()
         else:
             status = 500
             ret = {'status': 'false', 'message': form.errors}
