@@ -13,8 +13,7 @@ class CostCenter(Audit, LegacyCode, OfficeMixin):
         verbose_name="Nome",
         max_length=255,
         null=False,
-        blank=False,
-        default=""
+        blank=False
     )
 
     objects = OfficeManager()

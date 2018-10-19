@@ -13,7 +13,7 @@ from core.views_api import ApplicationView
 from lawsuit.models import Folder, Movement
 from django.utils import timezone
 from django.db.models import Q
-from core.views import remove_invalid_registry
+from core.views_api import OfficeMixinViewSet
 
 
 @permission_classes((TokenHasReadWriteScope,))
@@ -26,18 +26,11 @@ class TypeTaskMainViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 @permission_classes((TokenHasReadWriteScope, ))
-class TypeTaskViewSet(viewsets.ModelViewSet):
+class TypeTaskViewSet(OfficeMixinViewSet):
     queryset = TypeTask.objects.filter(is_active=True)
     serializer_class = TypeTaskSerializer
     filter_backends = (SearchFilter, )
     search_fields = ('name', 'legacy_code')
-
-    @remove_invalid_registry
-    def get_queryset(self, *args, **kwargs):
-        invalid_registry = kwargs.get('remove_invalid', None)
-        if invalid_registry:
-            self.queryset = self.queryset.exclude(id=invalid_registry)
-        return self.queryset.filter(office=self.request.auth.application.office)
 
 
 @permission_classes((TokenHasReadWriteScope, ))
@@ -55,7 +48,7 @@ class EcmTaskViewSet(mixins.CreateModelMixin,
 
 
 @permission_classes((TokenHasReadWriteScope, ))
-class TaskViewSet(viewsets.ModelViewSet, ApplicationView):
+class TaskViewSet(OfficeMixinViewSet, ApplicationView):
     queryset = Task.objects.all()
     filter_backends = (DjangoFilterBackend, )
     filter_class = TaskApiFilter
@@ -64,13 +57,6 @@ class TaskViewSet(viewsets.ModelViewSet, ApplicationView):
         if self.request.method == "POST":
             return TaskCreateSerializer
         return TaskSerializer
-
-    @remove_invalid_registry
-    def get_queryset(self, *args, **kwargs):
-        invalid_registry = kwargs.get('remove_invalid', None)
-        if invalid_registry:
-            self.queryset = self.queryset.exclude(id=invalid_registry)
-        return self.queryset.filter(office=self.request.auth.application.office)
 
 
 @api_view(['GET'])
