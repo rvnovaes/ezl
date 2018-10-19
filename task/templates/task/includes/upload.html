@@ -83,36 +83,37 @@
             showCancelButton: true,
             confirmButtonColor: "#DD6B55",
             confirmButtonText: "Sim, excluir o arquivo.",
-            cancelButtonText: "Cancelar",
-            closeOnConfirm: true,
-        }, function(){
-            $('#processing').modal('show');
-            $.ajax({
-                url: getUrlDelete(pk),
-                dataType: 'json',
+            cancelButtonText: "Cancelar",            
+        }).then(function(result){
+            if (result.value){
+                $('#processing').modal('show');
+                $.ajax({
+                    url: getUrlDelete(pk),
+                    dataType: 'json',
 
-                success: function (data) {                    
-                    if (data.is_deleted) {                        
-                        if (location.href.indexOf('external-task') != -1) {
-                            let hash = location.pathname.split('/')[3];
-                            get_external_ecms(hash);
-                        } else {
-                            get_internal_ecms(task_id);
-                        }                                                                     
+                    success: function (data) {                    
+                        if (data.is_deleted) {                        
+                            if (location.href.indexOf('external-task') != -1) {
+                                let hash = location.pathname.split('/')[3];
+                                get_external_ecms(hash);
+                            } else {
+                                get_internal_ecms(task_id);
+                            }                                                                     
+                        }
+                        else {
+                            $('#deleting').modal('hide');
+                            swal("Erro", data.message, "error")
+                        }
+                        console.log('data.num_ged', data.num_ged);
+                        if (!data.num_ged) {
+                            $('#deleting').modal('hide');
+                            $('#no-providence').removeClass('hide')
+                            $('.js-batch-download-files').show()
+                        }                    
+                        $('#processing').modal('hide');
                     }
-                    else {
-                        $('#deleting').modal('hide');
-                        swal("Erro", data.message, "error")
-                    }
-                    console.log('data.num_ged', data.num_ged);
-                    if (!data.num_ged) {
-                        $('#deleting').modal('hide');
-                        $('#no-providence').removeClass('hide')
-                        $('.js-batch-download-files').show()
-                    }                    
-                    $('#processing').modal('hide');
-                }
-            })
+                })                
+            }
         });
     }        
 </script>

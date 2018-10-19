@@ -69,10 +69,9 @@
                             confirmButtonText: "Sim",
                             cancelButtonText: "Não",
                             confirmButtonColor: "#DD6B55",                        
-                            closeOnConfirm: false
-                        }, function(isConfirm){
-                            if (isConfirm) {                                                   
-                                $('#import_service_price_table_form').submit();                            
+                        }.then(function(result){
+                            if (result.value) {                                                   
+                                $('#import_service_price_table_form').submit();                           
                             }
                         }
                     );

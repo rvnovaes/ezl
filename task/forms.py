@@ -26,8 +26,8 @@ class TaskForm(BaseForm):
     class Meta:
         model = Task
         fields = [
-            'office', 'task_number', 'person_asked_by', 'type_task',
-            'final_deadline_date', 'performance_place', 'description', 'is_active'
+            'office', 'task_number', 'person_asked_by', 'type_task', 'final_deadline_date', 'performance_place',
+            'description', 'is_active', 'legacy_code'
         ]
 
     person_asked_by = forms.ModelChoiceField(
@@ -183,7 +183,7 @@ class TypeTaskMainForm(forms.ModelForm):
 class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
-        fields = ['office', 'type_task_main', 'survey', 'name', 'is_active']
+        fields = ['office', 'type_task_main', 'survey', 'name', 'is_active', 'legacy_code']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -191,7 +191,7 @@ class TypeTaskForm(BaseForm):
         self.fields['office'] = get_office_field(self.request)
         self.fields['survey'].queryset = Survey.objects.filter(office=office)
         self.order_fields(
-            ['office', 'type_task_main', 'survey', 'name', 'is_active'])
+            ['office', 'type_task_main', 'survey', 'name', 'is_active', 'legacy_code'])
 
 
 class ImportTaskListForm(forms.ModelForm):

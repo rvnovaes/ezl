@@ -1,6 +1,8 @@
 import copy
+import uuid
 from django.template.loader import render_to_string
 from ecm.models import DefaultAttachmentRule, Attachment
+from task.workflow import get_child_recipients
 from task.models import *
 from task.mail import SendMail
 from task.rules import RuleViewTask
@@ -144,3 +146,35 @@ def clone_task_ecms(task_from, task_to):
 
 def self_or_none(obj):
     return obj if obj else None
+
+
+def delegate_child_task(object_parent, office_correspondent):
+    """
+    Este metodo e chamado quando um escritorio delega uma OS para outro escritorio
+    Ao realizar este processo a nova OS criada devera ficar com o status de Solicitada
+    enquanto a OS pai devera ficar com o status de Delegada/Em Aberti
+    :param object_parent: Task que sera copiada para gerar a nova task
+    :param office_correspondent: Escritorio responsavel pela nova task
+    :return:
+    """
+    if object_parent.get_child:
+        if TaskStatus(object_parent.get_child.task_status) not in [
+                TaskStatus.REFUSED, TaskStatus.REFUSED_SERVICE,
+                TaskStatus.FINISHED
+        ]:
+            return False
+    new_task = copy.copy(object_parent)
+    new_task.task_hash = uuid.uuid4()
+    new_task.legacy_code = None
+    new_task.system_prefix = None
+    new_task.pk = new_task.task_number = None
+    new_task.person_asked_by = None
+    new_task.person_executed_by = None
+    new_task.person_distributed_by = None
+    new_task.delegation_date = None
+    new_task.office = office_correspondent
+    new_task.task_status = TaskStatus.REQUESTED
+    new_task.parent = object_parent
+    new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
+    new_task.save()
+    clone_task_ecms(object_parent, new_task)

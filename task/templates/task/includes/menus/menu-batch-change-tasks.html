@@ -1,0 +1,57 @@
+{% if 'can_access_settings' in office_session_perms or 'group_admin' in office_session_perms or request.user.is_superuser %}            
+<li>
+    <a href="javascript:void(0)" class="waves-effect" id="menu-batch-change-tasks">
+        <i class="fa fa-exchange" data-icon="v"></i>
+        <span class="hide-menu">
+            Alteração em lote
+        </span>
+    </a>
+</li>
+{% endif %}
+
+{% block extra_scripts%}
+    <script type="text/javascript">
+        $(document).ready(function() {
+
+            async function showOptions (){
+                const {value: changeOption} = await swal({
+                  title: 'Selecione o tipo de alteração',
+                  input: 'select',
+                  width: '30%', 
+                  inputClass: 'form-control',
+                  inputOptions: {
+                    'A': 'Atribuir OS',
+                    'D': 'Delegar OS',
+                    'R': 'Recusar OS'
+                  },
+                  inputPlaceholder: 'Selecione a ação desejada',
+                  showCancelButton: true,
+                  inputValidator: (value) => {
+                    return new Promise((resolve) => {
+                      if (!value) {
+                        resolve('Você precisa selecionar uma opção!');
+                      } else {
+                        resolve();
+                      }
+
+                    })
+                  }
+                })
+
+                if (changeOption) {
+                  if (changeOption==='A') {
+                    window.location.href = "{% url 'batch_change_tasks' 'A' %}"
+                  } else if (changeOption==='D') {
+                    window.location.href = "{% url 'batch_change_tasks' 'D' %}"
+                  } else {
+                    window.location.href = "{% url 'batch_change_tasks' 'R' %}"
+                  }
+                }
+            };
+
+            $('#menu-batch-change-tasks').on('click', function(){
+                showOptions();
+            })
+        })
+    </script>
+{%endblock%}

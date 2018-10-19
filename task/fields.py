@@ -2,10 +2,8 @@ import json
 from django.contrib.postgres.forms import JSONField
 from django.db.models.fields import NOT_PROVIDED
 from import_export.fields import Field
-from import_export.widgets import Widget
 from task.messages import *
 from task.utils import self_or_none
-import warnings
 
 
 class JSONFieldMixin(JSONField):

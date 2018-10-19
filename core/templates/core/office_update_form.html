@@ -606,10 +606,11 @@
                 showCancelButton: true,
                 confirmButtonColor: "#DD6B55",
                 confirmButtonText: "Sim, desejo " + action.toLowerCase() + ".",
-                closeOnConfirm: false,
                 cancelButtonText: "Cancelar."
-            }, function () {
-                $('#' + source.form.id).submit()
+            }).then(function (result) {
+                if (result.value){
+                    $('#' + source.form.id).submit()                    
+                }
             });
         }
 
