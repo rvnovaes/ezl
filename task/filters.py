@@ -9,6 +9,7 @@ from lawsuit.models import CourtDistrict, Organ, CourtDistrictComplement
 from task.models import TypeTask, Task, Filter, TaskStatus
 from .models import DashboardViewModel, TypeTaskMain
 from core.utils import get_office_session
+from django import forms
 
 from django_filters import rest_framework as filters
 
@@ -191,6 +192,19 @@ class TaskFilter(FilterSet):
         model = DashboardViewModel
         fields = []
         order_by = ['final_deadline_date']
+
+class BatchChangTaskFilter(TaskFilter):
+    def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
+        super().__init__(data, queryset, prefix, strict, request)
+        if request.option in ['A', 'D']:
+            status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED]
+        else: 
+            status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN, 
+            TaskStatus.DONE, TaskStatus.ERROR]
+        self.filters['task_status'].extra['choices'] = list(
+            map(lambda x: (TaskStatus(x).name, x), status_to_filter))
+
+
 
 
 class TaskReportFilterBase(FilterSet):
