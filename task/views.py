@@ -197,11 +197,7 @@ class BatchTaskToAssignView(AuditFormMixin, UpdateView):
                 form.instance.person_distributed_by = self.request.user.person
                 form.instance.task_status = TaskStatus.OPEN        
                 get_task_attachment(self, form)
-                form.save()
-                task_history = TaskHistory(
-                    create_user=request.user, task=task, status=task.task_status, 
-                    notes="")
-                task_history.save()                        
+                form.save()                        
                 return JsonResponse({'status': 'ok'})            
             return JsonResponse({'status': 'error', 'errors': form})
         except Exception as e:
@@ -210,9 +206,6 @@ class BatchTaskToAssignView(AuditFormMixin, UpdateView):
 class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         try:
-            import logging 
-            logger = logging.getLogger('teste')
-            logger.info(request.POST)
             task = Task.objects.get(pk=kwargs.get('pk'))
             amount = request.POST.get('amount').replace('R$', '') if request.POST.get('amount') else '0.00'
             note = request.POST.get('note', '')
@@ -228,12 +221,14 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
                     pk=request.POST.get('servicepricetable_id'))
                 if servicepricetable:
                     delegate_child_task(form.instance, servicepricetable.office_correspondent)
-                    form.instance.person_executed_by = None
+                    form.instance.person_executed_by = None                
+                send_notes_execution_date.send(
+                    sender=self.__class__,
+                    notes=note,
+                    instance=form.instance,
+                    execution_date=form.instance.execution_date,
+                    survey_result=form.instance.survey_result)                    
                 form.save()
-                task_history = TaskHistory(
-                    create_user=request.user, task=task, status=task.task_status, 
-                    notes=note)
-                task_history.save()
                 return JsonResponse({'status': 'ok'})            
             return JsonResponse({'status': 'error', 'errors': form})
         except Exception as e:
@@ -243,12 +238,14 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
 class BatchTaskToRefuseView(AuditFormMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         task = Task.objects.get(pk=kwargs.get('pk'))
-        task.task_status = TaskStatus.REFUSED
-        task.save()
-        task_history = TaskHistory(
-            create_user=request.user, task=task, status=task.task_status, 
-            notes=request.POST.get('notes'))
-        task_history.save()
+        task.task_status = TaskStatus.REFUSED        
+        send_notes_execution_date.send(
+            sender=self.__class__,
+            notes=request.POST.get('notes'),
+            instance=task,
+            execution_date=task.execution_date,
+            survey_result=task.survey_result)
+        task.save()        
         return JsonResponse({'status': 'ok'})
 
 
