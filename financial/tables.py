@@ -27,10 +27,10 @@ class ServicePriceTableTable(tables.Table):
 
     class Meta:
         sequence = ('selection', 'office', 'office_correspondent', 'type_task', 'state', 'court_district',
-                    'court_district_complement', 'client', 'value', 'is_active', 'legacy_code')
+                    'court_district_complement', 'client', 'value', 'is_active')
         model = ServicePriceTable
         fields = ('selection', 'office', 'office_correspondent', 'type_task', 'court_district', 'state', 'client',
-                  'value', 'is_active', 'court_district_complement', 'legacy_code')
+                  'value', 'is_active', 'court_district_complement')
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existe tabela de preços cadastrada."
         row_attrs = {
@@ -50,7 +50,8 @@ class ServicePriceTableTaskTable(tables.Table):
     office_return_rating = tables.Column(orderable=False, verbose_name='OS Retornadas')
 
     class Meta:
-        sequence = ('office_correspondent', 'state', 'court_district', 'court_district_complement', 'client', 'value', 'office_rating', 'office_return_rating')
+        sequence = ('office_correspondent', 'state', 'court_district', 'court_district_complement', 'client', 'value',
+                    'office_rating', 'office_return_rating')
         model = ServicePriceTable
         fields = ('office_correspondent', 'court_district', 'state', 'client', 'value', 'court_district_complement',
                   'office_rating', 'office_return_rating')

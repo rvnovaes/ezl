@@ -81,14 +81,12 @@ class PersonTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
 
     class Meta:
-        sequecence = ('selection', 'legal_name', 'name', 'is_lawyer',
-                      'legal_type', 'cpf_cnpj', 'is_active', 'is_customer',
-                      'is_supplier', 'auth_user', 'legacy_code')
+        sequecence = ('selection', 'legal_name', 'name', 'is_lawyer', 'legal_type', 'cpf_cnpj', 'is_active',
+                      'is_customer', 'is_supplier', 'auth_user', 'legacy_code')
         model = Person
         fields = [
-            'selection', 'legal_name', 'name', 'legal_type', 'cpf_cnpj',
-            'is_lawyer', 'is_customer', 'is_supplier', 'auth_user',
-            'is_active', 'legacy_code'
+            'selection', 'legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_lawyer', 'is_customer', 'is_supplier',
+            'auth_user', 'is_active', 'legacy_code'
         ]
         attrs = {"class": "table-striped table-bordered"}
         empty_text = "Não existem pessoas cadastradas"
