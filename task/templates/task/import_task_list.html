@@ -69,7 +69,6 @@
                                             $total_rows[0].getElementsByTagName('span')[0].innerHTML = result.total_rows;
                                             $total_rows.css('display', 'block');
                                             if(result.totals){
-                                                result.totals.new += result.totals.warning
                                                 $.each(result.totals, function(key, val){
                                                     $("#"+key).html(val)
                                                 });
@@ -103,7 +102,7 @@
                                                     log_table_tbody.append('<tr> ' +
                                                         '<td>' + result_warning_obj.line + '</td>' +
                                                         '<td>' + wanings_desc + '</td>' +
-                                                        '<td><span class="label label-rounded label-warning"><i class="fa fa-warning fa-fw"></i>WARNING</span></td></tr>');
+                                                        '<td><span class="label label-rounded label-warning"><i class="fa fa-warning fa-fw"></i>ALERTA</span></td></tr>');
                                                 }
                                                 $("#div-log-table").css('display', 'block');
                                                 log_table.DataTable({
@@ -153,10 +152,9 @@
             <div class="col-xs-12">
                 <label>Detalhe dos registros importados:</label>
                 <ul>
-                    <li>Novos: <span id="new"></span> (<span id="warning"></span> warnings)</li>
+                    <li>Novos: <span id="new"></span></li>
                     <li>Atualizados: <span id="update"></span></li>
-                    <li>Apagados: <span id="delete"></span></li>
-                    <li>Ignorados: <span id="skip"></span></li>
+                    <li>Com alertas: <span id="warning"></span></li>
                     <li>Com erro: <span id="error"></span></li>
                 </ul>
             </div>

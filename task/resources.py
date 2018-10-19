@@ -13,7 +13,8 @@ from task.instance_loaders import TaskModelInstanceLoader
 from task.messages import *
 from task.models import Task, TypeTask
 from task.utils import self_or_none
-from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin
+from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, \
+    AcceptanceServiceDateWidget
 
 TRUE_FALSE_DICT = {'V': True, 'F': False}
 
@@ -132,6 +133,12 @@ COLUMN_NAME_DICT = {
         'required': False,
         'verbose_name': Movement._meta.get_field('legacy_code').verbose_name,
     },
+    'task_number': {
+        'column_name': 'os.numero',
+        'attribute': 'task_number',
+        'required': False,
+        'verbose_name': Task._meta.get_field('task_number').verbose_name,
+    },
     'person_asked_by': {
         'column_name': 'os.solicitante',
         'attribute': 'person_asked_by',
@@ -143,6 +150,12 @@ COLUMN_NAME_DICT = {
         'attribute': 'type_task',
         'required': True,
         'verbose_name': Task._meta.get_field('type_task').verbose_name,
+    },
+    'task_status': {
+        'column_name': 'os.status',
+        'attribute': 'task_status',
+        'required': True,
+        'verbose_name': Task._meta.get_field('task_status').verbose_name,
     },
     'final_deadline_date': {
         'column_name': 'os.prazo_fatal',
@@ -162,59 +175,11 @@ COLUMN_NAME_DICT = {
         'required': False,
         'verbose_name': Task._meta.get_field('description').verbose_name,
     },
-    'person_executed_by': {
-        'column_name': 'os.correspondente',
-        'attribute': 'person_executed_by',
-        'required': False,
-        'verbose_name': Task._meta.get_field('person_executed_by').verbose_name,
-    },
-    'person_distributed_by': {
-        'column_name': 'os.contratante',
-        'attribute': 'person_distributed_by',
-        'required': False,
-        'verbose_name': Task._meta.get_field('person_distributed_by').verbose_name,
-    },
-    'delegation_date': {
-        'column_name': 'os.data_delegacao',
-        'attribute': 'delegation_date',
-        'required': False,
-        'verbose_name': Task._meta.get_field('delegation_date').verbose_name,
-    },
-    'execution_date': {
-        'column_name': 'os.data_cumprimento',
-        'attribute': 'execution_date',
-        'required': False,
-        'verbose_name': Task._meta.get_field('execution_date').verbose_name,
-    },
     'requested_date': {
         'column_name': 'os.data_solicitacao',
         'attribute': 'requested_date',
         'required': False,
         'verbose_name': Task._meta.get_field('requested_date').verbose_name,
-    },
-    'acceptance_date': {
-        'column_name': 'os.data_aceite',
-        'attribute': 'acceptance_date',
-        'required': False,
-        'verbose_name': Task._meta.get_field('acceptance_date').verbose_name,
-    },
-    'task_status': {
-        'column_name': 'os.status',
-        'attribute': 'task_status',
-        'required': True,
-        'verbose_name': Task._meta.get_field('task_status').verbose_name,
-    },
-    'amount': {
-        'column_name': 'os.valor',
-        'attribute': 'amount',
-        'required': False,
-        'verbose_name': Task._meta.get_field('amount').verbose_name,
-    },
-    'is_active': {
-        'column_name': 'os.ativa',
-        'attribute': 'is_active',
-        'required': False,
-        'verbose_name': Task._meta.get_field('is_active').verbose_name,
     },
     'acceptance_service_date': {
         'column_name': 'os.data_aceite_service',
@@ -222,47 +187,11 @@ COLUMN_NAME_DICT = {
         'required': False,
         'verbose_name': Task._meta.get_field('acceptance_service_date').verbose_name,
     },
-    'refused_service_date': {
-        'column_name': 'os.data_recusa_service',
-        'attribute': 'refused_service_date',
+    'amount': {
+        'column_name': 'os.valor',
+        'attribute': 'amount',
         'required': False,
-        'verbose_name': Task._meta.get_field('refused_service_date').verbose_name,
-    },
-    'refused_date': {
-        'column_name': 'os.data_recusa_correspondente',
-        'attribute': 'refused_date',
-        'required': False,
-        'verbose_name': Task._meta.get_field('refused_date').verbose_name,
-    },
-    'return_date': {
-        'column_name': 'os.data_retorno',
-        'attribute': 'return_date',
-        'required': False,
-        'verbose_name': Task._meta.get_field('return_date').verbose_name,
-    },
-    'blocked_payment_date': {
-        'column_name': 'os.data_glosa',
-        'attribute': 'blocked_payment_date',
-        'required': False,
-        'verbose_name': Task._meta.get_field('blocked_payment_date').verbose_name,
-    },
-    'finished_date': {
-        'column_name': 'os.data_finalizacao',
-        'attribute': 'finished_date',
-        'required': False,
-        'verbose_name': Task._meta.get_field('finished_date').verbose_name,
-    },
-    'receipt_date': {
-        'column_name': 'os.data_recebimento',
-        'attribute': 'receipt_date',
-        'required': False,
-        'verbose_name': Task._meta.get_field('receipt_date').verbose_name,
-    },
-    'billing_date': {
-        'column_name': 'os.data_pagamento',
-        'attribute': 'billing_date',
-        'required': False,
-        'verbose_name': Task._meta.get_field('billing_date').verbose_name,
+        'verbose_name': Task._meta.get_field('amount').verbose_name,
     },
     'legacy_code': {
         'column_name': 'os.codigo_legado',
@@ -307,61 +236,35 @@ class TaskResult(Result):
 
 
 class TaskResource(resources.ModelResource):
-    id = CustomFieldImportExport(column_name='id', attribute='id', widget=IntegerWidget(), saves_null_values=True,
-                                 column_name_dict=COLUMN_NAME_DICT)
-    legacy_code = CustomFieldImportExport(column_name='legacy_code', attribute='legacy_code', widget=CharWidget(),
+    task_number = CustomFieldImportExport(column_name='task_number', attribute='task_number', widget=IntegerWidget(),
                                           saves_null_values=True, column_name_dict=COLUMN_NAME_DICT)
-    type_task = CustomFieldImportExport(column_name='type_task', attribute='type_task',
-                                        widget=UnaccentForeignKeyWidget(TypeTask, 'name'), saves_null_values=False,
-                                        column_name_dict=COLUMN_NAME_DICT)
-    movement = CustomFieldImportExport(column_name='movement', attribute='movement_id', saves_null_values=True,
-                                       column_name_dict=COLUMN_NAME_DICT)
     person_asked_by = CustomFieldImportExport(column_name='person_asked_by', attribute='person_asked_by',
                                               widget=PersonAskedByWidget(Person, 'legal_name'), saves_null_values=False,
                                               column_name_dict=COLUMN_NAME_DICT)
-    person_executed_by = CustomFieldImportExport(column_name='person_executed_by', attribute='person_executed_by',
-                                                 widget=UnaccentForeignKeyWidget(Person, 'legal_name'),
-                                                 column_name_dict=COLUMN_NAME_DICT)
-    person_distributed_by = CustomFieldImportExport(column_name='person_distributed_by',
-                                                    attribute='person_distributed_by',
-                                                    widget=UnaccentForeignKeyWidget(Person, 'legal_name'),
-                                                    column_name_dict=COLUMN_NAME_DICT)
+    type_task = CustomFieldImportExport(column_name='type_task', attribute='type_task',
+                                        widget=UnaccentForeignKeyWidget(TypeTask, 'name'), saves_null_values=False,
+                                        column_name_dict=COLUMN_NAME_DICT)
+    task_status = CustomFieldImportExport(column_name='task_status', attribute='task_status', widget=TaskStatusWidget(),
+                                          column_name_dict=COLUMN_NAME_DICT)
     final_deadline_date = CustomFieldImportExport(column_name='final_deadline_date', attribute='final_deadline_date',
                                                   widget=DateTimeWidgetMixin(), saves_null_values=False,
                                                   column_name_dict=COLUMN_NAME_DICT)
-    delegation_date = CustomFieldImportExport(column_name='delegation_date', attribute='delegation_date',
-                                              widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
-    acceptance_date = CustomFieldImportExport(column_name='acceptance_date', attribute='acceptance_date',
-                                              widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
-    execution_date = CustomFieldImportExport(column_name='execution_date', attribute='execution_date',
-                                             widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
+    performance_place = CustomFieldImportExport(column_name='performance_place', attribute='performance_place',
+                                                widget=CharWidget(), saves_null_values=False,
+                                                column_name_dict=COLUMN_NAME_DICT)
     requested_date = CustomFieldImportExport(column_name='requested_date', attribute='requested_date',
                                              widget=DateTimeWidgetMixin(), default=timezone.now(),
                                              column_name_dict=COLUMN_NAME_DICT)
     acceptance_service_date = CustomFieldImportExport(column_name='acceptance_service_date',
-                                                      attribute='acceptance_service_date', widget=DateTimeWidgetMixin(),
+                                                      attribute='acceptance_service_date',
+                                                      widget=AcceptanceServiceDateWidget(),
                                                       column_name_dict=COLUMN_NAME_DICT)
-    refused_service_date = CustomFieldImportExport(column_name='refused_service_date', attribute='refused_service_date',
-                                                   widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
-    refused_date = CustomFieldImportExport(column_name='refused_date', attribute='refused_date',
-                                           widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
-    return_date = CustomFieldImportExport(column_name='return_date', attribute='return_date',
-                                          widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
-    blocked_payment_date = CustomFieldImportExport(column_name='blocked_payment_date', attribute='blocked_payment_date',
-                                                   widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
-    finished_date = CustomFieldImportExport(column_name='finished_date', attribute='finished_date',
-                                            widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
-    receipt_date = CustomFieldImportExport(column_name='receipt_date', attribute='receipt_date',
-                                           widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
-    billing_date = CustomFieldImportExport(column_name='billing_date', attribute='billing_date',
-                                           widget=DateTimeWidgetMixin(), column_name_dict=COLUMN_NAME_DICT)
-    task_status = CustomFieldImportExport(column_name='task_status', attribute='task_status', widget=TaskStatusWidget(),
-                                          column_name_dict=COLUMN_NAME_DICT)
     amount = CustomFieldImportExport(column_name='amount', attribute='amount', widget=DecimalWidget(),
                                      default=Decimal('0.00'), column_name_dict=COLUMN_NAME_DICT)
-    performance_place = CustomFieldImportExport(column_name='performance_place', attribute='performance_place',
-                                                widget=CharWidget(), saves_null_values=False,
-                                                column_name_dict=COLUMN_NAME_DICT)
+    legacy_code = CustomFieldImportExport(column_name='legacy_code', attribute='legacy_code', widget=CharWidget(),
+                                          saves_null_values=True, column_name_dict=COLUMN_NAME_DICT)
+    movement = CustomFieldImportExport(column_name='movement', attribute='movement_id', saves_null_values=True,
+                                       column_name_dict=COLUMN_NAME_DICT)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -377,7 +280,7 @@ class TaskResource(resources.ModelResource):
 
     class Meta:
         model = Task
-        import_id_fields = ('legacy_code', )
+        import_id_fields = ('task_number', 'legacy_code')
 
     @classmethod
     def get_row_result_class(self):
@@ -583,14 +486,6 @@ class TaskResource(resources.ModelResource):
             if v['column_name'] in dataset.headers:
                 headers_index = dataset.headers.index(v['column_name'])
                 dataset.headers[headers_index] = k
-        if 'id' not in dataset.headers:
-            dataset.insert_col(
-                0, col=[
-                    "",
-                ] * dataset.height, header="id")
-        else:
-            del self._meta.import_id_fields
-            self._meta.import_id_fields = ('id', )
 
         self.default_type_movement, created = TypeMovement.objects.get_or_create(
             is_default=True,
@@ -599,8 +494,9 @@ class TaskResource(resources.ModelResource):
                 'name': 'OS Avulsa',
                 'create_user': self.create_user
             })
+        dataset.insert_col(0, col=["", ] * dataset.height, header="id")
         dataset.insert_col(1, col=[int("{}".format(self.office.id)), ] * dataset.height, header="office")
-        dataset.insert_col(1, col=[int("{}".format(self.create_user.id)), ] * dataset.height, header="create_user")
+        dataset.insert_col(2, col=[int("{}".format(self.create_user.id)), ] * dataset.height, header="create_user")
         dataset.insert_col(3, col=["", ] * dataset.height, header="movement")
         dataset.insert_col(dataset.width, col=[[], ] * dataset.height, header="warnings")
 
@@ -614,6 +510,8 @@ class TaskResource(resources.ModelResource):
             row['movement'] = self.movement.id
         if row_errors:
             raise Exception(row_errors)
+        row['task_number'] = self_or_none(row['task_number'])
+        row['legacy_code'] = self_or_none(row['legacy_code'])
         row['is_active'] = TRUE_FALSE_DICT.get('is_active', True)
 
     def after_import_row(self, row, row_result, **kwargs):
