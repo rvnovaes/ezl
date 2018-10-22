@@ -125,9 +125,8 @@ class CorrespondentsTable(object):
         correspondents = self.correspondents_qs        
         if self.qs:
             # Foi feito desta forma por conta de performance --Nao utilizar o sorted pois aumenta muito o tempo de execucao--
-            return max(self.qs.filter(value=self.qs.earliest('value').value), key=lambda k: k.office_rating if k.office_rating else '0.00')        
+            return max(self.qs.filter(value=self.qs.earliest('value').value), key=lambda k: k.office_rating if k.office_rating else '0.00')
         return None
-
 
     def get_correspondents_qs(self):
         task = self.task
@@ -135,6 +134,7 @@ class CorrespondentsTable(object):
         type_task_main = self.type_task_main
         if type_task:
             complement = task.movement.law_suit.court_district_complement
+            city = task.movement.law_suit.city
             court_district = task.movement.law_suit.court_district
             state = court_district.state if court_district else None
             client = task.movement.law_suit.folder.person_customer
@@ -164,6 +164,7 @@ class CorrespondentsTable(object):
                 Q(Q(court_district=court_district) | Q(court_district=None)),
                 Q(Q(state=state) | Q(state=None)),
                 Q(Q(court_district_complement=complement) | Q(court_district_complement=None)),
+                Q(Q(city=city) | Q(city=None)),
                 Q(Q(client=client) | Q(client=None)),
                 Q(is_active=True))
             qs_values = qs.values('pk', 'office_id', 'type_task__office_id',
