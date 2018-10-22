@@ -197,7 +197,11 @@
     <script>
         window.onload = function() {
             var browser=get_browser();
-            console.log(browser)
+            if (browser.message) {
+                var messageDiv = document.getElementById('message-browser-version');
+                messageDiv.innerHTML = browser.message;
+                messageDiv.classList.toggle('hide');
+            }
         }
     </script>
 </body>
