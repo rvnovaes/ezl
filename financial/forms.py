@@ -1,5 +1,5 @@
 from django import forms
-from core.models import Person, State
+from core.models import Person, State, City
 from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field
 from lawsuit.models import CourtDistrict, CourtDistrictComplement
 from task.models import TypeTask
@@ -54,6 +54,15 @@ class ServicePriceTableForm(BaseModelForm):
                                                     url='/processos/typeahead/search/complemento',
                                                 ))
 
+    city = forms.CharField(label="Cidade", required=False,
+                           widget=TypeaHeadForeignKeyWidget(
+                               model=City,
+                               field_related='name',
+                               forward='state',
+                               name='city',
+                               url='/city/autocomplete/',
+                           ))
+
     type_task = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(TypeTask.objects.all().order_by('name')),
         empty_label='',
@@ -70,7 +79,7 @@ class ServicePriceTableForm(BaseModelForm):
     class Meta:
         model = ServicePriceTable
         fields = ('office', 'office_correspondent', 'client', 'type_task', 'state', 'court_district',
-                  'court_district_complement', 'value', 'is_active')
+                  'court_district_complement', 'city', 'value', 'is_active')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'

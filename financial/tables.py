@@ -27,10 +27,10 @@ class ServicePriceTableTable(tables.Table):
 
     class Meta:
         sequence = ('selection', 'office', 'office_correspondent', 'type_task', 'state', 'court_district',
-                    'court_district_complement', 'client', 'value', 'is_active')
+                    'court_district_complement', 'city', 'client', 'value', 'is_active')
         model = ServicePriceTable
         fields = ('selection', 'office', 'office_correspondent', 'type_task', 'court_district', 'state', 'client',
-                  'value', 'is_active', 'court_district_complement')
+                  'value', 'is_active', 'court_district_complement', 'city')
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existe tabela de preços cadastrada."
         row_attrs = {
