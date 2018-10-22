@@ -1758,6 +1758,7 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
                     }, 
                 'create_user': price.create_user.pk, 
                 'client': price.client if price.client else '-',
+                'city': price.city.name if price.city else '-',
                 'office': {
                     'id': price.office.pk, 
                     'legal_name': price.office.legal_name
