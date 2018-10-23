@@ -190,15 +190,16 @@ class TypeTaskMainForm(forms.ModelForm):
 class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
-        fields = ['office', 'type_task_main', 'survey', 'name', 'is_active']
+        fields = ['office', 'type_task_main', 'survey', 'survey_company_representative', 'name', 'is_active']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         office = get_office_session(self.request)
         self.fields['office'] = get_office_field(self.request)
         self.fields['survey'].queryset = Survey.objects.filter(office=office)
+        self.fields['survey_company_representative'].queryset = Survey.objects.filter(office=office)
         self.order_fields(
-            ['office', 'type_task_main', 'survey', 'name', 'is_active'])
+            ['office', 'type_task_main', 'survey', 'survey_company_representative', 'name', 'is_active'])
 
 
 class ImportTaskListForm(forms.ModelForm):
