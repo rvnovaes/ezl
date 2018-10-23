@@ -341,6 +341,12 @@ class Task(Audit, LegacyCode, OfficeMixin):
         blank=False,
         max_length=255,
         verbose_name='Local de cumprimento')
+    person_company_representative = models.ForeignKey(
+        Person,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        verbose_name='Preposto', related_name='tasks_to_person_representative')
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
