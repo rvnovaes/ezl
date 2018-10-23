@@ -35,6 +35,24 @@ class UnaccentForeignKeyWidget(ForeignKeyWidget):
         else:
             return None
 
+class TypeTaskByWidget(UnaccentForeignKeyWidget):    
+    def clean(self, value, row=None, *args, **kwargs):
+        val = super(ForeignKeyWidget, self).clean(value)
+        if val:
+            ret = self.get_queryset(
+                value, row, *args,
+                **kwargs).filter(**{
+                    '{}'.format(self.field): val, 
+                    'office_id': row['office']
+                }).first()
+            return ret if ret else self.get_queryset(
+                value, row, *args, **kwargs).filter(
+                    **{
+                        '{}__unaccent__iexact'.format(self.field): val
+                    }).first()
+        else:
+            return None    
+
 
 class PersonAskedByWidget(UnaccentForeignKeyWidget):
     """

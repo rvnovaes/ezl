@@ -34,9 +34,9 @@ from core.models import Person, CorePermissions, CustomSettings
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE
-from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, ImportTaskListForm
+from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, ImportTaskListForm, TaskSurveyAnswerForm
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
-    TaskGeolocation, TypeTaskMain
+    TaskGeolocation, TypeTaskMain, TaskSurveyAnswer
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
 from task.tasks import import_xls_task_list
@@ -563,6 +563,12 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         survey_result = (form.cleaned_data['survey_result']
                          if form.cleaned_data['survey_result'] else
                          form.initial['survey_result'])
+        if survey_result:       
+            survey = TaskSurveyAnswer()
+            survey.task = form.instance
+            survey.create_user = self.request.user
+            survey.survey_result = survey_result
+            survey.save()
         send_notes_execution_date.send(
             sender=self.__class__,
             notes=notes,

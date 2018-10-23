@@ -8,7 +8,7 @@ from import_export.widgets import DecimalWidget
 from lawsuit.models import Folder, LawSuit, Movement, TypeMovement, CourtDistrict, CourtDivision, Organ, Instance
 from task.instance_loaders import TaskModelInstanceLoader
 from task.models import Task, TypeTask
-from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative
+from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative, TypeTaskByWidget
 
 TRUE_FALSE_DICT = {'V': True, 'F': False}
 
@@ -263,7 +263,7 @@ class TaskResource(resources.ModelResource):
     type_task = CustomFieldImportExport(
         column_name='type_task',
         attribute='type_task',
-        widget=UnaccentForeignKeyWidget(TypeTask, 'name'),
+        widget=TypeTaskByWidget(TypeTask, 'name'),
         saves_null_values=False)
     person_asked_by = CustomFieldImportExport(
         column_name='person_asked_by',

@@ -8,7 +8,7 @@ from core.models import Person, ImportXlsFile
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
 from core.widgets import MDDateTimepicker, MDDatePicker
 from core.forms import BaseForm, XlsxFileField
-from task.models import Task, TypeTask, Filter, TaskStatus, TypeTaskMain
+from task.models import Task, TypeTask, Filter, TaskStatus, TypeTaskMain, TaskSurveyAnswer
 from task.resources import COLUMN_NAME_DICT
 from task.widgets import code_mirror_schema
 from .schemas import *
@@ -216,3 +216,10 @@ class ImportTaskListForm(forms.ModelForm):
             v['column_name'] for k, v in COLUMN_NAME_DICT.items()
             if v['required']
         ])
+
+
+
+class TaskSurveyAnswerForm(forms.ModelForm):
+    class Meta: 
+        model = TaskSurveyAnswer
+        fields = ('create_user', 'survey_result')
