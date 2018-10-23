@@ -13,20 +13,8 @@
                         <a href="#sec-prov" class="sticon mdi mdi-archive"><span>Providência</span></a>
                     </li>
                     <li>
-                        <a href="#sec-corres" class="sticon mdi mdi-wallet-travel"><span>
-                            {% if form.instance.get_child %}
-                                Escritório Contratado
-                            {% else %}
-                                Correspondente
-                            {% endif %}
-                        </span></a>
-                    </li>
-                    <li>
-                        <a href="#sec-solic" class="sticon mdi mdi-account-card-details"><span>Solicitante</span></a>
-                    </li>
-                    <li>
-                        <a href="#sec-contr" class="sticon mdi mdi-receipt"><span>Contratante</span></a>
-                    </li>
+                        <a href="#sec-part" class="sticon mdi mdi-archive"><span>Participantes</span></a>
+                    </li>                    
                     <li><a href="#sec-sis-leg" class="sticon mdi mdi-cash-multiple"><span>Dados de Origem</span></a></li>
                 </ul>
             </nav>
@@ -35,22 +23,28 @@
                     {% include 'task/task_detail/data-prov.html' %}
                     <hr>
                 </section>
-                <section id="sec-corres" style="padding: 0 0 0 0">
+                <section id="#sec-part" style="padding: 0 0 0 0">
+                    {% if form.instance.get_child %}
+                        <h3>Escritório Contratado</h3>
+                    {% else %}
+                        <h3>Correspondente</h3>
+                    {% endif %}
                     {% if form.instance.get_child %}
                         {% include 'task/office_info.html' with office=form.instance.get_child.office %}
                     {% else %}
                         {% include 'task/person_info.html' with person=form.instance.person_executed_by %}
                     {% endif %}
-                </section>
-                <section id="sec-solic" style="padding: 0 0 0 0">
+                    <h3>Solicitante</h3>
                     {% if form.instance.parent %}
                         {% include 'task/office_info.html' with office=form.instance.parent.office %}
                     {% else %}
                         {% include 'task/person_info.html' with person=form.instance.person_asked_by %}
-                    {% endif %}
-                </section>
-                <section id="sec-contr" style="padding: 0 0 0 0">
+                    {% endif %}         
+                    <h3>Contratante</h3>           
                     {% include 'task/person_info.html' with person=form.instance.person_distributed_by %}
+                    <h3>Preposto</h3>
+                    {% include 'task/person_info.html' with person=form.instance.person_company_representative %}
+
                 </section>
                 <section id="sec-sis-leg" style="padding: 0 0 0 0">
                     <table class="table table-hover">

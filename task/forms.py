@@ -26,7 +26,7 @@ class TaskForm(BaseForm):
     class Meta:
         model = Task
         fields = [
-            'office', 'task_number', 'person_asked_by', 'type_task', 'final_deadline_date', 'performance_place',
+            'office', 'task_number', 'person_asked_by', 'person_company_representative', 'type_task', 'final_deadline_date', 'performance_place',
             'description', 'is_active', 'legacy_code'
         ]
 
@@ -34,6 +34,13 @@ class TaskForm(BaseForm):
         empty_label='Selecione...',
         queryset=filter_valid_choice_form(Person.objects.active().requesters().
                                           active_offices().order_by('name')))
+
+    person_company_representative = forms.ModelChoiceField(
+        empty_label='Selecione...',
+        required=False,
+        queryset=filter_valid_choice_form(
+            Person.objects.active().requesters().active_offices().filter(
+                legal_type='F').order_by('name')))
 
     type_task = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(
