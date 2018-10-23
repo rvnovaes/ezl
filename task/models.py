@@ -196,14 +196,14 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
         'survey.Survey',
         null=True,
         blank=True,
-        verbose_name='Tipo de Formulário')
+        verbose_name='Formulário do correspondente')
 
     survey_company_representative = models.ForeignKey(
         'survey.Survey',
         null=True,
         blank=True,
         related_name='type_tasks_person_company_representative',
-        verbose_name='Tipo de formulário do preposto')    
+        verbose_name='Formulário do preposto')    
 
     office = models.ForeignKey(
         Office,
