@@ -1,5 +1,5 @@
 import datetime
-from core.models import Person
+from core.models import Person, Office
 from django.utils.timezone import make_aware
 from import_export.widgets import ForeignKeyWidget, Widget, DateTimeWidget
 from task.models import TaskStatus
@@ -49,6 +49,18 @@ class PersonAskedByWidget(UnaccentForeignKeyWidget):
         else:
             raise ValueError(
                 "Não foi encontrado solicitante para este escritório com o nome {}."
+                .format(value))
+
+class PersonCompanyRepresentative(UnaccentForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        person_company_representative = super().clean(value)
+        office = Office.objects.get(pk=row['office'])
+        if person_company_representative and person_company_representative in office.persons.filter(
+            legal_type='F'):
+            return person_company_representative
+        else:
+            raise ValueError(
+                "Não foi encontrado preposto para este escritório com o nome {}."
                 .format(value))
 
 
