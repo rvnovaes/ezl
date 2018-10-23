@@ -117,9 +117,10 @@ class TypeTaskTable(tables.Table):
             'name',
             'type_task_main',
             'survey',
+            'survey_company_representative'
         )
         model = TypeTask
-        fields = ['name', 'type_task_main', 'survey']
+        fields = ['name', 'type_task_main', 'survey', 'survey_company_representative']
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existem questionários cadastrados"
         row_attrs = {
