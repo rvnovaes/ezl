@@ -1706,6 +1706,7 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView,
             return JsonResponse(ret, status=status)
         return JsonResponse(json.loads(json.dumps(ret)), status=status)
 
+
 class BatchChangeTasksView(DashboardSearchView):
     filter_class = BatchChangTaskFilter
     template_name = 'task/batch-change-tasks.html'
@@ -1726,7 +1727,6 @@ class BatchChangeTasksView(DashboardSearchView):
         status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN, 
             TaskStatus.DONE, TaskStatus.ERROR]            
         return task_list.filter(task_status__in=status_to_filter)
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
