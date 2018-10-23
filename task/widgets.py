@@ -3,6 +3,7 @@ from core.models import Person, Office
 from django.utils.timezone import make_aware
 from import_export.widgets import ForeignKeyWidget, Widget, DateTimeWidget
 from task.models import TaskStatus
+from task.messages import *
 from codemirror import CodeMirrorTextarea
 
 code_mirror_schema = CodeMirrorTextarea(
@@ -22,11 +23,7 @@ class UnaccentForeignKeyWidget(ForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         val = super(ForeignKeyWidget, self).clean(value)
         if val:
-            ret = self.get_queryset(
-                value, row, *args,
-                **kwargs).filter(**{
-                    '{}'.format(self.field): val
-                }).first()
+            ret = self.get_queryset(value, row, *args, **kwargs).filter(**{'{}'.format(self.field): val}).first()
             return ret if ret else self.get_queryset(
                 value, row, *args, **kwargs).filter(
                     **{
@@ -35,14 +32,21 @@ class UnaccentForeignKeyWidget(ForeignKeyWidget):
         else:
             return None
 
-class TypeTaskByWidget(UnaccentForeignKeyWidget):    
+    def get_queryset(self, value, row, *args, **kwargs):
+        try:
+            office_field = self.model._meta.get_field('office')
+            return self.model.objects.get_queryset(office=row['office'])
+        except:
+            return super().get_queryset(value, row, *args, **kwargs)
+
+class TypeTaskByWidget(UnaccentForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         val = super(ForeignKeyWidget, self).clean(value)
         if val:
             ret = self.get_queryset(
                 value, row, *args,
                 **kwargs).filter(**{
-                    '{}'.format(self.field): val, 
+                    '{}'.format(self.field): val,
                     'office_id': row['office']
                 }).first()
             return ret if ret else self.get_queryset(
@@ -51,7 +55,7 @@ class TypeTaskByWidget(UnaccentForeignKeyWidget):
                         '{}__unaccent__iexact'.format(self.field): val
                     }).first()
         else:
-            return None    
+            return None
 
 
 class PersonAskedByWidget(UnaccentForeignKeyWidget):
@@ -88,7 +92,14 @@ class TaskStatusWidget(Widget):
     """
 
     def clean(self, value, row=None, *args, **kwargs):
-        return TaskStatus._value2member_map_.get(value, TaskStatus.REQUESTED)
+        if value:
+            values = {item.value.title(): item.value for item in [TaskStatus.REQUESTED, TaskStatus.ACCEPTED_SERVICE]}
+            ret = values.get(value.title(), None)
+            if not ret:
+                raise ValueError(WRONG_TASK_STATUS.format(value.title(), values.values()))
+        else:
+            ret = TaskStatus.REQUESTED
+        return ret
 
 
 class DateTimeWidgetMixin(DateTimeWidget):
@@ -102,4 +113,15 @@ class DateTimeWidgetMixin(DateTimeWidget):
         if isinstance(value, float):
             seconds = int(round((value - 25569) * 86400.0))
             value = make_aware(datetime.datetime.utcfromtimestamp(seconds))
+        return super().clean(value, row, *args, **kwargs)
+
+
+class AcceptanceServiceDateWidget(DateTimeWidgetMixin):
+    """
+    Verifica o status da OS e obriga preencher a data de aceite pelo service, caso o status seja Aceite pelo Service
+    """
+
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value and row['task_status'].title() == TaskStatus.ACCEPTED_SERVICE.value.title():
+            raise ValueError(MISSING_ACCEPTANCE_SERVICE_DATE)
         return super().clean(value, row, *args, **kwargs)

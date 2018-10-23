@@ -1,0 +1,27 @@
+{% extends "skeleton/forms/base.html" %}
+{% load render_table from django_tables2 %}
+{% load static %}
+{% load querystring from django_tables2 %}
+{% load bootstrap3 %}
+{% load core_filters %}
+{% block content %} 
+	{% include 'task/includes/task-form-filters.html'%}    
+    {% block extra_content %}
+        {% if option == 'D' %}
+            {% include 'task/includes/batch-delegate-task-table.html'%}
+        {% elif option == 'A' %}
+            {% include 'task/includes/batch-assign-task-table.html'%}
+        {% else %}
+            {% include 'task/includes/batch-refuse-task-table.html'%}
+        {% endif %}
+    {% endblock extra_content %}	
+{% endblock %}
+
+{% block extra_scripts %} 
+    {% include 'task/includes/task-filter-extras.html'%}  
+    <script type="text/javascript">
+    	$(document).ready(function(){
+			$('#table-batch-change-tasks').css('font-size', '12px');
+    	})    	
+    </script>
+{%endblock%}

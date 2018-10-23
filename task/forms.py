@@ -26,8 +26,8 @@ class TaskForm(BaseForm):
     class Meta:
         model = Task
         fields = [
-            'office', 'task_number', 'person_asked_by', 'person_company_representative', 'type_task',
-            'final_deadline_date', 'performance_place', 'description', 'is_active'
+            'office', 'task_number', 'person_asked_by', 'person_company_representative', 'type_task', 'final_deadline_date', 'performance_place',
+            'description', 'is_active', 'legacy_code'
         ]
 
     person_asked_by = forms.ModelChoiceField(
@@ -190,7 +190,7 @@ class TypeTaskMainForm(forms.ModelForm):
 class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
-        fields = ['office', 'type_task_main', 'survey', 'survey_company_representative', 'name', 'is_active']
+        fields = ['office', 'type_task_main', 'survey', 'survey_company_representative', 'name', 'is_active', 'legacy_code']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -199,7 +199,7 @@ class TypeTaskForm(BaseForm):
         self.fields['survey'].queryset = Survey.objects.filter(office=office)
         self.fields['survey_company_representative'].queryset = Survey.objects.filter(office=office)
         self.order_fields(
-            ['office', 'type_task_main', 'survey', 'survey_company_representative', 'name', 'is_active'])
+            ['office', 'type_task_main', 'survey', 'survey_company_representative', 'name', 'is_active', 'legacy_code'])
 
 
 class ImportTaskListForm(forms.ModelForm):
@@ -220,6 +220,6 @@ class ImportTaskListForm(forms.ModelForm):
 
 
 class TaskSurveyAnswerForm(forms.ModelForm):
-    class Meta: 
+    class Meta:
         model = TaskSurveyAnswer
         fields = ('create_user', 'survey_result')

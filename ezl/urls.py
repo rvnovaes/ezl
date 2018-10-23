@@ -11,7 +11,7 @@ from core.views import (
     ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView,
     PasswordResetViewMixin, CorrespondentAutocomplete, RequesterAutocomplete,
     ServiceAutocomplete, EditableListSave, PopupSuccessView,
-    OfficeAutocomplete, OfficeCorrespondentAutocomplete)
+    OfficeAutocomplete, OfficeCorrespondentAutocomplete, OriginRequesterAutocomplete)
 from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView
 from rest_framework_swagger.views import get_swagger_view
@@ -23,9 +23,9 @@ urlpatterns = [
     url(r'^', include('core.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/login/$', LoginCustomView.as_view(), name='account_login'),
-    url(r'^accounts/password/reset/$',
-        PasswordResetViewMixin.as_view(),
-        name='account_reset_password'),
+    # url(r'^accounts/password/reset/$',
+    #     PasswordResetViewMixin.as_view(),
+    #     name='account_reset_password'),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^financeiro/', include('financial.urls'), name='financial'),
     url(r'^pesquisa/', include('survey.urls'), name='survey'),
@@ -70,6 +70,9 @@ urlpatterns = [
     url(r'^requester_form',
         login_required(RequesterAutocomplete.as_view()),
         name='requester_autocomplete'),
+    url(r'^origin_requester_form',
+        login_required(OriginRequesterAutocomplete.as_view()),
+        name='origin_requester_autocomplete'),    
     url(r'^service_form',
         login_required(ServiceAutocomplete.as_view()),
         name='service_autocomplete'),
@@ -86,6 +89,8 @@ urlpatterns = [
     url(r'^popup_success', PopupSuccessView.as_view(), name='popup_success'),
     url(r'^api-auth/', include('rest_framework.urls')),
     url(r'^api/v1/', include('ezl.urls_api')),
+    url(r'^api/v1/rest-auth/', include('rest_auth.urls')),
+    url(r'^api/v1/', include('django.contrib.auth.urls')),
 ] + static(
     settings.STATIC_URL,
     document_root=os.path.join(settings.BASE_DIR, 'static/'))

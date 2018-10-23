@@ -41,13 +41,22 @@ def valid_court_district(court_district, state):
     return True
 
 
-def check_service_price_table_unique(office_correspondent, state, court_district, type_task, client):
+def check_service_price_table_unique(pk, office, office_correspondent, state, court_district, type_task, client,
+                                     court_district_complement):
+    office_q = Q(office=office)
     office_correspondent_q = Q(office_correspondent=office_correspondent) if office_correspondent \
         else Q(office_correspondent__isnull=True)
     state_q = Q(state=state) if state else Q(state__isnull=True)
     court_district_q = Q(court_district=court_district) if court_district else Q(court_district__isnull=True)
+    court_district_complement_q = Q(court_district_complement=court_district_complement) if court_district_complement \
+        else Q(court_district_complement__isnull=True)
     type_task_q = Q(type_task=type_task) if type_task else Q(type_task__isnull=True)
     client_q = Q(client=client) if client else Q(client__isnull=True)
-    if ServicePriceTable.objects.filter(office_correspondent_q, state_q, court_district_q, type_task_q, client_q):
+    if ServicePriceTable.objects.filter(~Q(pk=pk), office_q, office_correspondent_q, state_q, court_district_q,
+                                        type_task_q, client_q, court_district_complement_q):
         return False
     return True
+
+
+def check_office_correspondent_relation(office, office_correspondent):
+    return office_correspondent in office.offices.active_offices()

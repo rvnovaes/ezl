@@ -10,9 +10,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0114_person_refunds_correspondent_service'),
-        ('task', '0116_add_ecmtask'),
+        ('task', '0117_auto_20181011_1509'),
     ]
-
     operations = [
         migrations.AddField(
             model_name='task',

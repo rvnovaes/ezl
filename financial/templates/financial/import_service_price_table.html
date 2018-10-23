@@ -31,7 +31,11 @@
         <div class="row">
             <!--Campo para upload do arquivo -->            
             <div class="form-group col-sm-12">
-                <label class="control-label" for="id_file_xls">Arquivo</label>
+                <label class="control-label">Baixe aqui o </label>
+                <a href="https://ezlawyer.atlassian.net/wiki/download/attachments/102745/modelo_importacao_tabela_precos_v1.xlsx?version=2&modificationDate=1539890229124&cacheVersion=1&api=v2">layout da planilha de importação</a>
+                <br>
+                <br>
+                <label class="control-label" for="id_file_xls">Arquivo - versão 1</label>
                 <div class="row bootstrap3-multi-input">
                     <div class="col-xs-12" style="width: 400px;">
                         <input type="file" name="file_xls" class="dropify" title="" required="" id="id_file_xls">
@@ -65,10 +69,9 @@
                             confirmButtonText: "Sim",
                             cancelButtonText: "Não",
                             confirmButtonColor: "#DD6B55",                        
-                            closeOnConfirm: false
-                        }, function(isConfirm){
-                            if (isConfirm) {                                                   
-                                $('#import_service_price_table_form').submit();                            
+                        }.then(function(result){
+                            if (result.value) {                                                   
+                                $('#import_service_price_table_form').submit();                           
                             }
                         }
                     );

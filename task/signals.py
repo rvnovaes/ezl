@@ -95,7 +95,7 @@ def create_users_company_by_chat(company, chat):
 def create_company_chat(sender, instance, created, **kwargs):
     if not instance.parent and instance.client.company:
         label = 'company-task-{}'.format(instance.pk)
-        title = """#{lawsuit_number}""".format(
+        title = """{lawsuit_number}""".format(
             lawsuit_number=instance.lawsuit_number)
         description = "Processo: {}".format(instance.lawsuit_number)
         chat, chat_created = Chat.objects.update_or_create(
