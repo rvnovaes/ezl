@@ -1678,10 +1678,17 @@ class CityAutoCompleteView(TypeaHeadGenericSearch):
     def get_data(module, model, field, q, office, forward_params, extra_params,
                  *args, **kwargs):
         data = []
-        for city in City.objects.filter(
-                Q(name__unaccent__icontains=q) | Q(state__initials__exact=q)
-                | Q(state__country__name__unaccent__contains=q)):
-            data.append({'id': city.id, 'data-value-txt': city.__str__()})
+        cities = City.objects.filter(**forward_params) if forward_params else City.objects.all()
+        forward_field = extra_params.get('forward_field', None)
+        if forward_field:
+            forward_field = forward_field.replace('__', '.')
+        for city in cities.filter(Q(name__unaccent__icontains=q) |
+                                  Q(state__initials__exact=q)|
+                                  Q(state__country__name__unaccent__contains=q)):
+            data.append({'id': city.id,
+                         'data-value-txt': city.__str__(),
+                         'data-forward-id': eval('city.{}'.format(forward_field)) if forward_field else 0
+                         })
         return list(data)
 
 
