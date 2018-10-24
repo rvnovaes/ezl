@@ -17,7 +17,27 @@ from lawsuit.models import Movement, Folder
 from chat.models import Chat
 from decimal import Decimal
 from .schemas import *
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, ArrayField
+from django.forms import MultipleChoiceField
+
+
+class ChoiceArrayField(ArrayField):
+    """
+    A field that allows us to store an array of choices.
+    Uses Django's Postgres ArrayField
+    and a MultipleChoiceField for its formfield.
+    """
+
+    def formfield(self, **kwargs):
+        defaults = {
+            'form_class': MultipleChoiceField,
+            'choices': self.base_field.choices,
+        }
+        defaults.update(kwargs)
+        # Skip our parent's formfield implementation completely as we don't
+        # care for it.
+        # pylint:disable=bad-super-call
+        return super(ArrayField, self).formfield(**defaults)
 
 
 class Permissions(Enum):
@@ -157,6 +177,22 @@ class CheckPointType(Enum):
     @classmethod
     def choices(cls):
         return [(x.value, x.name) for x in cls]
+
+
+class MailRecipients(Enum):
+    PERSON_ASKED_BY = 'Solicitante'
+    PERSON_EXECUTED_BY = 'Correspondente'
+    PERSON_DISTRIBUTED_BY = 'Contratante'
+    PARENT_OFFICE = 'Escritório Contratante'
+    CHILD_OFFICE = 'Escritório Correspondente'
+    NONE = 'Nenhum'
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        return [(x.name, x.value) for x in cls]
 
 
 class TypeTaskMain(models.Model):
@@ -851,3 +887,10 @@ class TaskShowStatus(Audit):
         default=TaskStatus.REQUESTED)
     send_mail_template = models.ForeignKey(
         EmailTemplate, verbose_name='Template a enviar', blank=True, null=True)
+    mail_recipients = ChoiceArrayField(
+        base_field=models.CharField(
+            null=True,
+            verbose_name='Destinatários do e-mail',
+            max_length=256,
+            choices=((x.name, x.value.title()) for x in MailRecipients)),
+        default=[])

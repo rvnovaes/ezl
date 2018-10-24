@@ -18,7 +18,7 @@ class TaskWorkflowInline(admin.TabularInline):
 
 class TaskShowStatusInline(admin.TabularInline):
     model = TaskShowStatus
-    fields = ('create_user', 'status_to_show', 'send_mail_template')
+    fields = ('create_user', 'status_to_show', 'send_mail_template', 'mail_recipients')
 
 
 @admin.register(CustomSettings)
