@@ -1,0 +1,118 @@
+{% load staticfiles %}
+
+{% block content %}
+    {% load bootstrap3 %}
+    <script id="inline-script">
+    </script>
+        <div id="survey" class="modal" data-status="">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div id=" modal modalHeader">
+                    <h4 style="text-align: center" class="panel-header panel-title panel-heading DONE">
+                        <i class="fa fa-align-justify"></i>
+                        Formulário de Cumprimento </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group" style="margin: auto">
+                        <div id="surveyElement">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>    
+    <script>
+
+    $('#survey').on('show.bs.modal', function(e) {
+        var surveyData = JSON.parse(selectedSurvey);        
+        var survey = new Survey.Model(surveyData);
+        Survey.Survey.cssType = "bootstrapmaterial";
+        Survey.defaultBootstrapMaterialCss.navigationButton = "btn btn-sm btn-raised btn-primary";
+
+        survey.onComplete.add(function (result) {
+            var surveyResponse = JSON.stringify(getSurveyResult(result));
+            var surveyResult = document.getElementsByName('survey_result').item(0);
+            surveyResult.value = surveyResponse;
+            document.getElementById('id_survey_result').innerHTML = surveyResponse;
+            let status = $('#survey').attr('data-status')
+            $(`<input name="action" value="${status}">`).appendTo($('#task_detail'));
+            submitSurvey();
+        });
+
+        survey.locale = "pt";        
+
+        Survey.JsonObject.metaData.addProperty("dropdown", {
+            name: "dateFormat",
+            default: "mm/dd/yy",
+            choices: ["mm/dd/yy", "yy-mm-dd", "d M, y", "d MM, y", "DD, d MM, yy", "'day' d 'of' MM 'in the year' yy"]
+        });
+
+
+        var widget = {
+            name: "datepicker",
+            htmlTemplate: "<input class='widget-datepicker form-control' type='text' style='width: 100%;'>",
+            isFit: function (question) {
+                return question.getType() === 'text' && question.inputType === 'date';
+            },
+            afterRender: function (question, el) {
+                var $el;
+
+                var $el = $(el).find(".widget-datepicker");
+
+                var widget = $el.datepicker({
+                    dateFormat: 'dd/mm/yy',
+                    onSelect: function (dateText) {
+                        question.value = dateText;
+                    },
+                    dayNames: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+                    dayNamesMin: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S', 'D'],
+                    dayNamesShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                    monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+                    monthNamesShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                    nextText: 'Próximo',
+                    prevText: 'Anterior'
+                });
+                question.valueChangedCallback = function () {
+                    widget.datepicker('setDate', new Date(question.value));
+                };
+                question.valueChangedCallback();
+                question.value = new Date();
+            },
+            willUnmount: function (question, el) {
+
+                $(el).find('.widget-datepicker').datepicker("destroy");
+
+            }
+        };
+
+        Survey.CustomWidgetCollection.Instance.addCustomWidget(widget);
+
+        $("#surveyElement").Survey({model: survey});
+
+        try {
+            var footer = document.querySelector("#surveyElement").querySelector('.panel-footer')
+            var cancelBtn = document.createElement("button");
+
+            footer.className = "row align-center";
+            footer.style = "text-align: center;";
+
+            cancelBtn.innerHTML = "Cancelar";
+            cancelBtn.className = "btn btn-sm btn-raised btn-error";
+            cancelBtn.type = "";
+            cancelBtn.name = "action";
+
+            cancelBtn.setAttribute("data-dismiss", "modal");
+
+
+            footer.appendChild(cancelBtn);
+        } catch (e){
+            console.log(e)
+        }
+
+    })
+
+    </script>    
+{% endblock %}

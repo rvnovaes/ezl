@@ -1834,4 +1834,11 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
     def get_queryset(self):
         task_list, task_filter = self.query_builder()
         self.filter = task_filter                
-        return task_list.filter(person_company_representative=self.request.user.person)    
+        return task_list.filter(person_company_representative=self.request.user.person)
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        context['surveys'] = [
+            {'task_id': task.pk, 'survey': task.type_task.survey} for task in self.object_list
+        ]        
+        return context        
