@@ -716,7 +716,12 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         type_task_field = get_correspondents_table.get_type_task_field()
         if type_task_field:
             context['form'].fields['type_task_field'] = type_task_field
-
+        checker = ObjectPermissionChecker(self.request.user)        
+        if checker.has_perm('can_see_tasks_company_representative', office_session):            
+            if not TaskSurveyAnswer.objects.filter(task=self.object, create_user=self.request.user):
+                if (self.object.type_task.survey):
+                    context['not_answer_questionnarie'] = True
+                    context['survey_company_representative'] = self.object.type_task.survey.data
         return context
 
 
