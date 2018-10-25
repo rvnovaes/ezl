@@ -183,6 +183,7 @@ class MailRecipients(Enum):
     PERSON_ASKED_BY = 'Solicitante'
     PERSON_EXECUTED_BY = 'Correspondente'
     PERSON_DISTRIBUTED_BY = 'Contratante'
+    OFFICE = 'Escritório'
     PARENT_OFFICE = 'Escritório Contratante'
     CHILD_OFFICE = 'Escritório Correspondente'
     NONE = 'Nenhum'

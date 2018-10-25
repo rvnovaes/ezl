@@ -284,7 +284,8 @@ class TaskMail(object):
             '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'
         )
         self.task = task
-        self.email = ', '.join(email)
+        import pdb;pdb.set_trace()
+        self.email = [{"email": email_address} for email_address in list(set(email))]
         self.template_id = template_id
         self.email_status = {
             TaskStatus.REFUSED_SERVICE: TaskRefusedServiceMailTemplate,
@@ -300,9 +301,7 @@ class TaskMail(object):
         )
         self.data = {
             "personalizations": [{
-                "to": [{
-                    "email": self.email
-                }],
+                "to": self.email,
                 "subject":
                     "Sending with SendGrid is Fun",
                 "dynamic_template_data":
