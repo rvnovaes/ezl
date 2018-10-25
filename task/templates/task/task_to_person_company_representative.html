@@ -1,4 +1,18 @@
-{% extends "skeleton/base.html" %}
-{%load staticfiles%}
+{% extends "skeleton/forms/base.html" %}
+{% load render_table from django_tables2 %}
+{% load static %}
+{% load querystring from django_tables2 %}
+{% load bootstrap3 %}
 
-TUDO CERTO
+{% block content %}    
+    {% include 'task/includes/task-form-filters.html'%}
+
+    {% block extra_content %}
+        {% include 'task/includes/task-table-list.html' with title_table='Providências a responder'%}    
+    {% endblock extra_content %}
+{% endblock content %}
+{% block extra_scripts %} 
+    {% include 'task/includes/task-filter-extras.html'%}
+{%endblock%}
+
+

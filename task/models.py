@@ -693,6 +693,13 @@ class DashboardViewModel(Audit, OfficeMixin):
         null=True,
         related_name='%(class)s_asked_by',
         verbose_name='Solicitante')
+    person_company_representative = models.ForeignKey(
+        Person,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name='%(class)s_company_representative',
+        verbose_name='Preposto')    
     person_executed_by = models.ForeignKey(
         Person,
         on_delete=models.PROTECT,

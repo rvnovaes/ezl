@@ -1828,5 +1828,10 @@ class BatchCheapestCorrespondent(CustomLoginRequiredView, View):
         return JsonResponse({})
 
 
-class ViewTaskToPersonCompanyRepresentative(CustomLoginRequiredView, TemplateView):
+class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):    
     template_name = 'task/task_to_person_company_representative.html'
+
+    def get_queryset(self):
+        task_list, task_filter = self.query_builder()
+        self.filter = task_filter                
+        return task_list.filter(person_company_representative=self.request.user.person)    
