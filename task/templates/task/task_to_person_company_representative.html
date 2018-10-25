@@ -36,13 +36,15 @@
         	surveys['{{survey.task_id}}'] = surveyData;        	
         {% endfor %}
     	$('tbody tr').each(function(){
-    		$(this).append('<td><button id="btn-open-questions" class="btn btn-primary">Responder</button></td>')    	
+            if ($(this).attr('tr-data-id')) {
+    		  $(this).append('<td><button id="btn-open-questions" class="btn btn-success btn-sm">Responder</button></td>')
+            }
     	}).promise().done(function() { 
 			$('#btn-open-questions').on('click', function(event) {
 				event.stopPropagation()
 				taskId = $(this).parent().parent().attr('tr-data-id');
                 selectedSurvey = surveys[taskId];
-                $("#survey").modal('show')
+                $("#survey-company-representative").modal('show')
 			})
         })
     </script>
