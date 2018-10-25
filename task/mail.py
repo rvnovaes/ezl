@@ -253,6 +253,30 @@ class TaskRefusedMailTemplate(object):
         }
 
 
+class TaskReturnMailTemplate(object):
+    def __init__(self, task):
+        self.task = task
+
+    def get_dynamic_template_data(self):
+        project_link = '{}{}'.format(
+            get_project_link(self.task),
+            reverse('task_detail', kwargs={'pk': self.task.pk}))
+        return {
+            "task_number":
+                self.task.task_number,
+            "type_task":
+                self.task.type_task.name,
+            "title_type_service":
+                "OS {task_number} - {type_task} ".format(
+                    task_number=self.task.task_number,
+                    type_task=self.task.type_task.name),
+            "person_distributed_by":
+                str(self.task.person_distributed_by).title(),
+            "task_url": project_link,
+            "final_deadline_date": timezone.localtime(self.task.final_deadline_date).strftime('%d/%m/%Y %H:%M')
+        }
+
+
 class TaskMail(object):
     def __init__(self, email, task, template_id):
         self.sg = sendgrid.SendGridAPIClient(
@@ -265,6 +289,7 @@ class TaskMail(object):
         self.email_status = {
             TaskStatus.REFUSED_SERVICE: TaskRefusedServiceMailTemplate,
             TaskStatus.REFUSED: TaskRefusedMailTemplate,
+            TaskStatus.RETURN: TaskReturnMailTemplate,
             TaskStatus.ACCEPTED: TaskAcceptedMailTemplate,
             TaskStatus.OPEN: TaskOpenMailTemplate,
             TaskStatus.FINISHED: TaskFinishedEmail,
