@@ -13,6 +13,7 @@ from task.models import TaskStatus
 import base64
 import traceback
 import logging
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,22 @@ def to_localtime(date_time=None, format_str='%d/%m/%Y %H:%M'):
 
 def get_str_or_blank(obj=None):
     return str(obj) if obj else ''
+
+
+def get_project_link(task):
+    if hasattr(task, '_TaskCreateView__server'):
+        project_link = task._TaskCreateView__server
+
+    elif hasattr(task, '_TaskUpdateView__server'):
+        project_link = task._TaskUpdateView__server
+
+    elif hasattr(task, '_TaskDetailView__server'):
+        project_link = task._TaskDetailView__server
+
+    else:
+        project_link = settings.PROJECT_LINK
+
+    return project_link
 
 
 class SendMail:
@@ -188,6 +205,54 @@ class TaskAcceptedMailTemplate(object):
         }
 
 
+class TaskRefusedServiceMailTemplate(object):
+    def __init__(self, task):
+        self.task = task
+
+    def get_dynamic_template_data(self):
+        project_link = '{}{}'.format(
+            get_project_link(self.task),
+            reverse('task_detail', kwargs={'pk': self.task.pk}))
+        return {
+            "task_number":
+                self.task.task_number,
+            "type_task":
+                self.task.type_task.name,
+            "title_type_service":
+                "OS {task_number} - {type_task} ".format(
+                    task_number=self.task.task_number,
+                    type_task=self.task.type_task.name),
+            "person_distributed_by":
+                str(self.task.person_distributed_by).title(),
+            "task_url": project_link,
+            "final_deadline_date": timezone.localtime(self.task.final_deadline_date).strftime('%d/%m/%Y %H:%M')
+        }
+
+
+class TaskRefusedMailTemplate(object):
+    def __init__(self, task):
+        self.task = task
+
+    def get_dynamic_template_data(self):
+        project_link = '{}{}'.format(
+            get_project_link(self.task),
+            reverse('task_detail', kwargs={'pk': self.task.pk}))
+        return {
+            "task_number":
+                self.task.task_number,
+            "type_task":
+                self.task.type_task.name,
+            "title_type_service":
+                "OS {task_number} - {type_task} ".format(
+                    task_number=self.task.task_number,
+                    type_task=self.task.type_task.name),
+            "person_executed_by":
+                str(self.task.person_executed_by).title(),
+            "task_url": project_link,
+            "final_deadline_date": timezone.localtime(self.task.final_deadline_date).strftime('%d/%m/%Y %H:%M')
+        }
+
+
 class TaskMail(object):
     def __init__(self, email, task, template_id):
         self.sg = sendgrid.SendGridAPIClient(
@@ -195,22 +260,19 @@ class TaskMail(object):
             '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'
         )
         self.task = task
-        self.email = email
+        self.email = ', '.join(email)
         self.template_id = template_id
         self.email_status = {
+            TaskStatus.REFUSED_SERVICE: TaskRefusedServiceMailTemplate,
+            TaskStatus.REFUSED: TaskRefusedMailTemplate,
             TaskStatus.ACCEPTED: TaskAcceptedMailTemplate,
             TaskStatus.OPEN: TaskOpenMailTemplate,
             TaskStatus.FINISHED: TaskFinishedEmail,
         }
         self.template_class = self.email_status.get(self.task.status)(task)
-        self.attachments = []
+        self.attachments = self.get_task_attachments()
         self.dynamic_template_data = self.template_class.get_dynamic_template_data(
         )
-        for ecm in self.task.parent.ecm_set.all():
-            try:
-                self.attachments.append(self.set_mail_attachment(ecm))
-            except:
-                pass
         self.data = {
             "personalizations": [{
                 "to": [{
@@ -230,6 +292,18 @@ class TaskMail(object):
 
         if self.attachments:
             self.data['attachments'] = self.attachments
+
+    def get_task_attachments(self):
+        task = self.task.parent if self.task.parent else self.task
+        ecm_list = []
+
+        for ecm in task.ecm_set.all():
+            try:
+                ecm_list.append(self.set_mail_attachment(ecm))
+            except:
+                pass
+
+        return ecm_list
 
     def set_mail_attachment(self, ecm):
         attachment = {

@@ -197,10 +197,26 @@ def workflow_send_mail(sender, instance, created, **kwargs):
             status_to_show = custom_settings.task_status_show.filter(
                 status_to_show=instance.task_status).first()
             if status_to_show and status_to_show.send_mail_template:
-                email = TaskMail(custom_settings.email_to_notification,
-                                 instance,
-                                 status_to_show.send_mail_template.template_id)
-                email.send_mail()
+                email = None
+                if custom_settings.i_work_alone:
+                    email = TaskMail([custom_settings.email_to_notification],
+                                     instance,
+                                     status_to_show.send_mail_template.template_id)
+                else:
+                    persons_to_receive = []
+                    mail_list = []
+                    person_recipient_list = status_to_show.mail_recipients
+                    for person in person_recipient_list:
+                        if getattr(instance, person.lower(), None):
+                            persons_to_receive.append(getattr(instance, person.lower()))
+                    for person in persons_to_receive:
+                        mails = person.emails.split(' | ')
+                        for mail in mails:
+                            if mail != '':
+                                mail_list.append(mail)
+                    email = TaskMail(mail_list, instance, status_to_show.send_mail_template.template_id)
+                if email:
+                    email.send_mail()
     except:
         pass
 
@@ -415,7 +431,6 @@ def send_task_emails(sender, instance, **kwargs):
                 instance.task_number,
                 instance.legacy_code) if instance.legacy_code else str(
                     instance.task_number)
-
             if hasattr(instance, '_TaskCreateView__server'):
                 project_link = instance._TaskCreateView__server
 
