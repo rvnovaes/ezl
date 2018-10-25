@@ -545,6 +545,15 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
     table_pagination = {'per_page': 5}
     ret_status_dict = {}
 
+    def get(self, request, *args, **kwargs):
+        office_session = get_office_session(request)
+        checker = ObjectPermissionChecker(request.user)
+        company_representative = checker.has_perm('can_see_tasks_company_representative', office_session)
+        view_all_tasks = checker.has_perm('view_all_tasks', office_session)
+        if company_representative and not view_all_tasks:
+            return HttpResponseRedirect(reverse_lazy('task_to_company_representative'))
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, *args, **kwargs):
         office_session = get_office_session(self.request)
         context = super().get_context_data(*args, **kwargs)
@@ -1817,3 +1826,7 @@ class BatchCheapestCorrespondent(CustomLoginRequiredView, View):
                     'value': cheapest_correspondent[0].value
                 })
         return JsonResponse({})
+
+
+class ViewTaskToPersonCompanyRepresentative(CustomLoginRequiredView, TemplateView):
+    template_name = 'task/task_to_person_company_representative.html'

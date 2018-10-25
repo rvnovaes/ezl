@@ -90,7 +90,7 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls')),
     url(r'^api/v1/', include('ezl.urls_api')),
     url(r'^api/v1/rest-auth/', include('rest_auth.urls')),
-    url(r'^api/v1/', include('django.contrib.auth.urls')),
+    # url(r'^api/v1/', include('django.contrib.auth.urls')),
 ] + static(
     settings.STATIC_URL,
     document_root=os.path.join(settings.BASE_DIR, 'static/'))
