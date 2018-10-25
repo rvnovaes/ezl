@@ -28,6 +28,7 @@
     <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>    
     {% include 'questionnaire/company_representative_questionnarie.html'%}
     <script type="text/javascript">
+        var taskId;
         var selectedSurvey;
     	var surveys = {};
         {% for survey in surveys%} 
@@ -39,7 +40,7 @@
     	}).promise().done(function() { 
 			$('#btn-open-questions').on('click', function(event) {
 				event.stopPropagation()
-				let taskId = $(this).parent().parent().attr('tr-data-id');
+				taskId = $(this).parent().parent().attr('tr-data-id');
                 selectedSurvey = surveys[taskId];
                 $("#survey").modal('show')
 			})

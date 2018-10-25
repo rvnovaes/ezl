@@ -32,14 +32,36 @@
         Survey.Survey.cssType = "bootstrapmaterial";
         Survey.defaultBootstrapMaterialCss.navigationButton = "btn btn-sm btn-raised btn-primary";
 
+        function getSurveyResult(result){
+            var data = {};
+            console.log(result.data);
+            $.each(result.getAllQuestions(), function(i, question){
+                if (question.visible && question.getType() != "file") {
+                    data[question.title] = question.value || "";
+                }
+            });
+            return data;
+        };
+
         survey.onComplete.add(function (result) {
-            var surveyResponse = JSON.stringify(getSurveyResult(result));
-            var surveyResult = document.getElementsByName('survey_result').item(0);
-            surveyResult.value = surveyResponse;
-            document.getElementById('id_survey_result').innerHTML = surveyResponse;
-            let status = $('#survey').attr('data-status')
-            $(`<input name="action" value="${status}">`).appendTo($('#task_detail'));
-            submitSurvey();
+            $.ajax({
+                method: 'POST', 
+                url: '/providencias/task_to_company_representative/', 
+                data: {
+                    task_id: taskId, 
+                    survey: JSON.stringify(result.data)
+                },
+                success: function(response) {
+                    $('#survey').modal('hide');
+                    location.reload();
+                },
+                error: function (request, status, error) {
+                },
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                },
+                dataType: 'json'                                        
+            })
         });
 
         survey.locale = "pt";        

@@ -1834,7 +1834,9 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
     def get_queryset(self):
         task_list, task_filter = self.query_builder()
         self.filter = task_filter                
-        return task_list.filter(person_company_representative=self.request.user.person)
+        return task_list.filter(
+            person_company_representative=self.request.user.person).exclude(
+            pk__in=self.request.user.tasksurveyanswer_create_user.values_list('task_id', flat=True))
 
     def get_context_data(self):
         context = super().get_context_data()
@@ -1842,3 +1844,14 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
             {'task_id': task.pk, 'survey': task.type_task.survey} for task in self.object_list
         ]        
         return context        
+
+    def post(self, request, *args, **kwargs):
+        try:
+            task = Task.objects.get(pk=request.POST.get('task_id'))
+            survey_result = json.loads(request.POST.get('survey'))
+            survey = TaskSurveyAnswer(create_user=request.user, task=task, survey_result=survey_result)
+            survey.save()
+            return JsonResponse({'status': 'ok'})
+        except Exception as e:
+            return JsonResponse({'error': e})     
+            
