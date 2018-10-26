@@ -12,13 +12,20 @@ class TaskModelInstanceLoader(BaseInstanceLoader):
         return self.resource._meta.model.objects.all()
 
     def get_instance(self, row):
-        try:
+        ret = None
+        for key in self.resource.get_import_id_fields():
             params = {}
-            for key in self.resource.get_import_id_fields():
-                field = self.resource.fields[key]
-                params[field.attribute] = field.clean(row)
-                params['{}__isnull'.format(field.attribute)] = False
-            return self.get_queryset().filter(office=row['office']).exclude(
-                legacy_code='').get(**params)
-        except self.resource._meta.model.DoesNotExist:
-            return None
+            field = self.resource.fields[key]
+            params[field.attribute] = field.clean(row)
+            params['{}__isnull'.format(field.attribute)] = False
+            instance = self.get_queryset().filter(office=row['office']).exclude(
+                legacy_code='').filter(**params).first()
+            if instance:
+                row['id'] = instance.id
+                row['task_number'] = instance.task_number
+                if instance.legacy_code:
+                    row['legacy_code'] = instance.legacy_code
+                ret = instance
+                break
+
+        return ret

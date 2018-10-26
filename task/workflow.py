@@ -3,6 +3,7 @@ from django.db.models import Q
 from financial.models import ServicePriceTable
 from financial.tables import ServicePriceTableTaskTable
 from task.models import TaskStatus, TypeTask
+from decimal import Decimal
 
 PARENT_STATUS = {
     TaskStatus.REQUESTED: TaskStatus.OPEN,
@@ -111,18 +112,27 @@ class CorrespondentsTable(object):
                  type_task=None):
         self.task = task
         self.office_session = office_session
-        self.type_task_qs = type_task_qs
+        self.type_task_qs = type_task_qs        
         if not type_task:
             self.type_task, self.type_task_main = self.get_type_task(task)
         else:
             self.type_task = type_task
             self.type_task_main = type_task.main_tasks
+        self.qs = None
+        self.correspondents_qs = self.get_correspondents_qs()            
 
-    def get_correspondents_table(self):
+    def get_cheapest_correspondent(self):        
+        correspondents = self.correspondents_qs        
+        if self.qs:
+            # Foi feito desta forma por conta de performance --Nao utilizar o sorted pois aumenta muito o tempo de execucao--
+            return max(self.qs.filter(value=self.qs.earliest('value').value), key=lambda k: k.office_rating if k.office_rating else '0.00')        
+        return None
+
+
+    def get_correspondents_qs(self):
         task = self.task
         type_task = self.type_task
         type_task_main = self.type_task_main
-
         if type_task:
             complement = task.movement.law_suit.court_district_complement
             court_district = task.movement.law_suit.court_district
@@ -165,12 +175,13 @@ class CorrespondentsTable(object):
             ]
             if ignore_list:
                 qs = qs.filter(~Q(id__in=ignore_list))
-            correspondents_table = ServicePriceTableTaskTable(set(qs))
+            self.qs = qs
+            return set(qs)
         else:
-            correspondents_table = ServicePriceTableTaskTable(
-                ServicePriceTable.objects.none())
+            return ServicePriceTable.objects.none()
 
-        return correspondents_table
+    def get_correspondents_table(self):
+        return ServicePriceTableTaskTable(self.correspondents_qs)
 
     def get_type_task(self, task):
         type_task = task.type_task

@@ -1,5 +1,4 @@
 from django import forms
-from material import Layout, Row
 from core.models import Person, State
 from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field
 from lawsuit.models import CourtDistrict, CourtDistrictComplement
@@ -11,14 +10,7 @@ from core.widgets import TypeaHeadForeignKeyWidget
 
 
 class CostCenterForm(BaseModelForm):
-    layout = Layout(
-        Row('office'),
-        Row('name', 'is_active')
-    )
-
-    legacy_code = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    legacy_code = forms.CharField(required=False)
 
     class Meta:
         model = CostCenter
@@ -111,6 +103,7 @@ class ServicePriceTableForm(BaseModelForm):
 class ImportServicePriceTableForm(forms.ModelForm):
     file_xls = XlsxFileField(label='Arquivo', required=True,
                              headers_to_check=['Correspondente', 'Serviço', 'Cliente', 'Comarca', 'UF', 'Valor'])
+
     class Meta:
         model = ImportServicePriceTable
         fields = ('file_xls', )

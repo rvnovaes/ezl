@@ -121,7 +121,7 @@ INSTALLED_APPS = [
     # Sequences
     'sequences.apps.SequencesConfig',
     'channels',
-    'chat',
+    'chat.apps.ChatConfig',
     'ecm',
     'dashboard',
     'codemirror',
@@ -133,6 +133,7 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'import_export',
     'django_dbconn_retry',
+    'rest_auth',
 ]
 
 MIDDLEWARE = [

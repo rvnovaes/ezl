@@ -12,6 +12,7 @@ from task.utils import task_send_mail, create_ecm_task
 from task.workflow import get_parent_status, get_child_status, get_parent_fields, get_child_recipients, \
     get_parent_recipients
 from chat.models import Chat, UserByChat
+from chat.utils import create_users_company_by_chat
 from lawsuit.models import CourtDistrict
 from core.utils import check_environ
 from core.models import CustomSettings
@@ -80,22 +81,10 @@ def create_or_update_user_by_chat(task, task_to_fields, fields):
                     user_by_chat=user, chat=task.chat).first()
             user = user.user_by_chat
 
-
-def create_users_company_by_chat(company, chat):
-    users = []
-    for company_user in company.users.all():
-        user_by_chat = UserByChat(
-            create_user=chat.create_user,
-            user_by_chat=company_user.user,
-            chat=chat)
-        users.append(user_by_chat)
-    UserByChat.objects.bulk_create(users)
-
-
 def create_company_chat(sender, instance, created, **kwargs):
     if not instance.parent and instance.client.company:
         label = 'company-task-{}'.format(instance.pk)
-        title = """#{lawsuit_number}""".format(
+        title = """{lawsuit_number}""".format(
             lawsuit_number=instance.lawsuit_number)
         description = "Processo: {}".format(instance.lawsuit_number)
         chat, chat_created = Chat.objects.update_or_create(

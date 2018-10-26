@@ -66,3 +66,4 @@ django-rest-swagger==2.2.0
 # Oauth
 django-oauth-toolkit==1.1.2
 rest-condition==1.0.3
+django-rest-auth==0.9.3

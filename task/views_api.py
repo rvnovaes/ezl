@@ -1,7 +1,8 @@
-from .models import TypeTask, Task, Ecm
-from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerializer, EcmTaskSerializer
-from .filters import TaskApiFilter
-from rest_framework import viewsets
+from .models import TypeTask, Task, Ecm, TypeTaskMain
+from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerializer, EcmTaskSerializer, \
+    TypeTaskMainSerializer
+from .filters import TaskApiFilter, TypeTaskMainFilter
+from rest_framework import viewsets, mixins
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -11,24 +12,43 @@ from rest_framework.decorators import permission_classes
 from core.views_api import ApplicationView
 from lawsuit.models import Folder, Movement
 from django.utils import timezone
+from django.db.models import Q
+from core.views_api import OfficeMixinViewSet
 
 
-@permission_classes((TokenHasReadWriteScope, ))
-class TypeTaskViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = TypeTask.objects.filter(is_active=True)
-    serializer_class = TypeTaskSerializer
-    filter_backends = (SearchFilter, )
+@permission_classes((TokenHasReadWriteScope,))
+class TypeTaskMainViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = TypeTaskMain.objects.all()
+    serializer_class = TypeTaskMainSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filter_class = TypeTaskMainFilter
     search_fields = ('name', )
 
 
 @permission_classes((TokenHasReadWriteScope, ))
-class EcmTaskViewSet(viewsets.ModelViewSet):
-    queryset = Ecm.objects.all()
-    serializer_class = EcmTaskSerializer
+class TypeTaskViewSet(OfficeMixinViewSet):
+    queryset = TypeTask.objects.filter(is_active=True)
+    serializer_class = TypeTaskSerializer
+    filter_backends = (SearchFilter, )
+    search_fields = ('name', 'legacy_code')
 
 
 @permission_classes((TokenHasReadWriteScope, ))
-class TaskViewSet(viewsets.ModelViewSet, ApplicationView):
+class EcmTaskViewSet(mixins.CreateModelMixin,
+                     mixins.RetrieveModelMixin,
+                     mixins.DestroyModelMixin,
+                     mixins.ListModelMixin,
+                     viewsets.GenericViewSet):
+    queryset = Ecm.objects.all()
+    serializer_class = EcmTaskSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        office = self.request.auth.application.office
+        return self.queryset.filter(Q(tasks__office=office.id) | Q(task__office_id=office.id))
+
+
+@permission_classes((TokenHasReadWriteScope, ))
+class TaskViewSet(OfficeMixinViewSet, ApplicationView):
     queryset = Task.objects.all()
     filter_backends = (DjangoFilterBackend, )
     filter_class = TaskApiFilter
