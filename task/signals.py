@@ -203,18 +203,34 @@ def workflow_send_mail(sender, instance, created, **kwargs):
                                      instance,
                                      status_to_show.send_mail_template.template_id)
                 else:
-                    persons_to_receive = []
-                    mail_list = []
-                    person_recipient_list = status_to_show.mail_recipients
-                    for person in person_recipient_list:
-                        if getattr(instance, person.lower(), None):
-                            persons_to_receive.append(getattr(instance, person.lower()))
-                    for person in persons_to_receive:
-                        mails = person.emails.split(' | ')
-                        for mail in mails:
-                            if mail != '':
-                                mail_list.append(mail)
-                    email = TaskMail(mail_list, instance, status_to_show.send_mail_template.template_id)
+                    if not getattr(
+                            instance, '_skip_mail'
+                    ) and instance.__previous_status != instance.task_status:
+                        persons_to_receive = []
+                        mail_list = []
+                        person_recipient_list = status_to_show.mail_recipients
+                        by_person = None
+                        import pdb;pdb.set_trace()
+                        for person in person_recipient_list:
+                            attrs = person.lower().split('__')
+                            obj = instance
+                            for attr in attrs:
+                                obj = getattr(obj, attr, None)
+                                if not obj:
+                                    break
+                                if len(attrs) > 1:
+                                    by_person = str(instance.office).title()
+                            if obj:
+                                persons_to_receive.append(obj)
+                        for person in persons_to_receive:
+                            mails = person.emails.split(' | ')
+                            for mail in mails:
+                                if mail != '':
+                                    mail_list.append(mail)
+                        email = TaskMail(mail_list,
+                                         instance,
+                                         status_to_show.send_mail_template.template_id,
+                                         by_person)
                 if email:
                     email.send_mail()
     except:

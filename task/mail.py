@@ -62,7 +62,7 @@ class SendMail:
 
 
 class TaskFinishedEmail(object):
-    def __init__(self, task):
+    def __init__(self, task, by_person):
         self.task = task
         self.custom_settings = CustomSettings.objects.filter(
             office=self.task.office).first()
@@ -102,7 +102,7 @@ class TaskFinishedEmail(object):
 
 
 class TaskOpenMailTemplate(object):
-    def __init__(self, task):
+    def __init__(self, task, by_person):
         self.task = task
 
     def get_dynamic_template_data(self):
@@ -181,7 +181,7 @@ class TaskOpenMailTemplate(object):
 
 
 class TaskAcceptedMailTemplate(object):
-    def __init__(self, task):
+    def __init__(self, task, by_person):
         self.task = task
 
     def get_dynamic_template_data(self):
@@ -206,7 +206,7 @@ class TaskAcceptedMailTemplate(object):
 
 
 class TaskRefusedServiceMailTemplate(object):
-    def __init__(self, task):
+    def __init__(self, task, by_person):
         self.task = task
 
     def get_dynamic_template_data(self):
@@ -230,7 +230,7 @@ class TaskRefusedServiceMailTemplate(object):
 
 
 class TaskRefusedMailTemplate(object):
-    def __init__(self, task):
+    def __init__(self, task, by_person):
         self.task = task
 
     def get_dynamic_template_data(self):
@@ -254,8 +254,9 @@ class TaskRefusedMailTemplate(object):
 
 
 class TaskReturnMailTemplate(object):
-    def __init__(self, task):
+    def __init__(self, task, by_person):
         self.task = task
+        self.by_person = by_person
 
     def get_dynamic_template_data(self):
         project_link = '{}{}'.format(
@@ -273,18 +274,19 @@ class TaskReturnMailTemplate(object):
             "person_distributed_by":
                 str(self.task.person_distributed_by).title(),
             "task_url": project_link,
-            "final_deadline_date": timezone.localtime(self.task.final_deadline_date).strftime('%d/%m/%Y %H:%M')
+            "final_deadline_date": timezone.localtime(self.task.final_deadline_date).strftime('%d/%m/%Y %H:%M'),
+            "by_person": 'pelo escritório {}'.format(self.by_person) if self.by_person else "pelo(a) contratante {}".format(str(self.task.person_distributed_by).title())
         }
 
 
 class TaskMail(object):
-    def __init__(self, email, task, template_id):
+    def __init__(self, email, task, template_id, by_person=None):
         self.sg = sendgrid.SendGridAPIClient(
             apikey=
             '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'
         )
+        self.by_person = by_person
         self.task = task
-        import pdb;pdb.set_trace()
         self.email = [{"email": email_address} for email_address in list(set(email))]
         self.template_id = template_id
         self.email_status = {
@@ -295,7 +297,7 @@ class TaskMail(object):
             TaskStatus.OPEN: TaskOpenMailTemplate,
             TaskStatus.FINISHED: TaskFinishedEmail,
         }
-        self.template_class = self.email_status.get(self.task.status)(task)
+        self.template_class = self.email_status.get(self.task.status)(task, by_person)
         self.attachments = self.get_task_attachments()
         self.dynamic_template_data = self.template_class.get_dynamic_template_data(
         )

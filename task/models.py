@@ -180,13 +180,19 @@ class CheckPointType(Enum):
 
 
 class MailRecipients(Enum):
-    PERSON_ASKED_BY = 'Solicitante'
-    PERSON_EXECUTED_BY = 'Correspondente'
-    PERSON_DISTRIBUTED_BY = 'Contratante'
-    OFFICE = 'Escritório'
-    PARENT_OFFICE = 'Escritório Contratante'
-    CHILD_OFFICE = 'Escritório Correspondente'
     NONE = 'Nenhum'
+    OFFICE = 'Escritório'
+    PERSON_ASKED_BY = 'Solicitante do Escritório'
+    PERSON_EXECUTED_BY = 'Correspondente do Escritório'
+    PERSON_DISTRIBUTED_BY = 'Contratante do Escritório'
+    PARENT__OFFICE = 'Escritório Contratante'
+    PARENT__PERSON_ASKED_BY = 'Solicitante do Escritório Contratante'
+    PARENT__PERSON_EXECUTED_BY = 'Correspondente do Escritório Contratante'
+    PARENT__PERSON_DISTRIBUTED_BY = 'Contratante do Escritório Contratante'
+    GET_CHILD__OFFICE = 'Escritório Correspondente'
+    GET_CHILD__PERSON_ASKED_BY = 'Solicitante do Escritório Correspondente'
+    GET_CHILD__PERSON_EXECUTED_BY = 'Correspondente do Escritório Correspondente'
+    GET_CHILD__PERSON_DISTRIBUTED_BY = 'Contratante do Escritório Correspondente'
 
     def __str__(self):
         return str(self.value)
