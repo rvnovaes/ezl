@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.db.models import Count
 from django.db.models.signals import post_delete, pre_delete
 from task.signals import delete_ecm_advwin, delete_related_ecm
+from task.models import Ecm
 
 
 class Command(BaseCommand):
