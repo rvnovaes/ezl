@@ -1,8 +1,10 @@
 import os
 import ntpath
 from django.db.utils import IntegrityError
+from django.db.models import  Q
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 import traceback
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
@@ -17,7 +19,7 @@ class EcmEtl(GenericETL):
                       G.ID_doc AS legacy_code,
                       A.Ident  AS task_legacy_code,
                       G.Link   AS path,
-                      G.Descricao as exhibition_name
+                      G.Nome as exhibition_name
                     FROM Jurid_Ged_Main AS G
                       INNER JOIN Jurid_agenda_table AS A
                         ON G.Codigo_OR = CAST(A.Ident AS VARCHAR(255))
@@ -31,7 +33,7 @@ class EcmEtl(GenericETL):
                       G.ID_doc AS legacy_code,
                       A.Ident  AS task_legacy_code,
                       G.Link   AS path,
-                      G.Descricao as exhibition_name
+                      G.Nome as exhibition_name
                     FROM Jurid_Ged_Main AS G
                       INNER JOIN Jurid_GEDLig AS GL
                         ON GL.Id_id_doc = G.ID_doc
@@ -80,23 +82,19 @@ class EcmEtl(GenericETL):
         MEDIA_ROOT apontando para /mnt/windows_ecm/Agenda.
         EX: sudo ln -s /mnt/windows_ecm/Agenda/ ./ECM
         """
-        for row in rows:
+        for row in rows:            
             try:
                 path = ecm_path_advwin2ezl(row['path'])
                 if path:
                     local_path = os.path.join(settings.MEDIA_ROOT, path)
                     if not os.path.exists(local_path):
                         continue
-
-                    with open(local_path, 'rb') as local_file:
-                        new_file = ContentFile(local_file.read())
-                    filename = ntpath.basename(local_path)
-                    new_file.name = filename
+                    filename = ntpath.basename(local_path)                    
 
                     tasks = Task.objects.filter(
                         legacy_code=row['task_legacy_code'],
                         legacy_code__isnull=False)
-                    for task in tasks:
+                    for task in tasks:                        
                         try:
                             """
                             fazemos um select antes pelo path e pela task, já que um arquivo criado por um usuário, é 
@@ -104,8 +102,26 @@ class EcmEtl(GenericETL):
                             arquivos acabam sendo duplicados
                             https://ezlawyer.atlassian.net/browse/EZL-828
                             """
-                            if not self.model.objects.filter(
-                                    task=task, path__endswith=filename):
+                            s3_filename = 'ECM/{0}/{1}'.format(task.pk, filename)
+                            if not self.model.objects.filter(Q(task=task),
+                                                             Q(
+                                                                Q(path__endswith=filename) |
+                                                                Q(exhibition_name=row['exhibition_name'])
+                                                             )):
+                                with open(local_path, 'rb') as local_file:
+                                    new_file = ContentFile(local_file.read())
+                                    new_file.name = filename                            
+
+                                """
+                                Caso o registro do arquivo não exista na base de dados e exista na S3 por algum motivo 
+                                nao esperado, e necessario exclui-lo antes de inseri-lo novamente na base de dados, 
+                                Se isso nao for feito ele sempre ira recriar o arquivo com um nome diferente que nunca 
+                                se encaixara no filtro path__endswith, assim inserindo o arquivo toda vez que esta 
+                                ETL rodar.
+                                """
+                                if default_storage.exists(s3_filename):
+                                    default_storage.delete(s3_filename)
+                                
                                 self.model.objects.create(
                                     task=task,
                                     legacy_code=row['legacy_code'],
