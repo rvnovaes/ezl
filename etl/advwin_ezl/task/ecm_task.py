@@ -1,6 +1,7 @@
 import os
 import ntpath
 from django.db.utils import IntegrityError
+from django.db.models import  Q
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -18,7 +19,7 @@ class EcmEtl(GenericETL):
                       G.ID_doc AS legacy_code,
                       A.Ident  AS task_legacy_code,
                       G.Link   AS path,
-                      G.Descricao as exhibition_name
+                      G.Nome as exhibition_name
                     FROM Jurid_Ged_Main AS G
                       INNER JOIN Jurid_agenda_table AS A
                         ON G.Codigo_OR = CAST(A.Ident AS VARCHAR(255))
@@ -32,7 +33,7 @@ class EcmEtl(GenericETL):
                       G.ID_doc AS legacy_code,
                       A.Ident  AS task_legacy_code,
                       G.Link   AS path,
-                      G.Descricao as exhibition_name
+                      G.Nome as exhibition_name
                     FROM Jurid_Ged_Main AS G
                       INNER JOIN Jurid_GEDLig AS GL
                         ON GL.Id_id_doc = G.ID_doc
@@ -102,8 +103,11 @@ class EcmEtl(GenericETL):
                             https://ezlawyer.atlassian.net/browse/EZL-828
                             """
                             s3_filename = 'ECM/{0}/{1}'.format(task.pk, filename)
-                            if not self.model.objects.filter(
-                                    task=task, path__endswith=filename):
+                            if not self.model.objects.filter(Q(task=task),
+                                                             Q(
+                                                                Q(path__endswith=filename) |
+                                                                Q(exhibition_name=row['exhibition_name'])
+                                                             )):
                                 with open(local_path, 'rb') as local_file:
                                     new_file = ContentFile(local_file.read())
                                     new_file.name = filename                            
