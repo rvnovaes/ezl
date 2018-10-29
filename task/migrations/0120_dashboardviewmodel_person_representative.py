@@ -11,7 +11,7 @@ import task.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0119_auto_20181023_1502'),
+        ('task', '0119_auto_20181024_1638'),
     ]
 
     operations = []
@@ -32,6 +32,7 @@ class Migration(migrations.Migration):
             task.alter_user_id,
             task.create_user_id,
             task.person_asked_by_id,
+            task.person_company_representative_id,
             task.person_executed_by_id,
             task.movement_id,
             task.is_active,

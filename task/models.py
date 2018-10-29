@@ -32,6 +32,7 @@ class Permissions(Enum):
     view_distributed_tasks = 'Can view tasks distributed by the user'
     can_distribute_tasks = 'Can distribute tasks to another user'
     can_see_tasks_from_team_members = 'Can see tasks from your team members'
+    can_see_tasks_company_representative = 'Can see tasks your company representative'
 
 
 # Dicionário para retornar o icone referente ao status da providencia
@@ -692,6 +693,13 @@ class DashboardViewModel(Audit, OfficeMixin):
         null=True,
         related_name='%(class)s_asked_by',
         verbose_name='Solicitante')
+    person_company_representative = models.ForeignKey(
+        Person,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name='%(class)s_company_representative',
+        verbose_name='Preposto')    
     person_executed_by = models.ForeignKey(
         Person,
         on_delete=models.PROTECT,

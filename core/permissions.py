@@ -31,6 +31,7 @@ GROUP_PERMISSIONS = {
     (Permissions.return_all_tasks, Permissions.validate_all_tasks,
      Permissions.view_requested_tasks, Permissions.block_payment_tasks,
      Permissions.can_access_general_data),
+    Person.COMPANY_REPRESENTATIVE: (Permissions.can_see_tasks_company_representative, ),
 }
 
 
