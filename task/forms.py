@@ -39,7 +39,7 @@ class TaskForm(BaseForm):
         empty_label='Selecione...',
         required=False,
         queryset=filter_valid_choice_form(
-            Person.objects.active().requesters().active_offices().filter(
+            Person.objects.active().filter(
                 legal_type='F').order_by('name')))
 
     type_task = forms.ModelChoiceField(
