@@ -210,7 +210,6 @@ def workflow_send_mail(sender, instance, created, **kwargs):
                         mail_list = []
                         person_recipient_list = status_to_show.mail_recipients
                         by_person = None
-                        import pdb;pdb.set_trace()
                         for person in person_recipient_list:
                             attrs = person.lower().split('__')
                             obj = instance
@@ -248,10 +247,10 @@ def post_save_task(sender, instance, created, **kwargs):
     try:
         new_task(sender, instance, created, **kwargs)
         ezl_export_task_to_advwin(sender, instance, **kwargs)
+        workflow_send_mail(sender, instance, created, **kwargs)
         create_or_update_chat(sender, instance, created, **kwargs)
         create_company_chat(sender, instance, created, **kwargs)
         workflow_task(sender, instance, created, **kwargs)
-        workflow_send_mail(sender, instance, created, **kwargs)
     except Exception as e:
         raise e
     finally:
@@ -365,7 +364,6 @@ def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
         export_task_history.delay(instance.pk)
 
 
-@receiver(pre_save, sender=Task)
 def update_status_parent_task(sender, instance, **kwargs):
     """
     Responsavel por alterar o status da OS pai, quando o status da OS filha e modificado
@@ -394,11 +392,10 @@ def update_status_parent_task(sender, instance, **kwargs):
                     getattr(instance, '_TaskDetailView__server', None))
             instance.parent.save(**{
                 'skip_signal': instance._skip_signal,
-                'skip_mail': False
+                'skip_mail': True
             })
 
 
-@receiver(pre_save, sender=Task)
 def update_status_child_task(sender, instance, **kwargs):
     """
     Responsavel por atualizar o status da os filha se a o estatus da OS pai e modificado
@@ -427,14 +424,11 @@ def update_status_child_task(sender, instance, **kwargs):
         child.save(
             **{
                 'skip_signal': instance._skip_signal,
-                'skip_mail': False,
+                'skip_mail': True,
                 'from_parent': True
             })
-        if instance.task_status == TaskStatus.RETURN:
-            setattr(instance, '_skip_mail', True)
 
 
-@receiver(pre_save, sender=Task)
 def send_task_emails(sender, instance, **kwargs):
     try:
         # Todo trocar posteriormente para workflow_send_mail
@@ -533,3 +527,21 @@ def send_task_emails(sender, instance, **kwargs):
             instance.__previous_status = TaskStatus(instance.task_status)
     except:
         pass
+
+
+@receiver(pre_save, sender=Task)
+def pre_save_task(sender, instance, **kwargs):
+    pre_save.disconnect(pre_save_task, sender=sender)
+    """
+    A ordem das chamadas a seguir e importante uma vez que ao dar o save na instancia em alguns métodos, alteramos as
+    propriedades skip_mail ou skip_signal da instancia. Esta alteracao acaba por influenciar o comportamento dos metodos 
+    seguintes.
+    """
+    try:
+        update_status_parent_task(sender, instance, **kwargs)
+        update_status_child_task(sender, instance, **kwargs)
+        # send_task_emails(sender, instance, **kwargs)
+    except Exception as e:
+        raise e
+    finally:
+        pre_save.connect(pre_save_task, sender=sender)

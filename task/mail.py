@@ -81,22 +81,14 @@ class TaskFinishedEmail(object):
     def get_dynamic_template_data(self):
         if not self.custom_settings.default_user.last_login:
             return {
-                "task_number":
-                    self.task.task_number,
-                "type_task":
-                    self.task.type_task.name,
-                "title_type_service":
-                    "OS {task_number} - {type_task} ".format(
-                        task_number=self.task.task_number,
-                        type_task=self.task.type_task.name),
-                "office_name":
-                    self.task.parent.office.legal_name,
-                "office_correspondent_name":
-                    self.task.parent.office.legal_name,
-                "username":
-                    self.custom_settings.default_user.username,
-                "btn_finished":
-                    self.get_url_change_password(),
+                "task_number": self.task.task_number,
+                "type_task": self.task.type_task.name,
+                "title_type_service": "OS {task_number} - {type_task} ".format(task_number=self.task.task_number,
+                                                                               type_task=self.task.type_task.name),
+                "office_name": self.task.parent.office.legal_name,
+                "office_correspondent_name": self.task.parent.office.legal_name,
+                "username": self.custom_settings.default_user.username,
+                "btn_finished": self.get_url_change_password(),
             }
         return False
 
@@ -106,77 +98,46 @@ class TaskOpenMailTemplate(object):
         self.task = task
 
     def get_dynamic_template_data(self):
+        task = self.task if self.task.parent else self.task.get_child
+        office = self.task.parent.office if self.task.parent else self.task.office
+        project_link = '{}{}'.format(get_project_link(self.task), reverse('task_detail', kwargs={'pk': task.pk}))
         return {
-            "task_number":
-                self.task.task_number,
-            "title_type_service":
-                "OS {task_number} - {type_task} ".format(
-                    task_number=self.task.task_number,
-                    type_task=self.task.type_task.name),
-            "type_task":
-                self.task.type_task.name,
-            "description":
-                get_str_or_blank(self.task.description),
-            "final_deadline_date":
-                to_localtime(self.task.final_deadline_date, '%d/%m/%Y %H:%M'),
-            "opposing_party":
-                get_str_or_blank(self.task.opposing_party),
-            "delegation_date":
-                to_localtime(self.task.delegation_date, '%d/%m/%Y %H:%M'),
-            "court_division":
-                get_str_or_blank(self.task.court_division),
-            "organ":
-                get_str_or_blank(self.task.movement.law_suit.organ),
-            "address":
-                get_str_or_blank(self.task.address),
-            "lawsuit_number":
-                get_str_or_blank(self.task.lawsuit_number),
-            "client":
-                get_str_or_blank(self.task.client),
-            "state":
-                get_str_or_blank(
-                    self.task.movement.law_suit.court_district.state) if self.task.movement.law_suit.court_district else '',
-            "court_district":
-                get_str_or_blank(self.task.movement.law_suit.court_district),
-            "city":
-                get_str_or_blank(self.task.city),
-            "court_district_complement":
-                get_str_or_blank(self.task.court_district_complement),
-            "performance_place":
-                get_str_or_blank(self.task.performance_place),
-            "office_name":
-                get_str_or_blank(self.task.parent.office.legal_name),
-            "office_phone":
-                get_str_or_blank(
-                    self.task.parent.office.contactmechanism_set.filter(
-                        contact_mechanism_type=PHONE).first()),
-            "office_email":
-                get_str_or_blank(
-                    self.task.parent.office.contactmechanism_set.filter(
-                        contact_mechanism_type=EMAIL).first()),
-            "office_address":
-                get_str_or_blank(self.task.parent.office.address_set.first()),
-            "office_correspondent_name":
-                self.task.office.legal_name,
-            "office_correspondent_phone":
-                get_str_or_blank(
-                    self.task.office.contactmechanism_set.filter(
-                        contact_mechanism_type=PHONE).first()),
-            "office_correspondent_email":
-                get_str_or_blank(
-                    self.task.office.contactmechanism_set.filter(
-                        contact_mechanism_type=EMAIL).first()),
-            "office_correspondent_address":
-                get_str_or_blank(self.task.parent.office.address_set.first()),
-            "task_url":
-                "{}/providencias/external-task-detail/{}/".format(
-                    settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex),
-            "btn_accpeted":
-                "{}/providencias/external-task/ACCEPTED/{}/".format(
-                    settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex),
-            "btn_refused":
-                "{}/providencias/external-task/REFUSED/{}/".format(
-                    settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex)
+            "task_number": task.task_number,
+            "title_type_service": "OS {task_number} - {type_task} ".format(task_number=task.task_number,
+                                                                           type_task=task.type_task.name),
+            "type_task": task.type_task.name,
+            "description": get_str_or_blank(task.description),
+            "final_deadline_date": to_localtime(task.final_deadline_date, '%d/%m/%Y %H:%M'),
+            "opposing_party": get_str_or_blank(task.opposing_party),
+            "delegation_date": to_localtime(task.delegation_date, '%d/%m/%Y %H:%M'),
+            "court_division": get_str_or_blank(task.court_division),
+            "organ": get_str_or_blank(task.movement.law_suit.organ),
+            "address": get_str_or_blank(task.address),
+            "lawsuit_number": get_str_or_blank(task.lawsuit_number),
+            "client": get_str_or_blank(task.client),
+            "state": get_str_or_blank(task.movement.law_suit.court_district.state
+                                      ) if task.movement.law_suit.court_district else '',
+            "court_district": get_str_or_blank(task.movement.law_suit.court_district),
+            "city": get_str_or_blank(task.city),
+            "court_district_complement": get_str_or_blank(task.court_district_complement),
+            "performance_place": get_str_or_blank(task.performance_place),
+            "office_name": get_str_or_blank(office.legal_name),
+            "office_phone": get_str_or_blank(office.contactmechanism_set.filter(contact_mechanism_type=PHONE).first()),
+            "office_email": get_str_or_blank(office.contactmechanism_set.filter(contact_mechanism_type=EMAIL).first()),
+            "office_address": get_str_or_blank(office.address_set.first()),
+            "office_correspondent_name": task.office.legal_name,
+            "office_correspondent_phone": get_str_or_blank(task.office.contactmechanism_set.filter(
+                contact_mechanism_type=PHONE).first()),
+            "office_correspondent_email": get_str_or_blank(task.office.contactmechanism_set.filter(
+                contact_mechanism_type=EMAIL).first()),
+            "office_correspondent_address": get_str_or_blank(task.office.address_set.first()),
+            "external_task_url": "{}/providencias/external-task-detail/{}/".format(
+                settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex),
+            "task_url": project_link,
+            "btn_accpeted": "{}/providencias/external-task/ACCEPTED/{}/".format(
+                settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex),
+            "btn_refused": "{}/providencias/external-task/REFUSED/{}/".format(
+                settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex)
         }
 
 
@@ -186,28 +147,22 @@ class TaskAcceptedMailTemplate(object):
 
     def get_dynamic_template_data(self):
         return {
-            "task_number":
-                self.task.task_number,
-            "type_task":
-                self.task.type_task.name,
-            "title_type_service":
-                "OS {task_number} - {type_task} ".format(
-                    task_number=self.task.task_number,
-                    type_task=self.task.type_task.name),
-            "office_name":
-                self.task.parent.office.legal_name,
-            "btn_done":
-                "{}/providencias/external-task/FINISHED/{}/".format(
-                    settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex),
-            "task_url":
-                "{}/providencias/external-task-detail/{}/".format(
-                    settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex),
+            "task_number": self.task.task_number,
+            "type_task": self.task.type_task.name,
+            "title_type_service": "OS {task_number} - {type_task} ".format(task_number=self.task.task_number,
+                                                                           type_task=self.task.type_task.name),
+            "office_name": self.task.parent.office.legal_name,
+            "btn_done": "{}/providencias/external-task/FINISHED/{}/".format(
+                settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex),
+            "task_url": "{}/providencias/external-task-detail/{}/".format(
+                settings.WORKFLOW_URL_EMAIL, self.task.task_hash.hex),
         }
 
 
 class TaskRefusedServiceMailTemplate(object):
     def __init__(self, task, by_person):
         self.task = task
+        self.by_person = by_person
 
     def get_dynamic_template_data(self):
         project_link = '{}{}'.format(
@@ -225,7 +180,10 @@ class TaskRefusedServiceMailTemplate(object):
             "person_distributed_by":
                 str(self.task.person_distributed_by).title(),
             "task_url": project_link,
-            "final_deadline_date": timezone.localtime(self.task.final_deadline_date).strftime('%d/%m/%Y %H:%M')
+            "final_deadline_date": timezone.localtime(self.task.final_deadline_date).strftime('%d/%m/%Y %H:%M'),
+            "by_person": 'pelo escritório {}'.format(self.by_person
+                                                     ) if self.by_person else "pelo(a) contratante {}".format(
+                str(self.task.person_distributed_by).title())
         }
 
 
@@ -249,7 +207,10 @@ class TaskRefusedMailTemplate(object):
             "person_executed_by":
                 str(self.task.person_executed_by).title(),
             "task_url": project_link,
-            "final_deadline_date": timezone.localtime(self.task.final_deadline_date).strftime('%d/%m/%Y %H:%M')
+            "final_deadline_date": timezone.localtime(self.task.final_deadline_date).strftime('%d/%m/%Y %H:%M'),
+            "by_person": 'pelo escritório {}'.format(
+                self.by_person) if self.by_person else "pelo(a) contratante {}".format(
+                str(self.task.person_distributed_by).title())
         }
 
 
