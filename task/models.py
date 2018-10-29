@@ -182,17 +182,17 @@ class CheckPointType(Enum):
 class MailRecipients(Enum):
     NONE = 'Nenhum'
     OFFICE = 'Escritório'
-    PERSON_ASKED_BY = 'Solicitante do Escritório'
-    PERSON_EXECUTED_BY = 'Correspondente do Escritório'
-    PERSON_DISTRIBUTED_BY = 'Contratante do Escritório'
-    PARENT__OFFICE = 'Escritório Contratante'
-    PARENT__PERSON_ASKED_BY = 'Solicitante do Escritório Contratante'
-    PARENT__PERSON_EXECUTED_BY = 'Correspondente do Escritório Contratante'
-    PARENT__PERSON_DISTRIBUTED_BY = 'Contratante do Escritório Contratante'
-    GET_CHILD__OFFICE = 'Escritório Correspondente'
-    GET_CHILD__PERSON_ASKED_BY = 'Solicitante do Escritório Correspondente'
-    GET_CHILD__PERSON_EXECUTED_BY = 'Correspondente do Escritório Correspondente'
-    GET_CHILD__PERSON_DISTRIBUTED_BY = 'Contratante do Escritório Correspondente'
+    PERSON_ASKED_BY = 'Solicitante'
+    PERSON_EXECUTED_BY = 'Correspondente'
+    PERSON_DISTRIBUTED_BY = 'Service'
+    PARENT__OFFICE = 'Escritório contratante'
+    PARENT__PERSON_ASKED_BY = 'Solicitante do contratante'
+    PARENT__PERSON_EXECUTED_BY = 'Correspondente do contratante'
+    PARENT__PERSON_DISTRIBUTED_BY = 'Service do contratante'
+    GET_CHILD__OFFICE = 'Escritório correspondente'
+    GET_CHILD__PERSON_ASKED_BY = 'Solicitante do correspondente'
+    GET_CHILD__PERSON_EXECUTED_BY = 'Correspondente do correspondente'
+    GET_CHILD__PERSON_DISTRIBUTED_BY = 'Service do correspondente'
 
     def __str__(self):
         return str(self.value)
@@ -899,5 +899,5 @@ class TaskShowStatus(Audit):
             null=True,
             verbose_name='Destinatários do e-mail',
             max_length=256,
-            choices=((x.name, x.value.title()) for x in MailRecipients)),
+            choices=((x.name, x.value) for x in MailRecipients)),
         default=[])

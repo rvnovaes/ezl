@@ -26,6 +26,10 @@ class CustomSettingsAdmin(admin.ModelAdmin):
     list_display = ('office', 'email_to_notification', 'i_work_alone')
     inlines = [TaskShowStatusInline, TaskWorkflowInline]
 
+    def save_form(self, request, form, change):
+        import pdb;pdb.set_trace()
+        return super().save_form(request, form, change)
+
 
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):

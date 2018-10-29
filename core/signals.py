@@ -119,54 +119,77 @@ def office_post_delete(sender, instance, **kwargs):
 
 @receiver(post_save, sender=CustomSettings)
 def custom_settings_post_save(sender, instance, created, **kwargs):
-    if created and instance.i_work_alone:
-        instance.office.use_etl = False
-        instance.office.use_service = False
-        instance.default_user.groups.add(
-            Group.objects.filter(
-                name='Correspondente-{}'.format(instance.office.pk)).first())
+    if instance.i_work_alone:
         status_to_show = [
-            TaskShowStatus(
-                custtom_settings_id=instance.id,
-                create_user=instance.create_user,
-                status_to_show=TaskStatus.OPEN,
-                send_mail_template=EmailTemplate.objects.filter(
-                    template_id='d-a9f3606fb333406c9b907fee244e30a4').first()),
-            TaskShowStatus(
-                custtom_settings_id=instance.id,
-                create_user=instance.create_user,
-                status_to_show=TaskStatus.RETURN),
-            TaskShowStatus(
-                custtom_settings_id=instance.id,
-                create_user=instance.create_user,
-                status_to_show=TaskStatus.REFUSED),
-            TaskShowStatus(
-                custtom_settings_id=instance.id,
-                create_user=instance.create_user,
-                status_to_show=TaskStatus.ACCEPTED,
-                send_mail_template=EmailTemplate.objects.filter(
-                    template_id='d-ae35cc53722345eaa4a4adf521c3bd81').first()),
-            TaskShowStatus(
-                custtom_settings_id=instance.id,
-                create_user=instance.create_user,
-                status_to_show=TaskStatus.FINISHED,
-                send_mail_template=EmailTemplate.objects.filter(
-                    template_id='d-7af22ba0396943729cdcb87e2e9f787c').first()),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.OPEN, send_mail_template=EmailTemplate.objects.filter(
+                    template_id='d-a9f3606fb333406c9b907fee244e30a4').first(), mail_recipients=['NONE']),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.RETURN, mail_recipients=['NONE']),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.REFUSED, mail_recipients=['NONE']),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.ACCEPTED, send_mail_template=EmailTemplate.objects.filter(
+                    template_id='d-ae35cc53722345eaa4a4adf521c3bd81').first(), mail_recipients=['NONE']),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.FINISHED, send_mail_template=EmailTemplate.objects.filter(
+                    template_id='d-7af22ba0396943729cdcb87e2e9f787c').first(), mail_recipients=['NONE']),
         ]
+    else:
+        status_to_show = [
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.REQUESTED, mail_recipients=['NONE']),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.ACCEPTED_SERVICE, mail_recipients=['NONE']),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.OPEN, send_mail_template=EmailTemplate.objects.filter(
+                    template_id='d-9233ece106b743c08074d1eb5efac1f3').first(),
+                           mail_recipients=['PERSON_EXECUTED_BY', 'GET_CHILD__OFFICE']),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.ACCEPTED, mail_recipients=['NONE']),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.DONE, mail_recipients=['NONE']),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.RETURN, send_mail_template=EmailTemplate.objects.filter(
+                    template_id='d-5c0f201b780a4b7ea6d3adfc7eae4e49').first(),
+                           mail_recipients=['PERSON_EXECUTED_BY', 'PERSON_DISTRIBUTED_BY', 'GET_CHILD__OFFICE']),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.FINISHED, mail_recipients=['NONE']),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.REFUSED_SERVICE, send_mail_template=EmailTemplate.objects.filter(
+                    template_id='d-a0687119152c4396894274fcf33c94bc').first(),
+                           mail_recipients=['PERSON_ASKED_BY', 'PARENT__PERSON_DISTRIBUTED_BY']),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.REFUSED, send_mail_template=EmailTemplate.objects.filter(
+                    template_id='d-f6188c1006af4193aa66f99af71d070b').first(),
+                           mail_recipients=['PERSON_DISTRIBUTED_BY', 'PARENT__PERSON_DISTRIBUTED_BY']),
+            TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                           status_to_show=TaskStatus.BLOCKEDPAYMENT, mail_recipients=['NONE']),
+        ]
+        if instance.office.use_etl:
+            status_to_show.append(TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
+                                                 status_to_show=TaskStatus.ERROR),)
+    if created:
         instance.task_status_show.bulk_create(status_to_show)
-        task_workflows = [
-            TaskWorkflow(
-                custtom_settings_id=instance.id,
-                create_user=instance.create_user,
-                task_from=TaskStatus.REQUESTED,
-                task_to=TaskStatus.ACCEPTED_SERVICE,
-                responsible_user=instance.default_user),
-            TaskWorkflow(
-                custtom_settings_id=instance.id,
-                create_user=instance.create_user,
-                task_from=TaskStatus.ACCEPTED_SERVICE,
-                task_to=TaskStatus.OPEN,
-                responsible_user=instance.default_user),
-        ]
-        instance.task_workflows.bulk_create(task_workflows)
+        if instance.i_work_alone:
+            instance.office.use_etl = False
+            instance.office.use_service = False
+            instance.default_user.groups.add(
+                Group.objects.filter(
+                    name='Correspondente-{}'.format(instance.office.pk)).first())
+            task_workflows = [
+                TaskWorkflow(
+                    custtom_settings_id=instance.id,
+                    create_user=instance.create_user,
+                    task_from=TaskStatus.REQUESTED,
+                    task_to=TaskStatus.ACCEPTED_SERVICE,
+                    responsible_user=instance.default_user),
+                TaskWorkflow(
+                    custtom_settings_id=instance.id,
+                    create_user=instance.create_user,
+                    task_from=TaskStatus.ACCEPTED_SERVICE,
+                    task_to=TaskStatus.OPEN,
+                    responsible_user=instance.default_user),
+            ]
+            instance.task_workflows.bulk_create(task_workflows)
         instance.save()

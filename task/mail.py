@@ -190,6 +190,7 @@ class TaskRefusedServiceMailTemplate(object):
 class TaskRefusedMailTemplate(object):
     def __init__(self, task, by_person):
         self.task = task
+        self.by_person = by_person
 
     def get_dynamic_template_data(self):
         project_link = '{}{}'.format(
@@ -209,8 +210,8 @@ class TaskRefusedMailTemplate(object):
             "task_url": project_link,
             "final_deadline_date": timezone.localtime(self.task.final_deadline_date).strftime('%d/%m/%Y %H:%M'),
             "by_person": 'pelo escritório {}'.format(
-                self.by_person) if self.by_person else "pelo(a) contratante {}".format(
-                str(self.task.person_distributed_by).title())
+                self.by_person) if self.by_person else "pelo(a) correspondente {}".format(
+                str(self.task.person_executed_by).title())
         }
 
 
