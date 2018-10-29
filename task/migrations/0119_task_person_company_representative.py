@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0114_person_refunds_correspondent_service'),
-        ('task', '0117_auto_20181011_1509'),
+        ('task', '0118_dashboardviewmodel_court_district_court_division'),
     ]
     operations = [
         migrations.AddField(
