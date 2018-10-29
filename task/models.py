@@ -196,7 +196,14 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
         'survey.Survey',
         null=True,
         blank=True,
-        verbose_name='Tipo de Formulário')
+        verbose_name='Formulário do correspondente')
+
+    survey_company_representative = models.ForeignKey(
+        'survey.Survey',
+        null=True,
+        blank=True,
+        related_name='type_tasks_person_company_representative',
+        verbose_name='Formulário do preposto')    
 
     office = models.ForeignKey(
         Office,
@@ -340,6 +347,12 @@ class Task(Audit, LegacyCode, OfficeMixin):
         blank=False,
         max_length=255,
         verbose_name='Local de cumprimento')
+    person_company_representative = models.ForeignKey(
+        Person,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        verbose_name='Preposto', related_name='tasks_to_person_representative')
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
@@ -851,3 +864,9 @@ class TaskShowStatus(Audit):
         default=TaskStatus.REQUESTED)
     send_mail_template = models.ForeignKey(
         EmailTemplate, verbose_name='Template a enviar', blank=True, null=True)
+
+
+class TaskSurveyAnswer(Audit):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True)
+    survey_result = JSONField(
+    verbose_name=u'Respotas do Formulário', blank=True, null=True)    

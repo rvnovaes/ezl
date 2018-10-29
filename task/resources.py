@@ -12,9 +12,11 @@ from task.fields import CustomFieldImportExport
 from task.instance_loaders import TaskModelInstanceLoader
 from task.messages import *
 from task.models import Task, TypeTask
+from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative
 from task.utils import self_or_none
 from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, \
     AcceptanceServiceDateWidget
+from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative, TypeTaskByWidget
 
 TRUE_FALSE_DICT = {'V': True, 'F': False}
 
@@ -145,6 +147,12 @@ COLUMN_NAME_DICT = {
         'required': True,
         'verbose_name': Task._meta.get_field('person_asked_by').verbose_name,
     },
+    'person_company_representative': {
+        'column_name': 'os.preposto',
+        'attribute': 'person_company_representative',
+        'required': False,
+        'verbose_name': Task._meta.get_field('person_company_representative').verbose_name,
+    },
     'type_task': {
         'column_name': 'os.tipo_servico',
         'attribute': 'type_task',
@@ -235,8 +243,11 @@ class TaskResource(resources.ModelResource):
     person_asked_by = CustomFieldImportExport(column_name='person_asked_by', attribute='person_asked_by',
                                               widget=PersonAskedByWidget(Person, 'legal_name'), saves_null_values=False,
                                               column_name_dict=COLUMN_NAME_DICT)
+    person_company_representative = CustomFieldImportExport(column_name='person_company_representative', attribute='person_company_representative',
+                                              widget=PersonCompanyRepresentative(Person, 'legal_name'), saves_null_values=False,
+                                              column_name_dict=COLUMN_NAME_DICT)
     type_task = CustomFieldImportExport(column_name='type_task', attribute='type_task',
-                                        widget=UnaccentForeignKeyWidget(TypeTask, 'name'), saves_null_values=False,
+                                        widget=TypeTaskByWidget(TypeTask, 'name'), saves_null_values=False,
                                         column_name_dict=COLUMN_NAME_DICT)
     task_status = CustomFieldImportExport(column_name='task_status', attribute='task_status', widget=TaskStatusWidget(),
                                           column_name_dict=COLUMN_NAME_DICT)
