@@ -194,6 +194,16 @@
     {% endblock extra_scripts %}    
     <!-- End Javascript Block  -->
     <!-- ============================================================== -->
+    <script>
+        window.onload = function() {
+            var browser=get_browser();
+            if (browser.message) {
+                var messageDiv = document.getElementById('message-browser-version');
+                messageDiv.innerHTML = browser.message;
+                messageDiv.classList.toggle('hide');
+            }
+        }
+    </script>
 </body>
 
 </html>
