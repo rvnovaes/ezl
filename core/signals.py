@@ -119,7 +119,7 @@ def office_post_delete(sender, instance, **kwargs):
 
 @receiver(post_save, sender=CustomSettings)
 def custom_settings_post_save(sender, instance, created, **kwargs):
-    if created:
+    if created and instance.i_work_alone:
         instance.office.use_etl = False
         instance.office.use_service = False
         instance.default_user.groups.add(
