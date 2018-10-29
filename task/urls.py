@@ -105,6 +105,9 @@ urlpatterns = [
     url(r'^batch_change_tasks/(?P<option>[A-Z]+)/', login_required(views.BatchChangeTasksView.as_view()), 
         name='batch_change_tasks'),
 
+    url(r'^task_to_company_representative/$', login_required(views.ViewTaskToPersonCompanyRepresentative.as_view()), 
+        name="task_to_company_representative"),
+
     # Filtros
     url(r'^import_task_list/$',
         login_required(views.ImportTaskList.as_view()),

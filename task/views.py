@@ -545,6 +545,15 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
     table_pagination = {'per_page': 5}
     ret_status_dict = {}
 
+    def get(self, request, *args, **kwargs):
+        office_session = get_office_session(request)
+        checker = ObjectPermissionChecker(request.user)
+        company_representative = checker.has_perm('can_see_tasks_company_representative', office_session)
+        view_all_tasks = checker.has_perm('view_all_tasks', office_session)
+        if company_representative and not view_all_tasks:
+            return HttpResponseRedirect(reverse_lazy('task_to_company_representative'))
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, *args, **kwargs):
         office_session = get_office_session(self.request)
         context = super().get_context_data(*args, **kwargs)
@@ -707,7 +716,12 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         type_task_field = get_correspondents_table.get_type_task_field()
         if type_task_field:
             context['form'].fields['type_task_field'] = type_task_field
-
+        checker = ObjectPermissionChecker(self.request.user)        
+        if checker.has_perm('can_see_tasks_company_representative', office_session):            
+            if not TaskSurveyAnswer.objects.filter(task=self.object, create_user=self.request.user):
+                if (self.object.type_task.survey):
+                    context['not_answer_questionnarie'] = True
+                    context['survey_company_representative'] = self.object.type_task.survey.data
         return context
 
 
@@ -899,7 +913,8 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     task_dynamic_query.add(Q(task_status__in=status), Q.AND)
                 if data['type_task']:
                     task_dynamic_query.add(
-                        Q(type_task=data['type_task']), Q.AND)
+                        Q(Q(type_task=data['type_task']) |
+                          Q(type_task__type_task_main__in=data['type_task'].type_task_main.all())), Q.AND)
                 if data['court']:
                     task_dynamic_query.add(
                         Q(movement__law_suit__organ=data['court']), Q.AND)
@@ -1816,3 +1831,32 @@ class BatchCheapestCorrespondent(CustomLoginRequiredView, View):
                     'value': cheapest_correspondent[0].value
                 })
         return JsonResponse({})
+
+
+class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):    
+    template_name = 'task/task_to_person_company_representative.html'
+
+    def get_queryset(self):
+        task_list, task_filter = self.query_builder()
+        self.filter = task_filter                
+        return task_list.filter(
+            person_company_representative=self.request.user.person).exclude(
+            pk__in=self.request.user.tasksurveyanswer_create_user.values_list('task_id', flat=True))
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        context['surveys'] = [
+            {'task_id': task.pk, 'survey': task.type_task.survey} for task in self.object_list
+        ]        
+        return context        
+
+    def post(self, request, *args, **kwargs):
+        try:
+            task = Task.objects.get(pk=request.POST.get('task_id'))
+            survey_result = json.loads(request.POST.get('survey'))
+            survey = TaskSurveyAnswer(create_user=request.user, task=task, survey_result=survey_result)
+            survey.save()
+            return JsonResponse({'status': 'ok'})
+        except Exception as e:
+            return JsonResponse({'error': e})     
+            

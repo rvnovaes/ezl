@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('survey', '0006_update_survey_sequence'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('task', '0118_auto_20181023_1309'),
+        ('task', '0120_auto_20181023_1309'),
     ]
 
     operations = [

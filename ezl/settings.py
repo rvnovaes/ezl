@@ -121,7 +121,7 @@ INSTALLED_APPS = [
     # Sequences
     'sequences.apps.SequencesConfig',
     'channels',
-    'chat',
+    'chat.apps.ChatConfig',
     'ecm',
     'dashboard',
     'codemirror',
