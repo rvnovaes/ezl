@@ -13,6 +13,16 @@ from guardian.shortcuts import get_groups_with_perms
 from task.models import TaskShowStatus, TaskWorkflow, TaskStatus
 
 
+def create_office_custom_settings(office):
+    CustomSettings.objects.get_or_create(
+        office=office,
+        defaults={'default_user': office.create_user,
+                  'email_to_notification': office.create_user.email,
+                  'i_work_alone': False,
+                  'create_user_id': office.create_user}
+    )
+
+
 def post_create_office(office):
     member, created = OfficeMembership.objects.get_or_create(
         person=office.create_user.person,
@@ -95,6 +105,7 @@ models.signals.post_save.connect(
 def office_post_save(sender, instance, created, **kwargs):
     if created:
         post_create_office(instance)
+        create_office_custom_settings(instance)
     if created or not get_groups_with_perms(instance):
         create_permission(instance)
         if not instance.create_user.is_superuser:
