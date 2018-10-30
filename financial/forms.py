@@ -87,18 +87,25 @@ class ServicePriceTableForm(BaseModelForm):
         value = value.replace(',', '.')
         return Decimal(value)
 
-    def form_valid(self, form):
-        if self.cleaned_data["state"] and self.cleaned_data["court_district"] \
-            and not CourtDistrict.objects.filter(name=self.cleaned_data["court_district"].name,
-                                                 state=self.cleaned_data["state"]):
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data["court_district"] and cleaned_data["court_district_complement"]:
+            cleaned_data["court_district"] = self.cleaned_data["court_district_complement"].court_district
+        if not cleaned_data["state"] and cleaned_data['court_district']:
+            cleaned_data["state"] = cleaned_data['court_district'].state
+        elif not cleaned_data["state"] and cleaned_data['city']:
+            cleaned_data["state"] = cleaned_data['city'].state
+        if cleaned_data["state"] and cleaned_data["court_district"] \
+            and not CourtDistrict.objects.filter(name=cleaned_data["court_district"].name,
+                                                 state=cleaned_data["state"]):
             raise forms.ValidationError('A comarca selecionada não pertence à UF selecionada')
-        if ServicePriceTable.objects.filter(type_task=self.cleaned_data["type_task"],
-                                            court_district=self.cleaned_data["court_district"],
-                                            state=self.cleaned_data["state"],
-                                            client=self.cleaned_data["client"],
-                                            office_correspondent=self.cleaned_data["office_correspondent"]).first():
+        if ServicePriceTable.objects.filter(type_task=cleaned_data["type_task"],
+                                            court_district=cleaned_data["court_district"],
+                                            state=cleaned_data["state"],
+                                            client=cleaned_data["client"],
+                                            office_correspondent=cleaned_data["office_correspondent"]).first():
             raise forms.ValidationError('Já existe um registro com os dados selecionados')
-        return super().form_valid(form)
+        return cleaned_data
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
