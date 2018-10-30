@@ -79,7 +79,8 @@ class GenericSearchFormat(object):
             'DateTimeField': GenericSearchDate(),
             'ForeignKey': GenericSearchForeignKey(self.model),
             'OneToOneField': GenericSearchForeignKey(self.model),
-            'BooleanField': GenericSearchBooleanField()
+            'BooleanField': GenericSearchBooleanField(),
+            'DecimalField': GenericSearchDecimal()
         }
 
     def despatch(self, office=False):
@@ -160,6 +161,11 @@ class GenericSearchString(GenericSearch):
 class GenericSearchInteger(GenericSearch):
     def dict_to_filter(self, param, value):
         return "{}='{}'".format(param, value)
+
+
+class GenericSearchDecimal(GenericSearch):
+    def dict_to_filter(self, param, value):
+        return "{}='{}'".format(param, value.replace(',', '.'))
 
 
 class GenericSearchBooleanField(GenericSearch):
