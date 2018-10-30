@@ -58,7 +58,7 @@
                     swal(
                         "Erro", 
                         "Deve ser configurado o tipo de mecanismo de contato 'E-mail' corretamente para continuar importação.", 
-                        "error")                    
+                        "error");
                 {% else %}
                     var text_msg = "Ao iniciar o processo de importação de tabela de preços não será possível cancelá-lo. Deseja continuar?"                
                     swal({
@@ -69,12 +69,11 @@
                             confirmButtonText: "Sim",
                             cancelButtonText: "Não",
                             confirmButtonColor: "#DD6B55",                        
-                        }.then(function(result){
+                        }).then(function(result){
                             if (result.value) {                                                   
                                 $('#import_service_price_table_form').submit();                           
                             }
-                        }
-                    );
+                        });
                 {% endif %}                
             }
             

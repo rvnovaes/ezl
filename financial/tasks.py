@@ -6,9 +6,9 @@ from enum import Enum
 from celery import shared_task, current_task, chain
 from openpyxl import load_workbook
 from .models import ServicePriceTable, ImportServicePriceTable
-from core.models import Office, State, Person
+from core.models import Office, State, City
 from task.models import TypeTask
-from lawsuit.models import CourtDistrict
+from lawsuit.models import CourtDistrict, CourtDistrictComplement
 from .utils import remove_caracter_especial
 
 IMPORTED_IMPORT_SERVICE_PRICE_TABLE = 'imported_ispt_'
@@ -22,9 +22,11 @@ class ColumnIndex(Enum):
     correspondent = 0
     type_task = 1
     client = 2
-    court_district = 3
-    state = 4
-    value = 5
+    state = 3
+    court_district = 4
+    court_district_complement = 5
+    city = 6
+    value = 7
 
 
 def get_office_correspondent(row, xls_file):
@@ -73,6 +75,19 @@ def get_court_district(row, xls_file, state):
     return court_district
 
 
+def get_court_district_complement(row, xls_file, court_district):
+    # Complemento de Comarca
+    court_district_complement = False
+    if row[ColumnIndex.court_district_complement.value].value and court_district:
+        complement_name = remove_caracter_especial(str(row[ColumnIndex.court_district_complement.value].value).strip())
+        court_district_complement = CourtDistrictComplement.objects.filter(
+            name__unaccent__iexact=complement_name, court_district_id=court_district.pk).first()
+        if not court_district_complement:
+            msg_error = '%s - %s' % (complement_name, court_district.name) if court_district else '%s' % complement_name
+            xls_file.log = xls_file.log + 'Complemento de comarca ' + msg_error + ' não encontrado' + ";"
+    return court_district_complement
+
+
 def get_state(row, xls_file):
     # uf            
     state = False
@@ -84,6 +99,17 @@ def get_state(row, xls_file):
     return state
 
 
+def get_city(row, xls_file, state):
+    # uf
+    city = False
+    if row[ColumnIndex.city.value].value and state:
+        city_name = remove_caracter_especial(str(row[ColumnIndex.city.value].value).strip())
+        city = City.objects.filter(name__unaccent__iexact=city_name, state=state).first()
+        if not city:
+            xls_file.log = xls_file.log + ('Cidade %s não encontrada para a UF %s' % (city_name, state.initials)) + ";"
+    return city
+
+
 def get_service_value(row, xls_file, office_correspondent, court_district, state, client):
     value = 0
     try:                        
@@ -92,8 +118,9 @@ def get_service_value(row, xls_file, office_correspondent, court_district, state
         else:                        
             value = row[ColumnIndex.value.value].value
     except:        
-        xls_file.log = xls_file.log + ('Valor {} inválido. Verificar escritório {}, comarca {}, estado {}, cliente {}.'.format(
-            row[ColumnIndex.value.value].value, office_correspondent, court_district, state, client)) + ";"
+        xls_file.log = xls_file.log + (
+            'Valor {} inválido. Verificar escritório {}, comarca {}, estado {}, cliente {}.'.format(
+                row[ColumnIndex.value.value].value, office_correspondent, court_district, state, client)) + ";"
     finally:
         return value
 
@@ -103,12 +130,15 @@ def row_is_valid(office_correspondent, type_task, state):
 
 
 def update_or_create_service_price_table(xls_file, office_session, user_session, office_correspondent,
-                                         type_task, court_district, state, client, value):
+                                         type_task, court_district, court_district_complement, state,
+                                         city, client, value):
     service_price_table = ServicePriceTable.objects.filter(
         office=office_session,
         office_correspondent=office_correspondent.pk,
         type_task=type_task.pk,
         court_district=court_district.pk if court_district else None,
+        court_district_complement=court_district_complement.pk if court_district_complement else None,
+        city=city.pk if city else None,
         client=client.pk if client else None,
         state=state.pk).first()
     if not service_price_table:                    
@@ -117,6 +147,8 @@ def update_or_create_service_price_table(xls_file, office_session, user_session,
             office_correspondent=office_correspondent,
             type_task=type_task,
             court_district=court_district if court_district else None,
+            court_district_complement=court_district_complement if court_district_complement else None,
+            city=city if city else None,
             client=client if client else None,
             state=state,
             value=value,
@@ -160,12 +192,15 @@ def import_xls_service_price_table(self, file_id):
                 type_task = get_type_task(row, xls_file)
                 state = get_state(row, xls_file)
                 court_district = get_court_district(row, xls_file, state)
+                court_district_complement = get_court_district_complement(row, xls_file, court_district)
+                city = get_city(row, xls_file, state)
                 client = get_client(row, xls_file, office_session)
 
                 if row_is_valid(office_correspondent, type_task, state):
                     value = get_service_value(row, xls_file, office_correspondent, court_district, state, client)
                     update_or_create_service_price_table(xls_file, office_session, user_session, office_correspondent,
-                                                         type_task, court_district, state, client, value)
+                                                         type_task, court_district, court_district_complement, state,
+                                                         city, client, value)
                     i = i + 1
                     process_percent = int(100 * float(i) / float(total))            
                     cache.set(percent_imported_cache_key, process_percent, timeout=None)            
