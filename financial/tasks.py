@@ -171,10 +171,10 @@ def update_or_create_service_price_table(xls_file, office_session, user_session,
             service_price_table.save()
 
 
-# @shared_task(bind=True)
-def import_xls_service_price_table(file_id):
+@shared_task(bind=True)
+def import_xls_service_price_table(self, file_id):
     try:
-        # self.update_state(state="PROGRESS")
+        self.update_state(state="PROGRESS")
         xls_file = ImportServicePriceTable.objects.get(pk=file_id)
         xls_file.log = " "
         # chaves para acessar dados em cache

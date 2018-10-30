@@ -148,7 +148,7 @@ def import_service_price_table(request):
             file_xls.start = timezone.now()               
             file_xls.save()
             
-            import_xls_service_price_table(file_xls.pk)
+            import_xls_service_price_table.delay(file_xls.pk)
             context['show_modal_progress'] = True
             context['file_xls'] = file_xls
             context['file_name'] = request.FILES['file_xls'].name           
