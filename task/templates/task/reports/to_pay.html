@@ -279,13 +279,13 @@
             `            
         }
 
-        var getTrClient = function(client_name, client_total, client_refunds){
+        var getTrClient = function(clientName, clientTotal, clientRefunds, officeId, clientId){
             return `
                 <tr>
                     <th></th>
                     <th colspan="10">
                         <div class="col-xs-10">
-                            ${client_name}                            
+                            ${clientName}                            
                         </div>
                         <div class="col-xs-2">
                             {% if office.client_refunds %}
@@ -293,7 +293,7 @@
                             {% endif %}
                         </div>
                     </th>
-                    <th><center>${client_total}</center></th>
+                    <th><center><span client-id=${officeId}-${clientId}>${clientTotal}<span></center></th>
                 </tr>
             `
         }
@@ -334,6 +334,7 @@
         var currentOffice;
         var currentClient;
         var totalOffice = 0.0;
+        var totalClient = 0.0;
         var count = 0;
         var isLoaging = false;
         async function getTasks () {
@@ -350,15 +351,21 @@
                 success: function(response){
                     JSON.parse(response).forEach(function(task){                        
                         if (currentOffice !== task.office_name) {         
-                            totalOffice = 0.0;                   
+                            totalOffice = 0.0;      
+                            totalClient = 0.0;             
                             currentOffice = task.office_name; 
                             currentClient = null;
                             tableBodyEl.append(getTrOffice(task.office_name, '0,00', task.office_id));                         
                         };
                         if(currentClient !== task.client_name){
+                            totalClient = 0.0;
                             currentClient = task.client_name;
-                            tableBodyEl.append(getTrClient(task.client_name, '0,00'))
+                            tableBodyEl.append(getTrClient(task.client_name, '0,00', false, task.office_id, task.client_id))
                         }
+                        totalOffice += parseFloat(task.amount);
+                        totalClient += parseFloat(task.amount);
+                        $(`[office-id=${task.office_id}]`).text('R$' + totalOffice.toFixed(2));
+                        $(`[client-id=${task.office_id}-${task.client_id}]`).text('R$' + totalClient.toFixed(2));
                         tableBodyEl.append(getTrTask(task));                            
                     })
                     console.log(JSON.parse(response)) 
