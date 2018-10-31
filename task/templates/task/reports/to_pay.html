@@ -83,11 +83,14 @@
 
    <div class="panel panel-default">
         <div class="panel-heading">
-            <h6 class="panel-title"><i class="fa fa-dollar fa-fw"></i>OS's a pagar</h6>
+            <h6 class="panel-title">
+                <i class="fa fa-dollar fa-fw"></i>OS's a pagar
+                <span id="loading-data"></span>
+            </h6>
         </div>
         <div class="panel-body page-content">
-            <div class="table-responsive">
-                <table id="os_exportable" style="margin-left: -10000px; position: absolute;">
+            <div class="table-responsive">                
+                <!--<table id="os_exportable" style="margin-left: -10000px; position: absolute;">
                     <thead>
                         <tr>
                             <th>OS</th>
@@ -132,7 +135,7 @@
                             {% endfor %}
                         {% endfor %}
                     </tbody>
-                </table>
+                </table>-->
                 <table class="table table-striped table-hover" id="os-table">
                     <thead>
                         <tr role="row">
@@ -151,6 +154,7 @@
                         </tr>
                     </thead>
                     <tbody id="os-table-body">
+                        <!--
                         {% for office in offices_report %}
                             {% ifchanged office.office_name %}
                                 <tr>
@@ -215,6 +219,7 @@
                                 <th colspan="2" class="text-right">{{total}}</th>
                             </tr>
                         {% endif %}
+                        -->
                     </tbody>
                 </table>
             </div>
@@ -256,6 +261,105 @@
     <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
+    <script type="text/javascript">
+        window.offices_by_clients = JSON.parse('{{offices_by_clients | safe}}');
+        window.totalTasks = '{{total_tasks}}'
+        var tableBodyEl = $('#os-table-body');
+        var getTrOffice = function(office_name, office_total) {
+            return `
+                <tr>
+                    <th colspan="10">${office_name}</th>
+                    <th></th>
+                    <th><center>${office_total}</center></th>
+                </tr>
+            `            
+        }
+
+        var getTrClient = function(client_name, client_total, client_refunds){
+            return `
+                <tr>
+                    <th></th>
+                    <th colspan="10">
+                        <div class="col-xs-10">
+                            ${client_name}                            
+                        </div>
+                        <div class="col-xs-2">
+                            {% if office.client_refunds %}
+                            <span class="badge badge-danger pull-right"><i class="fa fa-check"></i> Reembolsa valor</span>
+                            {% endif %}
+                        </div>
+                    </th>
+                    <th><center>${client_total}</center></th>
+                </tr>
+            `
+        }
+
+        var getTrTask = function(task) {
+            let elBilling = '';
+            if (task.billing_date) {
+                elBilling = `<input type="checkbox" value="${task.id}"/>`;
+            } 
+            return `
+                  <tr role="row">
+                        <td></td>
+                        <td></td>
+                        <td>
+                            ${elBilling}
+                        </td>
+                        <td>
+                            <a href="" target="_new">
+                                ${task.parent_task_number}
+                            </a>
+                        </td>
+                        <td>${task.finished_date}</td>
+                        <td>${task.type_task}</td>
+                        <td>${task.lawsuit_number}</td>
+                        <td>${task.court_district}</td>
+                        <td>${task.opposing_party}</td>
+                        <td>td de os de origem</td>
+                        <td>${task.billing_date}</td>
+                        <td class="text-center"><center>${task.amount}</center></td>
+                    </tr>            `
+        }
+        var currentOffice;
+        let keys  = Object.keys(offices_by_clients);
+        var count = 0;
+        keys.forEach(function(key){            
+            let data = {
+                office: JSON.parse(key)[0],
+                client: JSON.parse(key)[1],
+                tasks: offices_by_clients[key]
+            }
+            $.ajax({
+                method: 'GET', 
+                url: `/relatorios/os-a-pagar-data`, 
+                data: data, 
+                success: function(response){
+                    if (currentOffice !== response.office_name) {
+                        console.log(currentOffice, response.office_name)
+                        currentOffice = response.office_name; 
+                        tableBodyEl.append(getTrOffice(response.office_name, 'R$0,00'));                         
+                    }                                                         
+                    tableBodyEl.append(getTrClient(response.client_name, 'R$0,00', false));
+                    response.tasks.forEach(function(task){
+                        count += 1;
+                        $('#loading-data').text(`Carregando ${count} de ${totalTasks}`)
+                        tableBodyEl.append(getTrTask(task))
+                    }) 
+                },
+                error: function(error) {
+                  console.log('DEU ERRADO');
+                  console.log(error)
+                }, 
+                beforeSend: function (xhr, settings) {
+                  xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                },
+                dataType: 'json'                 
+            })            
+        }).promisse().done(function(){
+            alert('terminou de carregar')
+        })
+    </script>
     <script>
     $('#os_exportable').dataTable({
         dom: 'Bfrtip',

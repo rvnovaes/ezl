@@ -4,6 +4,7 @@ import csv
 import copy
 import pickle
 import io
+import pandas as pd
 from datetime import datetime
 from urllib.parse import urlparse
 from zipfile import ZipFile
@@ -11,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from core.views import CustomLoginRequiredView, set_office_session
+from .serializers import TaskToPaySerializer
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
@@ -31,7 +33,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
     operational_error_create, ioerror_create, exception_create, \
     integrity_error_delete, \
     DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
-from core.models import Person, CorePermissions, CustomSettings
+from core.models import Person, CorePermissions, CustomSettings, Office
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter
@@ -403,6 +405,8 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         offices_map = {}
         tasks = self.get_queryset()
         total = 0
+
+        # Transformar em funcao
         for task in tasks:
             correspondent = self._get_related_office(task)
             if correspondent not in offices_map:
@@ -410,27 +414,33 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
             client = self._get_related_client(task)
             if client not in offices_map[correspondent]:
                 offices_map[correspondent][client] = []
-            offices_map[correspondent][client].append(task)
+            serializer = TaskToPaySerializer(instance=task)
+            offices_map[correspondent][client].append(serializer.data)
 
-        offices_map_total = {}
-        for office, clients in offices_map.items():
-            office_total = 0
-            for client, tasks in clients.items():
-                client_total = sum(map(lambda x: x.amount, tasks))
-                office_total = office_total + client_total
-                offices.append({
-                    'office_name': office.name,
-                    'client_name': client.name,
-                    'client_refunds': client.refunds_correspondent_service,
-                    'tasks': tasks,
-                    "client_total": client_total,
-                    "office_total": 0,
-                })
-            offices_map_total[office.name] = office_total
-            total = total + office_total
+        # Transformar em funcao    
+        # offices_map_total = {}
+        # for office, clients in offices_map.items():
+        #     office_total = 0
+        #     for client, tasks in clients.items():
+        #         logger = logging.getLogger('aasdas')
+        #         logger.info(tasks)
+        #         client_total = sum(map(lambda x: Decimal(x.get('amount')), tasks))
+        #         office_total = office_total + client_total
+        #         offices.append({
+        #             'office_name': office.name,
+        #             'client_name': client.name,
+        #             'client_refunds': client.refunds_correspondent_service,
+        #             'tasks': tasks,
+        #             "client_total": client_total,
+        #             "office_total": 0,
+        #         })
+        #     offices_map_total[office.name] = office_total
+        #     total = total + office_total
 
-        for item in offices:
-            item['office_total'] = offices_map_total[item['office_name']]
+        # # Transformar em funcao
+
+        # for item in offices:
+        #     item['office_total'] = offices_map_total[item['office_name']]
 
         return offices, total
 
@@ -507,14 +517,121 @@ class ToReceiveTaskReportView(TaskReportBase):
         return JsonResponse({"status": "ok"})
 
 
-class ToPayTaskReportView(TaskReportBase):
+class ToPayOfficeReportView(TemplateView):
+    def get(self, request, *args, **kwargs):                       
+        office = Office.objects.get(pk=request.GET.get('office'))
+        client = Person.objects.get(pk=request.GET.get('client'))
+        task_ids = request.GET.getlist('tasks[]')
+        tasks = Task.objects.select_related('office') \
+        .select_related('type_task') \
+        .select_related('movement__type_movement') \
+        .select_related('movement__folder') \
+        .select_related('movement__folder__person_customer') \
+        .select_related('movement__law_suit__court_district') \
+        .select_related('parent__type_task').filter(pk__in=task_ids)
+        data = {
+            'office_name': office.legal_name, 
+            'client_name': client.legal_name,
+            'tasks': [
+                {
+                    'parent_task_number': task.parent.task_number, 
+                    'finished_date': task.finished_date, 
+                    'type_task': task.type_task.name, 
+                    'lawsuit_number': task.lawsuit_number, 
+                    'court_district': task.court_district.name, 
+                    'opposing_party': task.opposing_party, 
+                    'billing_date': task.billing_date, 
+                    'amount': task.amount
+                } for task in tasks
+            ]             
+        }
+        return JsonResponse(data)
+
+class ToPayTaskReportView(TemplateView):
     template_name = 'task/reports/to_pay.html'
     filter_class = TaskToPayFilter
     datetime_field = 'billing_date'
 
+    def filter_queryset(self, queryset):
+        if not self.task_filter.form.is_valid():
+            messages.add_message(self.request, messages.ERROR,
+                                 'Formulário inválido.')
+        else:
+            data = self.task_filter.form.cleaned_data
+            query = Q()
+            finished_query = Q()
+
+            if data['status']:
+                key = "{}__isnull".format(self.datetime_field)
+                query.add(Q(**{key: data['status'] != 'true'}), Q.AND)
+
+            if data['client']:
+                query.add(
+                    Q(movement__law_suit__folder__person_customer__legal_name__unaccent__icontains
+                      =data['client']), Q.AND)
+
+            if data['office']:
+                if isinstance(self, ToReceiveTaskReportView):
+                    query.add(
+                        Q(parent__office__name__unaccent__icontains=data[
+                            'office']), Q.AND)
+                else:
+                    query.add(
+                        Q(office__name__unaccent__icontains=data['office']),
+                        Q.AND)
+
+            if data['finished_in']:
+                if data['finished_in'].start:
+                    finished_query.add(
+                        Q(finished_date__gte=data['finished_in'].start.replace(
+                            hour=0, minute=0)), Q.AND)
+                if data['finished_in'].stop:
+                    finished_query.add(
+                        Q(finished_date__lte=data['finished_in'].stop.replace(
+                            hour=23, minute=59)), Q.AND)
+
+            if 'refunds_correspondent_service' in data and data['refunds_correspondent_service']:
+                refunds = (data['refunds_correspondent_service'] == 'True')
+                query.add(
+                    Q(movement__law_suit__folder__person_customer__refunds_correspondent_service=refunds),
+                    Q.AND)
+
+            if query or finished_query:
+                query.add(Q(finished_query), Q.AND)
+                queryset = queryset.filter(query)
+            else:
+                queryset = Task.objects.none()
+
+        return queryset
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        self.task_filter = self.filter_class(
+            data=self.request.GET, request=self.request)
+        context['filter'] = self.task_filter
+        tasks = self.get_queryset()
+        context['offices_by_clients'] = []
+        if tasks: 
+            data = [{
+                'office': task.office.pk, 
+                'pk': task.pk,             
+                'client': task.movement.folder.person_customer.pk} for task in tasks]
+            df = pd.DataFrame(data)                        
+            context['offices_by_clients'] = df.groupby(['office', 'client'])['pk'].apply(list).to_json() 
+            context['total_tasks'] = tasks.count()
+        return context
+
     def get_queryset(self):
         office = get_office_session(self.request)
-        queryset = Task.objects.filter(
+        queryset = Task.objects \
+        .select_related('office') \
+        .select_related('type_task') \
+        .select_related('movement__type_movement') \
+        .select_related('movement__folder') \
+        .select_related('movement__folder__person_customer') \
+        .select_related('movement__law_suit__court_district') \
+        .select_related('parent__type_task') \
+        .filter(
             parent__office=office,
             task_status=TaskStatus.FINISHED,
             parent__isnull=False)
