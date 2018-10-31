@@ -115,23 +115,22 @@ $(document).ready(function () {
 
     // limpa o campo de complemento de acordo com a uf selecionada, caso exista o campo de uf e complemento
     var stateField = $('#id_state');
-    if (stateField.length > 0 && complement.length > 0) {
+    var cityField = $('#city');
+    var stateSelect = 0;
+    if (stateField.length > 0){
         typeaheadAditionalParams.state = stateField.val();
         stateField.on('change', function(){
             typeaheadAditionalParams.state = $(this).val();
-            if(complement.attr('data-extra-params') !== $(this).val()){
+            if(complement.length > 0 && complement.attr('data-extra-params') !== $(this).val()){
                 clearTypeaheadField(complement);
             }
-        });
-    }
-
-    if (stateField.length > 0 && courtDistrict.length > 0) {
-        var stateSelect = stateField.prop('selectedIndex');
-        stateField.on('change', function () {
-            if (stateSelect !== stateField.prop('selectedIndex') && stateField.val() !== courtDistrict.attr('data-forward-id')) {
+            if (courtDistrict.length > 0 && stateSelect !== stateField.prop('selectedIndex') && stateField.val() !== courtDistrict.attr('data-forward-id')) {
                 clearTypeaheadField(courtDistrict);
-                stateSelect = $('#id_state').prop('selectedIndex');
             }
+            if (cityField.length > 0 && stateSelect !== stateField.prop('selectedIndex') && stateField.val() !== cityField.attr('data-forward-id')) {
+                clearTypeaheadField(cityField);
+            }
+            stateSelect = stateField.prop('selectedIndex');
         });
     }
 });

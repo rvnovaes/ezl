@@ -5,22 +5,25 @@
     <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
     <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
     <style type="text/css">
-      .modal {
-        width: 100%;
-      }
-      .modal-content {
-        position: absolute;
-      }
-      table.dataTable.row-border tbody tr:first-child th, table.dataTable.row-border tbody tr:first-child td, table.dataTable.display tbody tr:first-child th, table.dataTable.display tbody tr:first-child td {
-          font-size: small !important;
-          cursor: pointer;
-      }
-      tr {
-          cursor: pointer;
-      }
-      #table-service-price {
-          overflow: auto;
-      }      
+        .modal {
+            width: 100%;
+        }
+        .modal-content {
+            position: absolute;
+        }
+        table.dataTable.row-border tbody tr:first-child th, table.dataTable.row-border tbody tr:first-child td, table.dataTable.display tbody tr:first-child th, table.dataTable.display tbody tr:first-child td {
+            font-size: small !important;
+            cursor: pointer;
+        }
+        tr {
+            cursor: pointer;
+        }
+        #table-service-price {
+            overflow: auto;
+        }
+        table.dataTable thead .sorting_asc, table.dataTable thead .sorting, table.dataTable thead .sorting_desc{
+            background-image: none !important;
+        }
     </style>
 {% endblock %}
 
@@ -28,9 +31,9 @@
 <div id="modal-service-price-table" class="modal fade "
   tabindex="-1" role="alert" aria-labelledby="modalTitle"
   aria-hidden="true" task-id="">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog" style="min-width: 95%;">
     <!-- MODAL -->  
-    <div class="modal-content">
+    <div class="modal-content" style="min-width: 100%;">
       <!-- HEADER MODAL -->
       <div id="modalHeader" class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -55,6 +58,7 @@
                     <th>UF</th>
                     <th>Comarca</th>
                     <th>Complemento da comarca</th>
+                    <th>Cidade</th>
                     <th>Cliente</th>
                     <th>Valor</th>
                     <th>Avaliação</th>
@@ -107,78 +111,83 @@
         var correspondentTable;  
         var chosenPrice = {};
         $(document).ready(function(){          
-          $('#modal-service-price-table').on('show.bs.modal', function(e) {
-              var taskId = $(this).attr('task-id');
-              servicePriceTable = servicePrices[taskId];                            
-              $('#type-task').append(servicePriceTable.task.type_task.name)
-              if (!correspondentTable) {
-                correspondentTable = $('#table-service-price')
-                  .DataTable({
-                    language: {
-                        "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-                    }                          
-                  })
-              }
-              servicePriceTable.prices.forEach(function(price) {                        
-                office_correspondent_name = price.office_correspondent.legal_name;
-                state = price.state;
-                court_district_name = price.court_district.name;
-                court_district_complement_name = price.court_district_complement.name;
-                client_name = price.client;
-                value = price.value;
-                office_rating = price.office_rating;                        
-                office_return_rating = price.office_return_rating;
-                servicePriceTableId = price.id;
-                correspondentTable.row.add(
-                  [
-                    office_correspondent_name, 
-                    state, 
-                    court_district_name, 
-                    court_district_complement_name, 
-                    client_name, 
-                    value, 
-                    office_rating, 
-                    office_return_rating
-                  ]).node().id = servicePriceTableId;
-                correspondentTable.draw(false);
-              });
-              $('#table-service-price tbody tr').on('click', function() {            
-                $(this).addClass("ezl-bg-open");
-                $(this).siblings().removeClass("ezl-bg-open");
-                amount = correspondentTable.row(this).data()[5];                
-                $('#value').val(amount.replace(".", ","));
-                $('#value').focus();                
-                
-                chosenPrice = {
-                  taskId: taskId, 
-                  servicePriceTableId: $(this).attr('id'), 
-                  correspondenteName: correspondentTable.row(this).data()[0], // Nome
-                  correspondenteValue: amount, 
-                  note: $('#note').val()
-                };
-              })
-          });
+            $('#modal-service-price-table').on('show.bs.modal', function(e) {
+                var taskId = $(this).attr('task-id');
+                var servicePriceTable = servicePrices[taskId];
+                $('#type-task').append(servicePriceTable.task.type_task.name);
+                if (!correspondentTable) {
+                    var correspondentTable = $('#table-service-price')
+                        .DataTable({
+                            destroy: true,
+                            paging: false,
+                            order: [[6, 'asc'], [7, 'desc'], [8, 'asc'], [0, 'asc']],
+                            dom: 'frti',
+                            language: {"url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"}
+                        });
+                }
+                servicePriceTable.prices.forEach(function(price) {
+                    let office_correspondent_name = price.office_correspondent.legal_name;
+                    let state = price.state;
+                    let court_district_name = price.court_district.name;
+                    let court_district_complement_name = price.court_district_complement.name;
+                    let city = price.city;
+                    let client_name = price.client;
+                    let value = price.value;
+                    let office_rating = price.office_rating;
+                    let office_return_rating = price.office_return_rating;
+                    let servicePriceTableId = price.id;
+                    correspondentTable.row.add(
+                        [
+                            office_correspondent_name,
+                            state,
+                            court_district_name,
+                            court_district_complement_name,
+                            city,
+                            client_name,
+                            value,
+                            office_rating,
+                            office_return_rating
+                        ]
+                    ).node().id = servicePriceTableId;
+                    correspondentTable.draw(false);
+                });
+                $('#table-service-price tbody tr').on('click', function() {
+                    $(this).addClass("ezl-bg-open");
+                    $(this).siblings().removeClass("ezl-bg-open");
+                    amount = correspondentTable.row(this).data()[5];
+                    $('#value').val(amount.replace(".", ","));
+                    $('#value').focus();
 
-          $('#value').on('change', function() {            
-            chosenPrice.correspondenteValue = $(this).val().replace(".", "").replace(',', '.')
-          });
+                    chosenPrice = {
+                        taskId: taskId,
+                        servicePriceTableId: $(this).attr('id'),
+                        correspondenteName: correspondentTable.row(this).data()[0], // Nome
+                        correspondenteValue: amount,
+                        note: $('#note').val()
+                    };
+                })
+            });
 
-          $('#modal-service-price-table').on('hide.bs.modal', function(e) {
-            if ($('#value').val()) {
-              var taskId = $(this).attr('task-id');
-              chosenPrice.note =  $('#note').val();
-              servicePrices[taskId]['chosenPrice'] = chosenPrice;
-              console.log(servicePrices[taskId]);
-              correspondentTable.clear().draw(false);
-              correspondentTable.search('').draw(false);
-              $('#type-task').empty();
-              setChosenPrice(chosenPrice);              
-            }
-          });
+            $('#value').on('change', function() {
+                chosenPrice.correspondenteValue = $(this).val().replace(".", "").replace(',', '.')
+            });
 
-          $('#modal-service-price-table #btn-ok').on('click', function(e) {                        
-            $('#modal-service-price-table').modal('hide');
-          })
+            $('#modal-service-price-table').on('hide.bs.modal', function(e) {
+                if ($('#value').val()) {
+                    var taskId = $(this).attr('task-id');
+                    chosenPrice.note =  $('#note').val();
+                    servicePrices[taskId]['chosenPrice'] = chosenPrice;
+                    console.log(servicePrices[taskId]);
+                    correspondentTable.clear().draw(false);
+                    correspondentTable.search('').draw(false);
+                    $('#type-task').empty();
+                    setChosenPrice(chosenPrice);
+                }
+            });
+
+            $('#modal-service-price-table #btn-ok').on('click', function(e) {
+                $('#modal-service-price-table').modal('hide');
+            });
 
         })
     </script>

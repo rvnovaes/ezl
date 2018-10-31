@@ -309,11 +309,11 @@ class TaskResource(resources.ModelResource):
         cost_center = row['folder_cost_center']
         if cost_center:
             cost_center = CostCenter.objects.get_queryset(office=[self.office_id]).filter(
-                name__unaccent__icontains=cost_center).first()
+                name__unaccent__iexact=cost_center).first()
             if not cost_center:
                 row_errors.append(insert_incorrect_natural_key_message(row, 'folder_cost_center'))
         folder = None
-        person_customer = Person.objects.filter(legal_name__unaccent__icontains=str(row['folder_person_customer']),
+        person_customer = Person.objects.filter(legal_name__unaccent__iexact=str(row['folder_person_customer']),
                                                 officemembership__office=self.office,
                                                 is_customer=True).first()
         if not (folder_legacy_code or folder_number) and person_customer:
@@ -366,21 +366,21 @@ class TaskResource(resources.ModelResource):
                     office_id=self.office_id).first()
             instance = None
             if row['instance']:
-                instance = Instance.objects.filter(name__unaccent__icontains=row['instance'],
+                instance = Instance.objects.filter(name__unaccent__iexact=row['instance'],
                                                    office=self.office).first()
                 if not instance:
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'instance')])
             is_current_instance = TRUE_FALSE_DICT.get(row['lawsuit_is_current_instance'], False)
             person_lawyer = row.get('lawsuit_person_lawyer', '')
             if person_lawyer:
-                person_lawyer = Person.objects.filter(legal_name__unaccent__icontains=person_lawyer,
+                person_lawyer = Person.objects.filter(legal_name__unaccent__iexact=person_lawyer,
                                                       is_lawyer=True,
                                                       offices=self.office).first()
                 if not person_lawyer:
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_person_lawyer')])
             court_district = row.get('lawsuit_court_district', '')
             if court_district:
-                court_district = CourtDistrict.objects.filter(name__unaccent__icontains=court_district).first()
+                court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district).first()
                 if not court_district:
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_court_district')])
             court_district_complement = row.get('lawsuit_court_district_complement', '')
@@ -392,19 +392,19 @@ class TaskResource(resources.ModelResource):
                                                                                  'lawsuit_court_district_complement')])
             city = row.get('lawsuit_city', '')
             if city:
-                city = City.objects.filter(name__unaccent__icontains=city).first()
+                city = City.objects.filter(name__unaccent__iexact=city).first()
                 if not city:
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_city')])
             court_division = row.get('lawsuit_court_division', '')
             if court_division:
-                court_division = CourtDivision.objects.filter(name__unaccent__icontains=court_division,
+                court_division = CourtDivision.objects.filter(name__unaccent__iexact=court_division,
                                                               office=self.office).first()
                 if not court_division:
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_court_division')])
             organ = row.get('lawsuit_organ', '')
             if organ:
                 organ = Organ.objects.get_queryset(office=[self.office_id]).filter(
-                    legal_name__unaccent__icontains=organ).first()
+                    legal_name__unaccent__iexact=organ).first()
                 if not organ:
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_organ')])
             opposing_party = row.get('lawsuit_opposing_party', '')
@@ -461,7 +461,7 @@ class TaskResource(resources.ModelResource):
                 defaults={'create_user': self.create_user,
                           'system_prefix': row['system_prefix']})
         else:
-            type_movement = TypeMovement.objects.filter(name__unaccent__icontains=type_movement_name).first()
+            type_movement = TypeMovement.objects.filter(name__unaccent__iexact=type_movement_name).first()
             if movement_legacy_code:
                 movement = Movement.objects.filter(legacy_code=movement_legacy_code,
                                                    system_prefix=row['system_prefix'],

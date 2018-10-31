@@ -4,6 +4,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from financial.utils import remove_caracter_especial
 from core.utils import get_office_session
+from decimal import Decimal
 
 
 def field_to_html_input(field):
@@ -79,7 +80,8 @@ class GenericSearchFormat(object):
             'DateTimeField': GenericSearchDate(),
             'ForeignKey': GenericSearchForeignKey(self.model),
             'OneToOneField': GenericSearchForeignKey(self.model),
-            'BooleanField': GenericSearchBooleanField()
+            'BooleanField': GenericSearchBooleanField(),
+            'DecimalField': GenericSearchDecimal()
         }
 
     def despatch(self, office=False):
@@ -160,6 +162,13 @@ class GenericSearchString(GenericSearch):
 class GenericSearchInteger(GenericSearch):
     def dict_to_filter(self, param, value):
         return "{}='{}'".format(param, value)
+
+
+class GenericSearchDecimal(GenericSearch):
+    def dict_to_filter(self, param, value):
+        value = value.replace('.', '')
+        value = value.replace(',', '.')
+        return "{}='{}'".format(param, Decimal(value))
 
 
 class GenericSearchBooleanField(GenericSearch):

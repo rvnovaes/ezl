@@ -1,5 +1,5 @@
 from django import forms
-from core.models import Person, State
+from core.models import Person, State, City
 from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field
 from lawsuit.models import CourtDistrict, CourtDistrictComplement
 from task.models import TypeTask
@@ -54,6 +54,15 @@ class ServicePriceTableForm(BaseModelForm):
                                                     url='/processos/typeahead/search/complemento',
                                                 ))
 
+    city = forms.CharField(label="Cidade", required=False,
+                           widget=TypeaHeadForeignKeyWidget(
+                               model=City,
+                               field_related='name',
+                               forward='state',
+                               name='city',
+                               url='/city/autocomplete/',
+                           ))
+
     type_task = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(TypeTask.objects.all().order_by('name')),
         empty_label='',
@@ -70,7 +79,7 @@ class ServicePriceTableForm(BaseModelForm):
     class Meta:
         model = ServicePriceTable
         fields = ('office', 'office_correspondent', 'client', 'type_task', 'state', 'court_district',
-                  'court_district_complement', 'value', 'is_active')
+                  'court_district_complement', 'city', 'value', 'is_active')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'
@@ -78,18 +87,25 @@ class ServicePriceTableForm(BaseModelForm):
         value = value.replace(',', '.')
         return Decimal(value)
 
-    def form_valid(self, form):
-        if self.cleaned_data["state"] and self.cleaned_data["court_district"] \
-            and not CourtDistrict.objects.filter(name=self.cleaned_data["court_district"].name,
-                                                 state=self.cleaned_data["state"]):
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data["court_district"] and cleaned_data["court_district_complement"]:
+            cleaned_data["court_district"] = self.cleaned_data["court_district_complement"].court_district
+        if not cleaned_data["state"] and cleaned_data['court_district']:
+            cleaned_data["state"] = cleaned_data['court_district'].state
+        elif not cleaned_data["state"] and cleaned_data['city']:
+            cleaned_data["state"] = cleaned_data['city'].state
+        if cleaned_data["state"] and cleaned_data["court_district"] \
+            and not CourtDistrict.objects.filter(name=cleaned_data["court_district"].name,
+                                                 state=cleaned_data["state"]):
             raise forms.ValidationError('A comarca selecionada não pertence à UF selecionada')
-        if ServicePriceTable.objects.filter(type_task=self.cleaned_data["type_task"],
-                                            court_district=self.cleaned_data["court_district"],
-                                            state=self.cleaned_data["state"],
-                                            client=self.cleaned_data["client"],
-                                            office_correspondent=self.cleaned_data["office_correspondent"]).first():
+        if ServicePriceTable.objects.filter(type_task=cleaned_data["type_task"],
+                                            court_district=cleaned_data["court_district"],
+                                            state=cleaned_data["state"],
+                                            client=cleaned_data["client"],
+                                            office_correspondent=cleaned_data["office_correspondent"]).first():
             raise forms.ValidationError('Já existe um registro com os dados selecionados')
-        return super().form_valid(form)
+        return cleaned_data
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -102,7 +118,8 @@ class ServicePriceTableForm(BaseModelForm):
 
 class ImportServicePriceTableForm(forms.ModelForm):
     file_xls = XlsxFileField(label='Arquivo', required=True,
-                             headers_to_check=['Correspondente', 'Serviço', 'Cliente', 'Comarca', 'UF', 'Valor'])
+                             headers_to_check=['Correspondente', 'Serviço', 'Cliente', 'Comarca', 'UF', 'Valor',
+                                               'Complemento de comarca', 'Cidade'])
 
     class Meta:
         model = ImportServicePriceTable

@@ -80,6 +80,14 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         related_name='%(class)s_court_district_complement',
         verbose_name='Complemento de comarca'
     )
+    city = models.ForeignKey(
+        'core.City',
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name='%(class)s_city',
+        verbose_name='Cidade'
+    )
 
     objects = OfficeManager()
 
