@@ -101,7 +101,7 @@
                                 class="btn btn-default"
                                 data-dismiss="modal">
                             <i class="mdi mdi-close"></i> Cancelar
-                        </button>
+                        </button>                        
                         <button id="actionButton"
                             type="submit"
                             onclick="submit_task_detail(this, '{{form.instance.office.use_service}}')"
@@ -145,11 +145,22 @@
         })();
     </script>
     {% include 'questionnaire/generic_survey.html' %}
+    {% include 'questionnaire/company_representative_questionnarie.html'%}
 
     <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
          a medida que for adicionando novos arquivos -->
     <div id="scripts">
     </div>
+    <script type="text/javascript">
+        var taskId;
+        $('#btn-company_representative').on('click', function(event) {
+            event.preventDefault()
+            taskId = '{{object.pk}}';
+            selectedSurvey = '{{survey_company_representative|safe}}';
+            $("#survey-company-representative").modal('show')
+        })
+
+    </script>
 
     <script>
         var expanded = false;

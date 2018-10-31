@@ -8,7 +8,7 @@ from core.models import Person, ImportXlsFile
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
 from core.widgets import MDDateTimepicker, MDDatePicker
 from core.forms import BaseForm, XlsxFileField
-from task.models import Task, TypeTask, Filter, TaskStatus, TypeTaskMain
+from task.models import Task, TypeTask, Filter, TaskStatus, TypeTaskMain, TaskSurveyAnswer
 from task.resources import COLUMN_NAME_DICT
 from task.widgets import code_mirror_schema
 from .schemas import *
@@ -26,7 +26,7 @@ class TaskForm(BaseForm):
     class Meta:
         model = Task
         fields = [
-            'office', 'task_number', 'person_asked_by', 'type_task', 'final_deadline_date', 'performance_place',
+            'office', 'task_number', 'person_asked_by', 'person_company_representative', 'type_task', 'final_deadline_date', 'performance_place',
             'description', 'is_active', 'legacy_code'
         ]
 
@@ -34,6 +34,13 @@ class TaskForm(BaseForm):
         empty_label='Selecione...',
         queryset=filter_valid_choice_form(Person.objects.active().requesters().
                                           active_offices().order_by('name')))
+
+    person_company_representative = forms.ModelChoiceField(
+        empty_label='Selecione...',
+        required=False,
+        queryset=filter_valid_choice_form(
+            Person.objects.active().filter(
+                legal_type='F').order_by('name')))
 
     type_task = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(
@@ -183,15 +190,16 @@ class TypeTaskMainForm(forms.ModelForm):
 class TypeTaskForm(BaseForm):
     class Meta:
         model = TypeTask
-        fields = ['office', 'type_task_main', 'survey', 'name', 'is_active', 'legacy_code']
+        fields = ['office', 'type_task_main', 'survey', 'survey_company_representative', 'name', 'is_active', 'legacy_code']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         office = get_office_session(self.request)
         self.fields['office'] = get_office_field(self.request)
         self.fields['survey'].queryset = Survey.objects.filter(office=office)
+        self.fields['survey_company_representative'].queryset = Survey.objects.filter(office=office)
         self.order_fields(
-            ['office', 'type_task_main', 'survey', 'name', 'is_active', 'legacy_code'])
+            ['office', 'type_task_main', 'survey', 'survey_company_representative', 'name', 'is_active', 'legacy_code'])
 
 
 class ImportTaskListForm(forms.ModelForm):
@@ -208,3 +216,10 @@ class ImportTaskListForm(forms.ModelForm):
             v['column_name'] for k, v in COLUMN_NAME_DICT.items()
             if v['required']
         ])
+
+
+
+class TaskSurveyAnswerForm(forms.ModelForm):
+    class Meta:
+        model = TaskSurveyAnswer
+        fields = ('create_user', 'survey_result')

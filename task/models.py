@@ -32,6 +32,7 @@ class Permissions(Enum):
     view_distributed_tasks = 'Can view tasks distributed by the user'
     can_distribute_tasks = 'Can distribute tasks to another user'
     can_see_tasks_from_team_members = 'Can see tasks from your team members'
+    can_see_tasks_company_representative = 'Can see tasks your company representative'
 
 
 # Dicionário para retornar o icone referente ao status da providencia
@@ -196,7 +197,14 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
         'survey.Survey',
         null=True,
         blank=True,
-        verbose_name='Tipo de Formulário')
+        verbose_name='Formulário do correspondente')
+
+    survey_company_representative = models.ForeignKey(
+        'survey.Survey',
+        null=True,
+        blank=True,
+        related_name='type_tasks_person_company_representative',
+        verbose_name='Formulário do preposto')    
 
     office = models.ForeignKey(
         Office,
@@ -340,6 +348,12 @@ class Task(Audit, LegacyCode, OfficeMixin):
         blank=False,
         max_length=255,
         verbose_name='Local de cumprimento')
+    person_company_representative = models.ForeignKey(
+        Person,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        verbose_name='Preposto', related_name='tasks_to_person_representative')
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
@@ -679,6 +693,13 @@ class DashboardViewModel(Audit, OfficeMixin):
         null=True,
         related_name='%(class)s_asked_by',
         verbose_name='Solicitante')
+    person_company_representative = models.ForeignKey(
+        Person,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name='%(class)s_company_representative',
+        verbose_name='Preposto')    
     person_executed_by = models.ForeignKey(
         Person,
         on_delete=models.PROTECT,
@@ -851,3 +872,9 @@ class TaskShowStatus(Audit):
         default=TaskStatus.REQUESTED)
     send_mail_template = models.ForeignKey(
         EmailTemplate, verbose_name='Template a enviar', blank=True, null=True)
+
+
+class TaskSurveyAnswer(Audit):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True)
+    survey_result = JSONField(
+    verbose_name=u'Respotas do Formulário', blank=True, null=True)    

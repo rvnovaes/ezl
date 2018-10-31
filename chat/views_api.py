@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from .serializers import ChatSerializer, UnreadMessageSerializer
 from .models import Chat, UnreadMessage
 from django_filters.rest_framework import DjangoFilterBackend
-
+from .pagination import StandardResultsSetPagination
 
 class ChatViewSet(viewsets.ModelViewSet):
     queryset = Chat.objects.all()
@@ -16,6 +16,7 @@ class UnreadMessageViewSet(viewsets.ModelViewSet):
     serializer_class = UnreadMessageSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_fields = ('user_by_message__user_by_chat_id', 'message__message', 'message__chat__company_id')
+    pagination_class = StandardResultsSetPagination
 
     # def get_queryset(self):
     #     user = self.request.user

@@ -1,0 +1,53 @@
+{% extends "skeleton/forms/base.html" %}
+{% load render_table from django_tables2 %}
+{% load static %}
+{% load querystring from django_tables2 %}
+{% load bootstrap3 %}
+
+{% block content %}    	
+    {% include 'task/includes/task-form-filters.html'%}
+
+    {% block extra_content %}
+        {% include 'task/includes/task-table-list.html' with title_table='Providências a responder'%}   
+    {% endblock extra_content %}
+{% endblock content %}
+{% block extra_scripts %} 
+    {% include 'task/includes/task-filter-extras.html'%}
+
+    <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
+    <script src="{% static 'libs/bootstrap-rating/bootstrap-rating.min.js' %}"></script>
+    <!--Style Switcher -->
+    <script src="{% static 'skeleton/js/cbpFWTabs.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+
+    <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>    
+    {% include 'questionnaire/company_representative_questionnarie.html'%}
+    <script type="text/javascript">
+        var taskId;
+        var selectedSurvey;
+    	var surveys = {};
+        {% for survey in surveys%} 
+        	let surveyData = '{{survey.survey.data|safe}}';
+        	surveys['{{survey.task_id}}'] = surveyData;        	
+        {% endfor %}
+    	$('tbody tr').each(function(){
+            if ($(this).attr('tr-data-id')) {
+    		  $(this).append('<td><button id="btn-open-questions" class="btn btn-success btn-sm">Responder</button></td>')
+            }
+    	}).promise().done(function() { 
+			$('#btn-open-questions').on('click', function(event) {
+				event.stopPropagation()
+				taskId = $(this).parent().parent().attr('tr-data-id');
+                selectedSurvey = surveys[taskId];
+                $("#survey-company-representative").modal('show')
+			})
+        })
+    </script>
+{%endblock%}
+
+

@@ -1309,7 +1309,7 @@ class RegisterNewUser(CreateView):
 
         messages.add_message(request, messages.SUCCESS,
                              "Registro concluído com sucesso!", 'add_new_user')
-        return HttpResponseRedirect(reverse_lazy('login'))
+        return HttpResponseRedirect(reverse_lazy('account_login'))
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
