@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from core.views import CustomLoginRequiredView, set_office_session
 from .serializers import TaskToPaySerializer
+from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
@@ -40,6 +41,7 @@ from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFIC
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, ImportTaskListForm
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation, TypeTaskMain
+from task.queries import *    
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
 from task.tasks import import_xls_task_list
@@ -518,42 +520,15 @@ class ToReceiveTaskReportView(TaskReportBase):
 
 
 class ToPayOfficeReportView(TemplateView):
-    def get(self, request, *args, **kwargs):                       
-        office = Office.objects.get(pk=request.GET.get('office'))
-        client = Person.objects.get(pk=request.GET.get('client'))
-        task_ids = request.GET.getlist('tasks[]')
-        tasks = Task.objects.select_related('office') \
-        .select_related('type_task') \
-        .select_related('movement__type_movement') \
-        .select_related('movement__folder') \
-        .select_related('movement__folder__person_customer') \
-        .select_related('movement__law_suit__court_district') \
-        .select_related('parent__type_task').filter(pk__in=task_ids)
-        data = {
-            'office_name': office.legal_name, 
-            'client_name': client.legal_name,
-            'total_client': sum([task.amount for task in tasks]),
-            'tasks': [
-                {
-                    'parent_task_number': task.parent.task_number, 
-                    'finished_date': task.finished_date, 
-                    'type_task': task.type_task.name, 
-                    'lawsuit_number': task.lawsuit_number, 
-                    'court_district': task.court_district.name, 
-                    'opposing_party': task.opposing_party, 
-                    'billing_date': task.billing_date, 
-                    'amount': task.amount, 
-                    'legacy_code': task.legacy_code, 
-                    'parent_legacy_code': task.parent.legacy_code
-                } for task in tasks
-            ]             
-        }
-        return JsonResponse(data)
-
-class ToPayTaskReportView(TemplateView):
     template_name = 'task/reports/to_pay.html'
     filter_class = TaskToPayFilter
-    datetime_field = 'billing_date'
+    datetime_field = 'billing_date'    
+    def get(self, request, *args, **kwargs):                
+        self.task_filter = self.filter_class(
+            data=self.request.GET, request=self.request)
+        tasks = self.get_queryset()
+        data = json.dumps(get_tasks_to_pay(task_ids=list(tasks.values_list('pk', flat=True))), cls=DjangoJSONEncoder) 
+        return JsonResponse(data, safe=False)
 
     def filter_queryset(self, queryset):
         if not self.task_filter.form.is_valid():
@@ -607,23 +582,6 @@ class ToPayTaskReportView(TemplateView):
 
         return queryset
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        self.task_filter = self.filter_class(
-            data=self.request.GET, request=self.request)
-        context['filter'] = self.task_filter
-        tasks = self.get_queryset()
-        context['offices_by_clients'] = []
-        if tasks: 
-            data = [{
-                'office': task.office.pk, 
-                'pk': task.pk,             
-                'client': task.movement.folder.person_customer.pk} for task in tasks]
-            df = pd.DataFrame(data)                        
-            context['offices_by_clients'] = df.groupby(['office', 'client'])['pk'].apply(list).to_json() 
-            context['total_tasks'] = tasks.count()
-        return context
-
     def get_queryset(self):
         office = get_office_session(self.request)
         queryset = Task.objects \
@@ -639,11 +597,22 @@ class ToPayTaskReportView(TemplateView):
             task_status=TaskStatus.FINISHED,
             parent__isnull=False)
         queryset = self.filter_queryset(queryset)
-        return queryset.order_by('child__office__name')
+        return queryset
 
-    def _get_related_office(self, task):
-        return task.office
 
+
+class ToPayTaskReportView(TemplateView):
+    template_name = 'task/reports/to_pay.html'
+    filter_class = TaskToPayFilter
+    datetime_field = 'billing_date'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        self.task_filter = self.filter_class(
+            data=self.request.GET, request=self.request)
+        context['filter'] = self.task_filter
+        return context
+        
     def post(self, request):
         office = get_office_session(self.request)
         tasks_payload = request.POST.get('tasks')

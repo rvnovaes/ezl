@@ -262,8 +262,6 @@
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
     <script type="text/javascript">
-        window.offices_by_clients = JSON.parse('{{offices_by_clients | safe}}');
-        window.totalTasks = '{{total_tasks}}'
         var tableBodyEl = $('#os-table-body');
         var getBillingDate = function(billingData) {
             if (!billingData) {
@@ -300,6 +298,12 @@
             `
         }
 
+        var setDefaultOfNull = function(value){
+            if (!value) {
+                return ''
+            }
+        }
+
         var getTrTask = function(task) {
             let elBilling = '';
             if (!task.billing_date) {
@@ -322,72 +326,64 @@
                         <td>${task.lawsuit_number}</td>
                         <td>${task.court_district}</td>
                         <td>${task.opposing_party}</td>
-                        <td>${task.parent_legacy_code}</td>
+                        <td>${setDefaultOfNull(task.task_legacy_code)}</td>
                         <td>${getBillingDate(task.billing_date)}</td>
                         <td class="text-center"><center>${task.amount}</center></td>
                     </tr>            `
         }
         var currentOffice;
+        var currentClient;
         var totalOffice = 0.0;
-        let keys  = Object.keys(offices_by_clients);
         var count = 0;
+        var isLoaging = false;
         async function getTasks () {
-            keys.forEach(function(key){            
-                let data = {
-                    office: JSON.parse(key)[0],
-                    client: JSON.parse(key)[1],
-                    tasks: offices_by_clients[key]
-                }
-                $.ajax({
-                    method: 'GET', 
-                    url: `/relatorios/os-a-pagar-data`, 
-                    data: data, 
-                    success: function(response){
-                        if (currentOffice !== response.office_name) {         
-                            totalOffice = 0.0;                   
-                            currentOffice = response.office_name; 
-                            tableBodyEl.append(getTrOffice(response.office_name, '0,00', data.office));                         
-                        }                                                         
-                        tableBodyEl.append(getTrClient(response.client_name, 'R$' + response.total_client, false));
-                        response.tasks.forEach(function(task){
-                            count += 1;
-                            totalOffice += parseFloat(task.amount);                             
-                            $(`[office-id=${data.office}]`).text('R$' + totalOffice.toFixed(2));
-                            $('#loading-data').text(`Carregando ${count} de ${totalTasks}`)
-                            tableBodyEl.append(getTrTask(task))
-                        }) 
-                    },
-                    error: function(error) {
-                      console.log('DEU ERRADO');
-                      console.log(error)
-                    }, 
-                    beforeSend: function (xhr, settings) {
-                      xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
-                    },
-                    dataType: 'json'                 
-                })            
+            var formdata = $("form").serializeArray();
+            var data = {};
+            $(formdata ).each(function(index, obj){
+                data[obj.name] = obj.value;
             });
-            swal({
-                title: 'Carregando ordens de serviço', 
-                html: '<h3>Carregando <strong></strong></h3>',
-                onOpen: () => {
-                    swal.showLoading(), 
-                    ajaxInterval = setInterval(()=>{
-                        swal.getContent().querySelector('strong')
-                        .textContent = `${count} de ${totalTasks}`
-                        if (count == totalTasks) {
-                            clearInterval(ajaxInterval);
-                            swal.close();
+
+            $.ajax({
+                method: 'GET', 
+                url: `/relatorios/os-a-pagar-data`, 
+                data: data, 
+                success: function(response){
+                    JSON.parse(response).forEach(function(task){                        
+                        if (currentOffice !== task.office_name) {         
+                            totalOffice = 0.0;                   
+                            currentOffice = task.office_name; 
+                            currentClient = null;
+                            tableBodyEl.append(getTrOffice(task.office_name, '0,00', task.office_id));                         
+                        };
+                        if(currentClient !== task.client_name){
+                            currentClient = task.client_name;
+                            tableBodyEl.append(getTrClient(task.client_name, '0,00'))
                         }
-                    }, 0), 
-                    delegateTasks();
+                        tableBodyEl.append(getTrTask(task));                            
+                    })
+                    console.log(JSON.parse(response)) 
+                },
+                error: function(error) {
+                  console.log('DEU ERRADO');
+                  console.log(error)
                 }, 
-
-            })            
-        }
-
-        getTasks();
-
+                beforeSend: function (xhr, settings) {
+                  xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                },
+                dataType: 'json'                 
+            })                       
+        }     
+        $(document).ready(function(){
+            $('#filter_content').collapse('show');
+            $('form').on('submit', function(event){                
+                event.preventDefault();
+                $('#os-table-body').empty()
+                currentOffice = null;
+                currentClient = null;
+                $('#filter_content').collapse('hide');
+                getTasks();
+            })
+        })               
     </script>
     <script>
     $('#os_exportable').dataTable({
