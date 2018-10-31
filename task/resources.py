@@ -238,6 +238,8 @@ class TaskResult(Result):
 
 
 class TaskResource(resources.ModelResource):
+    movement = CustomFieldImportExport(column_name='movement', attribute='movement_id', saves_null_values=False,
+                                       column_name_dict=COLUMN_NAME_DICT)
     task_number = CustomFieldImportExport(column_name='task_number', attribute='task_number', widget=IntegerWidget(),
                                           saves_null_values=True, column_name_dict=COLUMN_NAME_DICT)
     person_asked_by = CustomFieldImportExport(column_name='person_asked_by', attribute='person_asked_by',
@@ -268,8 +270,6 @@ class TaskResource(resources.ModelResource):
                                                       column_name_dict=COLUMN_NAME_DICT)
     legacy_code = CustomFieldImportExport(column_name='legacy_code', attribute='legacy_code', widget=CharWidget(),
                                           saves_null_values=True, column_name_dict=COLUMN_NAME_DICT)
-    movement = CustomFieldImportExport(column_name='movement', attribute='movement_id', saves_null_values=True,
-                                       column_name_dict=COLUMN_NAME_DICT)
     system_prefix = CustomFieldImportExport(column_name='system_prefix', attribute='system_prefix',
                                             saves_null_values=False, column_name_dict=COLUMN_NAME_DICT)
 
@@ -510,17 +510,26 @@ class TaskResource(resources.ModelResource):
     def before_import_row(self, row, **kwargs):
         row_errors = []
         row['warnings'] = []
-        self.folder = self.validate_folder(row, row_errors)
-        self.lawsuit = self.validate_lawsuit(row, row_errors) if self.folder else None
-        self.movement = self.validate_movement(row, row_errors) if self.lawsuit else None
-
-        if self.movement:
-            row['movement'] = self.movement.id
-        if row_errors:
-            raise Exception(row_errors)
+        instance = None
         row['task_number'] = self_or_none(row['task_number'])
         row['legacy_code'] = self_or_none(row['legacy_code'])
         row['is_active'] = TRUE_FALSE_DICT.get('is_active', True)
+        import pdb;
+        pdb.set_trace()
+        if row['task_number'] or row['legacy_code']:
+            instance_loader = self._meta.instance_loader_class(self, row)
+            instance = self.get_instance(instance_loader, row)
+        if not instance:
+            self.folder = self.validate_folder(row, row_errors)
+            self.lawsuit = self.validate_lawsuit(row, row_errors) if self.folder else None
+            self.movement = self.validate_movement(row, row_errors) if self.lawsuit else None
+
+            if self.movement:
+                row['movement'] = self.movement.id
+            if row_errors:
+                raise Exception(row_errors)
+        else:
+            row['movement'] = instance.movement.id
 
     def after_import_row(self, row, row_result, **kwargs):
         line_warnings = row['warnings']
