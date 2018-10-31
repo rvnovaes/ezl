@@ -35,9 +35,9 @@ from core.models import Person, CorePermissions, CustomSettings
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter
-from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, ImportTaskListForm
+from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, ImportTaskListForm, TaskSurveyAnswerForm
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
-    TaskGeolocation, TypeTaskMain
+    TaskGeolocation, TypeTaskMain, TaskSurveyAnswer
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
 from task.tasks import import_xls_task_list
@@ -191,14 +191,14 @@ class BatchTaskToAssignView(AuditFormMixin, UpdateView):
         try:
             task_id = kwargs.get('pk')
             task = Task.objects.get(pk=task_id)
-            form = TaskToAssignForm(request.POST, instance=task)            
+            form = TaskToAssignForm(request.POST, instance=task)
             if form.is_valid():
                 form.instance.person_executed_by_id = request.POST.get('person_executed_by')
                 form.instance.person_distributed_by = self.request.user.person
-                form.instance.task_status = TaskStatus.OPEN        
+                form.instance.task_status = TaskStatus.OPEN
                 get_task_attachment(self, form)
-                form.save()                        
-                return JsonResponse({'status': 'ok'})            
+                form.save()
+                return JsonResponse({'status': 'ok'})
             return JsonResponse({'status': 'error', 'errors': form})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
@@ -209,7 +209,7 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
             task = Task.objects.get(pk=kwargs.get('pk'))
             amount = request.POST.get('amount').replace('R$', '') if request.POST.get('amount') else '0.00'
             note = request.POST.get('note', '')
-            form = TaskDetailForm(request.POST, instance=task)  
+            form = TaskDetailForm(request.POST, instance=task)
             if form.is_valid():
                 form.instance.task_status = TaskStatus.OPEN
                 form.instance.amount = Decimal(amount)
@@ -221,15 +221,15 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
                     pk=request.POST.get('servicepricetable_id'))
                 if servicepricetable:
                     delegate_child_task(form.instance, servicepricetable.office_correspondent)
-                    form.instance.person_executed_by = None                
+                    form.instance.person_executed_by = None
                 send_notes_execution_date.send(
                     sender=self.__class__,
                     notes=note,
                     instance=form.instance,
                     execution_date=form.instance.execution_date,
-                    survey_result=form.instance.survey_result)                    
+                    survey_result=form.instance.survey_result)
                 form.save()
-                return JsonResponse({'status': 'ok'})            
+                return JsonResponse({'status': 'ok'})
             return JsonResponse({'status': 'error', 'errors': form})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
@@ -238,14 +238,14 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
 class BatchTaskToRefuseView(AuditFormMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         task = Task.objects.get(pk=kwargs.get('pk'))
-        task.task_status = TaskStatus.REFUSED        
+        task.task_status = TaskStatus.REFUSED
         send_notes_execution_date.send(
             sender=self.__class__,
             notes=request.POST.get('notes'),
             instance=task,
             execution_date=task.execution_date,
             survey_result=task.survey_result)
-        task.save()        
+        task.save()
         return JsonResponse({'status': 'ok'})
 
 
@@ -545,6 +545,15 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
     table_pagination = {'per_page': 5}
     ret_status_dict = {}
 
+    def get(self, request, *args, **kwargs):
+        office_session = get_office_session(request)
+        checker = ObjectPermissionChecker(request.user)
+        company_representative = checker.has_perm('can_see_tasks_company_representative', office_session)
+        view_all_tasks = checker.has_perm('view_all_tasks', office_session)
+        if company_representative and not view_all_tasks:
+            return HttpResponseRedirect(reverse_lazy('task_to_company_representative'))
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, *args, **kwargs):
         office_session = get_office_session(self.request)
         context = super().get_context_data(*args, **kwargs)
@@ -630,6 +639,12 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         survey_result = (form.cleaned_data['survey_result']
                          if form.cleaned_data['survey_result'] else
                          form.initial['survey_result'])
+        if survey_result:
+            survey = TaskSurveyAnswer()
+            survey.task = form.instance
+            survey.create_user = self.request.user
+            survey.survey_result = survey_result
+            survey.save()
         send_notes_execution_date.send(
             sender=self.__class__,
             notes=notes,
@@ -701,7 +716,12 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         type_task_field = get_correspondents_table.get_type_task_field()
         if type_task_field:
             context['form'].fields['type_task_field'] = type_task_field
-
+        checker = ObjectPermissionChecker(self.request.user)        
+        if checker.has_perm('can_see_tasks_company_representative', office_session):            
+            if not TaskSurveyAnswer.objects.filter(task=self.object, create_user=self.request.user):
+                if (self.object.type_task.survey):
+                    context['not_answer_questionnarie'] = True
+                    context['survey_company_representative'] = self.object.type_task.survey.data
         return context
 
 
@@ -893,7 +913,8 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     task_dynamic_query.add(Q(task_status__in=status), Q.AND)
                 if data['type_task']:
                     task_dynamic_query.add(
-                        Q(type_task=data['type_task']), Q.AND)
+                        Q(Q(type_task=data['type_task']) |
+                          Q(type_task__type_task_main__in=data['type_task'].type_task_main.all())), Q.AND)
                 if data['court']:
                     task_dynamic_query.add(
                         Q(movement__law_suit__organ=data['court']), Q.AND)
@@ -933,9 +954,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 if data['person_asked_by']:
                     task_dynamic_query.add(
                         Q(person_asked_by=data['person_asked_by']), Q.AND)
-                if data['origin_office_asked_by']:                    
+                if data['origin_office_asked_by']:
                     task_dynamic_query.add(
-                        Q(office=office_session, parent__office_id=data['origin_office_asked_by']), Q.AND)                    
+                        Q(office=office_session, parent__office_id=data['origin_office_asked_by']), Q.AND)
                 if data['person_distributed_by']:
                     task_dynamic_query.add(
                         Q(person_distributed_by=data['person_distributed_by']),
@@ -1706,6 +1727,7 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView,
             return JsonResponse(ret, status=status)
         return JsonResponse(json.loads(json.dumps(ret)), status=status)
 
+
 class BatchChangeTasksView(DashboardSearchView):
     filter_class = BatchChangTaskFilter
     template_name = 'task/batch-change-tasks.html'
@@ -1723,10 +1745,9 @@ class BatchChangeTasksView(DashboardSearchView):
         if self.option in ['A', 'D']:
             status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED]
             return task_list.filter(task_status__in=status_to_filter)
-        status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN, 
-            TaskStatus.DONE, TaskStatus.ERROR]            
+        status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN,
+            TaskStatus.DONE, TaskStatus.ERROR]
         return task_list.filter(task_status__in=status_to_filter)
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -1735,7 +1756,7 @@ class BatchChangeTasksView(DashboardSearchView):
         RequestConfig(self.request, paginate={'per_page': 30}).configure(table)
         context['table'] = table
         context['option'] = self.option
-        context['office'] = get_office_session(self.request)        
+        context['office'] = get_office_session(self.request)
         return context
 
 
@@ -1747,31 +1768,32 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
             price_table = CorrespondentsTable(task, task.office)
             cheapest_correspondent = price_table.get_cheapest_correspondent()
             prices = [ {
-                'id': price.id, 
+                'id': price.id,
                 'court_district': {
-                    'id': price.court_district.pk if price.court_district else '-', 
-                    'name': price.court_district.name if price.court_district else '-',                 
-                }, 
+                    'id': price.court_district.pk if price.court_district else '-',
+                    'name': price.court_district.name if price.court_district else '-',
+                },
                 'court_district_complement': {
-                    'id': price.court_district_complement.pk if price.court_district_complement else '-', 
-                    'name': price.court_district_complement.name if price.court_district_complement else '-',            
-                    }, 
-                'create_user': price.create_user.pk, 
+                    'id': price.court_district_complement.pk if price.court_district_complement else '-',
+                    'name': price.court_district_complement.name if price.court_district_complement else '-',
+                    },
+                'create_user': price.create_user.pk,
                 'client': price.client if price.client else '-',
+                'city': price.city.name if price.city else '-',
                 'office': {
-                    'id': price.office.pk, 
+                    'id': price.office.pk,
                     'legal_name': price.office.legal_name
-                }, 
+                },
                 'office_correspondent': {
-                    'id': price.office_correspondent.pk, 
-                    'legal_name': price.office_correspondent.legal_name                    
-                }, 
-                'state': price.state.initials if price.state else '-', 
+                    'id': price.office_correspondent.pk,
+                    'legal_name': price.office_correspondent.legal_name
+                },
+                'state': price.state.initials if price.state else '-',
                 'type_task': {
-                    'id': price.type_task.pk if price.type_task else '-', 
+                    'id': price.type_task.pk if price.type_task else '-',
                     'name': price.type_task.name if price.type_task else '-'
-                }, 
-                'office_rating': price.office_rating, 
+                },
+                'office_rating': price.office_rating,
                 'office_return_rating': price.office_return_rating,
                 'value': price.value
 
@@ -1779,17 +1801,17 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
 
             data = {
                 'task': {
-                    'id': task.pk, 
+                    'id': task.pk,
                     'type_task': {
-                        'id': task.type_task.pk, 
+                        'id': task.type_task.pk,
                         'name': task.type_task.name
                     }
-                }, 
-                'prices': prices, 
+                },
+                'prices': prices,
                 'cheapest_correspondent': {
                     'count': len(price_table.correspondents_qs),
-                    'id': cheapest_correspondent.pk if cheapest_correspondent else '', 
-                    'office_correspondent': cheapest_correspondent.office_correspondent.legal_name if cheapest_correspondent else '', 
+                    'id': cheapest_correspondent.pk if cheapest_correspondent else '',
+                    'office_correspondent': cheapest_correspondent.office_correspondent.legal_name if cheapest_correspondent else '',
                     'value': cheapest_correspondent.value if cheapest_correspondent else ''
                 }
             }
@@ -1805,8 +1827,37 @@ class BatchCheapestCorrespondent(CustomLoginRequiredView, View):
         if cheapest_correspondent:
             return JsonResponse({
                     'count': len(cheapest_correspondent),
-                    'id': cheapest_correspondent[0].pk, 
-                    'office_correspondent': cheapest_correspondent[0].office_correspondent.legal_name, 
+                    'id': cheapest_correspondent[0].pk,
+                    'office_correspondent': cheapest_correspondent[0].office_correspondent.legal_name,
                     'value': cheapest_correspondent[0].value
                 })
         return JsonResponse({})
+
+
+class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):    
+    template_name = 'task/task_to_person_company_representative.html'
+
+    def get_queryset(self):
+        task_list, task_filter = self.query_builder()
+        self.filter = task_filter                
+        return task_list.filter(
+            person_company_representative=self.request.user.person).exclude(
+            pk__in=self.request.user.tasksurveyanswer_create_user.values_list('task_id', flat=True))
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        context['surveys'] = [
+            {'task_id': task.pk, 'survey': task.type_task.survey} for task in self.object_list
+        ]        
+        return context        
+
+    def post(self, request, *args, **kwargs):
+        try:
+            task = Task.objects.get(pk=request.POST.get('task_id'))
+            survey_result = json.loads(request.POST.get('survey'))
+            survey = TaskSurveyAnswer(create_user=request.user, task=task, survey_result=survey_result)
+            survey.save()
+            return JsonResponse({'status': 'ok'})
+        except Exception as e:
+            return JsonResponse({'error': e})     
+            

@@ -1,5 +1,5 @@
 import datetime
-from core.models import Person
+from core.models import Person, Office
 from django.utils.timezone import make_aware
 from import_export.widgets import ForeignKeyWidget, Widget, DateTimeWidget
 from task.models import TaskStatus
@@ -40,6 +40,25 @@ class UnaccentForeignKeyWidget(ForeignKeyWidget):
             return super().get_queryset(value, row, *args, **kwargs)
 
 
+class TypeTaskByWidget(UnaccentForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        val = super(ForeignKeyWidget, self).clean(value)
+        if val:
+            ret = self.get_queryset(
+                value, row, *args,
+                **kwargs).filter(**{
+                    '{}'.format(self.field): val,
+                    'office_id': row['office']
+                }).first()
+            return ret if ret else self.get_queryset(
+                value, row, *args, **kwargs).filter(
+                    **{
+                        '{}__unaccent__iexact'.format(self.field): val
+                    }).first()
+        else:
+            return None
+
+
 class PersonAskedByWidget(UnaccentForeignKeyWidget):
     """
     Widget to find the person_asked_by.
@@ -53,6 +72,18 @@ class PersonAskedByWidget(UnaccentForeignKeyWidget):
         else:
             raise ValueError(
                 "Não foi encontrado solicitante para este escritório com o nome {}."
+                .format(value))
+
+class PersonCompanyRepresentative(UnaccentForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        person_company_representative = super().clean(value)
+        office = Office.objects.get(pk=row['office'])
+        if person_company_representative and person_company_representative in office.persons.filter(
+            legal_type='F'):
+            return person_company_representative
+        else:
+            raise ValueError(
+                "Não foi encontrado preposto para este escritório com o nome {}."
                 .format(value))
 
 

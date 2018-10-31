@@ -215,6 +215,7 @@ class AbstractPerson(Audit, LegacyCode):
     REQUESTER_GROUP = 'Solicitante'
     SERVICE_GROUP = 'Service'
     SUPERVISOR_GROUP = 'Supervisor'
+    COMPANY_REPRESENTATIVE = 'Preposto'
     legal_name = models.CharField(
         max_length=255, blank=False, verbose_name='Razão social/Nome completo')
     name = models.CharField(
@@ -324,6 +325,11 @@ class AbstractPerson(Audit, LegacyCode):
     def is_supervisor(self):
         return True if self.auth_user.groups.filter(name__startswith=self.SUPERVISOR_GROUP).first() \
             else False
+
+    @property
+    def is_company_representative(self):
+        return True if self.auth_user.groups.filter(name__startswith=self.COMPANY_REPRESENTATIVE).first() \
+        else False
 
     class Meta:
         abstract = True
