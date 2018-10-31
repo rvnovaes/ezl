@@ -532,6 +532,7 @@ class ToPayOfficeReportView(TemplateView):
         data = {
             'office_name': office.legal_name, 
             'client_name': client.legal_name,
+            'total_client': sum([task.amount for task in tasks]),
             'tasks': [
                 {
                     'parent_task_number': task.parent.task_number, 

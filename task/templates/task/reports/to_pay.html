@@ -271,12 +271,12 @@
             }
             return billingData
         }
-        var getTrOffice = function(office_name, office_total) {
+        var getTrOffice = function(officeName, officeTotal, officeId) {
             return `
                 <tr>
-                    <th colspan="10">${office_name}</th>
+                    <th colspan="10">${officeName}</th>
                     <th></th>
-                    <th><center>${office_total}</center></th>
+                    <th><center><span office-id="${officeId}">${officeTotal}</span></center></th>
                 </tr>
             `            
         }
@@ -328,43 +328,66 @@
                     </tr>            `
         }
         var currentOffice;
+        var totalOffice = 0.0;
         let keys  = Object.keys(offices_by_clients);
         var count = 0;
-        keys.forEach(function(key){            
-            let data = {
-                office: JSON.parse(key)[0],
-                client: JSON.parse(key)[1],
-                tasks: offices_by_clients[key]
-            }
-            $.ajax({
-                method: 'GET', 
-                url: `/relatorios/os-a-pagar-data`, 
-                data: data, 
-                success: function(response){
-                    if (currentOffice !== response.office_name) {
-                        console.log(currentOffice, response.office_name)
-                        currentOffice = response.office_name; 
-                        tableBodyEl.append(getTrOffice(response.office_name, 'R$0,00'));                         
-                    }                                                         
-                    tableBodyEl.append(getTrClient(response.client_name, 'R$0,00', false));
-                    response.tasks.forEach(function(task){
-                        count += 1;
-                        $('#loading-data').text(`Carregando ${count} de ${totalTasks}`)
-                        tableBodyEl.append(getTrTask(task))
-                    }) 
-                },
-                error: function(error) {
-                  console.log('DEU ERRADO');
-                  console.log(error)
+        async function getTasks () {
+            keys.forEach(function(key){            
+                let data = {
+                    office: JSON.parse(key)[0],
+                    client: JSON.parse(key)[1],
+                    tasks: offices_by_clients[key]
+                }
+                $.ajax({
+                    method: 'GET', 
+                    url: `/relatorios/os-a-pagar-data`, 
+                    data: data, 
+                    success: function(response){
+                        if (currentOffice !== response.office_name) {         
+                            totalOffice = 0.0;                   
+                            currentOffice = response.office_name; 
+                            tableBodyEl.append(getTrOffice(response.office_name, '0,00', data.office));                         
+                        }                                                         
+                        tableBodyEl.append(getTrClient(response.client_name, 'R$' + response.total_client, false));
+                        response.tasks.forEach(function(task){
+                            count += 1;
+                            totalOffice += parseFloat(task.amount);                             
+                            $(`[office-id=${data.office}]`).text('R$' + totalOffice.toFixed(2));
+                            $('#loading-data').text(`Carregando ${count} de ${totalTasks}`)
+                            tableBodyEl.append(getTrTask(task))
+                        }) 
+                    },
+                    error: function(error) {
+                      console.log('DEU ERRADO');
+                      console.log(error)
+                    }, 
+                    beforeSend: function (xhr, settings) {
+                      xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                    },
+                    dataType: 'json'                 
+                })            
+            });
+            swal({
+                title: 'Carregando ordens de serviço', 
+                html: '<h3>Carregando <strong></strong></h3>',
+                onOpen: () => {
+                    swal.showLoading(), 
+                    ajaxInterval = setInterval(()=>{
+                        swal.getContent().querySelector('strong')
+                        .textContent = `${count} de ${totalTasks}`
+                        if (count == totalTasks) {
+                            clearInterval(ajaxInterval);
+                            swal.close();
+                        }
+                    }, 0), 
+                    delegateTasks();
                 }, 
-                beforeSend: function (xhr, settings) {
-                  xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
-                },
-                dataType: 'json'                 
+
             })            
-        }).promisse().done(function(){
-            alert('terminou de carregar')
-        })
+        }
+
+        getTasks();
+
     </script>
     <script>
     $('#os_exportable').dataTable({
