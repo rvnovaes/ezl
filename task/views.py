@@ -541,7 +541,9 @@ class ToPayOfficeReportView(TemplateView):
                     'court_district': task.court_district.name, 
                     'opposing_party': task.opposing_party, 
                     'billing_date': task.billing_date, 
-                    'amount': task.amount
+                    'amount': task.amount, 
+                    'legacy_code': task.legacy_code, 
+                    'parent_legacy_code': task.parent.legacy_code
                 } for task in tasks
             ]             
         }
