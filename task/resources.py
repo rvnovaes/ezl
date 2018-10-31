@@ -317,6 +317,7 @@ class TaskResource(resources.ModelResource):
                     if folder_legacy_code:
                         folder, created = Folder.objects.get_or_create(
                             legacy_code=folder_legacy_code,
+                            system_prefix=row['system_prefix'],
                             person_customer=person_customer,
                             office=self.office,
                             defaults={'create_user': self.create_user,
@@ -329,6 +330,7 @@ class TaskResource(resources.ModelResource):
                             office=self.office,
                             defaults={'create_user': self.create_user,
                                       'legacy_code': folder_legacy_code,
+                                      'system_prefix': row['system_prefix'],
                                       'cost_center': self_or_none(cost_center)})
         if not folder:
             row_errors.append(RECORD_NOT_FOUND.format(Folder._meta.verbose_name))
@@ -348,6 +350,7 @@ class TaskResource(resources.ModelResource):
             if lawsuit_legacy_code:
                 lawsuit = LawSuit.objects.filter(
                     legacy_code=lawsuit_legacy_code,
+                    system_prefix=row['system_prefix'],
                     folder=self.folder,
                     office_id=self.office_id).first()
             if not lawsuit and lawsuit_number:
@@ -380,7 +383,7 @@ class TaskResource(resources.ModelResource):
                     name=court_district_complement).first()
                 if not court_district_complement:
                     row['warnings'].append([insert_incorrect_natural_key_message(row,
-                                                                                'lawsuit_court_district_complement')])
+                                                                                 'lawsuit_court_district_complement')])
             city = row.get('lawsuit_city', '')
             if city:
                 city = City.objects.filter(name=city).first()
@@ -414,7 +417,8 @@ class TaskResource(resources.ModelResource):
                                                      opposing_party=self_or_none(opposing_party),
                                                      create_user=self.create_user,
                                                      office=self.office,
-                                                     legacy_code=lawsuit_legacy_code)
+                                                     legacy_code=lawsuit_legacy_code,
+                                                     system_prefix=row['system_prefix'],)
                 else:
                     if instance:
                         lawsuit.instance = instance
@@ -447,11 +451,13 @@ class TaskResource(resources.ModelResource):
                 law_suit=self.lawsuit,
                 type_movement=self.default_type_movement,
                 office=self.office,
-                defaults={'create_user': self.create_user})
+                defaults={'create_user': self.create_user,
+                          'system_prefix': row['system_prefix']})
         else:
             type_movement = TypeMovement.objects.filter(name=type_movement_name).first()
             if movement_legacy_code:
                 movement = Movement.objects.filter(legacy_code=movement_legacy_code,
+                                                   system_prefix=row['system_prefix'],
                                                    folder=self.folder,
                                                    law_suit=self.lawsuit,
                                                    office_id=self.office_id).first()
@@ -464,6 +470,7 @@ class TaskResource(resources.ModelResource):
                     office=self.office,
                     type_movement=type_movement,
                     defaults={'legacy_code': movement_legacy_code,
+                              'system_prefix': row['system_prefix'],
                               'create_user': self.create_user})
             elif not movement and not type_movement:
                 row_errors.append(insert_incorrect_natural_key_message(row, 'type_movement'))
