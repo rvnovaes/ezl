@@ -69,6 +69,8 @@ class PersonAskedByWidget(UnaccentForeignKeyWidget):
         if person_asked_by and person_asked_by in Person.objects.requesters(
                 office_id=row['office']):
             return person_asked_by
+        elif not person_asked_by:
+            return None
         else:
             raise ValueError(
                 "Não foi encontrado solicitante para este escritório com o nome {}."
@@ -81,6 +83,8 @@ class PersonCompanyRepresentative(UnaccentForeignKeyWidget):
         office = Office.objects.get(pk=row['office'])
         if person_company_representative and person_company_representative in office.persons.filter(legal_type='F'):
             return person_company_representative
+        elif not person_company_representative:
+            return None
         else:
             raise ValueError(
                 "Não foi encontrado preposto para este escritório com o nome {}."
