@@ -35,6 +35,8 @@ class CustomFieldImportExport(Field):
             if value in self.empty_values:
                 column_property = self.column_name_dict.get(self.column_name)
                 if column_property and column_property.get('required'):
+                    if old_value and not value:
+                        raise ValueError(RECORD_NOT_FOUND.format(self.column_name))
                     raise ValueError(REQUIRED_COLUMN.format(self.column_name))
                 if old_value not in self.empty_values and column_property:
                     data['warnings'].append([INCORRECT_NATURAL_KEY.format(column_property.get('verbose_name'),
