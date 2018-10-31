@@ -9,7 +9,7 @@ import task.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0118_taskshowstatus_mail_recipients'),
+        ('task', '0126_taskshowstatus_mail_recipients'),
     ]
 
     operations = [

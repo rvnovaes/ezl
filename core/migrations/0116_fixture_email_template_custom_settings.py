@@ -32,6 +32,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0115_auto_20181029_1749'),
+        ('task', '0126_taskshowstatus_mail_recipients'),
     ]
 
     operations = [
