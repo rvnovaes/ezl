@@ -39,6 +39,7 @@ class UnaccentForeignKeyWidget(ForeignKeyWidget):
         except:
             return super().get_queryset(value, row, *args, **kwargs)
 
+
 class TypeTaskByWidget(UnaccentForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         val = super(ForeignKeyWidget, self).clean(value)
@@ -73,12 +74,12 @@ class PersonAskedByWidget(UnaccentForeignKeyWidget):
                 "Não foi encontrado solicitante para este escritório com o nome {}."
                 .format(value))
 
+
 class PersonCompanyRepresentative(UnaccentForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         person_company_representative = super().clean(value)
         office = Office.objects.get(pk=row['office'])
-        if person_company_representative and person_company_representative in office.persons.filter(
-            legal_type='F'):
+        if person_company_representative and person_company_representative in office.persons.filter(legal_type='F'):
             return person_company_representative
         else:
             raise ValueError(
