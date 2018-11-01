@@ -721,7 +721,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             if not TaskSurveyAnswer.objects.filter(task=self.object, create_user=self.request.user):
                 if (self.object.type_task.survey):
                     context['not_answer_questionnarie'] = True
-                    context['survey_company_representative'] = self.object.type_task.survey.data
+                    if self.object.type_task.survey_company_representative:
+                        context['survey_company_representative'] = self.object.type_task.survey_company_representative.data
+                    else: 
+                        context['survey_company_representative'] = ''
         return context
 
 
@@ -1845,8 +1848,8 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
 
     def get_context_data(self):
         context = super().get_context_data()
-        context['surveys'] = [
-            {'task_id': task.pk, 'survey': task.type_task.survey} for task in self.object_list
+        context['surveys_company_representative'] = [
+            {'task_id': task.pk, 'survey': task.type_task.survey_company_representative} for task in self.object_list
         ]        
         return context        
 

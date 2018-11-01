@@ -36,8 +36,8 @@
             <button type="button" id="btn-open-questions" class="text-white btn btn-ezl-company_representative align-middle">
                 <span class="btn-label align-middle"><i class="mdi mdi-checkbox-multiple-marked-outline"></i></span> Responder
             </button>  
-        `
-        {% for survey in surveys%} 
+        `        
+        {% for survey in surveys_company_representative%} 
         	surveyData = `{{survey.survey.data|safe}}`;
         	surveys['{{survey.task_id}}'] = surveyData;        	
         {% endfor %}
@@ -50,7 +50,14 @@
 				event.stopPropagation()
 				taskId = $(this).parent().parent().attr('tr-data-id');
                 selectedSurvey = surveys[taskId];
-                $("#survey-company-representative").modal('show')
+                if (selectedSurvey.length < 1) {
+                    swal({
+                        type: 'error', 
+                        title: 'Não existe formulário cadastrado para este tipo de serviço'
+                    })                    
+                } else {
+                    $("#survey-company-representative").modal('show')
+                }                 
 			})
         })
     </script>

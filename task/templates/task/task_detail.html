@@ -155,9 +155,16 @@
         var taskId;
         $('#btn-company_representative').on('click', function(event) {
             event.preventDefault()
-            taskId = '{{object.pk}}';
-            selectedSurvey = `{{survey_company_representative|safe}}`;
-            $("#survey-company-representative").modal('show')
+            taskId = '{{object.pk}}';            
+            {% if survey_company_representative %} 
+                selectedSurvey = `{{survey_company_representative|safe}}`;
+                $("#survey-company-representative").modal('show');
+            {% else %}
+                swal({
+                    type: 'error', 
+                    title: 'Não existe formulário cadastrado para este tipo de serviço'
+                })
+            {% endif %}            
         })
 
     </script>
