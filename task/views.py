@@ -719,7 +719,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         checker = ObjectPermissionChecker(self.request.user)        
         if checker.has_perm('can_see_tasks_company_representative', office_session):            
             if not TaskSurveyAnswer.objects.filter(task=self.object, create_user=self.request.user):
-                if (self.object.type_task.survey):
+                if (self.object.type_task.survey_company_representative):
                     context['not_answer_questionnarie'] = True
                     if self.object.type_task.survey_company_representative:
                         context['survey_company_representative'] = self.object.type_task.survey_company_representative.data
