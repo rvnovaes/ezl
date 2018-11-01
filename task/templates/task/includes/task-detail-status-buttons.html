@@ -7,7 +7,9 @@
         {% include 'task/includes/task-detail-status-buttons-no-use-service.html' with  office_session_perms=office_session_perms %}
     {% else %}        
         {% if 'can_see_tasks_company_representative' in office_session_perms and not_answer_questionnarie%} 
-            <button id="btn-company_representative" class="btn btn-success">Responder</button>            
+            <button type="button" id="btn-company_representative" class="text-white btn btn-ezl-company_representative align-middle">
+                <span class="btn-label align-middle"><i class="mdi mdi-checkbox-multiple-marked-outline"></i></span> Responder
+            </button>            
         {% endif %}
         {% if 'can_distribute_tasks' in office_session_perms %}
             <button type="button" id="ACCEPTED_SERVICE" onclick="getId(this)" data-toggle="" data-target="#confirmAction"

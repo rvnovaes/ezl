@@ -271,6 +271,40 @@ fieldset[disabled] .btn-ezl-accepted_service.active {
     border-color: #884EA0;
 }
 
+/*company_representative*/
+
+.btn-ezl-company_representative {
+    background-color: #3CB371;
+    border-color: #3CB371;
+}
+
+.btn-ezl-company_representative:hover,
+.btn-ezl-company_representative:focus,
+.btn-ezl-company_representative:active,
+.btn-ezl-company_representative.active {
+    background-color: #2E8B57;
+    border-color: #2E8B57;
+}
+
+.btn-ezl-company_representative.disabled:hover,
+.btn-ezl-company_representative.disabled:focus,
+.btn-ezl-company_representative.disabled:active,
+.btn-ezl-company_representative.disabled.active,
+.btn-ezl-company_representative[disabled]:hover,
+.btn-ezl-company_representative[disabled]:focus,
+.btn-ezl-company_representative[disabled]:active,
+.btn-ezl-company_representative[disabled].active,
+fieldset[disabled] .btn-ezl-company_representative:hover,
+fieldset[disabled] .btn-ezl-company_representative:focus,
+fieldset[disabled] .btn-ezl-company_representative:active,
+fieldset[disabled] .btn-ezl-company_representative.active {
+    background-color: #3CB371;
+    border-color: #3CB371;
+}
+
+
+
+
 /* ACCEPTED */
 .btn-ezl-accepted {
     background-color: #EB984E;
