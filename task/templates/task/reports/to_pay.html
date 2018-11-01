@@ -262,7 +262,6 @@
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
     <script type="text/javascript">
-        var tableBodyEl = $('#os-table-body');
         var getBillingDate = function(billingData) {
             if (!billingData) {
                 return ''
@@ -336,50 +335,72 @@
         var totalOffice = 0.0;
         var totalClient = 0.0;
         var count = 0;
+        var total = 0;
         var isLoaging = false;
-        async function getTasks () {
+        var elTableBody = ``;
+        var mountTable = function(data) {                        
+            swal({
+                title: 'Carregando Ordens', 
+                html: '<h3>Carregando <strong></strong></h3>',
+                onOpen: () => {
+                    swal.showLoading() 
+                    total = data.length;  
+                    setTableInterval = setInterval(function() {                        
+                        if (data.length < 1) {
+                            clearInterval(setTableInterval)
+                            $('#os-table-body').append(elTableBody);
+                            swal.close();
+                        }                        
+                        data.splice(0, 1).forEach(function(task){             
+                            count += 1;   
+                            totalOffice += parseFloat(task.amount);
+                            totalClient += parseFloat(task.amount);                                                              
+                            swal.getContent().querySelector('strong')
+                                .textContent = `${count} de ${total}`;                                                             
+                            if (currentOffice !== task.office_name) {                     
+                                currentOffice = task.office_name; 
+                                currentClient = null;
+                                elTableBody += getTrOffice(task.office_name, 'R$0' + totalOffice.toFixed(2), task.office_id);
+                                totalOffice = 0.0;      
+                                totalClient = 0.0; 
+                            };
+                            if(currentClient !== task.client_name){
+                                currentClient = task.client_name;
+                                elTableBody += getTrClient(task.client_name,'R$0', false, task.office_id, task.client_id);
+                                totalClient = 0.0;
+                            }        
+                            console.log(totalOffice);
+                            elTableBody += getTrTask(task);
+                        });
+                    }, 0)
+                 }
+            })             
+        };
+        function getTasks () {
             var formdata = $("form").serializeArray();
             var data = {};
             $(formdata ).each(function(index, obj){
                 data[obj.name] = obj.value;
-            });
-
+            });                        
             $.ajax({
                 method: 'GET', 
                 url: `/relatorios/os-a-pagar-data`, 
                 data: data, 
-                success: function(response){
-                    JSON.parse(response).forEach(function(task){                        
-                        if (currentOffice !== task.office_name) {         
-                            totalOffice = 0.0;      
-                            totalClient = 0.0;             
-                            currentOffice = task.office_name; 
-                            currentClient = null;
-                            tableBodyEl.append(getTrOffice(task.office_name, '0,00', task.office_id));                         
-                        };
-                        if(currentClient !== task.client_name){
-                            totalClient = 0.0;
-                            currentClient = task.client_name;
-                            tableBodyEl.append(getTrClient(task.client_name, '0,00', false, task.office_id, task.client_id))
-                        }
-                        totalOffice += parseFloat(task.amount);
-                        totalClient += parseFloat(task.amount);
-                        $(`[office-id=${task.office_id}]`).text('R$' + totalOffice.toFixed(2));
-                        $(`[client-id=${task.office_id}-${task.client_id}]`).text('R$' + totalClient.toFixed(2));
-                        tableBodyEl.append(getTrTask(task));                            
-                    })
-                    console.log(JSON.parse(response)) 
-                },
+                success: function(response) {
+                    let responseData = JSON.parse(response);                                        
+                    mountTable(responseData);
+                },                
                 error: function(error) {
                   console.log('DEU ERRADO');
                   console.log(error)
-                }, 
+                },
                 beforeSend: function (xhr, settings) {
                   xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
                 },
                 dataType: 'json'                 
-            })                       
-        }     
+            }); 
+
+        };                                               
         $(document).ready(function(){
             $('#filter_content').collapse('show');
             $('form').on('submit', function(event){                
