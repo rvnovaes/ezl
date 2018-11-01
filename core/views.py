@@ -30,7 +30,8 @@ from allauth.account.views import LoginView, PasswordResetView
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
-    ResetPasswordFormMixin, OfficeForm, InviteForm, InviteOfficeForm, ContactMechanismForm, TeamForm, CustomSettingsForm
+    ResetPasswordFormMixin, OfficeForm, InviteForm, InviteOfficeForm, ContactMechanismForm, TeamForm, \
+    CustomSettingsForm, ImportCityListForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
@@ -55,6 +56,7 @@ from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_groups_with_perms
 from billing.models import Plan, PlanOffice
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from core.tasks import import_xls_city_list
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -2180,3 +2182,38 @@ class OfficePermissionRequiredMixin(PermissionRequiredMixin):
             if not guardian.has_perm(perm.name, office_session):
                 return False
         return True
+
+
+class ImportCityList(PermissionRequiredMixin, CustomLoginRequiredView,
+                     TemplateView):
+    permission_required = ('core.group_admin', )
+    template_name = 'core/import_city_list.html'
+    form_class = ImportCityListForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_name_plural'] = 'Importação de Cidades'
+        context['page_title'] = 'Importação de Cidade'
+        return context
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data(*args, **kwargs)
+        form = self.form_class(request.POST, request.FILES)
+        status = 200
+        if form.is_valid():
+            file_xls = form.save(commit=False)
+            file_xls.office = get_office_session(request)
+            file_xls.create_user = request.user
+            file_xls.start = timezone.now()
+            file_xls.save()
+
+            ret = import_xls_city_list(file_xls.pk)
+            file_xls.end = timezone.now()
+            file_xls.save()
+            file_xls.delete()
+        else:
+            status = 500
+            ret = {'status': 'false', 'message': form.errors}
+            messages.error(request, form.errors)
+            return JsonResponse(ret, status=status)
+        return JsonResponse(json.loads(json.dumps(ret)), status=status)

@@ -195,8 +195,8 @@ class City(Audit):
     court_district = models.ForeignKey(
         'lawsuit.CourtDistrict',
         on_delete=models.PROTECT,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         verbose_name='Comarca')
 
     class Meta:
