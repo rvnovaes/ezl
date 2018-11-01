@@ -186,10 +186,40 @@ def workflow_send_mail(sender, instance, created, **kwargs):
             status_to_show = custom_settings.task_status_show.filter(
                 status_to_show=instance.task_status).first()
             if status_to_show and status_to_show.send_mail_template:
-                email = TaskMail(custom_settings.email_to_notification,
-                                 instance,
-                                 status_to_show.send_mail_template.template_id)
-                email.send_mail()
+                email = None
+                if custom_settings.i_work_alone:
+                    email = TaskMail([custom_settings.email_to_notification],
+                                     instance,
+                                     status_to_show.send_mail_template.template_id)
+                else:
+                    if not getattr(instance, '_skip_mail') and instance.__previous_status != instance.task_status:
+                        persons_to_receive = []
+                        mail_list = []
+                        person_recipient_list = status_to_show.mail_recipients
+                        by_person = None
+                        for person in person_recipient_list:
+                            attrs = person.lower().split('__')
+                            obj = instance
+                            for attr in attrs:
+                                obj = getattr(obj, attr, None)
+                                if not obj:
+                                    break
+                                if len(attrs) > 1:
+                                    by_person = str(instance.office).title()
+                            if obj:
+                                persons_to_receive.append(obj)
+                        for person in persons_to_receive:
+                            mails = person.emails.split(' | ')
+                            for mail in mails:
+                                if mail != '':
+                                    mail_list.append(mail)
+                        email = TaskMail(mail_list,
+                                         instance,
+                                         status_to_show.send_mail_template.template_id,
+                                         by_person)
+                        instance.__previous_status = TaskStatus(instance.task_status)
+                if email:
+                    email.send_mail()
     except:
         pass
 
@@ -205,10 +235,10 @@ def post_save_task(sender, instance, created, **kwargs):
     try:
         new_task(sender, instance, created, **kwargs)
         ezl_export_task_to_advwin(sender, instance, **kwargs)
+        workflow_send_mail(sender, instance, created, **kwargs)
         create_or_update_chat(sender, instance, created, **kwargs)
         create_company_chat(sender, instance, created, **kwargs)
         workflow_task(sender, instance, created, **kwargs)
-        workflow_send_mail(sender, instance, created, **kwargs)
     except Exception as e:
         raise e
     finally:
@@ -322,7 +352,6 @@ def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
         export_task_history.delay(instance.pk)
 
 
-@receiver(pre_save, sender=Task)
 def update_status_parent_task(sender, instance, **kwargs):
     """
     Responsavel por alterar o status da OS pai, quando o status da OS filha e modificado
@@ -351,11 +380,10 @@ def update_status_parent_task(sender, instance, **kwargs):
                     getattr(instance, '_TaskDetailView__server', None))
             instance.parent.save(**{
                 'skip_signal': instance._skip_signal,
-                'skip_mail': False
+                'skip_mail': True
             })
 
 
-@receiver(pre_save, sender=Task)
 def update_status_child_task(sender, instance, **kwargs):
     """
     Responsavel por atualizar o status da os filha se a o estatus da OS pai e modificado
@@ -384,110 +412,23 @@ def update_status_child_task(sender, instance, **kwargs):
         child.save(
             **{
                 'skip_signal': instance._skip_signal,
-                'skip_mail': False,
+                'skip_mail': True,
                 'from_parent': True
             })
-        if instance.task_status == TaskStatus.RETURN:
-            setattr(instance, '_skip_mail', True)
 
 
 @receiver(pre_save, sender=Task)
-def send_task_emails(sender, instance, **kwargs):
+def pre_save_task(sender, instance, **kwargs):
+    pre_save.disconnect(pre_save_task, sender=sender)
+    """
+    A ordem das chamadas a seguir e importante uma vez que ao dar o save na instancia em alguns métodos, alteramos as
+    propriedades skip_mail ou skip_signal da instancia. Esta alteracao acaba por influenciar o comportamento dos metodos 
+    seguintes.
+    """
     try:
-        # Todo trocar posteriormente para workflow_send_mail
-        mail_list = []
-
-        if not getattr(
-                instance, '_skip_mail'
-        ) and instance.__previous_status != instance.task_status:
-            number = '{} ({})'.format(
-                instance.task_number,
-                instance.legacy_code) if instance.legacy_code else str(
-                    instance.task_number)
-
-            if hasattr(instance, '_TaskCreateView__server'):
-                project_link = instance._TaskCreateView__server
-
-            elif hasattr(instance, '_TaskUpdateView__server'):
-                project_link = instance._TaskUpdateView__server
-
-            elif hasattr(instance, '_TaskDetailView__server'):
-                project_link = instance._TaskDetailView__server
-
-            else:
-                project_link = '{}{}'.format(
-                    settings.PROJECT_LINK,
-                    reverse('task_detail', kwargs={'pk': instance.pk}))
-            """
-            Caso a OS não tenha o status alterado por um signal de um parent (Pai, ou filha), ela chegará aqui sem o atributo 
-            '_mail_attrs. Neste caso ela deve seguir o fluxo normal de envio de e-mails.
-            """
-            if not instance._mail_attrs:
-                persons_to_receive = []
-                custom_text = ''
-                short_message_dict = {
-                    TaskStatus.REFUSED_SERVICE: 'foi recusada ',
-                    TaskStatus.REFUSED: 'foi recusada',
-                    TaskStatus.RETURN: 'foi retornada'
-                }
-                short_message = short_message_dict.get(instance.status, '')
-
-                if instance.task_status in [TaskStatus.REFUSED_SERVICE]:
-                    custom_text = ' pelo(a) contratante ' + str(
-                        instance.person_distributed_by).title()
-                    persons_to_receive = [instance.person_asked_by]
-
-                elif instance.task_status in [TaskStatus.REFUSED]:
-                    custom_text = ' pelo(a) correspondente ' + str(
-                        instance.person_executed_by).title()
-                    persons_to_receive = [instance.person_distributed_by]
-
-                elif instance.task_status in [TaskStatus.RETURN]:
-                    custom_text = ' pelo(a) contratante ' + str(
-                        instance.person_distributed_by).title()
-                    persons_to_receive = [
-                        instance.office, instance.person_distributed_by
-                    ]
-                    if instance.person_executed_by:
-                        if instance.person_executed_by.emails != '':
-                            persons_to_receive = [
-                                instance.person_executed_by,
-                                instance.person_distributed_by
-                            ]
-
-                persons_to_receive = [
-                    x for x in persons_to_receive if x is not None
-                ]
-                for person in persons_to_receive:
-                    mails = person.emails.split(' | ')
-                    for mail in mails:
-                        if mail != '':
-                            mail_list.append(mail)
-            else:
-                mail_attrs = instance._mail_attrs
-                persons_to_receive = mail_attrs.get('persons_to_receive', [])
-                for person in persons_to_receive:
-                    recipient = getattr(instance, person, None)
-                    if recipient:
-                        mails = recipient.emails.split(' | ')
-                        for mail in mails:
-                            mail_list.append(mail)
-                short_message = mail_attrs.get(
-                    'short_message') if mail_list else ''
-                if mail_attrs.get('office') == 'parent':
-                    office = instance.parent.office
-                elif mail_attrs.get(
-                        'office') == 'child' and instance.get_child:
-                    office = instance.get_child.office
-                else:
-                    office = instance.child.latest('pk').office
-                custom_text = ' pelo escritório ' + office.__str__().title(
-                ) if mail_list else ''
-
-            if mail_list:
-                task_send_mail(instance, number, project_link, short_message,
-                               custom_text, mail_list)
-
-            instance.__previous_status = TaskStatus(instance.task_status)
-    except:
-        pass
+        update_status_parent_task(sender, instance, **kwargs)
+        update_status_child_task(sender, instance, **kwargs)
+    except Exception as e:
+        raise e
+    finally:
+        pre_save.connect(pre_save_task, sender=sender)

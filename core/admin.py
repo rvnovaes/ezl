@@ -18,13 +18,16 @@ class TaskWorkflowInline(admin.TabularInline):
 
 class TaskShowStatusInline(admin.TabularInline):
     model = TaskShowStatus
-    fields = ('create_user', 'status_to_show', 'send_mail_template')
+    fields = ('create_user', 'status_to_show', 'send_mail_template', 'mail_recipients')
 
 
 @admin.register(CustomSettings)
 class CustomSettingsAdmin(admin.ModelAdmin):
     list_display = ('office', 'email_to_notification', 'i_work_alone')
     inlines = [TaskShowStatusInline, TaskWorkflowInline]
+
+    def save_form(self, request, form, change):
+        return super().save_form(request, form, change)
 
 
 @admin.register(Company)

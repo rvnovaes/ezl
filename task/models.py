@@ -17,7 +17,27 @@ from lawsuit.models import Movement, Folder
 from chat.models import Chat
 from decimal import Decimal
 from .schemas import *
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, ArrayField
+from django.forms import MultipleChoiceField
+
+
+class ChoiceArrayField(ArrayField):
+    """
+    A field that allows us to store an array of choices.
+    Uses Django's Postgres ArrayField
+    and a MultipleChoiceField for its formfield.
+    """
+
+    def formfield(self, **kwargs):
+        defaults = {
+            'form_class': MultipleChoiceField,
+            'choices': self.base_field.choices,
+        }
+        defaults.update(kwargs)
+        # Skip our parent's formfield implementation completely as we don't
+        # care for it.
+        # pylint:disable=bad-super-call
+        return super(ArrayField, self).formfield(**defaults)
 
 
 class Permissions(Enum):
@@ -160,6 +180,29 @@ class CheckPointType(Enum):
         return [(x.value, x.name) for x in cls]
 
 
+class MailRecipients(Enum):
+    NONE = 'Nenhum'
+    OFFICE = 'Escritório'
+    PERSON_ASKED_BY = 'Solicitante'
+    PERSON_EXECUTED_BY = 'Correspondente'
+    PERSON_DISTRIBUTED_BY = 'Service'
+    PARENT__OFFICE = 'Escritório contratante'
+    PARENT__PERSON_ASKED_BY = 'Solicitante do contratante'
+    PARENT__PERSON_EXECUTED_BY = 'Correspondente do contratante'
+    PARENT__PERSON_DISTRIBUTED_BY = 'Service do contratante'
+    GET_CHILD__OFFICE = 'Escritório correspondente'
+    GET_CHILD__PERSON_ASKED_BY = 'Solicitante do correspondente'
+    GET_CHILD__PERSON_EXECUTED_BY = 'Correspondente do correspondente'
+    GET_CHILD__PERSON_DISTRIBUTED_BY = 'Service do correspondente'
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        return [(x.name, x.value) for x in cls]
+
+
 class TypeTaskMain(models.Model):
     is_hearing = models.BooleanField(verbose_name='É audiência', default=False)
     name = models.CharField(
@@ -204,7 +247,7 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
         null=True,
         blank=True,
         related_name='type_tasks_person_company_representative',
-        verbose_name='Formulário do preposto')    
+        verbose_name='Formulário do preposto')
 
     office = models.ForeignKey(
         Office,
@@ -699,7 +742,7 @@ class DashboardViewModel(Audit, OfficeMixin):
         blank=True,
         null=True,
         related_name='%(class)s_company_representative',
-        verbose_name='Preposto')    
+        verbose_name='Preposto')
     person_executed_by = models.ForeignKey(
         Person,
         on_delete=models.PROTECT,
@@ -872,9 +915,16 @@ class TaskShowStatus(Audit):
         default=TaskStatus.REQUESTED)
     send_mail_template = models.ForeignKey(
         EmailTemplate, verbose_name='Template a enviar', blank=True, null=True)
+    mail_recipients = ChoiceArrayField(
+        base_field=models.CharField(
+            null=True,
+            verbose_name='Destinatários do e-mail',
+            max_length=256,
+            choices=((x.name, x.value) for x in MailRecipients)),
+        default=[])
 
 
 class TaskSurveyAnswer(Audit):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True)
     survey_result = JSONField(
-    verbose_name=u'Respotas do Formulário', blank=True, null=True)    
+    verbose_name=u'Respotas do Formulário', blank=True, null=True)
