@@ -64,7 +64,6 @@ class CustomFieldImportExport(Field):
             for attr in attrs[:-1]:
                 obj = getattr(obj, attr, None)
             cleaned = self.clean(data)
-            import pdb;pdb.set_trace()
             if cleaned is not None or self.saves_null_values:
                 if not is_m2m:
                     setattr(obj, attrs[-1], cleaned)

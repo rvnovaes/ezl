@@ -65,11 +65,18 @@ class PersonAskedByWidget(UnaccentForeignKeyWidget):
     """
 
     def clean(self, value, row=None, *args, **kwargs):
-        person_asked_by = super().clean(value)
-        if person_asked_by and person_asked_by in Person.objects.requesters(
-                office_id=row['office']):
-            return person_asked_by
-        elif not person_asked_by:
+        queryset = Person.objects.requesters(office_id=row['office'])
+        ret = None
+        if value:
+            ret = queryset.filter(**{'{}'.format(self.field): value}).first()
+            if not ret:
+                ret = queryset.filter(
+                    **{
+                        '{}__unaccent__iexact'.format(self.field): value
+                    }).first()
+        if ret:
+            return ret
+        elif not (ret or value):
             return None
         else:
             raise ValueError(

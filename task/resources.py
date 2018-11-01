@@ -514,8 +514,6 @@ class TaskResource(resources.ModelResource):
         row['task_number'] = self_or_none(row['task_number'])
         row['legacy_code'] = self_or_none(row['legacy_code'])
         row['is_active'] = TRUE_FALSE_DICT.get('is_active', True)
-        import pdb;
-        pdb.set_trace()
         if row['task_number'] or row['legacy_code']:
             instance_loader = self._meta.instance_loader_class(self, row)
             instance = self.get_instance(instance_loader, row)
