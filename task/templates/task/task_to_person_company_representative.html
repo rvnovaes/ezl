@@ -38,7 +38,7 @@
             </button>  
         `
         {% for survey in surveys%} 
-        	surveyData = '{{survey.survey.data|safe}}';
+        	surveyData = `{{survey.survey.data|safe}}`;
         	surveys['{{survey.task_id}}'] = surveyData;        	
         {% endfor %}
     	$('tbody tr').each(function(){

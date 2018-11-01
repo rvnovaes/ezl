@@ -156,7 +156,7 @@
         $('#btn-company_representative').on('click', function(event) {
             event.preventDefault()
             taskId = '{{object.pk}}';
-            selectedSurvey = '{{survey_company_representative|safe}}';
+            selectedSurvey = `{{survey_company_representative|safe}}`;
             $("#survey-company-representative").modal('show')
         })
 
