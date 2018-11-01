@@ -444,6 +444,10 @@ class Office(AbstractPerson):
     def __str__(self):
         return self.legal_name
 
+    def save(self, *args, **kwargs):
+        self._i_work_alone = kwargs.pop('i_work_alone', False)
+        return super().save(*args, **kwargs)
+
 
 class OfficeMixin(models.Model):
     office = models.ForeignKey(
