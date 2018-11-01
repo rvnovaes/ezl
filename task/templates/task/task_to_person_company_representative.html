@@ -31,13 +31,19 @@
         var taskId;
         var selectedSurvey;
     	var surveys = {};
+        var surveyData;
+        var buttonEl = `
+            <button type="button" id="btn-open-questions" class="text-white btn btn-ezl-company_representative align-middle">
+                <span class="btn-label align-middle"><i class="mdi mdi-checkbox-multiple-marked-outline"></i></span> Responder
+            </button>  
+        `
         {% for survey in surveys%} 
-        	let surveyData = '{{survey.survey.data|safe}}';
+        	surveyData = '{{survey.survey.data|safe}}';
         	surveys['{{survey.task_id}}'] = surveyData;        	
         {% endfor %}
     	$('tbody tr').each(function(){
             if ($(this).attr('tr-data-id')) {
-    		  $(this).append('<td><button id="btn-open-questions" class="btn btn-success btn-sm">Responder</button></td>')
+    		  $(this).append(`<td>${buttonEl}</td>`)
             }
     	}).promise().done(function() { 
 			$('#btn-open-questions').on('click', function(event) {
