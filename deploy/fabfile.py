@@ -76,7 +76,7 @@ def mount_ecm_dir():
     """Monta a pasta do ECM/GED dentro do servidor"""
     username = prompt("Informe o nome do usuário do servidor Windows: ")
     password = getpass("Informe a senha do usuário: ")
-    host = "172.27.155.11"
+    host = "192.168.249.15"
     local_path = "/mnt/windows_ecm/"
     sudo("mount -t cifs -o username={},domain=mtostes,password={} "
          "//{}/ged_advwin$ {}".format(username, password, host, local_path))
