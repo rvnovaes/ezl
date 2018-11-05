@@ -268,7 +268,7 @@
             }
             return billingData
         }
-        var getTrOffice = function(officeName, officeTotal, officeId) {
+        var getTrOffice = function(officeName, officeId) {
             return `
                 <tr>
                     <th colspan="10">${officeName}</th>
@@ -278,7 +278,7 @@
             `            
         }
 
-        var getTrClient = function(clientName, clientTotal, clientRefunds, officeId, clientId){
+        var getTrClient = function(clientName, clientRefunds, officeId, clientId){
             return `
                 <tr>
                     <th></th>
@@ -407,13 +407,13 @@
                             if (currentOffice !== task.office_name) {                     
                                 currentOffice = task.office_name; 
                                 currentClient = null;
-                                elTableBody += getTrOffice(task.office_name, 'R$0' + totalOffice.toFixed(2), task.office_id);
+                                elTableBody += getTrOffice(task.office_name, task.office_id);
                                 totalOffice = 0.0;      
                                 totalClient = 0.0; 
                             };
                             if(currentClient !== task.client_name){
                                 currentClient = task.client_name;
-                                elTableBody += getTrClient(task.client_name,'R$0', false, task.office_id, task.client_id);
+                                elTableBody += getTrClient(task.client_name, false, task.office_id, task.client_id);
                                 totalClient = 0.0;
                             }        
                             count += 1;   
