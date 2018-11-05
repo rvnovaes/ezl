@@ -2173,6 +2173,7 @@ class MediaFileView(LoginRequiredMixin, View):
         return HttpResponseRedirect(
             urljoin(settings.AWS_STORAGE_BUCKET_URL, path))
 
+
 class OfficePermissionRequiredMixin(PermissionRequiredMixin):
     def has_permission(self):
         guardian = ObjectPermissionChecker(self.request.user)
@@ -2186,7 +2187,7 @@ class OfficePermissionRequiredMixin(PermissionRequiredMixin):
 
 class ImportCityList(PermissionRequiredMixin, CustomLoginRequiredView,
                      TemplateView):
-    permission_required = ('core.group_admin', )
+    permission_required = ('superuser', )
     template_name = 'core/import_city_list.html'
     form_class = ImportCityListForm
 
@@ -2205,15 +2206,31 @@ class ImportCityList(PermissionRequiredMixin, CustomLoginRequiredView,
             file_xls.office = get_office_session(request)
             file_xls.create_user = request.user
             file_xls.start = timezone.now()
+            file_xls.log_file = "{\"status\": \"Em andamento\" , \"current_line\": 0, \"total_lines\": 0}"
             file_xls.save()
 
-            ret = import_xls_city_list(file_xls.pk)
-            file_xls.end = timezone.now()
-            file_xls.save()
-            file_xls.delete()
+            import_xls_city_list.delay(file_xls.pk)
+
+            context['show_modal_progress'] = True
+            context['file_xls_id'] = file_xls.id
+            context['file_name'] = request.FILES['file_xls'].name
         else:
             status = 500
             ret = {'status': 'false', 'message': form.errors}
             messages.error(request, form.errors)
             return JsonResponse(ret, status=status)
-        return JsonResponse(json.loads(json.dumps(ret)), status=status)
+        context.pop('view')
+        return JsonResponse(json.loads(json.dumps(context)), status=status)
+
+    def get(self, request, *args, **kwargs):
+
+        context = self.get_context_data(**kwargs)
+        if request.GET.get('file_xls_id'):
+            context.pop('view')
+            file_xls_id = request.GET.get('file_xls_id')
+            file_xls = self.form_class._meta.model.objects.filter(pk=file_xls_id).first()
+            context['file_xls_id'] = file_xls.id
+            context['log_file'] = json.loads(file_xls.log_file) if file_xls.log_file else ''
+            return JsonResponse(json.loads(json.dumps(context)), status=200)
+        else:
+            return super().get(request, *args, **kwargs)

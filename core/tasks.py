@@ -1,5 +1,6 @@
 from django.contrib.sessions.models import Session
 from django.template.loader import render_to_string
+from django.utils import timezone
 from task.mail import SendMail
 from celery import shared_task, task
 from advwin_models.tasks import MAX_RETRIES, BASE_COUNTDOWN
@@ -8,6 +9,7 @@ from django.core.management import call_command
 from core.resources import CityResource
 from tablib import Dataset
 import traceback
+import json
 
 
 @shared_task(bind=True, max_retries=MAX_RETRIES)
@@ -41,8 +43,10 @@ def clear_sessions():
     return ret
 
 
+@shared_task()
 def import_xls_city_list(file_id):
-    ret = {'total_rows': 0, 'totals': 0}
+    ret = {"status": "Em andamento", "current_line": 0}
+    xls_file = None
     try:
         xls_file = ImportXlsFile.objects.get(pk=file_id)
         city_resource = CityResource()
@@ -52,6 +56,7 @@ def import_xls_city_list(file_id):
         params = {
             'create_user': xls_file.create_user,
             'office': xls_file.office,
+            'xls_file_id': xls_file.id,
             'warnings': []
         }
         result = city_resource.import_data(
@@ -69,12 +74,20 @@ def import_xls_city_list(file_id):
                         '[', '').replace(']', '')
                     errors.append(error_description.split("',"))
                 ret['errors'].append({'line': line, 'errors': errors})
-        if result.has_warnings():
-            for line_warning in result.row_warnings():
-                ret['warnings'].append({'line': line_warning[0], 'warnings': line_warning[1]})
+        ret["status"] = "Finalizado"
+        xls_file.end = timezone.now()
+        xls_file.log_file = json.dumps(ret)
+        xls_file.save()
 
     except Exception as e:
         ret['errors'] = '{} - {}'.format(e, traceback.format_exc())
 
     finally:
+        if xls_file:
+            delete_imported_xls_city_table.apply_async(([xls_file.pk]), countdown=60)
         return ret
+
+
+@shared_task(bind=True)
+def delete_imported_xls_city_table(self, xls_file_pk):
+    ImportXlsFile.objects.filter(pk=xls_file_pk).delete()

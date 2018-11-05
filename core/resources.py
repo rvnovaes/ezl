@@ -1,4 +1,4 @@
-from core.models import State, City
+from core.models import State, City, ImportXlsFile
 from import_export import resources
 from import_export.widgets import CharWidget
 from lawsuit.models import CourtDistrict
@@ -46,17 +46,17 @@ class CityResource(resources.ModelResource):
         self.office = None
         self.create_user = None
         self.office_id = None
-        self.default_type_movement = None
         self._meta.instance_loader_class = CityInstanceLoader
-        self.folder = None
-        self.lawsuit = None
-        self.movement = None
         self.current_line = 0
+        self.total_lines = 0
+        self.status = 'Em andamento'
+        self.file_id = None
+        self.xls_file = None
 
     class Meta:
         model = City
         import_id_fields = ('name', 'state')
-        fields = ('name', 'state', 'court_district')
+        fields = ('name', 'state', 'court_district', 'create_user')
 
     def get_court_district(self, row, row_errors):
         court_district = CourtDistrict.objects.filter(**{'name': row['MUNICÍPIO'],
@@ -64,6 +64,9 @@ class CityResource(resources.ModelResource):
         return court_district.name if court_district else ''
 
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+        self.file_id = kwargs.get('xls_file_id')
+        self.xls_file = ImportXlsFile.objects.get(pk=self.file_id)
+        self.total_lines = len(dataset)
         self.office = kwargs['office']
         self.create_user = kwargs['create_user']
         self.office_id = self.office.id
@@ -74,7 +77,10 @@ class CityResource(resources.ModelResource):
         dataset.insert_col(dataset.width, col=[[], ] * dataset.height, header="warnings")
 
     def before_import_row(self, row, **kwargs):
-        import pdb;pdb.set_trace()
+        self.current_line += 1
+        self.xls_file.log_file = "{\"status\": \"%s\" , \"current_line\": %d, \"total_lines\": %d}" % (
+            self.status, self.current_line, self.total_lines)
+        self.xls_file.save()
         row_errors = []
         row['comarca'] = self.get_court_district(row, row_errors)
         if row_errors:
