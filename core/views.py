@@ -2202,7 +2202,6 @@ class ImportCityList(PermissionRequiredMixin, CustomLoginRequiredView,
         form = self.form_class(request.POST, request.FILES)
         status = 200
         if form.is_valid():
-            import pdb;pdb.set_trace()
             file_xls = form.save(commit=False)
             file_xls.office = get_office_session(request)
             file_xls.create_user = request.user
