@@ -342,21 +342,49 @@
         var elTableBody = ``;
 
         var writeTable = function() {
-            $('#os-table-body').append(elTableBody);
+            swal({
+                title: 'Montando tabela', 
+                html: '<h3>Aguarde</h3>', 
+                onOpen: () => {
+                    swal.showLoading()
+                    setTimeout(function() {
+                        $('#os-table-body').append(elTableBody);
+                        swal.close();
+                    }, 100)
+                }
+            })                                    
         };
 
         var mountTableClientByOffice = function(){
-            Object.keys(totalClientsByOffice).forEach(function(key) {
-                elTableBody = elTableBody.replace(`|client=${key}|`, `${totalClientsByOffice[key].toFixed(2)}`)
-            })
-            writeTable()
+            swal({
+                title: 'Totalizando Clientes', 
+                html: '<h3>Aguarde</h3>', 
+                onOpen: () => {
+                    swal.showLoading()
+                    setTimeout(function() {
+                        Object.keys(totalClientsByOffice).forEach(function(key) {
+                            elTableBody = elTableBody.replace(`|client=${key}|`, `${totalClientsByOffice[key].toFixed(2)}`)
+                        }, 100)                        
+                        writeTable()                        
+                    })
+                }
+            })            
         }
 
         var mountTotalOffices = function() {
-            Object.keys(totalOffices).forEach(function(key){
-                elTableBody = elTableBody.replace(`|office=${key}|`, `${totalOffices[key].toFixed(2)}`)
-            })  
-            mountTableClientByOffice();
+            swal({
+                title: 'Totalizando Escritórios', 
+                html: '<h3>Aguarde</h3>', 
+                onOpen: () => {
+                    swal.showLoading()
+                    setTimeout(function() {
+                        Object.keys(totalOffices).forEach(function(key){
+                            elTableBody = elTableBody.replace(`|office=${key}|`, `${totalOffices[key].toFixed(2)}`)
+                        })
+                        mountTableClientByOffice();
+                    }, 100)
+                }
+            });                                     
         };
 
         var mountTable = function(data) {                        
@@ -369,8 +397,9 @@
                     setTableInterval = setInterval(function() {                        
                         if (data.length < 1) {
                             clearInterval(setTableInterval)                            
-                            mountTotalOffices()                            
-                            swal.close();
+                            setTimeout(function(){                                
+                                mountTotalOffices()                                                                                        
+                            }, 100)                            
                         }                        
                         data.splice(0, 1).forEach(function(task){                                                                       
                             swal.getContent().querySelector('strong')
@@ -429,6 +458,7 @@
             $('form').on('submit', function(event){                
                 event.preventDefault();
                 $('#os-table-body').empty()
+                count = 0;
                 currentOffice = null;
                 currentClient = null;
                 $('#filter_content').collapse('hide');
