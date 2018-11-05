@@ -273,7 +273,7 @@
                 <tr>
                     <th colspan="10">${officeName}</th>
                     <th></th>
-                    <th><center><span office-id="${officeId}">${officeTotal}</span></center></th>
+                    <th><center><span office-id="${officeId}">R$|office=${officeId}|</span></center></th>
                 </tr>
             `            
         }
@@ -292,7 +292,7 @@
                             {% endif %}
                         </div>
                     </th>
-                    <th><center><span client-id=${officeId}-${clientId}>${clientTotal}<span></center></th>
+                    <th><center><span client-id=${officeId}-${clientId}>R$|client=${officeId}-${clientId}|<span></center></th>
                 </tr>
             `
         }
@@ -334,10 +334,31 @@
         var currentClient;
         var totalOffice = 0.0;
         var totalClient = 0.0;
+        var totalOffices = {};
+        var totalClientsByOffice = {};
         var count = 0;
         var total = 0;
         var isLoaging = false;
         var elTableBody = ``;
+
+        var writeTable = function() {
+            $('#os-table-body').append(elTableBody);
+        };
+
+        var mountTableClientByOffice = function(){
+            Object.keys(totalClientsByOffice).forEach(function(key) {
+                elTableBody = elTableBody.replace(`|client=${key}|`, `${totalClientsByOffice[key].toFixed(2)}`)
+            })
+            writeTable()
+        }
+
+        var mountTotalOffices = function() {
+            Object.keys(totalOffices).forEach(function(key){
+                elTableBody = elTableBody.replace(`|office=${key}|`, `${totalOffices[key].toFixed(2)}`)
+            })  
+            mountTableClientByOffice();
+        };
+
         var mountTable = function(data) {                        
             swal({
                 title: 'Carregando Ordens', 
@@ -347,14 +368,11 @@
                     total = data.length;  
                     setTableInterval = setInterval(function() {                        
                         if (data.length < 1) {
-                            clearInterval(setTableInterval)
-                            $('#os-table-body').append(elTableBody);
+                            clearInterval(setTableInterval)                            
+                            mountTotalOffices()                            
                             swal.close();
                         }                        
-                        data.splice(0, 1).forEach(function(task){             
-                            count += 1;   
-                            totalOffice += parseFloat(task.amount);
-                            totalClient += parseFloat(task.amount);                                                              
+                        data.splice(0, 1).forEach(function(task){                                                                       
                             swal.getContent().querySelector('strong')
                                 .textContent = `${count} de ${total}`;                                                             
                             if (currentOffice !== task.office_name) {                     
@@ -369,7 +387,12 @@
                                 elTableBody += getTrClient(task.client_name,'R$0', false, task.office_id, task.client_id);
                                 totalClient = 0.0;
                             }        
-                            console.log(totalOffice);
+                            count += 1;   
+                            totalOffice += parseFloat(task.amount);
+                            totalClient += parseFloat(task.amount);  
+                            totalOffices[task.office_id] = totalOffice;
+                            totalClientsByOffice[task.office_id + '-' + task.client_id] = totalClient;
+
                             elTableBody += getTrTask(task);
                         });
                     }, 0)
