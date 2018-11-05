@@ -159,12 +159,8 @@
                     </tfoot>
                 </table>
             </div>
-            <div class="row">
-                <div class="text-center" style="padding-top: 10px">
-                {% if offices_report %}
-                    <button class="btn btn-success" id="btn-faturar">Faturar</button>
-                {% endif %}
-                </div>
+            <div class="row" id="btn-billing">
+
             </div>
         </div>
     </div>
@@ -198,6 +194,14 @@
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
     <script type="text/javascript">
+
+        var getBtnBilling = function() {
+            return `
+                <div class="text-center" style="padding-top: 10px">
+                    <button class="btn btn-success" id="btn-faturar">Faturar</button>
+                </div>            
+            `
+        }
 
         var getTrfoot = function(total) {
             return `
@@ -299,7 +303,8 @@
                     swal.showLoading()
                     setTimeout(function() {
                         $('#os-table-body').append(elTableBody);
-                        $('#os-table-foot').append(getTrfoot(totalToPay.toFixed(2)))
+                        $('#os-table-foot').append(getTrfoot(totalToPay.toFixed(2)));
+                        $('#btn-billing').append(getBtnBilling);
                         swal.close();
                     }, 500)
                 }
@@ -409,8 +414,11 @@
             $('#filter_content').collapse('show');
             $('form').on('submit', function(event){                
                 event.preventDefault();
-                $('#os-table-body').empty()
+                $('#os-table-body').empty();
+                $('#os-table-foot').empty();
+                $('#btn-billing').empty();                
                 count = 0;
+                totalToPay=0;
                 currentOffice = null;
                 currentClient = null;
                 $('#filter_content').collapse('hide');
