@@ -444,6 +444,10 @@ class Office(AbstractPerson):
     def __str__(self):
         return self.legal_name
 
+    def save(self, *args, **kwargs):
+        self._i_work_alone = kwargs.pop('i_work_alone', False)
+        return super().save(*args, **kwargs)
+
 
 class OfficeMixin(models.Model):
     office = models.ForeignKey(
@@ -751,9 +755,8 @@ class ControlFirstAccessUser(models.Model):
 
 class CustomSettings(Audit):
     office = models.OneToOneField(Office, verbose_name='Escritório')
-    default_user = models.OneToOneField(User, verbose_name='Usuário default')
-    email_to_notification = models.EmailField(
-        verbose_name='E-mail para receber notificações')
+    default_user = models.ForeignKey(User, verbose_name='Usuário default')
+    email_to_notification = models.EmailField(verbose_name='E-mail para receber notificações')
     i_work_alone = models.BooleanField(default=True)
 
     class Meta:
