@@ -526,11 +526,11 @@ class ToPayOfficeReportView(TemplateView):
     def get(self, request, *args, **kwargs):                
         self.task_filter = self.filter_class(
             data=self.request.GET, request=self.request)
-        tasks = self.get_queryset()
+        tasks = self.get_queryset()        
         data = json.dumps(get_tasks_to_pay(task_ids=list(tasks.values_list('pk', flat=True))), cls=DjangoJSONEncoder) 
         return JsonResponse(data, safe=False)
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset):        
         if not self.task_filter.form.is_valid():
             messages.add_message(self.request, messages.ERROR,
                                  'Formulário inválido.')
@@ -539,7 +539,7 @@ class ToPayOfficeReportView(TemplateView):
             query = Q()
             finished_query = Q()
 
-            if data['status']:
+            if data['status']:                
                 key = "{}__isnull".format(self.datetime_field)
                 query.add(Q(**{key: data['status'] != 'true'}), Q.AND)
 
@@ -573,7 +573,7 @@ class ToPayOfficeReportView(TemplateView):
                 query.add(
                     Q(movement__law_suit__folder__person_customer__refunds_correspondent_service=refunds),
                     Q.AND)
-
+            
             if query or finished_query:
                 query.add(Q(finished_query), Q.AND)
                 queryset = queryset.filter(query)

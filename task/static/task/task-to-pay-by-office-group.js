@@ -57,9 +57,11 @@ var formatLocalDateTime = function(strDate) {
     return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
 }        
 
-var getTrTask = function(task) {
-    console.log(task)
+var getTrTask = function(task) {    
     let elBilling = '';
+    if (task.task_id === '22929') {
+        console.log(task)
+    }
     if (!task.billing_date) {
         elBilling = `<input type="checkbox" value="${task.task_id}"/>`;
     } 
@@ -197,6 +199,9 @@ function getTasks () {
     totalToPay=0;
     currentOffice = null;
     currentClient = null;	
+    tasksToPay = [];
+    allTaskIds = [] ;  
+    elTableBody = ``;
     var formdata = $("form").serializeArray();
     var data = {};
     $(formdata ).each(function(index, obj){
@@ -207,7 +212,7 @@ function getTasks () {
         url: `/relatorios/os-a-pagar-data`, 
         data: data, 
         success: function(response) {
-            let responseData = JSON.parse(response);                                        
+            let responseData = JSON.parse(response);                                                    
             mountTable(responseData);
         },                
         error: function(error) {
