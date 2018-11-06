@@ -716,14 +716,40 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         type_task_field = get_correspondents_table.get_type_task_field()
         if type_task_field:
             context['form'].fields['type_task_field'] = type_task_field
-        checker = ObjectPermissionChecker(self.request.user)        
-        if checker.has_perm('can_see_tasks_company_representative', office_session):            
+        checker = ObjectPermissionChecker(self.request.user)
+        show_company_representative_tab = True        
+        if checker.has_perm('can_see_tasks_company_representative', office_session):                                    
             if not TaskSurveyAnswer.objects.filter(task=self.object, create_user=self.request.user):
                 if (self.object.type_task.survey):
                     context['not_answer_questionnarie'] = True
-                    context['survey_company_representative'] = self.object.type_task.survey.data
+                    context['survey_company_representative'] = self.object.type_task.survey.data            
+        context['show_company_representative_in_tab'] = self.show_company_representative_in_tab(checker, office_session)
+        context['show_person_executed_by_in_tab'] = self.show_person_executed_by_in_tab(checker, office_session)
         return context
 
+    def show_company_representative_in_tab(self, checker, office_session):
+        """
+            Caso a pessoa logada seja o correspondente da ordem de servico
+            Nao mostra os dados do preposto na aba Participantes
+        """
+        show_in_tab = True         
+        is_person_executed_by = checker.has_perm('view_delegated_tasks', office_session)
+        if is_person_executed_by:
+            if self.object.person_executed_by == self.request.user.person:            
+                show_in_tab = False
+        return show_in_tab
+
+    def show_person_executed_by_in_tab(self, checker, office_session):
+        """
+            Caso a pessoa logada seja o preposto da ordem de servico
+            Nao mostra os dados do correspondente na aba Participantes
+        """        
+        show_in_tab = True 
+        is_company_representative = checker.has_perm('can_see_tasks_company_representative', office_session)        
+        if is_company_representative:
+            if self.object.person_company_representative == self.request.user.person:
+                show_in_tab = False
+        return show_in_tab
 
 
     def dispatch(self, request, *args, **kwargs):
