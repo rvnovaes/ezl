@@ -235,10 +235,10 @@ def post_save_task(sender, instance, created, **kwargs):
     try:
         new_task(sender, instance, created, **kwargs)
         ezl_export_task_to_advwin(sender, instance, **kwargs)
+        workflow_task(sender, instance, created, **kwargs)
         workflow_send_mail(sender, instance, created, **kwargs)
         create_or_update_chat(sender, instance, created, **kwargs)
         create_company_chat(sender, instance, created, **kwargs)
-        workflow_task(sender, instance, created, **kwargs)
     except Exception as e:
         raise e
     finally:
@@ -412,7 +412,7 @@ def update_status_child_task(sender, instance, **kwargs):
         child.save(
             **{
                 'skip_signal': instance._skip_signal,
-                'skip_mail': True,
+                'skip_mail': False,
                 'from_parent': True
             })
 
