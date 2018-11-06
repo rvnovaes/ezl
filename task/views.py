@@ -716,15 +716,17 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         type_task_field = get_correspondents_table.get_type_task_field()
         if type_task_field:
             context['form'].fields['type_task_field'] = type_task_field
-        checker = ObjectPermissionChecker(self.request.user)
-        show_company_representative_tab = True        
-        if checker.has_perm('can_see_tasks_company_representative', office_session):                                    
+        checker = ObjectPermissionChecker(self.request.user)        
+        if checker.has_perm('can_see_tasks_company_representative', office_session):            
             if not TaskSurveyAnswer.objects.filter(task=self.object, create_user=self.request.user):
-                if (self.object.type_task.survey):
+                if (self.object.type_task.survey_company_representative):
                     context['not_answer_questionnarie'] = True
-                    context['survey_company_representative'] = self.object.type_task.survey.data            
+                    if self.object.type_task.survey_company_representative:
+                        context['survey_company_representative'] = self.object.type_task.survey_company_representative.data
+                    else: 
+                        context['survey_company_representative'] = ''
         context['show_company_representative_in_tab'] = self.show_company_representative_in_tab(checker, office_session)
-        context['show_person_executed_by_in_tab'] = self.show_person_executed_by_in_tab(checker, office_session)
+        context['show_person_executed_by_in_tab'] = self.show_person_executed_by_in_tab(checker, office_session)        
         return context
 
     def show_company_representative_in_tab(self, checker, office_session):
@@ -917,6 +919,8 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                                         office_session):
                         person_dynamic_query.add(
                             Q(person_asked_by=person.id), Q.OR)
+                    if checker.has_perm('can_see_tasks_company_representative', office_session):
+                        person_dynamic_query.add(Q(person_company_representative=person.id), Q.OR)
                 if data['office_executed_by']:
                     task_dynamic_query.add(
                         Q(child__office_id=data['office_executed_by']), Q.AND)
@@ -1872,8 +1876,8 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
 
     def get_context_data(self):
         context = super().get_context_data()
-        context['surveys'] = [
-            {'task_id': task.pk, 'survey': task.type_task.survey} for task in self.object_list
+        context['surveys_company_representative'] = [
+            {'task_id': task.pk, 'survey': task.type_task.survey_company_representative} for task in self.object_list
         ]        
         return context        
 

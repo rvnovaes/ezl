@@ -31,7 +31,8 @@
     <link href="{% static 'libs/bootstrap-rating/bootstrap-rating.css' %}" rel="stylesheet">
 
     {% include 'task/task_to_assign.html' with task=task %}
-    <form id="task_detail" action="" method="post">{% csrf_token %}        
+    <form id="task_detail" action="" method="post">{% csrf_token %}            
+
         {% include 'task/task_detail/tab.html' %}
         <div class="panel-group" role="tablist" aria-multiselectable="true">
             <!-- Arquivos ECM -->
@@ -155,9 +156,17 @@
         var taskId;
         $('#btn-company_representative').on('click', function(event) {
             event.preventDefault()
-            taskId = '{{object.pk}}';
-            selectedSurvey = '{{survey_company_representative|safe}}';
-            $("#survey-company-representative").modal('show')
+            taskId = '{{object.pk}}';            
+            {% if survey_company_representative %} 
+                selectedSurvey = `{{survey_company_representative|safe}}`;
+                $("#survey-company-representative").modal('show');
+            {% else %}
+                swal({
+                    type: 'error', 
+                    title: 'Questionário',
+                    text: "Não existe formulário cadastrado para este tipo de serviço."
+                })
+            {% endif %}            
         })
 
     </script>

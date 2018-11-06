@@ -1,3 +1,11 @@
+{% block extra_stylesheets%} 
+    <style type="text/css">
+        #sec-part th{            
+            width: 350px;
+        }
+    </style>
+{% endblock %}
+
 <div class="white-box">
     <!-- Tabstyle start -->
     <div class="ezl-text-{{ form.instance.status.name|lower }} panel-title font-bolder font-20">
@@ -24,7 +32,7 @@
                     {% include 'task/task_detail/data-prov.html' %}
                     <hr>
                 </section>
-                <section id="#sec-part" style="padding: 0 0 0 0">
+                <section id="sec-part" style="padding: 0 0 0 0">
                     {% if show_person_executed_by_in_tab %}
                         {% if form.instance.get_child %}
                             <h3>Escritório Contratado</h3>
@@ -46,7 +54,7 @@
                     <h3>Contratante</h3>           
                     {% include 'task/person_info.html' with person=form.instance.person_distributed_by %}
                     {% if show_company_representative_in_tab %}
-                    <h3>Preposto</h3>
+                     	<h3>Preposto</h3>
                         {% include 'task/person_info.html' with person=form.instance.person_company_representative %}
                     {%endif%}
 
