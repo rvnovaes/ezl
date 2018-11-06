@@ -58,12 +58,13 @@ var formatLocalDateTime = function(strDate) {
 }        
 
 var getTrTask = function(task) {
+    console.log(task)
     let elBilling = '';
     if (!task.billing_date) {
-        elBilling = `<input type="checkbox" value="${task.id}"/>`;
+        elBilling = `<input type="checkbox" value="${task.task_id}"/>`;
     } 
     return `
-          <tr role="row">
+          <tr role="row" id="${task.task_id}">
                 <td></td>
                 <td></td>
                 <td>
@@ -106,6 +107,7 @@ var writeTable = function() {
                 $('#os-table-body').append(elTableBody);
                 $('#os-table-foot').append(getTrfoot(totalToPay.toFixed(2)));
                 $('#btn-billing').append(getBtnBilling);
+                activeOnClickBtnFaturar();
                 swal.close();
             }, 500)
         }
@@ -181,6 +183,7 @@ var mountTable = function(data) {
                     totalClientsByOffice[task.office_id + '-' + task.client_id] = totalClient;
 
                     elTableBody += getTrTask(task);
+                    allTaskIds.push(task.task_id);
                 });
             }, 0)
          }

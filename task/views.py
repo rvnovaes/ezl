@@ -614,12 +614,12 @@ class ToPayTaskReportView(TemplateView):
         return context
         
     def post(self, request):
-        office = get_office_session(self.request)
-        tasks_payload = request.POST.get('tasks')
+        office = get_office_session(self.request)        
+        tasks_payload = request.POST.getlist('tasks[]')
         if not tasks_payload:
             return JsonResponse({"error": "tasks is required"}, status=400)
 
-        for task_id in json.loads(tasks_payload):
+        for task_id in tasks_payload:
             task = Task.objects.get(id=task_id, parent__office=office)
             setattr(task, self.datetime_field, timezone.now())
             task.save()
