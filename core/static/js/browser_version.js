@@ -26,21 +26,34 @@ function getMessage (name, version){
     return message;
 }
 
-function get_browser(){
-    var ua=navigator.userAgent,tem,M=ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+function getBrowser(){
+    var browserName = '';
+    var browserVersion = '';
+    var ua = navigator.userAgent, tem, M = ua.match(/(edge(?=\/))\/?\s*(\d+)/i) || [];
+    if (! M.length) {
+        ua = navigator.userAgent, tem, M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+    }
     if(/trident/i.test(M[1])){
         tem=/\brv[ :]+(\d+)/g.exec(ua) || [];
-        return {name:'IE',version:(tem[1]||'')};
-        }
+        browserName = 'IE';
+        browserVersion = (tem[1]||'');
+    }
     if(M[1]==='Chrome'){
         tem=ua.match(/\bOPR\/(\d+)/)
-        if(tem!=null)   {return {name:'Opera', version:tem[1]};}
+        if(tem!=null) {
+            browserName = 'Opera';
+            browserVersion = tem[1];
         }
+    }
     M=M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
     if((tem=ua.match(/version\/(\d+)/i))!=null) {M.splice(1,1,tem[1]);}
+    if (! browserName) {
+        browserName = M[0];
+        browserVersion = M[1];
+    }
     return {
-        name: M[0],
-        version: M[1],
-        message: getMessage(M[0].toLowerCase(), M[1])
+        name: browserName,
+        version: browserVersion,
+        message: getMessage(browserName.toLowerCase(), browserVersion)
     };
  }
