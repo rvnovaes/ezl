@@ -39,6 +39,7 @@ class UnaccentForeignKeyWidget(ForeignKeyWidget):
         except:
             return super().get_queryset(value, row, *args, **kwargs)
 
+
 class TypeTaskByWidget(UnaccentForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         val = super(ForeignKeyWidget, self).clean(value)
@@ -64,22 +65,33 @@ class PersonAskedByWidget(UnaccentForeignKeyWidget):
     """
 
     def clean(self, value, row=None, *args, **kwargs):
-        person_asked_by = super().clean(value)
-        if person_asked_by and person_asked_by in Person.objects.requesters(
-                office_id=row['office']):
-            return person_asked_by
+        queryset = Person.objects.requesters(office_id=row['office'])
+        ret = None
+        if value:
+            ret = queryset.filter(**{'{}'.format(self.field): value}).first()
+            if not ret:
+                ret = queryset.filter(
+                    **{
+                        '{}__unaccent__iexact'.format(self.field): value
+                    }).first()
+        if ret:
+            return ret
+        elif not (ret or value):
+            return None
         else:
             raise ValueError(
                 "Não foi encontrado solicitante para este escritório com o nome {}."
                 .format(value))
 
+
 class PersonCompanyRepresentative(UnaccentForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         person_company_representative = super().clean(value)
         office = Office.objects.get(pk=row['office'])
-        if person_company_representative and person_company_representative in office.persons.filter(
-            legal_type='F'):
+        if person_company_representative and person_company_representative in office.persons.filter(legal_type='F'):
             return person_company_representative
+        elif not person_company_representative:
+            return None
         else:
             raise ValueError(
                 "Não foi encontrado preposto para este escritório com o nome {}."

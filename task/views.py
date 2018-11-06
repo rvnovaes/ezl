@@ -719,9 +719,12 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         checker = ObjectPermissionChecker(self.request.user)        
         if checker.has_perm('can_see_tasks_company_representative', office_session):            
             if not TaskSurveyAnswer.objects.filter(task=self.object, create_user=self.request.user):
-                if (self.object.type_task.survey):
+                if (self.object.type_task.survey_company_representative):
                     context['not_answer_questionnarie'] = True
-                    context['survey_company_representative'] = self.object.type_task.survey.data
+                    if self.object.type_task.survey_company_representative:
+                        context['survey_company_representative'] = self.object.type_task.survey_company_representative.data
+                    else: 
+                        context['survey_company_representative'] = ''
         return context
 
 
@@ -891,6 +894,8 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                                         office_session):
                         person_dynamic_query.add(
                             Q(person_asked_by=person.id), Q.OR)
+                    if checker.has_perm('can_see_tasks_company_representative', office_session):
+                        person_dynamic_query.add(Q(person_company_representative=person.id), Q.OR)
                 if data['office_executed_by']:
                     task_dynamic_query.add(
                         Q(child__office_id=data['office_executed_by']), Q.AND)
@@ -1846,8 +1851,8 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
 
     def get_context_data(self):
         context = super().get_context_data()
-        context['surveys'] = [
-            {'task_id': task.pk, 'survey': task.type_task.survey} for task in self.object_list
+        context['surveys_company_representative'] = [
+            {'task_id': task.pk, 'survey': task.type_task.survey_company_representative} for task in self.object_list
         ]        
         return context        
 

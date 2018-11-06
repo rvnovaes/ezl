@@ -27,7 +27,7 @@ def import_xls_task_list(self, file_id):
         ret['warnings'] = []
         if result.has_errors():
             for line_error in result.row_errors():
-                line = line_error[0]
+                line = line_error[0] + 1
                 errors = []
                 for error in line_error[1]:
                     error_description = error.error.__str__().replace(

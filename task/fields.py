@@ -35,7 +35,8 @@ class CustomFieldImportExport(Field):
             if value in self.empty_values:
                 column_property = self.column_name_dict.get(self.column_name)
                 if column_property and column_property.get('required'):
-                    raise ValueError(REQUIRED_COLUMN.format(self.column_name))
+                    if old_value and not value:
+                        raise ValueError(RECORD_NOT_FOUND.format(self.column_name))
                 if old_value not in self.empty_values and column_property:
                     data['warnings'].append([INCORRECT_NATURAL_KEY.format(column_property.get('verbose_name'),
                                                                           self.column_name,
@@ -52,3 +53,22 @@ class CustomFieldImportExport(Field):
             return self.default
 
         return self_or_none(value)
+
+    def save(self, obj, data, is_m2m=False):
+        """
+        If this field is not declared readonly, the object's attribute will
+        be set to the value returned by :meth:`~import_export.fields.Field.clean`.
+        """
+        if not self.readonly:
+            attrs = self.attribute.split('__')
+            for attr in attrs[:-1]:
+                obj = getattr(obj, attr, None)
+            cleaned = self.clean(data)
+            if cleaned is not None or self.saves_null_values:
+                if not is_m2m:
+                    setattr(obj, attrs[-1], cleaned)
+                else:
+                    getattr(obj, attrs[-1]).set(cleaned)
+            if self.column_name_dict.get(attrs[-1], False) and \
+                    self.column_name_dict[attrs[-1]]['required'] and not getattr(obj, attrs[-1]):
+                raise ValueError(REQUIRED_COLUMN.format(self.column_name))
