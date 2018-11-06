@@ -191,8 +191,7 @@ class TaskAcceptedMailTemplate(object):
 class TaskMail(object):
     def __init__(self, email, task, template_id):
         self.sg = sendgrid.SendGridAPIClient(
-            apikey=
-            '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'
+            apikey=settings.EMAIL_HOST_PASSWORD
         )
         self.task = task
         self.email = email
