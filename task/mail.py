@@ -211,10 +211,15 @@ class TaskMail(object):
                 self.attachments.append(self.set_mail_attachment(ecm))
             except:
                 pass
+        to_email = self.email
+        original_recipient = None
+        if settings.DEFAULT_TO_EMAIL:
+            to_email = settings.DEFAULT_TO_EMAIL
+            original_recipient = self.email
         self.data = {
             "personalizations": [{
                 "to": [{
-                    "email": self.email
+                    "email": to_email
                 }],
                 "subject":
                     "Sending with SendGrid is Fun",
@@ -225,8 +230,16 @@ class TaskMail(object):
                 "email": "contato@ezlawyer.com.br"
             },
             "template_id":
-                self.template_id,
+                self.template_id
         }
+
+        if original_recipient:
+            self.data['mail_settings'] = {
+                "footer": {
+                    "enable": True,
+                    "html": "<p>Destinatário(s) originais: {}".format(original_recipient)
+                }
+            }
 
         if self.attachments:
             self.data['attachments'] = self.attachments
