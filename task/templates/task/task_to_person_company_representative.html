@@ -53,8 +53,9 @@
                 if (selectedSurvey.length < 1) {
                     swal({
                         type: 'error', 
-                        title: 'Não existe formulário cadastrado para este tipo de serviço'
-                    })                    
+                        title: 'Questionário',
+                        text: "Não existe formulário cadastrado para este tipo de serviço."
+                    })
                 } else {
                     $("#survey-company-representative").modal('show')
                 }                 

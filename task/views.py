@@ -894,6 +894,8 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                                         office_session):
                         person_dynamic_query.add(
                             Q(person_asked_by=person.id), Q.OR)
+                    if checker.has_perm('can_see_tasks_company_representative', office_session):
+                        person_dynamic_query.add(Q(person_company_representative=person.id), Q.OR)
                 if data['office_executed_by']:
                     task_dynamic_query.add(
                         Q(child__office_id=data['office_executed_by']), Q.AND)
