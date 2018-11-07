@@ -125,6 +125,14 @@
                 </a>
             </li>
             {%endif%}
+            {% if request.user.is_superuser %}
+            <li><!-- IMPORTAÇÃO OS -->
+                <a href="{% url 'import_city_list' %}" target="_self">
+                    <i class="fa fa-map-marker fa-fw"></i>
+                    <span class="hide-menu">Importação de Cidade</span>
+                </a>
+            </li>
+            {% endif %}
             <li><!-- IMPORTAÇÃO OS -->
                 <a href="{% url 'import_task_list' %}" target="_self">
                     <i class="fa fa-calendar fa-fw"></i>
