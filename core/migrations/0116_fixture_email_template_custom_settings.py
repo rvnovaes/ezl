@@ -12,7 +12,8 @@ def load_fixture(apps, schema_editor):
 
 
 def create_custom_settings(apps, schema_editor):
-    from core.models import CustomSettings, Office
+    CustomSettings = apps.get_model('core', 'CustomSettings')
+    Office = apps.get_model('core', 'Office')
     offices = Office.objects.all()
     for office in offices:
         admin_group = [user for user, perms in get_users_with_perms(
@@ -21,7 +22,7 @@ def create_custom_settings(apps, schema_editor):
             default_user = admin_group[0]
             CustomSettings.objects.get_or_create(
                 office=office,
-                defaults={'default_user': default_user,
+                defaults={'default_user_id': default_user.id,
                           'email_to_notification': default_user.email,
                           'i_work_alone': False,
                           'create_user_id': 2}

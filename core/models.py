@@ -758,6 +758,9 @@ class CustomSettings(Audit):
     default_user = models.ForeignKey(User, verbose_name='Usuário default')
     email_to_notification = models.EmailField(verbose_name='E-mail para receber notificações')
     i_work_alone = models.BooleanField(default=True)
+    default_customer = models.ForeignKey(Person, verbose_name='Cliente padrão',
+                                         blank=True, null=True,
+                                         limit_choices_to={"is_customer": True})
 
     class Meta:
         verbose_name = 'Configurações por escritório'
