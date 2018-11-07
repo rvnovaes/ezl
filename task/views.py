@@ -7,6 +7,7 @@ import io
 from datetime import datetime
 from urllib.parse import urlparse
 from zipfile import ZipFile
+import xlsxwriter
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -1141,20 +1142,37 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
         return super().get(request)
 
+    def _xls_write_row(self, writer, values):
+        last_row = getattr(self, '_xls_last_row', -1)
+        current_row = last_row + 1
+        setattr(self, '_xls_last_row', current_row)
+
+        for y, value in enumerate(values):
+            writer.write(current_row, y, value)
+
     def _export_answers(self, request):
-        response = HttpResponse(content_type='text/csv')
-        response[
-            'Content-Disposition'] = 'attachment; filename="respostas_dos_formularios.csv"'
-        writer = csv.writer(response)
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output)
+        worksheet = workbook.add_worksheet()
 
         queryset = self.get_queryset().filter(survey_result__isnull=False)
         tasks = self._fill_tasks_answers(queryset)
         columns = self._get_answers_columns(tasks)
-        writer.writerow(['N° da OS', 'N° da OS no sistema de origem'] +
-                        columns)
+
+        self._xls_write_row(worksheet, (['N° da OS', 'N° da OS no sistema de origem'] +
+                                        columns))
 
         for task in tasks:
-            self._export_answers_write_task(writer, task, columns)
+            self._export_answers_write_task(worksheet, task, columns)
+
+        workbook.close()
+
+        xlsx_data = output.getvalue()
+        response = HttpResponse(
+            xlsx_data,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response[
+            'Content-Disposition'] = 'attachment; filename="respostas_dos_formularios.xlsx"'
         return response
 
     def _fill_tasks_answers(self, queryset):
@@ -1174,7 +1192,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
             question_index = columns.index(question)
             answers[question_index] = answer
 
-        writer.writerow(base_fields + answers)
+        self._xls_write_row(writer, base_fields + answers)
 
     def _get_answers_columns(self, tasks):
         columns = []
