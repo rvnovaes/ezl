@@ -120,6 +120,11 @@
                                 onclick="javascript:window.open('{{ request.META.PATH_INFO }}', '_self')">
                             <span class="btn-label"><i class="fa fa-trash-o"></i></span>Limpar
                          </button>
+                     {% if perms.core.can_view_survey_results %}
+                         <button class="btn btn-success waves-effect waves-light" type="submit" name="export_answers" value="true">
+                             <span class="btn-label"><i class="fa fa-filter"></i></span>Exportar respostas dos formulários
+                         </button>
+                     {% endif %}
                          <button class="btn btn-success waves-effect waves-light" type="submit">
                              <span class="btn-label"><i class="fa fa-filter"></i></span>Filtrar
                          </button>

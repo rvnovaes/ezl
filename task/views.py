@@ -55,6 +55,7 @@ from django.shortcuts import render
 import os
 from django.conf import settings
 from urllib.parse import urljoin
+from survey.models import SurveyPermissions
 
 
 import logging
@@ -1160,7 +1161,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         tasks = []
         for task in queryset:
             try:
-                task.survey_result = json.loads(task.survey_result)
+                task.survey_result = task.survey_result
                 tasks.append(task)
             except ValueError:
                 return
