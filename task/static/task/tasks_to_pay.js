@@ -126,6 +126,17 @@ class ReportToPay {
 		return JSON.parse(response);
 	}
 
+	getSpanClientRefunds(clientRefunds) {
+		if (clientRefunds) {
+			return `
+                <div class="col-xs-2">                    
+                    <span class="badge badge-danger pull-right"><i class="fa fa-check"></i> Reembolsa valor</span>
+                </div>
+			`
+		}
+		return ''
+	}
+
 	getTrTask(task) {    
 	    let elBilling = '';
 	    if (!task.billing_date) {
@@ -260,9 +271,7 @@ class ReportToPayGroupByOffice extends ReportToPay {
 	                <div class="col-xs-10">
 	                    ${clientName}                            
 	                </div>
-	                <div class="col-xs-2">                    
-	                    <!--<span class="badge badge-danger pull-right"><i class="fa fa-check"></i> Reembolsa valor</span>-->                    
-	                </div>
+	                ${this.getSpanClientRefunds(clientRefunds)}
 	            </th>
 	            <th><center><span client-id=${officeId}-${clientId}>|client=${officeId}-${clientId}|<span></center></th>
 	        </tr>
@@ -280,7 +289,7 @@ class ReportToPayGroupByOffice extends ReportToPay {
 	async mountTrClient(task) {
 		if(this.currentClient !== task.client_id) {
 			this.currentClient = task.client_id; 
-			this.htmlTable += this.getTrClient(task.office_id, task.client_id, task.client_name, false)
+			this.htmlTable += this.getTrClient(task.office_id, task.client_id, task.client_name, task.client_refunds)
 		}	
 	}	
 
@@ -346,26 +355,28 @@ class ReportToPayGroupByClient extends ReportToPay {
 		this.totalOfficeByClient = {}
 	}
 
-	getTrClient(clientId, clientName){
+	getTrClient(clientId, clientName, clientRefunds){
 	    return `
 	        <tr>
-	            <th colspan="10">${clientName}</th>
+	            <th colspan="10">
+	            	<div class="col-xs-10">
+	            		${clientName}
+	            	</div>	
+	            	${this.getSpanClientRefunds(clientRefunds)}
+	            </th>
 	            <th></th>
 	            <th><center><span office-id="${clientId}">|client=${clientId}|</span></center></th>
 	        </tr>
 	    `
 	}
 
-	getTrOffice(clientId, officeId, officeName, clientRefunds){
+	getTrOffice(clientId, officeId, officeName){
 	    return `
 	        <tr>
 	            <th></th>
 	            <th colspan="10">
 	                <div class="col-xs-10">
 	                    ${officeName}                            
-	                </div>
-	                <div class="col-xs-2">                    
-	                    <!--<span class="badge badge-danger pull-right"><i class="fa fa-check"></i> Reembolsa valor</span>-->                    
 	                </div>
 	            </th>
 	            <th><center><span client-id=${clientId}-${officeId}>|office=${clientId}-${officeId}|<span></center></th>
@@ -377,14 +388,14 @@ class ReportToPayGroupByClient extends ReportToPay {
 		if(this.currentClient !== task.client_id){
 			this.currentClient = task.client_id;
 			this.currentOffice = null;
-			this.htmlTable += this.getTrClient(task.client_id, task.client_name);			
+			this.htmlTable += this.getTrClient(task.client_id, task.client_name, task.client_refunds);			
 		}
 	}
 
 	async mountTrOffice(task) {
 		if(this.currentOffice !== task.office_id) {
 			this.currentOffice = task.office_id; 
-			this.htmlTable += this.getTrOffice(task.client_id, task.office_id, task.office_name, false)
+			this.htmlTable += this.getTrOffice(task.client_id, task.office_id, task.office_name)
 		}	
 	}
 

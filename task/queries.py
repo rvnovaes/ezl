@@ -22,7 +22,8 @@ def get_tasks_to_pay(task_ids, order):
 			court_district.name as court_district, 
 			lawsuit.opposing_party, 
 			task.billing_date, 
-			task.amount	
+			task.amount,	
+			client.refunds_correspondent_service as client_refunds
 		FROM TASK as task
 		INNER JOIN task as parent ON parent.id = task.parent_id
 		INNER JOIN core_office as office ON office.id = task.office_id
