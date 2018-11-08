@@ -207,6 +207,9 @@
             $('form').on('submit', function(event){                
                 event.preventDefault();
                 $('#filter_content').collapse('hide');
+                var report = new ReportToPayGroupByOffice()
+                report.clear()
+                report.start()
             })
         })  
     </script>

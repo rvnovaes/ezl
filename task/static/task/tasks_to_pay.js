@@ -71,6 +71,22 @@ class ReportToPay {
 	            </tr>            `
 	}
 
+	getTrfoot() {
+	    return `
+	        <tr class="total-container">
+	            <th colspan="10" class="text-right" >Total Geral (R$)</th>
+	            <th colspan="2" class="text-right">${this.totalToPay.toFixed(2)}</th>
+	        </tr>`
+		};   	
+
+	getBtnBilling() {
+	    return `
+	        <div class="text-center" style="padding-top: 10px">
+	            <button class="btn btn-success" id="btn-faturar">Faturar</button>
+	        </div>            
+	    `
+	}		
+
 	addAmount(instance, key, value){
 		if (!instance[key]) {
 			instance[key] = parseFloat(value)
@@ -90,6 +106,8 @@ class ReportToPay {
 
 	writeTable(){
 		this.elTableBody.append(this.htmlTable)
+		this.elTableFoot.append(this.getTrfoot())
+		this.elBtnBilling.append(this.getBtnBilling())
 	}
 
 	async computeTotals(task){
