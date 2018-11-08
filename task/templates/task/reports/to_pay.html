@@ -148,6 +148,7 @@
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>    
     <script src="{% static 'task/task-to-pay-by-office-group.js' %}"></script>
+    <script src="{% static 'task/tasks_to_pay.js' %}"></script>
 
     <script type="text/javascript">
         var tasksToPay = [];
@@ -206,7 +207,6 @@
             $('form').on('submit', function(event){                
                 event.preventDefault();
                 $('#filter_content').collapse('hide');
-                getTasks();
             })
         })  
     </script>

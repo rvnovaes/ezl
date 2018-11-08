@@ -527,7 +527,7 @@ class ToPayOfficeReportView(TemplateView):
         self.task_filter = self.filter_class(
             data=self.request.GET, request=self.request)
         tasks = self.get_queryset()        
-        data = []
+        data = json.dumps([])
         if tasks:
             data = json.dumps(get_tasks_to_pay(task_ids=list(tasks.values_list('pk', flat=True))), cls=DjangoJSONEncoder) 
         return JsonResponse(data, safe=False)

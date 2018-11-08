@@ -1,3 +1,5 @@
+
+// Aproveita em qualquer forma de agrupamento
 var getBtnBilling = function() {
     return `
         <div class="text-center" style="padding-top: 10px">
@@ -13,37 +15,12 @@ var getTrfoot = function(total) {
             <th colspan="2" class="text-right">${total}</th>
         </tr>`
 };   
+
 var getBillingDate = function(billingData) {
     if (!billingData) {
         return ''
     }
     return billingData
-}
-var getTrOffice = function(officeName, officeId) {
-    return `
-        <tr>
-            <th colspan="10">${officeName}</th>
-            <th></th>
-            <th><center><span office-id="${officeId}">|office=${officeId}|</span></center></th>
-        </tr>
-    `            
-}
-
-var getTrClient = function(clientName, clientRefunds, officeId, clientId){
-    return `
-        <tr>
-            <th></th>
-            <th colspan="10">
-                <div class="col-xs-10">
-                    ${clientName}                            
-                </div>
-                <div class="col-xs-2">                    
-                    <!--<span class="badge badge-danger pull-right"><i class="fa fa-check"></i> Reembolsa valor</span>-->                    
-                </div>
-            </th>
-            <th><center><span client-id=${officeId}-${clientId}>|client=${officeId}-${clientId}|<span></center></th>
-        </tr>
-    `
 }
 
 var setDefaultOfNull = function(value){
@@ -55,7 +32,7 @@ var setDefaultOfNull = function(value){
 var formatLocalDateTime = function(strDate) {
     let date = new Date(strDate);
     return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-}        
+}
 
 var getTrTask = function(task) {    
     let elBilling = '';
@@ -87,6 +64,36 @@ var getTrTask = function(task) {
                 <td class="text-center"><center>${task.amount}</center></td>
             </tr>            `
 }
+
+// Aproveita no agrupamento por office
+var getTrOffice = function(officeName, officeId) {
+    return `
+        <tr>
+            <th colspan="10">${officeName}</th>
+            <th></th>
+            <th><center><span office-id="${officeId}">|office=${officeId}|</span></center></th>
+        </tr>
+    `            
+}
+
+var getTrClient = function(clientName, clientRefunds, officeId, clientId){
+    return `
+        <tr>
+            <th></th>
+            <th colspan="10">
+                <div class="col-xs-10">
+                    ${clientName}                            
+                </div>
+                <div class="col-xs-2">                    
+                    <!--<span class="badge badge-danger pull-right"><i class="fa fa-check"></i> Reembolsa valor</span>-->                    
+                </div>
+            </th>
+            <th><center><span client-id=${officeId}-${clientId}>|client=${officeId}-${clientId}|<span></center></th>
+        </tr>
+    `
+}
+        
+
 var totalToPay = 0.0;
 var currentOffice;
 var currentClient;
@@ -191,6 +198,7 @@ var mountTable = function(data) {
          }
     })             
 };
+
 function getTasks () {
     $('#os-table-body').empty();
     $('#os-table-foot').empty();
@@ -212,7 +220,7 @@ function getTasks () {
         url: `/relatorios/os-a-pagar-data`, 
         data: data, 
         success: function(response) {
-            let responseData = JSON.parse(response);                                                    
+            let responseData = JSON.parse(response) ;                                                    
             mountTable(responseData);
         },                
         error: function(error) {
