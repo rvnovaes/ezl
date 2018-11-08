@@ -20,7 +20,7 @@ class ReportToPay {
 	    if (!billingData) {
 	        return ''
 	    }
-	    return billingData
+	    return this.formatLocalDateTime(billingData)
 	}
 
 	setDefaultOfNull(value){

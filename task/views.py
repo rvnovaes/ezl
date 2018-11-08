@@ -529,9 +529,9 @@ class ToPayOfficeReportView(TemplateView):
         tasks = self.get_queryset()        
         data = json.dumps([])
         if request.GET.get("group_by_tasks") == 'E':
-            order = 'office_name, client_name'
+            order = 'office_name, client_name, finished_date'
         else:
-            order = 'client_name, office_name'
+            order = 'client_name, office_name, finished_date'
         if tasks:
             data = json.dumps(get_tasks_to_pay(task_ids=list(tasks.values_list('pk', flat=True)), order=order), cls=DjangoJSONEncoder) 
         return JsonResponse(data, safe=False)
