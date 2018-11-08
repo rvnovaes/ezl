@@ -15,6 +15,24 @@ class ReportToPay {
 
 	}
 
+	getBillingDate(billingData) {
+	    if (!billingData) {
+	        return ''
+	    }
+	    return billingData
+	}
+
+	setDefaultOfNull(value){
+	    if (!value) {
+	        return ''
+	    }
+	}
+
+	formatLocalDateTime(strDate) {
+	    let date = new Date(strDate);
+	    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+	}
+
 	get formData() {
 		return $("form").serializeArray();
 	}
@@ -123,13 +141,13 @@ class ReportToPay {
 	                        ${task.parent_task_number}
 	                    </a>
 	                </td>
-	                <td>${formatLocalDateTime(task.finished_date)}</td>
+	                <td>${this.formatLocalDateTime(task.finished_date)}</td>
 	                <td>${task.type_task}</td>
 	                <td>${task.lawsuit_number}</td>
 	                <td>${task.court_district}</td>
 	                <td>${task.opposing_party}</td>
-	                <td>${setDefaultOfNull(task.task_legacy_code)}</td>
-	                <td>${getBillingDate(task.billing_date)}</td>
+	                <td>${this.setDefaultOfNull(task.task_legacy_code)}</td>
+	                <td>${this.getBillingDate(task.billing_date)}</td>
 	                <td class="text-center"><center>${task.amount}</center></td>
 	            </tr>            `
 	}
@@ -164,7 +182,7 @@ class ReportToPay {
 
 
 	async mountTrTask(task){
-		this.htmlTable += getTrTask(task)
+		this.htmlTable += this.getTrTask(task)
 	}
 
 	writeTable(){

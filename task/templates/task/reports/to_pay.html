@@ -147,62 +147,10 @@
     <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>    
-    <script src="{% static 'task/task-to-pay-by-office-group.js' %}"></script>
     <script src="{% static 'task/tasks_to_pay.js' %}"></script>
 
     <script type="text/javascript">
-        var report = new ReportToPayGroupByOffice()
-        var tasksToPay = [];
-        var allTaskIds = [];
-        var activeOnClickBtnFaturar = function() {
-            $("#checkAll").click(function(){        
-                $('#os-table input:checkbox').not(this).prop('checked', this.checked);
-            });
-            $('#action-billing').click(function(){                
-                data = {tasks: tasksToPay};
-                $.ajax({
-                    type: 'POST',
-                    url: location.href,
-                    data: data,
-                    success: function (response) {
-                        location.reload();
-                    },
-                    beforeSend: function (xhr, settings) {
-                        xhr.setRequestHeader("X-CSRFToken", $('input[name=csrfmiddlewaretoken]').val());
-                    },
-                    dataType: 'json'
-                });
-                $('#modal-billing').modal('hide');
-            });                
-            $('#os-table input:checkbox').on('change', function(){
-                if ($(this).attr('id') === 'checkAll') {
-                    if ($(this).is(':checked')) {
-                        tasksToPay = allTaskIds
-                    } else {
-                        tasksToPay = [];
-                    }
-                } else {
-                    if ($(this).is(':checked')) {
-                        tasksToPay.push($(this).val())    
-                    } else {
-                        tasksToPay.splice(tasksToPay.indexOf($(this).val(), 1))
-                    }                            
-                }
-            })
-            $('#btn-billing').click(function(){
-                if (tasksToPay.length == 0){
-                    swal({
-                        title: "Importante",
-                        text: "Você deve selecionar pelo menos uma OS para ser faturada.",
-                        type: "warning",
-                        confirmButtonColor: "#DD6B55",
-                        confirmButtonText: "Ok"
-                    });
-                    return false;
-                }
-                $('#modal-billing').modal();
-            });        
-        };            
+        var report = new ReportToPayGroupByOffice()      
         $(document).ready(function(){
             $('#filter_content').collapse('show');
             $('form').on('submit', function(event){                
@@ -212,20 +160,6 @@
                 report.start()
             })
         })  
-    </script>
-    <script>        
-    $('#os_exportable').dataTable({
-        dom: 'Bfrtip',
-        paging: false,
-        searching: false,
-        order: [[ "0", "asc" ]],
-        buttons: [
-            'copy', 'csv', 'excel', 'pdf', 'print'
-        ],
-        language: {
-            "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-        },
-    });
     </script>
 {% endblock %}
 
