@@ -77,7 +77,7 @@ class EcmEtl(GenericETL):
         Para que as duas aplicacacoes tenham acesso ao arquivo, e necessario que
         os dois tenham acesso ao mesmo servidor de arquivos.
         Para o EZL e necessario que a unidade do servidor de arquivos esteja montada no servidor
-        linux. EX sudo mount -t cifs -o username=user //172.27.155.11/ged_advwin$ /mnt/windows_ecm/
+        linux. EX sudo mount -t cifs -o username=user //192.168.249.15/ged_advwin$ /mnt/windows_ecm/
         E necessario tambem criar um link simbolico com o nome ECM dentro do diretorio de
         MEDIA_ROOT apontando para /mnt/windows_ecm/Agenda.
         EX: sudo ln -s /mnt/windows_ecm/Agenda/ ./ECM
