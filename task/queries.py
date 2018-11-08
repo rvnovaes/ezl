@@ -7,7 +7,7 @@ def dictfetchall(cursor):
         for row in cursor.fetchall()
     ]
 
-def get_tasks_to_pay(task_ids):
+def get_tasks_to_pay(task_ids, order):
 	sql = """
 		SELECT 	task.id as task_id, 	
 			task.legacy_code as task_legacy_code,
@@ -33,8 +33,8 @@ def get_tasks_to_pay(task_ids):
 		INNER JOIN person AS client ON client.id = folder.person_customer_id
 		INNER JOIN type_task ON type_task.id = task.type_task_id		
 		WHERE task.id IN {task_ids}
-		ORDER BY office_name, client_name
-	""".format(task_ids=str(task_ids).replace('[', '(').replace(']', ')'))
+		ORDER BY {order}
+	""".format(task_ids=str(task_ids).replace('[', '(').replace(']', ')'), order=order)
 	cursor = connection.cursor()
 	cursor.execute(sql)
 	return dictfetchall(cursor)

@@ -1,3 +1,4 @@
+// Classe base do relatorio que deve ser herdada
 class ReportToPay {
 	constructor() {				
 		this.elTableBody = $('#os-table-body');
@@ -82,12 +83,13 @@ class ReportToPay {
                     confirmButtonText: "Ok"
                 });
                 return false;
+            } else {        	
+	            $('#modal-billing').modal();
+	            $('#action-billing').click(()=>{                
+	                $('#modal-billing').modal('hide');
+	                this.billingTasks();
+	            });                        			
             }
-            $('#modal-billing').modal();
-            $('#action-billing').click(()=>{                
-                $('#modal-billing').modal('hide');
-                this.billingTasks();
-            });                        			
 		})
 	}
 
@@ -230,16 +232,17 @@ class ReportToPay {
 	}
 }
 
+// Gera o relatorio agrupado por office
 class ReportToPayGroupByOffice extends ReportToPay {
 	constructor() {
-		super()
+		super();
 		this.currentOffice;
 		this.currentClient;
 		this.totalByOffice = {};
 		this.totalClientByOffice = {};
 	}
 
-	getTrOffice(officeId, officeName, clientName, clientRefunds){
+	getTrOffice(officeId, officeName){
 	    return `
 	        <tr>
 	            <th colspan="10">${officeName}</th>
@@ -306,13 +309,13 @@ class ReportToPayGroupByOffice extends ReportToPay {
 		this.addAmount(this.totalByOffice, task.office_id, task.amount)
 	}
 
-	computeTotalOfficeByClient(task){
+	computeTotalClientByOffice(task){
 		this.addAmount(this.totalClientByOffice, `${task.office_id}-${task.client_id}`, task.amount)
 	}
 
 	async computeTotals(task){
 		this.computeTotalOffice(task)
-		this.computeTotalOfficeByClient(task)
+		this.computeTotalClientByOffice(task)
 		this.computeTotalToPay(task)
 	}
 
@@ -331,10 +334,109 @@ class ReportToPayGroupByOffice extends ReportToPay {
 		this.startOnCheckItem();
 		this.startOnClickBtnBilling();
 	}
-
-
 }
 
+// Gera o relatorio agrupado por cliente
 class ReportToPayGroupByClient extends ReportToPay {
+	constructor() {
+		super();
+		this.currentOffice;
+		this.currentClient;
+		this.totalByClient = {}
+		this.totalOfficeByClient = {}
+	}
 
+	getTrClient(clientId, clientName){
+	    return `
+	        <tr>
+	            <th colspan="10">${clientName}</th>
+	            <th></th>
+	            <th><center><span office-id="${clientId}">|client=${clientId}|</span></center></th>
+	        </tr>
+	    `
+	}
+
+	getTrOffice(clientId, officeId, officeName, clientRefunds){
+	    return `
+	        <tr>
+	            <th></th>
+	            <th colspan="10">
+	                <div class="col-xs-10">
+	                    ${officeName}                            
+	                </div>
+	                <div class="col-xs-2">                    
+	                    <!--<span class="badge badge-danger pull-right"><i class="fa fa-check"></i> Reembolsa valor</span>-->                    
+	                </div>
+	            </th>
+	            <th><center><span client-id=${clientId}-${officeId}>|office=${clientId}-${officeId}|<span></center></th>
+	        </tr>
+	    `
+	}
+
+	async mountTrClient(task) {
+		if(this.currentClient !== task.client_id){
+			this.currentClient = task.client_id;
+			this.currentOffice = null;
+			this.htmlTable += this.getTrClient(task.client_id, task.client_name);			
+		}
+	}
+
+	async mountTrOffice(task) {
+		if(this.currentOffice !== task.office_id) {
+			this.currentOffice = task.office_id; 
+			this.htmlTable += this.getTrOffice(task.client_id, task.office_id, task.office_name, false)
+		}	
+	}
+
+	async mountTable(task){				
+    	// Monta <tr> do client
+    	this.mountTrClient(task);
+    	// Monta <tr> do office
+    	this.mountTrOffice(task);
+    	// Monta <tr> task
+    	this.mountTrTask(task);
+	}
+
+	async replaceTotalByClient(){
+		Object.keys(this.totalByClient).forEach((key)=>{
+			this.htmlTable = this.htmlTable.replace(`|client=${key}|`, `${this.totalByClient[key].toFixed(2)}`)			
+		})
+	}
+
+
+	async replaceTotalOfficeByClient(){
+		Object.keys(this.totalOfficeByClient).forEach((key)=>{
+			this.htmlTable = this.htmlTable.replace(`|office=${key}|`, `${this.totalOfficeByClient[key].toFixed(2)}`)			
+		})
+	}
+
+	computeTotalClient(task){
+		this.addAmount(this.totalByClient, task.client_id, task.amount)
+	}
+
+	computeTotalOfficeByClient(task){
+		this.addAmount(this.totalOfficeByClient, `${task.client_id}-${task.office_id}`, task.amount)
+	}
+
+	async computeTotals(task){
+		this.computeTotalClient(task)
+		this.computeTotalOfficeByClient(task)				
+		this.computeTotalToPay(task)
+	}
+
+	async makeReport(data) {
+		while (data.length > 0) {			
+		    data.splice(0, 1).forEach((task)=>{	
+		    	this.allTaskIds.push(task.task_id);
+		    	this.mountTable(task);		    	
+		    	this.computeTotals(task);
+		    });	
+		};
+		await this.replaceTotalByClient();
+		await this.replaceTotalOfficeByClient();
+		await this.writeTable();	
+		this.startOnCheckAllItems();
+		this.startOnCheckItem();
+		this.startOnClickBtnBilling();
+	}	
 }

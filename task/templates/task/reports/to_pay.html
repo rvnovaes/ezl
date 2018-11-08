@@ -150,12 +150,17 @@
     <script src="{% static 'task/tasks_to_pay.js' %}"></script>
 
     <script type="text/javascript">
-        var report = new ReportToPayGroupByOffice()      
+        var report;      
         $(document).ready(function(){
             $('#filter_content').collapse('show');
             $('form').on('submit', function(event){                
                 event.preventDefault();
-                $('#filter_content').collapse('hide');                
+                $('#filter_content').collapse('hide');
+                if ($('[name=group_by_tasks]').val() === 'E') {
+                    report = new ReportToPayGroupByOffice();
+                } else {
+                    report = new ReportToPayGroupByClient();
+                }                
                 report.clear()
                 report.start()
             })
