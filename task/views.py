@@ -519,10 +519,10 @@ class ToReceiveTaskReportView(TaskReportBase):
         return JsonResponse({"status": "ok"})
 
 
-class ToPayOfficeReportView(TemplateView):
-    template_name = 'task/reports/to_pay.html'
+class ToPayTaskReportView(View):
     filter_class = TaskToPayFilter
     datetime_field = 'billing_date'    
+
     def get(self, request, *args, **kwargs):                
         self.task_filter = self.filter_class(
             data=self.request.GET, request=self.request)
@@ -605,20 +605,6 @@ class ToPayOfficeReportView(TemplateView):
         queryset = self.filter_queryset(queryset)
         return queryset
 
-
-
-class ToPayTaskReportView(TemplateView):
-    template_name = 'task/reports/to_pay.html'
-    filter_class = TaskToPayFilter
-    datetime_field = 'billing_date'
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        self.task_filter = self.filter_class(
-            data=self.request.GET, request=self.request)
-        context['filter'] = self.task_filter
-        return context
-        
     def post(self, request):
         office = get_office_session(self.request)        
         tasks_payload = request.POST.getlist('tasks[]')
@@ -633,6 +619,18 @@ class ToPayTaskReportView(TemplateView):
         messages.add_message(self.request, messages.INFO,
                              "OS's faturadas com sucesso.")
         return JsonResponse({"status": "ok"})
+
+class ToPayTaskReportTemplateView(TemplateView):
+    template_name = 'task/reports/to_pay.html'
+    filter_class = TaskToPayFilter
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        self.task_filter = self.filter_class(
+            data=self.request.GET, request=self.request)
+        context['filter'] = self.task_filter
+        return context
+        
 
 
 class DashboardView(CustomLoginRequiredView, TemplateView):

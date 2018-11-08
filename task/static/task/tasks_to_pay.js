@@ -97,7 +97,7 @@ class ReportToPay {
         let data = {tasks: this.tasksToPay};
         $.ajax({
             type: 'POST',
-            url: location.href,
+            url: '/relatorios/os-a-pagar-data',
             data: data,
             success: function (response) {
                 location.reload();
