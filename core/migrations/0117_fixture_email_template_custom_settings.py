@@ -31,7 +31,7 @@ def create_custom_settings(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0115_auto_20181029_1749'),
+        ('core', '0116_auto_20181101_1407'),
         ('task', '0126_taskshowstatus_mail_recipients'),
     ]
 

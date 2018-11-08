@@ -9,7 +9,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0115_auto_20181101_1407'),
+        ('core', '0117_fixture_email_template_custom_settings'),
     ]
 
     operations = [
