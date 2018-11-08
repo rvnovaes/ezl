@@ -197,5 +197,10 @@ urlpatterns = [
         name='custom_settings_create'),
     url(r'^custtom_settings/(?P<pk>[0-9]+)/$',
         login_required(views.CustomSettingsUpdateView.as_view()),
-        name='custom_settings_update')
+        name='custom_settings_update'),
+
+    # import city list
+    url(r'^import_city_list/$',
+        login_required(views.ImportCityList.as_view()),
+        name='import_city_list'),
 ]

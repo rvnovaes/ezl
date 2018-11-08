@@ -1,0 +1,277 @@
+{% extends "skeleton/base.html" %}
+
+{% load staticfiles %}
+
+{% block extra_stylesheets %}
+<link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
+<link href="{% static 'skeleton/plugins/bower_components/dropify/dist/css/dropify.min.css' %}" rel="stylesheet" type="text/css" />
+<link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
+<style>
+    #divProgress {
+        width: 100%;
+        background-color: grey;
+        position: relative;
+    }
+    #progressBar {
+        width: 1%;
+        height: 30px;
+        background-color: green;
+        position: relative;
+        margin-top: -19px;
+    }
+    #progressText {
+        background-color: transparent;
+        z-index: 10;
+        color: #FFF;
+        font-weight: 600;
+        vertical-align: middle;
+        margin-top: -20px;
+        width: 100%;
+        text-align: center;
+    }
+    #percent {
+        z-index: 999;
+        position: absolute;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% load staticfiles bootstrap3 %}
+    
+    {% include 'core/widgets/messages.html' %}
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <form id="import_task_list_form" action="" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <!--Campo para upload do arquivo -->
+                    <div class="form-group col-sm-12">
+                        <label class="control-label" for="id_file_xls">Arquivo - lista de cidades</label>
+                        <div class="row bootstrap3-multi-input">
+                            <div class="col-xs-12" style="width: 400px;">
+                                <input type="file" name="file_xls" class="dropify" title="" required="" id="id_file_xls">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+                <button id="btn-submit"
+                    style="width: 100px!important;"
+                    type="button"
+                    onclick="showMessages()"
+                    class="btn btn-success waves-effect waves-light">Importar
+                </button>
+                <script>
+                    function showMessages()
+                    {
+                        var text_msg = "Ao iniciar o processo de importação de cidades não será possível cancelá-lo. Deseja continuar?";
+                        swal({
+                                title: "Importante",
+                                text: text_msg,
+                                type: "warning",
+                                showCancelButton: true,
+                                confirmButtonText: "Sim",
+                                cancelButtonText: "Não",
+                                confirmButtonColor: "#DD6B55"
+                            }).then(function(isConfirm){
+                                if (isConfirm.value) {
+                                    var formData = new FormData($('#import_task_list_form')[0]);
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: window.location,
+                                        data: formData,
+                                        contentType: false,
+                                        processData: false,
+                                        success: function (result) {
+                                            var file_xls_id = result.file_xls_id;
+                                            var file_name = result.file_name;
+                                            process_interval = setInterval(function() {setImported(file_xls_id, file_name)}, 1000);
+                                            $('#progressBarImportCityAction').modal({backdrop: 'static', keyboard: false});
+                                        },
+                                        error: function (request, status, error) {
+                                            window.location.reload()
+                                        },
+                                        beforeSend: function (xhr, settings) {
+                                            xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                                        },
+                                        dataType: 'json'
+                                    })
+                                }
+                            }
+                        );
+                    }
+                </script>
+            </form>
+        </div>
+    </div>
+    
+    <div id="totals" class="panel panel-default" style="display: none">
+        <div class="panel-heading">
+            <div class="panel-title form-row">Log do processo:</div>
+        </div>
+        <div class="panel-body">
+            <div class="col-xs-12 form-group"  id="total_rows" style="display: none">
+                <label>Total importado: </label>&nbsp;<span></span>
+            </div>
+            <div class="col-xs-12">
+                <label>Detalhe dos registros importados:</label>
+                <ul>
+                    <li>Novos: <span id="new"></span></li>
+                    <li>Atualizados: <span id="update"></span></li>
+                    <li>Com erro: <span id="error"></span></li>
+                </ul>
+            </div>
+            <div id="div-log-table" style="display: none">
+                <table id="log_table">
+                    <thead>
+                        <tr>
+                            <th>Linha</th>
+                            <th>Observação</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% include 'task/modal/processing.html' %}
+    <div id="progressBarImportCityAction" class="modal fade "
+        tabindex="-1" role="alert" aria-labelledby="modalTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg ">
+            <div class="modal-content">
+                <div id="modalHeader" class="modal-header">
+                    <h4 id="modalTitle" class="modal-title">
+                        <i id="icon" class="mdi-24px"></i>
+                            <span id="title-progressbar">Importação de Cidades<br></span> </h4>
+                </div>
+                <div class="modal-body p-30">
+                    <div id="divProgress">
+                        <div id="progressText"><span id="percent"></span></div>
+                        <div id="progressBar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block extra_scripts %}
+    <script src="{% static 'skeleton/plugins/bower_components/dropify/dist/js/dropify.min.js' %}"></script>    
+    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+    <!-- start - This is for export functionality only -->
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.flash.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
+    <script>
+        $('document').ready(function(){
+            window.file_xls_field = $('.dropify');
+            window.file_xls_field.attr('data-height', '200').attr('data-allowed-file-extensions', 'xlsx').dropify();
+        });
+        setImported = function(file_xls_id, file_name){
+            $.ajax({
+                method: 'GET',
+                url: window.location,
+                data: {"file_xls_id": file_xls_id},
+                dataType: 'json',
+                success: function(response) {
+                    var elem = document.getElementById("progressBar");
+                    var percent = document.getElementById("percent");
+                    var title = document.getElementById("title-progressbar");
+
+                    let import_status = response.log_file.status;
+                    let current_line = response.log_file.current_line;
+                    let total_rows = response.log_file.total_lines;
+
+                    if (import_status !== 'Finalizado'){
+                        width = (current_line/total_rows)*100;
+                        percent.innerHTML = width.toFixed(2) + '%';
+                        elem.style.width = width.toFixed(2) + '%';
+                    }else{
+                        width = 100;
+                        percent.innerHTML = width + '%';
+                        elem.style.width = width + '%';
+                        clearInterval(process_interval)
+
+                        var $total_rows = $("#total_rows");
+                        var log_file = response.log_file;
+                        $total_rows[0].getElementsByTagName('span')[0].innerHTML = log_file.total_rows;
+                        $total_rows.css('display', 'block');
+                        if(log_file.totals){
+                            $.each(log_file.totals, function(key, val){
+                                $("#"+key).html(val)
+                            });
+                            $("#totals").css('display', 'block');
+                        } else {
+                            $("#totals").css('display', 'none');
+                        }
+                        $("#id_file_xls").val('');
+
+                        if(log_file.errors.length || log_file.warnings.length) {
+                            var log_table = $('#log_table');
+                            log_table.DataTable().destroy();
+                            var log_table_tbody = $('#log_table tbody');
+                            log_table_tbody.html('');
+                            for (var j = 0; j < log_file.errors.length; j++) {
+                                var result_error_obj = log_file.errors[j];
+                                var errors_desc = '';
+                                for (var i = 0; i < result_error_obj.errors[0].length; i++) {
+                                    errors_desc += $.trim(result_error_obj.errors[0][i]).split("'").join('') + '<br />';
+                                }
+                                log_table_tbody.append('<tr> ' +
+                                    '<td>' + result_error_obj.line + '</td>' +
+                                    '<td>' + errors_desc + '</td>' +
+                                    '<td><span class="label label-rounded label-danger"><i class="fa fa-times fa-fw"></i>ERRO</span></td></tr>');
+                            }
+                            for (var j = 0; j < log_file.warnings.length; j++) {
+                                var result_warning_obj = log_file.warnings[j];
+                                var wanings_desc = '';
+                                for (var i = 0; i < result_warning_obj.warnings.length; i++) {
+                                    wanings_desc += $.trim(result_warning_obj.warnings[i].join('<br />')) + '<br />';
+                                }
+                                log_table_tbody.append('<tr> ' +
+                                    '<td>' + result_warning_obj.line + '</td>' +
+                                    '<td>' + wanings_desc + '</td>' +
+                                    '<td><span class="label label-rounded label-warning"><i class="fa fa-warning fa-fw"></i>ALERTA</span></td></tr>');
+                            }
+                            $("#div-log-table").css('display', 'block');
+                            log_table.DataTable({
+                                language: {
+                                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                                },
+                                buttons: [
+                                    'copy', 'csv', 'excel', 'pdf', 'print'
+                                ],
+                                destroy: true,
+                            });
+                        } else {
+                            $("#div-log-table").css('display', 'none');
+                        }
+                        var drEvent = window.file_xls_field.dropify();
+                        drEvent = drEvent.data('dropify');
+                        drEvent.resetPreview();
+                        drEvent.clearElement();
+
+                        $('#progressBarImportCityAction').modal('hide');
+                    }
+
+                },
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+            })
+        };
+    </script>
+{% endblock %}
