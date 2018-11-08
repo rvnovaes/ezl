@@ -23,7 +23,10 @@ class CityInstanceLoader(BaseInstanceLoader):
         params = {}
         for key in self.resource.get_import_id_fields():
             field = self.resource.fields[key]
-            params[field.attribute] = field.clean(row)
+            if key == 'name':
+                params['{}__unaccent__iexact'.format(field.attribute)] = field.clean(row)
+            else:
+                params['{}'.format(field.attribute)] = field.clean(row)
             params['{}__isnull'.format(field.attribute)] = False
         instance = self.get_queryset().filter(**params).first()
         if instance:
@@ -59,8 +62,8 @@ class CityResource(resources.ModelResource):
         fields = ('name', 'state', 'court_district', 'create_user')
 
     def get_court_district(self, row, row_errors):
-        court_district = CourtDistrict.objects.filter(**{'name': row['MUNICÍPIO'],
-                                                         'state__initials': row['UF']}).first()
+        court_district = CourtDistrict.objects.filter(**{'name__unaccent__iexact': row['MUNICÍPIO'],
+                                                         'state__initials__iexact': row['UF']}).first()
         return court_district.name if court_district else ''
 
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
@@ -81,6 +84,8 @@ class CityResource(resources.ModelResource):
         self.xls_file.log_file = "{\"status\": \"%s\" , \"current_line\": %d, \"total_lines\": %d}" % (
             self.status, self.current_line, self.total_lines)
         self.xls_file.save()
+        row['UF'] = row['UF'].strip()
+        row['MUNICÍPIO'] = row['MUNICÍPIO'].replace('*', '').strip()
         row_errors = []
         row['comarca'] = self.get_court_district(row, row_errors)
         if row_errors:
