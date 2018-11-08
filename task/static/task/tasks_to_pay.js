@@ -3,6 +3,7 @@ class ReportToPay {
 		this.elTableBody = $('#os-table-body');
 		this.elTableFoot = $('#os-table-foot');
 		this.elBtnBilling = $('#btn-billing');		
+		this.elCheckAllItems = $('#checkAll');
 	    this.count = 0;
 	    this.totalToPay=0;
 	    this.currentOffice = null;
@@ -11,6 +12,7 @@ class ReportToPay {
 	    this.allTaskIds = [] ;  
 	    this.htmlTable = ``;
 	    this.elInputClient = $('[name=client]');	    
+
 	}
 
 	get formData() {
@@ -25,6 +27,67 @@ class ReportToPay {
 		    });		
 		return data;
 	}
+
+	startOnCheckAllItems() {
+		this.elCheckAllItems.on('change', function() {
+			$('#os-table input:checkbox').not(this).prop('checked', this.checked);
+		})
+	}
+
+	startOnCheckItem(){
+		let self = this;
+        $('#os-table input:checkbox').on('change', function(){
+            if ($(this).attr('id') === 'checkAll') {
+                if ($(this).is(':checked')) {
+                    self.tasksToPay = self.allTaskIds
+                } else {
+                    self.tasksToPay = [];
+                }
+            } else {
+                if ($(this).is(':checked')) {
+                    self.tasksToPay.push($(this).val())    
+                } else {
+                    self.tasksToPay.splice(self.tasksToPay.indexOf($(this).val(), 1))
+                }                            
+            }
+        })		
+	}
+
+	startOnClickBtnBilling() {
+		this.elBtnBilling.on('click', ()=>{
+            if (this.tasksToPay.length == 0){
+                swal({
+                    title: "Importante",
+                    text: "Você deve selecionar pelo menos uma OS para ser faturada.",
+                    type: "warning",
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Ok"
+                });
+                return false;
+            }
+            $('#modal-billing').modal();
+            $('#action-billing').click(()=>{                
+                $('#modal-billing').modal('hide');
+                this.billingTasks();
+            });                        			
+		})
+	}
+
+	billingTasks(){
+        let data = {tasks: this.tasksToPay};
+        $.ajax({
+            type: 'POST',
+            url: location.href,
+            data: data,
+            success: function (response) {
+                location.reload();
+            },
+            beforeSend: function (xhr, settings) {
+                xhr.setRequestHeader("X-CSRFToken", $('input[name=csrfmiddlewaretoken]').val());
+            },
+            dataType: 'json'
+        });				
+	}	
 
 	async search() {
 		const response = await this.getData().then((data)=>{
@@ -237,15 +300,21 @@ class ReportToPayGroupByOffice extends ReportToPay {
 
 	async makeReport(data) {
 		while (data.length > 0) {			
-		    data.splice(0, 1).forEach((task)=>{		    	
+		    data.splice(0, 1).forEach((task)=>{	
+		    	this.allTaskIds.push(task.task_id);
 		    	this.mountTable(task);		    	
 		    	this.computeTotals(task);
 		    });	
 		};
 		await this.replaceTotalByOffice();
 		await this.replaceTotalClientByOffice();
-		await this.writeTable();		
-	}	
+		await this.writeTable();	
+		this.startOnCheckAllItems();
+		this.startOnCheckItem();
+		this.startOnClickBtnBilling();
+	}
+
+
 }
 
 class ReportToPayGroupByClient extends ReportToPay {

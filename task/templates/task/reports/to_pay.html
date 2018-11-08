@@ -118,7 +118,7 @@
             </div>
         </div>
     </div>
-    <div id="modal-faturar" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div id="modal-billing" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -130,7 +130,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success waves-effect" id="action-faturar">Faturar</button>
+                    <button type="button" class="btn btn-success waves-effect" id="action-billing">Faturar</button>
                 </div>
             </div>
         </div>
@@ -151,13 +151,14 @@
     <script src="{% static 'task/tasks_to_pay.js' %}"></script>
 
     <script type="text/javascript">
+        var report = new ReportToPayGroupByOffice()
         var tasksToPay = [];
         var allTaskIds = [];
         var activeOnClickBtnFaturar = function() {
             $("#checkAll").click(function(){        
                 $('#os-table input:checkbox').not(this).prop('checked', this.checked);
             });
-            $('#action-faturar').click(function(){                
+            $('#action-billing').click(function(){                
                 data = {tasks: tasksToPay};
                 $.ajax({
                     type: 'POST',
@@ -171,7 +172,7 @@
                     },
                     dataType: 'json'
                 });
-                $('#modal-faturar').modal('hide');
+                $('#modal-billing').modal('hide');
             });                
             $('#os-table input:checkbox').on('change', function(){
                 if ($(this).attr('id') === 'checkAll') {
@@ -188,7 +189,7 @@
                     }                            
                 }
             })
-            $('#btn-faturar').click(function(){
+            $('#btn-billing').click(function(){
                 if (tasksToPay.length == 0){
                     swal({
                         title: "Importante",
@@ -199,15 +200,14 @@
                     });
                     return false;
                 }
-                $('#modal-faturar').modal();
+                $('#modal-billing').modal();
             });        
         };            
         $(document).ready(function(){
             $('#filter_content').collapse('show');
             $('form').on('submit', function(event){                
                 event.preventDefault();
-                $('#filter_content').collapse('hide');
-                var report = new ReportToPayGroupByOffice()
+                $('#filter_content').collapse('hide');                
                 report.clear()
                 report.start()
             })
