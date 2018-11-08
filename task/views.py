@@ -1,7 +1,6 @@
 import json
 import uuid
 import csv
-import copy
 import pickle
 import io
 from datetime import datetime
@@ -23,8 +22,6 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django.core.exceptions import ValidationError
-from django.shortcuts import render
-from django.forms.models import model_to_dict
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from djmoney.money import Money
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
@@ -35,7 +32,8 @@ from core.models import Person, CorePermissions, CustomSettings
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.models import Movement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter
-from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, ImportTaskListForm, TaskSurveyAnswerForm
+from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, \
+    ImportTaskListForm, TaskBulkCreateForm
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation, TypeTaskMain, TaskSurveyAnswer
 from task.signals import send_notes_execution_date
@@ -43,7 +41,6 @@ from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTa
 from task.tasks import import_xls_task_list
 from task.rules import RuleViewTask
 from task.workflow import CorrespondentsTable
-from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms, delegate_child_task
@@ -70,7 +67,7 @@ class TaskListView(CustomLoginRequiredView, SingleTableViewMixin):
 
 class TaskBulkCreateView(AuditFormMixin, CreateView):
     model = Task
-    form_class = TaskCreateForm
+    form_class = TaskBulkCreateForm
     success_url = reverse_lazy('task_list')
     success_message = CREATE_SUCCESS_MESSAGE
     template_name_suffix = '_bulk_create_form'

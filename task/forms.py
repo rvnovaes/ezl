@@ -6,8 +6,9 @@ from django_file_form.forms import MultipleUploadedFileField
 
 from core.models import Person, ImportXlsFile
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
-from core.widgets import MDDateTimepicker, MDDatePicker
+from core.widgets import MDDateTimepicker, MDDatePicker, TypeaHeadForeignKeyWidget
 from core.forms import BaseForm, XlsxFileField
+from lawsuit.models import CourtDistrict, CourtDistrictComplement, City, TypeMovement
 from task.models import Task, TypeTask, Filter, TaskStatus, TypeTaskMain, TaskSurveyAnswer
 from task.resources import COLUMN_NAME_DICT
 from task.widgets import code_mirror_schema
@@ -92,6 +93,54 @@ class TaskCreateForm(TaskForm):
 
     class Meta(TaskForm.Meta):
         fields = TaskForm.Meta.fields + ['documents']
+
+
+class TaskBulkCreateForm(TaskCreateForm):
+    law_suit_number = forms.CharField(max_length=255, required=True)
+    court_district = forms.CharField(label='Comarca',
+                                     required=False,
+                                     widget=TypeaHeadForeignKeyWidget(
+                                         model=CourtDistrict,
+                                         field_related='name',
+                                         name='court_district',
+                                         url='/processos/courtdistrict_autocomplete'))
+    city = forms.CharField(label='Cidade',
+                           required=False,
+                           widget=TypeaHeadForeignKeyWidget(
+                               model=City,
+                               field_related='name',
+                               name='city',
+                               url='/city/autocomplete/'))
+    court_district_complement = forms.CharField(label="Complemento de Comarca",
+                                                required=False,
+                                                widget=TypeaHeadForeignKeyWidget(
+                                                    model=CourtDistrictComplement,
+                                                    field_related='name',
+                                                    forward='court_district',
+                                                    name='court_district_complement',
+                                                    url='/processos/typeahead/search/complemento',
+                                                ))
+    person_customer = forms.CharField(label="Cliente",
+                                      required=True,
+                                      widget=TypeaHeadForeignKeyWidget(
+                                          model=Person,
+                                          field_related='legal_name',
+                                          name='person_customer',
+                                          url='/client_form'))
+    folder_number = forms.CharField(widget=forms.TextInput(), required=False)
+    type_movement = forms.ModelChoiceField(required=False,
+                                           queryset=filter_valid_choice_form(TypeMovement.objects.filter(
+                                               is_active=True)).order_by('name'),
+                                           empty_label=u"Selecione...",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.fields['person_asked_by'].initial:
+            self.fields['person_asked_by'].widget = forms.HiddenInput()
+        self.fields['performance_place'].widget = forms.HiddenInput()
+        self.fields['office'].widget = forms.HiddenInput()
+        self.fields['task_number'].widget = forms.HiddenInput()
 
 
 class TaskDetailForm(ModelForm):

@@ -1,15 +1,12 @@
-{% extends 'skeleton/forms/base.html' %}
+{% extends 'task/task_form.html' %}
 {% load core_filters form_tags staticfiles bootstrap3 %}
 
-
 {% block page_title %}
-
     {% with "ORDEM DE SERVIÇO" as form_name_plural %}
         {% with " " as page_title %}
             {{block.super}}
         {% endwith %}
     {% endwith %}
-
 {% endblock %}
 
 {% block bar_buttons %}
@@ -22,211 +19,54 @@
     {% include 'core/widgets/messages.html' %}
     <form id="task_form" action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ formset.management_form }}
-            <div class="form-row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h1 class="panel-title">Criar ordem de serviço</h1>
-                    </div>
-                    <div class="panel-body">
-                        <div class="row nav-form">
-                            <div class="form-group col-sm-4">
-                                    <button id="btn_add_folder"
-                                            type="button"
-                                            class="btn btn-sm-custom btn-raised btn-primary pull-right"
-                                            title="Adicionar nova Pasta">
-                                        <i class="mdi mdi-plus"></i>
-                                    </button>
-                                    <span style="font-weight: 500;">Número da pasta / Cliente*</span>
-                                    <input class="twitter-typeahead form-control"
-                                           type="text"
-                                           placeholder="Selecione..."
-                                           id="id_folder"
-                                           data-url="{% url 'folder_autocomplete' %}"
-                                           name="folder"
-                                           data-value=""
-                                           value=""
-                                           data-module="lawsuit.models"
-                                           data-model="Folder"
-                                           search-field="person_customer"
-                                           data-typeahead="true"
-                                           data-value-txt=""
-                                           data-forward="">
-                            </div>
-                            <div class="form-group col-sm-4">
-                                <label>
-                                    <button id="btn_add_lawsuit"
-                                            type="button"
-                                            class="btn btn-sm-custom btn-raised btn-primary pull-right disabled-btn"
-                                            title="Adicionar novo processo">
-                                        <i class="mdi mdi-plus"></i>
-                                    </button>
-                                    Número do processo*
-                                </label>
-                                <select name="lawsuit"
-                                    class="selectpicker"
-                                    data-style="form-control"
-                                    id="id_lawsuit">
-                                        <option value="">Selecione a pasta</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-sm-4">
-                                <label>
-                                    <button id="btn_add_movement"
-                                            type="button"
-                                            class="btn btn-sm-custom btn-raised btn-primary pull-right disabled-btn"
-                                            title="Adicionar nova movimentação">
-                                        <i class="mdi mdi-plus"></i>
-                                    </button>
-
-                                    Movimentação*
-                                </label>
-                                <select name="movement"
-                                    class="selectpicker"
-                                    data-style="form-control"
-                                    required
-                                    id="id_movement">
-                                        <option value="">Selecione o processo</option>
-                                </select>
-                            </div>
+        <div class="form-row">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">Criar ordem de serviço</h1>
+                </div>
+                <div class="panel-body">
+                    <fieldset>
+                        <div class="row">
+                            {% bootstrap_field form.person_asked_by form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
+                            {% bootstrap_field form.person_company_representative form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
                         </div>
-                        {% verbatim %}
-                        <div class="form-row">
-                            <div class="panel panel-primary">
-                                <div class="panel-heading">
-                                    <h6 class="panel-title">Providências</h6>
-                                </div>
-                                <div class="panel-body">
-                                    <table class="table" id="app_task_list">
-                                        <thead>
-                                            <tr>
-                                                <th>Status</th>
-                                                <th>O.S.</th>
-                                                <th>Prazo</th>
-                                                <th>Serviço</th>
-                                                <th>Processo</th>
-                                                <th>Cliente</th>
-                                                <th>Parte Adversa</th>
-                                                <th>Delegação</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="(task, i) in tasks" v-bind:data-href="task.url" data-href-target="_new">
-                                                <td>{{ task.status }}</td>
-                                                <td>{{ task.task_number }}</td>
-                                                <td>{{ task.final_deadline_date }}</td>
-                                                <td>{{ task.type_task.name }}</td>
-                                                <td>{{ task.lawsuit_number }}</td>
-                                                <td>{{ task.client.name }}</td>
-                                                <td>{{ task.opposing_party }}</td>
-                                                <td>{{ task.delegation_date }}</td>
-                                            </tr>
-                                            <tr v-if="tasks.length == 0">
-                                                <td class="text-center" colspan="7">Nenhuma OS para exibir</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                        <div class="row">
+                            {% bootstrap_field form.type_task form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
+                            {% bootstrap_field form.law_suit_number form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
                         </div>
-                        {% endverbatim %}
-                        <div id="form-content" class="modal">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content ">
-                                    <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                        <h4 class="modal-title">Cadastrar providência</h4>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="form-row">
-                                            <div class="panel panel-primary">
-                                                <div class="panel-body">
-                                                  {% for field in form %}
-                                                      {% field_type field as field_type %}
-                                                      {% if field_type == 'checkbox'%}
-                                                          <div class="form-group col-sm-6">
-                                                              <div class="checkbox checkbox-success">
-                                                                  {{ field }}
-                                                                  {{ field.label_tag }}
-                                                              </div>
-                                                          </div>
-                                                      {% elif field_type != 'clearablefile' and field.name != 'documents' %}
-                                                        {% bootstrap_field field form_group_class="form-group col-sm-6" required_css_class="ezl-required" %}
-                                                      {% endif %}
-                                                  {% endfor %}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {% include 'ecm/attachments.html' %}
-
-                                        <div class="form-row  text-center">
-                                            <button class="btn btn-danger waves-effect waves-light" type="button" data-dismiss="modal">
-                                                <span class="btn-label"><i class="fa fa-close"></i></span>Cancelar
-                                            </button>
-                                            <button class="btn btn-success waves-effect waves-light" type="submit">
-                                                <span class="btn-label"><i class="fa fa-save"></i></span>Salvar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="row">
+                            {% bootstrap_field form.description form_group_class="form-group col-sm-12" required_css_class='ezl-required' %}
                         </div>
+                        <div class="row">
+                            {% bootstrap_field form.final_deadline_date form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field form.court_district form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
+                            {% bootstrap_field form.city form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field form.court_district_complement form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field form.person_customer form_group_class="form-group col-sm-9" required_css_class='ezl-required' %}
+                        </div>
+                        {% include 'ecm/attachments_create.html' %}
+                        <div class="row">
+                            {% bootstrap_field form.folder_number form_group_class="form-group col-sm-9" required_css_class='ezl-required' %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field form.type_movement form_group_class="form-group col-sm-9" required_css_class='ezl-required' %}
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="panel-footer">
+                    <div class="form-row  text-center">
+                        {% block form_buttons %}
+                            {{ block.super }}
+                        {% endblock %}
                     </div>
                 </div>
             </div>
+        </div>
     </form>
 {% endblock content %}
-
-
-{% block extra_scripts %}
-    {{ block.super }}
-    <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
-    <script src="{% static 'task/task-bulk-create.js' %}"></script>
-    <script src="{% static 'skeleton/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js' %}"></script>
-    <script src="{% static 'core/js/typeahead.js' %}"></script>
-    <script src="{% static "skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js" %}"></script>
-    <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
-    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
-    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
-    {% include 'ecm/javascripts.html' %}
-{% endblock extra_scripts %}
-
-{% block extra_stylesheets %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{% static "fileuploader.css" %}">
-    <link href="{% static "skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css" %}" rel="stylesheet" type="text/css" />
-    <style type="text/css">
-        .select2{
-            margin-top: -4px !important;
-        }
-
-        .select2-container {
-            min-width: 100% !important;
-        }
-
-        .nav-form label{
-            width: 100%;
-        }
-
-        .modal-dialog {
-            width: 95%!important;
-        }
-        .loading {
-            background-color: #ffffff;
-            background-image: url("{% static "img/loading.gif" %}") !important;
-            background-size: 16px 16px;
-            background-position: right center;
-            background-repeat: no-repeat;
-
-        }
-    </style>
-
-    <link href="/static/autocomplete_light/vendor/select2/dist/css/select2.css" type="text/css" media="all" rel="stylesheet" />
-    <link href="/static/autocomplete_light/select2.css" type="text/css" media="all" rel="stylesheet" />
-    <script type="text/javascript" src="/static/autocomplete_light/jquery.init.js"></script>
-    <script type="text/javascript" src="/static/autocomplete_light/autocomplete.init.js"></script>
-    <script type="text/javascript" src="/static/autocomplete_light/vendor/select2/dist/js/select2.full.js"></script>
-    <script type="text/javascript" src="/static/autocomplete_light/vendor/select2/dist/js/i18n/pt-BR.js"></script>
-    <script type="text/javascript" src="/static/libs/django-autocomplete-light-3.2.9/select2.js"></script>
-{% endblock %}
