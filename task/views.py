@@ -408,8 +408,6 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         offices_map = {}
         tasks = self.get_queryset()
         total = 0
-
-        # Transformar em funcao
         for task in tasks:
             correspondent = self._get_related_office(task)
             if correspondent not in offices_map:
@@ -417,33 +415,27 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
             client = self._get_related_client(task)
             if client not in offices_map[correspondent]:
                 offices_map[correspondent][client] = []
-            serializer = TaskToPaySerializer(instance=task)
-            offices_map[correspondent][client].append(serializer.data)
+            offices_map[correspondent][client].append(task)
 
-        # Transformar em funcao    
-        # offices_map_total = {}
-        # for office, clients in offices_map.items():
-        #     office_total = 0
-        #     for client, tasks in clients.items():
-        #         logger = logging.getLogger('aasdas')
-        #         logger.info(tasks)
-        #         client_total = sum(map(lambda x: Decimal(x.get('amount')), tasks))
-        #         office_total = office_total + client_total
-        #         offices.append({
-        #             'office_name': office.name,
-        #             'client_name': client.name,
-        #             'client_refunds': client.refunds_correspondent_service,
-        #             'tasks': tasks,
-        #             "client_total": client_total,
-        #             "office_total": 0,
-        #         })
-        #     offices_map_total[office.name] = office_total
-        #     total = total + office_total
+        offices_map_total = {}
+        for office, clients in offices_map.items():
+            office_total = 0
+            for client, tasks in clients.items():
+                client_total = sum(map(lambda x: x.amount, tasks))
+                office_total = office_total + client_total
+                offices.append({
+                    'office_name': office.name,
+                    'client_name': client.name,
+                    'client_refunds': client.refunds_correspondent_service,
+                    'tasks': tasks,
+                    "client_total": client_total,
+                    "office_total": 0,
+                })
+            offices_map_total[office.name] = office_total
+            total = total + office_total
 
-        # # Transformar em funcao
-
-        # for item in offices:
-        #     item['office_total'] = offices_map_total[item['office_name']]
+        for item in offices:
+            item['office_total'] = offices_map_total[item['office_name']]
 
         return offices, total
 
