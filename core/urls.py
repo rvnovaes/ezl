@@ -197,5 +197,8 @@ urlpatterns = [
         name='custom_settings_create'),
     url(r'^custtom_settings/(?P<pk>[0-9]+)/$',
         login_required(views.CustomSettingsUpdateView.as_view()),
-        name='custom_settings_update')
+        name='custom_settings_update'),
+    url(r'^person_customer/add/$',
+        login_required(views.PersonCustomerCreateTaskBulkCreate.as_view()),
+        name='person_customer_add')
 ]

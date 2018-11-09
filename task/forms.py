@@ -120,7 +120,7 @@ class TaskBulkCreateForm(TaskCreateForm):
                                                     name='court_district_complement',
                                                     url='/processos/typeahead/search/complemento',
                                                 ))
-    person_customer = forms.CharField(label="Cliente",
+    person_customer = forms.CharField(label="Cliente/Parte",
                                       required=True,
                                       widget=TypeaHeadForeignKeyWidget(
                                           model=Person,

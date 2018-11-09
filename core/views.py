@@ -2166,6 +2166,7 @@ class MediaFileView(LoginRequiredMixin, View):
         return HttpResponseRedirect(
             urljoin(settings.AWS_STORAGE_BUCKET_URL, path))
 
+
 class OfficePermissionRequiredMixin(PermissionRequiredMixin):
     def has_permission(self):
         guardian = ObjectPermissionChecker(self.request.user)
@@ -2175,3 +2176,25 @@ class OfficePermissionRequiredMixin(PermissionRequiredMixin):
             if not guardian.has_perm(perm.name, office_session):
                 return False
         return True
+
+
+class PersonCustomerCreateTaskBulkCreate(View):
+    form = PersonForm
+
+    def post(self, *args, **kwargs):
+        create_user = self.request.user
+        office_session = get_office_session(self.request)
+        form = self.form(self.request.POST)
+        status = 200
+        if form.is_valid():
+            form.instance.create_user = create_user
+            instance = form.save()
+            create_person_office_relation(instance, self.request.user, office_session)
+            data = {'id': instance.id, 'dataValueTxt': instance.legal_name}
+        else:
+            status = 500
+            data = {'error': True, 'errors': []}
+            for error in form.errors:
+                data['errors'].append(error)
+
+        return JsonResponse(json.loads(json.dumps(data)), status=status)

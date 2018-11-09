@@ -44,8 +44,15 @@
                             {% bootstrap_field form.court_district_complement form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
                         </div>
                         <div class="row">
-                            {{ default_customer }}
-                            {% bootstrap_field form.person_customer form_group_class="form-group col-sm-9" required_css_class='ezl-required' %}
+                            {% bootstrap_field form.person_customer form_group_class="col-sm-9 p-r-0" layout='horizontal' label_class='col-md-3 ezl-required' %}
+                            <div class="col-sm-3 pull-left p-l-0 p-r-0">
+                                <button id="btn_add_person_customer"
+                                        type="button"
+                                        class="btn btn-lg-custom btn-raised btn-primary"
+                                        title="Adicionar Cliente/Parte">
+                                    <i class="mdi mdi-plus"></i>
+                                </button>
+                            </div>
                         </div>
                         {% include 'ecm/attachments_create.html' %}
                         <div class="row">
@@ -75,5 +82,17 @@
 {% block extra_scripts %}
     {{ block.super }}
     {{ form.media }}
-    <script src="{% static 'task/task-bulk-create.js' %}"></script
+    <script src="{% static 'task/task-bulk-create.js' %}"></script>
+    <script type="text/javascript">
+        var task;
+        var defaultCustomer = {};
+        $(document).ready(function(){
+            task = new TaskBulkCreate();
+            {% if default_customer %} defaultCustomer = {id: {{ default_customer.id }}, dataValueTxt: "{{ default_customer.data_value_txt }}" }; {% endif %}
+            task.personCustomer = defaultCustomer;
+            $("#btn_add_person_customer").on('click', function () {
+                task.newPersonCustomer('{{ csrf_token }}')
+            })
+        })
+    </script>
 {% endblock %}

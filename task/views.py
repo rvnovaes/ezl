@@ -75,7 +75,10 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         office = get_office_session(self.request)
-        context['default_customer'] = office.customsettings.default_customer if office.customsettings else None
+        context['default_customer'] = None
+        if office.customsettings and office.customsettings.default_customer:
+            context['default_customer'] = {'id': office.customsettings.default_customer.id,
+                                           'data_value_txt': office.customsettings.default_customer.legal_name}
         return context
 
     def form_valid(self, form):
