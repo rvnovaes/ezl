@@ -136,12 +136,11 @@ class TaskBulkCreateForm(TaskCreateForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        office = get_office_session(self.request)
-        if self.fields['person_asked_by'].initial:
-            self.fields['person_asked_by'].widget = forms.HiddenInput()
+        office_session = get_office_session(self.request)
         self.fields['performance_place'].widget = forms.HiddenInput()
-        self.fields['office'].widget = forms.HiddenInput()
         self.fields['task_number'].widget = forms.HiddenInput()
+        self.fields['office'].widget = forms.HiddenInput()
+        self.fields['office'].initial = office_session
 
 
 class TaskDetailForm(ModelForm):
