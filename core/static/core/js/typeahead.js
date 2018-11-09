@@ -89,7 +89,8 @@ $(document).ready(function () {
     });
 
     // funcao responsavel por limpar um campo typeahead
-    var clearTypeaheadField = function(field){
+    // esta função é utilizada no task-bulk-create.js
+    clearTypeaheadField = function(field){
         field.attr('value', '');
         field.attr('data-value', '');
         field.attr('data-value-txt', '');

@@ -1,6 +1,11 @@
 class TaskBulkCreate {
 	constructor() {
 		this.elInputPersonCustomer = $('[name=person_customer]');
+		this.elCourtDistrict = $('[name=court_district]');
+		this.elCourtDistrictComplemt = $('[name=court_district_complement]');
+		this.elCity = $('[name=city]');
+		this.onChangeCity();
+		this.onChangeCourtDistrict();
 
 	}
 
@@ -15,6 +20,14 @@ class TaskBulkCreate {
             this.elInputPersonCustomer.attr('data-value-txt', data.dataValueTxt);
             this.elInputPersonCustomer.val(data.dataValueTxt);
         }
+    }
+
+    get city() {
+	    return this.elCity.val();
+    }
+
+    get courtDistrict() {
+	    return this.elCourtDistrict.val();
     }
 
     async newPersonCustomer (csrfToken){
@@ -47,20 +60,35 @@ class TaskBulkCreate {
                 type: 'POST',
                 url: '/person_customer/add/',
                 data: data,
-                success: function (result) {
-                    console.log(result);
-                    swal.close();
-                    task.personCustomer = result;
+                success: (result)=>{
+                    this.personCustomer = result;
                 },
-                error: function (request, status, error) {
-                    swal.close();
-                    showToast('error', 'Atenção', result.errors, 0, false);
+                error: (request, status, error)=>{
+                    showToast('error', 'Atenção', error, 0, false);
                 },
-                beforeSend: function (xhr, settings) {
+                beforeSend: (xhr, settings)=>{
                     xhr.setRequestHeader("X-CSRFToken", csrfToken);
                 },
                 dataType: 'json'
             });
         }
     };
+
+	onChangeCity(){
+	    this.elCity.on('change',()=>{
+            if(this.city) {
+                // a função clearTypeaheadField a seguir é definida como uma variável global no arquivo typeahead.js
+                clearTypeaheadField(this.elCourtDistrict);
+            }
+        });
+    }
+
+	onChangeCourtDistrict(){
+	    this.elCourtDistrict.on('change',()=>{
+            if(this.courtDistrict) {
+                // a função clearTypeaheadField a seguir é definida como uma variável global no arquivo typeahead.js
+                clearTypeaheadField(this.elCity);
+            }
+        });
+    }
 }
