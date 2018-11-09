@@ -41,6 +41,7 @@ from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFIC
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, ImportTaskListForm
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation, TypeTaskMain
+from .report import TaskToPayXlsx
 from task.queries import *    
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
@@ -619,6 +620,28 @@ class ToPayTaskReportView(View):
         messages.add_message(self.request, messages.INFO,
                              "OS's faturadas com sucesso.")
         return JsonResponse({"status": "ok"})
+
+class ToPayTaskReportXlsxView(ToPayTaskReportView):
+    def get(self, request, *args, **kwargs):                
+        self.task_filter = self.filter_class(
+            data=self.request.GET, request=self.request)        
+        tasks = self.get_queryset()            
+        data = []    
+        if request.GET.get("group_by_tasks") == 'E':
+            order = 'office_name, client_name, finished_date'
+        else:
+            order = 'client_name, office_name, finished_date'
+        if tasks:
+            data = get_tasks_to_pay(task_ids=list(tasks.values_list('pk', flat=True)), order=order)
+        report = TaskToPayXlsx(data)                
+        output = report.get_report()
+        filename = 'os_pagar.xlsx'                
+        response = HttpResponse(
+            output,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=%s' % filename
+        return response
 
 class ToPayTaskReportTemplateView(TemplateView):
     template_name = 'task/reports/to_pay.html'

@@ -1,6 +1,7 @@
 // Classe base do relatorio que deve ser herdada
 class ReportToPay {
-	constructor() {				
+	constructor() {		
+		this.btnDownloadXlsx = $('#btn-download-xlsx');
 		this.elTableBody = $('#os-table-body');
 		this.elTableFoot = $('#os-table-foot');
 		this.elBtnBilling = $('#btn-billing');		
@@ -14,7 +15,14 @@ class ReportToPay {
 	    this.htmlTable = ``;
 	    this.elInputClient = $('[name=client]');	    
 
-	}
+	}	
+
+	showBtnDownloadXlsxFile() {
+		this.btnDownloadXlsx.show()
+		this.btnDownloadXlsx.on('click', ()=>{
+			this.getXlsx()
+		})
+	}	
 
 	getBillingDate(billingData) {
 	    if (!billingData) {
@@ -124,6 +132,42 @@ class ReportToPay {
 	        dataType: 'json', 	        
 		});
 		return JSON.parse(response);
+	}
+
+	getXlsx() {
+		swal({
+			title: 'Gerando excel', 
+			html: 'Aguarde',
+			onOpen: ()=>{
+				swal.showLoading()
+			}
+		})
+		let request = new XMLHttpRequest();
+		let fileName = 'os-a-pagar.xlsx'
+		let params = $.param(this.query)
+		let url = `/relatorios/os-a-pagar-xlsx?${params}` 
+		request.open('GET', url, true);
+		request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+		request.responseType = 'blob';
+		request.onload = function(e) {
+		    if (this.status === 200) {
+		        var blob = this.response;
+		        if(window.navigator.msSaveOrOpenBlob) {
+		            window.navigator.msSaveBlob(blob, fileName);
+		        }
+		        else{
+		            var downloadLink = window.document.createElement('a');
+		            var contentTypeHeader = request.getResponseHeader("Content-Type");
+		            downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: contentTypeHeader }));
+		            downloadLink.download = fileName;
+		            document.body.appendChild(downloadLink);
+		            downloadLink.click();
+		            document.body.removeChild(downloadLink);
+		           }
+		       }
+		       swal.close()
+		   };
+		   request.send();				
 	}
 
 	getSpanClientRefunds(clientRefunds) {
@@ -342,6 +386,7 @@ class ReportToPayGroupByOffice extends ReportToPay {
 		this.startOnCheckAllItems();
 		this.startOnCheckItem();
 		this.startOnClickBtnBilling();
+		this.showBtnDownloadXlsxFile();
 	}
 }
 
@@ -449,5 +494,6 @@ class ReportToPayGroupByClient extends ReportToPay {
 		this.startOnCheckAllItems();
 		this.startOnCheckItem();
 		this.startOnClickBtnBilling();
+		this.showBtnDownloadXlsxFile();
 	}	
 }
