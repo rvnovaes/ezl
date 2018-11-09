@@ -27,10 +27,6 @@
                 <div class="panel-body">
                     <fieldset>
                         <div class="row">
-                            {% bootstrap_field form.person_asked_by form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
-                            {% bootstrap_field form.person_company_representative form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
-                        </div>
-                        <div class="row">
                             {% bootstrap_field form.type_task form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
                             {% bootstrap_field form.law_suit_number form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
                         </div>
@@ -48,6 +44,7 @@
                             {% bootstrap_field form.court_district_complement form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
                         </div>
                         <div class="row">
+                            {{ default_customer }}
                             {% bootstrap_field form.person_customer form_group_class="form-group col-sm-9" required_css_class='ezl-required' %}
                         </div>
                         {% include 'ecm/attachments_create.html' %}
@@ -56,6 +53,10 @@
                         </div>
                         <div class="row">
                             {% bootstrap_field form.type_movement form_group_class="form-group col-sm-9" required_css_class='ezl-required' %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field form.person_asked_by form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
+                            {% bootstrap_field form.person_company_representative form_group_class="form-group col-sm-6" required_css_class='ezl-required' %}
                         </div>
                     </fieldset>
                 </div>
@@ -70,3 +71,9 @@
         </div>
     </form>
 {% endblock content %}
+
+{% block extra_scripts %}
+    {{ block.super }}
+    {{ form.media }}
+    <script src="{% static 'task/task-bulk-create.js' %}"></script
+{% endblock %}

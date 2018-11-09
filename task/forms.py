@@ -127,15 +127,16 @@ class TaskBulkCreateForm(TaskCreateForm):
                                           field_related='legal_name',
                                           name='person_customer',
                                           url='/client_form'))
-    folder_number = forms.CharField(widget=forms.TextInput(), required=False)
+    folder_number = forms.CharField(widget=forms.TextInput(), required=False, label='Nº da Pasta')
     type_movement = forms.ModelChoiceField(required=False,
                                            queryset=filter_valid_choice_form(TypeMovement.objects.filter(
                                                is_active=True)).order_by('name'),
                                            empty_label=u"Selecione...",
-    )
+                                           label='Tipo de Movimentação')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        office = get_office_session(self.request)
         if self.fields['person_asked_by'].initial:
             self.fields['person_asked_by'].widget = forms.HiddenInput()
         self.fields['performance_place'].widget = forms.HiddenInput()

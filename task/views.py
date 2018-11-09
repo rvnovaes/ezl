@@ -72,6 +72,12 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
     success_message = CREATE_SUCCESS_MESSAGE
     template_name_suffix = '_bulk_create_form'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        office = get_office_session(self.request)
+        context['default_customer'] = office.customsettings.default_customer if office.customsettings else None
+        return context
+
     def form_valid(self, form):
         task = form.instance
         form.instance.movement_id = self.request.POST['movement']
