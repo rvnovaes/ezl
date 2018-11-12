@@ -23,7 +23,7 @@ class DateTimeFormatCell(BaseFormatCell):
 class MoneyFormatCell(BaseFormatCell):
     def __init__(self, workbook):
         super().__init__(workbook)
-        self.cell_format.num_format = 'R$#.##0'
+        self.cell_format.num_format = 'R$#.#0'
 
 def format_boolean(value):
     if value:

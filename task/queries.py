@@ -16,7 +16,7 @@ def get_tasks_to_pay(task_ids, order):
 			client.id as client_id, 
 			client.legal_name as client_name,
 			parent.task_number as parent_task_number, 
-			task.finished_date, 
+			parent.finished_date, 
 			type_task.name as type_task,			
 			lawsuit.law_suit_number as lawsuit_number, 
 			court_district.name as court_district, 

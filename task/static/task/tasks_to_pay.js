@@ -39,7 +39,7 @@ class ReportToPay {
 
 	formatLocalDateTime(strDate) {
 	    let date = new Date(strDate);
-	    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+	    return `${date.toLocaleString("pt-BR")}`;
 	}
 
 	get formData() {
@@ -205,7 +205,7 @@ class ReportToPay {
 	                <td>${task.opposing_party}</td>
 	                <td>${this.setDefaultOfNull(task.task_legacy_code)}</td>
 	                <td>${this.getBillingDate(task.billing_date)}</td>
-	                <td class="text-center"><center>${task.amount}</center></td>
+	                <td class="text-center"><center>${this.formatMoney(task.amount)}</center></td>
 	            </tr>            `
 	}
 
@@ -213,7 +213,7 @@ class ReportToPay {
 	    return `
 	        <tr class="total-container">
 	            <th colspan="10" class="text-right" >Total Geral (R$)</th>
-	            <th colspan="2" class="text-right">${this.totalToPay.toFixed(2)}</th>
+	            <th colspan="2" class="text-right">${this.formatMoney(this.totalToPay.toFixed(2))}</th>
 	        </tr>`
 		};   	
 
@@ -231,6 +231,10 @@ class ReportToPay {
 		} else {
 			instance[key] += parseFloat(value)
 		}
+	}
+
+	formatMoney(value) {
+		return parseFloat(value).toLocaleString("pt-BR", { style: "currency" , currency:"BRL"})
 	}
 
 	async mountTable(data){		
@@ -348,13 +352,13 @@ class ReportToPayGroupByOffice extends ReportToPay {
 
 	async replaceTotalByOffice(){
 		Object.keys(this.totalByOffice).forEach((key)=>{
-			this.htmlTable = this.htmlTable.replace(`|office=${key}|`, `${this.totalByOffice[key].toFixed(2)}`)			
+			this.htmlTable = this.htmlTable.replace(`|office=${key}|`, `${this.formatMoney(this.totalByOffice[key].toFixed(2))}`)			
 		})
 	}
 
 	async replaceTotalClientByOffice(){
 		Object.keys(this.totalClientByOffice).forEach((key)=>{
-			this.htmlTable = this.htmlTable.replace(`|client=${key}|`, `${this.totalClientByOffice[key].toFixed(2)}`)			
+			this.htmlTable = this.htmlTable.replace(`|client=${key}|`, `${this.formatMoney(this.totalClientByOffice[key].toFixed(2))}`)			
 		})
 	}	
 
@@ -455,14 +459,14 @@ class ReportToPayGroupByClient extends ReportToPay {
 
 	async replaceTotalByClient(){
 		Object.keys(this.totalByClient).forEach((key)=>{
-			this.htmlTable = this.htmlTable.replace(`|client=${key}|`, `${this.totalByClient[key].toFixed(2)}`)			
+			this.htmlTable = this.htmlTable.replace(`|client=${key}|`, `${this.formatMoney(this.totalByClient[key].toFixed(2))}`)			
 		})
 	}
 
 
 	async replaceTotalOfficeByClient(){
 		Object.keys(this.totalOfficeByClient).forEach((key)=>{
-			this.htmlTable = this.htmlTable.replace(`|office=${key}|`, `${this.totalOfficeByClient[key].toFixed(2)}`)			
+			this.htmlTable = this.htmlTable.replace(`|office=${key}|`, `${this.formatMoney(this.totalOfficeByClient[key].toFixed(2))}`)			
 		})
 	}
 

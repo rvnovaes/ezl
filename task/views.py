@@ -554,16 +554,16 @@ class ToPayTaskReportView(View):
                 else:
                     query.add(
                         Q(office__name__unaccent__icontains=data['office']),
-                        Q.AND)
+                        Q.AND)            
 
             if data['finished_in']:
                 if data['finished_in'].start:
                     finished_query.add(
-                        Q(finished_date__gte=data['finished_in'].start.replace(
+                        Q(parent__finished_date__gte=data['finished_in'].start.replace(
                             hour=0, minute=0)), Q.AND)
                 if data['finished_in'].stop:
                     finished_query.add(
-                        Q(finished_date__lte=data['finished_in'].stop.replace(
+                        Q(parent__finished_date__lte=data['finished_in'].stop.replace(
                             hour=23, minute=59)), Q.AND)
 
             if 'refunds_correspondent_service' in data and data['refunds_correspondent_service']:
