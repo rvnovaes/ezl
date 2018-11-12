@@ -18,11 +18,12 @@ logger = logging.getLogger(__name__)
 
 
 def get_task_attachment(self, form):
+    state = form.instance.court_district.state if form.instance.court_district else None
     attachmentrules = DefaultAttachmentRule.objects.filter(
         Q(office=get_office_session(self.request)),
         Q(Q(type_task=form.instance.type_task) | Q(type_task=None)),
         Q(Q(person_customer=form.instance.client) | Q(person_customer=None)),
-        Q(Q(state=form.instance.court_district.state) | Q(state=None)),
+        Q(Q(state=state) | Q(state=None)),
         Q(
             Q(court_district=form.instance.court_district)
             | Q(court_district=None)),

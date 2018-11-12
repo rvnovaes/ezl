@@ -53,6 +53,7 @@ try:
     email_host_user = source['email_host_user']
     email_host_password = source['email_host_password']
     email_default_from_email = source['email_default_from_email']
+    email_default_to_email = source.get('email_default_to_email', None)
     linux_password = source_etl['linux_password']
     linux_user = source_etl['linux_user']
 
@@ -314,6 +315,7 @@ EMAIL_PORT = email_port
 EMAIL_HOST_USER = email_host_user
 EMAIL_HOST_PASSWORD = email_host_password
 DEFAULT_FROM_EMAIL = email_default_from_email
+DEFAULT_TO_EMAIL = email_default_to_email
 
 INTERNAL_IPS = '127.0.0.1'
 PROJECT_NAME = 'Easy Lawyer'
