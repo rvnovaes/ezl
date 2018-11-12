@@ -25,8 +25,8 @@ from core.views import remove_invalid_registry, PopupMixin
 from django.core.cache import cache
 from dal import autocomplete
 from django.db.models import Q
-
 from core.views import CustomLoginRequiredView, TypeaHeadGenericSearch
+from core.utils import get_office_session
 
 
 class InstanceListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -820,27 +820,42 @@ class FolderAutocomplete(TypeaHeadGenericSearch):
         return list(data)
 
 
-class LawsuitAutocomplete(autocomplete.Select2QuerySetView):
+class FolderSelect2Autocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Folder.objects.none()
-
+        qs = Folder.objects.get_queryset(office=[get_office_session(self.request).id])
         if self.q:
-            filters = Q(person_lawyer__name__unaccent__istartswith=self.q)
-            filters |= Q(law_suit_number__startswith=self.q)
-            qs = LawSuit.objects.filter(is_active=True).filter(filters)
+            filters = Q(person_customer__legal_name__unaccent__istartswith=self.q)
+            filters |= Q(folder_number__startswith=self.q)
+            qs = qs.filter(is_active=True).filter(filters)
         return qs
 
     def get_result_label(self, result):
-        return "{} - {}".format(result.law_suit_number,
-                                result.person_lawyer.name)
+        return "{} - {}".format(result.folder_number,
+                                result.person_customer.legal_name)
+
+
+class LawsuitAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = LawSuit.objects.get_queryset(office=[get_office_session(self.request).id])
+        if self.q:
+            filters = Q(court_district__name__unaccent__icontains=self.q)
+            filters |= Q(law_suit_number__icontains=self.q)
+            qs = qs.filter(is_active=True).filter(filters)
+        return qs
+
+    def get_result_label(self, result):
+        ret = "{}".format(result.law_suit_number)
+        if result.court_district:
+            ret = "{} - {}".format(ret, result.court_district.name)
+        return ret
 
 
 class MovementAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Movement.objects.none()
+        qs = Movement.objects.get_queryset(office=[get_office_session(self.request).id])
 
         if self.q:
-            qs = Movement.objects.filter(
+            qs = qs.filter(
                 is_active=True,
                 type_movement__name__unaccent__icontains=self.q)
         return qs

@@ -1699,6 +1699,30 @@ class ClientAutocomplete(TypeaHeadGenericSearch):
         return list(data)
 
 
+class ClientSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Person.objects.all().filter(offices=get_office_session(self.request), is_customer=True, is_active=True)
+
+        if self.q:
+            qs = qs.filter(legal_name__unaccent__icontains=self.q)
+        return qs
+
+    def get_result_label(self, result):
+        return result.legal_name
+
+
+class PersonCompanyRepresentativeSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Person.objects.all().filter(offices=get_office_session(self.request), legal_type='F', is_active=True)
+
+        if self.q:
+            qs = qs.filter(legal_name__unaccent__icontains=self.q)
+        return qs
+
+    def get_result_label(self, result):
+        return result.legal_name
+
+
 class OfficeAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params):

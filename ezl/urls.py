@@ -8,12 +8,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 from core import views_api
 from core.views import (
-    ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView,
-    PasswordResetViewMixin, CorrespondentAutocomplete, RequesterAutocomplete,
-    ServiceAutocomplete, EditableListSave, PopupSuccessView,
+    ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin,
+    CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave, PopupSuccessView,
     OfficeAutocomplete, OfficeCorrespondentAutocomplete, OriginRequesterAutocomplete)
 from django.conf import settings
-from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView
+from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, \
+    TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView
 from rest_framework_swagger.views import get_swagger_view
 
 schema_view = get_swagger_view(title='API para integração com o Ezlawyer')

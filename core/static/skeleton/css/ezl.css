@@ -661,3 +661,6 @@ fieldset[disabled] .btn-ezl-error.active {
     color: red;
 }
 
+.col-sm-3-batch-form {
+    width: 19.5%;
+}

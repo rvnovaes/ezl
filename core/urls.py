@@ -200,5 +200,11 @@ urlpatterns = [
         name='custom_settings_update'),
     url(r'^person_customer/add/$',
         login_required(views.PersonCustomerCreateTaskBulkCreate.as_view()),
-        name='person_customer_add')
+        name='person_customer_add'),
+    url(r'^get_client_2/$',
+        views.ClientSelect2Autocomplete.as_view(),
+        name='get_client_2'),
+    url(r'^get_person_company_representative_2/$',
+        views.PersonCompanyRepresentativeSelect2Autocomplete.as_view(),
+        name='get_person_company_representative_2')
 ]

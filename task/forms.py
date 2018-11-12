@@ -6,9 +6,9 @@ from django_file_form.forms import MultipleUploadedFileField
 
 from core.models import Person, ImportXlsFile
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
-from core.widgets import MDDateTimepicker, MDDatePicker, TypeaHeadForeignKeyWidget
+from core.widgets import MDDateTimepicker, MDDatePicker, TypeaHeadForeignKeyWidget, MDSelect
 from core.forms import BaseForm, XlsxFileField
-from lawsuit.models import CourtDistrict, CourtDistrictComplement, City, TypeMovement
+from lawsuit.models import CourtDistrict, CourtDistrictComplement, City, Movement, LawSuit, Folder
 from task.models import Task, TypeTask, Filter, TaskStatus, TypeTaskMain, TaskSurveyAnswer
 from task.resources import COLUMN_NAME_DICT
 from task.widgets import code_mirror_schema
@@ -96,7 +96,9 @@ class TaskCreateForm(TaskForm):
 
 
 class TaskBulkCreateForm(TaskCreateForm):
-    law_suit_number = forms.CharField(max_length=255, required=True)
+    law_suit_number = forms.ModelChoiceField(label='Número do processo',
+                                             widget=MDSelect(url='/processos/lawsuit_autocomplete', ),
+                                             queryset=LawSuit.objects.none())
     court_district = forms.CharField(label='Comarca',
                                      required=False,
                                      widget=TypeaHeadForeignKeyWidget(
@@ -120,19 +122,22 @@ class TaskBulkCreateForm(TaskCreateForm):
                                                     name='court_district_complement',
                                                     url='/processos/typeahead/search/complemento',
                                                 ))
-    person_customer = forms.CharField(label="Cliente/Parte",
-                                      required=True,
-                                      widget=TypeaHeadForeignKeyWidget(
-                                          model=Person,
-                                          field_related='legal_name',
-                                          name='person_customer',
-                                          url='/client_form'))
-    folder_number = forms.CharField(widget=forms.TextInput(), required=False, label='Nº da Pasta')
-    type_movement = forms.ModelChoiceField(required=False,
-                                           queryset=filter_valid_choice_form(TypeMovement.objects.filter(
-                                               is_active=True)).order_by('name'),
-                                           empty_label=u"Selecione...",
-                                           label='Tipo de Movimentação')
+    person_customer = forms.ModelChoiceField(label='Cliente/Parte',
+                                             required=True,
+                                             widget=MDSelect(url='/get_client_2', ),
+                                             queryset=Folder.objects.none())
+    folder_number = forms.ModelChoiceField(label='Nº da Pasta',
+                                           required=False,
+                                           widget=MDSelect(url='/processos/folder_autocomplete_2', ),
+                                           queryset=Folder.objects.none())
+    type_movement = forms.ModelChoiceField(label='Tipo de Movimentação',
+                                           required=False,
+                                           widget=MDSelect(url='/processos/movement_autocomplete', ),
+                                           queryset=Movement.objects.none())
+    person_company_representative = forms.ModelChoiceField(label='Preposto',
+                                                           required=False,
+                                                           widget=MDSelect(url='/get_person_company_representative_2', ),
+                                                           queryset=Person.objects.none())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
