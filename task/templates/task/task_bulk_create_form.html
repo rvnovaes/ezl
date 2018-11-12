@@ -31,30 +31,30 @@
                                 {% bootstrap_field form.type_task form_group_class="col-sm-12 p-0" required_css_class='' layout='horizontal' label_class="ezl-required p-0 col-sm-4" field_class="p-0 col-sm-8" %}
                             </div>
                             <div class="col-sm-6 p-r-0">
-                                {% bootstrap_field form.law_suit_number addon_after='<button id="btn_add_person_customer" type="button" class="btn btn-lg-custom btn-raised btn-primary" title="Adicionar Cliente/Parte"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10' form_group_class="col-sm-11 p-0" layout='horizontal' label_class="p-0 col-sm-4" field_class="p-l-0 p-r-5 col-sm-8" %}
+                                {% bootstrap_field form.law_suit_number addon_after='<button id="" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Cliente/Parte"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10' form_group_class="col-sm-11 p-0" layout='horizontal' label_class="p-0 col-sm-4" field_class="p-l-0 p-r-5 col-sm-8" %}
                             </div>
                         </div>
                         <div class="row p-b-10">
                             <div class="col-sm-12 p-r-0">
-                                {% bootstrap_field form.description layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
+                                {% bootstrap_field form.description layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-10 p-l-0' %}
                             </div>
                         </div>
                         <div class="row p-b-10">
                             <div class="col-sm-12 p-r-0">
-                                {% bootstrap_field form.final_deadline_date layout='horizontal' label_class='col-sm-2 control-label ezl-required p-0' field_class='col-sm-9 p-l-0' %}
+                                {% bootstrap_field form.final_deadline_date layout='horizontal' addon_after='(Mínimo de 48h)' addon_after_class='input-group-addon addon-txt' label_class='col-sm-2 control-label ezl-required p-0' field_class='col-sm-6 p-l-0' %}
                             </div>
                         </div>
                         <div class="panel panel-default block2">
                             <div class="panel-heading p-l-0 p-t-0 p-b-0 ezl-required"><a href="#" data-perform="panel-collapse">Informar a comarca ou a cidade</a>
                             </div>
-                            <div class="panel-wrapper collapse" aria-expanded="True" style="">
+                            <div class="panel-wrapper collapse in" aria-expanded="true" style="">
                                 <div class="panel-body p-l-0 p-b-0 p-r-0">
                                     <div class="row p-b-10">
                                         <div class="col-sm-6 p-r-0">
                                             {% bootstrap_field form.court_district form_group_class="col-sm-12 p-0" layout='horizontal' label_class="p-0 col-sm-4" field_class="p-0 col-sm-8" %}
                                         </div>
                                         <div class="col-sm-6 p-r-0">
-                                            {% bootstrap_field form.city form_group_class="col-sm-12 p-0" required_css_class='' layout='horizontal' label_class="p-0 col-sm-4" field_class="p-0 col-sm-8" %}
+                                            {% bootstrap_field form.city form_group_class="col-sm-12 p-0" required_css_class='' layout='horizontal' label_class="p-0 col-sm-4" field_class="p-l-0 p-r-5 col-sm-8" %}
                                         </div>
                                     </div>
                                     <div class="row p-b-10">
@@ -64,7 +64,7 @@
                                     </div>
                                     <div class="row p-b-10">
                                         <div class="col-sm-12 p-r-0">
-                                            {% bootstrap_field form.person_customer layout='horizontal' addon_after='<button id="btn_add_person_customer" type="button" class="btn btn-lg-custom btn-raised btn-primary" title="Adicionar Cliente/Parte"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10' form_group_class="col-sm-12 p-0" label_class='col-sm-2 ezl-required p-0' field_class='col-sm-8 p-0' %}
+                                            {% bootstrap_field form.person_customer layout='horizontal' addon_after='<button id="btn_add_person_customer" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Cliente/Parte"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10' form_group_class="col-sm-12 p-0" label_class='col-sm-2 ezl-required p-0' field_class='col-sm-8 p-0' %}
                                         </div>
                                     </div>
                                 </div>
@@ -82,16 +82,16 @@
                         <div class="panel panel-default block2">
                             <div class="panel-heading p-l-0 p-t-0 p-b-0"><a href="#" data-perform="panel-collapse">Mais informações</a>
                             </div>
-                            <div class="panel-wrapper collapse" aria-expanded="True" style="">
+                            <div class="panel-wrapper collapse" aria-expanded="false" style="">
                                 <div class="panel-body p-l-0 p-b-0 p-r-0">
                                     <div class="row p-b-10">
-                                        <div class="col-sm-12 p-r-0">
-                                            {% bootstrap_field form.folder_number addon_after='<button id="btn_add_person_customer" type="button" class="btn btn-lg-custom btn-raised btn-primary" title="Adicionar Cliente/Parte"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10'  layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
+                                        <div class="col-sm-12 p-r-0 btn-raised">
+                                            {% bootstrap_field form.folder_number addon_after='<button id="" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Cliente/Parte"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10'  layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
                                         </div>
                                     </div>
                                     <div class="row p-b-10">
                                         <div class="col-sm-12 p-r-0">
-                                            {% bootstrap_field form.type_movement addon_after='<button id="btn_add_person_customer" type="button" class="btn btn-lg-custom btn-raised btn-primary" title="Adicionar Cliente/Parte"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10'  layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
+                                            {% bootstrap_field form.type_movement addon_after='<button id="" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Cliente/Parte"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10'  layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
                                         </div>
                                     </div>
                                     <div class="row p-b-10">
@@ -142,4 +142,22 @@
 {% block extra_stylesheets %}
     <link href="/static/autocomplete_light/vendor/select2/dist/css/select2.css" type="text/css" media="all" rel="stylesheet" />
     <link href="/static/autocomplete_light/select2.css" type="text/css" media="all" rel="stylesheet" />
+    <style>
+    .input-group {
+        width: 100% !important;
+        line-height: 38px !important;
+    }
+    button.btn-select2 {
+        width: 38px !important;
+        height: 38px !important;
+        padding: 6px 10px !important;
+    }
+    .addon-txt {
+        background-color: #ffffff !important;
+        border: none !important;
+    }
+    .btn-primary {
+        border-radius: 3px !important;
+    }
+    </style>
 {% endblock %}

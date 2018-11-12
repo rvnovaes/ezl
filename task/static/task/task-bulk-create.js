@@ -14,11 +14,9 @@ class TaskBulkCreate {
     }
 
     set personCustomer(data) {
-	    if(data.id && data.dataValueTxt) {
-            this.elInputPersonCustomer.attr('value', data.id);
-            this.elInputPersonCustomer.attr('data-value', data.id);
-            this.elInputPersonCustomer.attr('data-value-txt', data.dataValueTxt);
-            this.elInputPersonCustomer.val(data.dataValueTxt);
+	    if(data.id && data.text) {
+	        var newOption = new Option(data.text, data.id, true, true);
+            this.elInputPersonCustomer.append(newOption).trigger('change');
         }
     }
 

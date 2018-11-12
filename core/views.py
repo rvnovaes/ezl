@@ -1774,6 +1774,7 @@ class RequesterAutocomplete(TypeaHeadGenericSearch):
             })
         return list(data)
 
+
 class OriginRequesterAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params, extra_params,
@@ -1786,6 +1787,7 @@ class OriginRequesterAutocomplete(TypeaHeadGenericSearch):
                 'data-value-txt': office_correspondent.__str__()
             })
         return list(data)
+
 
 class ServiceAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
@@ -2212,9 +2214,10 @@ class PersonCustomerCreateTaskBulkCreate(View):
         status = 200
         if form.is_valid():
             form.instance.create_user = create_user
+            form.instance.is_active = True
             instance = form.save()
             create_person_office_relation(instance, self.request.user, office_session)
-            data = {'id': instance.id, 'dataValueTxt': instance.legal_name}
+            data = {'id': instance.id, 'text': instance.legal_name}
         else:
             status = 500
             data = {'error': True, 'errors': []}
