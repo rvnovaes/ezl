@@ -4,6 +4,7 @@ from django.template.loader import render_to_string
 from ecm.models import DefaultAttachmentRule, Attachment
 from task.workflow import get_child_recipients
 from task.models import *
+from task.serializers import *
 from task.mail import SendMail
 from task.rules import RuleViewTask
 from core.utils import get_office_session
@@ -179,3 +180,10 @@ def delegate_child_task(object_parent, office_correspondent):
     new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
     new_task.save()
     clone_task_ecms(object_parent, new_task)
+
+
+def get_offices_to_pay(tasks):
+    return [OfficeToPaySerializer(task.office).data for task in tasks]    
+
+def get_clients_to_pay():
+    pass

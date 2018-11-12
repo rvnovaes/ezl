@@ -50,7 +50,7 @@ class EcmETL:
             tabela_or = 'Agenda'
             codigo_OR = ecm.task.legacy_code
             id_OR = 0
-            link = '\\' + "\\172.27.155.11\ged_advwin$\Agenda\\" + str(codigo_OR) + "\\" + nome + ""
+            link = '\\' + "\\192.168.249.15\ged_advwin$\Agenda\\" + str(codigo_OR) + "\\" + nome + ""
             # data = '2015-09-30 09:08:18.580'
             data = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
             arq_tipo = os.path.splitext(str(ecm.path))[1][1:]
