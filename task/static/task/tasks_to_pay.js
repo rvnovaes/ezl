@@ -262,8 +262,8 @@ class ReportToPay {
 
 	async start(){
 		swal({
-	        title: 'Carregando Ordens', 
-	        html: '<h3>Carregando <strong></strong></h3>',
+	        title: "Carregando OS's",
+	        html: '<h3>Aguarde... <strong></strong></h3>',
 	        onOpen: ()=> {
 	        	swal.showLoading()
 	        }
