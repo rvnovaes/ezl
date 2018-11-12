@@ -116,7 +116,7 @@
                 var servicePriceTable = servicePrices[taskId];
                 $('#type-task').append(servicePriceTable.task.type_task.name);
                 if (!correspondentTable) {
-                    var correspondentTable = $('#table-service-price')
+                    correspondentTable = $('#table-service-price')
                         .DataTable({
                             destroy: true,
                             paging: false,
@@ -154,7 +154,7 @@
                 $('#table-service-price tbody tr').on('click', function() {
                     $(this).addClass("ezl-bg-open");
                     $(this).siblings().removeClass("ezl-bg-open");
-                    amount = correspondentTable.row(this).data()[5];
+                    amount = correspondentTable.row(this).data()[6];
                     $('#value').val(amount.replace(".", ","));
                     $('#value').focus();
 
@@ -177,7 +177,6 @@
                     var taskId = $(this).attr('task-id');
                     chosenPrice.note =  $('#note').val();
                     servicePrices[taskId]['chosenPrice'] = chosenPrice;
-                    console.log(servicePrices[taskId]);
                     correspondentTable.clear().draw(false);
                     correspondentTable.search('').draw(false);
                     $('#type-task').empty();
