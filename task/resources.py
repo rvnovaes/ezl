@@ -17,14 +17,18 @@ from task.utils import self_or_none
 from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, \
     AcceptanceServiceDateWidget
 from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative, TypeTaskByWidget
+import logging
+
 
 TRUE_FALSE_DICT = {'V': True, 'F': False}
+
+logger = logging.getLogger('resources')
 
 COLUMN_NAME_DICT = {
     'system_prefix': {
         'column_name': 'sistema',
         'attribute': 'system_prefix',
-        'required': True,
+        'required': False,
         'verbose_name': Task._meta.get_field('system_prefix').verbose_name,
     },
     'folder_number': {
@@ -303,7 +307,7 @@ class TaskResource(resources.ModelResource):
         """
         return TaskResult
 
-    def validate_folder(self, row, row_errors):
+    def validate_folder(self, row, row_errors):        
         folder_number = int(row['folder_number']) if self_or_none(row['folder_number']) else None
         folder_legacy_code = row['folder_legacy_code']
         cost_center = row['folder_cost_center']
@@ -330,7 +334,7 @@ class TaskResource(resources.ModelResource):
                 folder = Folder.objects.filter(folder_number=folder_number,
                                                office=self.office).first()
             if not folder and person_customer:
-                folder = Folder.objects.get_or_create(person_customer=person_customer,
+                folder, created  = Folder.objects.get_or_create(person_customer=person_customer,
                                                       office=self.office,
                                                       legacy_code=folder_legacy_code,
                                                       folder_number=folder_number,
@@ -359,7 +363,7 @@ class TaskResource(resources.ModelResource):
                     system_prefix=row['system_prefix'],
                     folder=self.folder,
                     office_id=self.office_id).first()
-            if not lawsuit and lawsuit_number:
+            if not lawsuit and lawsuit_number:                                
                 lawsuit = LawSuit.objects.filter(
                     law_suit_number=lawsuit_number,
                     folder=self.folder,
@@ -407,7 +411,7 @@ class TaskResource(resources.ModelResource):
                     legal_name__unaccent__iexact=organ).first()
                 if not organ:
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_organ')])
-            opposing_party = row.get('lawsuit_opposing_party', '')
+            opposing_party = row.get('lawsuit_opposing_party', '')            
             if not row_errors:
                 if not lawsuit:
                     lawsuit = LawSuit.objects.create(type_lawsuit=TypeLawsuit(type_lawsuit).name,
@@ -443,6 +447,7 @@ class TaskResource(resources.ModelResource):
                         lawsuit.organ = organ
                     if opposing_party:
                         lawsuit.opposing_party = opposing_party
+                    lawsuit.is_current_instance = is_current_instance                    
                     lawsuit.save()
         if not lawsuit:
             row_errors.append(RECORD_NOT_FOUND.format(LawSuit._meta.verbose_name))
@@ -527,7 +532,9 @@ class TaskResource(resources.ModelResource):
             if row_errors:
                 raise Exception(row_errors)
         else:
-            row['movement'] = instance.movement.id
+            row['movement'] = instance.movement.id            
+            if not row['performance_place']:
+                row['performance_place'] = instance.performance_place
 
     def after_import_row(self, row, row_result, **kwargs):
         line_warnings = row['warnings']
