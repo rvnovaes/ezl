@@ -75,6 +75,9 @@ urlpatterns = [
     url(r'^processos/excluir$',
         login_required(views.LawSuitDeleteView.as_view()),
         name='lawsuit_delete'),
+    url(r'processos/task_bulk_create/$',
+        login_required(views.LawSuitCreateTaskBulkCreate.as_view()),
+        name='lawsuit_task_bulk_create'),
 
     # Movimentacao
     url(r'^movimentacao/listar/$',

@@ -4,6 +4,7 @@ class TaskBulkCreate {
 		this.elCourtDistrict = $('[name=court_district]');
 		this.elCourtDistrictComplemt = $('[name=court_district_complement]');
 		this.elCity = $('[name=city]');
+		this.elTaskLawsuitNumber = $('[name=task_law_suit_number]');
 		this.onChangeCity();
 		this.onChangeCourtDistrict();
 
@@ -26,6 +27,17 @@ class TaskBulkCreate {
 
     get courtDistrict() {
 	    return this.elCourtDistrict.val();
+    }
+
+    get taskLawSuitNumber() {
+	    return this.elTaskLawsuitNumber.val();
+    }
+
+    set taskLawSuitNumber(data) {
+	    if(data.id && data.text) {
+	        var newOption = new Option(data.text, data.id, true, true);
+            this.elTaskLawsuitNumber.append(newOption).trigger('change');
+        }
     }
 
     async newPersonCustomer (csrfToken){
@@ -70,7 +82,59 @@ class TaskBulkCreate {
                 dataType: 'json'
             });
         }
-    };
+    }
+
+	async newLawSuit (csrfToken, fields) {
+	    var html_fields = '';
+        fields.forEach(function(field){html_fields += field + '\n'});
+	    const {value: formValues} = await swal({
+            title: 'Cadastro de Processo',
+            html: html_fields,
+            width: '30%',
+            focusConfirm: false,
+            showCancelButton: true,
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                let typeLawsuit = document.getElementById("id_type_lawsuit").value;
+                let lawsuitNumber = document.getElementById("id_law_suit_number").value;
+                if (!typeLawsuit || !lawsuitNumber) {
+                    swal.showValidationMessage('Campos obrigatórios não foram informados');
+                    return false;
+                }else if(!document.getElementById('id_person_customer').value){
+                    swal.showValidationMessage('Favor selecionar um cliente');
+                    return false;
+                }else{
+                    return {
+                        typeLawsuit: typeLawsuit,
+                        lawsuitNumber: lawsuitNumber
+                    };
+                }
+            },
+        });
+
+        if (formValues) {
+            let data = {'type_lawsuit': formValues.typeLawsuit,
+                    'law_suit_number': formValues.lawsuitNumber,
+                    'person_customer': document.getElementById('id_person_customer').value,
+                    'folder_id': document.getElementById('id_folder_number').value
+                };
+            $.ajax({
+                type: 'POST',
+                url: '/processos/processos/task_bulk_create/',
+                data: data,
+                success: (result)=>{
+                    this.taskLawSuitNumber = result;
+                },
+                error: (request, status, error)=>{
+                    showToast('error', 'Atenção', error, 0, false);
+                },
+                beforeSend: (xhr, settings)=>{
+                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                },
+                dataType: 'json'
+            });
+        }
+    }
 
 	onChangeCity(){
 	    this.elCity.on('change',()=>{

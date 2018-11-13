@@ -1,12 +1,15 @@
+import json
 from urllib.parse import urlparse
 
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.validators import ValidationError
+from django.views.generic import View
 # project imports
 from django.db.models import ProtectedError
 from django.http import HttpResponseRedirect
+from django.http.response import JsonResponse
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
@@ -964,3 +967,46 @@ class TypeaHeadCourtDistrictComplementSearch(TypeaHeadGenericSearch):
                 'data-extra-params': complement.court_district.state.id
             })
         return list(data)
+
+
+class LawSuitCreateTaskBulkCreate(View):
+
+    def get_folder(self, office, folder_id=None):
+        if not folder_id:
+            person_customer_id = self.request.POST['person_customer']
+            folder, created = Folder.objects.get_or_create(office=office,
+                                                           is_default=True,
+                                                           person_customer_id=person_customer_id,
+                                                           defaults={'is_active': True,
+                                                                     'create_user': self.request.user})
+            return folder
+        else:
+            return Folder.objects.filter(office=office, id=folder_id).first()
+
+    def post(self, *args, **kwargs):
+        errors = []
+        create_user = self.request.user
+        office_session = get_office_session(self.request)
+        folder_id = self.request.POST['folder_id']
+        folder = self.get_folder(office_session, folder_id)
+        if not folder:
+            errors.append('Este escritório não possui pasta padrão configurado')
+        law_suit_number = self.request.POST['law_suit_number']
+        type_lawsuit = self.request.POST['type_lawsuit']
+
+        status = 200
+        if not errors:
+            instance = LawSuit.objects.create(create_user=create_user,
+                                              office=office_session,
+                                              folder=folder,
+                                              law_suit_number=law_suit_number,
+                                              type_lawsuit=type_lawsuit,
+                                              is_active=True)
+            data = {'id': instance.id, 'text': instance.__str__()}
+        else:
+            status = 500
+            data = {'error': True, 'errors': []}
+            for error in errors:
+                data['errors'].append(error)
+
+        return JsonResponse(json.loads(json.dumps(data)), status=status)

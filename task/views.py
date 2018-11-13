@@ -30,6 +30,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
     DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
 from core.models import Person, CorePermissions, CustomSettings
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
+from lawsuit.forms import LawSuitForm
 from lawsuit.models import Movement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, \
@@ -76,9 +77,10 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         context = super().get_context_data(**kwargs)
         office = get_office_session(self.request)
         context['default_customer'] = None
+        context['lawsuit_form'] = LawSuitForm()
         if office.customsettings and office.customsettings.default_customer:
             context['default_customer'] = {'id': office.customsettings.default_customer.id,
-                                           'data_value_txt': office.customsettings.default_customer.legal_name}
+                                           'text': office.customsettings.default_customer.legal_name}
         return context
 
     def form_valid(self, form):

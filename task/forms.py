@@ -96,9 +96,9 @@ class TaskCreateForm(TaskForm):
 
 
 class TaskBulkCreateForm(TaskCreateForm):
-    law_suit_number = forms.ModelChoiceField(label='Número do processo',
-                                             widget=MDSelect(url='/processos/lawsuit_autocomplete', ),
-                                             queryset=LawSuit.objects.none())
+    task_law_suit_number = forms.ModelChoiceField(label='Número do processo',
+                                                  widget=MDSelect(url='/processos/lawsuit_autocomplete', ),
+                                                  queryset=LawSuit.objects.none())
     court_district = forms.CharField(label='Comarca',
                                      required=False,
                                      widget=TypeaHeadForeignKeyWidget(

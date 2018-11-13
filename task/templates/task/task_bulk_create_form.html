@@ -31,7 +31,7 @@
                                 {% bootstrap_field form.type_task form_group_class="col-sm-12 p-0" required_css_class='' layout='horizontal' label_class="ezl-required p-0 col-sm-4" field_class="p-0 col-sm-8" %}
                             </div>
                             <div class="col-sm-6 p-r-0">
-                                {% bootstrap_field form.law_suit_number addon_after='<button id="" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Cliente/Parte"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10' form_group_class="col-sm-11 p-0" layout='horizontal' label_class="p-0 col-sm-4" field_class="p-l-0 p-r-5 col-sm-8" %}
+                                {% bootstrap_field form.task_law_suit_number addon_after='<button id="btn_add_lawsuit" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Cliente/Parte"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10' form_group_class="col-sm-11 p-0" layout='horizontal' label_class="p-0 col-sm-4" field_class="p-l-0 p-r-5 col-sm-8" %}
                             </div>
                         </div>
                         <div class="row p-b-10">
@@ -45,7 +45,7 @@
                             </div>
                         </div>
                         <div class="panel panel-default block2">
-                            <div class="panel-heading p-l-0 p-t-0 p-b-0 ezl-required"><a href="#" data-perform="panel-collapse">Informar a comarca ou a cidade</a>
+                            <div class="panel-heading p-l-0 p-t-10 p-b-0 ezl-required"><a href="#" data-perform="panel-collapse">Informar a comarca ou a cidade</a>
                             </div>
                             <div class="panel-wrapper collapse in" aria-expanded="true" style="">
                                 <div class="panel-body p-l-0 p-b-0 p-r-0">
@@ -130,10 +130,17 @@
         var defaultCustomer = {};
         $(document).ready(function(){
             task = new TaskBulkCreate();
-            {% if default_customer %} defaultCustomer = {id: {{ default_customer.id }}, dataValueTxt: "{{ default_customer.data_value_txt }}" }; {% endif %}
+            defaultCustomer = {};
+            {% if default_customer %} defaultCustomer = {id: {{ default_customer.id }}, text: "{{ default_customer.text }}" }; {% endif %}
             task.personCustomer = defaultCustomer;
             $("#btn_add_person_customer").on('click', function () {
                 task.newPersonCustomer('{{ csrf_token }}')
+            });
+            var fields = [];
+            fields.push('{% bootstrap_field_oneline lawsuit_form.type_lawsuit label_class='control-label ezl-required pull-left'  %}');
+            fields.push('{% bootstrap_field lawsuit_form.law_suit_number label_class='control-label ezl-required pull-left' %}');
+            $("#btn_add_lawsuit").on('click', function () {
+                task.newLawSuit('{{ csrf_token }}', fields)
             })
         })
     </script>
