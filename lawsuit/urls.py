@@ -136,6 +136,10 @@ urlpatterns = [
     url(r'^pastas/excluir$',
         login_required(login_required(views.FolderDeleteView.as_view())),
         name='folder_delete'),
+    url(r'^pastas/task_bulk_create/$',
+        login_required(
+            login_required(views.FolderCreateTaskBulkCreate.as_view())),
+        name='folder_add'),
 
     # Orgao
     url(r'^orgaos/$',

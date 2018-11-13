@@ -125,15 +125,22 @@ class TaskBulkCreateForm(TaskCreateForm):
     person_customer = forms.ModelChoiceField(label='Cliente/Parte',
                                              required=True,
                                              widget=MDSelect(url='/get_client_2', ),
-                                             queryset=Folder.objects.none())
+                                             queryset=Person.objects.none())
+    person_customer_swal = forms.CharField(label="Cliente",
+                                           required=False,
+                                           widget=TypeaHeadForeignKeyWidget(model=Person,
+                                                                            field_related='legal_name',
+                                                                            name='person_customer',
+                                                                            url='/client_form'))
+
     folder_number = forms.ModelChoiceField(label='Nº da Pasta',
                                            required=False,
                                            widget=MDSelect(url='/processos/folder_autocomplete_2', ),
                                            queryset=Folder.objects.none())
-    type_movement = forms.ModelChoiceField(label='Tipo de Movimentação',
-                                           required=False,
-                                           widget=MDSelect(url='/processos/movement_autocomplete', ),
-                                           queryset=Movement.objects.none())
+    movement = forms.ModelChoiceField(label='Movimentação',
+                                      required=False,
+                                      widget=MDSelect(url='/processos/movement_autocomplete', ),
+                                      queryset=Movement.objects.none())
     person_company_representative = forms.ModelChoiceField(label='Preposto',
                                                            required=False,
                                                            widget=MDSelect(url='/get_person_company_representative_2', ),

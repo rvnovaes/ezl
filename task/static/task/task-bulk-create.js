@@ -146,6 +146,48 @@ class TaskBulkCreate {
         }
     }
 
+    async newFolder (csrfToken, fields) {
+	    var html_fields = '';
+        fields.forEach(function(field){html_fields += field + '\n'});
+	    const {value: formValues} = await swal({
+            title: 'Cadastro de Pasta',
+            html: html_fields,
+            width: '30%',
+            focusConfirm: false,
+            showCancelButton: true,
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                let personCustomer = document.getElementById("person_customer").dataset.value;
+                if (!personCustomer) {
+                    swal.showValidationMessage('Favor selecionar um Cliente');
+                    return false;
+                }else{
+                    return personCustomer;
+                }
+            },
+        });
+
+        if (formValues) {
+            let data = {'person_customer': formValues};
+            $.ajax({
+                type: 'POST',
+                url: '/processos/pastas/task_bulk_create/',
+                data: data,
+                success: (result)=>{
+                    this.folderNumber = result.folder;
+                    this.personCustomer = result.person_customer;
+                },
+                error: (request, status, error)=>{
+                    showToast('error', 'Atenção', error, 0, false);
+                },
+                beforeSend: (xhr, settings)=>{
+                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                },
+                dataType: 'json'
+            });
+        }
+    }
+
 	onChangeCity(){
 	    this.elCity.on('change',()=>{
             if(this.city) {

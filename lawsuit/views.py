@@ -1011,3 +1011,28 @@ class LawSuitCreateTaskBulkCreate(View):
                 data['errors'].append(error)
 
         return JsonResponse(json.loads(json.dumps(data)), status=status)
+
+
+class FolderCreateTaskBulkCreate(View):
+
+    def post(self, *args, **kwargs):
+        errors = []
+        create_user = self.request.user
+        office_session = get_office_session(self.request)
+        person_customer = self.request.POST['person_customer']
+
+        status = 200
+        if not errors:
+            instance = Folder.objects.create(create_user=create_user,
+                                             office=office_session,
+                                             person_customer_id=person_customer,
+                                             is_active=True)
+            data = {'folder': {'id': instance.id, 'text': instance.__str__()},
+                    'person_customer': {'id': instance.person_customer.id, 'text': instance.person_customer.legal_name}}
+        else:
+            status = 500
+            data = {'error': True, 'errors': []}
+            for error in errors:
+                data['errors'].append(error)
+
+        return JsonResponse(json.loads(json.dumps(data)), status=status)

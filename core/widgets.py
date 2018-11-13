@@ -185,6 +185,7 @@ class MDDateTimeRangeFilter(RangeFilter):
 class MDSelect(ModelSelect2):
 
     class Media:
+        extend = False
         css = {
             'all': (
                 'autocomplete_light/vendor/select2/dist/css/select2.css',
@@ -195,13 +196,13 @@ class MDSelect(ModelSelect2):
         js = ('autocomplete_light/jquery.init.js',
               'autocomplete_light/autocomplete.init.js',
               'autocomplete_light/vendor/select2/dist/js/select2.full.js',
-              'autocomplete_light/select2.js',
               'autocomplete_light/vendor/select2/dist/js/i18n/pt-BR.js',
+              'autocomplete_light/select2.js',
               )
 
     def build_attrs(self, *args, **kwargs):
         attrs = super().build_attrs(*args, **kwargs)
-        attrs.setdefault('data-locale', 'pt-BR')
+        attrs.setdefault('data-language', 'pt-BR')
         attrs.setdefault('data-placeholder', 'Procurar...')
         return attrs
 
