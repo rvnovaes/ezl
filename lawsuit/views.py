@@ -1002,7 +1002,8 @@ class LawSuitCreateTaskBulkCreate(View):
                                               law_suit_number=law_suit_number,
                                               type_lawsuit=type_lawsuit,
                                               is_active=True)
-            data = {'id': instance.id, 'text': instance.__str__()}
+            data = {'id': instance.id, 'text': instance.__str__(),
+                    'folder': {'id': instance.folder_id, 'text': instance.folder.__str__()}}
         else:
             status = 500
             data = {'error': True, 'errors': []}

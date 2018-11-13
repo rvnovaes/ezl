@@ -5,20 +5,25 @@ class TaskBulkCreate {
 		this.elCourtDistrictComplemt = $('[name=court_district_complement]');
 		this.elCity = $('[name=city]');
 		this.elTaskLawsuitNumber = $('[name=task_law_suit_number]');
+		this.elFolderNumber = $('[name=folder_number]');
 		this.onChangeCity();
 		this.onChangeCourtDistrict();
 
 	}
+
+	setSelect2(data, element) {
+	    if(data.id && data.text) {
+	        var newOption = new Option(data.text, data.id, true, true);
+            element.append(newOption).trigger('change');
+        }
+    }
 
 	get personCustomer() {
 	    return this.elInputPersonCustomer.val();
     }
 
     set personCustomer(data) {
-	    if(data.id && data.text) {
-	        var newOption = new Option(data.text, data.id, true, true);
-            this.elInputPersonCustomer.append(newOption).trigger('change');
-        }
+	    this.setSelect2(data, this.elInputPersonCustomer)
     }
 
     get city() {
@@ -34,10 +39,14 @@ class TaskBulkCreate {
     }
 
     set taskLawSuitNumber(data) {
-	    if(data.id && data.text) {
-	        var newOption = new Option(data.text, data.id, true, true);
-            this.elTaskLawsuitNumber.append(newOption).trigger('change');
-        }
+	    this.setSelect2(data, this.elTaskLawsuitNumber)
+    }
+    get folderNumber() {
+	    return this.elFolderNumber.val();
+    }
+
+    set folderNumber(data) {
+	    this.setSelect2(data, this.elFolderNumber)
     }
 
     async newPersonCustomer (csrfToken){
@@ -123,7 +132,8 @@ class TaskBulkCreate {
                 url: '/processos/processos/task_bulk_create/',
                 data: data,
                 success: (result)=>{
-                    this.taskLawSuitNumber = result;
+                    this.taskLawSuitNumber = {id: result.id, text: result.text};
+                    this.folderNumber = result.folder;
                 },
                 error: (request, status, error)=>{
                     showToast('error', 'Atenção', error, 0, false);
