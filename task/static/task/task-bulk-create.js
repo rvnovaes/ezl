@@ -9,9 +9,11 @@ class TaskBulkCreate {
 		this.elFolderNumber = $('[name=folder_number]');
         this.elTypeTask = $('[name=type_task]');
         this.elMovement = $('[name=movement]');
+        this.labelLawSuitNumber = $("label[for=id_task_law_suit_number]")
 		this.onChangeCity();
 		this.onChangeCourtDistrict();
 		this.onChangeLawSuitNumber();
+		this.onChangeTypeTask();
         this.onSaveSubmit();
         this.elMovement.attr('disabled', true);
 	}
@@ -233,6 +235,16 @@ class TaskBulkCreate {
 	    this.elLawsuitNumber.on('change',()=>{
             this.movement = this.nullData;
             this.elMovement.attr('disabled', !this.lawSuitNumber);
+        });
+    }
+
+	onChangeTypeTask(){
+	    this.elTypeTask.on('change',()=>{
+            if(this.isHearing){
+                this.labelLawSuitNumber.addClass('ezl-required');
+            }else{
+                this.labelLawSuitNumber.removeClass('ezl-required');
+            }
         });
     }
 
