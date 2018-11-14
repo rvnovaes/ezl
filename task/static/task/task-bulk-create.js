@@ -13,6 +13,7 @@ class TaskBulkCreate {
 		this.onChangeCourtDistrict();
 		this.onChangeLawSuitNumber();
         this.onSaveSubmit();
+        this.elMovement.attr('disabled', true);
 	}
 
 	setSelect2(data, element) {
@@ -230,7 +231,8 @@ class TaskBulkCreate {
 
 	onChangeLawSuitNumber(){
 	    this.elLawsuitNumber.on('change',()=>{
-            this.movement = this.nullData
+            this.movement = this.nullData;
+            this.elMovement.attr('disabled', !this.lawSuitNumber);
         });
     }
 
