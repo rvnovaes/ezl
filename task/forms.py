@@ -139,7 +139,8 @@ class TaskBulkCreateForm(TaskCreateForm):
                                            queryset=Folder.objects.none())
     movement = forms.ModelChoiceField(label='Movimentação',
                                       required=False,
-                                      widget=MDSelect(url='/processos/movement_autocomplete', ),
+                                      widget=MDSelect(url='/processos/movement_autocomplete',
+                                                      forward=['task_law_suit_number']),
                                       queryset=Movement.objects.none())
     person_company_representative = forms.ModelChoiceField(label='Preposto',
                                                            required=False,

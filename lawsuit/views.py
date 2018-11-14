@@ -854,8 +854,12 @@ class LawsuitAutocomplete(autocomplete.Select2QuerySetView):
 
 
 class MovementAutocomplete(autocomplete.Select2QuerySetView):
+
+    create_field = 'type_movement'
+
     def get_queryset(self):
-        qs = Movement.objects.get_queryset(office=[get_office_session(self.request).id])
+        law_suit = self.forwarded.get('task_law_suit_number', None)
+        qs = Movement.objects.get_queryset(office=[get_office_session(self.request).id]).filter(law_suit=law_suit)
 
         if self.q:
             qs = qs.filter(
@@ -865,6 +869,24 @@ class MovementAutocomplete(autocomplete.Select2QuerySetView):
 
     def get_result_label(self, result):
         return result.type_movement.name
+
+    def create_object(self, text):
+        obj = None
+        law_suit = self.forwarded.get('task_law_suit_number', None)
+        if law_suit:
+            law_suit = LawSuit.objects.filter(pk=law_suit).first()
+            office_session = get_office_session(self.request)
+            type_movement, created = TypeMovement.objects.get_or_create(office=office_session,
+                                                                        name=text,
+                                                                        defaults={'create_user': self.request.user,
+                                                                                  'is_active': True})
+            obj = self.get_queryset().get_or_create(**{self.create_field: type_movement,
+                                                       'office': office_session,
+                                                       'law_suit': law_suit,
+                                                       'folder': law_suit.folder,
+                                                       'defaults': {'create_user': self.request.user,
+                                                                    'is_active': True}})[0]
+        return obj
 
 
 class AddressOrganCreateView(AddressCreateView):
