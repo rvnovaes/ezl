@@ -14,6 +14,7 @@ class TaskBulkCreate {
 		this.onChangeCourtDistrict();
 		this.onChangeLawSuitNumber();
 		this.onChangeTypeTask();
+		this.onChangeFolderNumber();
         this.onSaveSubmit();
         this.elMovement.attr('disabled', true);
 	}
@@ -248,6 +249,12 @@ class TaskBulkCreate {
         });
     }
 
+	onChangeFolderNumber(){
+	    this.elFolderNumber.on('change',()=>{
+            this.personCustomer = this.elFolderNumber.select2('data')[0].person_customer
+        });
+    }
+
     validateLawsuit() {
         if (this.isHearing && !this.lawSuitNumber) {
             swal({
@@ -260,7 +267,7 @@ class TaskBulkCreate {
     }
 
     validateForm() {
-        this.validateLawsuit()
+        this.validateLawsuit();
     }
 
     save() {

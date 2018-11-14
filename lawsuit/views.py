@@ -836,6 +836,16 @@ class FolderSelect2Autocomplete(autocomplete.Select2QuerySetView):
         return "{} - {}".format(result.folder_number,
                                 result.person_customer.legal_name)
 
+    def get_results(self, context):
+        return [
+            {
+                'id': self.get_result_value(result),
+                'text': self.get_result_label(result),
+                'person_customer': {'id': result.person_customer.id,
+                                    'text': result.person_customer.legal_name}
+            } for result in context['object_list']
+        ]
+
 
 class LawsuitAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
