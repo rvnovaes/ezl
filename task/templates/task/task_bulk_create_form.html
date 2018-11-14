@@ -156,6 +156,9 @@
             $("#btn_add_folder").on('click', function () {
                 task.newFolder('{{ csrf_token }}', fields_folder);
                 createTypeahead($('#person_customer'));
+                $('#person_customer').attr('value', task.elInputPersonCustomer.select2('data')[0].id);
+                $('#person_customer').attr('data-value', task.elInputPersonCustomer.select2('data')[0].id);
+                $('#person_customer').attr('data-value-txt', task.elInputPersonCustomer.select2('data')[0].text);
             });
         })
     </script>

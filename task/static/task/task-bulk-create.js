@@ -254,7 +254,7 @@ class TaskBulkCreate {
                 title: 'Campos obrigatórios não preenchidos', 
                 html: 'É necessário informar processo para este tipo de serviço',
                 type: 'error'
-            })
+            });
         }
 
     }
