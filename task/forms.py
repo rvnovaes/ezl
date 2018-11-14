@@ -126,12 +126,10 @@ class TaskBulkCreateForm(TaskCreateForm):
                                              required=True,
                                              widget=MDSelect(url='/get_client_2', ),
                                              queryset=Person.objects.none())
-    person_customer_swal = forms.CharField(label="Cliente",
-                                           required=False,
-                                           widget=TypeaHeadForeignKeyWidget(model=Person,
-                                                                            field_related='legal_name',
-                                                                            name='person_customer',
-                                                                            url='/client_form'))
+    person_customer_swal  = forms.ModelChoiceField(label='Cliente/Parte',
+                                             required=True,
+                                             widget=MDSelect(url='/get_client_2', ),
+                                             queryset=Person.objects.none())
 
     folder_number = forms.ModelChoiceField(label='Nº da Pasta',
                                            required=False,

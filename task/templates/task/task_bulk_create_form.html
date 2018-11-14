@@ -155,7 +155,6 @@
             var fields_folder = ['{% bootstrap_field_oneline form.person_customer_swal label_class='control-label ezl-required pull-left' %}']
             $("#btn_add_folder").on('click', function () {
                 task.newFolder('{{ csrf_token }}', fields_folder);
-                createTypeahead($('#person_customer'));
             });
         })
     </script>

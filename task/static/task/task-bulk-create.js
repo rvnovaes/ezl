@@ -10,7 +10,7 @@ class TaskBulkCreate {
 		this.elFolderNumber = $('[name=folder_number]');
         this.elTypeTask = $('[name=type_task]');
         this.elMovement = $('[name=movement]');
-        this.labelLawSuitNumber = $("label[for=id_task_law_suit_number]")
+        this.labelLawSuitNumber = $('label[for=id_task_law_suit_number]');
 		this.onChangeCity();
 		this.onChangeCourtDistrict();
 		this.onChangeLawSuitNumber();
@@ -64,7 +64,7 @@ class TaskBulkCreate {
     }
 
     set personCustomer(data) {
-	    this.setSelect2(data, this.elInputPersonCustomer)
+	    this.setSelect2(data, this.elInputPersonCustomer);
     }
 
     get city() {
@@ -213,8 +213,13 @@ class TaskBulkCreate {
             focusConfirm: false,
             showCancelButton: true,
             showLoaderOnConfirm: true,
+            onOpen: () => {
+                let data = this.elInputPersonCustomer.select2('data')[0];
+                let newOption = new Option(data.text, data.id, true, true);
+                $('[name=person_customer_swal]').append(newOption).trigger('change');
+            },
             preConfirm: () => {
-                let personCustomer = document.getElementById("person_customer").dataset.value;
+                let personCustomer = document.getElementById('id_person_customer_swal').value;
                 if (!personCustomer) {
                     swal.showValidationMessage('Favor selecionar um Cliente');
                     return false;
@@ -222,7 +227,7 @@ class TaskBulkCreate {
                     return personCustomer;
                 }
             },
-        });
+        }).then(() => {console.log('teste');});
 
         if (formValues) {
             let data = {'person_customer': formValues};
