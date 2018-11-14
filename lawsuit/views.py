@@ -859,12 +859,14 @@ class MovementAutocomplete(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
         law_suit = self.forwarded.get('task_law_suit_number', None)
-        qs = Movement.objects.get_queryset(office=[get_office_session(self.request).id]).filter(law_suit=law_suit)
+        qs = Movement.objects.none()
+        if law_suit:
+            qs = Movement.objects.get_queryset(office=[get_office_session(self.request).id]).filter(law_suit=law_suit)
 
-        if self.q:
-            qs = qs.filter(
-                is_active=True,
-                type_movement__name__unaccent__icontains=self.q)
+            if self.q:
+                qs = qs.filter(
+                    is_active=True,
+                    type_movement__name__unaccent__icontains=self.q)
         return qs
 
     def get_result_label(self, result):

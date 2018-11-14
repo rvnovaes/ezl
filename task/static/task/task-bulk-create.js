@@ -1,15 +1,17 @@
 class TaskBulkCreate {
 	constructor() {
+	    this.nullData = {id: null, text: null};
 		this.elInputPersonCustomer = $('[name=person_customer]');
 		this.elCourtDistrict = $('[name=court_district]');
 		this.elCourtDistrictComplemt = $('[name=court_district_complement]');
 		this.elCity = $('[name=city]');
-		this.elTaskLawsuitNumber = $('[name=task_law_suit_number]');
+		this.elLawsuitNumber = $('[name=task_law_suit_number]');
 		this.elFolderNumber = $('[name=folder_number]');
-        this.elTypeTask = $('[name=type_task]')
-        this.elLawsuit = $('#id_task_law_suit_number')
+        this.elTypeTask = $('[name=type_task]');
+        this.elMovement = $('[name=movement]');
 		this.onChangeCity();
 		this.onChangeCourtDistrict();
+		this.onChangeLawSuitNumber();
         this.onSaveSubmit();
 	}
 
@@ -17,28 +19,14 @@ class TaskBulkCreate {
 	    if(data.id && data.text) {
 	        var newOption = new Option(data.text, data.id, true, true);
             element.append(newOption).trigger('change');
+        }else{
+	        element.val(null).trigger('change');
         }
     }
-
-    onChangeTypeTask() {
-        this.elTypeTask.on('change', ()=>{
-            setLabelRequired('')
-        })
-    };  
     
     get isHearing() {
-        if (task.elTypeTask.find(':selected').attr('is-hearing') === 'True'){
-            return true            
-        };
-        return false        
+        return this.elTypeTask.find(':selected').attr('is-hearing') === 'True';
     }
-
-    get lawsuit() {
-        if (this.elLawsuit.val().length > 0) {
-            return this.elLawsuit.val()
-        }   
-        return false     
-    }    
 
 	get personCustomer() {
 	    return this.elInputPersonCustomer.val();
@@ -56,19 +44,31 @@ class TaskBulkCreate {
 	    return this.elCourtDistrict.val();
     }
 
-    get taskLawSuitNumber() {
-	    return this.elTaskLawsuitNumber.val();
+    get lawSuitNumber() {
+	    if (this.elLawsuitNumber.val().length > 0) {
+            return this.elLawsuitNumber.val();
+        }
+        return false;
     }
 
-    set taskLawSuitNumber(data) {
-	    this.setSelect2(data, this.elTaskLawsuitNumber)
+    set lawSuitNumber(data) {
+	    this.setSelect2(data, this.elLawsuitNumber);
     }
+
     get folderNumber() {
 	    return this.elFolderNumber.val();
     }
 
     set folderNumber(data) {
-	    this.setSelect2(data, this.elFolderNumber)
+	    this.setSelect2(data, this.elFolderNumber);
+    }
+
+    get movement() {
+        return this.elMovement.val();
+    }
+
+    set movement(data) {
+        this.setSelect2(data, this.elMovement);
     }
 
     async newPersonCustomer (csrfToken){
@@ -154,7 +154,7 @@ class TaskBulkCreate {
                 url: '/processos/processos/task_bulk_create/',
                 data: data,
                 success: (result)=>{
-                    this.taskLawSuitNumber = {id: result.id, text: result.text};
+                    this.lawSuitNumber = {id: result.id, text: result.text};
                     this.folderNumber = result.folder;
                 },
                 error: (request, status, error)=>{
@@ -228,8 +228,14 @@ class TaskBulkCreate {
         });
     }
 
+	onChangeLawSuitNumber(){
+	    this.elLawsuitNumber.on('change',()=>{
+            this.movement = this.nullData
+        });
+    }
+
     validateLawsuit() {
-        if (this.isHearing && !this.lawsuit) {
+        if (this.isHearing && !this.lawSuitNumber) {
             swal({
                 title: 'Campos obrigatórios não preenchidos', 
                 html: 'É necessário informar processo para este tipo de serviço',

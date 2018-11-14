@@ -146,15 +146,15 @@
             $("#btn_add_person_customer").on('click', function () {
                 task.newPersonCustomer('{{ csrf_token }}');
             });
-            var fields = [];
-            fields.push('{% bootstrap_field_oneline lawsuit_form.type_lawsuit label_class='control-label ezl-required pull-left'  %}');
-            fields.push('{% bootstrap_field_oneline lawsuit_form.law_suit_number label_class='control-label ezl-required pull-left' %}');
+            var fields_lawsuit = [];
+            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.type_lawsuit label_class='control-label ezl-required pull-left'  %}');
+            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.law_suit_number label_class='control-label ezl-required pull-left' %}');
             $("#btn_add_lawsuit").on('click', function () {
-                task.newLawSuit('{{ csrf_token }}', fields);
+                task.newLawSuit('{{ csrf_token }}', fields_lawsuit);
             });
-            fields = ['{% bootstrap_field_oneline form.person_customer_swal label_class='control-label ezl-required pull-left' %}']
+            var fields_folder = ['{% bootstrap_field_oneline form.person_customer_swal label_class='control-label ezl-required pull-left' %}']
             $("#btn_add_folder").on('click', function () {
-                task.newFolder('{{ csrf_token }}', fields);
+                task.newFolder('{{ csrf_token }}', fields_folder);
                 createTypeahead($('#person_customer'));
             });
         })
