@@ -260,7 +260,7 @@ class TaskBulkCreate {
     }
 
     validateForm() {
-        this.validateLawsuit();        
+        this.validateLawsuit()
     }
 
     save() {
