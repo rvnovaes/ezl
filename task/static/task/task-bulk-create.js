@@ -16,6 +16,7 @@ class TaskBulkCreate {
 		this.onChangeTypeTask();
 		this.onChangeFolderNumber();
         this.onSaveSubmit();
+        this.onChangePersonCustomer()
         this.elMovement.attr('disabled', true);
 	}
 
@@ -251,7 +252,19 @@ class TaskBulkCreate {
 
 	onChangeFolderNumber(){
 	    this.elFolderNumber.on('change',()=>{
-            this.personCustomer = this.elFolderNumber.select2('data')[0].person_customer
+	        let personCustomer = this.elFolderNumber.select2('data')[0].person_customer;
+	        if (personCustomer) {
+	            this.personCustomer = personCustomer;
+            }
+        });
+    }
+
+	onChangePersonCustomer(){
+	    this.elInputPersonCustomer.on('change',()=> {
+	        let personCustomer = this.elFolderNumber.select2('data')[0].person_customer;
+	        if (personCustomer && personCustomer.id !== parseInt(this.personCustomer)){
+	            this.folderNumber = this.nullData;
+            }
         });
     }
 
