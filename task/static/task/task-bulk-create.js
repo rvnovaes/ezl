@@ -1,5 +1,6 @@
 class TaskBulkCreate {
 	constructor() {
+	    this.formErrors = [];
 	    this.nullData = {id: null, text: null};
 		this.elInputPersonCustomer = $('[name=person_customer]');
 		this.elCourtDistrict = $('[name=court_district]');
@@ -19,6 +20,31 @@ class TaskBulkCreate {
         this.onChangePersonCustomer()
         this.elMovement.attr('disabled', true);
 	}
+
+	clearFormErrors(){
+	    this.formErrors.splice(0, this.formErrors.length);
+    }
+
+    insertFormErrors(error, elements=[]){
+        this.formErrors.push({field: elements,
+                              message: error});
+    }
+
+    formatError(message){
+	    return `<li>${message}</li>`
+    }
+
+    getErrors(){
+	    let liErrors = ``;
+        this.formErrors.forEach((error) => {
+            liErrors += this.formatError(error.message );
+        });
+        return `
+            <ul style="text-align: left;">
+            ${liErrors}
+            </ul>
+        `;
+    }
 
 	setSelect2(data, element) {
 	    if(data.id && data.text) {
@@ -47,6 +73,10 @@ class TaskBulkCreate {
 
     get courtDistrict() {
 	    return this.elCourtDistrict.val();
+    }
+
+    get courtDistrictComplement() {
+	    return this.elCourtDistrictComplemt.val();
     }
 
     get lawSuitNumber() {
@@ -270,17 +300,34 @@ class TaskBulkCreate {
 
     validateLawsuit() {
         if (this.isHearing && !this.lawSuitNumber) {
-            swal({
-                title: 'Campos obrigatórios não preenchidos', 
-                html: 'É necessário informar processo para este tipo de serviço',
-                type: 'error'
-            });
+            this.insertFormErrors('É necessário informar processo para este tipo de serviço',
+                [this.elTypeTask, this.elLawsuitNumber]);
+        }
+
+    }
+
+    validatePerformancePlace() {
+        if (!(this.courtDistrict || this.city || this.courtDistrictComplement)) {
+            this.insertFormErrors('Deve ser informada a comarca, o complemento ou a cidade para a solicitação da OS.',
+                [this.elCourtDistrict, this.elCity, this.elCourtDistrictComplemt]);
         }
 
     }
 
     validateForm() {
+	    this.clearFormErrors();
         this.validateLawsuit();
+        this.validatePerformancePlace();
+        if (this.formErrors.length <= 0) {
+            return;
+        }
+        let htmlErrors = this.getErrors()
+        swal({
+            title: 'Campos obrigatórios não preenchidos',
+            width: '45%',
+            html: htmlErrors,
+            type: 'error'
+        });
     }
 
     save() {
