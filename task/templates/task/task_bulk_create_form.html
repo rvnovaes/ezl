@@ -24,12 +24,22 @@
                 <div class="panel-heading">
                     <h1 class="panel-title">Criar ordem de serviço</h1>
                 </div>
-                <div class="panel-body">
-                    <fieldset>
+                <div class="panel-body">                    
+                    <fieldset>                      
                         <div class="row p-b-10">
                             <div class="col-sm-6 p-r-0">
-                                {% bootstrap_field form.type_task form_group_class="col-sm-12 p-0" required_css_class='' layout='horizontal' label_class="ezl-required p-0 col-sm-4" field_class="p-0 col-sm-8" %}
-                            </div>
+                                <div class="col-sm-12 p-0">
+                                    <label class="ezl-required p-0 col-sm-4 control-label" for="id_type_task">Tipo de Serviço</label>
+                                    <div class="p-0 col-sm-8">
+                                        <select name="type_task" class="form-control" title="" required="" id="id_type_task">
+                                            <option value="" selected="">Selecione...</option>
+                                            {% for type_task in form.fields.type_task.queryset %} 
+                                                <option is-hearing="{{type_task.type_task_main.all.0.is_hearing}}" value="{{type_task.pk}}" selected="">{{type_task.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>                             
                             <div class="col-sm-6 p-r-0">
                                 {% bootstrap_field form.task_law_suit_number addon_after='<button id="btn_add_lawsuit" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Processo"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10' form_group_class="col-sm-11 p-0" layout='horizontal' label_class="p-0 col-sm-4" field_class="p-l-0 p-r-5 col-sm-8" %}
                             </div>

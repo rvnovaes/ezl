@@ -6,9 +6,11 @@ class TaskBulkCreate {
 		this.elCity = $('[name=city]');
 		this.elTaskLawsuitNumber = $('[name=task_law_suit_number]');
 		this.elFolderNumber = $('[name=folder_number]');
+        this.elTypeTask = $('[name=type_task]')
+        this.elLawsuit = $('#id_task_law_suit_number')
 		this.onChangeCity();
 		this.onChangeCourtDistrict();
-
+        this.onSaveSubmit();
 	}
 
 	setSelect2(data, element) {
@@ -17,6 +19,26 @@ class TaskBulkCreate {
             element.append(newOption).trigger('change');
         }
     }
+
+    onChangeTypeTask() {
+        this.elTypeTask.on('change', ()=>{
+            setLabelRequired('')
+        })
+    };  
+    
+    get isHearing() {
+        if (task.elTypeTask.find(':selected').attr('is-hearing') === 'True'){
+            return true            
+        };
+        return false        
+    }
+
+    get lawsuit() {
+        if (this.elLawsuit.val().length > 0) {
+            return this.elLawsuit.val()
+        }   
+        return false     
+    }    
 
 	get personCustomer() {
 	    return this.elInputPersonCustomer.val();
@@ -205,4 +227,30 @@ class TaskBulkCreate {
             }
         });
     }
+
+    validateLawsuit() {
+        if (this.isHearing && !this.lawsuit) {
+            swal({
+                title: 'Campos obrigatórios não preenchidos', 
+                html: 'É necessário informar processo para este tipo de serviço',
+                type: 'error'
+            })
+        }
+
+    }
+
+    validateForm() {
+        this.validateLawsuit();        
+    }
+
+    save() {
+        this.validateForm();
+    }
+
+    onSaveSubmit() {
+        $('[type=submit]').on('click', (el)=> {                
+            el.preventDefault();
+            this.save();
+        })
+    }    
 }
