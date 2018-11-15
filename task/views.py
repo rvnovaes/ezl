@@ -832,8 +832,33 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                         context['survey_company_representative'] = self.object.type_task.survey_company_representative.data
                     else:
                         context['survey_company_representative'] = ''
+        context['show_company_representative_in_tab'] = self.show_company_representative_in_tab(checker, office_session)
+        context['show_person_executed_by_in_tab'] = self.show_person_executed_by_in_tab(checker, office_session)        
         return context
 
+    def show_company_representative_in_tab(self, checker, office_session):
+        """
+            Caso a pessoa logada seja o correspondente da ordem de servico
+            Nao mostra os dados do preposto na aba Participantes
+        """
+        show_in_tab = True         
+        is_person_executed_by = checker.has_perm('view_delegated_tasks', office_session)
+        if is_person_executed_by:
+            if self.object.person_executed_by == self.request.user.person:            
+                show_in_tab = False
+        return show_in_tab
+
+    def show_person_executed_by_in_tab(self, checker, office_session):
+        """
+            Caso a pessoa logada seja o preposto da ordem de servico
+            Nao mostra os dados do correspondente na aba Participantes
+        """        
+        show_in_tab = True 
+        is_company_representative = checker.has_perm('can_see_tasks_company_representative', office_session)        
+        if is_company_representative:
+            if self.object.person_company_representative == self.request.user.person:
+                show_in_tab = False
+        return show_in_tab
 
 
     def dispatch(self, request, *args, **kwargs):
@@ -1972,3 +1997,4 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
             return JsonResponse({'status': 'ok'})
         except Exception as e:
             return JsonResponse({'error': e})
+
