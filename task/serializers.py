@@ -1,6 +1,6 @@
 from .models import TypeTask, Task, Ecm, TypeTaskMain
 from rest_framework import serializers
-from core.models import Person
+from core.models import Person, Office
 from core.serializers import OfficeDefault, CreateUserDefault, CreateUserSerializerMixin, OfficeSerializerMixin
 from rest_framework.compat import unicode_to_repr
 
@@ -66,3 +66,14 @@ class EcmTaskSerializer(serializers.ModelSerializer,
     class Meta:
         model = Ecm
         exclude = ('create_date', 'alter_date', 'system_prefix', 'is_active')
+
+
+class OfficeToPaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Office
+        fields = ('pk', 'legal_name')
+
+class TaskToPaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ('pk', 'amount' , 'parent')
