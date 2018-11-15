@@ -20,7 +20,7 @@
         {% csrf_token %}
         <form method="get">
             <div class="panel-heading ">
-                <a href="#" data-perform="panel-collapse"><i class="ti-filter"></i> Filtrar OS's</a>
+                <a href="#" data-perform="panel-collapse"><i class="ti-filter"></i> Filtrar OS's</a>                
                 <div class="panel-action">
                     <label for="{{ filter.form.custom_filter.id_for_label }}">{{ filter.form.custom_filter.label }}</label>
                     {{ filter.form.custom_filter }}
@@ -83,56 +83,15 @@
 
    <div class="panel panel-default">
         <div class="panel-heading">
-            <h6 class="panel-title"><i class="fa fa-dollar fa-fw"></i>OS's a pagar</h6>
+            <h6 class="panel-title">
+                <i class="fa fa-dollar fa-fw"></i>OS's a pagar
+                <span id="loading-data"></span>
+                <button id="btn-download-xlsx" class="pull-right btn btn-success" style="display: none"> <i class="fa fa-file-excel-o"></i>
+  Exportar para o Excel </button>
+            </h6>
         </div>
         <div class="panel-body page-content">
-            <div class="table-responsive">
-                <table id="os_exportable" style="margin-left: -10000px; position: absolute;">
-                    <thead>
-                        <tr>
-                            <th>OS</th>
-                            <th>Escritório</th>
-                            <th>Finalização</th>
-                            <th>Serviço</th>
-                            <th>Processo</th>
-                            <th>Comarca</th>
-                            <th>Cliente</th>
-                            <th>Reembolsa valor</th>
-                            <th>Parte Adversa</th>
-                            <th>OS Original</th>
-                            <th>Faturada</th>
-                            <th>Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for office in offices_report %}
-                            {% for task in office.tasks %}
-                                <tr>
-                                    <td>{{ task.parent.task_number }}</td>
-                                    <td>{{ office.office_name }}</td>
-                                    <td>{{ task.finished_date|date:"d/m/Y H:i" }}</td>
-                                    <td>{{ task.type_task }}</td>
-                                    <td>{{ task.lawsuit_number }}</td>
-                                    <td>{{ task.court_district }}</td>
-                                    <td>{{ task.client }}</td>
-                                    <td>{{ office.client_refunds }}</td>
-                                    <td>{{ task.opposing_party }}</td>
-                                    {% if task.parent %}
-                                        {% if task.parent.parent %}
-                                            <td>{{ task.parent.task_number }}</td>
-                                        {% else %}
-                                            <td>{{ task.parent.legacy_code }}</td>
-                                        {% endif %}
-                                    {% else %}
-                                        <td>{{ task.legacy_code }}</td>
-                                    {% endif %}
-                                    <td>{{ task.billing_date|date:"d/m/Y" }}</td>
-                                    <td>{{ task.amount }}</td>
-                                </tr>
-                            {% endfor %}
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div class="table-responsive">                
                 <table class="table table-striped table-hover" id="os-table">
                     <thead>
                         <tr role="row">
@@ -151,83 +110,17 @@
                         </tr>
                     </thead>
                     <tbody id="os-table-body">
-                        {% for office in offices_report %}
-                            {% ifchanged office.office_name %}
-                                <tr>
-                                    <th colspan="10">{{ office.office_name }}</th>
-                                    <th></th>
-                                    <th><center>{{office.office_total}}</center></th>
-                                </tr>
-                            {% endifchanged %}
-
-                            {% ifchanged office.client_name or office.office_name %}
-                                <tr>
-                                    <th></th>
-                                    <th colspan="10">
-                                        <div class="col-xs-10">
-                                            {{ office.client_name }}
-                                        </div>
-                                        <div class="col-xs-2">
-                                            {% if office.client_refunds %}
-                                            <span class="badge badge-danger pull-right"><i class="fa fa-check"></i> Reembolsa valor</span>
-                                            {% endif %}
-                                        </div>
-                                    </th>
-                                    <th><center>{{office.client_total}}</center></th>
-                                </tr>
-                            {% endifchanged %}
-                            {% for task in office.tasks %}
-                                <tr role="row">
-                                    <td></td>
-                                    <td></td>
-                                    <td>
-                                        {% if not task.billing_date %}
-                                            <input type="checkbox" value="{{ task.id }}"/>
-                                        {% endif %}
-                                    </td>
-                                    <td><a href="{% url 'task_detail' task.parent.id %}" target="_new">{{ task.parent.task_number|stringformat:"05d" }}</a></td>
-                                    <td>{{ task.finished_date|date:"d/m/Y H:i" }}</td>
-                                    <td>{{ task.type_task }}</td>
-                                    <td>{{ task.lawsuit_number }}</td>
-                                    <td>{{ task.court_district }}</td>
-                                    <td>{{ task.opposing_party }}</td>
-                                    {% if task.parent %}
-                                        {% if task.parent.parent %}
-                                            <td>{{ task.parent.task_number }}</td>
-                                        {% else %}
-                                            <td>{{ task.parent.legacy_code }}</td>
-                                        {% endif %}
-                                    {% else %}
-                                        <td>{{ task.legacy_code }}</td>
-                                    {% endif %}
-                                    <td>{{ task.billing_date|date:"d/m/Y" }}</td>
-                                    <td class="text-center"><center>{{ task.amount }}</center></td>
-                                </tr>
-                            {% endfor %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="11">Nenhuma OS encontrada com os filtros especificados.</td>
-                            </tr>
-                        {% endfor %}
-                        {% if total %}
-                            <tr class="total-container">
-                                <th colspan="10" class="text-right" >Total Geral (R$)</th>
-                                <th colspan="2" class="text-right">{{total}}</th>
-                            </tr>
-                        {% endif %}
                     </tbody>
+                    <tfoot id="os-table-foot">                        
+                    </tfoot>
                 </table>
             </div>
-            <div class="row">
-                <div class="text-center" style="padding-top: 10px">
-                {% if offices_report %}
-                    <button class="btn btn-success" id="btn-faturar">Faturar</button>
-                {% endif %}
-                </div>
+            <div class="row" id="btn-billing">
+
             </div>
         </div>
     </div>
-    <div id="modal-faturar" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div id="modal-billing" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -239,7 +132,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success waves-effect" id="action-faturar">Faturar</button>
+                    <button type="button" class="btn btn-success waves-effect" id="action-billing">Faturar</button>
                 </div>
             </div>
         </div>
@@ -255,58 +148,25 @@
     <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
     <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
-    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
-    <script>
-    $('#os_exportable').dataTable({
-        dom: 'Bfrtip',
-        paging: false,
-        searching: false,
-        order: [[ "0", "asc" ]],
-        buttons: [
-            'copy', 'csv', 'excel', 'pdf', 'print'
-        ],
-        language: {
-            "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-        },
-    });
-    function getSelectedOs(){
-        return $.map($('#os-table-body input:checkbox:checked'), function(item){
-            return item.value;
-        });
-    }
-    $("#checkAll").click(function(){
-        $('#os-table input:checkbox').not(this).prop('checked', this.checked);
-    });
-    $('#btn-faturar').click(function(){
-        if (getSelectedOs().length == 0){
-            swal({
-                title: "Importante",
-                text: "Você deve selecionar pelo menos uma OS para ser faturada.",
-                type: "warning",
-                confirmButtonColor: "#DD6B55",
-                confirmButtonText: "Ok"
-            });
-            return false;
-        }
-        $('#modal-faturar').modal();
-    });
-    $('#action-faturar').click(function(){
-        var selected = getSelectedOs(),
-            data = {tasks: JSON.stringify(selected)};
-        $.ajax({
-            type: 'POST',
-            url: location.href,
-            data: data,
-            success: function (response) {
-                location.reload();
-            },
-            beforeSend: function (xhr, settings) {
-                xhr.setRequestHeader("X-CSRFToken", $('input[name=csrfmiddlewaretoken]').val());
-            },
-            dataType: 'json'
-        });
-        $('#modal-faturar').modal('hide');
-    });
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>    
+    <script src="{% static 'task/tasks_to_pay.js' %}"></script>
+
+    <script type="text/javascript">
+        var report;      
+        $(document).ready(function(){
+            $('#filter_content').collapse('show');
+            $('form').on('submit', function(event){                
+                event.preventDefault();
+                $('#filter_content').collapse('hide');
+                if ($('[name=group_by_tasks]').val() === 'E') {
+                    report = new ReportToPayGroupByOffice();
+                } else {
+                    report = new ReportToPayGroupByClient();
+                }                
+                report.clear()
+                report.start()
+            })
+        })  
     </script>
 {% endblock %}
 
@@ -325,6 +185,10 @@
         }
         #os_exportable_wrapper{
             margin-top: 1em;
+        }
+
+        #os-table-body{
+            font-size: 12px;
         }
 
     </style>
