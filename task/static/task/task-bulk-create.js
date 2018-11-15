@@ -17,7 +17,8 @@ class TaskBulkCreate {
 		this.onChangeTypeTask();
 		this.onChangeFolderNumber();
         this.onSaveSubmit();
-        this.onChangePersonCustomer()
+        this.onChangePersonCustomer();
+        this.onChangeCourtDistrictComplement();
         this.elMovement.attr('disabled', true);
 	}
 
@@ -71,12 +72,24 @@ class TaskBulkCreate {
 	    return this.elCity.val();
     }
 
+    set city(data) {
+	    this.setSelect2(data, this.elCity);
+    }
+
     get courtDistrict() {
 	    return this.elCourtDistrict.val();
     }
 
+    set courtDistrict(data) {
+	    this.setSelect2(data, this.elCourtDistrict);
+    }
+
     get courtDistrictComplement() {
 	    return this.elCourtDistrictComplemt.val();
+    }
+
+    set courtDistrictComplement(data) {
+	    this.setSelect2(data, this.elCourtDistrictComplemt);
     }
 
     get lawSuitNumber() {
@@ -252,18 +265,36 @@ class TaskBulkCreate {
 	onChangeCity(){
 	    this.elCity.on('change',()=>{
             if(this.city) {
-                // a função clearTypeaheadField a seguir é definida como uma variável global no arquivo typeahead.js
-                clearTypeaheadField(this.elCourtDistrict);
+                this.courtDistrict = this.nullData;
             }
+            this.elCourtDistrict.attr('disabled', !(!this.city));
+            this.elCourtDistrictComplemt.attr('disabled', !(!this.city));
         });
     }
 
 	onChangeCourtDistrict(){
 	    this.elCourtDistrict.on('change',()=>{
             if(this.courtDistrict) {
-                // a função clearTypeaheadField a seguir é definida como uma variável global no arquivo typeahead.js
-                clearTypeaheadField(this.elCity);
+                this.city = this.nullData;
+                let courtDistrict = this.elCourtDistrictComplemt.select2('data')[0].court_district;
+                if (courtDistrict && courtDistrict.id !== parseInt(this.courtDistrict)){
+                    this.courtDistrictComplement = this.nullData;
+                }
             }
+            this.elCity.attr('disabled', !(!this.courtDistrict));
+        });
+    }
+
+    onChangeCourtDistrictComplement(){
+	    this.elCourtDistrictComplemt.on('change',()=>{
+            if(this.courtDistrictComplement) {
+                this.city = this.nullData;
+                let courtDistrict = this.elCourtDistrictComplemt.select2('data')[0].court_district;
+                if (courtDistrict) {
+                    this.courtDistrict= courtDistrict;
+                }
+            }
+            this.elCity.attr('disabled', !(!this.courtDistrict));
         });
     }
 

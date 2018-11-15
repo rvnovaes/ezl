@@ -1031,6 +1031,16 @@ class CourtDistrictComplementSelect2Autocomplete(autocomplete.Select2QuerySetVie
     def get_result_label(self, result):
         return "{}".format(result.__str__())
 
+    def get_results(self, context):
+        return [
+            {
+                'id': self.get_result_value(result),
+                'text': self.get_result_label(result),
+                'court_district': {'id': result.court_district.id,
+                                    'text': result.court_district.name}
+            } for result in context['object_list']
+        ]
+
 
 class LawSuitCreateTaskBulkCreate(View):
 
