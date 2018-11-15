@@ -307,15 +307,18 @@ class TaskResource(resources.ModelResource):
         """
         return TaskResult
 
-    def validate_folder(self, row, row_errors):        
+    def validate_folder(self, row, row_errors):            
         folder_number = int(row['folder_number']) if self_or_none(row['folder_number']) else None
         folder_legacy_code = row['folder_legacy_code']
         cost_center = row['folder_cost_center']
+        update_cost_center = False
         if cost_center:
             cost_center = CostCenter.objects.get_queryset(office=[self.office_id]).filter(
                 name__unaccent__iexact=cost_center).first()
             if not cost_center:
                 row_errors.append(insert_incorrect_natural_key_message(row, 'folder_cost_center'))
+            else:
+                update_cost_center = True 
         folder = None
         person_customer = Person.objects.filter(legal_name__unaccent__iexact=str(row['folder_person_customer']),
                                                 officemembership__office=self.office,
@@ -324,7 +327,7 @@ class TaskResource(resources.ModelResource):
             folder, created = Folder.objects.get_or_create(person_customer=person_customer,
                                                            is_default=True,
                                                            office=self.office,
-                                                           defaults={'create_user': self.create_user})
+                                                           defaults={'create_user': self.create_user, 'cost_center': cost_center})
         else:
             if folder_legacy_code:
                 folder = Folder.objects.filter(legacy_code=folder_legacy_code,
@@ -339,11 +342,14 @@ class TaskResource(resources.ModelResource):
                                                       legacy_code=folder_legacy_code,
                                                       folder_number=folder_number,
                                                       system_prefix=row['system_prefix'],
-                                                      defaults={'create_user': self.create_user})
+                                                      defaults={'create_user': self.create_user, 'cost_center': cost_center})
         if not folder:
             row_errors.append(RECORD_NOT_FOUND.format(Folder._meta.verbose_name))
             if row['folder_person_customer'] and not person_customer:
                 row_errors.append(RECORD_NOT_FOUND.format(COLUMN_NAME_DICT['folder_person_customer']['verbose_name']))
+        if update_cost_center:
+            folder.cost_center = cost_center
+            folder.save()                    
         return folder
 
     def validate_lawsuit(self, row, row_errors):
