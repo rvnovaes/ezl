@@ -31,14 +31,14 @@ class TaskBulkCreate {
                               message: error});
     }
 
-    formatError(message){
+    static formatError(message){
 	    return `<li>${message}</li>`
     }
 
     getErrors(){
 	    let liErrors = ``;
         this.formErrors.forEach((error) => {
-            liErrors += this.formatError(error.message );
+            liErrors += TaskBulkCreate.formatError(error.message );
         });
         return `
             <ul style="text-align: left;">
@@ -47,7 +47,7 @@ class TaskBulkCreate {
         `;
     }
 
-	setSelect2(data, element) {
+	static setSelect2(data, element) {
 	    if(data.id && data.text) {
 	        var newOption = new Option(data.text, data.id, true, true);
             element.append(newOption).trigger('change');
@@ -65,7 +65,7 @@ class TaskBulkCreate {
     }
 
     set personCustomer(data) {
-	    this.setSelect2(data, this.elInputPersonCustomer);
+	    TaskBulkCreate.setSelect2(data, this.elInputPersonCustomer);
     }
 
     get city() {
@@ -73,7 +73,7 @@ class TaskBulkCreate {
     }
 
     set city(data) {
-	    this.setSelect2(data, this.elCity);
+	    TaskBulkCreate.setSelect2(data, this.elCity);
     }
 
     get courtDistrict() {
@@ -81,7 +81,7 @@ class TaskBulkCreate {
     }
 
     set courtDistrict(data) {
-	    this.setSelect2(data, this.elCourtDistrict);
+	    TaskBulkCreate.setSelect2(data, this.elCourtDistrict);
     }
 
     get courtDistrictComplement() {
@@ -89,7 +89,7 @@ class TaskBulkCreate {
     }
 
     set courtDistrictComplement(data) {
-	    this.setSelect2(data, this.elCourtDistrictComplemt);
+	    TaskBulkCreate.setSelect2(data, this.elCourtDistrictComplemt);
     }
 
     get lawSuitNumber() {
@@ -100,7 +100,7 @@ class TaskBulkCreate {
     }
 
     set lawSuitNumber(data) {
-	    this.setSelect2(data, this.elLawsuitNumber);
+	    TaskBulkCreate.setSelect2(data, this.elLawsuitNumber);
     }
 
     get folderNumber() {
@@ -108,7 +108,7 @@ class TaskBulkCreate {
     }
 
     set folderNumber(data) {
-	    this.setSelect2(data, this.elFolderNumber);
+	    TaskBulkCreate.setSelect2(data, this.elFolderNumber);
     }
 
     get movement() {
@@ -116,7 +116,7 @@ class TaskBulkCreate {
     }
 
     set movement(data) {
-        this.setSelect2(data, this.elMovement);
+        TaskBulkCreate.setSelect2(data, this.elMovement);
     }
 
     async newPersonCustomer (csrfToken){
@@ -228,7 +228,7 @@ class TaskBulkCreate {
             showLoaderOnConfirm: true,
             onOpen: () => {
                 let data = this.elInputPersonCustomer.select2('data')[0];
-                this.setSelect2(data, $('[name=person_customer_swal]'));
+                TaskBulkCreate.setSelect2(data, $('[name=person_customer_swal]'));
             },
             preConfirm: () => {
                 let personCustomer = document.getElementById('id_person_customer_swal').value;
