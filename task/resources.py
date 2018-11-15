@@ -487,8 +487,6 @@ class TaskResource(resources.ModelResource):
                                                    folder=self.folder,
                                                    law_suit=self.lawsuit,
                                                    office_id=self.office_id).first()
-                if not movement:
-                    row_errors.append(RECORD_NOT_FOUND.format(Movement._meta.verbose_name))
             if not movement and type_movement:
                 movement, created = Movement.objects.get_or_create(
                     folder=self.folder,
