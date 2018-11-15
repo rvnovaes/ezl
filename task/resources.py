@@ -456,7 +456,8 @@ class TaskResource(resources.ModelResource):
     def validate_movement(self, row, row_errors):
         type_movement_name = row['type_movement']
         movement_legacy_code = row['movement_legacy_code']
-        movement = None
+        if type(movement_legacy_code) == float and movement_legacy_code.is_integer():
+            movement_legacy_code = str(int(movement_legacy_code))
         if not (type_movement_name or movement_legacy_code):
             movement, created = Movement.objects.get_or_create(
                 folder=self.folder,
@@ -481,6 +482,7 @@ class TaskResource(resources.ModelResource):
                     law_suit=self.lawsuit,
                     office=self.office,
                     type_movement=type_movement,
+                    legacy_code=movement_legacy_code,
                     defaults={'legacy_code': movement_legacy_code,
                               'system_prefix': row['system_prefix'],
                               'create_user': self.create_user})
