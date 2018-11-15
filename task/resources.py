@@ -311,7 +311,6 @@ class TaskResource(resources.ModelResource):
         folder_number = int(row['folder_number']) if self_or_none(row['folder_number']) else None
         folder_legacy_code = row['folder_legacy_code']
         cost_center = row['folder_cost_center']
-        import pdb; pdb.set_trace()
         update_cost_center = False
         if cost_center:
             cost_center = CostCenter.objects.get_queryset(office=[self.office_id]).filter(
