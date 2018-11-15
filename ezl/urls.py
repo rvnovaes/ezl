@@ -13,7 +13,7 @@ from core.views import (
     ServiceAutocomplete, EditableListSave, PopupSuccessView,
     OfficeAutocomplete, OfficeCorrespondentAutocomplete, OriginRequesterAutocomplete)
 from django.conf import settings
-from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView
+from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView, ToPayTaskReportTemplateView, ToPayTaskReportXlsxView
 from rest_framework_swagger.views import get_swagger_view
 
 schema_view = get_swagger_view(title='API para integração com o Ezlawyer')
@@ -41,8 +41,14 @@ urlpatterns = [
         ToReceiveTaskReportView.as_view(),
         name='task_report_to_receive'),
     url(r'^relatorios/os-a-pagar$',
-        ToPayTaskReportView.as_view(),
+        ToPayTaskReportTemplateView.as_view(),
         name='task_report_to_pay'),
+    url(r'^relatorios/os-a-pagar-data$',
+        ToPayTaskReportView.as_view(),
+        name='task_report_to_pay_data'),    
+    url(r'^relatorios/os-a-pagar-xlsx$',
+        ToPayTaskReportXlsxView.as_view(),
+        name='task_report_to_pay_xlsx'),        
     url(r'^dashboard/(?P<pk>[0-9]+)/$',
         login_required(TaskDetailView.as_view()),
         name='task_detail'),
