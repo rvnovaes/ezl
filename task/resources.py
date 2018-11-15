@@ -311,6 +311,7 @@ class TaskResource(resources.ModelResource):
         folder_number = int(row['folder_number']) if self_or_none(row['folder_number']) else None
         folder_legacy_code = row['folder_legacy_code']
         cost_center = row['folder_cost_center']
+        import pdb; pdb.set_trace()
         update_cost_center = False
         if cost_center:
             cost_center = CostCenter.objects.get_queryset(office=[self.office_id]).filter(
@@ -318,16 +319,20 @@ class TaskResource(resources.ModelResource):
             if not cost_center:
                 row_errors.append(insert_incorrect_natural_key_message(row, 'folder_cost_center'))
             else:
-                update_cost_center = True 
+                if isinstance(cost_center, CostCenter):
+                    update_cost_center = True 
         folder = None
         person_customer = Person.objects.filter(legal_name__unaccent__iexact=str(row['folder_person_customer']),
                                                 officemembership__office=self.office,
                                                 is_customer=True).first()
         if not (folder_legacy_code or folder_number) and person_customer:
+            data = {'create_user': self.create_user}
+            if update_cost_center:
+                data['cost_center'] = cost_center
             folder, created = Folder.objects.get_or_create(person_customer=person_customer,
                                                            is_default=True,
                                                            office=self.office,
-                                                           defaults={'create_user': self.create_user, 'cost_center': cost_center})
+                                                           defaults=data)
         else:
             if folder_legacy_code:
                 folder = Folder.objects.filter(legacy_code=folder_legacy_code,
@@ -337,12 +342,15 @@ class TaskResource(resources.ModelResource):
                 folder = Folder.objects.filter(folder_number=folder_number,
                                                office=self.office).first()
             if not folder and person_customer:
+                data = {'create_user': self.create_user}
+                if update_cost_center:
+                    data['cost_center'] = cost_center                
                 folder, created  = Folder.objects.get_or_create(person_customer=person_customer,
                                                       office=self.office,
                                                       legacy_code=folder_legacy_code,
                                                       folder_number=folder_number,
                                                       system_prefix=row['system_prefix'],
-                                                      defaults={'create_user': self.create_user, 'cost_center': cost_center})
+                                                      defaults=data)
         if not folder:
             row_errors.append(RECORD_NOT_FOUND.format(Folder._meta.verbose_name))
             if row['folder_person_customer'] and not person_customer:
