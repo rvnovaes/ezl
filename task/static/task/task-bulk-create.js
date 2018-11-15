@@ -215,8 +215,7 @@ class TaskBulkCreate {
             showLoaderOnConfirm: true,
             onOpen: () => {
                 let data = this.elInputPersonCustomer.select2('data')[0];
-                let newOption = new Option(data.text, data.id, true, true);
-                $('[name=person_customer_swal]').append(newOption).trigger('change');
+                this.setSelect2(data, $('[name=person_customer_swal]'));
             },
             preConfirm: () => {
                 let personCustomer = document.getElementById('id_person_customer_swal').value;

@@ -29,7 +29,7 @@ from django.core.cache import cache
 from dal import autocomplete
 from django.db.models import Q
 from core.views import CustomLoginRequiredView, TypeaHeadGenericSearch
-from core.utils import get_office_session
+from core.utils import get_office_session, filter_valid_choice_form
 
 
 class InstanceListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -809,6 +809,19 @@ class CourtDistrictAutocomplete(TypeaHeadGenericSearch):
         return list(data)
 
 
+class CourtDistrictSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True))
+        if self.q:
+            filters = Q(name__unaccent__icontains=self.q)
+            filters |= Q(state__initials__unaccent__icontains=self.q)
+            qs = qs.filter(filters)
+        return qs
+
+    def get_result_label(self, result):
+        return "{}".format(result.__str__())
+
+
 class FolderAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params, extra_params,
@@ -1001,6 +1014,22 @@ class TypeaHeadCourtDistrictComplementSearch(TypeaHeadGenericSearch):
                 'data-extra-params': complement.court_district.state.id
             })
         return list(data)
+
+
+class CourtDistrictComplementSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        court_district = self.forwarded.get('court_district', None)
+        qs = filter_valid_choice_form(CourtDistrictComplement.objects.filter(is_active=True))
+        if court_district:
+            qs = qs.filter(court_district_id=court_district)
+        if self.q:
+            filters = Q(name__unaccent__icontains=self.q)
+            filters |= Q(court_district__name__unaccent__icontains=self.q)
+            qs = qs.filter(filters)
+        return qs.order_by('name')
+
+    def get_result_label(self, result):
+        return "{}".format(result.__str__())
 
 
 class LawSuitCreateTaskBulkCreate(View):

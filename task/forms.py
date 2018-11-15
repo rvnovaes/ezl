@@ -99,29 +99,19 @@ class TaskBulkCreateForm(TaskCreateForm):
     task_law_suit_number = forms.ModelChoiceField(label='Número do processo',
                                                   widget=MDSelect(url='/processos/lawsuit_autocomplete', ),
                                                   queryset=LawSuit.objects.none())
-    court_district = forms.CharField(label='Comarca',
-                                     required=False,
-                                     widget=TypeaHeadForeignKeyWidget(
-                                         model=CourtDistrict,
-                                         field_related='name',
-                                         name='court_district',
-                                         url='/processos/courtdistrict_autocomplete'))
-    city = forms.CharField(label='Cidade',
-                           required=False,
-                           widget=TypeaHeadForeignKeyWidget(
-                               model=City,
-                               field_related='name',
-                               name='city',
-                               url='/city/autocomplete/'))
-    court_district_complement = forms.CharField(label="Complemento de Comarca",
-                                                required=False,
-                                                widget=TypeaHeadForeignKeyWidget(
-                                                    model=CourtDistrictComplement,
-                                                    field_related='name',
-                                                    forward='court_district',
-                                                    name='court_district_complement',
-                                                    url='/processos/typeahead/search/complemento',
-                                                ))
+    court_district = forms.ModelChoiceField(label='Comarca',
+                                            required=False,
+                                            widget=MDSelect(url='/processos/courtdistrict_select2', ),
+                                            queryset=CourtDistrict.objects.none())
+    city = forms.ModelChoiceField(label='Cidade',
+                                  required=False,
+                                  widget=MDSelect(url='/city/autocomplete_select2/', ),
+                                  queryset=City.objects.none())
+    court_district_complement = forms.ModelChoiceField(label='Complemento de Comarca',
+                                                       required=False,
+                                                       widget=MDSelect(url='/processos/complemento_select2',
+                                                                       forward=['court_district']),
+                                                       queryset=CourtDistrictComplement.objects.none())
     person_customer = forms.ModelChoiceField(label='Cliente/Parte',
                                              required=True,
                                              widget=MDSelect(url='/get_client_2', ),

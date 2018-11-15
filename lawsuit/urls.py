@@ -21,6 +21,9 @@ urlpatterns = [
     url(r'courtdistrict_autocomplete$',
         login_required(views.CourtDistrictAutocomplete.as_view()),
         name='courtdistrict_autocomplete'),
+    url(r'courtdistrict_select2$',
+        login_required(views.CourtDistrictSelect2Autocomplete.as_view()),
+        name='courtdistrict_select2'),
     url(r'folder_autocomplete$',
         login_required(views.FolderAutocomplete.as_view()),
         name='folder_autocomplete'),
@@ -47,6 +50,9 @@ urlpatterns = [
     url(r'^typeahead/search/complemento$',
         login_required(views.TypeaHeadCourtDistrictComplementSearch.as_view()),
         name='typeahead_complemento'),
+    url(r'^complemento_select2$',
+        login_required(views.CourtDistrictComplementSelect2Autocomplete.as_view()),
+        name='complemento_select2'),
 
     # Varas
     url(r'^varas/$',

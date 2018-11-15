@@ -41,7 +41,7 @@ from core.models import Person, Address, City, State, Country, AddressType, Offi
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
-from core.utils import login_log, logout_log, get_office_session, get_domain
+from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form
 from core.view_validators import create_person_office_relation, person_exists
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
@@ -1685,6 +1685,19 @@ class CityAutoCompleteView(TypeaHeadGenericSearch):
                          'data-forward-id': eval('city.{}'.format(forward_field)) if forward_field else 0
                          })
         return list(data)
+
+
+class CitySelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = filter_valid_choice_form(City.objects.filter(is_active=True))
+        if self.q:
+            filters = Q(name__unaccent__icontains=self.q)
+            filters |= Q(state__initials__unaccent__icontains=self.q)
+            qs = qs.filter(filters)
+        return qs.order_by('name')
+
+    def get_result_label(self, result):
+        return "{}".format(result.__str__())
 
 
 class ClientAutocomplete(TypeaHeadGenericSearch):
