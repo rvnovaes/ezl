@@ -6,7 +6,13 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <div class="panel-title form-row">{{title_table}} ({{ table.length }})</div>
+            <div class="panel-title form-row">
+                {{title_table}} ({{ table.length }})
+                <button class="pull-right btn btn-info"
+                        onClick="$('#btn-export-excel').click();"
+                        title="Exportar respostas do formulário"
+                        id="btn-assign">Exportar Respostas</button>
+            </div>
         </div>
         <div class="panel-body">
             <div class="table-responsive">
