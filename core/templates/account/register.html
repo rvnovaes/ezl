@@ -1,374 +1,110 @@
-{% extends 'skeleton/base.html' %}
 {% load static %}
-{% load djmoney %}
-{% block sidebar %}
-{% endblock %}
-{% block extra_stylesheets %}
-    <!-- Wizard CSS -->
-    <link href="{% static 'skeleton/plugins/bower_components/jquery-wizard-master/css/wizard.css' %}" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" sizes="16x16" href="../plugins/images/favicon.png">
+    <title>Ample Admin Template - The Ultimate Multipurpose admin template</title>
+    <!-- Bootstrap Core CSS -->
+    <link href="{% static 'skeleton/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- animation CSS -->
+    <link href="{% static 'skeleton/css/animate.css' %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'skeleton/css/style.css' %}" rel="stylesheet">
     <!-- color CSS -->
-    <link href="{% static 'skeleton/css/colors/default.css' %}" id="theme" rel="stylesheet">
+    <link href="{% static 'skeleton/css/colors/ezl.css' %}" id="theme" rel="stylesheet">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+<style type="text/css">
+    .new-login-register .lg-info-panel {      
+      background: url("{% static 'skeleton/images/login-register.jpg'%}") center center/cover no-repeat !important;)
+    }
+</style>
+</head>
 
-    <link href="{% static 'libs/toastr/build/toastr.min.css' %}" rel="stylesheet">
-
-    <link href="{% static 'skeleton/plugins/bower_components/custom-select/custom-select.css' %}" rel="stylesheet" type="text/css">
-    <style>
-        #page-wrapper{
-            margin-left: 0!important;
-        }
-        .modal-title{
-            margin-top: 15px !important;
-        }
-        div.select-row-icon{padding:0;margin:0}
-        div.select-row-icon div{display:block;list-style:none}
-        div.select-row-icon div a{display:block;color:#313131;padding:8px 15px;position:relative;border:2px solid #fff}
-        div.select-row-icon div a i{font-size:24px;vertical-align:middle;padding-right:10px}
-        div.select-row-icon div a i.whn-hov{color:#41b3f9;display:none;float:right;position:absolute;right:15px;top:10px}
-        div.select-row-icon div a.selected,div.select-row-icon div a:hover{border:2px solid rgba(120,130,140,.13)}
-        div.select-row-icon div a.selected i.whn-hov,div.select-row-icon div a:hover i.whn-hov{display:inline-block}
-    </style>
-{% endblock %}
-{% block navbar %}
-    <nav class="navbar navbar-default navbar-static-top m-b-0">
-        <div class="col-md-12 text-center m-t-15 m-b-10">
-            <p>Já possui uma conta? <a href="{% url 'login' %}" class="text-primary m-l-5"><b>Entrar</b></a>
-            </p>
-        </div>
-    </nav>
-{% endblock %}
-{% block containner %}
-    <!-- .row -->
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="white-box">
-                <div class="text-center">
-                    <img src="{% static 'img/logo_ezl.png'%}" alt="Easy Lawyer" class="" width="200px">
-                </div>
-                <h3 class="box-title m-b-0">CADASTRE-SE AGORA</h3>
-                <p class="text-muted m-b-30 font-13">Crie sua conta para começar a trabalhar</p>
-                <div id="registerForm" class="wizard">
-                    <ul class="wizard-steps" role="tablist">
-                        <li class="active" role="tab">
-                            <h4><span><i class="ti-user"></i></span>Dados de Acesso</h4> </li>
-                        <li role="tab">
-                            <h4><span><i class="fa fa-building-o"></i></span>Forma de trabalho</h4> </li>
-                        <li data-target="#plan_tab" role="tab">
-                            <h4><span><i class="fa fa-dashboard"></i></span>Plano de acesso</h4> </li>
-                        <li data-target="#confirm_tab" role="tab">
-                            <h4><span><i class="ti-check"></i></span>Confirmar</h4> </li>
-                    </ul>
-                    <form enctype="multipart/form-data" id="validation" class="form-horizontal" method="post" action="{% url 'register_user' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="invite_code" {% if invite_code %}value="{{ invite_code }}"{% endif %} >
-                        <div class="wizard-content">
-                            <div class="wizard-pane active" role="tabpanel">
-                                <div class="form-group">
-                                    <label class="col-xs-3 control-label">Nome</label>
-                                    <div class="col-xs-5">
-                                        <input type="text" class="form-control" name="name" /> </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-xs-3 control-label">Sobrenome</label>
-                                    <div class="col-xs-5">
-                                        <input type="text" class="form-control" name="last_name" /> </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-xs-3 control-label">Usuário</label>
-                                    <div class="col-xs-5">
-                                        <input type="text" class="form-control" name="username" /> </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-xs-3 control-label">E-mail</label>
-                                    <div class="col-xs-5">
-                                        <input type="text" class="form-control" name="email"
-                                        {% if email %}value="{{ email }}"{% endif %}/> </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-xs-3 control-label">Senha</label>
-                                    <div class="col-xs-5">
-                                        <input type="password" class="form-control" name="password" /> </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-xs-3 control-label">Confirmar Senha</label>
-                                    <div class="col-xs-5">
-                                        <input type="password" class="form-control" name="confirmpassword" /> </div>
-                                </div>
-                            </div>
-                            <div class="wizard-pane" role="tabpanel">
-                                <div class="form-group">
-                                    <div class="input-group">
-                                    </div>
-                                    <input type="hidden" name="select_office_register" required>
-                                    <div id="tab-1-alert" class="alert alert-danger alert" style="display: none">Favor selecionar uma forma de trabalho. </div>
-                                    <div id="select_office_register" class="select-row-icon">
-                                        <div class="row col-md-12">
-                                            <a id="existing_office" data-id="1" class='select_office_list' href="javascript:void(0)"><i class="fa fa-building-o"></i> <span>Vincular-me a um escritório já cadastrado</span> <i class="whn-hov mdi mdi-checkbox-marked-circle"></i></a>
-                                            <div id="select_office_detail_1" class="hide b-all p-10 m-b-15 text-center">
-                                                <h5 class="modal-title">Selecione o Escritório</h5>
-                                                <div class="row m-t-10 m-b-10">
-                                                    <div class="col-md-12"><input type="text" class="form-control form-inline" autocomplete="off" data-session="false" placeholder="Procurar..." id="filter_office_legal_name" name="filter_office_legal_name" ></div>
-                                                </div>
-                                                <div class="row" style="max-height: 400px; min-height: 140px; overflow: scroll">
-                                                    {% for office in offices %}
-                                                        <div class="col-md-4 col-sm-12 hide" id="office-{{ office.id }}">
-                                                            <div class="white-box color-bordered-table muted-bordered-table p-10 office-card-p" onclick="select_office('{{office.pk}}')">
-                                                                <div class="row">
-                                                                    <div class="col-md-2 col-sm-2 text-center">
-                                                                        <button type="button" class="btn btn-default btn-circle btn-md">
-                                                                            <i class="fa fa-building-o"></i>
-                                                                        </button>
-                                                                    </div>
-                                                                    <div class="col-md-10 col-sm-10" style="overflow-y: auto; overflow-x:hidden;">
-                                                                        <span class="box-title office-legal-name"><small>{{office.legal_name}}</small></span>
-                                                                            {% with office.get_address.first as first_address  %}
-                                                                                {% if first_address %}
-                                                                                    <br /><small><strong><span id="office-city">{{ first_address.city.name }} ({{ first_address.city.state.initials }})</span></strong></small>
-                                                                                {% endif %}
-                                                                            {% endwith %}
-                                                                        <input type="checkbox" id="office_checkbox_{{ office.pk }}" name="office_checkbox" class="hidden" value="{{ office.pk }}" >
-                                                                    </div>
-                                                                </div>
-                                                                <div class="row">
-                                                                    <div class="col-md-12 office-select-button">
-                                                                        <button id="button_action-{{ office.pk }}"
-                                                                                class="btn btn-custom btn-block btn-rounded btn-block m-t-10 p-t-0 p-b-0">
-                                                                            <i id='icon-{{ office.pk }}' class="fa fa-check" style="font-size: 13px;"></i>
-                                                                            <span id="title-{{ office.pk }}" style="font-size: 12px;">Selecionar</span></button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    {% endfor %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row col-md-12">
-                                            <a id="new_office" data-id="2" class='select_office_list' href="javascript:void(0)"><i class="fa fa-plus-square-o"></i> <span> Não encontrei meu escritório e desejo cadastrá-lo</span> <i class="whn-hov mdi mdi-checkbox-marked-circle"></i></a>
-                                            <div id="select_office_detail_2" class="hide b-all p-20 m-b-15 text-center">
-                                                <div class="form-group">
-                                                    <label class="col-xs-3 control-label">Razão social / Nome completo</label>
-                                                    <div class="col-xs-5">
-                                                        <input type="text" class="form-control" name="legal_name" /> </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label class="col-xs-3 control-label">Nome fantasia / Apelido</label>
-                                                    <div class="col-xs-5">
-                                                        <input type="text" class="form-control" name="office_name" /> </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label class="col-xs-3 control-label">Tipo</label>
-                                                    <div class="col-xs-5">
-                                                        <select name="legal_type" class="form-control" title="" id="id_legal_type">
-                                                          <option value="F">Física</option>
-                                                          <option value="J" selected="">Jurídica</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label class="col-xs-3 control-label">CPF / CNPJ</label>
-                                                    <div class="col-xs-5">
-                                                        <input type="text" class="form-control" name="cpf_cnpj" id="id_cpf_cnpj" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row col-md-12">
-                                            <a id="work_alone" data-id="3" class='select_office_list' href="javascript:void(0)"><i class="fa fa-user"></i> <span>Trabalho sozinho</span> <i class="whn-hov mdi mdi-checkbox-marked-circle"></i></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="wizard-pane active" id="plan_tab" role="tabpanel">
-                                <div id="tab-2-alert" class="alert alert-danger alert" style="display: none">Favor selecionar um Plano de acesso. </div>
-                                <div class="row pricing-plan">
-                                    {% for plan in plans %}
-                                        <div class="col-md-4 col-xs-12 col-sm-6 no-padding">
-                                            <div id="plan-{{ plan.pk }}-box" class="pricing-box b-l b-r">
-                                                <div class="pricing-body">
-                                                    <div class="pricing-header" style="min-height: 125px">
-                                                        <h4 class="text-center">{{ plan.name }}</h4>
-                                                        {% if plan.custom_pricing %}
-                                                            <h2 class="p-b-20 font-bold">{{ plan.custom_pricing_text }}</h2>
-                                                        {% else %}
-                                                        <h2 class="text-center">
-                                                            {% money_localize plan.month_value on as formated_month_value%}
-                                                            <span class="price-sign">{{ formated_month_value|make_list|slice:':2'|join:'' }}</span>
-                                                            {{ formated_month_value|make_list|slice:'2:'|join:'' }}
-                                                        </h2>
-                                                        <p class="uppercase">por mês</p>
-                                                        {% endif %}
-                                                    </div>
-                                                    <div class="price-table-content">
-                                                        {{ plan.description|safe }}
-                                                        <div class="price-row">
-                                                            <button class="btn btn-success waves-effect waves-light m-t-20"
-                                                                    data-select="plan"
-                                                                    data-value="{{ plan.pk }}"
-                                                                    data-name="{{ plan.name }}"
-                                                                    {% if plan.custom_pricing %}
-                                                                    data-month_value="{{ plan.custom_pricing_text }}"
-                                                                    {% else %}
-                                                                    data-month_value="{{ formated_month_value }}/mês"
-                                                                    {% endif %}
-                                                                    onclick="choose_plan(this)">Contratar</button>
-                                                            <input type='radio' id='plan-{{ plan.pk }}-radio' name='plan' value='{{ plan.pk }}' class="hidden" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            <div class="wizard-pane" id="confirm_tab" role="tabpanel">
-                                <div class="row">
-                                    <h4 class="font-bold">Dados de acesso</h4>
-                                    <div class="form-group m-b-0">
-                                        <label class="col-xs-3 control-label p-t-10">Nome</label>
-                                        <div class="col-xs-5 p-t-10">
-                                            <span id="name"></span>
-                                        </div>
-                                    </div>
-                                    <div class="form-group m-b-0">
-                                        <label class="col-xs-3 control-label p-t-10">Usuário</label>
-                                        <div class="col-xs-5 p-t-10">
-                                            <span id="username"></span>
-                                        </div>
-                                    </div>
-                                    <div class="form-group m-b-0">
-                                        <label class="col-xs-3 control-label p-t-10">E-mail</label>
-                                        <div class="col-xs-5 p-t-10">
-                                            <span id="email"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <h4 class="font-bold">Forma de trabalho</h4>
-                                    <div id="select_office_register-1" class="form-group m-b-0">
-                                        <label class="col-xs-3 control-label p-t-10">Vicular-me a um escritório já cadastrado</label>
-                                        <div class="col-xs-5 p-t-10">
-                                            <span id="office_list"></span>
-                                        </div>
-                                    </div>
-                                    <div id="select_office_register-2" class="form-group m-b-0">
-                                        <div class="form-group m-b-0 m-l-15">
-                                            <label class="control-label p-t-10">Não encontrei meu escritório e desejo cadastrá-lo</label>
-                                        </div>
-                                        <div class="form-group m-b-0">
-                                            <label class="col-xs-3 control-label p-t-10">Razão social / Nome completo</label>
-                                            <div class="col-xs-5 p-t-10">
-                                                <span id="legal_name"></span>
-                                            </div>
-                                        </div>
-                                        <div class="form-group m-b-0">
-                                            <label class="col-xs-3 control-label p-t-10">Nome fantasia / Apelido</label>
-                                            <div class="col-xs-5 p-t-10">
-                                                <span id="office_name"></span>
-                                            </div>
-                                        </div>
-                                        <div class="form-group m-b-0">
-                                            <label class="col-xs-3 control-label p-t-10">Tipo</label>
-                                            <div class="col-xs-5 p-t-10">
-                                                <span id="legal_type"></span>
-                                            </div>
-                                        </div>
-                                        <div class="form-group m-b-0">
-                                            <label class="col-xs-3 control-label p-t-10">CPF / CNPJ</label>
-                                            <div class="col-xs-5 p-t-10">
-                                                <span id="cpf_cnpj"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div id="select_office_register-3" class="form-group m-b-0">
-                                        <label class="col-xs-3 control-label p-t-10">Trabalho Sozinho</label>
-                                    </div>
-                                </div>
-                                <div id="plan-row" class="row">
-                                    <h4 class="font-bold">Plano de acesso</h4>
-                                    <span id="selected-plan" class="m-l-10 control-label p-t-10"></span>
-                                    <div class="form-group m-b-0">
-                                        <label id="selected-plan_name" class="col-xs-3 control-label p-t-10"></label>
-                                        <div class="col-xs-5 p-t-10">
-                                            <span id="selected-plan_month_value"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <h4 class="font-bold">Termos de uso e serviço</h4>
-                                    <div class="row terms-conditions">
-                                        <blockquote><small>
-                                            {% include 'account/terms/terms_and_conditions.html' %}
-                                        </small></blockquote>
-                                    </div>
-                                    <div class="row">
-                                        <div class="form-group m-l-15">
-                                            <div class="checkbox">
-                                                <input id="terms" value="yes" required type="checkbox">
-                                                <label for="terms"> Aceito os Termos e Condições de Uso</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% include 'core/mask_selector.html' %}
-                    </form>
-                </div>
+<body>
+    <!-- Preloader -->
+    <div class="preloader">
+        <svg class="circular" viewBox="25 25 50 50">
+            <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/>
+        </svg>
+    </div>
+    <section id="wrapper" class="new-login-register">
+        <div class="lg-info-panel">
+            <div class="inner-panel">
+                <a href="javascript:void(0)" class="p-20 di"><img src="{% static 'img/logo_ezl.png'%}"></a>
+                  <div class="lg-content">
+                      <h2>Plataforma de correspondentes e serviços jurídicos</h2>
+                      <p class="text-muted">Gerencie sua própria rede de correspondentes, ofereça seus serviços ou contrate diretamente nossa logística jurídica. Software como serviço - SAAS sem custo de implantação ou de infraestrutura. Sistema na nuvem - cloud based. Sem custos fixos - pay-as-you-go.</p>
+                  </div>
             </div>
         </div>
-    </div>
-    <!-- /.row -->
-{% endblock containner %}
-{% block modal %}
-{% endblock %}
-{% block extra_scripts %}
-    <!-- Form Wizard JavaScript -->
-    <script src="{% static 'skeleton/plugins/bower_components/jquery-wizard-master/dist/jquery-wizard.min.js' %}"></script>
-    <!-- FormValidation -->
-    <link rel="stylesheet" href="{% static 'skeleton/plugins/bower_components/jquery-wizard-master/libs/formvalidation/formValidation.min.css' %}">
-    <!-- FormValidation plugin and the class supports validating Bootstrap form -->
-    <script src="{% static 'skeleton/plugins/bower_components/jquery-wizard-master/libs/formvalidation/formValidation.min.js' %}"></script>
-    <script src="{% static 'skeleton/plugins/bower_components/jquery-wizard-master/libs/formvalidation/bootstrap.min.js' %}"></script>
-    <!--Toast-->
-    <script src="{% static 'libs/toastr/build/toastr.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'skeleton/plugins/bower_components/custom-select/custom-select.min.js' %}"></script>
-    <!-- scripts do template -->
-    <script type="text/javascript" src="{% static 'js/register.js' %}"></script>
+        <div class="new-login-box">
+            <div class="white-box">
+                <h3 class="box-title m-b-0">Informe os dados abaixo</h3> 
+                <small>Clique em cadastrar ao terminar o preenchimento</small>                
+                <form class="form-horizontal new-lg-form" id="loginform" action="index.html">
+                    <div class="form-group ">
+                        <div class="col-xs-12">
+                            <input class="form-control" type="text" required="" placeholder="E-mail"> </div>
+                    </div>
+                    <div class="form-group ">
+                        <div class="col-xs-12">
+                            <input class="form-control" type="password" required="" placeholder="Senha"> </div>
+                    </div>
+                    <div class="form-group ">
+                        <div class="col-xs-12">
+                            <input class="form-control" type="text" required="" placeholder="Nome completo"> </div>
+                    </div>
+                    <div class="form-group ">
+                        <div class="col-xs-12">
+                            <input class="form-control" type="text" required="" placeholder="Nome da escritório/empresa"> </div>
+                    </div>                    
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="checkbox checkbox-primary p-t-0">
+                                <input id="checkbox-signup" type="checkbox">
+                                <label for="checkbox-signup"> Eu aceito todos os <a href="#">Termos</a></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group text-center m-t-20">
+                        <div class="col-xs-12">
+                            <button class="btn btn-info btn-lg btn-block text-uppercase waves-effect waves-light" type="submit">Cadastrar</button>
+                        </div>
+                    </div>
+                    <div class="form-group m-b-0">
+                        <div class="col-sm-12 text-center">
+                            <p>Você já é cadastradp? <a href="login.html" class="text-danger m-l-5"><b>Entrar</b></a></p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!-- jQuery -->
+    <script src="{% static 'skeleton/plugins/bower_components/jquery/dist/jquery.min.js' %}"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{% static 'skeleton/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <!-- Menu Plugin JavaScript -->
+    <script src="{% static 'skeleton/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js' %}"></script>
+    <!--slimscroll JavaScript -->
+    <script src="{% static 'skeleton/js/jquery.slimscroll.js' %}"></script>
+    <!--Wave Effects -->
+    <script src="{% static 'skeleton/js/waves.js' %}"></script>
+    <!-- Custom Theme JavaScript -->
+    <script src="{% static 'skeleton/js/custom.js' %}"></script>
+    <!--Style Switcher -->
+    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
+</body>
 
-{% endblock extra_scripts %}
-{% block script_document_ready %}
-    {% if errors %}
-        {% for error in errors %}
-             showToast('error', '{{ error.title }}', '{{ error.message|escape }}', 0, false);
-        {% endfor %}
-    {% endif %}
-    $('.select2').select2();
-    $('input[id^=office_checkbox_]').each(function (index) {
-        if($( this ).prop("checked")){
-            var office_id = $( this ).val();
-            var office_card = $('#office-'+office_id);
-            var office_icon = $('#icon-'+office_id);
-            var office_title = $('#title-'+office_id);
-            var button_action = $('#button_action-'+office_id);
-            office_icon.removeClass('fa-check')
-            office_icon.addClass('fa-times')
-            office_title.html(' Remover')
-            button_action.removeClass('btn-custom')
-            button_action.addClass('btn-danger')
-            office_card.addClass('card-fixed')
-            office_card.removeClass('hide')
-        }
-    })
-    $( "input[name=password]" ).blur(function() {
-      $('#validation').formValidation('revalidateField', 'password')
-    });
-    $( "input[name=username]" ).blur(function() {
-      $('#validation').formValidation('revalidateField', 'username')
-    });
-    $( "input[name=email]" ).blur(function() {
-      $('#validation').formValidation('revalidateField', 'email')
-    });
-    $(document).on('keypress', ':input:not(textarea)', function(event) {
-        return event.keyCode != 13;
-    });
-{% endblock %}
+</html>

@@ -48,6 +48,8 @@
       </div>
       <div class="new-login-box">
                 <div class="white-box">
+                <h3 class="box-title m-b-0">Informe os dados abaixo</h3> 
+                <small>Clique em entrar após terminar o preenchimento</small>                  
                   <form class="form-horizontal new-lg-form" id="loginform" action="{% url 'account_login' %}" method="POST">{% csrf_token %}
                     
                     <div class="form-group  m-t-20">
@@ -114,7 +116,7 @@
 <!--Wave Effects -->
 <script src="{% static 'skeleton/js/waves.js' %}"></script>
 <!-- Custom Theme JavaScript -->
-<script src="{% static 'skeleton/js/custom.js' %}"></script>>
+<script src="{% static 'skeleton/js/custom.js' %}"></script>
 <!--Style Switcher -->
 <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
 </body>
