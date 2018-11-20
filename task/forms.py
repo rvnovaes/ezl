@@ -218,7 +218,6 @@ class ImportTaskListForm(forms.ModelForm):
         ])
 
 
-
 class TaskSurveyAnswerForm(forms.ModelForm):
     class Meta:
         model = TaskSurveyAnswer
