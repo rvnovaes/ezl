@@ -97,43 +97,44 @@ class TaskCreateForm(TaskForm):
 
 class TaskBulkCreateForm(TaskCreateForm):
     task_law_suit_number = forms.ModelChoiceField(label='Número do processo',
+                                                  required=False,
                                                   widget=MDSelect(url='/processos/lawsuit_autocomplete', ),
-                                                  queryset=LawSuit.objects.none())
+                                                  queryset=LawSuit.objects.all())
     court_district = forms.ModelChoiceField(label='Comarca',
                                             required=False,
                                             widget=MDSelect(url='/processos/courtdistrict_select2', ),
-                                            queryset=CourtDistrict.objects.none())
+                                            queryset=CourtDistrict.objects.all())
     city = forms.ModelChoiceField(label='Cidade',
                                   required=False,
                                   widget=MDSelect(url='/city/autocomplete_select2/', ),
-                                  queryset=City.objects.none())
+                                  queryset=City.objects.all())
     court_district_complement = forms.ModelChoiceField(label='Complemento de Comarca',
                                                        required=False,
                                                        widget=MDSelect(url='/processos/complemento_select2',
                                                                        forward=['court_district']),
-                                                       queryset=CourtDistrictComplement.objects.none())
+                                                       queryset=CourtDistrictComplement.objects.all())
     person_customer = forms.ModelChoiceField(label='Cliente/Parte',
                                              required=True,
                                              widget=MDSelect(url='/get_client_2', ),
-                                             queryset=Person.objects.none())
+                                             queryset=Person.objects.all())
     person_customer_swal = forms.ModelChoiceField(label='Cliente/Parte',
                                                   required=True,
                                                   widget=MDSelect(url='/get_client_2', ),
-                                                  queryset=Person.objects.none())
+                                                  queryset=Person.objects.all())
 
     folder_number = forms.ModelChoiceField(label='Nº da Pasta',
                                            required=False,
                                            widget=MDSelect(url='/processos/folder_autocomplete_2', ),
-                                           queryset=Folder.objects.none())
+                                           queryset=Folder.objects.all())
     movement = forms.ModelChoiceField(label='Movimentação',
                                       required=False,
                                       widget=MDSelect(url='/processos/movement_autocomplete',
                                                       forward=['task_law_suit_number']),
-                                      queryset=Movement.objects.none())
+                                      queryset=Movement.objects.all())
     person_company_representative = forms.ModelChoiceField(label='Preposto',
                                                            required=False,
                                                            widget=MDSelect(url='/get_person_company_representative_2', ),
-                                                           queryset=Person.objects.none())
+                                                           queryset=Person.objects.all())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -142,6 +143,10 @@ class TaskBulkCreateForm(TaskCreateForm):
         self.fields['task_number'].widget = forms.HiddenInput()
         self.fields['office'].widget = forms.HiddenInput()
         self.fields['office'].initial = office_session
+        choices = [choice for choice in self.fields['person_asked_by'].choices]
+        if (self.request.user.person.id, self.request.user.person.legal_name) not in choices:
+            choices.append((self.request.user.person.id, self.request.user.person.legal_name))
+        self.fields['person_asked_by'].choices = choices
 
 
 class TaskDetailForm(ModelForm):

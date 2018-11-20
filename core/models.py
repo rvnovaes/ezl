@@ -205,8 +205,7 @@ class City(Audit):
         unique_together = (('name', 'state'), )
 
     def __str__(self):
-        return '{} - {} - {}'.format(self.name, self.state.initials,
-                                     self.state.country.name)
+        return '{} - {}'.format(self.name, self.state.initials)
 
 
 class AbstractPerson(Audit, LegacyCode):

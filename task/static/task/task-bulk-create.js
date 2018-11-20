@@ -2,6 +2,7 @@ class TaskBulkCreate {
 	constructor() {
 	    this.formErrors = [];
 	    this.nullData = {id: null, text: null};
+	    this.defaultPersonAskedBy = null;
 		this.elInputPersonCustomer = $('[name=person_customer]');
 		this.elCourtDistrict = $('[name=court_district]');
 		this.elCourtDistrictComplemt = $('[name=court_district_complement]');
@@ -10,6 +11,8 @@ class TaskBulkCreate {
 		this.elFolderNumber = $('[name=folder_number]');
         this.elTypeTask = $('[name=type_task]');
         this.elMovement = $('[name=movement]');
+        this.elFinalDeadlineDate = $('[name=final_deadline_date]');
+        this.elPerformancePlace = $('#id_performance_place');
         this.labelLawSuitNumber = $('label[for=id_task_law_suit_number]');
 		this.onChangeCity();
 		this.onChangeCourtDistrict();
@@ -68,6 +71,34 @@ class TaskBulkCreate {
 	    TaskBulkCreate.setSelect2(data, this.elInputPersonCustomer);
     }
 
+    setPerformancePlace() {
+	    let performancePlace = '';
+	    let courtDistrictComplement = this.courtDistrictComplementText;
+	    let courtDistrict = this.courtDistrictText;
+	    let city = this.cityText;
+	    if (courtDistrictComplement){
+	        performancePlace = courtDistrictComplement;
+        }else if(courtDistrict){
+	        performancePlace = courtDistrict;
+        }else if(city){
+	        performancePlace = city;
+        }
+        this.elPerformancePlace.val(performancePlace);
+    }
+
+    get performancePlace() {
+	    this.setPerformancePlace();
+	    return this.elPerformancePlace.val();
+    }
+
+    get finalDeadlineDate() {
+	    return this.elFinalDeadlineDate.val();
+    }
+
+    get cityText() {
+	    return (this.city) ? this.elCity.select2('data')[0].text : '';
+    }
+
     get city() {
 	    return this.elCity.val();
     }
@@ -76,12 +107,20 @@ class TaskBulkCreate {
 	    TaskBulkCreate.setSelect2(data, this.elCity);
     }
 
+    get courtDistrictText() {
+	    return (this.courtDistrict) ? this.elCourtDistrict.select2('data')[0].text : '';
+    }
+
     get courtDistrict() {
 	    return this.elCourtDistrict.val();
     }
 
     set courtDistrict(data) {
 	    TaskBulkCreate.setSelect2(data, this.elCourtDistrict);
+    }
+
+    get courtDistrictComplementText() {
+	    return (this.courtDistrictComplement) ? this.elCourtDistrictComplemt.select2('data')[0].text : '';
     }
 
     get courtDistrictComplement() {
@@ -349,30 +388,94 @@ class TaskBulkCreate {
 
     }
 
+    validateFinalDeadlineDate() {
+        if (!this.finalDeadlineDate) {
+            this.insertFormErrors('Deve ser informado o prazo de cumprimento da OS.',
+                [this.elFinalDeadlineDate]);
+        }
+        if (moment().add(2, 'hour') > moment(this.finalDeadlineDate, "DD/MM/YYYY HH:mm")){
+            this.insertFormErrors('O prazo de cumprimento da OS é inferior a duas horas.',
+                [this.elFinalDeadlineDate]);
+        }
+
+    }
+
+    submitForm(data){
+	    let baseURL = window.location.origin;
+        $.ajax({
+            type: 'POST',
+            url: window.location,
+            data: data,
+            success: (result)=>{
+                swal({
+                    title: 'OS criada:',
+                    type: 'success',
+                    html: '<a href="'+baseURL + '/dashboard/' + result.task_id + '" target="_blank">' + baseURL + '/dashboard/' + result.task_id + '</a>',
+                    showCloseButton: true,
+                    showCancelButton: false,
+                    focusConfirm: true,
+                });
+            },
+            error: (request, status, error)=>{
+                showToast('error', 'Atenção', error, 0, false);
+            },
+            beforeSend: (xhr, settings)=>{
+                xhr.setRequestHeader("X-CSRFToken", data.csrfmiddlewaretoken);
+            },
+            dataType: 'json'
+        });
+    }
+
+    static get formData() {
+		return $("form").serializeArray();
+	}
+
+	get query() {
+		let formData = TaskBulkCreate.formData;
+		let data = {};
+		$(formData ).each(function(index, obj){
+		    data[obj.name] = obj.value;
+		});
+        if (data.person_asked_by === "") {
+            data.person_asked_by = String(this.defaultPersonAskedBy);
+        }
+        data.performance_place = this.performancePlace;
+        if (!data.movement){
+            data.movement = this.movement;
+        }
+		return data;
+	}
+
     validateForm() {
 	    this.clearFormErrors();
         this.validateLawsuit();
         this.validatePerformancePlace();
+        this.validateFinalDeadlineDate();
         if (this.formErrors.length <= 0) {
-            return;
+            return false;
         }
-        let htmlErrors = this.getErrors()
+        let htmlErrors = this.getErrors();
         swal({
             title: 'Campos obrigatórios não preenchidos',
             width: '45%',
             html: htmlErrors,
             type: 'error'
         });
+        return this.formErrors.length;
     }
 
     save() {
-        this.validateForm();
+        let formErrors = this.validateForm();
+        if (!formErrors) {
+            let data = this.query;
+            this.submitForm(data)
+        }
     }
 
     onSaveSubmit() {
         $('[type=submit]').on('click', (el)=> {                
             el.preventDefault();
             this.save();
-        })
+        });
     }    
 }

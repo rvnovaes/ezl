@@ -33,7 +33,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
 from core.models import Person, CorePermissions, CustomSettings, Office
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from lawsuit.forms import LawSuitForm
-from lawsuit.models import Movement
+from lawsuit.models import Movement, LawSuit, Folder, TypeMovement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, \
     ImportTaskListForm, TaskBulkCreateForm
@@ -87,12 +87,62 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
                                            'text': office.customsettings.default_customer.legal_name}
         return context
 
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        form.fields['person_customer_swal'].required = False
+        form.fields['person_asked_by'].queryset = Person.objects.all()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
     def form_valid(self, form):
-        task = form.instance
-        form.instance.movement_id = self.request.POST['movement']
-        self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
+        create_user = self.request.user
+        form.instance.create_user = create_user
+        form.instance.create_date = timezone.now()
+        form.instance.is_active = True
+        office = form.instance.office
+        movement_id = self.request.POST['movement']
+        law_suit_number = self.request.POST['task_law_suit_number']
+        folder_number = self.request.POST['folder_number']
+        person_customer_id = self.request.POST['person_customer']
+        if folder_number:
+            folder = Folder.objects.filter(id=folder_number).first()
+        else:
+            folder, created = Folder.objects.get_or_create(person_customer_id=person_customer_id,
+                                                           is_default=True,
+                                                           office=office,
+                                                           defaults={'create_user': create_user,
+                                                                     'is_active': True})
+        if law_suit_number:
+            law_suit = LawSuit.objects.filter(id=law_suit_number).first()
+            law_suit.folder = folder
+            law_suit.save()
+        else:
+            law_suit, created = LawSuit.objects.get_or_create(folder=folder,
+                                                              law_suit_number='Processo avulso',
+                                                              office=office,
+                                                              defaults={'create_user': create_user,
+                                                                        'is_active': True})
+        if movement_id:
+            movement = Movement.objects.filter(id=movement_id).first()
+            movement.law_suit = law_suit
+            movement.save()
+        else:
+            default_type_movement, created = TypeMovement.objects.get_or_create(is_default=True,
+                                                                                office=office,
+                                                                                defaults={
+                                                                                    'name': 'OS Avulsa',
+                                                                                    'create_user': create_user})
+            movement, created = Movement.objects.get_or_create(folder=folder,
+                                                               law_suit=law_suit,
+                                                               type_movement=default_type_movement,
+                                                               office=office,
+                                                               defaults={'create_user': create_user,
+                                                                         'is_active': True})
+        form.instance.movement = movement
         form.instance.__server = get_domain(self.request)
-        response = super(TaskBulkCreateView, self).form_valid(form)
+        task = form.save()
 
         documents = self.request.FILES.getlist('file')
         if documents:
@@ -105,7 +155,14 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
 
         form.delete_temporary_files()
 
-        return response
+        status = 200
+        ret = {'status': 'Ok', 'task_id': task.id}
+        return JsonResponse(ret, status=status)
+
+    def form_invalid(self, form):
+        status = 500
+        ret = {'status': 'false', 'errors': form.errors}
+        return JsonResponse(ret, status=status)
 
     def get_success_url(self):
         return "{}?movement={}&movementLabel={}&lawsuit={}&lawsuitLabel={}&folder={}&folderLabel={}".format(
