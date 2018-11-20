@@ -8,6 +8,7 @@ import pandas as pd
 from datetime import datetime
 from urllib.parse import urlparse
 from zipfile import ZipFile
+import xlsxwriter
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -59,6 +60,7 @@ from django.shortcuts import render
 import os
 from django.conf import settings
 from urllib.parse import urljoin
+from survey.models import SurveyPermissions
 
 
 import logging
@@ -971,7 +973,7 @@ def delete_external_ecm(request, task_hash, pk):
 
 
 class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
-    model = DashboardViewModel
+    model = Task
     filter_class = TaskFilter
     template_name = 'task/task_filter.html'
     context_object_name = 'task_filter'
@@ -999,7 +1001,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
             if data['custom_filter']:
                 q = pickle.loads(data['custom_filter'].query)
-                query_set = DashboardViewModel.objects.filter(q)
+                query_set = Task.objects.filter(q)
 
             else:
                 task_dynamic_query = Q()
@@ -1226,7 +1228,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
                 office_id = (get_office_session(self.request).id
                              if get_office_session(self.request) else 0)
-                query_set = DashboardViewModel.objects.filter(
+                query_set = Task.objects.filter(
                     office_id=office_id).filter(person_dynamic_query)
 
             try:
@@ -1272,46 +1274,64 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
         return super().get(request)
 
+    def _xls_write_row(self, writer, values):
+        last_row = getattr(self, '_xls_last_row', -1)
+        current_row = last_row + 1
+        setattr(self, '_xls_last_row', current_row)
+
+        for y, value in enumerate(values):
+            writer.write(current_row, y, value)
+
     def _export_answers(self, request):
-        response = HttpResponse(content_type='text/csv')
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output)
+        worksheet = workbook.add_worksheet()
+
+        task_ids = self.get_queryset().filter(
+                tasksurveyanswer__survey_result__isnull=False
+            ).values_list('id', flat=True)
+
+        answers = TaskSurveyAnswer.objects.filter(
+            task_id__in=task_ids).select_related('task')
+        columns = self._get_answers_columns(answers)
+
+        self._xls_write_row(
+            worksheet,
+            (['N° da OS',
+              'N° da OS no sistema de origem',
+              'Tipo de Serviço',
+              'Usuário',
+            ] + columns)
+        )
+
+        for answer in answers:
+            self._export_answers_write_task(worksheet, answer, columns)
+
+        workbook.close()
+
+        xlsx_data = output.getvalue()
+        response = HttpResponse(
+            xlsx_data,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response[
-            'Content-Disposition'] = 'attachment; filename="respostas_dos_formularios.csv"'
-        writer = csv.writer(response)
-
-        queryset = self.get_queryset().filter(survey_result__isnull=False)
-        tasks = self._fill_tasks_answers(queryset)
-        columns = self._get_answers_columns(tasks)
-        writer.writerow(['N° da OS', 'N° da OS no sistema de origem'] +
-                        columns)
-
-        for task in tasks:
-            self._export_answers_write_task(writer, task, columns)
+            'Content-Disposition'] = 'attachment; filename="respostas_dos_formularios.xlsx"'
         return response
 
-    def _fill_tasks_answers(self, queryset):
-        tasks = []
-        for task in queryset:
-            try:
-                task.survey_result = json.loads(task.survey_result)
-                tasks.append(task)
-            except ValueError:
-                return
-        return tasks
-
-    def _export_answers_write_task(self, writer, task, columns):
-        base_fields = [task.id, task.legacy_code]
+    def _export_answers_write_task(self, writer, answer, columns):
+        task = answer.task
+        base_fields = [task.id, task.legacy_code, str(task.type_task), answer.create_user.username]
         answers = ['' for x in range(len(columns))]
-        for question, answer in task.survey_result.items():
+        for question, answer in answer.survey_result.items():
             question_index = columns.index(question)
             answers[question_index] = answer
 
-        writer.writerow(base_fields + answers)
+        self._xls_write_row(writer, base_fields + answers)
 
-    def _get_answers_columns(self, tasks):
+    def _get_answers_columns(self, answers):
         columns = []
         i = 0
-        for task in tasks:
-            for question, answer in task.survey_result.items():
+        for answer in answers:
+            for question, answer in answer.survey_result.items():
                 if question not in columns:
                     columns.append(question)
         columns.sort()

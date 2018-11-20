@@ -156,5 +156,12 @@
                     </div>
                 </div>
             </div>
+         {% if perms.core.can_view_survey_results %}
+            {% comment %}
+                Por questões de UX colocamos um "espelho" do botão fora do formulário e ao clicar nele acionamos esse botão.
+            {% endcomment %}
+             <button class="btn btn-success waves-effect waves-light hide" type="submit" name="export_answers" value="true" id="btn-export-excel">
+             </button>
+         {% endif %}
         </form>
     </div>
