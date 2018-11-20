@@ -18,17 +18,16 @@
 {% block content %}
     {% include 'core/widgets/messages.html' %}
     <form id="task_form" action="" method="post" enctype="multipart/form-data">
+        <fieldset>
         {% csrf_token %}
         {% for hidden in form.hidden_fields %}
         {{ hidden }}
         {% endfor %}
-        <div class="form-row">
+        <div class="col-xs-12 form-row">
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h1 class="panel-title">Criar ordem de serviço</h1>
-                </div>
-                <div class="panel-body">                    
-                    <fieldset>
+                <div class="panel-heading">Criar ordem de serviço</div>
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
                         <div class="row p-b-10">
                             <div class="col-sm-12 p-r-0">
                                 {% bootstrap_field form.person_customer layout='horizontal' addon_after='<button id="btn_add_person_customer" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Cliente/Parte"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10' form_group_class="col-sm-12 p-0" label_class='col-sm-2 ezl-required p-0' field_class='col-sm-8 p-0' %}
@@ -41,13 +40,13 @@
                                     <div class="p-0 col-sm-8">
                                         <select name="type_task" class="form-control" title="" required="" id="id_type_task">
                                             <option value="" selected="">Selecione...</option>
-                                            {% for type_task in form.fields.type_task.queryset %} 
+                                            {% for type_task in form.fields.type_task.queryset %}
                                                 <option is-hearing="{{type_task.type_task_main.all.0.is_hearing}}" value="{{type_task.pk}}" selected="">{{type_task.name}}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
                                 </div>
-                            </div>                             
+                            </div>
                             <div class="col-sm-6 p-r-0">
                                 {% bootstrap_field form.task_law_suit_number addon_after='<button id="btn_add_lawsuit" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Processo"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10' form_group_class="col-sm-11 p-0" layout='horizontal' label_class="p-0 col-sm-4" field_class="p-l-0 p-r-5 col-sm-8" %}
                             </div>
@@ -62,68 +61,78 @@
                                 {% bootstrap_field form.final_deadline_date layout='horizontal' addon_after='(Mínimo de 48h)' addon_after_class='input-group-addon addon-txt' label_class='col-sm-2 control-label ezl-required p-0' field_class='col-sm-6 p-l-0' %}
                             </div>
                         </div>
-                        <div class="panel panel-default block2">
-                            <div class="panel-heading p-l-0 p-t-10 p-b-0 ezl-required"><a href="#" data-perform="panel-collapse">Informar a comarca ou a cidade</a>
-                            </div>
-                            <div class="panel-wrapper collapse in" aria-expanded="true" style="">
-                                <div class="panel-body p-l-0 p-b-0 p-r-0">
-                                    <div class="row p-b-10">
-                                        <div class="col-sm-6 p-r-0">
-                                            {% bootstrap_field form.court_district form_group_class="col-sm-12 p-0" layout='horizontal' label_class="p-0 col-sm-4" field_class="p-0 col-sm-8" %}
-                                        </div>
-                                        <div class="col-sm-6 p-r-0">
-                                            {% bootstrap_field form.city form_group_class="col-sm-12 p-0" required_css_class='' layout='horizontal' label_class="p-0 col-sm-4" field_class="p-l-0 p-r-5 col-sm-8" %}
-                                        </div>
-                                    </div>
-                                    <div class="row p-b-10">
-                                        <div class="col-sm-6 p-r-0">
-                                            {% bootstrap_field form.court_district_complement form_group_class="col-sm-12 p-0" layout='horizontal' label_class='col-sm-4 control-label p-0' field_class='col-sm-8 p-0' %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="panel panel-default block2">
-                            <div class="panel-heading p-l-0 p-t-0 p-b-0"><a href="#" data-perform="panel-collapse">Anexos</a>
-                            </div>
-                            <div class="panel-wrapper collapse in" aria-expanded="true" style="">
-                                <div class="panel-body p-l-0 p-b-0 p-r-0">
-                                    {% include 'ecm/attachments_create.html' %}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="panel panel-default block2">
-                            <div class="panel-heading p-l-0 p-t-0 p-b-0"><a href="#" data-perform="panel-collapse">Mais informações</a>
-                            </div>
-                            <div class="panel-wrapper collapse" aria-expanded="false" style="">
-                                <div class="panel-body p-l-0 p-b-0 p-r-0">
-                                    <div class="row p-b-10">
-                                        <div class="col-sm-12 p-r-0 btn-raised">
-                                            {% bootstrap_field form.folder_number addon_after='<button id="btn_add_folder" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Passta"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10'  layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
-                                        </div>
-                                    </div>
-                                    <div class="row p-b-10">
-                                        <div class="col-sm-12 p-r-0">
-                                            {% bootstrap_field form.movement layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
-                                        </div>
-                                    </div>
-                                    <div class="row p-b-10">
-                                        <div class="col-sm-12 p-r-0">
-                                            {% bootstrap_field form.person_company_representative layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
-                                        </div>
-                                    </div>
-                                    <div class="row p-b-10">
-                                        <div class="col-sm-12 p-r-0">
-                                            {% bootstrap_field form.person_asked_by layout='horizontal' label_class='col-sm-2 control-label p-0 ezl-required' field_class='col-sm-9 p-l-0' %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </fieldset>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 form-row">
+            <div class="panel panel-default">
+                <div class="panel-heading ezl-required"><a href="#" data-perform="panel-collapse">Informar a comarca ou a cidade</a></div>
+                <div class="panel-wrapper collapse in" aria-expanded="true" style="">
+                    <div class="panel-body">
+                        <div class="row p-b-10">
+                            <div class="col-sm-6 p-r-0">
+                                {% bootstrap_field form.court_district form_group_class="col-sm-12 p-0" layout='horizontal' label_class="p-0 col-sm-4" field_class="p-0 col-sm-8" %}
+                            </div>
+                            <div class="col-sm-6 p-r-0">
+                                {% bootstrap_field form.city form_group_class="col-sm-12 p-0" required_css_class='' layout='horizontal' label_class="p-0 col-sm-4" field_class="p-l-0 p-r-5 col-sm-8" %}
+                            </div>
+                        </div>
+                        <div class="row p-b-10">
+                            <div class="col-sm-6 p-r-0">
+                                {% bootstrap_field form.court_district_complement form_group_class="col-sm-12 p-0" layout='horizontal' label_class='col-sm-4 control-label p-0' field_class='col-sm-8 p-0' %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 form-row">
+            <div class="panel panel-default">
+                <div class="panel-heading ezl-required"><a href="#" data-perform="panel-collapse">Anexar Arquivos</a>a</div>
+                <div class="panel-wrapper collapse in" aria-expanded="true" style="">
+                    <div class="panel-body">
+                        {% include 'ecm/attachments_create.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 form-row">
+            <div class="panel panel-default">
+                <div class="panel-heading"><a href="#" data-perform="panel-collapse">Mais informações</a></div>
+                <div class="panel-wrapper collapse" aria-expanded="false" style="">
+                    <div class="panel-body">
+                        <div class="row p-b-10">
+                            <div class="col-sm-12 p-r-0 btn-raised">
+                                {% bootstrap_field form.folder_number addon_after='<button id="btn_add_folder" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Passta"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10'  layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
+                            </div>
+                        </div>
+                        <div class="row p-b-10">
+                            <div class="col-sm-12 p-r-0">
+                                {% bootstrap_field form.movement layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
+                            </div>
+                        </div>
+                        <div class="row p-b-10">
+                            <div class="col-sm-12 p-r-0">
+                                {% bootstrap_field form.person_company_representative layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
+                            </div>
+                        </div>
+                        <div class="row p-b-10">
+                            <div class="col-sm-12 p-r-0">
+                                {% bootstrap_field form.person_asked_by layout='horizontal' label_class='col-sm-2 control-label p-0 ezl-required' field_class='col-sm-9 p-l-0' %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 form-row">
+            <div class="panel panel-default">
                 <div class="panel-footer">
-                    <div class="form-row  text-center">
+                    <div class="text-center">
                         {% block form_buttons %}
                             {{ block.super }}
                         {% endblock %}
@@ -131,6 +140,7 @@
                 </div>
             </div>
         </div>
+        </fieldset>
     </form>
 {% endblock content %}
 
@@ -138,6 +148,13 @@
     {{ block.super }}
     {{ form.media }}
     <script src="{% static 'task/task-bulk-create.js' %}"></script>
+    <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
+    <script src="{% static "file_form/file_form.js" %}"></script>
+    <script>
+       $(function() {
+           initUploadFields($('#task_form'));
+       });
+    </script>
     <script type="text/javascript">
         var task;
         var defaultCustomer = {};
@@ -165,6 +182,7 @@
 {% endblock %}
 
 {% block extra_stylesheets %}
+    <link rel="stylesheet" href="{% static "fileuploader.css" %}">
     <link href="/static/autocomplete_light/vendor/select2/dist/css/select2.css" type="text/css" media="all" rel="stylesheet" />
     <link href="/static/autocomplete_light/select2.css" type="text/css" media="all" rel="stylesheet" />
     <style>

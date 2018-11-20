@@ -410,10 +410,13 @@ class TaskBulkCreate {
                 swal({
                     title: 'OS criada:',
                     type: 'success',
-                    html: '<a href="'+baseURL + '/dashboard/' + result.task_id + '" target="_blank">' + baseURL + '/dashboard/' + result.task_id + '</a>',
+                    html: `<a href="${baseURL}/dashboard/${result.task_id}" target="_blank">${baseURL}/dashboard/${result.task_id}</a>`,
                     showCloseButton: true,
                     showCancelButton: false,
                     focusConfirm: true,
+                    onClose: () => {
+                        window.location.reload();
+                    }
                 });
             },
             error: (request, status, error)=>{

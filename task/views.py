@@ -144,7 +144,8 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         form.instance.__server = get_domain(self.request)
         task = form.save()
 
-        documents = self.request.FILES.getlist('file')
+        import pdb;pdb.set_trace()
+        documents = form.cleaned_data['documents'] if form.fields.get('documents') else []
         if documents:
             for document in documents:
                 file_name = document.name.replace(' ', '_')
