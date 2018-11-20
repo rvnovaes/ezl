@@ -16,6 +16,11 @@ create_certificate_teste:
 
 deploy: check_compose_override build restart migrate collectstatic load_fixtures
 
+dev_mode:
+	docker-compose up -d
+	docker-compose stop web ws-worker
+	docker-compose run web bash -c "ip addr; python manage.py runserver 0:8005"
+
 local_sqlserver:
 	ln -s docker-compose.sqlserver.yml docker-compose.override.yml
 
