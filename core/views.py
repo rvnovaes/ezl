@@ -42,7 +42,7 @@ from core.models import Person, Address, City, State, Country, AddressType, Offi
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
-from core.utils import login_log, logout_log, get_office_session, get_domain
+from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form
 from core.view_validators import create_person_office_relation, person_exists
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
@@ -90,6 +90,23 @@ class AutoCompleteView(autocomplete.Select2QuerySetView):
             qs = qs[:10]
 
         return qs
+
+    def get_create_option(self, context, q):
+        """This method is required just to translate the creation message."""
+        create_option = []
+        display_create_option = False
+        if self.create_field and q:
+            page_obj = context.get('page_obj', None)
+            if page_obj is None or page_obj.number == 1:
+                display_create_option = True
+
+        if display_create_option and self.has_add_permission(self.request):
+            create_option = [{
+                'id': q,
+                'text': 'Criar "%(new_value)s"' % {'new_value': q},
+                'create_id': True,
+            }]
+        return create_option
 
 
 def login(request):
@@ -1689,6 +1706,19 @@ class CityAutoCompleteView(TypeaHeadGenericSearch):
         return list(data)
 
 
+class CitySelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = filter_valid_choice_form(City.objects.filter(is_active=True))
+        if self.q:
+            filters = Q(name__unaccent__icontains=self.q)
+            filters |= Q(state__initials__unaccent__icontains=self.q)
+            qs = qs.filter(filters)
+        return qs.order_by('name')
+
+    def get_result_label(self, result):
+        return "{}".format(result.__str__())
+
+
 class ClientAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params, extra_params,
@@ -1699,6 +1729,30 @@ class ClientAutocomplete(TypeaHeadGenericSearch):
                 Q(offices=office)):
             data.append({'id': client.id, 'data-value-txt': client.__str__()})
         return list(data)
+
+
+class ClientSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Person.objects.all().filter(offices=get_office_session(self.request), is_customer=True, is_active=True)
+
+        if self.q:
+            qs = qs.filter(legal_name__unaccent__icontains=self.q)
+        return qs
+
+    def get_result_label(self, result):
+        return result.legal_name
+
+
+class PersonCompanyRepresentativeSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Person.objects.all().filter(offices=get_office_session(self.request), legal_type='F', is_active=True)
+
+        if self.q:
+            qs = qs.filter(legal_name__unaccent__icontains=self.q)
+        return qs
+
+    def get_result_label(self, result):
+        return result.legal_name
 
 
 class OfficeAutocomplete(TypeaHeadGenericSearch):
@@ -1752,6 +1806,7 @@ class RequesterAutocomplete(TypeaHeadGenericSearch):
             })
         return list(data)
 
+
 class OriginRequesterAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params, extra_params,
@@ -1764,6 +1819,7 @@ class OriginRequesterAutocomplete(TypeaHeadGenericSearch):
                 'data-value-txt': office_correspondent.__str__()
             })
         return list(data)
+
 
 class ServiceAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
@@ -2178,6 +2234,29 @@ class OfficePermissionRequiredMixin(PermissionRequiredMixin):
             if not guardian.has_perm(perm.name, office_session):
                 return False
         return True
+
+
+class PersonCustomerCreateTaskBulkCreate(View):
+    form = PersonForm
+
+    def post(self, *args, **kwargs):
+        create_user = self.request.user
+        office_session = get_office_session(self.request)
+        form = self.form(self.request.POST)
+        status = 200
+        if form.is_valid():
+            form.instance.create_user = create_user
+            form.instance.is_active = True
+            instance = form.save()
+            create_person_office_relation(instance, self.request.user, office_session)
+            data = {'id': instance.id, 'text': instance.legal_name}
+        else:
+            status = 500
+            data = {'error': True, 'errors': []}
+            for error in form.errors:
+                data['errors'].append(error)
+
+        return JsonResponse(json.loads(json.dumps(data)), status=status)
 
 
 class ImportCityList(PermissionRequiredMixin, CustomLoginRequiredView,
