@@ -89,6 +89,23 @@ class AutoCompleteView(autocomplete.Select2QuerySetView):
 
         return qs
 
+    def get_create_option(self, context, q):
+        """This method is required just to translate the creation message."""
+        create_option = []
+        display_create_option = False
+        if self.create_field and q:
+            page_obj = context.get('page_obj', None)
+            if page_obj is None or page_obj.number == 1:
+                display_create_option = True
+
+        if display_create_option and self.has_add_permission(self.request):
+            create_option = [{
+                'id': q,
+                'text': 'Criar "%(new_value)s"' % {'new_value': q},
+                'create_id': True,
+            }]
+        return create_option
+
 
 def login(request):
     if request.user.is_authenticated:

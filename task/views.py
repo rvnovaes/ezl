@@ -167,17 +167,6 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         ret = {'status': 'false', 'errors': form.errors}
         return JsonResponse(ret, status=status)
 
-    def get_success_url(self):
-        return "{}?movement={}&movementLabel={}&lawsuit={}&lawsuitLabel={}&folder={}&folderLabel={}".format(
-            reverse('task_add'),
-            self.object.movement_id,
-            self.object.movement.type_movement.name,
-            self.object.movement.law_suit_id,
-            self.object.movement.law_suit,
-            self.object.movement.law_suit.folder_id,
-            self.object.movement.law_suit.folder,
-        )
-
 
 class TaskCreateView(AuditFormMixin, CreateView):
     model = Task

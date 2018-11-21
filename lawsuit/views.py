@@ -14,8 +14,8 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     delete_error_protected
-from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin, \
-    GenericFormOneToMany, AddressCreateView, AddressUpdateView, AddressDeleteView
+from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin, GenericFormOneToMany, \
+    AddressCreateView, AddressUpdateView, AddressDeleteView, AutoCompleteView
 from task.models import Task
 from task.tables import TaskTable
 from .forms import (TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm, OrganForm,
@@ -898,7 +898,7 @@ class LawsuitAutocomplete(autocomplete.Select2QuerySetView):
         return ret
 
 
-class MovementAutocomplete(autocomplete.Select2QuerySetView):
+class MovementAutocomplete(AutoCompleteView):
 
     create_field = 'type_movement'
 
