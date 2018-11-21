@@ -481,6 +481,7 @@ class TaskResource(resources.ModelResource):
                           'system_prefix': row['system_prefix']})
         else:
             type_movement = TypeMovement.objects.filter(name__unaccent__iexact=type_movement_name).first()
+            movement = None
             if movement_legacy_code:
                 movement = Movement.objects.filter(legacy_code=movement_legacy_code,
                                                    system_prefix=row['system_prefix'],
