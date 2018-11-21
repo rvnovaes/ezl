@@ -145,7 +145,7 @@ urlpatterns = [
     url(r'^pastas/task_bulk_create/$',
         login_required(
             login_required(views.FolderCreateTaskBulkCreate.as_view())),
-        name='folder_add'),
+        name='folder_bulk_create'),
 
     # Orgao
     url(r'^orgaos/$',

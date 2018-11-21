@@ -98,7 +98,8 @@ class TaskCreateForm(TaskForm):
 class TaskBulkCreateForm(TaskCreateForm):
     task_law_suit_number = forms.ModelChoiceField(label='Número do processo',
                                                   required=False,
-                                                  widget=MDSelect(url='/processos/lawsuit_autocomplete', ),
+                                                  widget=MDSelect(url='/processos/lawsuit_autocomplete',
+                                                                  forward=['person_customer']),
                                                   queryset=LawSuit.objects.all())
     court_district = forms.ModelChoiceField(label='Comarca',
                                             required=False,
@@ -124,7 +125,8 @@ class TaskBulkCreateForm(TaskCreateForm):
 
     folder_number = forms.ModelChoiceField(label='Nº da Pasta',
                                            required=False,
-                                           widget=MDSelect(url='/processos/folder_autocomplete_2', ),
+                                           widget=MDSelect(url='/processos/folder_autocomplete_2',
+                                                           forward=['task_law_suit_number']),
                                            queryset=Folder.objects.all())
     movement = forms.ModelChoiceField(label='Movimentação',
                                       required=False,

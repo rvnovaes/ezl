@@ -116,8 +116,11 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
                                                                      'is_active': True})
         if law_suit_number:
             law_suit = LawSuit.objects.filter(id=law_suit_number).first()
-            law_suit.folder = folder
-            law_suit.save()
+            if law_suit.folder != folder and not folder.is_default:
+                law_suit.folder = folder
+                law_suit.save()
+            else:
+                folder = law_suit.folder
         else:
             law_suit, created = LawSuit.objects.get_or_create(folder=folder,
                                                               law_suit_number='Processo avulso',
@@ -144,7 +147,6 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         form.instance.__server = get_domain(self.request)
         task = form.save()
 
-        import pdb;pdb.set_trace()
         documents = form.cleaned_data['documents'] if form.fields.get('documents') else []
         if documents:
             for document in documents:

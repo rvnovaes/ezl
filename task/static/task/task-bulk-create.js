@@ -14,6 +14,7 @@ class TaskBulkCreate {
         this.elFinalDeadlineDate = $('[name=final_deadline_date]');
         this.elPerformancePlace = $('#id_performance_place');
         this.labelLawSuitNumber = $('label[for=id_task_law_suit_number]');
+        this.elBtnAddFolder = $("#btn_add_folder");
 		this.onChangeCity();
 		this.onChangeCourtDistrict();
 		this.onChangeLawSuitNumber();
@@ -278,7 +279,7 @@ class TaskBulkCreate {
                     return personCustomer;
                 }
             },
-        }).then(() => {console.log('teste');});
+        });
 
         if (formValues) {
             let data = {'person_customer': formValues};
@@ -288,7 +289,9 @@ class TaskBulkCreate {
                 data: data,
                 success: (result)=>{
                     this.folderNumber = result.folder;
-                    this.personCustomer = result.person_customer;
+                    if(parseInt(this.personCustomer) !== parseInt(result.person_customer.id)){
+                        this.personCustomer = result.person_customer;
+                    }
                 },
                 error: (request, status, error)=>{
                     showToast('error', 'Atenção', error, 0, false);
@@ -341,6 +344,14 @@ class TaskBulkCreate {
 	    this.elLawsuitNumber.on('change',()=>{
             this.movement = this.nullData;
             this.elMovement.attr('disabled', !this.lawSuitNumber);
+            this.elBtnAddFolder.attr('disabled', false);
+            if (this.lawSuitNumber){
+                let folder = this.elLawsuitNumber.select2('data')[0].folder;
+                if (folder && !folder.isDefault) {
+                    this.folderNumber = folder;
+                    this.elBtnAddFolder.attr('disabled', true);
+                }
+            }
         });
     }
 
@@ -369,6 +380,7 @@ class TaskBulkCreate {
 	        if (personCustomer && personCustomer.id !== parseInt(this.personCustomer)){
 	            this.folderNumber = this.nullData;
             }
+            this.lawSuitNumber = this.nullData;
         });
     }
 
@@ -471,7 +483,7 @@ class TaskBulkCreate {
         let formErrors = this.validateForm();
         if (!formErrors) {
             let data = this.query;
-            this.submitForm(data)
+            this.submitForm(data);
         }
     }
 

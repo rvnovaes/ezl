@@ -838,11 +838,18 @@ class FolderAutocomplete(TypeaHeadGenericSearch):
 
 class FolderSelect2Autocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Folder.objects.get_queryset(office=[get_office_session(self.request).id])
-        if self.q:
-            filters = Q(person_customer__legal_name__unaccent__istartswith=self.q)
-            filters |= Q(folder_number__startswith=self.q)
-            qs = qs.filter(is_active=True).filter(filters)
+        law_suit_id = self.forwarded.get('task_law_suit_number', None)
+        law_suit = None
+        if law_suit_id:
+            law_suit = LawSuit.objects.filter(id=law_suit_id).first()
+        if law_suit and not law_suit.folder.is_default:
+            qs = Folder.objects.filter(folders__id=law_suit.id)
+        else:
+            qs = Folder.objects.get_queryset(office=[get_office_session(self.request).id])
+            if self.q:
+                filters = Q(person_customer__legal_name__unaccent__istartswith=self.q)
+                filters |= Q(folder_number__startswith=self.q)
+                qs = qs.filter(is_active=True).filter(filters)
         return qs
 
     def get_result_label(self, result):
@@ -854,6 +861,7 @@ class FolderSelect2Autocomplete(autocomplete.Select2QuerySetView):
             {
                 'id': self.get_result_value(result),
                 'text': self.get_result_label(result),
+                'isDefault': result.is_default,
                 'person_customer': {'id': result.person_customer.id,
                                     'text': result.person_customer.legal_name}
             } for result in context['object_list']
@@ -862,12 +870,26 @@ class FolderSelect2Autocomplete(autocomplete.Select2QuerySetView):
 
 class LawsuitAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
+        person_customer_id = self.forwarded.get('person_customer', None)
         qs = LawSuit.objects.get_queryset(office=[get_office_session(self.request).id])
+        if person_customer_id:
+            qs = qs.filter(folder__person_customer__id=person_customer_id)
         if self.q:
             filters = Q(court_district__name__unaccent__icontains=self.q)
             filters |= Q(law_suit_number__icontains=self.q)
             qs = qs.filter(is_active=True).filter(filters)
         return qs
+
+    def get_results(self, context):
+        return [
+            {
+                'id': self.get_result_value(result),
+                'text': self.get_result_label(result),
+                'folder': {'id': result.folder.id,
+                           'text': result.folder.__str__(),
+                           'isDefault': result.folder.is_default}
+            } for result in context['object_list']
+        ]
 
     def get_result_label(self, result):
         ret = "{}".format(result.law_suit_number)
