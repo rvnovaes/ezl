@@ -386,7 +386,7 @@ class TaskBulkCreate {
 
     validateLawsuit() {
         if (this.isHearing && !this.lawSuitNumber) {
-            this.insertFormErrors('É necessário informar processo para este tipo de serviço',
+            this.insertFormErrors('É necessário informar processo para este tipo de serviço.',
                 [this.elTypeTask, this.elLawsuitNumber]);
         }
 
