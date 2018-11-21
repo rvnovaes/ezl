@@ -25,6 +25,9 @@
 <![endif]-->
 
 <style type="text/css">
+    .new-login-register {
+      position: absolute;      
+    }
     .new-login-register .lg-info-panel {      
       background: url("{% static 'skeleton/images/login-register.jpg'%}") center center/cover no-repeat !important;)
     }
@@ -91,7 +94,7 @@
                         <h3 class="box-title m-b-0">Ainda não se cadastrou?</h3> 
                         <small>Clique no botão abaixo e cadastre-se</small>
                         <hr>
-                        <a href="{% url 'register_user' %}" class="btn btn-danger btn-lg btn-block text-uppercase waves-effect waves-light" type="submit">Cadastre-se</a>                        
+                        <a href="{% url 'register_user' %}" class="btn btn-info btn-lg btn-block text-uppercase waves-effect waves-light" type="submit">Cadastre-se</a>                        
                       </div>
                       </div>
                     </div>
