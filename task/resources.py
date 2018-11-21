@@ -17,14 +17,18 @@ from task.utils import self_or_none
 from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, \
     AcceptanceServiceDateWidget
 from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative, TypeTaskByWidget
+import logging
+
 
 TRUE_FALSE_DICT = {'V': True, 'F': False}
+
+logger = logging.getLogger('resources')
 
 COLUMN_NAME_DICT = {
     'system_prefix': {
         'column_name': 'sistema',
         'attribute': 'system_prefix',
-        'required': True,
+        'required': False,
         'verbose_name': Task._meta.get_field('system_prefix').verbose_name,
     },
     'folder_number': {
@@ -303,24 +307,31 @@ class TaskResource(resources.ModelResource):
         """
         return TaskResult
 
-    def validate_folder(self, row, row_errors):
+    def validate_folder(self, row, row_errors):            
         folder_number = int(row['folder_number']) if self_or_none(row['folder_number']) else None
         folder_legacy_code = row['folder_legacy_code']
         cost_center = row['folder_cost_center']
+        update_cost_center = False
         if cost_center:
             cost_center = CostCenter.objects.get_queryset(office=[self.office_id]).filter(
                 name__unaccent__iexact=cost_center).first()
             if not cost_center:
                 row_errors.append(insert_incorrect_natural_key_message(row, 'folder_cost_center'))
+            else:
+                if isinstance(cost_center, CostCenter):
+                    update_cost_center = True 
         folder = None
         person_customer = Person.objects.filter(legal_name__unaccent__iexact=str(row['folder_person_customer']),
                                                 officemembership__office=self.office,
                                                 is_customer=True).first()
         if not (folder_legacy_code or folder_number) and person_customer:
+            data = {'create_user': self.create_user}
+            if update_cost_center:
+                data['cost_center'] = cost_center
             folder, created = Folder.objects.get_or_create(person_customer=person_customer,
                                                            is_default=True,
                                                            office=self.office,
-                                                           defaults={'create_user': self.create_user})
+                                                           defaults=data)
         else:
             if folder_legacy_code:
                 folder = Folder.objects.filter(legacy_code=folder_legacy_code,
@@ -330,16 +341,22 @@ class TaskResource(resources.ModelResource):
                 folder = Folder.objects.filter(folder_number=folder_number,
                                                office=self.office).first()
             if not folder and person_customer:
-                folder = Folder.objects.get_or_create(person_customer=person_customer,
+                data = {'create_user': self.create_user}
+                if update_cost_center:
+                    data['cost_center'] = cost_center                
+                folder, created  = Folder.objects.get_or_create(person_customer=person_customer,
                                                       office=self.office,
                                                       legacy_code=folder_legacy_code,
                                                       folder_number=folder_number,
                                                       system_prefix=row['system_prefix'],
-                                                      defaults={'create_user': self.create_user})
+                                                      defaults=data)
         if not folder:
             row_errors.append(RECORD_NOT_FOUND.format(Folder._meta.verbose_name))
             if row['folder_person_customer'] and not person_customer:
                 row_errors.append(RECORD_NOT_FOUND.format(COLUMN_NAME_DICT['folder_person_customer']['verbose_name']))
+        if update_cost_center:
+            folder.cost_center = cost_center
+            folder.save()                    
         return folder
 
     def validate_lawsuit(self, row, row_errors):
@@ -359,7 +376,7 @@ class TaskResource(resources.ModelResource):
                     system_prefix=row['system_prefix'],
                     folder=self.folder,
                     office_id=self.office_id).first()
-            if not lawsuit and lawsuit_number:
+            if not lawsuit and lawsuit_number:                                
                 lawsuit = LawSuit.objects.filter(
                     law_suit_number=lawsuit_number,
                     folder=self.folder,
@@ -407,7 +424,7 @@ class TaskResource(resources.ModelResource):
                     legal_name__unaccent__iexact=organ).first()
                 if not organ:
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_organ')])
-            opposing_party = row.get('lawsuit_opposing_party', '')
+            opposing_party = row.get('lawsuit_opposing_party', '')            
             if not row_errors:
                 if not lawsuit:
                     lawsuit = LawSuit.objects.create(type_lawsuit=TypeLawsuit(type_lawsuit).name,
@@ -443,6 +460,7 @@ class TaskResource(resources.ModelResource):
                         lawsuit.organ = organ
                     if opposing_party:
                         lawsuit.opposing_party = opposing_party
+                    lawsuit.is_current_instance = is_current_instance                    
                     lawsuit.save()
         if not lawsuit:
             row_errors.append(RECORD_NOT_FOUND.format(LawSuit._meta.verbose_name))
@@ -451,7 +469,8 @@ class TaskResource(resources.ModelResource):
     def validate_movement(self, row, row_errors):
         type_movement_name = row['type_movement']
         movement_legacy_code = row['movement_legacy_code']
-        movement = None
+        if type(movement_legacy_code) == float and movement_legacy_code.is_integer():
+            movement_legacy_code = str(int(movement_legacy_code))
         if not (type_movement_name or movement_legacy_code):
             movement, created = Movement.objects.get_or_create(
                 folder=self.folder,
@@ -468,14 +487,13 @@ class TaskResource(resources.ModelResource):
                                                    folder=self.folder,
                                                    law_suit=self.lawsuit,
                                                    office_id=self.office_id).first()
-                if not movement:
-                    row_errors.append(RECORD_NOT_FOUND.format(Movement._meta.verbose_name))
             if not movement and type_movement:
                 movement, created = Movement.objects.get_or_create(
                     folder=self.folder,
                     law_suit=self.lawsuit,
                     office=self.office,
                     type_movement=type_movement,
+                    legacy_code=movement_legacy_code,
                     defaults={'legacy_code': movement_legacy_code,
                               'system_prefix': row['system_prefix'],
                               'create_user': self.create_user})
@@ -527,7 +545,9 @@ class TaskResource(resources.ModelResource):
             if row_errors:
                 raise Exception(row_errors)
         else:
-            row['movement'] = instance.movement.id
+            row['movement'] = instance.movement.id            
+            if not row['performance_place']:
+                row['performance_place'] = instance.performance_place
 
     def after_import_row(self, row, row_result, **kwargs):
         line_warnings = row['warnings']
