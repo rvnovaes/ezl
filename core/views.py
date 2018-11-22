@@ -44,6 +44,7 @@ from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
 from core.utils import login_log, logout_log, get_office_session, get_domain
 from core.view_validators import create_person_office_relation, person_exists
+from .mail import send_mail_sign_up
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task, TaskStatus
@@ -2201,6 +2202,7 @@ class NewRegister(TemplateView):
                 create_user=user)                
             authenticate(username=username, password=password)
             auth_login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
+            send_mail_sign_up(first_name, email)
             return JsonResponse({'redirect': reverse_lazy('dashboard')})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
