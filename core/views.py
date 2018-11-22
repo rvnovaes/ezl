@@ -27,6 +27,7 @@ from django.views.static import serve as static_serve_view
 from django.views import View
 from django.views.generic import ListView, TemplateView
 from allauth.account.views import LoginView, PasswordResetView
+from django.contrib.auth import authenticate, login as auth_login
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
@@ -2175,3 +2176,27 @@ class OfficePermissionRequiredMixin(PermissionRequiredMixin):
             if not guardian.has_perm(perm.name, office_session):
                 return False
         return True
+
+
+class NewRegister(TemplateView):
+    template_name = 'account/register.html'
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        return context
+
+    def post(self, request, *args, **kwargs):        
+        username = email = request.POST.get('email')
+        password = request.POST.get('password')
+        first_name = request.POST.get('name').split(' ')[0]
+        last_name = ' '.join(request.POST.get('name').split(' ')[1:])
+        office_name = request.POST.get('office')
+        user = User.objects.create(username=username, password=password, last_name=last_name, first_name=first_name)
+        office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)
+        DefaultOffice.objects.create(
+            auth_user=user,
+            office=office,
+            create_user=user)                
+        authenticate(username=username, password=password)
+        auth_login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
+        return JsonResponse({'redirect': reverse_lazy('dashboard')})
