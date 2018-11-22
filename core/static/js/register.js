@@ -3,9 +3,13 @@ class Register {
         this.elRegisterForm = $('#register-form');
         this.elEmail = $('input[name=email]');
         this.elPassword = $('input[name=password]');        
+        this.elName = $('input[name=name]');
+        this.elAcceptTerms = $('input[name=accept-terms]')
         this.onSubmit();
         this.onBlurEmail();
         this.onBlurPassword();
+        this.onBlurName();
+        this.onChangeAcceptTerms();
         this.errors = {};
     }
 
@@ -24,8 +28,12 @@ class Register {
 
     onSubmit() {
         this.elRegisterForm.on('submit', (el)=>{
-            el.preventDefault();
-            this.save()
+            el.preventDefault();            
+            if (!Object.keys(this.errors).length) {
+                this.save()
+            } else {
+                this.validateAcceptTerms();
+            }            
         })
     }
     onBlurEmail(){
@@ -39,7 +47,18 @@ class Register {
             delete this.errors['password'];
             this.validatePassword()
         })        
-    }    
+    }
+    onBlurName() {
+        this.elName.on('blur', ()=>{
+            delete this.errors['name'];
+            this.validateName()
+        })        
+    }        
+    onChangeAcceptTerms() {
+        this.elAcceptTerms.on('change', ()=>{
+            this.validateAcceptTerms();
+        })
+    }
     validateEmail() {
         $.ajax({
             method: 'POST', 
@@ -95,6 +114,27 @@ class Register {
             dataType: 'json'            
         })               
     }
+    validateName() {
+        if (this.elName.val().trim().split(' ').length <= 1) {
+            this.errors['name'] = false;
+            this.elName.closest('.form-group').addClass('has-error')
+            this.elName.siblings().css('display', 'block');
+        } else {
+            this.elName.closest('.form-group').removeClass('has-error')            
+            this.elName.siblings().css('display', 'none');
+        }
+    }
+    validateAcceptTerms() {
+        if (this.elAcceptTerms.is(':checked')) {
+            delete this.errors['acceptTerms'];
+            this.elAcceptTerms.closest('.form-group').removeClass('has-error')            
+            this.elAcceptTerms.siblings('span').css('display', 'none');            
+        } else {
+            this.errors['acceptTerms'] = false;
+            this.elAcceptTerms.closest('.form-group').addClass('has-error')
+            this.elAcceptTerms.siblings('span').css('display', 'block');            
+        }                        
+    }    
     save() {
         $.ajax({
             method: 'POST', 
