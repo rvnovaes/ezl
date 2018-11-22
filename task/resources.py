@@ -2,6 +2,7 @@ from core.models import Person
 from collections import OrderedDict
 from decimal import Decimal
 from django.db import transaction
+from django.db.models.signals import pre_save
 from django.utils import timezone
 from financial.models import CostCenter
 from import_export import resources
@@ -13,6 +14,7 @@ from task.fields import CustomFieldImportExport
 from task.instance_loaders import TaskModelInstanceLoader
 from task.messages import *
 from task.models import Task, TypeTask
+from task.signals import change_status
 from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative
 from task.utils import self_or_none
 from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, \
@@ -560,3 +562,9 @@ class TaskResource(resources.ModelResource):
             for warning in line_warnings:
                 row_result.warnings.append(warning)
             row_result.import_type = TaskRowResult.IMPORT_TYPE_WARNING
+
+    def before_save_instance(self, instance, using_transactions, dry_run):
+        pre_save.disconnect(change_status, sender=Task)
+
+    def after_save_instance(self, instance, using_transactions, dry_run):
+        pre_save.connect(change_status, sender=Task)
