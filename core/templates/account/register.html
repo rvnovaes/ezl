@@ -56,13 +56,17 @@
                 <h3 class="box-title m-b-0">Informe os dados abaixo</h3> 
                 <small>Clique em cadastrar ao terminar o preenchimento</small>                
                 <form class="form-horizontal new-lg-form" id="register-form" action="#">{% csrf_token %}
-                    <div class="form-group ">
+                    <div class="form-group">
                         <div class="col-xs-12">
-                            <input class="form-control" type="text" required="" placeholder="E-mail" name='email'> </div>
+                            <input class="form-control" type="text" required="" placeholder="E-mail" name='email'> 
+                            <span class="text-danger" id="email-error" style="display: none">* Já existe usuário cadastrado com este e-mail</span>
+                        </div>
                     </div>
                     <div class="form-group ">
                         <div class="col-xs-12">
-                            <input class="form-control" type="password" required="" placeholder="Senha" name='password'> </div>
+                            <input class="form-control" type="password" required="" placeholder="Senha" name='password'> 
+                            <span class="text-danger" id="email-error" style="display: none"></span>
+                        </div>
                     </div>
                     <div class="form-group ">
                         <div class="col-xs-12">

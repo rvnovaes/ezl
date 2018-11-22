@@ -2191,7 +2191,7 @@ class NewRegister(TemplateView):
         first_name = request.POST.get('name').split(' ')[0]
         last_name = ' '.join(request.POST.get('name').split(' ')[1:])
         office_name = request.POST.get('office')
-        user = User.objects.create(username=username, password=password, last_name=last_name, first_name=first_name)
+        user = User.objects.create(username=username, password=password, last_name=last_name, first_name=first_name, email=email)
         office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)
         DefaultOffice.objects.create(
             auth_user=user,

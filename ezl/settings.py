@@ -214,7 +214,7 @@ CACHES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
-if environment == 'development':
+if environment == '':
     AUTH_PASSWORD_VALIDATORS = [
         {
             'NAME':
