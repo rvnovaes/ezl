@@ -4,13 +4,15 @@ class Register {
         this.elEmail = $('input[name=email]');
         this.elPassword = $('input[name=password]');        
         this.elName = $('input[name=name]');
-        this.elAcceptTerms = $('input[name=accept-terms]')
+        this.elAcceptTerms = $('input[name=accept-terms]'); 
+        this.elBtnEye = $('#btn-eye'); 
         this.onSubmit();
         this.onBlurEmail();
         this.onBlurPassword();
         this.onBlurName();
         this.onChangeAcceptTerms();
-        this.errors = {};
+        this.onClickBtnEye();
+        this.errors = {'acceptTerms': false};
     }
 
     get formData() {
@@ -59,6 +61,17 @@ class Register {
             this.validateAcceptTerms();
         })
     }
+    onClickBtnEye() {
+        this.elBtnEye.on('click', ()=>{
+            if (this.elPassword.attr('type') == 'password') {
+                this.elPassword.attr('type', 'text')                
+                this.elBtnEye.children('i').attr('class', 'fa fa-eye-slash')
+            } else {
+                this.elPassword.attr('type', 'password')
+                this.elBtnEye.children('i').attr('class', 'fa fa-eye')
+            }
+        })
+    }
     validateEmail() {
         $.ajax({
             method: 'POST', 
@@ -92,17 +105,17 @@ class Register {
             data: this.query, 
             success: (response) => {                
                 console.log(response)
-                this.elPassword.siblings().empty()
+                $('#password-error').empty()
                 if (!response.valid) {                    
                     this.elPassword.closest('.form-group').addClass('has-error');
-                    this.elPassword.siblings().css('display', 'block');
+                    $('#password-error').css('display', 'block');
                     response.message.forEach((message)=>{
-                        this.elPassword.siblings().append('* ' + message);
+                        $('#password-error').append('* ' + message);
                     })                    
 
                 } else {
                     this.elPassword.closest('.form-group').removeClass('has-error');
-                    this.elPassword.siblings().css('display', 'none');
+                    $('#password-error').css('display', 'none');
                 }
             }, 
             error: (error) => {
@@ -136,19 +149,27 @@ class Register {
         }                        
     }    
     save() {
-        $.ajax({
-            method: 'POST', 
-            data: this.query, 
-            success: (response) => {                
-                window.location.href = response.redirect                                
-            }, 
-            error: (error) => {
-                console.log(error)
-            },
-            beforeSend: function (xhr, settings) {
-                xhr.setRequestHeader("X-CSRFToken", $('input[name=csrfmiddlewaretoken]').val());
-            },
-            dataType: 'json'            
+        swal({
+            title: 'Criando seu escritório', 
+            text: 'Aguarde um momento',
+            onOpen: ()=>{
+                swal.showLoading()
+                $.ajax({
+                    method: 'POST', 
+                    data: this.query, 
+                    success: (response) => {                
+                        window.location.href = response.redirect                                
+                        swal.close();
+                    }, 
+                    error: (error) => {
+                        console.log(error)
+                    },
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", $('input[name=csrfmiddlewaretoken]').val());
+                    },
+                    dataType: 'json'            
+                })                
+            }
         })       
     }
 

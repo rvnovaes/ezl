@@ -1979,7 +1979,6 @@ class ValidateEmail(View):
             data['valid'] = False
         if User.objects.filter(username=email).first():
             data['valid'] = False
-
         return JsonResponse(data, safe=False)
 
 

@@ -18,6 +18,8 @@
     <link href="{% static 'skeleton/css/style.css' %}" rel="stylesheet">
     <!-- color CSS -->
     <link href="{% static 'skeleton/css/colors/ezl.css' %}" id="theme" rel="stylesheet">
+    <!--alerts CSS -->
+    <link href="{% static 'skeleton/plugins/bower_components/sweetalert2/dist/sweetalert2.min.css' %}" rel="stylesheet" type="text/css">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -64,9 +66,14 @@
                     </div>
                     <div class="form-group ">
                         <div class="col-xs-12">
-                            <input class="form-control" type="password" required="" placeholder="Senha" name='password'> 
-                            <span class="text-danger" id="email-error" style="display: none"></span>
+                            <div class="input-group m-t-2">
+                                <input class="form-control" type="password" required="" placeholder="Senha" name='password'>                                 
+                                <span class="input-group-btn">
+                                    <a href="#" class="btn waves-effect waves-light btn-info" id="btn-eye"><i class="fa fa-eye"></i></a>
+                                </span>                                 
+                            </div>                                                    
                         </div>
+                        <span class="text-danger" id="password-error" style="display: none"></span>
                     </div>
                     <div class="form-group ">
                         <div class="col-xs-12">
@@ -115,6 +122,8 @@
     <script src="{% static 'skeleton/js/custom.js' %}"></script>
     <!--Style Switcher -->
     <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
+    <!-- Swal  -->
+    <script src="{% static 'skeleton/plugins/bower_components/sweetalert2/dist/sweetalert2.all.min.js' %}"></script>    
     <script type="text/javascript" src="{% static 'js/register.js' %}"></script>
     <script type="text/javascript">
         var register;
