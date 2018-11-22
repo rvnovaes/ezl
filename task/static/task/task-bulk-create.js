@@ -3,6 +3,7 @@ class TaskBulkCreate {
 	    this.formErrors = [];
 	    this.nullData = {id: null, text: null};
 	    this.defaultPersonAskedBy = null;
+	    this.enableOnChange = true;
 		this.elInputPersonCustomer = $('[name=person_customer]');
 		this.elCourtDistrict = $('[name=court_district]');
 		this.elCourtDistrictComplemt = $('[name=court_district_complement]');
@@ -13,6 +14,7 @@ class TaskBulkCreate {
         this.elMovement = $('[name=movement]');
         this.elFinalDeadlineDate = $('[name=final_deadline_date]');
         this.elPerformancePlace = $('#id_performance_place');
+        this.elPersonAskedBy = $('#id_person_asked_by');
         this.labelLawSuitNumber = $('label[for=id_task_law_suit_number]');
         this.elBtnAddFolder = $("#btn_add_folder");
 		this.onChangeCity();
@@ -23,7 +25,7 @@ class TaskBulkCreate {
         this.onSaveSubmit();
         this.onChangePersonCustomer();
         this.onChangeCourtDistrictComplement();
-        this.elMovement.attr('disabled', true);
+        this.onDocumentReady();
 	}
 
 	clearFormErrors(){
@@ -137,6 +139,10 @@ class TaskBulkCreate {
             return this.elLawsuitNumber.val();
         }
         return false;
+    }
+
+    get lawSuitNumberData() {
+	    return this.elLawsuitNumber.select2('data')[0];
     }
 
     set lawSuitNumber(data) {
@@ -306,50 +312,76 @@ class TaskBulkCreate {
 
 	onChangeCity(){
 	    this.elCity.on('change',()=>{
-            if(this.city) {
-                this.courtDistrict = this.nullData;
+            if(this.enableOnChange) {
+                if (this.city) {
+                    this.courtDistrict = this.nullData;
+                }
+                this.elCourtDistrict.attr('disabled', !(!this.city));
+                this.elCourtDistrictComplemt.attr('disabled', !(!this.city));
             }
-            this.elCourtDistrict.attr('disabled', !(!this.city));
-            this.elCourtDistrictComplemt.attr('disabled', !(!this.city));
         });
     }
 
 	onChangeCourtDistrict(){
 	    this.elCourtDistrict.on('change',()=>{
-            if(this.courtDistrict) {
-                this.city = this.nullData;
-                let courtDistrict = this.elCourtDistrictComplemt.select2('data')[0].court_district;
-                if (courtDistrict && courtDistrict.id !== parseInt(this.courtDistrict)){
-                    this.courtDistrictComplement = this.nullData;
+            if(this.enableOnChange){
+                if(this.courtDistrict) {
+                    this.city = this.nullData;
+                    let courtDistrict = this.elCourtDistrictComplemt.select2('data')[0].court_district;
+                    if (courtDistrict && courtDistrict.id !== parseInt(this.courtDistrict)){
+                        this.courtDistrictComplement = this.nullData;
+                    }
                 }
+                this.elCity.attr('disabled', !(!this.courtDistrict));
             }
-            this.elCity.attr('disabled', !(!this.courtDistrict));
         });
     }
 
     onChangeCourtDistrictComplement(){
 	    this.elCourtDistrictComplemt.on('change',()=>{
-            if(this.courtDistrictComplement) {
-                this.city = this.nullData;
-                let courtDistrict = this.elCourtDistrictComplemt.select2('data')[0].court_district;
-                if (courtDistrict) {
-                    this.courtDistrict= courtDistrict;
+            if(this.enableOnChange){
+                if(this.courtDistrictComplement) {
+                    this.city = this.nullData;
+                    let courtDistrict = this.elCourtDistrictComplemt.select2('data')[0].court_district;
+                    if (courtDistrict) {
+                        this.courtDistrict= courtDistrict;
+                    }
                 }
+                this.elCity.attr('disabled', !(!this.courtDistrict));
             }
-            this.elCity.attr('disabled', !(!this.courtDistrict));
         });
     }
 
 	onChangeLawSuitNumber(){
 	    this.elLawsuitNumber.on('change',()=>{
-            this.movement = this.nullData;
-            this.elMovement.attr('disabled', !this.lawSuitNumber);
-            this.elBtnAddFolder.attr('disabled', false);
-            if (this.lawSuitNumber){
-                let folder = this.elLawsuitNumber.select2('data')[0].folder;
-                if (folder && !folder.isDefault) {
-                    this.folderNumber = folder;
-                    this.elBtnAddFolder.attr('disabled', true);
+	        if (this.enableOnChange) {
+                this.movement = this.nullData;
+                this.elMovement.attr('disabled', !this.lawSuitNumber);
+                this.elBtnAddFolder.attr('disabled', false);
+                if (this.lawSuitNumber) {
+                    this.enableOnChange = false;
+                    let personCustomer = this.lawSuitNumberData.person_customer;
+                    if (personCustomer && personCustomer.id) {
+                        this.personCustomer = personCustomer;
+                    }
+                    let folder = this.lawSuitNumberData.folder;
+                    if (folder && !folder.isDefault) {
+                        this.folderNumber = folder;
+                        this.elBtnAddFolder.attr('disabled', true);
+                    }
+                    let courtDistrict = this.lawSuitNumberData.court_district;
+                    if (courtDistrict && courtDistrict.id) {
+                        this.courtDistrict = courtDistrict;
+                    }
+                    let courtDistrictComplement = this.lawSuitNumberData.court_district_complement;
+                    if (courtDistrictComplement && courtDistrictComplement.id) {
+                        this.courtDistrictComplement = courtDistrictComplement;
+                    }
+                    let city = this.lawSuitNumberData.city;
+                    if (city && city.id) {
+                        this.city = city;
+                    }
+                    this.enableOnChange = true
                 }
             }
         });
@@ -367,21 +399,33 @@ class TaskBulkCreate {
 
 	onChangeFolderNumber(){
 	    this.elFolderNumber.on('change',()=>{
-	        let personCustomer = this.elFolderNumber.select2('data')[0].person_customer;
-	        if (personCustomer) {
-	            this.personCustomer = personCustomer;
+	        if (this.enableOnChange) {
+                let personCustomer = this.elFolderNumber.select2('data')[0].person_customer;
+                if (personCustomer) {
+                    this.personCustomer = personCustomer;
+                }
             }
         });
     }
 
 	onChangePersonCustomer(){
 	    this.elInputPersonCustomer.on('change',()=> {
-	        let personCustomer = this.elFolderNumber.select2('data')[0].person_customer;
-	        if (personCustomer && personCustomer.id !== parseInt(this.personCustomer)){
-	            this.folderNumber = this.nullData;
+	        if(this.enableOnChange){
+	            let personCustomer = this.elFolderNumber.select2('data')[0].person_customer;
+                if (personCustomer && personCustomer.id !== parseInt(this.personCustomer)){
+                    this.folderNumber = this.nullData;
+                }
+                this.lawSuitNumber = this.nullData;
             }
-            this.lawSuitNumber = this.nullData;
         });
+    }
+
+    validatePersonCustomer() {
+        if (!this.personCustomer) {
+            this.insertFormErrors('É necessário informar um cliente.',
+                [this.elInputPersonCustomer]);
+        }
+
     }
 
     validateLawsuit() {
@@ -414,15 +458,17 @@ class TaskBulkCreate {
 
     submitForm(data){
 	    let baseURL = window.location.origin;
+	    TaskBulkCreate.swalLoading('Criando a OS');
         $.ajax({
             type: 'POST',
             url: window.location,
             data: data,
             success: (result)=>{
+                swal.close();
                 swal({
-                    title: 'OS criada:',
+                    title: 'OS criada com sucesso',
                     type: 'success',
-                    html: `<a href="${baseURL}/dashboard/${result.task_id}" target="_blank">${baseURL}/dashboard/${result.task_id}</a>`,
+                    html: `Número da OS: <a href="${baseURL}/dashboard/${result.task_id}" target="_blank">${result.task_number}</a>`,
                     showCloseButton: true,
                     showCancelButton: false,
                     focusConfirm: true,
@@ -432,10 +478,11 @@ class TaskBulkCreate {
                 });
             },
             error: (request, status, error)=>{
+                swal.close();
                 showToast('error', 'Atenção', error, 0, false);
             },
             beforeSend: (xhr, settings)=>{
-                xhr.setRequestHeader("X-CSRFToken", data.csrfmiddlewaretoken);
+                xhr.setRequestHeader('X-CSRFToken', data.csrfmiddlewaretoken);
             },
             dataType: 'json'
         });
@@ -463,6 +510,7 @@ class TaskBulkCreate {
 
     validateForm() {
 	    this.clearFormErrors();
+	    this.validatePersonCustomer();
         this.validateLawsuit();
         this.validatePerformancePlace();
         this.validateFinalDeadlineDate();
@@ -492,5 +540,24 @@ class TaskBulkCreate {
             el.preventDefault();
             this.save();
         });
-    }    
+    }
+
+    static swalLoading(title='', message=''){
+	    swal({
+            title: title,
+            html: message,
+            allowOutsideClick: false,
+            onOpen: () => {
+                swal.showLoading();
+            }
+        });
+    }
+
+    onDocumentReady(){
+	    $(document).ready(()=>{
+	        this.elMovement.attr('disabled', true);
+	        this.elTypeTask.select2({placeholder: 'Selecione...', language: 'pt-BR', selectOnClose: true});
+	        this.elPersonAskedBy.select2({placeholder: 'Procurar...', language: 'pt-BR', selectOnClose: true});
+        });
+    }
 }

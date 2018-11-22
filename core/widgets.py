@@ -204,6 +204,7 @@ class MDSelect(ModelSelect2):
         attrs = super().build_attrs(*args, **kwargs)
         attrs.setdefault('data-language', 'pt-BR')
         attrs.setdefault('data-placeholder', 'Procurar...')
+        attrs.setdefault('data-select-on-close', 'true')
         return attrs
 
     def get_context(self, name, value, attrs):

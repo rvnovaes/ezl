@@ -159,7 +159,7 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         form.delete_temporary_files()
 
         status = 200
-        ret = {'status': 'Ok', 'task_id': task.id}
+        ret = {'status': 'Ok', 'task_id': task.id, 'task_number': task.task_number}
         return JsonResponse(ret, status=status)
 
     def form_invalid(self, form):

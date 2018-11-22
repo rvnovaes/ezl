@@ -887,7 +887,16 @@ class LawsuitAutocomplete(autocomplete.Select2QuerySetView):
                 'text': self.get_result_label(result),
                 'folder': {'id': result.folder.id,
                            'text': result.folder.__str__(),
-                           'isDefault': result.folder.is_default}
+                           'isDefault': result.folder.is_default},
+                'person_customer': {'id': result.folder.person_customer_id,
+                                    'text': result.folder.person_customer.__str__()},
+                'court_district': {'id': result.court_district_id,
+                                   'text': (result.court_district.__str__() if result.court_district else '')},
+                'court_district_complement': {'id': result.court_district_complement_id,
+                                              'text': (result.court_district_complement.__str__() if
+                                                       result.court_district_complement else '')},
+                'city': {'id': result.city_id,
+                         'text': (result.city.__str__() if result.city else '')},
             } for result in context['object_list']
         ]
 

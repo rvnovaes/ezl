@@ -145,6 +145,7 @@ class TaskBulkCreateForm(TaskCreateForm):
         self.fields['task_number'].widget = forms.HiddenInput()
         self.fields['office'].widget = forms.HiddenInput()
         self.fields['office'].initial = office_session
+        self.fields['person_asked_by'].empty_label = 'Procurar...'
         choices = [choice for choice in self.fields['person_asked_by'].choices]
         if (self.request.user.person.id, self.request.user.person.legal_name) not in choices:
             choices.append((self.request.user.person.id, self.request.user.person.legal_name))

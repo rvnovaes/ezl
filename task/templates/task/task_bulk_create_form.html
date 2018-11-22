@@ -27,25 +27,39 @@
                     <div class="panel-body">
                         <div class="row p-b-10">
                             <div class="col-sm-12 p-r-0">
-                                {% bootstrap_field form.person_customer layout='horizontal' addon_after='<button id="btn_add_person_customer" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Cliente/Parte"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10' form_group_class="col-sm-12 p-0" label_class='col-sm-2 ezl-required p-0' field_class='col-sm-8 p-0' %}
+                                <div class="col-sm-2 p-0">
+                                    <div class="input-group">
+                                        {% bootstrap_label form.person_customer.label label_for='id_person_customer' label_class='control-label ezl-required' %}
+                                    </div>
+                                </div>
+                                {% bootstrap_field form.person_customer show_label=False layout='horizontal' addon_after='<button id="btn_add_person_customer" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Cliente/Parte"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10' form_group_class="col-sm-10 p-0" field_class='col-sm-10 p-0' %}
                             </div>
                         </div>
                         <div class="row p-b-10">
                             <div class="col-sm-6 p-r-0">
                                 <div class="col-sm-12 p-0">
-                                    <label class="ezl-required p-0 col-sm-4 control-label" for="id_type_task">Tipo de Serviço</label>
+                                    <div class="col-sm-4 p-0">
+                                        <div class="input-group">
+                                            {% bootstrap_label form.type_task.label label_for='id_type_task' label_class='control-label ezl-required' %}
+                                        </div>
+                                    </div>
                                     <div class="p-0 col-sm-8">
                                         <select name="type_task" class="form-control" title="" required="" id="id_type_task">
                                             <option value="" selected="">Selecione...</option>
                                             {% for type_task in form.fields.type_task.queryset %}
-                                                <option is-hearing="{{type_task.type_task_main.all.0.is_hearing}}" value="{{type_task.pk}}" selected="">{{type_task.name}}</option>
+                                                <option is-hearing="{{type_task.type_task_main.all.0.is_hearing}}" value="{{type_task.pk}}">{{type_task.name}}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-6 p-r-0">
-                                {% bootstrap_field form.task_law_suit_number addon_after='<button id="btn_add_lawsuit" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Processo"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10' form_group_class="col-sm-11 p-0" layout='horizontal' label_class="p-0 col-sm-4" field_class="p-l-0 p-r-5 col-sm-8" %}
+                                <div class="col-sm-4 p-0">
+                                    <div class="input-group">
+                                    {% bootstrap_label form.task_law_suit_number.label label_for='id_task_law_suit_number' label_class='control-label' %}
+                                    </div>
+                                </div>
+                                {% bootstrap_field form.task_law_suit_number show_label=False addon_after='<button id="btn_add_lawsuit" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Processo"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10' form_group_class="col-sm-8 p-0" layout='horizontal' field_class="p-l-0 p-r-5 col-sm-12" %}
                             </div>
                         </div>
                         <div class="row p-b-10">
@@ -55,7 +69,12 @@
                         </div>
                         <div class="row p-b-10">
                             <div class="col-sm-12 p-r-0">
-                                {% bootstrap_field form.final_deadline_date layout='horizontal' addon_after='(Mínimo de 48h)' addon_after_class='input-group-addon addon-txt' label_class='col-sm-2 control-label ezl-required p-0' field_class='col-sm-6 p-l-0' %}
+                                <div class="col-sm-2 p-0">
+                                    <div class="input-group">
+                                    {% bootstrap_label form.final_deadline_date.label label_for='id_final_deadline_date' label_class='control-label ezl-required' %}
+                                    </div>
+                                </div>
+                                {% bootstrap_field form.final_deadline_date layout='horizontal' show_label=False addon_after='<span class="ezl-tooltip" title="Pedidos feitos com prazo inferior à 48 horas estão sujeitos a análise da viabilidade de sua execução."><i class="mdi mdi-help-circle-outline"></i></span>' addon_after_class='input-group-addon addon-txt' field_class='col-sm-6 p-l-0' %}
                             </div>
                         </div>
                     </div>
@@ -70,15 +89,30 @@
                     <div class="panel-body">
                         <div class="row p-b-10">
                             <div class="col-sm-6 p-r-0">
-                                {% bootstrap_field form.court_district form_group_class="col-sm-12 p-0" layout='horizontal' label_class="p-0 col-sm-4" field_class="p-0 col-sm-8" %}
+                                <div class="col-sm-4 p-0">
+                                    <div class="input-group">
+                                    {% bootstrap_label form.court_district.label label_for='id_court_district' label_class='control-label' %}
+                                    </div>
+                                </div>
+                                {% bootstrap_field form.court_district show_label=False form_group_class="col-sm-8 p-0" layout='horizontal' field_class="p-0 col-sm-12" %}
                             </div>
                             <div class="col-sm-6 p-r-0">
-                                {% bootstrap_field form.city form_group_class="col-sm-12 p-0" required_css_class='' layout='horizontal' label_class="p-0 col-sm-4" field_class="p-l-0 p-r-5 col-sm-8" %}
+                                <div class="col-sm-4 p-0">
+                                    <div class="input-group">
+                                    {% bootstrap_label form.city.label label_for='id_court_district_complement' label_class='control-label' %}
+                                    </div>
+                                </div>
+                                {% bootstrap_field form.city show_label=False form_group_class="col-sm-8 p-0" required_css_class='' layout='horizontal' field_class="p-l-0 p-r-5 col-sm-12" %}
                             </div>
                         </div>
                         <div class="row p-b-10">
                             <div class="col-sm-6 p-r-0">
-                                {% bootstrap_field form.court_district_complement form_group_class="col-sm-12 p-0" layout='horizontal' label_class='col-sm-4 control-label p-0' field_class='col-sm-8 p-0' %}
+                                <div class="col-sm-4 p-0">
+                                    <div class="input-group">
+                                    {% bootstrap_label form.court_district_complement.label label_for='id_court_district_complement' label_class='control-label' %}
+                                    </div>
+                                </div>
+                                {% bootstrap_field form.court_district_complement show_label=False form_group_class="col-sm-8 p-0" layout='horizontal' field_class='col-sm-12 p-0' %}
                             </div>
                         </div>
                     </div>
@@ -104,22 +138,42 @@
                     <div class="panel-body">
                         <div class="row p-b-10">
                             <div class="col-sm-12 p-r-0 btn-raised">
-                                {% bootstrap_field form.folder_number addon_after='<button id="btn_add_folder" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Passta"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10'  layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
+                                <div class="col-sm-2 p-0">
+                                    <div class="input-group">
+                                    {% bootstrap_label form.folder_number.label label_for='id_folder_number' label_class='control-label' %}
+                                    </div>
+                                </div>
+                                {% bootstrap_field form.folder_number show_label=False addon_after='<button id="btn_add_folder" type="button" class="btn btn-select2 btn-raised btn-primary" title="Adicionar Passta"><i class="mdi mdi-plus"></i></button>' addon_after_class='input-group-btn p-l-10'  layout='horizontal' field_class='col-sm-9 p-l-0' %}
                             </div>
                         </div>
                         <div class="row p-b-10">
                             <div class="col-sm-12 p-r-0">
-                                {% bootstrap_field form.movement layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
+                                <div class="col-sm-2 p-0">
+                                    <div class="input-group">
+                                    {% bootstrap_label form.movement.label label_for='id_movement' label_class='control-label' %}
+                                    </div>
+                                </div>
+                                {% bootstrap_field form.movement show_label=False layout='horizontal' field_class='col-sm-9 p-l-0' %}
                             </div>
                         </div>
                         <div class="row p-b-10">
                             <div class="col-sm-12 p-r-0">
-                                {% bootstrap_field form.person_company_representative layout='horizontal' label_class='col-sm-2 control-label p-0' field_class='col-sm-9 p-l-0' %}
+                                <div class="col-sm-2 p-0">
+                                    <div class="input-group">
+                                    {% bootstrap_label form.person_company_representative.label label_for='id_person_company_representative' label_class='control-label' %}
+                                    </div>
+                                </div>
+                                {% bootstrap_field form.person_company_representative show_label=False layout='horizontal' field_class='col-sm-9 p-l-0' %}
                             </div>
                         </div>
                         <div class="row p-b-10">
                             <div class="col-sm-12 p-r-0">
-                                {% bootstrap_field form.person_asked_by layout='horizontal' label_class='col-sm-2 control-label p-0 ezl-required' field_class='col-sm-9 p-l-0' %}
+                                <div class="col-sm-2 p-0">
+                                    <div class="input-group">
+                                    {% bootstrap_label form.person_asked_by.label label_for='id_person_asked_by' label_class='ezl-required control-label' %}
+                                    </div>
+                                </div>
+                                {% bootstrap_field form.person_asked_by show_label=False layout='horizontal' field_class='col-sm-9 p-l-0' %}
                             </div>
                         </div>
                     </div>
@@ -187,6 +241,9 @@
         width: 100% !important;
         line-height: 38px !important;
     }
+    .input-group label {
+        line-height: normal;
+    }
     button.btn-select2 {
         width: 38px !important;
         height: 38px !important;
@@ -198,6 +255,13 @@
     }
     .btn-primary {
         border-radius: 3px !important;
+    }
+    .swal2-popup #swal2-content {
+        font-size: 1.5em !important;
+    }
+    .swal2-popup #swal2-content a {
+        font-weight: bolder;
+        text-decoration: underline;
     }
     </style>
 {% endblock %}
