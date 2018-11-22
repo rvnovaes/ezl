@@ -2330,7 +2330,17 @@ class NewRegister(TemplateView):
             user = User.objects.create(username=username, last_name=last_name, first_name=first_name, email=email)
             user.set_password(password)
             user.save()
-            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)
+            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
+            customer = Person.objects.create(name=office_name, legal_name=office_name, create_user=user, is_customer=True)
+            member, created = OfficeMembership.objects.get_or_create(
+                person=customer,
+                office=office,
+                defaults={
+                    'create_user': user,
+                    'is_active': True
+                })
+            office.customsettings.default_customer = customer
+            office.customsettings.save()
             DefaultOffice.objects.create(
                 auth_user=user,
                 office=office,
