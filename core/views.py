@@ -2187,17 +2187,20 @@ class NewRegister(TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):        
-        username = email = request.POST.get('email')
-        password = request.POST.get('password')
-        first_name = request.POST.get('name').split(' ')[0]
-        last_name = ' '.join(request.POST.get('name').split(' ')[1:])
-        office_name = request.POST.get('office')
-        user = User.objects.create(username=username, password=password, last_name=last_name, first_name=first_name, email=email)
-        office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)
-        DefaultOffice.objects.create(
-            auth_user=user,
-            office=office,
-            create_user=user)                
-        authenticate(username=username, password=password)
-        auth_login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
-        return JsonResponse({'redirect': reverse_lazy('dashboard')})
+        try:
+            username = email = request.POST.get('email')
+            password = request.POST.get('password')
+            first_name = request.POST.get('name').split(' ')[0]
+            last_name = ' '.join(request.POST.get('name').split(' ')[1:])
+            office_name = request.POST.get('office')
+            user = User.objects.create(username=username, password=password, last_name=last_name, first_name=first_name, email=email)
+            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)
+            DefaultOffice.objects.create(
+                auth_user=user,
+                office=office,
+                create_user=user)                
+            authenticate(username=username, password=password)
+            auth_login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
+            return JsonResponse({'redirect': reverse_lazy('dashboard')})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
