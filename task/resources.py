@@ -1,6 +1,7 @@
 from core.models import Person
 from collections import OrderedDict
 from decimal import Decimal
+from django.db import transaction
 from django.utils import timezone
 from financial.models import CostCenter
 from import_export import resources
@@ -338,6 +339,7 @@ class TaskResource(resources.ModelResource):
                                                system_prefix=row['system_prefix'],
                                                office=self.office).first()
             if not folder and folder_number:
+
                 folder = Folder.objects.filter(folder_number=folder_number,
                                                office=self.office).first()
             if not folder and person_customer:
@@ -345,16 +347,16 @@ class TaskResource(resources.ModelResource):
                 if update_cost_center:
                     data['cost_center'] = cost_center                
                 folder, created  = Folder.objects.get_or_create(person_customer=person_customer,
-                                                      office=self.office,
-                                                      legacy_code=folder_legacy_code,
-                                                      folder_number=folder_number,
-                                                      system_prefix=row['system_prefix'],
-                                                      defaults=data)
+                                                                office=self.office,
+                                                                legacy_code=folder_legacy_code,
+                                                                folder_number=folder_number,
+                                                                system_prefix=row['system_prefix'],
+                                                                defaults=data)
         if not folder:
             row_errors.append(RECORD_NOT_FOUND.format(Folder._meta.verbose_name))
             if row['folder_person_customer'] and not person_customer:
                 row_errors.append(RECORD_NOT_FOUND.format(COLUMN_NAME_DICT['folder_person_customer']['verbose_name']))
-        if update_cost_center:
+        if folder and update_cost_center:
             folder.cost_center = cost_center
             folder.save()                    
         return folder
@@ -537,14 +539,16 @@ class TaskResource(resources.ModelResource):
             instance_loader = self._meta.instance_loader_class(self, row)
             instance = self.get_instance(instance_loader, row)
         if not instance:
-            self.folder = self.validate_folder(row, row_errors)
-            self.lawsuit = self.validate_lawsuit(row, row_errors) if self.folder else None
-            self.movement = self.validate_movement(row, row_errors) if self.lawsuit else None
+            with transaction.atomic():
+                self.folder = self.validate_folder(row, row_errors)
+                self.lawsuit = self.validate_lawsuit(row, row_errors) if self.folder else None
+                self.movement = self.validate_movement(row, row_errors) if self.lawsuit else None
 
-            if self.movement:
-                row['movement'] = self.movement.id
-            if row_errors:
-                raise Exception(row_errors)
+                if self.movement:
+                    row['movement'] = self.movement.id
+                if row_errors:
+                    transaction.set_rollback(True)
+                    raise Exception(row_errors)
         else:
             row['movement'] = instance.movement.id            
             if not row['performance_place']:
