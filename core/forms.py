@@ -633,11 +633,14 @@ class XlsxFileField(forms.FileField):
 class CustomSettingsForm(BaseForm):
     class Meta:
         model = CustomSettings
-        fields = ('office', 'email_to_notification')
+        fields = ('office', 'email_to_notification', 'default_customer')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        office = get_office_session(self.request)
         self.fields['office'] = get_office_field(self.request)
+        qs = self.fields['default_customer'].queryset
+        self.fields['default_customer'].queryset = qs.filter(officemembership__office_id=office.id)
 
 
 class ImportCityListForm(forms.ModelForm):

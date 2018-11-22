@@ -1,6 +1,8 @@
 from django import template
 from django.conf import settings
 from core.models import Office
+from bootstrap3.templatetags.bootstrap3 import bootstrap_field
+from django.utils.safestring import mark_safe
 
 
 register = template.Library()
@@ -122,3 +124,13 @@ def get_correspondent(persons, office):
 @register.filter
 def format_plan_month_value(month_value):
     pass
+
+
+@register.simple_tag
+def bootstrap_field_oneline(*args, **kwargs):
+    """
+    Render a field based on the def bootstrap_field
+    Gets the same arguments
+    """
+    field_str = bootstrap_field(*args, **kwargs).replace('\n', '')
+    return mark_safe(field_str)

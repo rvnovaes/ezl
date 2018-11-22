@@ -1,299 +1,496 @@
-function getSearchParams(k){
-    var p={};
-    location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(s,k,v){p[k]=v})
-    return k?p[k]:p;
-}
+class TaskBulkCreate {
+	constructor() {
+	    this.formErrors = [];
+	    this.nullData = {id: null, text: null};
+	    this.defaultPersonAskedBy = null;
+		this.elInputPersonCustomer = $('[name=person_customer]');
+		this.elCourtDistrict = $('[name=court_district]');
+		this.elCourtDistrictComplemt = $('[name=court_district_complement]');
+		this.elCity = $('[name=city]');
+		this.elLawsuitNumber = $('[name=task_law_suit_number]');
+		this.elFolderNumber = $('[name=folder_number]');
+        this.elTypeTask = $('[name=type_task]');
+        this.elMovement = $('[name=movement]');
+        this.elFinalDeadlineDate = $('[name=final_deadline_date]');
+        this.elPerformancePlace = $('#id_performance_place');
+        this.labelLawSuitNumber = $('label[for=id_task_law_suit_number]');
+        this.elBtnAddFolder = $("#btn_add_folder");
+		this.onChangeCity();
+		this.onChangeCourtDistrict();
+		this.onChangeLawSuitNumber();
+		this.onChangeTypeTask();
+		this.onChangeFolderNumber();
+        this.onSaveSubmit();
+        this.onChangePersonCustomer();
+        this.onChangeCourtDistrictComplement();
+        this.elMovement.attr('disabled', true);
+	}
 
-function successPopup(field, value, label){
-    TaskForm.successPopup(field, value, label);
-}
-
-function isEmpty(value){
-    return value == "" || value == null || value == undefined || value == "0";
-}
-
-function addOption($el, text, value) {
-    value = value | ''; 
-    $el.append('<option value="' + value + '">'+ text +'</option>');
-}
-
-TaskForm = (function($){
-    var self;
-
-    function TaskForm(){
-        this.$folder = $("#id_folder");
-        this.$lawsuit = $("#id_lawsuit");
-        this.$movement = $("#id_movement");
-        this.$btn_add_folder = $("#btn_add_folder");
-        this.$btn_add_lawsuit = $("#btn_add_lawsuit");
-        this.$btn_add_movement = $("#btn_add_movement");
-        this.$btn_add = $('#btn_add');
+	clearFormErrors(){
+	    this.formErrors.splice(0, this.formErrors.length);
     }
 
-    TaskForm.prototype.init = function() {
-        var params = getSearchParams();
-        self.loadEvents();
-        self.task_list = new Vue({
-            el: '#app_task_list',
-            data: {
-                tasks: []
+    insertFormErrors(error, elements=[]){
+        this.formErrors.push({field: elements,
+                              message: error});
+    }
+
+    static formatError(message){
+	    return `<li>${message}</li>`
+    }
+
+    getErrors(){
+	    let liErrors = ``;
+        this.formErrors.forEach((error) => {
+            liErrors += TaskBulkCreate.formatError(error.message );
+        });
+        return `
+            <ul style="text-align: left;">
+            ${liErrors}
+            </ul>
+        `;
+    }
+
+	static setSelect2(data, element) {
+	    if(data.id && data.text) {
+	        var newOption = new Option(data.text, data.id, true, true);
+            element.append(newOption).trigger('change');
+        }else{
+	        element.val(null).trigger('change');
+        }
+    }
+    
+    get isHearing() {
+        return this.elTypeTask.find(':selected').attr('is-hearing') === 'True';
+    }
+
+	get personCustomer() {
+	    return this.elInputPersonCustomer.val();
+    }
+
+    set personCustomer(data) {
+	    TaskBulkCreate.setSelect2(data, this.elInputPersonCustomer);
+    }
+
+    setPerformancePlace() {
+	    let performancePlace = '';
+	    let courtDistrictComplement = this.courtDistrictComplementText;
+	    let courtDistrict = this.courtDistrictText;
+	    let city = this.cityText;
+	    if (courtDistrictComplement){
+	        performancePlace = courtDistrictComplement;
+        }else if(courtDistrict){
+	        performancePlace = courtDistrict;
+        }else if(city){
+	        performancePlace = city;
+        }
+        this.elPerformancePlace.val(performancePlace);
+    }
+
+    get performancePlace() {
+	    this.setPerformancePlace();
+	    return this.elPerformancePlace.val();
+    }
+
+    get finalDeadlineDate() {
+	    return this.elFinalDeadlineDate.val();
+    }
+
+    get cityText() {
+	    return (this.city) ? this.elCity.select2('data')[0].text : '';
+    }
+
+    get city() {
+	    return this.elCity.val();
+    }
+
+    set city(data) {
+	    TaskBulkCreate.setSelect2(data, this.elCity);
+    }
+
+    get courtDistrictText() {
+	    return (this.courtDistrict) ? this.elCourtDistrict.select2('data')[0].text : '';
+    }
+
+    get courtDistrict() {
+	    return this.elCourtDistrict.val();
+    }
+
+    set courtDistrict(data) {
+	    TaskBulkCreate.setSelect2(data, this.elCourtDistrict);
+    }
+
+    get courtDistrictComplementText() {
+	    return (this.courtDistrictComplement) ? this.elCourtDistrictComplemt.select2('data')[0].text : '';
+    }
+
+    get courtDistrictComplement() {
+	    return this.elCourtDistrictComplemt.val();
+    }
+
+    set courtDistrictComplement(data) {
+	    TaskBulkCreate.setSelect2(data, this.elCourtDistrictComplemt);
+    }
+
+    get lawSuitNumber() {
+	    if (this.elLawsuitNumber.val().length > 0) {
+            return this.elLawsuitNumber.val();
+        }
+        return false;
+    }
+
+    set lawSuitNumber(data) {
+	    TaskBulkCreate.setSelect2(data, this.elLawsuitNumber);
+    }
+
+    get folderNumber() {
+	    return this.elFolderNumber.val();
+    }
+
+    set folderNumber(data) {
+	    TaskBulkCreate.setSelect2(data, this.elFolderNumber);
+    }
+
+    get movement() {
+        return this.elMovement.val();
+    }
+
+    set movement(data) {
+        TaskBulkCreate.setSelect2(data, this.elMovement);
+    }
+
+    async newPersonCustomer (csrfToken){
+        const {value: personCustomerName} = await swal({
+          title: 'Cadastro de Cliente/Parte',
+          input: 'text',
+          width: '30%',
+          inputClass: 'form-control',
+          inputPlaceholder: 'Nome',
+          showCancelButton: true,
+          inputValidator: (value) => {
+            return new Promise((resolve) => {
+              if (!value.trim()) {
+                resolve('O nome é obrigatório!');
+              } else {
+                resolve();
+              }
+
+            });
+          }
+        });
+
+        if (personCustomerName) {
+            var data = {'legal_name': personCustomerName,
+                     'name': personCustomerName,
+                     'legal_type': 'J',
+                     'is_customer': true
+                };
+            $.ajax({
+                type: 'POST',
+                url: '/person_customer/add/',
+                data: data,
+                success: (result)=>{
+                    this.personCustomer = result;
+                },
+                error: (request, status, error)=>{
+                    showToast('error', 'Atenção', error, 0, false);
+                },
+                beforeSend: (xhr, settings)=>{
+                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                },
+                dataType: 'json'
+            });
+        }
+    }
+
+	async newLawSuit (csrfToken, fields) {
+	    var html_fields = '';
+        fields.forEach(function(field){html_fields += field + '\n'});
+	    const {value: formValues} = await swal({
+            title: 'Cadastro de Processo',
+            html: html_fields,
+            width: '30%',
+            focusConfirm: false,
+            showCancelButton: true,
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                let typeLawsuit = document.getElementById("id_type_lawsuit").value;
+                let lawsuitNumber = document.getElementById("id_law_suit_number").value;
+                if (!typeLawsuit || !lawsuitNumber) {
+                    swal.showValidationMessage('Campos obrigatórios não foram informados');
+                    return false;
+                }else if(!document.getElementById('id_person_customer').value){
+                    swal.showValidationMessage('Favor selecionar um cliente');
+                    return false;
+                }else{
+                    return {
+                        typeLawsuit: typeLawsuit,
+                        lawsuitNumber: lawsuitNumber
+                    };
+                }
+            },
+        });
+
+        if (formValues) {
+            let data = {'type_lawsuit': formValues.typeLawsuit,
+                    'law_suit_number': formValues.lawsuitNumber,
+                    'person_customer': document.getElementById('id_person_customer').value,
+                    'folder_id': document.getElementById('id_folder_number').value
+                };
+            $.ajax({
+                type: 'POST',
+                url: '/processos/processos/task_bulk_create/',
+                data: data,
+                success: (result)=>{
+                    this.lawSuitNumber = {id: result.id, text: result.text};
+                    this.folderNumber = result.folder;
+                },
+                error: (request, status, error)=>{
+                    showToast('error', 'Atenção', error, 0, false);
+                },
+                beforeSend: (xhr, settings)=>{
+                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                },
+                dataType: 'json'
+            });
+        }
+    }
+
+    async newFolder (csrfToken, fields) {
+	    var html_fields = '';
+        fields.forEach(function(field){html_fields += field + '\n'});
+	    const {value: formValues} = await swal({
+            title: 'Cadastro de Pasta',
+            html: html_fields,
+            width: '30%',
+            focusConfirm: false,
+            showCancelButton: true,
+            showLoaderOnConfirm: true,
+            onOpen: () => {
+                let data = this.elInputPersonCustomer.select2('data')[0];
+                TaskBulkCreate.setSelect2(data, $('[name=person_customer_swal]'));
+            },
+            preConfirm: () => {
+                let personCustomer = document.getElementById('id_person_customer_swal').value;
+                if (!personCustomer) {
+                    swal.showValidationMessage('Favor selecionar um Cliente');
+                    return false;
+                }else{
+                    return personCustomer;
+                }
+            },
+        });
+
+        if (formValues) {
+            let data = {'person_customer': formValues};
+            $.ajax({
+                type: 'POST',
+                url: '/processos/pastas/task_bulk_create/',
+                data: data,
+                success: (result)=>{
+                    this.folderNumber = result.folder;
+                    if(parseInt(this.personCustomer) !== parseInt(result.person_customer.id)){
+                        this.personCustomer = result.person_customer;
+                    }
+                },
+                error: (request, status, error)=>{
+                    showToast('error', 'Atenção', error, 0, false);
+                },
+                beforeSend: (xhr, settings)=>{
+                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                },
+                dataType: 'json'
+            });
+        }
+    }
+
+	onChangeCity(){
+	    this.elCity.on('change',()=>{
+            if(this.city) {
+                this.courtDistrict = this.nullData;
+            }
+            this.elCourtDistrict.attr('disabled', !(!this.city));
+            this.elCourtDistrictComplemt.attr('disabled', !(!this.city));
+        });
+    }
+
+	onChangeCourtDistrict(){
+	    this.elCourtDistrict.on('change',()=>{
+            if(this.courtDistrict) {
+                this.city = this.nullData;
+                let courtDistrict = this.elCourtDistrictComplemt.select2('data')[0].court_district;
+                if (courtDistrict && courtDistrict.id !== parseInt(this.courtDistrict)){
+                    this.courtDistrictComplement = this.nullData;
+                }
+            }
+            this.elCity.attr('disabled', !(!this.courtDistrict));
+        });
+    }
+
+    onChangeCourtDistrictComplement(){
+	    this.elCourtDistrictComplemt.on('change',()=>{
+            if(this.courtDistrictComplement) {
+                this.city = this.nullData;
+                let courtDistrict = this.elCourtDistrictComplemt.select2('data')[0].court_district;
+                if (courtDistrict) {
+                    this.courtDistrict= courtDistrict;
+                }
+            }
+            this.elCity.attr('disabled', !(!this.courtDistrict));
+        });
+    }
+
+	onChangeLawSuitNumber(){
+	    this.elLawsuitNumber.on('change',()=>{
+            this.movement = this.nullData;
+            this.elMovement.attr('disabled', !this.lawSuitNumber);
+            this.elBtnAddFolder.attr('disabled', false);
+            if (this.lawSuitNumber){
+                let folder = this.elLawsuitNumber.select2('data')[0].folder;
+                if (folder && !folder.isDefault) {
+                    this.folderNumber = folder;
+                    this.elBtnAddFolder.attr('disabled', true);
+                }
             }
         });
-        if(params.movement != undefined) {
-            self.loadTasks(params.movement);
-        }
-        self.fillForm(params);
-    };
+    }
 
-    TaskForm.prototype.eventChangeFolder = function(value, callback) {
-        self.fieldWasChanged('folder', value);
-        if (isEmpty(value)){
-            choices = ['<option value="">Sem registros</option>'];
-            self.$lawsuit.html(choices.join(''));
-            self.$lawsuit.select2();
-            self.$lawsuit.selectpicker('refresh')
+	onChangeTypeTask(){
+	    this.elTypeTask.on('change',()=>{
+            if(this.isHearing){
+                this.labelLawSuitNumber.addClass('ezl-required');
+            }else{
+                this.labelLawSuitNumber.removeClass('ezl-required');
+            }
+        });
+    }
+
+	onChangeFolderNumber(){
+	    this.elFolderNumber.on('change',()=>{
+	        let personCustomer = this.elFolderNumber.select2('data')[0].person_customer;
+	        if (personCustomer) {
+	            this.personCustomer = personCustomer;
+            }
+        });
+    }
+
+	onChangePersonCustomer(){
+	    this.elInputPersonCustomer.on('change',()=> {
+	        let personCustomer = this.elFolderNumber.select2('data')[0].person_customer;
+	        if (personCustomer && personCustomer.id !== parseInt(this.personCustomer)){
+	            this.folderNumber = this.nullData;
+            }
+            this.lawSuitNumber = this.nullData;
+        });
+    }
+
+    validateLawsuit() {
+        if (this.isHearing && !this.lawSuitNumber) {
+            this.insertFormErrors('É necessário informar processo para este tipo de serviço.',
+                [this.elTypeTask, this.elLawsuitNumber]);
+        }
+
+    }
+
+    validatePerformancePlace() {
+        if (!(this.courtDistrict || this.city || this.courtDistrictComplement)) {
+            this.insertFormErrors('Deve ser informada a comarca, o complemento ou a cidade para a solicitação da OS.',
+                [this.elCourtDistrict, this.elCity, this.elCourtDistrictComplemt]);
+        }
+
+    }
+
+    validateFinalDeadlineDate() {
+        if (!this.finalDeadlineDate) {
+            this.insertFormErrors('Deve ser informado o prazo de cumprimento da OS.',
+                [this.elFinalDeadlineDate]);
+        }
+        if (moment().add(2, 'hour') > moment(this.finalDeadlineDate, "DD/MM/YYYY HH:mm")){
+            this.insertFormErrors('O prazo de cumprimento da OS é inferior a duas horas.',
+                [this.elFinalDeadlineDate]);
+        }
+
+    }
+
+    submitForm(data){
+	    let baseURL = window.location.origin;
+        $.ajax({
+            type: 'POST',
+            url: window.location,
+            data: data,
+            success: (result)=>{
+                swal({
+                    title: 'OS criada:',
+                    type: 'success',
+                    html: `<a href="${baseURL}/dashboard/${result.task_id}" target="_blank">${baseURL}/dashboard/${result.task_id}</a>`,
+                    showCloseButton: true,
+                    showCancelButton: false,
+                    focusConfirm: true,
+                    onClose: () => {
+                        window.location.reload();
+                    }
+                });
+            },
+            error: (request, status, error)=>{
+                showToast('error', 'Atenção', error, 0, false);
+            },
+            beforeSend: (xhr, settings)=>{
+                xhr.setRequestHeader("X-CSRFToken", data.csrfmiddlewaretoken);
+            },
+            dataType: 'json'
+        });
+    }
+
+    static get formData() {
+		return $("form").serializeArray();
+	}
+
+	get query() {
+		let formData = TaskBulkCreate.formData;
+		let data = {};
+		$(formData ).each(function(index, obj){
+		    data[obj.name] = obj.value;
+		});
+        if (data.person_asked_by === "") {
+            data.person_asked_by = String(this.defaultPersonAskedBy);
+        }
+        data.performance_place = this.performancePlace;
+        if (!data.movement){
+            data.movement = this.movement;
+        }
+		return data;
+	}
+
+    validateForm() {
+	    this.clearFormErrors();
+        this.validateLawsuit();
+        this.validatePerformancePlace();
+        this.validateFinalDeadlineDate();
+        if (this.formErrors.length <= 0) {
             return false;
         }
-        $.get("/v1/lawsuit/lawsuit_common?folder=" + value, function(data){
-            var choices;
-            if (data.data.length == 0) {
-                choices = ['<option value="">Sem registros</option>'];
-            } else {
-                choices = ['<option value="">Selecione...</option>'];
-            }
-            $(data.data).each(function(i, item){
-                choices.push('<option value="' + item.id + '">' + item.law_suit_number + ' - ' + item.court_district.name + '</option>');
-            });
-            self.$lawsuit.html(choices.join(''));
-            self.$lawsuit.select2();
-            self.$lawsuit.selectpicker('refresh')
-
-            if (typeof(callback) == "function"){
-                callback();
-            }
-            self.$lawsuit.focus();
+        let htmlErrors = this.getErrors();
+        swal({
+            title: 'Campos obrigatórios não preenchidos',
+            width: '45%',
+            html: htmlErrors,
+            type: 'error'
         });
-    };
+        return this.formErrors.length;
+    }
 
-    TaskForm.prototype.eventChangeLawsuit = function(value, callback) {
-        self.fieldWasChanged('lawsuit', value);
-        if(value == '' || value == undefined){
-            return false;
+    save() {
+        let formErrors = this.validateForm();
+        if (!formErrors) {
+            let data = this.query;
+            this.submitForm(data);
         }
+    }
 
-        $.get("/v1/lawsuit/movement_common?lawsuit=" + value, function(data){
-            var choices = [];
-            if (data.data.length > 0) {
-                choices = ['<option value="">Selecione...</option>'];
-            } else {
-                choices = ['<option value="">Sem registros</option>'];
-            }
-            $(data.data).each(function(i, item){
-                choices.push('<option value="' + item.id + '">' + item.type_movement_name + '</option>');
-            });
-            self.$movement.html(choices.join(''));
-            self.$movement.selectpicker('refresh')
-
-            if (typeof(callback) == "function"){
-                callback();
-            }
-            self.$movement.focus();
+    onSaveSubmit() {
+        $('[type=submit]').on('click', (el)=> {                
+            el.preventDefault();
+            this.save();
         });
-    };
-
-    TaskForm.prototype.eventChangeMovement = function(value) {
-        self.fieldWasChanged('movement', value);
-        self.loadTasks(value);
-    };
-
-    TaskForm.prototype.loadEvents = function() {
-        self.$folder.change(function(){
-            if ($(this).val() === '') {
-                $(this).data('value', '');
-                $(this).attr('value', '');
-            }else{
-                $(this).data('value', parseInt($(this).attr('value')));
-            }
-            var value = $(this).data('value');
-            self.eventChangeFolder(value);
-        });
-
-        self.$lawsuit.change(function(){
-            var value = $(this).val();
-            self.eventChangeLawsuit(value);
-        });
-
-        self.$movement.change(function(){
-            var value = $(this).val();
-            self.eventChangeMovement(value);
-        });
-
-        this.$btn_add_folder.click(function(){
-            self.openPopup("/processos/pastas/criar/");
-        });
-
-        this.$btn_add_lawsuit.click(function(){
-            var folder = self.$folder.data('value');
-            if (isEmpty(folder)) {
-                return
-            }
-            self.openPopup("/processos/processos/" + folder);
-        });
-
-        this.$btn_add_movement.click(function(){
-            var lawsuit = self.$lawsuit.val();
-            if (isEmpty(lawsuit)) {
-                return
-            }
-            self.openPopup("/processos/movimentacao/" + lawsuit);
-        });
-
-        this.$btn_add.click(function(){
-            if(self.$btn_add.hasClass('disabled-btn')){
-                return false;
-            }
-            $('#form-content').modal('show');
-        });
-
-    };
-
-    TaskForm.prototype.disableAdd = function(field){
-        self['$btn_add_' + field].addClass('disabled-btn');
-        if(field == 'lawsuit' || field == 'movement'){
-            self['$' + field].prop('disabled', true);
-            self['$' + field].selectpicker('refresh');
-        }
-    };
-
-    TaskForm.prototype.enableAdd = function(field){
-        self['$btn_add_' + field].removeClass('disabled-btn');
-        if(field == 'lawsuit' || field == 'movement'){
-            self['$' + field].prop('disabled', false);
-            self['$' + field].selectpicker('refresh');
-        }
-    };
-
-    TaskForm.prototype.clearTaskList = function(){
-        self.task_list.$data.tasks = [];
-    };
-
-    TaskForm.prototype.removeChoices = function(field){
-        var $el = self['$' + field],
-            label;
-        $el.html('');
-
-        if (field == 'lawsuit') {
-            label = 'Selecione a pasta';
-            self.removeChoices('movement');
-        }
-        if (field == 'movement') {
-            label = 'Selecione o processo';
-        }
-        addOption($el, label);
-    };
-
-    TaskForm.prototype.fieldWasChanged = function(field, value){
-        if (field == "folder") {
-            if(isEmpty(value)){
-                self.disableAdd('lawsuit');
-                self.removeChoices('lawsuit');
-            } else {
-                self.enableAdd('lawsuit');
-            }
-            self.disableAdd('movement');
-            self.clearTaskList();
-        }
-        if (field == 'lawsuit'){
-            if(isEmpty(value)){
-                self.disableAdd('movement');
-                self.removeChoices('movement');
-            } else {
-                self.enableAdd('movement');
-            }
-            self.clearTaskList();
-        }
-        this.$btn_add.addClass('disabled-btn');
-        if (field == 'movement'){
-            if (isEmpty(value)) {
-                self.clearTaskList();
-            } else {
-                this.$btn_add.removeClass('disabled-btn');
-                self.loadTasks(value);
-            }
-        }
-    };
-
-    TaskForm.prototype.openPopup = function(url){
-        window.open(url +"?popup=1", "", "width=800,height=500");
-    };
-
-    TaskForm.prototype.successPopup = function(field, value, label){
-        var $el = self["$" + field];
-        debugger
-        if ($el.prop('tagName').toLowerCase() == "select"){
-            addOption($el, decodeURI(label), value);
-            if (field == 'lawsuit'){
-                $el.val(value).trigger("change");
-            }else{
-                $el.val(value);
-            }
-            $el.value = value;
-        } else {
-            $('#id_folder').attr('data-value', value);
-            $('#id_folder').attr('data-value-txt', decodeURI(label));
-            $('#id_folder').attr('value', value);
-            $('#id_folder').val(decodeURI(label));
-        }
-        self.fieldWasChanged(field, value);
-        if (field == 'lawsuit' || field == 'folder') {
-            self.$movement.html('');
-            addOption(self.$movement, "Sem registros", "");
-        }
-        if (field == 'folder') {
-            self.$lawsuit.html('');
-            addOption(self.$lawsuit, "Sem registros", "");
-        }
-        if ($el.hasClass('selectpicker')){
-            $el.selectpicker('refresh')
-        }
-        $("html, body").animate({ scrollTop: 0 }, "slow");
-    };
-
-    TaskForm.prototype.loadTasks = function(movement){
-        self.task_list.$data.tasks = [];
-        $.get("/v1/lawsuit/task_common?movement=" + movement, function(data){
-            self.task_list.$data.tasks = data.data;
-            setTimeout(addLinkOnRows, 1000);
-        });
-    };
-
-    TaskForm.prototype.fillForm = function(params){
-        if (params.folder != undefined && params.folderLabel != undefined){
-            var id_folder_field = $('#id_folder');
-            id_folder_field.attr('data-value', decodeURI(params.folder));
-            id_folder_field.attr('data-value-txt', decodeURI(params.folderLabel));
-            id_folder_field.attr('value', decodeURI(params.folder));
-            id_folder_field.val(decodeURI(params.folderLabel));
-            self.enableAdd('lawsuit');
-            self.$btn_add_lawsuit.removeClass('disabled-btn');
-        }
-
-        self.eventChangeFolder(params.folder, function(){
-            self.$lawsuit.val(params.lawsuit).trigger('change');
-            self.eventChangeLawsuit(params.lawsuit, function(){
-                self.$movement.val(params.movement).trigger('change');
-                self.eventChangeMovement(params.movement);
-                self.$movement.selectpicker('refresh')
-            });
-            self.$lawsuit.selectpicker('refresh')
-        });
-    };
-
-    self = new TaskForm();
-    return self;
-})(jQuery);
-
-
-$(document).ready(function(){
-    TaskForm.init();
-});
+    }    
+}

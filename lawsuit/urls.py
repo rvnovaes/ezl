@@ -21,9 +21,15 @@ urlpatterns = [
     url(r'courtdistrict_autocomplete$',
         login_required(views.CourtDistrictAutocomplete.as_view()),
         name='courtdistrict_autocomplete'),
+    url(r'courtdistrict_select2$',
+        login_required(views.CourtDistrictSelect2Autocomplete.as_view()),
+        name='courtdistrict_select2'),
     url(r'folder_autocomplete$',
         login_required(views.FolderAutocomplete.as_view()),
         name='folder_autocomplete'),
+    url(r'folder_autocomplete_2$',
+        login_required(views.FolderSelect2Autocomplete.as_view()),
+        name='folder_autocomplete_2'),
     url(r'lawsuit_autocomplete$',
         login_required(views.LawsuitAutocomplete.as_view()),
         name='lawsuit_autocomplete'),
@@ -44,6 +50,9 @@ urlpatterns = [
     url(r'^typeahead/search/complemento$',
         login_required(views.TypeaHeadCourtDistrictComplementSearch.as_view()),
         name='typeahead_complemento'),
+    url(r'^complemento_select2$',
+        login_required(views.CourtDistrictComplementSelect2Autocomplete.as_view()),
+        name='complemento_select2'),
 
     # Varas
     url(r'^varas/$',
@@ -72,6 +81,9 @@ urlpatterns = [
     url(r'^processos/excluir$',
         login_required(views.LawSuitDeleteView.as_view()),
         name='lawsuit_delete'),
+    url(r'processos/task_bulk_create/$',
+        login_required(views.LawSuitCreateTaskBulkCreate.as_view()),
+        name='lawsuit_task_bulk_create'),
 
     # Movimentacao
     url(r'^movimentacao/listar/$',
@@ -130,6 +142,10 @@ urlpatterns = [
     url(r'^pastas/excluir$',
         login_required(login_required(views.FolderDeleteView.as_view())),
         name='folder_delete'),
+    url(r'^pastas/task_bulk_create/$',
+        login_required(
+            login_required(views.FolderCreateTaskBulkCreate.as_view())),
+        name='folder_bulk_create'),
 
     # Orgao
     url(r'^orgaos/$',
