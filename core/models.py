@@ -6,6 +6,7 @@ import time
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User, Group
+from django.contrib.postgres.fields import JSONField
 
 from core.managers import PersonManager
 from core.utils import LegacySystem
@@ -195,8 +196,8 @@ class City(Audit):
     court_district = models.ForeignKey(
         'lawsuit.CourtDistrict',
         on_delete=models.PROTECT,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         verbose_name='Comarca')
 
     class Meta:
@@ -205,8 +206,7 @@ class City(Audit):
         unique_together = (('name', 'state'), )
 
     def __str__(self):
-        return '{} - {} - {}'.format(self.name, self.state.initials,
-                                     self.state.country.name)
+        return '{} - {}'.format(self.name, self.state.initials)
 
 
 class AbstractPerson(Audit, LegacyCode):
@@ -709,9 +709,12 @@ def get_dir_name(instance, filename):
 
 class ImportXlsFile(Audit, OfficeMixin):
     file_xls = models.FileField('Arquivo', upload_to=get_dir_name)
-    log = models.TextField('Log', null=True)
     start = models.DateTimeField('Início processo')
     end = models.DateTimeField('Fim processo', null=True)
+    log_file = JSONField(
+        null=True,
+        blank=True,
+        verbose_name='Log do processo')
 
     def __str__(self):
         return self.file_xls.file.name + ' - ' + 'Início: ' + str(
@@ -758,6 +761,9 @@ class CustomSettings(Audit):
     default_user = models.ForeignKey(User, verbose_name='Usuário default')
     email_to_notification = models.EmailField(verbose_name='E-mail para receber notificações')
     i_work_alone = models.BooleanField(default=True)
+    default_customer = models.ForeignKey(Person, verbose_name='Cliente padrão',
+                                         blank=True, null=True,
+                                         limit_choices_to={"is_customer": True})
 
     class Meta:
         verbose_name = 'Configurações por escritório'

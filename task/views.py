@@ -1,7 +1,6 @@
 import json
 import uuid
 import csv
-import copy
 import pickle
 import io
 import pandas as pd
@@ -25,8 +24,6 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django.core.exceptions import ValidationError
-from django.shortcuts import render
-from django.forms.models import model_to_dict
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from djmoney.money import Money
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
@@ -35,9 +32,11 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
     DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
 from core.models import Person, CorePermissions, CustomSettings, Office
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
-from lawsuit.models import Movement
+from lawsuit.forms import LawSuitForm
+from lawsuit.models import Movement, LawSuit, Folder, TypeMovement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter
-from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, ImportTaskListForm, TaskSurveyAnswerForm
+from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, \
+    ImportTaskListForm, TaskBulkCreateForm
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation, TypeTaskMain, TaskSurveyAnswer
 from .report import TaskToPayXlsx
@@ -47,7 +46,6 @@ from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTa
 from task.tasks import import_xls_task_list
 from task.rules import RuleViewTask
 from task.workflow import CorrespondentsTable
-from task.workflow import get_child_recipients
 from financial.models import ServicePriceTable
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms, delegate_child_task
@@ -74,19 +72,82 @@ class TaskListView(CustomLoginRequiredView, SingleTableViewMixin):
 
 class TaskBulkCreateView(AuditFormMixin, CreateView):
     model = Task
-    form_class = TaskCreateForm
+    form_class = TaskBulkCreateForm
     success_url = reverse_lazy('task_list')
     success_message = CREATE_SUCCESS_MESSAGE
     template_name_suffix = '_bulk_create_form'
 
-    def form_valid(self, form):
-        task = form.instance
-        form.instance.movement_id = self.request.POST['movement']
-        self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
-        form.instance.__server = get_domain(self.request)
-        response = super(TaskBulkCreateView, self).form_valid(form)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        office = get_office_session(self.request)
+        context['default_customer'] = None
+        context['lawsuit_form'] = LawSuitForm()
+        if office.customsettings and office.customsettings.default_customer:
+            context['default_customer'] = {'id': office.customsettings.default_customer.id,
+                                           'text': office.customsettings.default_customer.legal_name}
+        return context
 
-        documents = self.request.FILES.getlist('file')
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        form.fields['person_customer_swal'].required = False
+        form.fields['person_asked_by'].queryset = Person.objects.all()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        create_user = self.request.user
+        form.instance.create_user = create_user
+        form.instance.create_date = timezone.now()
+        form.instance.is_active = True
+        office = form.instance.office
+        movement_id = self.request.POST['movement']
+        law_suit_number = self.request.POST['task_law_suit_number']
+        folder_number = self.request.POST['folder_number']
+        person_customer_id = self.request.POST['person_customer']
+        if folder_number:
+            folder = Folder.objects.filter(id=folder_number).first()
+        else:
+            folder, created = Folder.objects.get_or_create(person_customer_id=person_customer_id,
+                                                           is_default=True,
+                                                           office=office,
+                                                           defaults={'create_user': create_user,
+                                                                     'is_active': True})
+        if law_suit_number:
+            law_suit = LawSuit.objects.filter(id=law_suit_number).first()
+            if law_suit.folder != folder and not folder.is_default:
+                law_suit.folder = folder
+                law_suit.save()
+            else:
+                folder = law_suit.folder
+        else:
+            law_suit, created = LawSuit.objects.get_or_create(folder=folder,
+                                                              law_suit_number='Processo avulso',
+                                                              office=office,
+                                                              defaults={'create_user': create_user,
+                                                                        'is_active': True})
+        if movement_id:
+            movement = Movement.objects.filter(id=movement_id).first()
+            movement.law_suit = law_suit
+            movement.save()
+        else:
+            default_type_movement, created = TypeMovement.objects.get_or_create(is_default=True,
+                                                                                office=office,
+                                                                                defaults={
+                                                                                    'name': 'OS Avulsa',
+                                                                                    'create_user': create_user})
+            movement, created = Movement.objects.get_or_create(folder=folder,
+                                                               law_suit=law_suit,
+                                                               type_movement=default_type_movement,
+                                                               office=office,
+                                                               defaults={'create_user': create_user,
+                                                                         'is_active': True})
+        form.instance.movement = movement
+        form.instance.__server = get_domain(self.request)
+        task = form.save()
+
+        documents = form.cleaned_data['documents'] if form.fields.get('documents') else []
         if documents:
             for document in documents:
                 file_name = document.name.replace(' ', '_')
@@ -97,18 +158,14 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
 
         form.delete_temporary_files()
 
-        return response
+        status = 200
+        ret = {'status': 'Ok', 'task_id': task.id}
+        return JsonResponse(ret, status=status)
 
-    def get_success_url(self):
-        return "{}?movement={}&movementLabel={}&lawsuit={}&lawsuitLabel={}&folder={}&folderLabel={}".format(
-            reverse('task_add'),
-            self.object.movement_id,
-            self.object.movement.type_movement.name,
-            self.object.movement.law_suit_id,
-            self.object.movement.law_suit,
-            self.object.movement.law_suit.folder_id,
-            self.object.movement.law_suit.folder,
-        )
+    def form_invalid(self, form):
+        status = 500
+        ret = {'status': 'false', 'errors': form.errors}
+        return JsonResponse(ret, status=status)
 
 
 class TaskCreateView(AuditFormMixin, CreateView):

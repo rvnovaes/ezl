@@ -20,7 +20,7 @@ from core.models import ContactUs, Person, Address, City, ContactMechanism, Cont
     LegalType, Office, Invite, InviteOffice, Team, CustomSettings
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session, get_domain
 from core.widgets import TypeaHeadForeignKeyWidget
-from core.models import OfficeMixin
+from core.models import OfficeMixin, ImportXlsFile
 from django_file_form.forms import MultipleUploadedFileField, FileFormMixin
 from core.utils import validate_xlsx_header
 from django.core.exceptions import ValidationError
@@ -633,8 +633,20 @@ class XlsxFileField(forms.FileField):
 class CustomSettingsForm(BaseForm):
     class Meta:
         model = CustomSettings
-        fields = ('office', 'email_to_notification')
+        fields = ('office', 'email_to_notification', 'default_customer')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        office = get_office_session(self.request)
         self.fields['office'] = get_office_field(self.request)
+        qs = self.fields['default_customer'].queryset
+        self.fields['default_customer'].queryset = qs.filter(officemembership__office_id=office.id)
+
+
+class ImportCityListForm(forms.ModelForm):
+    file_xls = XlsxFileField(
+        label='Arquivo', required=True, headers_to_check=['UF', 'MUNICÍPIO'])
+
+    class Meta:
+        model = ImportXlsFile
+        fields = ('file_xls', )

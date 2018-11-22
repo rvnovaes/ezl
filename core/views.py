@@ -31,7 +31,8 @@ from django.contrib.auth import authenticate, login as auth_login
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
-    ResetPasswordFormMixin, OfficeForm, InviteForm, InviteOfficeForm, ContactMechanismForm, TeamForm, CustomSettingsForm
+    ResetPasswordFormMixin, OfficeForm, InviteForm, InviteOfficeForm, ContactMechanismForm, TeamForm, \
+    CustomSettingsForm, ImportCityListForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
@@ -42,7 +43,7 @@ from core.models import Person, Address, City, State, Country, AddressType, Offi
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
-from core.utils import login_log, logout_log, get_office_session, get_domain
+from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form
 from core.view_validators import create_person_office_relation, person_exists
 from .mail import send_mail_sign_up
 from financial.models import ServicePriceTable
@@ -57,6 +58,7 @@ from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_groups_with_perms
 from billing.models import Plan, PlanOffice
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from core.tasks import import_xls_city_list
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -90,6 +92,23 @@ class AutoCompleteView(autocomplete.Select2QuerySetView):
             qs = qs[:10]
 
         return qs
+
+    def get_create_option(self, context, q):
+        """This method is required just to translate the creation message."""
+        create_option = []
+        display_create_option = False
+        if self.create_field and q:
+            page_obj = context.get('page_obj', None)
+            if page_obj is None or page_obj.number == 1:
+                display_create_option = True
+
+        if display_create_option and self.has_add_permission(self.request):
+            create_option = [{
+                'id': q,
+                'text': 'Criar "%(new_value)s"' % {'new_value': q},
+                'create_id': True,
+            }]
+        return create_option
 
 
 def login(request):
@@ -1689,6 +1708,19 @@ class CityAutoCompleteView(TypeaHeadGenericSearch):
         return list(data)
 
 
+class CitySelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = filter_valid_choice_form(City.objects.filter(is_active=True))
+        if self.q:
+            filters = Q(name__unaccent__icontains=self.q)
+            filters |= Q(state__initials__unaccent__icontains=self.q)
+            qs = qs.filter(filters)
+        return qs.order_by('name')
+
+    def get_result_label(self, result):
+        return "{}".format(result.__str__())
+
+
 class ClientAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params, extra_params,
@@ -1699,6 +1731,30 @@ class ClientAutocomplete(TypeaHeadGenericSearch):
                 Q(offices=office)):
             data.append({'id': client.id, 'data-value-txt': client.__str__()})
         return list(data)
+
+
+class ClientSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Person.objects.all().filter(offices=get_office_session(self.request), is_customer=True, is_active=True)
+
+        if self.q:
+            qs = qs.filter(legal_name__unaccent__icontains=self.q)
+        return qs
+
+    def get_result_label(self, result):
+        return result.legal_name
+
+
+class PersonCompanyRepresentativeSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Person.objects.all().filter(offices=get_office_session(self.request), legal_type='F', is_active=True)
+
+        if self.q:
+            qs = qs.filter(legal_name__unaccent__icontains=self.q)
+        return qs
+
+    def get_result_label(self, result):
+        return result.legal_name
 
 
 class OfficeAutocomplete(TypeaHeadGenericSearch):
@@ -1752,6 +1808,7 @@ class RequesterAutocomplete(TypeaHeadGenericSearch):
             })
         return list(data)
 
+
 class OriginRequesterAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params, extra_params,
@@ -1764,6 +1821,7 @@ class OriginRequesterAutocomplete(TypeaHeadGenericSearch):
                 'data-value-txt': office_correspondent.__str__()
             })
         return list(data)
+
 
 class ServiceAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
@@ -2169,6 +2227,7 @@ class MediaFileView(LoginRequiredMixin, View):
         return HttpResponseRedirect(
             urljoin(settings.AWS_STORAGE_BUCKET_URL, path))
 
+
 class OfficePermissionRequiredMixin(PermissionRequiredMixin):
     def has_permission(self):
         guardian = ObjectPermissionChecker(self.request.user)
@@ -2180,6 +2239,80 @@ class OfficePermissionRequiredMixin(PermissionRequiredMixin):
         return True
 
 
+class PersonCustomerCreateTaskBulkCreate(View):
+    form = PersonForm
+
+    def post(self, *args, **kwargs):
+        create_user = self.request.user
+        office_session = get_office_session(self.request)
+        form = self.form(self.request.POST)
+        status = 200
+        if form.is_valid():
+            form.instance.create_user = create_user
+            form.instance.is_active = True
+            instance = form.save()
+            create_person_office_relation(instance, self.request.user, office_session)
+            data = {'id': instance.id, 'text': instance.legal_name}
+        else:
+            status = 500
+            data = {'error': True, 'errors': []}
+            for error in form.errors:
+                data['errors'].append(error)
+
+        return JsonResponse(json.loads(json.dumps(data)), status=status)
+
+
+class ImportCityList(PermissionRequiredMixin, CustomLoginRequiredView,
+                     TemplateView):
+    permission_required = ('superuser', )
+    template_name = 'core/import_city_list.html'
+    form_class = ImportCityListForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_name_plural'] = 'Importação de Cidades'
+        context['page_title'] = 'Importação de Cidade'
+        return context
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data(*args, **kwargs)
+        form = self.form_class(request.POST, request.FILES)
+        status = 200
+        if form.is_valid():
+            file_xls = form.save(commit=False)
+            file_xls.office = get_office_session(request)
+            file_xls.create_user = request.user
+            file_xls.start = timezone.now()
+            file_xls.log_file = "{\"status\": \"Em andamento\" , \"current_line\": 0, \"total_lines\": 0}"
+            file_xls.save()
+
+            import_xls_city_list.delay(file_xls.pk)
+
+            context['show_modal_progress'] = True
+            context['file_xls_id'] = file_xls.id
+            context['file_name'] = request.FILES['file_xls'].name
+        else:
+            status = 500
+            ret = {'status': 'false', 'message': form.errors}
+            messages.error(request, form.errors)
+            return JsonResponse(ret, status=status)
+        context.pop('view')
+        return JsonResponse(json.loads(json.dumps(context)), status=status)
+
+    def get(self, request, *args, **kwargs):
+
+        context = self.get_context_data(**kwargs)
+        if request.GET.get('file_xls_id'):
+            context.pop('view')
+            file_xls_id = request.GET.get('file_xls_id')
+            file_xls = self.form_class._meta.model.objects.filter(pk=file_xls_id).first()
+            context['file_xls_id'] = file_xls.id
+            context['log_file'] = json.loads(file_xls.log_file) if file_xls.log_file else ''
+            return JsonResponse(json.loads(json.dumps(context)), status=200)
+        else:
+            return super().get(request, *args, **kwargs)
+
+
 class NewRegister(TemplateView):
     template_name = 'account/register.html'
 
@@ -2187,7 +2320,7 @@ class NewRegister(TemplateView):
         context = super().get_context_data()
         return context
 
-    def post(self, request, *args, **kwargs):        
+    def post(self, request, *args, **kwargs):
         try:
             username = email = request.POST.get('email')
             password = request.POST.get('password')
@@ -2201,7 +2334,7 @@ class NewRegister(TemplateView):
             DefaultOffice.objects.create(
                 auth_user=user,
                 office=office,
-                create_user=user)                
+                create_user=user)
             authenticate(username=username, password=password)
             auth_login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
             send_mail_sign_up(first_name, email)

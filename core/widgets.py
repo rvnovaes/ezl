@@ -8,6 +8,7 @@ from django_filters import RangeFilter
 from django.forms.widgets import Widget
 from django.template import loader
 from django.utils.safestring import mark_safe
+from dal.autocomplete import ModelSelect2
 
 from django.conf import settings
 
@@ -181,13 +182,29 @@ class MDDateTimeRangeFilter(RangeFilter):
         super(MDDateTimeRangeFilter, self).__init__(*args, **kwargs)
 
 
-class MDSelect(ChoiceWidget):
-    input_type = 'select'
-    template_name = 'core/widgets/md_select.html'
-    option_template_name = 'core/widgets/md_select_option.html'
-    add_id_index = False
-    checked_attribute = {'selected': True}
-    option_inherits_attrs = False
+class MDSelect(ModelSelect2):
+
+    class Media:
+        extend = False
+        css = {
+            'all': (
+                'autocomplete_light/vendor/select2/dist/css/select2.css',
+                'autocomplete_light/select2.css',
+                'select2.css'
+            )
+        }
+        js = ('autocomplete_light/jquery.init.js',
+              'autocomplete_light/autocomplete.init.js',
+              'autocomplete_light/vendor/select2/dist/js/select2.full.js',
+              'autocomplete_light/vendor/select2/dist/js/i18n/pt-BR.js',
+              'autocomplete_light/select2.js',
+              )
+
+    def build_attrs(self, *args, **kwargs):
+        attrs = super().build_attrs(*args, **kwargs)
+        attrs.setdefault('data-language', 'pt-BR')
+        attrs.setdefault('data-placeholder', 'Procurar...')
+        return attrs
 
     def get_context(self, name, value, attrs):
         context = super(MDSelect, self).get_context(name, value, attrs)
