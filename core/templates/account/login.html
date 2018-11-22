@@ -17,6 +17,7 @@
 <link href="{% static 'skeleton/css/style.css' %}" rel="stylesheet">
 <!-- color CSS -->
 <link href="{% static 'skeleton/css/colors/ezl.css' %}" id="theme" rel="stylesheet">
+<link href="{% static 'libs/toastr/build/toastr.min.css' %}" rel="stylesheet">
 <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 <!--[if lt IE 9]>
@@ -138,5 +139,26 @@
 <script src="{% static 'skeleton/js/custom.js' %}"></script>
 <!--Style Switcher -->
 <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
+<!--Toast-->
+<script src="{% static 'libs/toastr/build/toastr.min.js' %}"></script>
+<script type="text/javascript">
+      $(document).ready(function () {
+        {% if form.errors %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    toastr.error('{{ error }}', 'Erro ao efetuar o login', {timeOut: 5000});
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                toastr.error('{{ error }}', 'Erro ao efetuar o login', {timeOut: 5000});
+            {% endfor %}
+        {% endif %}
+        {% for message in messages %}
+            {% if message.tags == 'add_new_user success' %}
+            swal('Cadastro Finalizado', '{{ message }}');
+            {% endif %}
+        {% endfor %}
+    });
+</script>
 </body>
 </html>
