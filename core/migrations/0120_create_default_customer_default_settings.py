@@ -52,7 +52,7 @@ def create_custom_settings(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0118_fixture_email_template_custom_settings'),
+        ('core', '0119_customsettings_default_customer'),
     ]
 
     operations = [
