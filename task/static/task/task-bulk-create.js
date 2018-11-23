@@ -28,8 +28,31 @@ class TaskBulkCreate {
         this.onDocumentReady();
 	}
 
+	static removeErrorClass(field=null){
+	    if (!field){
+	        $('.error').each(function () {
+                $(this).removeClass('error');
+            });
+        }else{
+	        field.removeClass('error');
+        }
+    }
+
+    static addErrorClass(field){
+	    if (!field){
+	        return;
+        }
+        // $(task.elInputPersonCustomer.data('select2').$selection).addClass('error')
+        if(field.data('select2')) {
+            $(field.data('select2').$selection).addClass('error');
+        }else{
+            field.addClass('error');
+        }
+    }
+
 	clearFormErrors(){
 	    this.formErrors.splice(0, this.formErrors.length);
+        TaskBulkCreate.removeErrorClass();
     }
 
     insertFormErrors(error, elements=[]){
@@ -44,6 +67,7 @@ class TaskBulkCreate {
     getErrors(){
 	    let liErrors = ``;
         this.formErrors.forEach((error) => {
+            error.field.forEach((field) => TaskBulkCreate.addErrorClass(field));
             liErrors += TaskBulkCreate.formatError(error.message );
         });
         return `
@@ -72,6 +96,10 @@ class TaskBulkCreate {
 
     set personCustomer(data) {
 	    TaskBulkCreate.setSelect2(data, this.elInputPersonCustomer);
+    }
+
+    get typeTask() {
+	    return this.elTypeTask.val();
     }
 
     setPerformancePlace() {
@@ -428,6 +456,14 @@ class TaskBulkCreate {
 
     }
 
+    validateTypeTask() {
+        if (!this.typeTask) {
+            this.insertFormErrors('É necessário informar um tipo de serviço.',
+                [this.elTypeTask]);
+        }
+
+    }
+
     validateLawsuit() {
         if (this.isHearing && !this.lawSuitNumber) {
             this.insertFormErrors('É necessário informar processo para este tipo de serviço.',
@@ -511,6 +547,7 @@ class TaskBulkCreate {
     validateForm() {
 	    this.clearFormErrors();
 	    this.validatePersonCustomer();
+	    this.validateTypeTask();
         this.validateLawsuit();
         this.validatePerformancePlace();
         this.validateFinalDeadlineDate();
@@ -556,8 +593,8 @@ class TaskBulkCreate {
     onDocumentReady(){
 	    $(document).ready(()=>{
 	        this.elMovement.attr('disabled', true);
-	        this.elTypeTask.select2({placeholder: 'Selecione...', language: 'pt-BR', selectOnClose: true});
-	        this.elPersonAskedBy.select2({placeholder: 'Procurar...', language: 'pt-BR', selectOnClose: true});
+	        this.elTypeTask.select2({placeholder: 'Selecione...', language: 'pt-BR'});
+	        this.elPersonAskedBy.select2({placeholder: 'Procurar...', language: 'pt-BR'});
         });
     }
 }

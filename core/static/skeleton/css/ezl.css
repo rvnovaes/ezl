@@ -35,6 +35,10 @@ select option {
     transition: all 300ms linear 0s;
 }
 
+.select2-selection.error {
+    border: 2px solid rgb(221, 107, 85) !important;
+}
+
 .select2-container--default .select2-selection--single {
     padding-top: 4px;
 }
