@@ -65,8 +65,12 @@
       <div class="new-login-box">
                 <div class="white-box">
                   <form class="form-horizontal new-lg-form" id="loginform" action="{% url 'account_login' %}" method="POST">{% csrf_token %}
-                    <h3 class="box-title m-b-0">Informe os dados abaixo</h3> 
-                    <small>Clique em entrar após terminar o preenchimento</small>                  
+                    <div class="col-xs-12">
+                      <div class="form-group text-center m-t-20">
+                        <h3 class="box-title m-b-0">Informe seus dados abaixo</h3>
+                        <small>Clique em entrar após terminar o preenchimento</small>
+                      </div>
+                    </div>
                     
                     <div class="form-group  m-t-20">
                       <div class="col-xs-12">
