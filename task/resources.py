@@ -532,6 +532,8 @@ class TaskResource(resources.ModelResource):
                     transaction.set_rollback(True)
                     raise Exception(row_errors)
         else:
+            row['id'] = instance.id
+            row['task_status'] = instance.task_status
             row['movement'] = instance.movement.id            
             if not row['performance_place']:
                 row['performance_place'] = instance.performance_place

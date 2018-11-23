@@ -104,13 +104,15 @@ class TaskStatusWidget(Widget):
     """
 
     def clean(self, value, row=None, *args, **kwargs):
+        ret = TaskStatus.REQUESTED
         if value:
-            values = {item.value.title(): item.value for item in [TaskStatus.REQUESTED, TaskStatus.ACCEPTED_SERVICE]}
-            ret = values.get(value.title(), None)
-            if not ret:
-                raise ValueError(WRONG_TASK_STATUS.format(value.title(), values.values()))
-        else:
-            ret = TaskStatus.REQUESTED
+            if not row['id']:
+                values = {item.value.title(): item.value for item in [TaskStatus.REQUESTED, TaskStatus.ACCEPTED_SERVICE]}
+                ret = values.get(value.title(), None)
+                if not ret:
+                    raise ValueError(WRONG_TASK_STATUS.format(value.title(), values.values()))
+            else:
+                ret = value
         return ret
 
 
