@@ -126,14 +126,3 @@ class DateTimeWidgetMixin(DateTimeWidget):
             seconds = int(round((value - 25569) * 86400.0))
             value = make_aware(datetime.datetime.utcfromtimestamp(seconds))
         return super().clean(value, row, *args, **kwargs)
-
-
-class AcceptanceServiceDateWidget(DateTimeWidgetMixin):
-    """
-    Verifica o status da OS e obriga preencher a data de aceite pelo service, caso o status seja Aceite pelo Service
-    """
-
-    def clean(self, value, row=None, *args, **kwargs):
-        if not value and row['task_status'].title() == TaskStatus.ACCEPTED_SERVICE.value.title():
-            raise ValueError(MISSING_ACCEPTANCE_SERVICE_DATE)
-        return super().clean(value, row, *args, **kwargs)
