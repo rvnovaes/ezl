@@ -291,6 +291,12 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
         username = task_history.create_user.username[:20]
 
     task = task_history.task
+    person_asked_by_legacy_code = None
+    if task.person_asked_by and task.person_asked_by.id != 1:
+        person_asked_by_legacy_code = task.person_asked_by.legacy_code
+    person_distributed_by_legacy_code = None
+    if task.person_distributed_by and task.person_distributed_by.id != 1:
+        person_distributed_by_legacy_code = task.person_distributed_by.legacy_code
     person_executed_by_legacy_code = None
     person_executed_by_legal_name = None
     justification = task_history.notes[:1000]
@@ -374,8 +380,8 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
     elif task_history.status == TaskStatus.ACCEPTED_SERVICE.value:
         values = {
             'ident_agenda': task.legacy_code,
-            'codigo_adv_solicitante': task.person_asked_by.legacy_code,
-            'codigo_adv_origem': task.person_distributed_by.legacy_code,
+            'codigo_adv_solicitante': person_asked_by_legacy_code,
+            'codigo_adv_origem': person_distributed_by_legacy_code,
             'SubStatus': 11,
             'status': 0,
             'data_operacao': timezone.localtime(task_history.create_date),
@@ -387,8 +393,8 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
     elif task_history.status == TaskStatus.REFUSED_SERVICE.value:
         values = {
             'ident_agenda': task.legacy_code,
-            'codigo_adv_solicitante': task.person_asked_by.legacy_code,
-            'codigo_adv_origem': task.person_distributed_by.legacy_code,
+            'codigo_adv_solicitante': person_asked_by_legacy_code,
+            'codigo_adv_origem': person_distributed_by_legacy_code,
             'SubStatus': 20,
             'status': 1,
             'data_operacao': timezone.localtime(task_history.create_date),
@@ -400,8 +406,8 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
     elif task_history.status == TaskStatus.OPEN.value:
         values = {
             'ident_agenda': task.legacy_code,
-            'codigo_adv_solicitante': task.person_asked_by.legacy_code,
-            'codigo_adv_origem': task.person_distributed_by.legacy_code,
+            'codigo_adv_solicitante': person_asked_by_legacy_code,
+            'codigo_adv_origem': person_distributed_by_legacy_code,
             'codigo_adv_correspondente': person_executed_by_legacy_code,
             'SubStatus': 30,
             'status': 0,
