@@ -160,8 +160,10 @@
             {% comment %}
                 Por questões de UX colocamos um "espelho" do botão fora do formulário e ao clicar nele acionamos esse botão.
             {% endcomment %}
-             <button class="btn btn-success waves-effect waves-light hide" type="submit" name="export_answers" value="true" id="btn-export-excel">
+             <button class="hide" type="submit" name="export_answers" value="true" id="btn-export-answers">
              </button>
          {% endif %}
+         <button class="hide" type="submit" name="export_result" value="true" id="btn-export-result">
+             </button>
         </form>
     </div>

@@ -8,7 +8,6 @@ import pandas as pd
 from datetime import datetime
 from urllib.parse import urlparse
 from zipfile import ZipFile
-import xlsxwriter
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -36,6 +35,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
     DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
 from core.models import Person, CorePermissions, CustomSettings, Office
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
+from core.xlsx import XLSXWriter
 from lawsuit.models import Movement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, ImportTaskListForm, TaskSurveyAnswerForm
@@ -61,7 +61,6 @@ import os
 from django.conf import settings
 from urllib.parse import urljoin
 from survey.models import SurveyPermissions
-
 
 import logging
 logger = logging.getLogger(__name__)
@@ -1272,52 +1271,73 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 'can_view_survey_results', get_office_session(request))):
             return self._export_answers(request)
 
+        if self.request.GET.get('export_result'):
+            return self._export_result(request)
+
         return super().get(request)
 
-    def _xls_write_row(self, writer, values):
-        last_row = getattr(self, '_xls_last_row', -1)
-        current_row = last_row + 1
-        setattr(self, '_xls_last_row', current_row)
+    def _export_result(self, request):
+        def format_date(value):
+            if not value:
+                return ""
+            return value.strftime(settings.DATETIME_FORMAT)
 
-        for y, value in enumerate(values):
-            writer.write(current_row, y, value)
+        columns = [
+            'Status',
+            'N° da OS',
+            'Prazo',
+            'Serviço',
+            'Processo',
+            'Cliente',
+            'Parte Adversa',
+            'OS Original',
+            'UF',
+            'Comarca',
+            'Data Solicitação',
+        ]
+        xlsx = XLSXWriter("resultado_de_pesquisa.xlsx", columns)
+
+        for task in self.get_queryset():
+            values = [
+                str(task.status),
+                task.task_number,
+                format_date(task.final_deadline_date),
+                task.type_task.name,
+                task.lawsuit_number,
+                task.client.name,
+                task.opposing_party,
+                task.origin_code,
+                task.court_district.state.name,
+                task.court_district.name,
+                format_date(task.requested_date),
+            ]
+            xlsx.write_row(values)
+
+        xlsx.close()
+        return xlsx.get_http_response()
 
     def _export_answers(self, request):
-        output = io.BytesIO()
-        workbook = xlsxwriter.Workbook(output)
-        worksheet = workbook.add_worksheet()
-
         task_ids = self.get_queryset().filter(
                 tasksurveyanswer__survey_result__isnull=False
             ).values_list('id', flat=True)
-
         answers = TaskSurveyAnswer.objects.filter(
             task_id__in=task_ids).select_related('task')
         columns = self._get_answers_columns(answers)
-
-        self._xls_write_row(
-            worksheet,
-            (['N° da OS',
-              'N° da OS no sistema de origem',
-              'Tipo de Serviço',
-              'Usuário',
-            ] + columns)
-        )
+        all_columns = [
+            'N° da OS',
+            'N° da OS no sistema de origem',
+            'Tipo de Serviço',
+            'Usuário',
+        ] + columns
+        xlsx = XLSXWriter("respostas_dos_formularios.xlsx", all_columns)
 
         for answer in answers:
-            self._export_answers_write_task(worksheet, answer, columns)
+            self._export_answers_write_task(xlsx, answer, columns)
 
-        workbook.close()
+        xlsx.close()
+        return xlsx.get_http_response()
 
-        xlsx_data = output.getvalue()
-        response = HttpResponse(
-            xlsx_data,
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response[
-            'Content-Disposition'] = 'attachment; filename="respostas_dos_formularios.xlsx"'
-        return response
-
-    def _export_answers_write_task(self, writer, answer, columns):
+    def _export_answers_write_task(self, xlsx, answer, columns):
         task = answer.task
         base_fields = [task.id, task.legacy_code, str(task.type_task), answer.create_user.username]
         answers = ['' for x in range(len(columns))]
@@ -1325,7 +1345,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
             question_index = columns.index(question)
             answers[question_index] = answer
 
-        self._xls_write_row(writer, base_fields + answers)
+        xlsx.write_row(base_fields + answers)
 
     def _get_answers_columns(self, answers):
         columns = []

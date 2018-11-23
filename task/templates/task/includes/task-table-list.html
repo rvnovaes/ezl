@@ -8,10 +8,21 @@
         <div class="panel-heading">
             <div class="panel-title form-row">
                 {{title_table}} ({{ table.length }})
-                <button class="pull-right btn btn-info"
-                        onClick="$('#btn-export-excel').click();"
-                        title="Exportar respostas do formulário"
-                        id="btn-assign">Exportar Respostas</button>
+                <div class = "btn-group pull-right">
+                    <button type = "button" class = "btn btn-info dropdown-toggle" data-toggle = "dropdown">
+                        <i class="mdi mdi-download"></i>
+                            Exportar 
+                        <span class = "caret"></span>
+                    </button>
+                   
+                    <ul class = "dropdown-menu" role = "menu">
+                        <li><a href="#" onClick="$('#btn-export-result').click();">Resultado da pesquisa</a></li>
+                        {% if perms.core.can_view_survey_results %}
+                            <li><a href="#" onClick="$('#btn-export-answers').click();">Respostas de questionários</a></li>
+                        {% endif %}
+                   </ul>
+                   
+                </div>
             </div>
         </div>
         <div class="panel-body">
