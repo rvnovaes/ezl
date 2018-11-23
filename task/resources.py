@@ -190,18 +190,6 @@ COLUMN_NAME_DICT = {
         'required': False,
         'verbose_name': Task._meta.get_field('description').verbose_name,
     },
-    'requested_date': {
-        'column_name': 'os.data_solicitacao',
-        'attribute': 'requested_date',
-        'required': False,
-        'verbose_name': Task._meta.get_field('requested_date').verbose_name,
-    },
-    'acceptance_service_date': {
-        'column_name': 'os.data_aceite_service',
-        'attribute': 'acceptance_service_date',
-        'required': False,
-        'verbose_name': Task._meta.get_field('acceptance_service_date').verbose_name,
-    },
     'legacy_code': {
         'column_name': 'os.codigo_legado',
         'attribute': 'legacy_code',
@@ -268,13 +256,6 @@ class TaskResource(resources.ModelResource):
     performance_place = CustomFieldImportExport(column_name='performance_place', attribute='performance_place',
                                                 widget=CharWidget(), saves_null_values=False,
                                                 column_name_dict=COLUMN_NAME_DICT)
-    requested_date = CustomFieldImportExport(column_name='requested_date', attribute='requested_date',
-                                             widget=DateTimeWidgetMixin(), default=timezone.now(),
-                                             column_name_dict=COLUMN_NAME_DICT)
-    acceptance_service_date = CustomFieldImportExport(column_name='acceptance_service_date',
-                                                      attribute='acceptance_service_date',
-                                                      widget=AcceptanceServiceDateWidget(),
-                                                      column_name_dict=COLUMN_NAME_DICT)
     legacy_code = CustomFieldImportExport(column_name='legacy_code', attribute='legacy_code', widget=CharWidget(),
                                           saves_null_values=True, column_name_dict=COLUMN_NAME_DICT)
     system_prefix = CustomFieldImportExport(column_name='system_prefix', attribute='system_prefix',
