@@ -498,6 +498,15 @@ class DefaultOffice(OfficeMixin, Audit):
         verbose_name_plural = 'Escritórios Padrão'
 
 
+class OfficeNetwork(Audit):
+    name = models.CharField(verbose_name='Nome do grupo', max_length=255)
+    members = models.ManyToManyField(Office, related_name='network_members', verbose_name='Membros')
+
+    class Meta:
+        verbose_name = 'Grupo de Escritórios'
+        verbose_name_plural = 'Grupos de Escritórios'
+
+
 class Invite(Audit):
     person = models.ForeignKey(
         Person,
