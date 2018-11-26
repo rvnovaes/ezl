@@ -138,8 +138,8 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
                                                 client_q):
                 raise ValidationError({
                     NON_FIELD_ERRORS: [
-                        "Os campos office, office_correspondent, type_task, client, court_district, state e "
-                        "court_district_complement devem criar um set único."
+                        "Os campos office, office_correspondent, office_network, type_task, client, court_district, "
+                        "state e court_district_complement devem criar um set único."
                     ],
                     'office_correspondent': ['Favor verificar o escritório correspondente'],
                     'office_network': ['Favor verificar a rede de escritórios'],

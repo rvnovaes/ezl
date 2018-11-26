@@ -122,6 +122,7 @@ class ServicePriceTableCreateView(AuditFormMixin, CreateView):
         if form.is_valid():
             return self.form_valid(form)
         else:
+            self.object = form.instance
             return self.form_invalid(form)
 
 
