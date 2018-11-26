@@ -1,6 +1,6 @@
 from django import forms
 from core.models import Person, State, City
-from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field
+from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field, get_office_session
 from lawsuit.models import CourtDistrict, CourtDistrictComplement
 from task.models import TypeTask
 from .models import CostCenter, ServicePriceTable, ImportServicePriceTable
@@ -103,17 +103,21 @@ class ServicePriceTableForm(BaseModelForm):
                                             court_district=cleaned_data["court_district"],
                                             state=cleaned_data["state"],
                                             client=cleaned_data["client"],
-                                            office_correspondent=cleaned_data["office_correspondent"]).first():
+                                            office_correspondent=cleaned_data["office_correspondent"],
+                                            office=cleaned_data["office"]).first():
             raise forms.ValidationError('Já existe um registro com os dados selecionados')
         return cleaned_data
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        office_session = get_office_session(self.request)
         self.fields['office'] = get_office_field(self.request)
         self.fields['office_correspondent'] = get_office_related_office_field(self.request)
         self.fields['office_correspondent'].label = u"Escritório Correspondente"
         self.fields['office_correspondent'].required = True
         self.fields['office'].required = True
+        self.fields['type_task'].queryset = filter_valid_choice_form(TypeTask.objects.get_queryset(
+            office=office_session.id).order_by('name'))
 
 
 class ImportServicePriceTableForm(forms.ModelForm):
