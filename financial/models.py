@@ -3,7 +3,7 @@ from django.core.validators import ValidationError
 from django.core.exceptions import NON_FIELD_ERRORS, ObjectDoesNotExist
 from django.db import models
 from django.db.models import Q
-from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager, Office
+from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager, Office, OfficeNetwork
 from decimal import Decimal
 from task.metrics import get_office_correspondent_metrics
 
@@ -30,10 +30,14 @@ class CostCenter(Audit, LegacyCode, OfficeMixin):
 
 
 class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
-    office_correspondent = models.ForeignKey(Office, on_delete=models.PROTECT, blank=False,
-                                             null=False,
+    office_correspondent = models.ForeignKey(Office, on_delete=models.PROTECT, blank=True,
+                                             null=True,
                                              related_name='office_correspondent',
                                              verbose_name='Escritório Correspondente')
+    office_network = models.ForeignKey(OfficeNetwork, on_delete=models.PROTECT, blank=True,
+                                       null=True,
+                                       related_name='office_network',
+                                       verbose_name='Rede de escritórios')
     type_task = models.ForeignKey(
         'task.TypeTask',
         null=True,
@@ -111,8 +115,10 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
     def validate_unique(self, exclude=None):
         res = super().validate_unique(exclude)
         office_q = Q(office=self.office)
-        office_correspondent_q = Q(office_correspondent=self.office_correspondent) if self.office_correspondent \
-            else Q(office_correspondent__isnull=True)
+        office_correspondent_q = Q(office_correspondent=self.office_correspondent) \
+            if getattr(self, 'office_correspondent', None) else Q(office_correspondent__isnull=True)
+        office_network_q = Q(office_network=self.office_network) \
+            if getattr(self, 'office_network', None) else Q(office_network__isnull=True)
         state_q = Q(state=self.state) if self.state else Q(state__isnull=True)
         court_district_q = Q(court_district=self.court_district) if self.court_district \
             else Q(court_district__isnull=True)
@@ -124,6 +130,7 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
             if ServicePriceTable.objects.filter(~Q(pk=self.pk),
                                                 office_q,
                                                 office_correspondent_q,
+                                                office_network_q,
                                                 state_q,
                                                 court_district_q,
                                                 court_district_complement_q,
@@ -135,6 +142,7 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
                         "court_district_complement devem criar um set único."
                     ],
                     'office_correspondent': ['Favor verificar o escritório correspondente'],
+                    'office_network': ['Favor verificar a rede de escritórios'],
                     'type_task': ['Favor verificar o tipo de serviço'],
                     'state': ['Favor verificar o estado'],
                     'court_district': ['Favor verificar a comarca'],

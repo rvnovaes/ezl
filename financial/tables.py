@@ -26,17 +26,17 @@ class ServicePriceTableTable(tables.Table):
     value = tables.Column(attrs={"editable": True, "mask": "money"})
 
     class Meta:
-        sequence = ('selection', 'office', 'office_correspondent', 'type_task', 'state', 'court_district',
+        sequence = ('selection', 'office', 'office_correspondent', 'office_network', 'type_task', 'state', 'court_district',
                     'court_district_complement', 'city', 'client', 'value', 'is_active')
         model = ServicePriceTable
-        fields = ('selection', 'office', 'office_correspondent', 'type_task', 'court_district', 'state', 'client',
+        fields = ('selection', 'office', 'office_correspondent', 'office_network', 'type_task', 'court_district', 'state', 'client',
                   'value', 'is_active', 'court_district_complement', 'city')
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existe tabela de preços cadastrada."
         row_attrs = {
             'data_href': lambda record: reverse_lazy('servicepricetable_update', args=(record.pk,))
         }
-        order_by = 'office'
+        order_by = ('office', 'office_correspondent', 'office_network')
 
 
 class ServicePriceTableTaskTable(tables.Table):

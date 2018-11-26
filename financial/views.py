@@ -113,6 +113,17 @@ class ServicePriceTableCreateView(AuditFormMixin, CreateView):
         kw['request'] = self.request
         return kw
 
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if request.POST['office_network'] and not request.POST['office_correspondent']:
+            form.fields['office_correspondent'].required = False
+        if request.POST['office_correspondent'] and not request.POST['office_network']:
+            form.fields['office_network'].required = False
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
 
 class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
     model = ServicePriceTable
@@ -126,6 +137,18 @@ class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if request.POST['office_network'] and not request.POST['office_correspondent']:
+            form.fields['office_correspondent'].required = False
+        if request.POST['office_correspondent'] and not request.POST['office_network']:
+            form.fields['office_network'].required = False
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
 
 
 class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):

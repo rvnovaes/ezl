@@ -513,7 +513,7 @@ class OfficeNetwork(Audit):
 
     @property
     def list_members(self):
-        list_members = [x.legal_name for x in self.members.all().order_by('legal_name')]
+        list_members = [x.__str__() for x in self.members.all().order_by('legal_name')]
         return list_members
     list_members.fget.short_description = 'Membros'
 
