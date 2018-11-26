@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="icon" type="image/png" sizes="16x16" href="../plugins/images/favicon.png">
-    <title>Ample Admin Template - The Ultimate Multipurpose admin template</title>
+    <title>Easy Lawyer (EZL)</title>
     <!-- Bootstrap Core CSS -->
     <link href="{% static 'skeleton/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
     <!-- animation CSS -->
@@ -67,8 +67,12 @@
         </div>
         <div class="new-login-box">
             <div class="white-box">
-                <h3 class="box-title m-b-0">Informe os dados abaixo</h3> 
-                <small>Clique em cadastrar ao terminar o preenchimento</small>                
+                <div class="col-xs-12">
+                  <div class="form-group text-center m-t-20">
+                    <h3 class="box-title m-b-0">Informe seus dados abaixo</h3>
+                    <small>Clique em entrar após terminar o preenchimento</small>
+                  </div>
+                </div>
                 <form class="form-horizontal new-lg-form" id="register-form" action="#">{% csrf_token %}
                     <div class="form-group">
                         <div class="col-xs-12">
