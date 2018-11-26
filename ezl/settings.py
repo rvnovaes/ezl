@@ -103,6 +103,9 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.openid',
     'celery',
     'django_tables2',
     'django_filters',
@@ -490,3 +493,9 @@ DATETIME_INPUT_FORMATS = (
     '%d/%m/%Y %H:%M',
     '%d/%m/%Y %H:%M',
 )
+
+SOCIALACCOUNT_ADAPTER = 'core.account.adapter.EzlSocialAccountAdapter'
+ACCOUNT_AUTHENTICATION_METHOD = "username"
+SOCIALACCOUNT_QUERY_EMAIL = True
+ACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_QUERY_EMAIL = True

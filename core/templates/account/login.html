@@ -1,4 +1,6 @@
 {% load static %}
+{% load socialaccount %}
+
 <!DOCTYPE html>  
 <html lang="en">
 <head>
@@ -101,7 +103,8 @@
                       </div>
                       <div class="col-xs-12 text-center">
                         <div class="social">
-                          <a href="javascript:void(0)" class="btn btn-googleplus btn-block btn-lg" data-toggle="tooltip"  title="Login com Google"> <i aria-hidden="true" class="fa fa-google-plus"></i> Entrar com o Google</a> </div>
+                          <a href="/accounts/google/login" class="btn btn-googleplus btn-block btn-lg" data-toggle="tooltip"  title="Login com Google"> <i aria-hidden="true" class="fa fa-google-plus"></i> Entrar com o Google</a> 
+                        </div>
                       </div>                                              
                       <div class="col-xs-12">
                         <h3 class="box-title m-b-0">Ainda não se cadastrou?</h3> 

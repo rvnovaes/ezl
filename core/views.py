@@ -125,8 +125,8 @@ def inicial(request):
             set_office_session(request)
             if not get_office_session(request):
                 return HttpResponseRedirect(reverse_lazy('office_instance'))
-            return HttpResponseRedirect(reverse_lazy('dashboard'))
-        return HttpResponseRedirect(reverse_lazy('start_user'))
+            return HttpResponseRedirect(reverse_lazy('dashboard'))        
+        return HttpResponseRedirect(reverse_lazy('social_register'))
     else:
         return HttpResponseRedirect('/')
 
@@ -2351,3 +2351,35 @@ class NewRegister(TemplateView):
             return JsonResponse({'redirect': reverse_lazy('dashboard')})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+class SocialRegister(TemplateView):
+    template_name = 'account/social_register.html'
+
+    def post(self, request, *args, **kwargs):
+        try:
+            office_name = request.POST.get('office')
+            user = request.user            
+            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
+            customer = Person.objects.create(name=office_name, legal_name=office_name, create_user=user, is_customer=True)
+            member, created = OfficeMembership.objects.get_or_create(
+                person=customer,
+                office=office,
+                defaults={
+                    'create_user': user,
+                    'is_active': True
+                })
+            office.customsettings.default_customer = customer
+            office.customsettings.save()
+            DefaultOffice.objects.create(
+                auth_user=user,
+                office=office,
+                create_user=user)
+            send_mail_sign_up(user.first_name, user.email)
+            return JsonResponse({'redirect': reverse_lazy('dashboard')})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+class TermsView(TemplateView):
+    template_name = 'account/terms/terms_and_conditions.html'
