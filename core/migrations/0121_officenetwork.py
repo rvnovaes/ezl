@@ -28,8 +28,16 @@ class Migration(migrations.Migration):
                 ('members', models.ManyToManyField(related_name='network_members', to='core.Office', verbose_name='Membros')),
             ],
             options={
-                'verbose_name': 'Grupo de Escritórios',
-                'verbose_name_plural': 'Grupos de Escritórios',
+                'verbose_name': 'Rede de escritórios',
+                'verbose_name_plural': 'Redes de escritórios',
             },
+        ),
+        migrations.AlterModelOptions(
+            name='country',
+            options={'verbose_name': 'País', 'verbose_name_plural': 'Paises'},
+        ),
+        migrations.AlterModelOptions(
+            name='officerelgroup',
+            options={'verbose_name': 'Grupo por escritório', 'verbose_name_plural': 'Grupos por escritório'},
         ),
     ]
