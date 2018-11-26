@@ -27,6 +27,7 @@ from django.views.static import serve as static_serve_view
 from django.views import View
 from django.views.generic import ListView, TemplateView
 from allauth.account.views import LoginView, PasswordResetView
+from django.contrib.auth import authenticate, login as auth_login
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
@@ -44,6 +45,7 @@ from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
 from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form
 from core.view_validators import create_person_office_relation, person_exists
+from .mail import send_mail_sign_up
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task, TaskStatus
@@ -123,8 +125,8 @@ def inicial(request):
             set_office_session(request)
             if not get_office_session(request):
                 return HttpResponseRedirect(reverse_lazy('office_instance'))
-            return HttpResponseRedirect(reverse_lazy('dashboard'))
-        return HttpResponseRedirect(reverse_lazy('start_user'))
+            return HttpResponseRedirect(reverse_lazy('dashboard'))        
+        return HttpResponseRedirect(reverse_lazy('social_register'))
     else:
         return HttpResponseRedirect('/')
 
@@ -2034,7 +2036,8 @@ class ValidateEmail(View):
         data = {'valid': True}
         if User.objects.filter(email=email).first():
             data['valid'] = False
-
+        if User.objects.filter(username=email).first():
+            data['valid'] = False
         return JsonResponse(data, safe=False)
 
 
@@ -2308,3 +2311,75 @@ class ImportCityList(PermissionRequiredMixin, CustomLoginRequiredView,
             return JsonResponse(json.loads(json.dumps(context)), status=200)
         else:
             return super().get(request, *args, **kwargs)
+
+
+class NewRegister(TemplateView):
+    template_name = 'account/register.html'
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        try:
+            username = email = request.POST.get('email')
+            password = request.POST.get('password')
+            first_name = request.POST.get('name').split(' ')[0]
+            last_name = ' '.join(request.POST.get('name').split(' ')[1:])
+            office_name = request.POST.get('office')
+            user = User.objects.create(username=username, last_name=last_name, first_name=first_name, email=email)
+            user.set_password(password)
+            user.save()
+            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
+            customer = Person.objects.create(name=office_name, legal_name=office_name, create_user=user, is_customer=True)
+            member, created = OfficeMembership.objects.get_or_create(
+                person=customer,
+                office=office,
+                defaults={
+                    'create_user': user,
+                    'is_active': True
+                })
+            office.customsettings.default_customer = customer
+            office.customsettings.save()
+            DefaultOffice.objects.create(
+                auth_user=user,
+                office=office,
+                create_user=user)
+            authenticate(username=username, password=password)
+            auth_login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
+            send_mail_sign_up(first_name, email)
+            return JsonResponse({'redirect': reverse_lazy('dashboard')})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+class SocialRegister(TemplateView):
+    template_name = 'account/social_register.html'
+
+    def post(self, request, *args, **kwargs):
+        try:
+            office_name = request.POST.get('office')
+            user = request.user            
+            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
+            customer = Person.objects.create(name=office_name, legal_name=office_name, create_user=user, is_customer=True)
+            member, created = OfficeMembership.objects.get_or_create(
+                person=customer,
+                office=office,
+                defaults={
+                    'create_user': user,
+                    'is_active': True
+                })
+            office.customsettings.default_customer = customer
+            office.customsettings.save()
+            DefaultOffice.objects.create(
+                auth_user=user,
+                office=office,
+                create_user=user)
+            send_mail_sign_up(user.first_name, user.email)
+            return JsonResponse({'redirect': reverse_lazy('dashboard')})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+class TermsView(TemplateView):
+    template_name = 'account/terms/terms_and_conditions.html'

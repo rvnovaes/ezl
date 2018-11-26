@@ -739,7 +739,7 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
 
     def get(self, request, *args, **kwargs):
         office_session = get_office_session(request)
-        checker = ObjectPermissionChecker(request.user)
+        checker = ObjectPermissionChecker(request.user)        
         company_representative = checker.has_perm('can_see_tasks_company_representative', office_session)
         view_all_tasks = checker.has_perm('view_all_tasks', office_session)
         if company_representative and not view_all_tasks:
