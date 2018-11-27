@@ -2392,8 +2392,6 @@ class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
     def get_callback_url(self, request, app):
         callback_url = reverse(self.provider_id + "_callback")
         protocol = self.redirect_uri_protocol
-        if settings.DEBUG:
-            return build_absolute_uri(request, callback_url, protocol)
         return build_absolute_uri(None, callback_url, protocol)            
 
 
