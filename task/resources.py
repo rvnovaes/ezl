@@ -13,7 +13,7 @@ from lawsuit.models import Folder, LawSuit, Movement, TypeMovement, CourtDistric
 from task.fields import CustomFieldImportExport
 from task.instance_loaders import TaskModelInstanceLoader
 from task.messages import *
-from task.models import Task, TypeTask
+from task.models import Task, TypeTask, TaskStatus
 from task.signals import change_status
 from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative
 from task.utils import self_or_none
@@ -544,3 +544,8 @@ class TaskResource(resources.ModelResource):
             for warning in line_warnings:
                 row_result.warnings.append(warning)
             row_result.import_type = TaskRowResult.IMPORT_TYPE_WARNING
+
+    def skip_row(self, instance, original):
+        if instance.task_status not in [TaskStatus.REQUESTED.value, TaskStatus.ACCEPTED_SERVICE.value]:
+            return True
+        return super().skip_row(instance, original)
