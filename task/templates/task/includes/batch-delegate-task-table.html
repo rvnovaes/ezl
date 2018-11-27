@@ -97,15 +97,15 @@
                 $('.checkbox-delegate').prop('checked', false); 
                 tasksToDelegate = [];
             }
-        }),
+        });
         $('.checkbox-delegate').on('change', function() {            
             if ($(this).is(':checked')){
                 tasksToDelegate.push($(this).attr('id'))
             } else {
                 tasksToDelegate.splice(tasksToDelegate.indexOf($(this).attr('id'), 1))
             }             
-        })        
-    })
+        });
+    });
 
     $(window).load(function() {
         var taskIds = [];
@@ -122,18 +122,18 @@
                 }
             }            
         })
-    })
+    });
 
     var formatPrice = function(price) {        
         return `R$${price.replace(".", ",")}`
-    }
+    };
 
     var setChosenPrice = function(chosenPrice) {
-        let elTable = $(`#table-batch-change-tasks [data-id=${chosenPrice.taskId}]`)
-        $(elTable).find('tr').attr('service-price-id', chosenPrice.servicePriceTableId )
-        $(elTable).find('td [td-correspondent]').text(chosenPrice.correspondenteName)
+        let elTable = $(`#table-batch-change-tasks [data-id=${chosenPrice.taskId}]`);
+        $(elTable).find('tr').attr('service-price-id', chosenPrice.servicePriceTableId );
+        $(elTable).find('td [td-correspondent]').text(chosenPrice.correspondenteName);
         $(elTable).find('td [td-correspondent-value]').text(formatPrice(chosenPrice.correspondenteValue))   
-    }
+    };
 
     var setCorrespondents = function(taskIds) {         
         $.ajax({
@@ -150,7 +150,7 @@
                       correspondenteName: data.cheapest_correspondent.office_correspondent, // Nome
                       correspondenteValue: data.cheapest_correspondent.value, 
                       note: ''                    
-                    }
+                    };
                     servicePrices[data.task.id]=data;
                     setChosenPrice(data.chosenPrice);
                     if (data.prices.length > 1) {
@@ -173,7 +173,7 @@
     $('.btn-change-office-correspondent').on('click', function() {
         $('#modal-service-price-table').attr('task-id', $(this).attr('btn-data-id'));
         $('#modal-service-price-table').modal('show');          
-    })
+    });
 
 
     async function sendTasksToDelegate (){
@@ -235,7 +235,7 @@
                 console.log('I was closed by the timer')
             }                    
         });
-    };
+    }
     $('#btn-delegate').on('click', function(){
         if (tasksToDelegate.length === 0) {
             swal({

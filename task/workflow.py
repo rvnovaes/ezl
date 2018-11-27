@@ -122,7 +122,7 @@ class CorrespondentsTable(object):
         self.correspondents_qs = self.get_correspondents_qs()            
 
     def get_cheapest_correspondent(self):        
-        correspondents = self.correspondents_qs        
+        correspondents = self.correspondents_qs
         if self.qs:
             # Foi feito desta forma por conta de performance --Nao utilizar o sorted pois aumenta muito o tempo de execucao--
             return max(self.qs.filter(value=self.qs.earliest('value').value), key=lambda k: k.office_rating if k.office_rating else '0.00')

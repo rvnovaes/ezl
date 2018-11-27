@@ -1966,7 +1966,8 @@ class BatchChangeTasksView(DashboardSearchView):
             return task_list.filter(task_status__in=status_to_filter)
         status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN,
             TaskStatus.DONE, TaskStatus.ERROR]
-        return task_list.filter(task_status__in=status_to_filter)
+        office_session = get_office_session(self.request)
+        return task_list.filter(office=office_session, task_status__in=status_to_filter)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -2006,6 +2007,10 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
                 'office_correspondent': {
                     'id': price.office_correspondent.pk,
                     'legal_name': price.office_correspondent.legal_name
+                },
+                'office_network': {
+                    'id': price.office_network.pk if price.office_network else '-',
+                    'name': price.office_network.name if price.office_network else '-'
                 },
                 'state': price.state.initials if price.state else '-',
                 'type_task': {
