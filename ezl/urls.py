@@ -10,7 +10,7 @@ from core import views_api
 from core.views import (
     ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin,
     CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave, PopupSuccessView,
-    OfficeAutocomplete, OfficeCorrespondentAutocomplete, OriginRequesterAutocomplete)
+    OfficeAutocomplete, OfficeCorrespondentAutocomplete, OriginRequesterAutocomplete, SocialRegister, TermsView)
 from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, \
     TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView, ToPayTaskReportTemplateView, ToPayTaskReportXlsxView
@@ -23,9 +23,11 @@ urlpatterns = [
     url(r'^', include('core.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/login/$', LoginCustomView.as_view(), name='account_login'),
-    # url(r'^accounts/password/reset/$',
-    #     PasswordResetViewMixin.as_view(),
-    #     name='account_reset_password'),
+    url(r'^accounts/social_register/$', SocialRegister.as_view(), name='social_register'),
+    url(r'^accounts/terms/$', TermsView.as_view(), name='terms'),
+    url(r'^accounts/password/reset/$',
+        PasswordResetViewMixin.as_view(),
+        name='account_reset_password'),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^financeiro/', include('financial.urls'), name='financial'),
     url(r'^pesquisa/', include('survey.urls'), name='survey'),
