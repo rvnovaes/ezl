@@ -2,6 +2,7 @@ class ServicePriceTable {
     constructor(){
         this.elOfficeNetwork = $('#id_office_network');
         this.elOfficeCorrespondent = $('#id_office_correspondent');
+        this.elOffice = $('#id_office');
         this.onChangeOfficeNetwork();
         this.onChangeOfficeCorrespondent();
         this.onSaveSubmit();
@@ -16,7 +17,9 @@ class ServicePriceTable {
     }
 
     disableOfficeCorrespondent(){
-        this.officeCorrespondent = '';
+        if (this.officeCorrespondent !== this.office) {
+            this.officeCorrespondent = '';
+        }
         ServicePriceTable.disableElement(this.elOfficeCorrespondent);
         this.elOfficeCorrespondent.parent().removeClass('ezl-required');
     }
@@ -41,6 +44,10 @@ class ServicePriceTable {
 
     set officeCorrespondent(value){
         this.elOfficeCorrespondent.val(value);
+    }
+
+    get office(){
+        return this.elOffice.val();
     }
 
     onChangeOfficeNetwork(){

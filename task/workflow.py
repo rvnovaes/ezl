@@ -169,7 +169,7 @@ class CorrespondentsTable(object):
                         # para escritórios que pertencem as mesmas redes do escritório da task
                         # selecionar os preços que estão vinculados aos tipos de serviço vinculado
                         # ao tipo de serviço padrão
-                        Q(type_task__type_task_main__in=type_task_main),
+                        Q(Q(type_task__type_task_main__in=type_task_main) | Q(type_task__isnull=True)),
                         Q(office_network__in=networks),
                         ~Q(office=task.office)
                     )
@@ -179,7 +179,7 @@ class CorrespondentsTable(object):
                     Q(
                         Q(office_correspondent__public_office=True), ~Q(office_correspondent=task.office)
                     ) |
-                    Q(office_correspondent__isnull=True)
+                    Q(office_correspondent__in=network_office_id_list)
                 ),
                 Q(
                     Q(office_correspondent__is_active=True) | Q(office_correspondent__isnull=True)

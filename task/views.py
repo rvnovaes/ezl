@@ -902,9 +902,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         office_session = get_office_session(self.request)
         get_correspondents_table = CorrespondentsTable(self.object,
                                                        office_session)
-        context[
-            'correspondents_table'] = get_correspondents_table.get_correspondents_table(
-            )
+        context['correspondents_table'] = get_correspondents_table.get_correspondents_table()
         type_task_field = get_correspondents_table.get_type_task_field()
         if type_task_field:
             context['form'].fields['type_task_field'] = type_task_field

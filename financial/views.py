@@ -125,6 +125,11 @@ class ServicePriceTableCreateView(AuditFormMixin, CreateView):
             self.object = form.instance
             return self.form_invalid(form)
 
+    def form_valid(self, form):
+        if not form.instance.office_correspondent:
+            form.instance.office_correspondent = get_office_session(self.request)
+        return super().form_valid(form)
+
 
 class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
     model = ServicePriceTable
@@ -150,6 +155,11 @@ class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
+
+    def form_valid(self, form):
+        if not form.instance.office_correspondent:
+            form.instance.office_correspondent = get_office_session(self.request)
+        return super().form_valid(form)
 
 
 class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):
