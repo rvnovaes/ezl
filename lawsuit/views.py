@@ -1,18 +1,21 @@
+import json
 from urllib.parse import urlparse
 
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.validators import ValidationError
+from django.views.generic import View
 # project imports
 from django.db.models import ProtectedError
 from django.http import HttpResponseRedirect
+from django.http.response import JsonResponse
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     delete_error_protected
-from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin, \
-    GenericFormOneToMany, AddressCreateView, AddressUpdateView, AddressDeleteView
+from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin, GenericFormOneToMany, \
+    AddressCreateView, AddressUpdateView, AddressDeleteView, AutoCompleteView
 from task.models import Task
 from task.tables import TaskTable
 from .forms import (TypeMovementForm, InstanceForm, MovementForm, FolderForm, LawSuitForm, CourtDistrictForm, OrganForm,
@@ -25,8 +28,8 @@ from core.views import remove_invalid_registry, PopupMixin
 from django.core.cache import cache
 from dal import autocomplete
 from django.db.models import Q
-
 from core.views import CustomLoginRequiredView, TypeaHeadGenericSearch
+from core.utils import get_office_session, filter_valid_choice_form
 
 
 class InstanceListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -806,6 +809,19 @@ class CourtDistrictAutocomplete(TypeaHeadGenericSearch):
         return list(data)
 
 
+class CourtDistrictSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True))
+        if self.q:
+            filters = Q(name__unaccent__icontains=self.q)
+            filters |= Q(state__initials__unaccent__icontains=self.q)
+            qs = qs.filter(filters)
+        return qs
+
+    def get_result_label(self, result):
+        return "{}".format(result.__str__())
+
+
 class FolderAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params, extra_params,
@@ -820,33 +836,113 @@ class FolderAutocomplete(TypeaHeadGenericSearch):
         return list(data)
 
 
-class LawsuitAutocomplete(autocomplete.Select2QuerySetView):
+class FolderSelect2Autocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Folder.objects.none()
-
-        if self.q:
-            filters = Q(person_lawyer__name__unaccent__istartswith=self.q)
-            filters |= Q(law_suit_number__startswith=self.q)
-            qs = LawSuit.objects.filter(is_active=True).filter(filters)
+        law_suit_id = self.forwarded.get('task_law_suit_number', None)
+        law_suit = None
+        if law_suit_id:
+            law_suit = LawSuit.objects.filter(id=law_suit_id).first()
+        if law_suit and not law_suit.folder.is_default:
+            qs = Folder.objects.filter(folders__id=law_suit.id)
+        else:
+            qs = Folder.objects.get_queryset(office=[get_office_session(self.request).id])
+            if self.q:
+                filters = Q(person_customer__legal_name__unaccent__istartswith=self.q)
+                filters |= Q(folder_number__startswith=self.q)
+                qs = qs.filter(is_active=True).filter(filters)
         return qs
 
     def get_result_label(self, result):
-        return "{} - {}".format(result.law_suit_number,
-                                result.person_lawyer.name)
+        return "{} - {}".format(result.folder_number,
+                                result.person_customer.legal_name)
+
+    def get_results(self, context):
+        return [
+            {
+                'id': self.get_result_value(result),
+                'text': self.get_result_label(result),
+                'isDefault': result.is_default,
+                'person_customer': {'id': result.person_customer.id,
+                                    'text': result.person_customer.legal_name}
+            } for result in context['object_list']
+        ]
 
 
-class MovementAutocomplete(autocomplete.Select2QuerySetView):
+class LawsuitAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Movement.objects.none()
-
+        person_customer_id = self.forwarded.get('person_customer', None)
+        qs = LawSuit.objects.get_queryset(office=[get_office_session(self.request).id])
+        if person_customer_id:
+            qs = qs.filter(folder__person_customer__id=person_customer_id)
         if self.q:
-            qs = Movement.objects.filter(
-                is_active=True,
-                type_movement__name__unaccent__icontains=self.q)
+            filters = Q(court_district__name__unaccent__icontains=self.q)
+            filters |= Q(law_suit_number__icontains=self.q)
+            qs = qs.filter(is_active=True).filter(filters)
+        return qs
+
+    def get_results(self, context):
+        return [
+            {
+                'id': self.get_result_value(result),
+                'text': self.get_result_label(result),
+                'folder': {'id': result.folder.id,
+                           'text': result.folder.__str__(),
+                           'isDefault': result.folder.is_default},
+                'person_customer': {'id': result.folder.person_customer_id,
+                                    'text': result.folder.person_customer.__str__()},
+                'court_district': {'id': result.court_district_id,
+                                   'text': (result.court_district.__str__() if result.court_district else '')},
+                'court_district_complement': {'id': result.court_district_complement_id,
+                                              'text': (result.court_district_complement.__str__() if
+                                                       result.court_district_complement else '')},
+                'city': {'id': result.city_id,
+                         'text': (result.city.__str__() if result.city else '')},
+            } for result in context['object_list']
+        ]
+
+    def get_result_label(self, result):
+        ret = "{}".format(result.law_suit_number)
+        if result.court_district:
+            ret = "{} - {}".format(ret, result.court_district.name)
+        return ret
+
+
+class MovementAutocomplete(AutoCompleteView):
+
+    create_field = 'type_movement'
+
+    def get_queryset(self):
+        law_suit = self.forwarded.get('task_law_suit_number', None)
+        qs = Movement.objects.none()
+        if law_suit:
+            qs = Movement.objects.get_queryset(office=[get_office_session(self.request).id]).filter(law_suit=law_suit)
+
+            if self.q:
+                qs = qs.filter(
+                    is_active=True,
+                    type_movement__name__unaccent__icontains=self.q)
         return qs
 
     def get_result_label(self, result):
         return result.type_movement.name
+
+    def create_object(self, text):
+        obj = None
+        law_suit = self.forwarded.get('task_law_suit_number', None)
+        if law_suit:
+            law_suit = LawSuit.objects.filter(pk=law_suit).first()
+            office_session = get_office_session(self.request)
+            type_movement, created = TypeMovement.objects.get_or_create(office=office_session,
+                                                                        name=text,
+                                                                        defaults={'create_user': self.request.user,
+                                                                                  'is_active': True})
+            obj = self.get_queryset().get_or_create(**{self.create_field: type_movement,
+                                                       'office': office_session,
+                                                       'law_suit': law_suit,
+                                                       'folder': law_suit.folder,
+                                                       'defaults': {'create_user': self.request.user,
+                                                                    'is_active': True}})[0]
+        return obj
 
 
 class AddressOrganCreateView(AddressCreateView):
@@ -949,3 +1045,98 @@ class TypeaHeadCourtDistrictComplementSearch(TypeaHeadGenericSearch):
                 'data-extra-params': complement.court_district.state.id
             })
         return list(data)
+
+
+class CourtDistrictComplementSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        court_district = self.forwarded.get('court_district', None)
+        qs = filter_valid_choice_form(CourtDistrictComplement.objects.filter(is_active=True))
+        if court_district:
+            qs = qs.filter(court_district_id=court_district)
+        if self.q:
+            filters = Q(name__unaccent__icontains=self.q)
+            filters |= Q(court_district__name__unaccent__icontains=self.q)
+            qs = qs.filter(filters)
+        return qs.order_by('name')
+
+    def get_result_label(self, result):
+        return "{}".format(result.__str__())
+
+    def get_results(self, context):
+        return [
+            {
+                'id': self.get_result_value(result),
+                'text': self.get_result_label(result),
+                'court_district': {'id': result.court_district.id,
+                                    'text': result.court_district.name}
+            } for result in context['object_list']
+        ]
+
+
+class LawSuitCreateTaskBulkCreate(View):
+
+    def get_folder(self, office, folder_id=None):
+        if not folder_id:
+            person_customer_id = self.request.POST['person_customer']
+            folder, created = Folder.objects.get_or_create(office=office,
+                                                           is_default=True,
+                                                           person_customer_id=person_customer_id,
+                                                           defaults={'is_active': True,
+                                                                     'create_user': self.request.user})
+            return folder
+        else:
+            return Folder.objects.filter(office=office, id=folder_id).first()
+
+    def post(self, *args, **kwargs):
+        errors = []
+        create_user = self.request.user
+        office_session = get_office_session(self.request)
+        folder_id = self.request.POST['folder_id']
+        folder = self.get_folder(office_session, folder_id)
+        if not folder:
+            errors.append('Este escritório não possui pasta padrão configurado')
+        law_suit_number = self.request.POST['law_suit_number']
+        type_lawsuit = self.request.POST['type_lawsuit']
+
+        status = 200
+        if not errors:
+            instance = LawSuit.objects.create(create_user=create_user,
+                                              office=office_session,
+                                              folder=folder,
+                                              law_suit_number=law_suit_number,
+                                              type_lawsuit=type_lawsuit,
+                                              is_active=True)
+            data = {'id': instance.id, 'text': instance.__str__(),
+                    'folder': {'id': instance.folder_id, 'text': instance.folder.__str__()}}
+        else:
+            status = 500
+            data = {'error': True, 'errors': []}
+            for error in errors:
+                data['errors'].append(error)
+
+        return JsonResponse(json.loads(json.dumps(data)), status=status)
+
+
+class FolderCreateTaskBulkCreate(View):
+
+    def post(self, *args, **kwargs):
+        errors = []
+        create_user = self.request.user
+        office_session = get_office_session(self.request)
+        person_customer = self.request.POST['person_customer']
+
+        status = 200
+        if not errors:
+            instance = Folder.objects.create(create_user=create_user,
+                                             office=office_session,
+                                             person_customer_id=person_customer,
+                                             is_active=True)
+            data = {'folder': {'id': instance.id, 'text': instance.__str__()},
+                    'person_customer': {'id': instance.person_customer.id, 'text': instance.person_customer.legal_name}}
+        else:
+            status = 500
+            data = {'error': True, 'errors': []}
+            for error in errors:
+                data['errors'].append(error)
+
+        return JsonResponse(json.loads(json.dumps(data)), status=status)

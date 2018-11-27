@@ -31,6 +31,8 @@ services:
     image: ezl:latest
     volumes:
       - .:/app
+      - ./media/service_price_table:/app/media/service_price_table
+      - ./media/temp_uploads:/app/media/temp_uploads
       - ezl-logs:/var/log/ezl
     ports:
       - '8002:8002'
@@ -39,6 +41,8 @@ services:
     image: ezl:latest
     volumes:
       - .:/app
+      - ./media/service_price_table:/app/media/service_price_table
+      - ./media/temp_uploads:/app/media/temp_uploads
       - ezl-logs:/var/log/ezl
     environment:
       ENV: development

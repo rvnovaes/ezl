@@ -8,13 +8,15 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 from core import views_api
 from core.views import (
-    ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView,
-    PasswordResetViewMixin, CorrespondentAutocomplete, RequesterAutocomplete,
-    ServiceAutocomplete, EditableListSave, PopupSuccessView,
-    OfficeAutocomplete, OfficeCorrespondentAutocomplete, OriginRequesterAutocomplete)
+    ClientAutocomplete, GenericAutocompleteForeignKey, LoginCustomView, PasswordResetViewMixin,
+    CorrespondentAutocomplete, RequesterAutocomplete, ServiceAutocomplete, EditableListSave, PopupSuccessView,
+    OfficeAutocomplete, OfficeCorrespondentAutocomplete, OriginRequesterAutocomplete, SocialRegister, TermsView)
 from django.conf import settings
-from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView, ToPayTaskReportTemplateView, ToPayTaskReportXlsxView
+from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, \
+    TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView, ToPayTaskReportTemplateView, ToPayTaskReportXlsxView
 from rest_framework_swagger.views import get_swagger_view
+from core.views import oauth2_login, oauth2_callback
+
 
 schema_view = get_swagger_view(title='API para integração com o Ezlawyer')
 urlpatterns = [
@@ -23,9 +25,13 @@ urlpatterns = [
     url(r'^', include('core.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/login/$', LoginCustomView.as_view(), name='account_login'),
-    # url(r'^accounts/password/reset/$',
-    #     PasswordResetViewMixin.as_view(),
-    #     name='account_reset_password'),
+    url(r'^accounts/social_register/$', SocialRegister.as_view(), name='social_register'),
+    url(r'^accounts/terms/$', TermsView.as_view(), name='terms'),
+    url(r'^accounts/password/reset/$',
+        PasswordResetViewMixin.as_view(),
+        name='account_reset_password'),
+    url(r'^accounts/google/login/$', oauth2_login),
+    url(r'^accounts/google/login/callback/$', oauth2_callback),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^financeiro/', include('financial.urls'), name='financial'),
     url(r'^pesquisa/', include('survey.urls'), name='survey'),
@@ -45,10 +51,10 @@ urlpatterns = [
         name='task_report_to_pay'),
     url(r'^relatorios/os-a-pagar-data$',
         ToPayTaskReportView.as_view(),
-        name='task_report_to_pay_data'),    
+        name='task_report_to_pay_data'),
     url(r'^relatorios/os-a-pagar-xlsx$',
         ToPayTaskReportXlsxView.as_view(),
-        name='task_report_to_pay_xlsx'),        
+        name='task_report_to_pay_xlsx'),
     url(r'^dashboard/(?P<pk>[0-9]+)/$',
         login_required(TaskDetailView.as_view()),
         name='task_detail'),

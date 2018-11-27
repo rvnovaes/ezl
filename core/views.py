@@ -27,6 +27,7 @@ from django.views.static import serve as static_serve_view
 from django.views import View
 from django.views.generic import ListView, TemplateView
 from allauth.account.views import LoginView, PasswordResetView
+from django.contrib.auth import authenticate, login as auth_login
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
@@ -42,8 +43,9 @@ from core.models import Person, Address, City, State, Country, AddressType, Offi
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
-from core.utils import login_log, logout_log, get_office_session, get_domain
+from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form
 from core.view_validators import create_person_office_relation, person_exists
+from core.mail import send_mail_sign_up
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task, TaskStatus
@@ -57,7 +59,8 @@ from guardian.shortcuts import get_groups_with_perms
 from billing.models import Plan, PlanOffice
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from core.tasks import import_xls_city_list
-
+from allauth.socialaccount.providers.oauth2.views import *
+from allauth.socialaccount.providers.google.views import *
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
     model = abstractproperty()
@@ -91,6 +94,23 @@ class AutoCompleteView(autocomplete.Select2QuerySetView):
 
         return qs
 
+    def get_create_option(self, context, q):
+        """This method is required just to translate the creation message."""
+        create_option = []
+        display_create_option = False
+        if self.create_field and q:
+            page_obj = context.get('page_obj', None)
+            if page_obj is None or page_obj.number == 1:
+                display_create_option = True
+
+        if display_create_option and self.has_add_permission(self.request):
+            create_option = [{
+                'id': q,
+                'text': 'Criar "%(new_value)s"' % {'new_value': q},
+                'create_id': True,
+            }]
+        return create_option
+
 
 def login(request):
     if request.user.is_authenticated:
@@ -106,8 +126,8 @@ def inicial(request):
             set_office_session(request)
             if not get_office_session(request):
                 return HttpResponseRedirect(reverse_lazy('office_instance'))
-            return HttpResponseRedirect(reverse_lazy('dashboard'))
-        return HttpResponseRedirect(reverse_lazy('start_user'))
+            return HttpResponseRedirect(reverse_lazy('dashboard'))        
+        return HttpResponseRedirect(reverse_lazy('social_register'))
     else:
         return HttpResponseRedirect('/')
 
@@ -1689,6 +1709,19 @@ class CityAutoCompleteView(TypeaHeadGenericSearch):
         return list(data)
 
 
+class CitySelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = filter_valid_choice_form(City.objects.filter(is_active=True))
+        if self.q:
+            filters = Q(name__unaccent__icontains=self.q)
+            filters |= Q(state__initials__unaccent__icontains=self.q)
+            qs = qs.filter(filters)
+        return qs.order_by('name')
+
+    def get_result_label(self, result):
+        return "{}".format(result.__str__())
+
+
 class ClientAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params, extra_params,
@@ -1699,6 +1732,30 @@ class ClientAutocomplete(TypeaHeadGenericSearch):
                 Q(offices=office)):
             data.append({'id': client.id, 'data-value-txt': client.__str__()})
         return list(data)
+
+
+class ClientSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Person.objects.all().filter(offices=get_office_session(self.request), is_customer=True, is_active=True)
+
+        if self.q:
+            qs = qs.filter(legal_name__unaccent__icontains=self.q)
+        return qs
+
+    def get_result_label(self, result):
+        return result.legal_name
+
+
+class PersonCompanyRepresentativeSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Person.objects.all().filter(offices=get_office_session(self.request), legal_type='F', is_active=True)
+
+        if self.q:
+            qs = qs.filter(legal_name__unaccent__icontains=self.q)
+        return qs
+
+    def get_result_label(self, result):
+        return result.legal_name
 
 
 class OfficeAutocomplete(TypeaHeadGenericSearch):
@@ -1752,6 +1809,7 @@ class RequesterAutocomplete(TypeaHeadGenericSearch):
             })
         return list(data)
 
+
 class OriginRequesterAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params, extra_params,
@@ -1764,6 +1822,7 @@ class OriginRequesterAutocomplete(TypeaHeadGenericSearch):
                 'data-value-txt': office_correspondent.__str__()
             })
         return list(data)
+
 
 class ServiceAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
@@ -1978,7 +2037,8 @@ class ValidateEmail(View):
         data = {'valid': True}
         if User.objects.filter(email=email).first():
             data['valid'] = False
-
+        if User.objects.filter(username=email).first():
+            data['valid'] = False
         return JsonResponse(data, safe=False)
 
 
@@ -2180,6 +2240,29 @@ class OfficePermissionRequiredMixin(PermissionRequiredMixin):
         return True
 
 
+class PersonCustomerCreateTaskBulkCreate(View):
+    form = PersonForm
+
+    def post(self, *args, **kwargs):
+        create_user = self.request.user
+        office_session = get_office_session(self.request)
+        form = self.form(self.request.POST)
+        status = 200
+        if form.is_valid():
+            form.instance.create_user = create_user
+            form.instance.is_active = True
+            instance = form.save()
+            create_person_office_relation(instance, self.request.user, office_session)
+            data = {'id': instance.id, 'text': instance.legal_name}
+        else:
+            status = 500
+            data = {'error': True, 'errors': []}
+            for error in form.errors:
+                data['errors'].append(error)
+
+        return JsonResponse(json.loads(json.dumps(data)), status=status)
+
+
 class ImportCityList(PermissionRequiredMixin, CustomLoginRequiredView,
                      TemplateView):
     permission_required = ('superuser', )
@@ -2229,3 +2312,90 @@ class ImportCityList(PermissionRequiredMixin, CustomLoginRequiredView,
             return JsonResponse(json.loads(json.dumps(context)), status=200)
         else:
             return super().get(request, *args, **kwargs)
+
+
+class NewRegister(TemplateView):
+    template_name = 'account/register.html'
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        try:
+            username = email = request.POST.get('email')
+            password = request.POST.get('password')
+            first_name = request.POST.get('name').split(' ')[0]
+            last_name = ' '.join(request.POST.get('name').split(' ')[1:])
+            office_name = request.POST.get('office')
+            user = User.objects.create(username=username, last_name=last_name, first_name=first_name, email=email)
+            user.set_password(password)
+            user.save()
+            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
+            customer = Person.objects.create(name=office_name, legal_name=office_name, create_user=user, is_customer=True)
+            member, created = OfficeMembership.objects.get_or_create(
+                person=customer,
+                office=office,
+                defaults={
+                    'create_user': user,
+                    'is_active': True
+                })
+            office.customsettings.default_customer = customer
+            office.customsettings.email_to_notification = email
+            office.customsettings.save()
+            DefaultOffice.objects.create(
+                auth_user=user,
+                office=office,
+                create_user=user)
+            authenticate(username=username, password=password)
+            auth_login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
+            send_mail_sign_up(first_name, email)
+            return JsonResponse({'redirect': reverse_lazy('dashboard')})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+class SocialRegister(TemplateView):
+    template_name = 'account/social_register.html'
+
+    def post(self, request, *args, **kwargs):
+        try:
+            office_name = request.POST.get('office')
+            user = request.user            
+            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
+            customer = Person.objects.create(name=office_name, legal_name=office_name, create_user=user, is_customer=True)
+            member, created = OfficeMembership.objects.get_or_create(
+                person=customer,
+                office=office,
+                defaults={
+                    'create_user': user,
+                    'is_active': True
+                })
+            office.customsettings.default_customer = customer
+            office.customsettings.email_to_notification = user.email
+            office.customsettings.save()
+            DefaultOffice.objects.create(
+                auth_user=user,
+                office=office,
+                create_user=user)
+            send_mail_sign_up(user.first_name, user.email)
+            return JsonResponse({'redirect': reverse_lazy('dashboard')})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+class TermsView(TemplateView):
+    template_name = 'account/terms/terms_and_conditions.html'
+
+
+class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
+    def get_callback_url(self, request, app):
+        callback_url = reverse(self.provider_id + "_callback")
+        protocol = self.redirect_uri_protocol
+        if settings.DEBUG:
+            return build_absolute_uri(request, callback_url, protocol)
+        return build_absolute_uri(None, callback_url, protocol)            
+
+
+oauth2_login = OAuth2LoginView.adapter_view(CustomGoogleOAuth2Adapter)
+oauth2_callback = OAuth2CallbackView.adapter_view(CustomGoogleOAuth2Adapter)

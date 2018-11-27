@@ -6,8 +6,9 @@ from django_file_form.forms import MultipleUploadedFileField
 
 from core.models import Person, ImportXlsFile
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
-from core.widgets import MDDateTimepicker, MDDatePicker
+from core.widgets import MDDateTimepicker, MDDatePicker, TypeaHeadForeignKeyWidget, MDSelect
 from core.forms import BaseForm, XlsxFileField
+from lawsuit.models import CourtDistrict, CourtDistrictComplement, City, Movement, LawSuit, Folder
 from task.models import Task, TypeTask, Filter, TaskStatus, TypeTaskMain, TaskSurveyAnswer
 from task.resources import COLUMN_NAME_DICT
 from task.widgets import code_mirror_schema
@@ -92,6 +93,63 @@ class TaskCreateForm(TaskForm):
 
     class Meta(TaskForm.Meta):
         fields = TaskForm.Meta.fields + ['documents']
+
+
+class TaskBulkCreateForm(TaskCreateForm):
+    task_law_suit_number = forms.ModelChoiceField(label='Número do processo',
+                                                  required=False,
+                                                  widget=MDSelect(url='/processos/lawsuit_autocomplete',
+                                                                  forward=['person_customer']),
+                                                  queryset=LawSuit.objects.all())
+    court_district = forms.ModelChoiceField(label='Comarca',
+                                            required=False,
+                                            widget=MDSelect(url='/processos/courtdistrict_select2', ),
+                                            queryset=CourtDistrict.objects.all())
+    city = forms.ModelChoiceField(label='Cidade',
+                                  required=False,
+                                  widget=MDSelect(url='/city/autocomplete_select2/', ),
+                                  queryset=City.objects.all())
+    court_district_complement = forms.ModelChoiceField(label='Complemento de Comarca',
+                                                       required=False,
+                                                       widget=MDSelect(url='/processos/complemento_select2',
+                                                                       forward=['court_district']),
+                                                       queryset=CourtDistrictComplement.objects.all())
+    person_customer = forms.ModelChoiceField(label='Cliente/Parte',
+                                             required=True,
+                                             widget=MDSelect(url='/get_client_2', ),
+                                             queryset=Person.objects.all())
+    person_customer_swal = forms.ModelChoiceField(label='Cliente/Parte',
+                                                  required=True,
+                                                  widget=MDSelect(url='/get_client_2', ),
+                                                  queryset=Person.objects.all())
+
+    folder_number = forms.ModelChoiceField(label='Nº da Pasta',
+                                           required=False,
+                                           widget=MDSelect(url='/processos/folder_autocomplete_2',
+                                                           forward=['task_law_suit_number']),
+                                           queryset=Folder.objects.all())
+    movement = forms.ModelChoiceField(label='Movimentação',
+                                      required=False,
+                                      widget=MDSelect(url='/processos/movement_autocomplete',
+                                                      forward=['task_law_suit_number']),
+                                      queryset=Movement.objects.all())
+    person_company_representative = forms.ModelChoiceField(label='Preposto',
+                                                           required=False,
+                                                           widget=MDSelect(url='/get_person_company_representative_2', ),
+                                                           queryset=Person.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        office_session = get_office_session(self.request)
+        self.fields['performance_place'].widget = forms.HiddenInput()
+        self.fields['task_number'].widget = forms.HiddenInput()
+        self.fields['office'].widget = forms.HiddenInput()
+        self.fields['office'].initial = office_session
+        self.fields['person_asked_by'].empty_label = 'Procurar...'
+        choices = [choice for choice in self.fields['person_asked_by'].choices]
+        if (self.request.user.person.id, self.request.user.person.legal_name) not in choices:
+            choices.append((self.request.user.person.id, self.request.user.person.legal_name))
+        self.fields['person_asked_by'].choices = choices
 
 
 class TaskDetailForm(ModelForm):

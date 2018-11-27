@@ -605,8 +605,8 @@
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#DD6B55",
-                confirmButtonText: "Sim, desejo " + action.toLowerCase() + ".",
-                cancelButtonText: "Cancelar."
+                confirmButtonText: "Sim, desejo " + action.toLowerCase(),
+                cancelButtonText: "Cancelar"
             }).then(function (result) {
                 if (result.value){
                     $('#' + source.form.id).submit()                    
