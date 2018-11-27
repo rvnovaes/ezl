@@ -2341,6 +2341,7 @@ class NewRegister(TemplateView):
                     'is_active': True
                 })
             office.customsettings.default_customer = customer
+            office.customsettings.email_to_notification = email
             office.customsettings.save()
             DefaultOffice.objects.create(
                 auth_user=user,
@@ -2371,6 +2372,7 @@ class SocialRegister(TemplateView):
                     'is_active': True
                 })
             office.customsettings.default_customer = customer
+            office.customsettings.email_to_notification = user.email
             office.customsettings.save()
             DefaultOffice.objects.create(
                 auth_user=user,
