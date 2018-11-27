@@ -45,7 +45,7 @@ from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
 from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form
 from core.view_validators import create_person_office_relation, person_exists
-from .mail import send_mail_sign_up
+from core.mail import send_mail_sign_up
 from financial.models import ServicePriceTable
 from lawsuit.models import Folder, Movement, LawSuit, Organ
 from task.models import Task, TaskStatus
@@ -59,7 +59,8 @@ from guardian.shortcuts import get_groups_with_perms
 from billing.models import Plan, PlanOffice
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from core.tasks import import_xls_city_list
-
+from allauth.socialaccount.providers.oauth2.views import *
+from allauth.socialaccount.providers.google.views import *
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
     model = abstractproperty()
@@ -2340,6 +2341,7 @@ class NewRegister(TemplateView):
                     'is_active': True
                 })
             office.customsettings.default_customer = customer
+            office.customsettings.email_to_notification = email
             office.customsettings.save()
             DefaultOffice.objects.create(
                 auth_user=user,
@@ -2370,6 +2372,7 @@ class SocialRegister(TemplateView):
                     'is_active': True
                 })
             office.customsettings.default_customer = customer
+            office.customsettings.email_to_notification = user.email
             office.customsettings.save()
             DefaultOffice.objects.create(
                 auth_user=user,
@@ -2383,3 +2386,16 @@ class SocialRegister(TemplateView):
 
 class TermsView(TemplateView):
     template_name = 'account/terms/terms_and_conditions.html'
+
+
+class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
+    def get_callback_url(self, request, app):
+        callback_url = reverse(self.provider_id + "_callback")
+        protocol = self.redirect_uri_protocol
+        if settings.DEBUG:
+            return build_absolute_uri(request, callback_url, protocol)
+        return build_absolute_uri(None, callback_url, protocol)            
+
+
+oauth2_login = OAuth2LoginView.adapter_view(CustomGoogleOAuth2Adapter)
+oauth2_callback = OAuth2CallbackView.adapter_view(CustomGoogleOAuth2Adapter)
