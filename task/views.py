@@ -168,6 +168,17 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
 
         self.get_folder(validation_data)
         self.get_law_suit(validation_data)
+        if self.request.POST.get('court_district', None) \
+                and self.law_suit.court_district_id != int(self.request.POST['court_district']):
+            self.law_suit.court_district_id = int(self.request.POST['court_district'])
+            self.law_suit.save()
+        if self.request.POST.get('court_district_complement', None) and \
+                self.law_suit.court_district_complement_id != int(self.request.POST['court_district_complement']):
+            self.law_suit.court_district_complement_id = int(self.request.POST['court_district_complement'])
+            self.law_suit.save()
+        if self.request.POST.get('city', None) and self.law_suit.city_id != int(self.request.POST['city']):
+            self.law_suit.city_id = int(self.request.POST['city'])
+            self.law_suit.save()
         self.get_movement(validation_data)
 
         form.instance.movement = self.movement
